@@ -36,3 +36,22 @@ The original H2 master is distinct from the Remotion reference video. Its expect
 4. Review the generated files, then commit and push the binary, checksum, contact sheets and updated documentation. The package workflow will update the portable skill ZIP to include the H2 master as well as the Remotion reference sample.
 
 Do not rename the Remotion render as the H2 master. If the checksum fails, stop; the input is not the exact canonical H2 file.
+
+
+## Archive previous videos and the H2 source code
+
+The repository catalog lists older render iterations and their checksums in `video-library/previous-works-catalog.json`. If the corresponding attachments are downloaded into one folder, run:
+
+```powershell
+python tools/video/archive_previous_works.py --source-dir "$env:USERPROFILE\Downloads\video-previous-works-import-pack\assets"
+```
+
+Review the staged files, commit and push them. Wait for the “Verify previous AI video assets” workflow to pass before relying on the recorded repository paths.
+
+The full H2 renderer/source ZIP is larger than a sensible Git blob. To preserve it as a durable Release asset, download the exact `one-more-scroll-h2-source.zip` and related files to a local folder, then run:
+
+```powershell
+.	oolsideopublish_h2_source_release.ps1 -AssetsDir "$env:USERPROFILE\Downloads\h2-production-assets"
+```
+
+The publisher requires GitHub CLI authentication, checks each file against a fixed SHA-256 allow-list, creates a versioned GitHub Release and stages `h2-source-release.json`. Commit/push that manifest after reviewing it. The source-v2 archive has extra scene fixes that were not verified by a complete render; do not treat that archive as a new final master.
