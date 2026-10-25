@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "README.md"
       - "AGENTS.md"
       - "CLAUDE.md"
       - ".agents/skills/video-production-master/**"
@@ -58,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library
-          cp AGENTS.md CLAUDE.md bundle/
+          cp README.md AGENTS.md CLAUDE.md bundle/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
@@ -131,6 +132,7 @@ jobs:
           path = "video-production-master-skill.zip"
           required = [
               ".agents/skills/video-production-master/SKILL.md",
+              "README.md",
               "AGENTS.md",
               "CLAUDE.md",
               "video-projects/remotion/src/OneMoreScroll.tsx",
