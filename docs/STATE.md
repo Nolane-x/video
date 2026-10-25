@@ -60,7 +60,7 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - Remotion render CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio normalization, metadata and contact-sheet generation.
 - Archive CI: [run 40197855575](https://github.com/Nolane-x/video/actions/runs/40197855575) — passed and committed the video plus skill ZIP.
 - Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`.
-- Portable skill bundle: `video-library/video-production-master-skill.zip`, which the new packaging workflow is updating to include the current video and the instructions/source.
+- Portable skill bundle: `video-library/video-production-master-skill.zip`. The latest validated package includes the Remotion run 36 reference MP4, cross-agent instructions/state, the H2 v1.0.2 base-source mirror, and the full H2 v1.1.0 production overlay plus release report. Bundle workflow [run 40209051977](https://github.com/Nolane-x/video/actions/runs/40209051977) passed ZIP integrity and required-file checks; the bundle checksum is recorded at `video-library/video-production-master-skill.zip.sha256`.
 
 ## Prior work catalog and reusable archive tooling
 - The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.
@@ -69,10 +69,10 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - The current portable skill ZIP intentionally includes the Remotion reference video and, after checksum-verified import, the canonical H2 MP4. It does not bundle every historical video clip to avoid exceeding GitHub's single-file size limit. Clone the repo or inspect the catalog for the rest.
 
 ## Next priorities
-1. Complete the portable skill package workflow and verify the ZIP contains the actual MP4 as well as skill/source docs.
-2. Import the exact H2 master binary using `tools/video/archive_h2_master.py` once the attachment is downloaded to a local path, then commit/push the resulting video, checksum and contact sheets.
-3. Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but this archive turn did not sign off the video on artistic criteria. The latest run 36 measured -14.5 LUFS integrated and -2.3 dBFS true peak, within the configured conservative peak gate. Run 31's older -1.2 dBFS peak is historical, not the current master.
-4. Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
+1. **Completed:** Portable skill package now contains the reference MP4, source map, state/handoff docs, H2 base-source mirror and the full v1.1.0 production overlay. The build validates required files and active plugin release metadata; see [successful packaging run 40209051977](https://github.com/Nolane-x/video/actions/runs/40209051977). Future overlay changes are included by the same workflow.
+2. **Open:** Import the exact H2 master binary with `tools/video/archive_h2_master.py` once `one-more-scroll-h2-final.mp4` is available locally. Expected SHA-256 is `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`; the file was not available in the current production workspace at this snapshot, so it is still not archived in GitHub.
+3. **Open:** Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but artistic QA is not signed off. The latest run 36 measured -14.5 LUFS integrated and -2.3 dBFS true peak, within the configured conservative peak gate. Run 31's older -1.2 dBFS peak is historical, not the current master.
+4. **Open:** Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.
 
 
