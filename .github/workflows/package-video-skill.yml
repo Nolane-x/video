@@ -77,6 +77,7 @@ jobs:
              video-library/one-more-scroll/manifest.json \
              video-library/one-more-scroll/QA.md \
              video-library/one-more-scroll/latest-remotion-release.json \
+             video-library/one-more-scroll/h2-source-release.json \
              bundle/video-library/one-more-scroll/
           # Include the canonical H2 master too, once the checksum-verified import helper has archived it.
           if [ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ]; then
@@ -104,6 +105,7 @@ jobs:
           python -m py_compile tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py
           python -m json.tool video-library/previous-works-catalog.json > /dev/null
           python -m json.tool video-library/one-more-scroll/manifest.json > /dev/null
+          python -m json.tool video-library/one-more-scroll/h2-source-release.json > /dev/null
           cat > bundle/VIDEO_PRODUCTION_BUNDLE_MANIFEST.json <<JSON
           {
             "bundle_name": "Nolane Video Production Master",
@@ -141,6 +143,7 @@ jobs:
               "docs/TOOL_INVENTORY.md",
               "video-library/previous-works-catalog.json",
               "video-library/one-more-scroll/manifest.json",
+              "video-library/one-more-scroll/h2-source-release.json",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
           with zipfile.ZipFile(path) as archive:
