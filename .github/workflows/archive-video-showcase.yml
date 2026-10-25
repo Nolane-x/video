@@ -13,14 +13,14 @@ jobs:
   publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && contains(github.event.workflow_run.head_commit.message, '[archive-video]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out exact render commit
+      - name: Check out the render commit
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Download render and QA outputs from the successful run
+      - name: Download render and QA outputs
         uses: actions/download-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
@@ -28,7 +28,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: downloaded
 
-      - name: Prepare release contents
+      - name: Prepare video files and skill package
         id: prep
         run: |
           set -euo pipefail
@@ -46,61 +46,52 @@ jobs:
           [ -z "$OVERVIEW" ] || cp "$OVERVIEW" release/contact-sheet-overview.jpg
           cp "$META" release/metadata.json
           [ -z "$LOUDNESS" ] || cp "$LOUDNESS" release/audio-loudness.txt
-          zip -qr release/video-production-master-skill.zip \
-            AGENTS.md .agents/skills/video-production-master docs/STATE.md docs/AI_HANDOFF.md \
-            docs/ART_DIRECTION_IFVERSE_DAYONE.md video-library
+          # Package current default-branch skill and its restore-state documents, not a stale copy.
+          git fetch origin main
+          git archive --format=zip --output=release/video-production-master-skill.zip origin/main \
+            AGENTS.md CLAUDE.md .agents/skills/video-production-master \
+            .claude/skills/video-production-master docs/STATE.md docs/AI_HANDOFF.md \
+            docs/ART_DIRECTION_IFVERSE_DAYONE.md docs/VIDEO_PRODUCTION_STATE_SCHEMA.json \
+            tools/video/validate_story.py video-library
           sha256sum release/one-more-scroll-remotion-master.mp4 \
             release/contact-sheet-shots.jpg release/video-production-master-skill.zip \
             | tee release/SHA256SUMS.txt
-          echo "tag=showcase-remotion-${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "run_number=${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "run_id=${{ github.event.workflow_run.id }}" >> "$GITHUB_OUTPUT"
           echo "source_sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          echo "archive_dir=video-library/one-more-scroll/renders/remotion-run-${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
 
-      - name: Create a source-pinned Git tag
+      - name: Commit durable video and skill into the library
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          git tag "${{ steps.prep.outputs.tag }}" "${{ steps.prep.outputs.source_sha }}"
-          git push origin "${{ steps.prep.outputs.tag }}"
-
-      - name: Publish permanent release assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ steps.prep.outputs.tag }}" \
-            release/one-more-scroll-remotion-master.mp4#one-more-scroll-remotion-master.mp4 \
-            release/contact-sheet-shots.jpg#contact-sheet-shots.jpg \
-            release/contact-sheet-overview.jpg#contact-sheet-overview.jpg \
-            release/metadata.json#metadata.json \
-            release/audio-loudness.txt#audio-loudness.txt \
-            release/video-production-master-skill.zip#video-production-master-skill.zip \
-            release/SHA256SUMS.txt#SHA256SUMS.txt \
-            --title "ONE MORE SCROLL — Remotion render + production skill" \
-            --notes "Reproducible Remotion output and production skill pinned to source commit ${{ github.event.workflow_run.head_sha }}. This is the repository's Remotion render, not the separately delivered H2 Canvas/Chromium master."
-
-      - name: Index the durable release in the video folder
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.prep.outputs.tag }}
-          ASSET_URL: https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/one-more-scroll-remotion-master.mp4
           SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ID: ${{ steps.prep.outputs.run_id }}
+          RUN_NUMBER: ${{ steps.prep.outputs.run_number }}
+          ARCHIVE_DIR: ${{ steps.prep.outputs.archive_dir }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.prep.outputs.tag }}"
-          SOURCE_SHA="${{ steps.prep.outputs.source_sha }}"
-          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
-          ASSET_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/one-more-scroll-remotion-master.mp4"
+          # Work from current main so we don't move the branch backwards to the render commit.
           git fetch origin main
           git checkout -B archive-index origin/main
+          mkdir -p "$ARCHIVE_DIR"
+          cp release/one-more-scroll-remotion-master.mp4 "$ARCHIVE_DIR/one-more-scroll-remotion-master.mp4"
+          cp release/contact-sheet-shots.jpg "$ARCHIVE_DIR/contact-sheet-shots.jpg"
+          [ ! -f release/contact-sheet-overview.jpg ] || cp release/contact-sheet-overview.jpg "$ARCHIVE_DIR/contact-sheet-overview.jpg"
+          cp release/metadata.json "$ARCHIVE_DIR/metadata.json"
+          [ ! -f release/audio-loudness.txt ] || cp release/audio-loudness.txt "$ARCHIVE_DIR/audio-loudness.txt"
+          cp release/SHA256SUMS.txt "$ARCHIVE_DIR/SHA256SUMS.txt"
+          cp release/video-production-master-skill.zip video-library/video-production-master-skill.zip
+          cp release/video-production-master-skill.zip "$ARCHIVE_DIR/video-production-master-skill.zip"
           python - <<'PY'
           import json, os
           payload = {
             "project_id": "one-more-scroll",
             "artifact_kind": "remotion-reproducible-render",
             "renderer": "Remotion CLI + procedural audio + FFmpeg mastering",
-            "release_url": os.environ["RELEASE_URL"],
-            "video_asset_url": os.environ["ASSET_URL"],
+            "video_path": os.path.join(os.environ["ARCHIVE_DIR"], "one-more-scroll-remotion-master.mp4"),
+            "contact_sheet_path": os.path.join(os.environ["ARCHIVE_DIR"], "contact-sheet-shots.jpg"),
+            "metadata_path": os.path.join(os.environ["ARCHIVE_DIR"], "metadata.json"),
+            "skill_zip_path": "video-library/video-production-master-skill.zip",
             "source_commit": os.environ["SOURCE_SHA"],
             "workflow_run_id": os.environ["RUN_ID"],
             "note": "This is the repository's Remotion build, not the separately delivered H2 Canvas/Chromium master."
@@ -111,6 +102,10 @@ jobs:
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add video-library/one-more-scroll/latest-remotion-release.json
-          git commit -m "docs: index archived Remotion showcase release"
+          git add "$ARCHIVE_DIR" video-library/video-production-master-skill.zip video-library/one-more-scroll/latest-remotion-release.json
+          if git diff --cached --quiet; then
+            echo "Archive already committed; no changes."
+            exit 0
+          fi
+          git commit -m "build: archive Remotion video and production skill run $RUN_NUMBER"
           git push origin HEAD:main
