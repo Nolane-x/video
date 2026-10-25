@@ -18,7 +18,7 @@ Simple reusable stick-figure characters staged in rich, cinematic environments. 
 
 ## H2 SelfImprove Studio in ChatGPT
 
-[Open/activate the private H2 SelfImprove Studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Plugin Creator created version 1.0.2 from the user's uploaded archive. The 51 plugin source files are mirrored in [integrations/h2-selfimprove-studio/](integrations/h2-selfimprove-studio/) for version control; see [the source manifest](integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json) and [activation notes](docs/CHATGPT_PLUGIN.md).
+[Open/activate the private H2 SelfImprove Studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). The active Plugin Creator release is **v1.1.0** (`pluginrel_6ade248942988191a57ff1059c818720`), updated and confirmed on 2026-10-25. The 51-file source mirror under [integrations/h2-selfimprove-studio/](integrations/h2-selfimprove-studio/) intentionally preserves the v1.0.2 base source; the production overlay is versioned separately under [integrations/h2-selfimprove-studio-production-overlay/](integrations/h2-selfimprove-studio-production-overlay/). See the [source manifest](integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json), [release result](integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md) and [activation notes](docs/CHATGPT_PLUGIN.md).
 
 ## Production architecture
 - **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
@@ -40,7 +40,7 @@ Large video masters should be kept as Release assets, not ordinary Git blobs. Th
 
 ## Reusable ChatGPT plugin
 
-The user's H2 plugin has been created privately through ChatGPT Plugin Creator: [Open h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Its source/version and scope are documented in [docs/CHATGPT_PLUGIN.md](docs/CHATGPT_PLUGIN.md). This is the original H2 kit/plugin, distinct from the repo's Remotion renderer.
+The active private H2 plugin is v1.1.0: [Open h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Its current release ID, CI evidence, checksum and base-source/overlay distinction are documented in [docs/CHATGPT_PLUGIN.md](docs/CHATGPT_PLUGIN.md). The native H2 kit remains distinct from the repo's Remotion renderer.
 
 ## Downloads and current reference
 
