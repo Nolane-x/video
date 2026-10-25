@@ -24,9 +24,15 @@ This repository should store **our own project code, production scripts, configu
 5. **Quality gates** — render a contact sheet, inspect keyframes and transitions, run typecheck/tests, validate MP4 metadata and audio.
 6. **Delivery** — render MP4 and publish it as a GitHub Actions artifact, not as a large binary committed into Git.
 
+## Render pipelines
+
+- **Remotion:** [video-projects/remotion](video-projects/remotion) is the main text/2D animation timeline. Push changes there to start the render workflow; the resulting MP4 is uploaded as a GitHub Actions artifact.
+- **Blender:** [tools/blender](tools/blender) contains an optional headless 2.5D/3D style study. The Blender workflow renders a short proof to an artifact.
+- **Krita:** [tools/krita](tools/krita) documents the hand-authored asset workflow. Krita source files and exports should only be committed when intentionally created and licensed for the project.
+
 ## Local setup
 
-See [docs/SETUP.md](docs/SETUP.md) and [docs/WORKFLOW.md](docs/WORKFLOW.md).
+See [docs/SETUP.md](docs/SETUP.md), [docs/WORKFLOW.md](docs/WORKFLOW.md), and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md).
 
 ## Rights & attribution
 
