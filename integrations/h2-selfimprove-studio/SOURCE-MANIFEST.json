@@ -1,0 +1,339 @@
+{
+  "schema_version": "1.0",
+  "mirror_kind": "Plugin Creator source mirror",
+  "source_plugin": {
+    "plugin_id": "plugins_6ade1c3ca8d0819188070ae20f2792d0",
+    "name": "h2-selfimprove-studio",
+    "version": "1.0.2",
+    "current_release_id": "pluginrel_6ade1c3ecb20819199def25125d2f89a",
+    "scope": "USER",
+    "discoverability": "PRIVATE",
+    "url": "https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0"
+  },
+  "repository": "Nolane-x/video",
+  "root_path": "integrations/h2-selfimprove-studio/",
+  "files": [
+    {
+      "path": ".codex-plugin/plugin.json",
+      "repository_path": "integrations/h2-selfimprove-studio/.codex-plugin/plugin.json",
+      "size_bytes": 1693,
+      "git_blob_sha": "ebb4d55be9c1d48758ebcad89a7313a539d8be3e"
+    },
+    {
+      "path": "MIRROR-NOTES.md",
+      "repository_path": "integrations/h2-selfimprove-studio/MIRROR-NOTES.md",
+      "size_bytes": 948,
+      "git_blob_sha": "3e40b087130f8ba2c7ad494d8f120abb04d5cd2c"
+    },
+    {
+      "path": "README.md",
+      "repository_path": "integrations/h2-selfimprove-studio/README.md",
+      "size_bytes": 2160,
+      "git_blob_sha": "4caa983a59120e7c1e305e3c79e9ee68af237d14"
+    },
+    {
+      "path": "skills/kich-ban-selfimprove/references/cau-truc.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/kich-ban-selfimprove/references/cau-truc.md",
+      "size_bytes": 11237,
+      "git_blob_sha": "1621f02b9005df98a1fab5b5de3f1471b25677be"
+    },
+    {
+      "path": "skills/kich-ban-selfimprove/references/thumbnail.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/kich-ban-selfimprove/references/thumbnail.md",
+      "size_bytes": 5627,
+      "git_blob_sha": "398084c6bcf6d57a2a505ae0dc28d4359416e151"
+    },
+    {
+      "path": "skills/kich-ban-selfimprove/SKILL.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/kich-ban-selfimprove/SKILL.md",
+      "size_bytes": 8981,
+      "git_blob_sha": "ffd46834e9ce01184f8321c5bebb241ff1882ec0"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/audio/build_audio.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/audio/build_audio.py",
+      "size_bytes": 678,
+      "git_blob_sha": "3c591cb31263a161c99bc982607da0d95faace55"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/audio/music.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/audio/music.py",
+      "size_bytes": 5724,
+      "git_blob_sha": "1cca780d55bb6f8ce31b3184b9574f0f051c0cbb"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/audio/synth.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/audio/synth.py",
+      "size_bytes": 11487,
+      "git_blob_sha": "4b31c4310d7701bb5ad0aa7d03601922047dcb1d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/core.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/core.js",
+      "size_bytes": 12699,
+      "git_blob_sha": "6058d7b4e2edf031c0ba08b5df9118ece83ec32d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/fx.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/fx.js",
+      "size_bytes": 14662,
+      "git_blob_sha": "73647fd3cec987657a2db5772317c7c0a4f15963"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/player.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/player.js",
+      "size_bytes": 14071,
+      "git_blob_sha": "13c8588b4f54ba839af800fe54fb31abca65d5b2"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/rig.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/rig.js",
+      "size_bytes": 24341,
+      "git_blob_sha": "b703e134645028faa4b98fe41d247c0f14126ea6"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/three3d.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js",
+      "size_bytes": 14745,
+      "git_blob_sha": "b51ec35fefde2d893c9118fd19f7176f493dd31d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/engine/ui.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/ui.js",
+      "size_bytes": 12549,
+      "git_blob_sha": "57ef6894eec0c0c29d1ae453d33de4e1d7282f3e"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/package.json",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/package.json",
+      "size_bytes": 614,
+      "git_blob_sha": "588e81b52619a99c505e542bcdc6383b245b12d5"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/art.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/art.js",
+      "size_bytes": 14391,
+      "git_blob_sha": "02f069bf0e5785ce8d07118d24b6d25dc2c81564"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/audio.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/audio.py",
+      "size_bytes": 8214,
+      "git_blob_sha": "23121fdf5925e35330e1df799592c95145aa236b"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/bean.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/bean.js",
+      "size_bytes": 25619,
+      "git_blob_sha": "2f9408a373bc62b1b96422cacb4dfee1bd3ce1d1"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/ink.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/ink.js",
+      "size_bytes": 11466,
+      "git_blob_sha": "93f0f70531fb13589825229ddc963ab17c2fcd69"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/pack.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/pack.js",
+      "size_bytes": 1675,
+      "git_blob_sha": "f107885211f7d28af970f9549e7ead8d78d36a77"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/phone.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/phone.js",
+      "size_bytes": 16337,
+      "git_blob_sha": "7f438b15b2b73b5cb2e4a82039b0748682cba1f1"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/sets.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/sets.js",
+      "size_bytes": 25107,
+      "git_blob_sha": "1759395a3dbeb2a4191549d587845ee9c150d94d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/templates.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/templates.js",
+      "size_bytes": 24827,
+      "git_blob_sha": "bade48fe6d0bcf56c2deef90d0bab5acf720fdfb"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/dem/thumb.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/thumb.js",
+      "size_bytes": 3851,
+      "git_blob_sha": "25fa8b8544009c314397b5cab24b0f974604576d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/host.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/host.js",
+      "size_bytes": 18278,
+      "git_blob_sha": "a4f242e1ba6b78df8b717cb98401c3bfc20dd36b"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/ink.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/ink.js",
+      "size_bytes": 13391,
+      "git_blob_sha": "b32b27b81603ae267af13a313467c521c9139326"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/map.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/map.js",
+      "size_bytes": 8254,
+      "git_blob_sha": "70f212aa32adcab357c282c636549dfeea386f82"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/pack.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/pack.js",
+      "size_bytes": 3898,
+      "git_blob_sha": "7821e2474a05cb98a50b1baa0730a36af8941bfd"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/props.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/props.js",
+      "size_bytes": 23103,
+      "git_blob_sha": "102c86ada95d85e2b233d4b51466a0f51c3bf402"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/sketch.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/sketch.js",
+      "size_bytes": 12812,
+      "git_blob_sha": "6609a5bb2b42d9fdd4ea3af909298c82e0cfce67"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/templates.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/templates.js",
+      "size_bytes": 27124,
+      "git_blob_sha": "222c0b5d6961c8318f2ef75dd83454806f94bdcf"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/packs/doodle/world.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/doodle/world.js",
+      "size_bytes": 6740,
+      "git_blob_sha": "23708a960797428e56a6edac2d75e44c1b16cd62"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/player.html",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/player.html",
+      "size_bytes": 642,
+      "git_blob_sha": "33bb208f1844db09bcea447d1f796ed4f87fa9f0"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/projects/selfimprove-mau/config.json",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/projects/selfimprove-mau/config.json",
+      "size_bytes": 188,
+      "git_blob_sha": "47c389eb28f234a4158e8d24eadc7c20c89c7bc5"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/projects/selfimprove-mau/scenes/shots/thumb.js",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/projects/selfimprove-mau/scenes/shots/thumb.js",
+      "size_bytes": 104,
+      "git_blob_sha": "ab20c328e6e7799e79be231fcb39ce956079d3c9"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/projects/selfimprove-mau/story/shots.json",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/projects/selfimprove-mau/story/shots.json",
+      "size_bytes": 16282,
+      "git_blob_sha": "ccb35b8eb5d12dbc8a9b223e2af3827ae1dea810"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/render.mjs",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/render.mjs",
+      "size_bytes": 12791,
+      "git_blob_sha": "7188f45b5c5d93426a092704e0ab6f4247a52658"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/common.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/common.py",
+      "size_bytes": 2977,
+      "git_blob_sha": "1dbb8ad78d68ec66a7a600db16897a2c383bb705"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/doctor.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/doctor.py",
+      "size_bytes": 3380,
+      "git_blob_sha": "370c083a052c01266c873c76522f83a45554f63b"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/draft_shots.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/draft_shots.py",
+      "size_bytes": 6208,
+      "git_blob_sha": "fe8aa443684a40e00c3c24ba8de72df1d1205c44"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/import_anh.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/import_anh.py",
+      "size_bytes": 2105,
+      "git_blob_sha": "73ed0632d1a66bb95570b6edecca71501d6d2f8d"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/mix.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py",
+      "size_bytes": 5929,
+      "git_blob_sha": "a86bec6b843502be45326212a086bff27efa2d03"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/new_project.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/new_project.py",
+      "size_bytes": 1567,
+      "git_blob_sha": "378fa5fd2f032b09b951c2a4c194d35af58bae09"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/phim.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/phim.py",
+      "size_bytes": 17345,
+      "git_blob_sha": "f7f2f8bfa8548dde5538c56737d56fcaa156a304"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/kit/tools/prep_voice.py",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py",
+      "size_bytes": 12744,
+      "git_blob_sha": "9bd22c8e7808c1e40fc0fcbc05f08694765526e9"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/references/am-thanh.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/references/am-thanh.md",
+      "size_bytes": 3702,
+      "git_blob_sha": "cc1766c3d3f7ad0df9e2d28599a9adfcdf92c038"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/references/cai-dat.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/references/cai-dat.md",
+      "size_bytes": 4337,
+      "git_blob_sha": "64cbb24c8b03c8e7890c1415c016431dcf5896a1"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/references/kiem-tra.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/references/kiem-tra.md",
+      "size_bytes": 3449,
+      "git_blob_sha": "f8c5007a41e607b9b15e72fec1c72f122c9a656b"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/references/mau-canh.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/references/mau-canh.md",
+      "size_bytes": 10923,
+      "git_blob_sha": "c528b16e4dd6594416c27b9654a38fb1780bae92"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/references/phong-cach.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/references/phong-cach.md",
+      "size_bytes": 4124,
+      "git_blob_sha": "a95364843f7a596072e8e7505e3a5fc219c20452"
+    },
+    {
+      "path": "skills/lam-video-selfimprove/SKILL.md",
+      "repository_path": "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/SKILL.md",
+      "size_bytes": 9029,
+      "git_blob_sha": "6b40afe46ddc70f0a8d6314350075d9f5de05ebe"
+    }
+  ],
+  "summary": {
+    "plugin_source_files": 51,
+    "added_documentation_files": 1,
+    "includes_h2_renderer_entrypoint": true,
+    "includes_rig_and_scene_packs": true,
+    "includes_audio_generators_and_tools": true,
+    "full_upstream_remotion_blender_krita_app_sources": false,
+    "original_binary_plugin_archive_committed": false
+  },
+  "note": "The 51 text source files were read from Plugin Creator and mirrored into GitHub. The .plugin archive itself has not been committed as a binary; the private Plugin Creator app is the activation point."
+}
