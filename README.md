@@ -34,6 +34,10 @@ The Full HD H2 master previously delivered in ChatGPT is noted in the manifest b
 
 Large video masters should be kept as Release assets, not ordinary Git blobs. The skill and manifest preserve a distinction between source-only changes, rendered output and visually reviewed output.
 
+## Reusable ChatGPT plugin
+
+The user's H2 plugin has been created privately through ChatGPT Plugin Creator: [Open h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Its source/version and scope are documented in [docs/CHATGPT_PLUGIN.md](docs/CHATGPT_PLUGIN.md). This is the original H2 kit/plugin, distinct from the repo's Remotion renderer.
+
 ## Downloads and current reference
 
 - **[Download the portable Video Production Master ZIP](video-library/video-production-master-skill.zip)** — reusable agent skill, cross-agent entrypoints, project/source map, tool inventory, state/handoff, Remotion source, storyboard and the archived reference render.
