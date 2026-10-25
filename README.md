@@ -16,6 +16,10 @@ Simple reusable stick-figure characters staged in rich, cinematic environments. 
 - [Verified tools/source inventory](docs/TOOL_INVENTORY.md)
 - [Prior video catalog](video-library/previous-works-catalog.json)
 
+## H2 SelfImprove Studio in ChatGPT
+
+[Open/activate the private H2 SelfImprove Studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Plugin Creator created version 1.0.2 from the user's uploaded archive. The 51 plugin source files are mirrored in [integrations/h2-selfimprove-studio/](integrations/h2-selfimprove-studio/) for version control; see [the source manifest](integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json) and [activation notes](docs/CHATGPT_PLUGIN.md).
+
 ## Production architecture
 - **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
 - **Remotion:** timeline, text, frame-driven composition, compositing and CI. Project: [video-projects/remotion](video-projects/remotion).
