@@ -2,11 +2,11 @@
   "project_id": "one-more-scroll",
   "artifact_kind": "remotion-reproducible-render",
   "renderer": "Remotion CLI + procedural audio + FFmpeg mastering",
-  "video_path": "video-library/one-more-scroll/renders/remotion-run-30/one-more-scroll-remotion-master.mp4",
-  "contact_sheet_path": "video-library/one-more-scroll/renders/remotion-run-30/contact-sheet-shots.jpg",
-  "metadata_path": "video-library/one-more-scroll/renders/remotion-run-30/metadata.json",
+  "video_path": "video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4",
+  "contact_sheet_path": "video-library/one-more-scroll/renders/remotion-run-31/contact-sheet-shots.jpg",
+  "metadata_path": "video-library/one-more-scroll/renders/remotion-run-31/metadata.json",
   "skill_zip_path": "video-library/video-production-master-skill.zip",
-  "source_commit": "f8846cd8652e61968b18a48d6168c5eaf72ee47c",
-  "workflow_run_id": "40197338515",
+  "source_commit": "38ed2bffda70a399e875ba650f17396b43805878",
+  "workflow_run_id": "40197641208",
   "note": "This is the repository's Remotion build, not the separately delivered H2 Canvas/Chromium master."
 }
