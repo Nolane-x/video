@@ -15,6 +15,10 @@ Code-first video production workspace for H2 SelfImprove Studio.
 
 This repository should store **our own project code, production scripts, configurations, story assets, and setup instructions**. It should not vendor entire upstream Remotion, Blender, or Krita source repositories or commit huge split archives. Install those tools through their official package/install mechanisms instead. This keeps licensing, repository size, updates, and CI manageable.
 
+## Visual direction
+
+The current direction takes high-level inspiration from [Ifverse Tales](https://www.youtube.com/@IfverseTales) and [Day One Films](https://www.youtube.com/@dayonefilmsofficial), while keeping H2's own character and story design. See [docs/ART_DIRECTION_IFVERSE_DAYONE.md](docs/ART_DIRECTION_IFVERSE_DAYONE.md) for the visual brief and acceptance checklist. The character should remain a simple stylized stick-figure; the environment, lighting, composition, camera and actions carry the cinematic quality.
+
 ## Production architecture
 
 1. **Story & art direction** — premise, character bible, shot list, emotional beats, palette, camera intention.
