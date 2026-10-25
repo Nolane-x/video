@@ -18,6 +18,8 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Audio generators: `video-projects/remotion/h2-audio`
 - Blender: `tools/blender/render_h2_stage.py`
 - Krita: `tools/krita/README.md`
+- H2 source mirror: `integrations/h2-selfimprove-studio/`
+- Private ChatGPT plugin: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), see `docs/CHATGPT_PLUGIN.md`
 - Film manifest: `video-library/one-more-scroll/manifest.json`
 
 ## Tool and video inventory
