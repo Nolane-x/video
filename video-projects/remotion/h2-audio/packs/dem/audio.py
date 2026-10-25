@@ -20,7 +20,7 @@ def drone_bed(name,root_hz,d=72.0,beat_bpm=None,bells=True):
     if bells:
         for s in np.arange(4,d-4,6.0): place(buf,ding(root_hz*8*rng.choice([1,1.2,1.5]),4.0,.3),s,.12,p=rng.uniform(-.6,.6))
     buf=reverb(buf,3.5,.4,3000)[:n]; f=int(2*SR); buf[:f]*=np.linspace(0,1,f)[:,None]; buf[-f:]*=np.linspace(1,0,f)[:,None]
-    buf=norm(buf,.7); p=os.path.join(AUDIO,"music",name+".wav"); sf.write(p,buf.astype(np.float32),SR,subtype="PCM_24"); print(p)
+    buf=norm(buf,.7); p=os.path.join(AUDIO,"music",name+".wav"); os.makedirs(os.path.dirname(p),exist_ok=True); sf.write(p,buf.astype(np.float32),SR,subtype="PCM_24"); print(p)
 def sad_piano(name,prog,bpm,loops,notes_per_bar=4,oct_=4,drone=True):
     beat=60/bpm; bar=beat*4; total=len(prog)*loops*bar; buf=np.zeros((int((total+5)*SR),2))
     for i,ch in enumerate(prog*loops):
@@ -30,7 +30,7 @@ def sad_piano(name,prog,bpm,loops,notes_per_bar=4,oct_=4,drone=True):
         place(buf,piano(fr[0],4,.5),t0,.22)
     buf=reverb(buf,3.8,.42,4200)[:int((total+3)*SR)]
     f=int(SR); buf[:f]*=np.linspace(0,1,f)[:,None]; g=int(3*SR); buf[-g:]*=np.linspace(1,0,g)[:,None]
-    buf=norm(buf,.7); p=os.path.join(AUDIO,"music",name+".wav"); sf.write(p,buf.astype(np.float32),SR,subtype="PCM_24"); print(p)
+    buf=norm(buf,.7); p=os.path.join(AUDIO,"music",name+".wav"); os.makedirs(os.path.dirname(p),exist_ok=True); sf.write(p,buf.astype(np.float32),SR,subtype="PCM_24"); print(p)
 def build_music():
     sad_piano("bed_sad_Am_64bpm",["Am","F","C","G"],64,5)
     drone_bed("bed_dark_E_drone",41.2,72,beat_bpm=62)
