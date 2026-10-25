@@ -84,13 +84,13 @@ jobs:
       - name: Normalize final audio
         run: |
           ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 \
-            -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:v copy -c:a aac -b:a 192k \
+            -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k \
             -movflags +faststart out/master.mp4
           mv out/master.mp4 out/one-more-scroll.mp4
 
       - name: Validate MP4 and generate contact sheet
         run: |
-          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json out/one-more-scroll.mp4 | tee out/metadata.json
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json out/one-more-scroll.mp4 | tee out/metadata.json
           python - <<'PY'
           import json
           with open("out/metadata.json", encoding="utf-8") as f:
@@ -102,12 +102,30 @@ jobs:
           assert audio is not None, "missing audio stream"
           assert video.get("width") == 1280 and video.get("height") == 720, "unexpected resolution"
           assert video.get("r_frame_rate") == "24/1", "unexpected frame rate"
+          assert audio.get("codec_name") == "aac", f"unexpected audio codec: {audio.get('codec_name')}"
+          assert audio.get("sample_rate") == "48000", f"unexpected sample rate: {audio.get('sample_rate')}"
+          assert audio.get("channels") == 2, f"unexpected channel count: {audio.get('channels')}"
           assert abs(duration - 155.0) < 0.2, f"unexpected duration: {duration}"
-          print(f"Validated: {duration:.3f}s, 1280x720, 24fps, audio={audio.get('codec_name')}")
+          print(f"Validated: {duration:.3f}s, 1280x720, 24fps, AAC stereo 48kHz")
           PY
           ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/5,scale=320:-1,tile=4x8" -frames:v 1 out/contact-sheet-shots.jpg
           ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/10,scale=320:-1,tile=4x4" -frames:v 1 out/contact-sheet-overview.jpg
           ffmpeg -hide_banner -loglevel info -i out/one-more-scroll.mp4 -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          report = Path("out/audio-loudness.txt").read_text(encoding="utf-8", errors="replace")
+          integrated = re.search(r"Integrated loudness:\\s*I:\\s*(-?\\d+(?:\\.\\d+)?) LUFS", report, re.S)
+          peak = re.search(r"True peak:\\s*Peak:\\s*(-?\\d+(?:\\.\\d+)?) dBFS", report, re.S)
+          if not integrated or not peak:
+              raise SystemExit("Could not parse integrated loudness/true peak from FFmpeg ebur128 output")
+          lufs, true_peak = float(integrated.group(1)), float(peak.group(1))
+          print(f"Measured audio: {lufs:.1f} LUFS integrated; {true_peak:.1f} dBFS true peak")
+          if abs(lufs - (-14.0)) > 1.0:
+              raise SystemExit(f"Integrated loudness outside allowed -14 ±1 LUFS window: {lufs:.1f}")
+          if true_peak > -1.5:
+              raise SystemExit(f"True peak exceeds conservative -1.5 dBFS limit: {true_peak:.1f}")
+          PY
 
       - name: Upload render and QA outputs
         uses: actions/upload-artifact@v4
