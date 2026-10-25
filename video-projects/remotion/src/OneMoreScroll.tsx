@@ -581,7 +581,7 @@ const ShadowFigure: React.FC<{ x: number; strength: number; frame: number }> = (
   return (
     <svg width="430" height="525" viewBox="0 0 430 525" style={{
       position: "absolute", left: x - 215, top: 28, opacity: strength,
-      transform: "scale(" + breathe + ",1)", transformOrigin: "50% 100%",
+      transform: "scale(" + (breathe * (0.38 + 0.62 * strength)) + "," + (0.52 + 0.48 * strength) + ")", transformOrigin: "50% 100%",
       filter: "blur(1.2px)", pointerEvents: "none",
     }}>
       <defs>
@@ -601,18 +601,18 @@ const ShadowFigure: React.FC<{ x: number; strength: number; frame: number }> = (
 const Character: React.FC<{
   x: number; y: number; pose: Pose; t: number; shirt: string; scale?: number; companion?: boolean;
 }> = ({ x, y, pose, t, shirt, scale = 1, companion = false }) => {
-  const walking = pose === "walk" || (pose === "meet" && companion);
-  const phase = t * Math.PI * 4.2;
+  const walking = pose === "walk" || pose === "run" || (pose === "meet" && companion);
+  const phase = t * Math.PI * (pose === "run" ? 6.2 : 4.2);
   const swing = walking ? Math.sin(phase) : 0;
-  const bob = walking ? -Math.abs(Math.sin(phase)) * 5 : pose === "scroll" ? Math.sin(t * Math.PI * 2) * 1.5 : 0;
-  const lean = pose === "slump" ? 12 : pose === "scroll" ? 8 : pose === "tired" ? 6 : pose === "hero" ? -4 : 0;
-  const headTilt = pose === "scroll" ? 15 : pose === "slump" || pose === "tired" ? 20 : pose === "hero" ? -5 : pose === "meet" && !companion ? -8 : 0;
+  const bob = walking ? -Math.abs(Math.sin(phase)) * (pose === "run" ? 9 : 5) : pose === "scroll" ? Math.sin(t * Math.PI * 2) * 1.5 : pose === "drink" ? Math.sin(t * Math.PI * 2) * 1.2 : 0;
+  const lean = pose === "slump" ? 12 : pose === "scroll" ? 8 : pose === "tired" ? 6 : pose === "tie" ? 25 : pose === "punch" ? -7 : pose === "run" ? 15 : pose === "stretch" ? -4 : pose === "hero" || pose === "cheer" ? -4 : 0;
+  const headTilt = pose === "scroll" ? 15 : pose === "slump" || pose === "tired" ? 20 : pose === "tie" ? 25 : pose === "drink" ? 8 : pose === "hero" || pose === "cheer" ? -5 : pose === "meet" || pose === "listen" ? -8 : 0;
   const scrollReach = clampInterp(t, [0.05, 0.42, 0.78, 1], [0, 1, 0.35, 0.15]);
   const writeReach = clampInterp(t, [0.05, 0.6, 1], [0, 1, 0.7]);
-  const leftArm = pose === "scroll" ? -37 - scrollReach * 19 : pose === "write" ? -38 - writeReach * 26 : pose === "slump" || pose === "tired" ? 25 : pose === "hero" ? -32 : walking ? -18 + swing * 27 : pose === "meet" && !companion ? -37 : -8;
-  const rightArm = pose === "scroll" ? 34 + scrollReach * 7 : pose === "write" ? 14 : pose === "slump" || pose === "tired" ? 36 : pose === "hero" ? 20 : walking ? 18 - swing * 27 : pose === "meet" && companion ? -30 : pose === "meet" ? -24 : 9;
-  const leftLeg = walking ? -22 + swing * 31 : pose === "scroll" ? 25 : pose === "slump" ? 10 : 0;
-  const rightLeg = walking ? 22 - swing * 31 : pose === "scroll" ? 31 : pose === "slump" ? 15 : 0;
+  const leftArm = pose === "scroll" ? -37 - scrollReach * 19 : pose === "write" ? -38 - writeReach * 26 : pose === "slump" || pose === "tired" ? 25 : pose === "tie" ? -56 : pose === "drink" ? -55 : pose === "punch" ? -66 : pose === "stretch" || pose === "cheer" ? -112 : pose === "hero" ? -32 : walking ? -18 + swing * (pose === "run" ? 37 : 27) : pose === "meet" && !companion ? -37 : -8;
+  const rightArm = pose === "scroll" ? 34 + scrollReach * 7 : pose === "write" ? 14 : pose === "slump" || pose === "tired" ? 36 : pose === "tie" ? -24 : pose === "drink" ? -65 : pose === "punch" ? 66 : pose === "stretch" || pose === "cheer" ? 112 : pose === "hero" ? 20 : walking ? 18 - swing * (pose === "run" ? 37 : 27) : pose === "meet" && companion ? -30 : pose === "meet" || pose === "listen" ? -24 : 9;
+  const leftLeg = walking ? (pose === "run" ? -30 : -22) + swing * (pose === "run" ? 40 : 31) : pose === "scroll" ? 25 : pose === "slump" ? 10 : pose === "tie" ? 38 : pose === "sit" ? 58 : pose === "punch" ? -8 : 0;
+  const rightLeg = walking ? (pose === "run" ? 30 : 22) - swing * (pose === "run" ? 40 : 31) : pose === "scroll" ? 31 : pose === "slump" ? 15 : pose === "tie" ? 42 : pose === "sit" ? 62 : pose === "punch" ? 14 : 0;
   const mouth = pose === "slump" || pose === "tired" ? "M-7 -137 Q0 -143 7 -137" : pose === "hero" ? "M-8 -137 Q0 -129 8 -137" : pose === "scroll" ? "M-6 -139 Q0 -137 6 -139" : "M-7 -137 H7";
   const blink = (Math.sin(t * 13.5 + (companion ? 2 : 0)) > 0.975) ? 0.25 : 1;
   const phonePulse = 0.82 + Math.sin(t * 12) * 0.1;
@@ -671,6 +671,23 @@ const Character: React.FC<{
       {pose === "write" && !companion && <g>
         <path d="M47 -52 L67 -39" stroke="#ead7c1" strokeWidth="4" strokeLinecap="round" />
         <path d={"M" + (66 + writeReach * 3) + " " + (39 - writeReach * 2) + " l10 7"} stroke="#d7b79b" strokeWidth="2.6" />
+      </g>}
+      {pose === "drink" && !companion && <g transform="translate(62 -92)">
+        <path d="M-9 -14 H9 L7 10 Q0 16 -7 10Z" fill="#d6c8bb" stroke="#ead7c1" strokeWidth="2.2"/>
+        <path d="M9 -10 Q20 -11 16 -1 Q14 5 8 4" fill="none" stroke="#ead7c1" strokeWidth="2.2"/>
+        <path d="M-5 -9 H5" stroke="#9ab7be" strokeWidth="2" opacity=".7"/>
+      </g>}
+      {pose === "tie" && !companion && <g>
+        <path d="M-28 17 Q0 9 28 17" fill="none" stroke="#ead7c1" strokeWidth="3"/>
+        <path d="M-18 25 Q0 16 18 25" fill="none" stroke="#c56d9b" strokeWidth="3"/>
+      </g>}
+      {pose === "punch" && !companion && <g opacity={0.65 + Math.sin(t*18)*0.25}>
+        <path d="M72 -81 l22 -8 M74 -69 l27 0 M70 -58 l21 9" stroke="#f0c58f" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="73" cy="-69" r="3.5" fill="#f0c58f"/>
+      </g>}
+      {pose === "stretch" && !companion && <path d="M-52 -134 l-12 -15 M52 -134 l12 -15" stroke="#ead7c1" strokeWidth="2.5" opacity=".55"/>}
+      {pose === "cheer" && !companion && <g>
+        <path d="M-74 -108 l-12 -9 M-64 -123 l-6 -15 M74 -108 l12 -9 M64 -123 l6 -15" stroke="#f2d0a0" strokeWidth="3" strokeLinecap="round"/>
       </g>}
       {pose === "hero" && !companion && <path d="M-55 -74 l-11 -8 M-49 -86 l-4 -14 M55 -74 l11 -8 M49 -86 l4 -14" stroke="#f2d0a0" strokeWidth="3" strokeLinecap="round" opacity=".7" />}
     </svg>
