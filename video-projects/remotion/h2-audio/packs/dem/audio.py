@@ -86,7 +86,7 @@ def build_sfx():
     paths.append(save(f"{d}/notif_msg",notif(),.6)); paths.append(save(f"{d}/msg_sent",sent(),.55))
     paths.append(save(f"{d}/punch_bag",lp(impact(.45,110,55,.9,.3),1200),.9)); paths.append(save(f"{d}/boom_deep",boom(),.95,rev=(2.5,.3,1500)))
     paths.append(save(f"{d}/tempt_swell",swell(),.8,rev=(2.0,.35,3000))); paths.append(save(f"{d}/tempt_whisper",whisper(),.55,rev=(1.6,.4,6000)))
-    paths.append(save(f"{d}/clock_tick",clock_tick(),.5)); paths.append(save(f"{d}/footsteps",footsteps(),.7)); paths.append(save(f"{d}/door_open",door(),.6,rev=(1.0,.2,4000))
+    paths.append(save(f"{d}/clock_tick",clock_tick(),.5)); paths.append(save(f"{d}/footsteps",footsteps(),.7)); paths.append(save(f"{d}/door_open",door(),.6,rev=(1.0,.2,4000)))
     paths.append(save(f"{d}/breath_in",breath(),.5)); paths.append(save(f"{d}/sting_low",sting(),.9,rev=(3.0,.35,2000))); paths.append(save(f"{d}/page_flip",page(),.5))
     return paths
 if __name__ == "__main__":
