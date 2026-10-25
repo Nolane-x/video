@@ -15,8 +15,18 @@ on:
       - "docs/INSTALL_VIDEO_SKILL.md"
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
+      - "video-library/README.md"
+      - "video-library/one-more-scroll/**"
+      - "video-library/video-production-master-skill.zip"
+      - "video-library/video-production-master-skill.zip.sha256"
+      - "tools/blender/**"
+      - "tools/krita/**"
+      - "video-projects/remotion/README.md"
+      - "video-projects/remotion/src/**"
+      - "video-projects/remotion/public/story/**"
       - "video-library/one-more-scroll/manifest.json"
       - "video-library/one-more-scroll/renders/**/one-more-scroll-remotion-master.mp4"
+      - ".github/workflows/package-video-skill.yml"
   workflow_dispatch:
 
 permissions:
@@ -73,8 +83,58 @@ jobs:
           cp -R video-projects/remotion bundle/video-projects/
           cp -R tools/blender bundle/tools/
           cp -R tools/krita bundle/tools/
+          cat > bundle/VIDEO_PRODUCTION_BUNDLE_MANIFEST.json <<JSON
+          {
+            "bundle_name": "Nolane Video Production Master",
+            "created_from_commit": "$(git rev-parse HEAD)",
+            "created_at_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "canonical_skill": ".agents/skills/video-production-master/SKILL.md",
+            "cross_agent_entrypoints": ["AGENTS.md", "CLAUDE.md", ".claude/skills/video-production-master/SKILL.md"],
+            "included_reference_render": "$VIDEO_PATH",
+            "included_reference_render_sha256": "$(sha256sum "$VIDEO_PATH" | cut -d ' ' -f1)",
+            "includes_original_h2_master": $([ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ] && echo true || echo false),
+            "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py"],
+            "important": "The included Remotion render is not the original H2 Canvas/Chromium master. The full upstream Remotion, Blender and Krita application source trees are not vendored."
+          }
+          JSON
           (cd bundle && zip -qr ../video-production-master-skill.zip .)
           test -s video-production-master-skill.zip
+          zip -T video-production-master-skill.zip
+          python - <<'PY'
+          import json, sys, zipfile
+          path = "video-production-master-skill.zip"
+          required = [
+              ".agents/skills/video-production-master/SKILL.md",
+              "AGENTS.md",
+              "CLAUDE.md",
+              "video-projects/remotion/src/OneMoreScroll.tsx",
+              "video-projects/remotion/public/story/shots.json",
+              "tools/blender/render_h2_stage.py",
+              "tools/krita/README.md",
+              "tools/video/archive_h2_master.py",
+              "video-library/one-more-scroll/manifest.json",
+              "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
+          ]
+          with zipfile.ZipFile(path) as archive:
+              bad = archive.testzip()
+              if bad:
+                  raise SystemExit(f"Corrupt ZIP member: {bad}")
+              names = set(archive.namelist())
+              missing = [item for item in required if item not in names]
+              if missing:
+                  raise SystemExit(f"Missing expected bundle entries: {missing}")
+              video_path = json.loads(archive.read("VIDEO_PRODUCTION_BUNDLE_MANIFEST.json"))["included_reference_render"]
+              if video_path not in names:
+                  raise SystemExit(f"Reference video missing from bundle: {video_path}")
+              info = archive.getinfo(video_path)
+              if info.file_size < 5_000_000:
+                  raise SystemExit(f"Reference video unexpectedly small: {info.file_size}")
+              h2 = "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
+              has_h2 = h2 in names
+              if has_h2 and archive.getinfo(h2).file_size != 31_547_778:
+                  raise SystemExit("The H2 master size does not match the expected canonical file")
+              print(f"Verified portable ZIP: {len(names)} entries; Remotion MP4 {info.file_size:,} bytes; original H2 master included={has_h2}.")
+          PY
           ls -lh video-production-master-skill.zip "$DEST/one-more-scroll-remotion-master.mp4"
           sha256sum video-production-master-skill.zip | tee video-production-master-skill.zip.sha256
 
