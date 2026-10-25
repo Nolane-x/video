@@ -1,0 +1,131 @@
+name: Build H2 SelfImprove Studio Plugin v1.1.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "integrations/h2-selfimprove-studio-production-overlay/**"
+      - ".github/workflows/build-h2-selfimprove-plugin.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-h2-selfimprove-plugin
+  cancel-in-progress: false
+
+jobs:
+  package-plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Overlay production workflow without altering the v1.0.2 source mirror
+        run: |
+          set -euo pipefail
+          mkdir -p plugin-build
+          cp -a integrations/h2-selfimprove-studio/. plugin-build/
+          cp integrations/h2-selfimprove-studio-production-overlay/SKILL-ADDENDUM.md plugin-build/SKILL-ADDENDUM.build-tmp.md
+          cat integrations/h2-selfimprove-studio-production-overlay/SKILL-ADDENDUM.md >> plugin-build/skills/lam-video-selfimprove/SKILL.md
+          cp -a integrations/h2-selfimprove-studio-production-overlay/references/. plugin-build/skills/lam-video-selfimprove/references/
+          cat integrations/h2-selfimprove-studio-production-overlay/README.md >> plugin-build/README.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("plugin-build/.codex-plugin/plugin.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          data["version"] = "1.1.0"
+          description = (
+              "H2 Self-Improvement Studio: native code-driven animated shorts with production-grade "
+              "storyboarding, H2 rig/packs, visible action/contact QA, Remotion/Blender/Krita selection, "
+              "measured audio mastering, reproducible renders and persistent handoff."
+          )
+          data["description"] = description
+          interface = data.setdefault("interface", {})
+          interface["longDescription"] = description
+          interface["shortDescription"] = (
+              "H2 animated shorts with native rig/packs, production workflow, motion/contact QA and audio mastering."
+          )
+          keywords = data.setdefault("keywords", [])
+          for keyword in ["production workflow", "motion QA", "contact validation", "Remotion", "Blender", "Krita"]:
+              if keyword not in keywords:
+                  keywords.append(keyword)
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          manifest = {
+              "name": data.get("name"),
+              "version": data["version"],
+              "base_plugin_release_id": "pluginrel_6ade1c3ecb20819199def25125d2f89a",
+              "base_plugin_version": "1.0.2",
+              "base_source_mirror": "integrations/h2-selfimprove-studio/",
+              "production_overlay": "integrations/h2-selfimprove-studio-production-overlay/",
+              "source_commit": __import__("subprocess").check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "note": "Packaging artifact for Plugin Creator update. Does not imply that the active plugin has been updated; only Plugin Creator's response can confirm that."
+          }
+          Path("plugin-build/PRODUCTION-RELEASE-MANIFEST.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          Path("plugin-build/PRODUCTION-OVERLAY-README.md").write_text(
+              Path("integrations/h2-selfimprove-studio-production-overlay/README.md").read_text(encoding="utf-8"),
+              encoding="utf-8"
+          )
+          PY
+          rm -f plugin-build/SKILL-ADDENDUM.build-tmp.md
+
+      - name: Validate plugin structure and production gates
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          (cd plugin-build && zip -qr ../dist/h2-selfimprove-studio-v1.1.0.zip .)
+          zip -T dist/h2-selfimprove-studio-v1.1.0.zip
+          python - <<'PY'
+          import json, zipfile
+          path = "dist/h2-selfimprove-studio-v1.1.0.zip"
+          required = [
+              ".codex-plugin/plugin.json",
+              "skills/kich-ban-selfimprove/SKILL.md",
+              "skills/lam-video-selfimprove/SKILL.md",
+              "skills/lam-video-selfimprove/kit/engine/rig.js",
+              "skills/lam-video-selfimprove/kit/render.mjs",
+              "skills/lam-video-selfimprove/kit/packs/dem/templates.js",
+              "skills/lam-video-selfimprove/kit/packs/doodle/templates.js",
+              "skills/lam-video-selfimprove/references/production-pipeline.md",
+              "skills/lam-video-selfimprove/references/quality-gates.md",
+              "skills/lam-video-selfimprove/references/state-handoff.md",
+              "skills/lam-video-selfimprove/references/one-more-scroll-case-study.md",
+              "PRODUCTION-RELEASE-MANIFEST.json"
+          ]
+          with zipfile.ZipFile(path) as archive:
+              bad = archive.testzip()
+              if bad:
+                  raise SystemExit(f"Corrupt ZIP member: {bad}")
+              names = set(archive.namelist())
+              missing = [x for x in required if x not in names]
+              if missing:
+                  raise SystemExit(f"Missing plugin files: {missing}")
+              plugin = json.loads(archive.read(".codex-plugin/plugin.json"))
+              if plugin.get("name") != "h2-selfimprove-studio" or plugin.get("version") != "1.1.0":
+                  raise SystemExit(f"Unexpected plugin identity/version: {plugin.get('name')} {plugin.get('version')}")
+              skill = archive.read("skills/lam-video-selfimprove/SKILL.md").decode("utf-8")
+              if "Production-grade workflow and persistent memory" not in skill:
+                  raise SystemExit("Production addendum was not merged into the main H2 video skill")
+              if "P0/P1" not in archive.read("skills/lam-video-selfimprove/references/quality-gates.md").decode("utf-8"):
+                  raise SystemExit("Quality severity gates were not found")
+              print(f"PASS: valid H2 plugin ZIP; {len(names)} files; version {plugin['version']}; native H2 rig/packs retained.")
+          PY
+          sha256sum dist/h2-selfimprove-studio-v1.1.0.zip | tee dist/h2-selfimprove-studio-v1.1.0.zip.sha256
+          ls -lh dist/
+
+      - name: Upload plugin archive for guarded Plugin Creator update
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-selfimprove-studio-v1.1.0-plugin-archive
+          path: |
+            dist/h2-selfimprove-studio-v1.1.0.zip
+            dist/h2-selfimprove-studio-v1.1.0.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
