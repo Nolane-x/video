@@ -44,7 +44,7 @@ const Character: React.FC<{x: number; y: number; pose: Pose; t: number; scale?: 
   const headY = pose === "slump" ? -117 : pose === "scroll" || pose === "write" ? -123 : -132;
   const face = red ? "#762f39" : "#25282d";
   return (
-    <svg width="172" height="240" viewBox="-100 -245 200 270" style={{position: "absolute", left: x - 100, top: 390 + y + bob, overflow: "visible", transform: "scale(" + scale + ")", transformOrigin: "50% 100%"}}>
+    <svg width="220" height="330" viewBox="-100 -245 200 300" style={{position: "absolute", left: x - 110, top: 240 + y + bob, overflow: "visible", transform: "scale(" + scale + ")", transformOrigin: "50% 100%"}}>
       <g opacity={red ? 0.95 : 1} transform={"rotate(" + bodyTilt + " 0 -72)"}>
         <path d="M-28 -110 Q-55 -76 -37 -36 L-28 -5 L28 -5 L38 -38 Q54 -82 27 -111 Z" fill={hoodie} stroke={ink} strokeWidth="3" strokeLinejoin="round"/>
         <path d="M-20 -102 Q0 -82 20 -102" fill="none" stroke={red ? "#9f4248" : "#737983"} strokeWidth="3"/>
