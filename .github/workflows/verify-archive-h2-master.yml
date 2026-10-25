@@ -147,6 +147,19 @@ jobs:
                           "- [x] Archive the exact H2 master to durable GitHub storage.")
           qa = qa.replace("- [ ] Record its SHA-256 and fresh ffprobe output.",
                           "- [x] Record its SHA-256 and fresh ffprobe output.")
+          # Remove any local-staging note created before the binary was pushed; it is stale now.
+          lines = qa.splitlines()
+          filtered = []
+          skip_local_section = False
+          for line in lines:
+              if line.startswith("## H2 master validated locally for archive"):
+                  skip_local_section = True
+                  continue
+              if skip_local_section and line.startswith("## "):
+                  skip_local_section = False
+              if not skip_local_section:
+                  filtered.append(line)
+          qa = "\n".join(filtered).rstrip()
           if "## H2 master archived and verified by GitHub Actions" not in qa:
               qa += (
                   "\n\n## H2 master archived and verified by GitHub Actions\n"
@@ -161,8 +174,17 @@ jobs:
           state_path = Path("docs/STATE.md")
           state = state_path.read_text(encoding="utf-8")
           state = state.replace(
+              "## Previously delivered H2 master (outside Git history)",
+              "## Canonical H2 master (archived and verified in GitHub)"
+          )
+          state = state.replace(
               "- **Storage truth:** these were delivered as ChatGPT attachments; they are not committed binary files in this repo.",
-              f"- **Storage truth:** the exact H2 master is archived at `{video}`, SHA-256 `{sha}`, and verified by [workflow run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']}). The source ZIPs remain prior-session attachments until separately archived."
+              f"- **Storage truth:** the exact H2 master is archived at `{video}`, SHA-256 `{sha}`, and verified by [workflow run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']}). The source ZIPs remain external until separately uploaded as Release assets."
+          )
+          stale_probe_bullet = "- The exact H2 master SHA-256 is `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, size 31,547,778 bytes. It has been freshly probed in the current workspace, but the binary itself is not yet committed to GitHub. Use `tools/video/archive_h2_master.py` after downloading that exact attachment to import it with checksum validation."
+          state = state.replace(
+              stale_probe_bullet,
+              f"- Exact H2 master: `{video}`, SHA-256 `{sha}`, {size:,} bytes. GitHub Actions verified its SHA, codec, dimensions, FPS, duration and audio format in [run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']})."
           )
           state = state.replace(
               "The exact original H2 MP4 remains a separate binary-archive task; do not confuse it with the reproducible Remotion file committed by the workflow.",
@@ -176,7 +198,28 @@ jobs:
               "The prior 155-second Full HD H2 master and source ZIP were delivered as attachments in an earlier ChatGPT session; metadata, SHA-256 and ffprobe results are recorded in the manifest. The exact H2 binary is still not committed here. The Remotion reference build has been persisted under `video-library/one-more-scroll/renders/remotion-run-31/`; this is a separate renderer output. Never conflate them.",
               f"The exact 155-second Full HD H2 master is archived at `{video}` and verified by workflow run {os.environ['VERIFY_RUN_ID']}. The source ZIP remains external to GitHub until uploaded separately. The Remotion reference build under `video-library/one-more-scroll/renders/remotion-run-31/` is a separate renderer output. Never conflate them."
           )
+          handoff = handoff.replace(
+              "The exact H2 binary is still not committed here.",
+              f"The exact H2 binary is committed at `{video}` and verified by workflow run {os.environ['VERIFY_RUN_ID']}."
+          )
           handoff_path.write_text(handoff, encoding="utf-8")
+
+          readme_path = Path("video-library/README.md")
+          readme = readme_path.read_text(encoding="utf-8")
+          readme = readme.replace(
+              "The original H2 MP4 was delivered in a prior ChatGPT session but is not yet binary content in GitHub; the repository's Remotion output is a different build.",
+              f"The original H2 MP4 is archived at `{video}`, SHA-256 `{sha}`, and verified by [workflow run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']}). The Remotion output is a different build."
+          )
+          readme_path.write_text(readme, encoding="utf-8")
+
+          film_readme_path = root / "README.md"
+          film_readme = film_readme_path.read_text(encoding="utf-8")
+          film_readme = film_readme.replace(
+              "The original 155-second 1920×1080 H2 Canvas/Chromium master was delivered as a ChatGPT attachment but was not imported as a durable binary in this repo.",
+              f"The original 155-second 1920×1080 H2 Canvas/Chromium master is archived as `{video}` and verified by [workflow run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']})."
+          )
+          film_readme_path.write_text(film_readme, encoding="utf-8")
+
           print(f"Verified original H2 master {sha} ({size} bytes), duration {duration:.3f}s.")
           PY
 
@@ -193,7 +236,8 @@ jobs:
             video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg \
             video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg \
             video-library/one-more-scroll/manifest.json video-library/one-more-scroll/QA.md \
-            docs/STATE.md docs/AI_HANDOFF.md
+            docs/STATE.md docs/AI_HANDOFF.md video-library/README.md \
+            video-library/one-more-scroll/README.md
           if git diff --cached --quiet; then
             echo "H2 archive is already verified and current."
             exit 0
