@@ -57,6 +57,9 @@ jobs:
           cp h2-audio/audio/sfx/notif_msg.wav public/audio/
           cp h2-audio/audio/sfx/clock_tick.wav public/audio/
           cp h2-audio/audio/sfx/tempt_whisper.wav public/audio/
+          cp h2-audio/audio/sfx/tempt_swell.wav public/audio/
+          cp h2-audio/audio/sfx/rain_loop.wav public/audio/
+          cp h2-audio/audio/sfx/punch_bag.wav public/audio/
           cp h2-audio/audio/sfx/page_flip.wav public/audio/
           cp h2-audio/audio/sfx/footsteps.wav public/audio/
           cp h2-audio/audio/sfx/door_open.wav public/audio/
@@ -96,11 +99,11 @@ jobs:
           assert audio is not None, "missing audio stream"
           assert video.get("width") == 1280 and video.get("height") == 720, "unexpected resolution"
           assert video.get("r_frame_rate") == "24/1", "unexpected frame rate"
-          assert abs(duration - 60.0) < 0.12, f"unexpected duration: {duration}"
+          assert abs(duration - 155.0) < 0.2, f"unexpected duration: {duration}"
           print(f"Validated: {duration:.3f}s, 1280x720, 24fps, audio={audio.get('codec_name')}")
           PY
-          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/5,scale=320:-1,tile=4x3" -frames:v 1 out/contact-sheet.jpg
-          ffmpeg -hide_banner -loglevel error -i out/one-more-scroll.mp4 -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
+          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/10,scale=320:-1,tile=4x4" -frames:v 1 out/contact-sheet.jpg
+          ffmpeg -hide_banner -loglevel info -i out/one-more-scroll.mp4 -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
 
       - name: Upload render and QA outputs
         uses: actions/upload-artifact@v4
