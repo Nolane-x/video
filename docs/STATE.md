@@ -68,7 +68,7 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 ## Next priorities
 1. Complete the portable skill package workflow and verify the ZIP contains the actual MP4 as well as skill/source docs.
 2. Import the exact H2 master binary using `tools/video/archive_h2_master.py` once the attachment is downloaded to a local path, then commit/push the resulting video, checksum and contact sheets.
-3. Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but this archive turn did not sign off the video on artistic criteria. Consider an audio-only remaster because measured true peak is -1.2 dBFS, slightly above the conservative -1.5 dBTP target.
+3. Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but this archive turn did not sign off the video on artistic criteria. The latest run 36 measured -14.5 LUFS integrated and -2.3 dBFS true peak, within the configured conservative peak gate. Run 31's older -1.2 dBFS peak is historical, not the current master.
 4. Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.
 
