@@ -21,7 +21,7 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Film manifest: `video-library/one-more-scroll/manifest.json`
 
 ## Artifact truth
-The prior 155-second Full HD H2 master and source ZIP were delivered as attachments in an earlier ChatGPT session but are not binary files in this repository. The Remotion output is a separate reproducible build. Check the manifest before claiming otherwise.
+The prior 155-second Full HD H2 master and source ZIP were delivered as attachments in an earlier ChatGPT session; metadata, SHA-256 and ffprobe results are recorded in the manifest. The exact H2 binary is still not committed here. The Remotion reference build has been persisted under `video-library/one-more-scroll/renders/remotion-run-31/`; this is a separate renderer output. Never conflate them.
 
 ## End-of-session
 Run checks; inspect contact sheets and motion proofs; record exact renderer, commit, run URL, artifact storage/expiry, audio measures, defects and next actions. Update `docs/STATE.md`, this file and the per-video manifest.

@@ -1,6 +1,6 @@
 # Video Studio — current state snapshot
 
-Snapshot authored 2026-10-25. Verify live GitHub state and Actions before relying on it.
+Snapshot updated 2026-10-25 after successful render/archive. Verify live GitHub state and Actions before relying on it.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video
@@ -43,6 +43,8 @@ The full H2 source and its packed skill were used in the prior ChatGPT session b
 - Audio target reported about -14 LUFS; reported true peak about -2.4 dBFS.
 - Related session attachments: 30-second preview, thumbnail, two contact sheets, QA report, source ZIP (~115.9 MB) and source-v2 ZIP (~115.9 MB).
 - **Storage truth:** these were delivered as ChatGPT attachments; they are not committed binary files in this repo. Source-v2 includes fixes that had not been verified by a new full render due to local Chromium navigation restrictions. Do not claim those fixes are in the master.
+- The exact H2 master SHA-256 is `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, size 31,547,778 bytes. It has been freshly probed in the current workspace, but the binary itself is not yet committed to GitHub. Use `tools/video/archive_h2_master.py` after downloading that exact attachment to import it with checksum validation.
+- The repository's Remotion reference render **is now persisted** at `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`. Its SHA-256 is `cba900cebb306acc42fa3f741f7c7d008e9a04400a867a87402dcdf8090ac3e3`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
 
 ## Historical CI evidence
@@ -51,9 +53,15 @@ Earlier in the conversation:
 - H2 runtime packaging runs 40189690048 and 40189801017 succeeded.
 These are historical identifiers, not proof about current HEAD. Check the live Actions page.
 
+## Verified latest state
+- Remotion render CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio normalization, metadata and contact-sheet generation.
+- Archive CI: [run 40197855575](https://github.com/Nolane-x/video/actions/runs/40197855575) — passed and committed the video plus skill ZIP.
+- Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`.
+- Portable skill bundle: `video-library/video-production-master-skill.zip`, which the new packaging workflow is updating to include the current video and the instructions/source.
+
 ## Next priorities
-1. Verify current Remotion source and latest CI after skill/state additions.
-2. Archive a reproducible Remotion output, contact sheets, metadata and skill ZIP inside `video-library/one-more-scroll/renders/` using the archive workflow; triggering render commit must include `[archive-video]`.
-3. The exact original H2 MP4 remains a separate binary-archive task; do not confuse it with the reproducible Remotion file committed by the workflow.
+1. Complete the portable skill package workflow and verify the ZIP contains the actual MP4 as well as skill/source docs.
+2. Import the exact H2 master binary using `tools/video/archive_h2_master.py` once the attachment is downloaded to a local path, then commit/push the resulting video, checksum and contact sheets.
+3. Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but this archive turn did not sign off the video on artistic criteria. Consider an audio-only remaster because measured true peak is -1.2 dBFS, slightly above the conservative -1.5 dBTP target.
 4. Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.

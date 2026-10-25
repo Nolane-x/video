@@ -116,5 +116,45 @@
   "known_unverified": [
     "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render.",
     "The exact canonical H2 master is not archived as a durable GitHub binary."
-  ]
+  ],
+  "latest_remotion_render": {
+    "artifact_kind": "reference render / reproducible pipeline proof",
+    "renderer": "Remotion CLI with procedural H2-style music/SFX generation and FFmpeg audio mastering",
+    "repository_path": "video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4",
+    "source_commit": "38ed2bffda70a399e875ba650f17396b43805878",
+    "source_commit_message": "build: rerender and archive video plus skill [archive-video]",
+    "workflow_run_id": "40197641208",
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40197641208",
+    "archive_workflow_run_id": "40197855575",
+    "archive_workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40197855575",
+    "size_bytes": 17441393,
+    "sha256": "cba900cebb306acc42fa3f741f7c7d008e9a04400a867a87402dcdf8090ac3e3",
+    "duration_seconds": 155.1,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "integrated_loudness_lufs": -14.5,
+    "loudness_range_lu": 7.2,
+    "reported_true_peak_dbfs": -1.2,
+    "contact_sheet_path": "video-library/one-more-scroll/renders/remotion-run-31/contact-sheet-shots.jpg",
+    "overview_contact_sheet_path": "video-library/one-more-scroll/renders/remotion-run-31/contact-sheet-overview.jpg",
+    "metadata_path": "video-library/one-more-scroll/renders/remotion-run-31/metadata.json",
+    "skill_zip_path": "video-library/video-production-master-skill.zip",
+    "technical_gates": {
+      "storyboard_schema_and_timing": "passed",
+      "typescript": "passed",
+      "remotion_render": "passed",
+      "audio_mastering": "passed",
+      "mp4_metadata": "passed",
+      "contact_sheets_generated": "passed",
+      "manual_motion_review": "not signed off in this archive turn; use the saved sheets/proofs before treating it as a quality-approved master"
+    },
+    "notes": [
+      "This is the repository's Remotion output, not the canonical H2 Canvas/Chromium master.",
+      "The measured true peak was -1.2 dBFS, slightly above the skill's conservative -1.5 dBTP target; consider a stricter audio-only remaster if this reference is published.",
+      "The skill archive workflow now commits the MP4 and QA files to the repository, not only as an expiring Actions artifact."
+    ]
+  }
 }

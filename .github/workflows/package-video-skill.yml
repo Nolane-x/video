@@ -1,0 +1,92 @@
+name: Package portable video skill with example
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".agents/skills/video-production-master/**"
+      - ".claude/skills/video-production-master/**"
+      - "docs/STATE.md"
+      - "docs/AI_HANDOFF.md"
+      - "docs/ART_DIRECTION_IFVERSE_DAYONE.md"
+      - "docs/VIDEO_PRODUCTION_STATE_SCHEMA.json"
+      - "docs/INSTALL_VIDEO_SKILL.md"
+      - "tools/video/validate_story.py"
+      - "tools/video/archive_h2_master.py"
+      - "video-library/one-more-scroll/manifest.json"
+      - "video-library/one-more-scroll/renders/**/one-more-scroll-remotion-master.mp4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: package-video-skill
+  cancel-in-progress: false
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Package skill, instructions, source map, state and reference video
+        run: |
+          set -euo pipefail
+          mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library
+          cp AGENTS.md CLAUDE.md bundle/
+          cp -R .agents/skills/video-production-master bundle/.agents/skills/
+          cp -R .claude/skills/video-production-master bundle/.claude/skills/
+          cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
+             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md bundle/docs/
+          cp tools/video/validate_story.py tools/video/archive_h2_master.py bundle/tools/video/
+          cp video-library/README.md bundle/video-library/
+          mkdir -p bundle/video-library/one-more-scroll
+          cp video-library/one-more-scroll/README.md \
+             video-library/one-more-scroll/manifest.json \
+             video-library/one-more-scroll/QA.md \
+             video-library/one-more-scroll/latest-remotion-release.json \
+             bundle/video-library/one-more-scroll/
+          VIDEO_PATH="$(python -c 'import json; print(json.load(open("video-library/one-more-scroll/latest-remotion-release.json"))["video_path"])')"
+          RENDER_DIR="$(dirname "$VIDEO_PATH")"
+          test -s "$VIDEO_PATH"
+          DEST="bundle/$RENDER_DIR"
+          mkdir -p "$DEST"
+          for f in one-more-scroll-remotion-master.mp4 contact-sheet-shots.jpg contact-sheet-overview.jpg metadata.json audio-loudness.txt SHA256SUMS.txt; do
+            [ ! -f "$RENDER_DIR/$f" ] || cp "$RENDER_DIR/$f" "$DEST/$f"
+          done
+          cp video-projects/remotion/README.md bundle/video-library/one-more-scroll/remotion-README.md
+          mkdir -p bundle/video-projects
+          cp -R video-projects/remotion bundle/video-projects/
+          cp -R tools/blender bundle/tools/
+          cp -R tools/krita bundle/tools/
+          (cd bundle && zip -qr ../video-production-master-skill.zip .)
+          test -s video-production-master-skill.zip
+          ls -lh video-production-master-skill.zip "$DEST/one-more-scroll-remotion-master.mp4"
+          sha256sum video-production-master-skill.zip | tee video-production-master-skill.zip.sha256
+
+      - name: Persist bundle to the repository
+        run: |
+          set -euo pipefail
+          cp video-production-master-skill.zip video-library/video-production-master-skill.zip
+          cp video-production-master-skill.zip.sha256 video-library/video-production-master-skill.zip.sha256
+          VIDEO_PATH="$(python -c 'import json; print(json.load(open("video-library/one-more-scroll/latest-remotion-release.json"))["video_path"])')"
+          RENDER_DIR="$(dirname "$VIDEO_PATH")"
+          cp video-production-master-skill.zip "$RENDER_DIR/video-production-master-skill.zip"
+          cp video-production-master-skill.zip.sha256 "$RENDER_DIR/video-production-master-skill.zip.sha256"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add video-library/video-production-master-skill.zip video-library/video-production-master-skill.zip.sha256 \
+            "$RENDER_DIR/video-production-master-skill.zip" "$RENDER_DIR/video-production-master-skill.zip.sha256"
+          if git diff --cached --quiet; then
+            echo "Bundle is already current."
+            exit 0
+          fi
+          git commit -m "build: package portable video skill with reference footage"
+          git push origin main

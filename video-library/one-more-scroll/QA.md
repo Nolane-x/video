@@ -24,3 +24,16 @@ The delivered master and later source-v2 are different versions. The prior maste
 - [ ] Record its SHA-256 and fresh ffprobe output.
 - [ ] Re-render source-v2 with the real H2 engine.
 - [ ] Inspect all fixed shots and transitions.
+
+
+## Persisted Remotion reference build (run 31)
+- File: `renders/remotion-run-31/one-more-scroll-remotion-master.mp4`
+- Source commit: `38ed2bffda70a399e875ba650f17396b43805878`
+- CI render: [40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208)
+- Archive: [40197855575](https://github.com/Nolane-x/video/actions/runs/40197855575)
+- Technical result: schema validation, TypeScript, render, FFmpeg audio processing, metadata and contact-sheet generation all passed.
+- Actual metadata: 155.1 s, 1280×720, 24 fps, H.264 + AAC.
+- SHA-256: `cba900cebb306acc42fa3f741f7c7d008e9a04400a867a87402dcdf8090ac3e3`
+- Audio measurement: -14.5 LUFS integrated, 7.2 LU LRA, true peak reported -1.2 dBFS. The last value is 0.3 dB higher than the conservative target; consider a remaster if publishing.
+- Full shot sheet: `renders/remotion-run-31/contact-sheet-shots.jpg`; overview: `renders/remotion-run-31/contact-sheet-overview.jpg`.
+- **Do not label this as the H2 master.** A fresh visual/motion review is still needed before calling it a visually approved master.
