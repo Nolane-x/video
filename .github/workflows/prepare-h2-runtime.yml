@@ -47,9 +47,11 @@ jobs:
           }
           JSON
           npm install --no-audit --no-fund
+          npx playwright install chromium
           cd ..
           zip -qr h2-node-modules.zip h2-runtime/node_modules
-          sha256sum h2-node-modules.zip | tee h2-node-modules.sha256
+          zip -qr h2-playwright-browsers.zip "$HOME/.cache/ms-playwright"
+          sha256sum h2-node-modules.zip h2-playwright-browsers.zip | tee h2-runtime.sha256
 
       - name: Upload H2 runtime for offline rendering workspace
         uses: actions/upload-artifact@v4
@@ -57,6 +59,7 @@ jobs:
           name: h2-studio-node-runtime
           path: |
             h2-node-modules.zip
-            h2-node-modules.sha256
+            h2-playwright-browsers.zip
+            h2-runtime.sha256
           if-no-files-found: error
           retention-days: 7
