@@ -19,7 +19,6 @@ on:
       - "tools/video/archive_previous_works.py"
       - "tools/video/publish_h2_source_release.ps1"
       - ".github/workflows/verify-previous-works.yml"
-      - "video-library/previous-works-catalog.json"
       - ".github/workflows/verify-archive-h2-master.yml"
       - "video-library/README.md"
       - "tools/blender/**"
@@ -27,12 +26,7 @@ on:
       - "video-projects/remotion/README.md"
       - "video-projects/remotion/src/**"
       - "video-projects/remotion/public/story/**"
-      - "video-library/one-more-scroll/manifest.json"
-      - "video-library/one-more-scroll/README.md"
-      - "video-library/one-more-scroll/QA.md"
-      - "video-library/one-more-scroll/latest-remotion-release.json"
       - "video-library/one-more-scroll/h2-source-release.json"
-      - "video-library/previous-works/**"
       - ".github/workflows/package-video-skill.yml"
   workflow_run:
     workflows:
