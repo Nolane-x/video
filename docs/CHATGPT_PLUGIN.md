@@ -1,45 +1,73 @@
 # ChatGPT Plugin Creator integration — H2 SelfImprove Studio
 
-## Exact plugin created
+## Current active plugin — verified 2026-10-25
 
 - Name: `h2-selfimprove-studio`
 - Plugin ID: `plugins_6ade1c3ca8d0819188070ae20f2792d0`
-- Version created from the user-provided plugin: `1.0.2`
-- Scope: private personal plugin (`USER`)
+- **Active version: `1.1.0`**
+- **Current release ID: `pluginrel_6ade248942988191a57ff1059c818720`**
+- Scope: private personal plugin (`USER`); discoverability: `PRIVATE`
 - Open/activate in ChatGPT: https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0
-- Source input: `h2-selfimprove-studio.plugin` supplied in the production chat
-- Creation result: Plugin Creator reported `status=created` and release ID `pluginrel_6ade1c3ecb20819199def25125d2f89a`.
+- Plugin Creator explicitly returned `status=updated`, version `1.1.0`, and the release ID above. This is a confirmed plugin update, not merely a prepared build artifact.
 
-## GitHub source mirror
+The release was created by updating the existing private plugin using the guarded expected base release ID `pluginrel_6ade1c3ecb20819199def25125d2f89a` (version 1.0.2). The prior release was retained in Plugin Creator history.
 
-The 51 UTF-8 source files from this plugin release have been copied into `integrations/h2-selfimprove-studio/` in the repository. Start with [MIRROR-NOTES.md](../integrations/h2-selfimprove-studio/MIRROR-NOTES.md) and [SOURCE-MANIFEST.json](../integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json). This makes the H2 kit's source reviewable/versioned on GitHub even though the original `.plugin` archive itself is not committed as a binary.
+## GitHub build and verification evidence
 
-## GitHub source mirror
+- Repository: https://github.com/Nolane-x/video
+- Build workflow: [Build H2 SelfImprove Studio Plugin v1.1.0](https://github.com/Nolane-x/video/actions/workflows/build-h2-selfimprove-plugin.yml)
+- Source commit: [`a58ed0a0ca85079435b61ef670fa62531cd7f502`](https://github.com/Nolane-x/video/commit/a58ed0a0ca85079435b61ef670fa62531cd7f502)
+- Successful GitHub Actions run: [`40207680206`](https://github.com/Nolane-x/video/actions/runs/40207680206) — package job and all build/validation/upload steps succeeded.
+- Artifact: `h2-selfimprove-studio-v1.1.0-plugin-archive`, artifact ID `12604430984`; its GitHub retention expiry is 2026-11-08.
+- Inner plugin ZIP SHA-256: `84993b9eab1d61662cb5859214664b1ac93c1491d9dea6493886df2ab6914917`.
+- GitHub artifact-container digest: `sha256:9358f78ac76dd08b7e63154ac6462cfcab71b708f89a11008248ccf82d5eed58`.
+- Pre-update checks: ZIP test passed, SHA-256 matched the build's checksum file, required H2 engine/rig/scene packs and production references were present, manifest reported `h2-selfimprove-studio 1.1.0`.
+- Post-update checks: Plugin Creator returned the exact new active release ID above and reported `status=updated`.
 
-The 51 UTF-8 source files from this Plugin Creator release are now mirrored under `integrations/h2-selfimprove-studio/`. See [MIRROR-NOTES.md](../integrations/h2-selfimprove-studio/MIRROR-NOTES.md) and [SOURCE-MANIFEST.json](../integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json). The mirror is versioned in GitHub even though the original `.plugin` archive itself is not committed as a binary.
+## What version 1.1.0 adds
 
-## What the plugin contains
+The release combines the original H2 plugin source with the versioned production overlay at `integrations/h2-selfimprove-studio-production-overlay/`. It preserves the original H2 renderer, rig, `dem` and `doodle` packs, scene templates, procedural audio, script workflow and tools while adding:
 
-The Plugin Creator successfully ingested the supplied archive and reported these principal components:
-- `skills/kich-ban-selfimprove/SKILL.md` plus story-structure and thumbnail references.
-- `skills/lam-video-selfimprove/SKILL.md` plus style, audio, install and scene QA references.
-- The H2 kit: `kit/engine/`, `kit/packs/dem/`, `kit/packs/doodle/`, `kit/render.mjs`, the project shot plan, audio generation/mixing tools, draft/doctor/import helpers and package manifest.
-- The actual character rig, scene templates, environment/prop drawing code, procedural audio and render scripts from the supplied plugin archive.
+- A production pipeline with explicit gates for state recovery, creative brief, reference breakdown, storyboard/schema, blocking, acting, previews, rendering, audio, QA and delivery.
+- P0/P1/P2 defect severity, regression cases for prop contact and action readability, and requirements for contact sheets plus moving proofs.
+- State handoff instructions and the `ONE MORE SCROLL` case study, including known failure modes to test rather than repeat.
+- A clearer engine-selection contract for H2, Remotion, Blender, Krita and FFmpeg.
+- Updated plugin metadata and keywords for production workflow, motion QA and contact validation.
 
-This means the H2 kit is preserved inside the private ChatGPT plugin; it is not the same as a full upstream Remotion, Blender or Krita application checkout.
+The source mirror under `integrations/h2-selfimprove-studio/` intentionally remains the exact base snapshot of version 1.0.2. Do not change that base source manifest to pretend it was generated by the 1.1.0 overlay; the current release and overlay are recorded separately.
 
-## How a future ChatGPT session should use it
+## GitHub project map for future AI sessions
 
-1. Open the plugin link above and make sure it is available in the user's ChatGPT workspace. Its current discoverability is private to the user's account.
-2. For script work, invoke the `kich-ban-selfimprove` workflow.
-3. For H2 film production, invoke the `lam-video-selfimprove` workflow and read the H2 package's scene/schema/install/QA references before changing templates.
-4. Also read this repository's canonical production skill at `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, and the current per-video manifest.
-5. Select the renderer per scene. Use H2 for its native rig/scene packs; use Remotion for timeline and compositing; Blender for selected shots that benefit from depth/3D; Krita for intentional hand-authored assets; FFmpeg for mastering/validation.
-6. Distinguish the H2 master from the Remotion reference render. A successful render or generated contact sheet is not a manual visual QA sign-off.
+Start with [`AGENTS.md`](../AGENTS.md), the [cross-engine Video Production Master skill](../.agents/skills/video-production-master/SKILL.md), [current state](STATE.md), [AI handoff](AI_HANDOFF.md), [tool inventory](TOOL_INVENTORY.md), and [video library](../video-library/README.md).
 
-## Versioning and honest status
+- Remotion project/story/renderer: `video-projects/remotion/`
+- Blender shot helper and workflow: `tools/blender/` and `.github/workflows/render-blender-preview.yml`
+- Krita asset-authoring guide: `tools/krita/README.md`
+- H2 source mirror: `integrations/h2-selfimprove-studio/`
+- H2 production overlay used in v1.1.0: `integrations/h2-selfimprove-studio-production-overlay/`
+- Video catalog, per-film manifest, QA notes and archived Remotion sample: `video-library/`
 
-- Version `1.0.2` is the successfully created private plugin release.
-- The canonical production playbook and QA gates are maintained in this repo and are linked above; they are not silently claimed to be embedded in version 1.0.2.
-- A plugin update requires building a new ZIP/tar.gz overlay and calling Plugin Creator's guarded `update_plugin` action with the current release ID. The original plugin should be preserved, and omitted files must remain intact.
-- Do not say the plugin was updated to a new version until Plugin Creator returns that updated version and release ID.
+## Important scope and artifact truth
+
+The private ChatGPT plugin packages the H2 production kit and its skill; it does **not** contain the complete upstream Remotion, Blender or Krita applications. This repository contains the Remotion project, Blender helper workflow, Krita guidance and production state, not full upstream application source trees.
+
+The original Full HD H2 master video and H2 source ZIP were previously delivered as ChatGPT attachments and are not yet canonical binary files in ordinary Git history. The archived Remotion render is a different renderer/output. Never conflate them, and never claim that a render passed artistic review unless the actual moving footage and relevant contact sheets were inspected.
+
+## How a future ChatGPT session should use the plugin
+
+1. Open the plugin link above and ensure it is available in the current ChatGPT workspace.
+2. For a new production task, read `AGENTS.md`, the cross-engine skill, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md` and the per-film manifest before acting.
+3. If H2 is the selected engine, invoke the H2 script/video workflow and read its bundled `production-pipeline.md`, `quality-gates.md`, `state-handoff.md`, `one-more-scroll-case-study.md` and existing install/style/audio/QA references.
+4. Verify current GitHub HEAD, workflow status and artifact paths. Do not assume an old ChatGPT attachment or expiring Actions artifact is permanent storage.
+5. Choose the engine per shot: H2 for its native rig/packs; Remotion for timeline/type/compositing/CI; Blender for shots that truly benefit from depth/3D; Krita for deliberately authored art; FFmpeg/ffprobe for mastering/technical validation.
+6. Keep the user's cinematic art direction: simple symbolic character, richly staged sets, warm practical light against plum/charcoal shadows, varied and motivated camera, visible acting/contact, purposeful sound and story progression. Learn from references without copying their frames, scripts, characters or music.
+7. End each session by recording the exact source commit, renderer, command/workflow run, artifact storage/checksum, visual QA status, defects and next actions in the state/handoff/film manifest.
+
+## Versioning rule
+
+Always distinguish:
+- Active private ChatGPT plugin: **v1.1.0**, release `pluginrel_6ade248942988191a57ff1059c818720`.
+- Base H2 source mirror: v1.0.2, release `pluginrel_6ade1c3ecb20819199def25125d2f89a`.
+- Production overlay commit/build source: `a58ed0a0ca85079435b61ef670fa62531cd7f502`.
+
+For later updates, fetch the exact current release ID from Plugin Creator and use it as the guarded expected release. Only a successful Plugin Creator response confirms a new active version.
