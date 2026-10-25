@@ -53,6 +53,13 @@ jobs:
              video-library/one-more-scroll/QA.md \
              video-library/one-more-scroll/latest-remotion-release.json \
              bundle/video-library/one-more-scroll/
+          # Include the canonical H2 master too, once the checksum-verified import helper has archived it.
+          if [ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ]; then
+            cp video-library/one-more-scroll/one-more-scroll-h2-final.mp4 bundle/video-library/one-more-scroll/
+            [ ! -f video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256 ] || cp video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256 bundle/video-library/one-more-scroll/
+            [ ! -f video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg ] || cp video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg bundle/video-library/one-more-scroll/
+            [ ! -f video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg ] || cp video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg bundle/video-library/one-more-scroll/
+          fi
           VIDEO_PATH="$(python -c 'import json; print(json.load(open("video-library/one-more-scroll/latest-remotion-release.json"))["video_path"])')"
           RENDER_DIR="$(dirname "$VIDEO_PATH")"
           test -s "$VIDEO_PATH"
