@@ -1,51 +1,119 @@
 {
-  "title":"ONE MORE SCROLL",
-  "project_id":"one-more-scroll",
-  "creative_target":"cinematic stick-figure self-improvement short film",
-  "canonical_master":{
-    "file_name":"one-more-scroll-h2-final.mp4",
-    "renderer":"H2 Canvas/Chromium pipeline with FFmpeg audio mastering",
-    "duration_seconds":155,
-    "width":1920,
-    "height":1080,
-    "fps":24,
-    "video_codec":"H.264",
-    "audio_codec":"AAC",
-    "audio":"stereo 48 kHz",
-    "integrated_loudness_target_lufs":-14,
-    "reported_true_peak_dbfs":-2.4,
-    "storage_status":"prior ChatGPT attachment; not yet committed as a binary GitHub file or permanent Release asset",
-    "do_not_misrepresent":"This H2 master is not the same file as the repository's Remotion render."
+  "title": "ONE MORE SCROLL",
+  "project_id": "one-more-scroll",
+  "creative_target": "cinematic stick-figure self-improvement short film",
+  "canonical_master": {
+    "file_name": "one-more-scroll-h2-final.mp4",
+    "renderer": "H2 Canvas/Chromium pipeline with FFmpeg audio mastering",
+    "duration_seconds": 155,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "video_codec": "H.264",
+    "audio_codec": "AAC",
+    "audio": "stereo 48 kHz",
+    "integrated_loudness_target_lufs": -14,
+    "reported_true_peak_dbfs": -2.4,
+    "storage_status": "prior ChatGPT attachment exists in current workspace and has been probed/hashed; not yet committed as a binary GitHub file",
+    "do_not_misrepresent": "This H2 master is not the same file as the repository's Remotion render.",
+    "size_bytes": 31547778,
+    "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
+    "fresh_probe": {
+      "duration_seconds": 155,
+      "width": 1920,
+      "height": 1080,
+      "fps": "24/1",
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "audio_sample_rate_hz": 48000,
+      "audio_channels": 2,
+      "source": "ffprobe run on exact prior-session attachment during 2026-10-25 session"
+    }
   },
-  "prior_session_files":[
-    {"file":"one-more-scroll-h2-final.mp4","kind":"master","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-preview-30s.mp4","kind":"preview","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-thumbnail.png","kind":"thumbnail","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-contact-sheet-1.jpg","kind":"contact-sheet shots 1-16","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-contact-sheet-2.jpg","kind":"contact-sheet shots 17-31","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-QA-report.md","kind":"QA report","storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-source.zip","kind":"source","approx_size_bytes":115875783,"storage":"ChatGPT attachment"},
-    {"file":"one-more-scroll-h2-source-v2-scene-fixes.zip","kind":"source with later fixes","approx_size_bytes":115856962,"storage":"ChatGPT attachment; fresh full render not verified"}
+  "prior_session_files": [
+    {
+      "file": "one-more-scroll-h2-final.mp4",
+      "kind": "master",
+      "storage": "ChatGPT attachment",
+      "size_bytes": 31547778,
+      "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f"
+    },
+    {
+      "file": "one-more-scroll-h2-preview-30s.mp4",
+      "kind": "preview",
+      "storage": "ChatGPT attachment",
+      "sha256": "1df4a41e408b8729eca2c9f481a1ed9c38e9d89715adb56bfa5a3a6163603168"
+    },
+    {
+      "file": "one-more-scroll-h2-thumbnail.png",
+      "kind": "thumbnail",
+      "storage": "ChatGPT attachment",
+      "sha256": "dbb11a7096a6a904386a60148b6ea6e457674e10fb1d51dbc7a4826559d90747"
+    },
+    {
+      "file": "one-more-scroll-h2-contact-sheet-1.jpg",
+      "kind": "contact-sheet shots 1-16",
+      "storage": "ChatGPT attachment",
+      "sha256": "affe02514ddc1c930aff1fa248a438186ae00af05689b329d35d953a7629799e"
+    },
+    {
+      "file": "one-more-scroll-h2-contact-sheet-2.jpg",
+      "kind": "contact-sheet shots 17-31",
+      "storage": "ChatGPT attachment",
+      "sha256": "791aba77a97671d98e7a7738f42ca19702d97770e9cf2eb3b2fac2c0dfa652b5"
+    },
+    {
+      "file": "one-more-scroll-h2-QA-report.md",
+      "kind": "QA report",
+      "storage": "ChatGPT attachment",
+      "sha256": "ab6408184c668612ccdd914d27c15ab73d042f12f84d9d57784b128a3a07d889"
+    },
+    {
+      "file": "one-more-scroll-h2-source.zip",
+      "kind": "source",
+      "approx_size_bytes": 115875783,
+      "storage": "ChatGPT attachment",
+      "sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
+      "zip_integrity_test": "passed via zipfile.testzip() in working environment"
+    },
+    {
+      "file": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+      "kind": "source with later fixes",
+      "approx_size_bytes": 115856962,
+      "storage": "ChatGPT attachment; fresh full render not verified",
+      "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+      "zip_integrity_test": "passed via zipfile.testzip() in working environment"
+    }
   ],
-  "remotion_project":{
-    "directory":"video-projects/remotion",
-    "composition":"OneMoreScroll",
-    "storyboard":"video-projects/remotion/public/story/shots.json",
-    "source":"video-projects/remotion/src/OneMoreScroll.tsx",
-    "workflow":".github/workflows/render-remotion.yml",
-    "intended_duration_seconds":155,
-    "intended_resolution":"1280x720",
-    "fps":24,
-    "role":"separate reproducible timeline/2D composition pipeline, not the H2 Canvas engine"
+  "remotion_project": {
+    "directory": "video-projects/remotion",
+    "composition": "OneMoreScroll",
+    "storyboard": "video-projects/remotion/public/story/shots.json",
+    "source": "video-projects/remotion/src/OneMoreScroll.tsx",
+    "workflow": ".github/workflows/render-remotion.yml",
+    "intended_duration_seconds": 155,
+    "intended_resolution": "1280x720",
+    "fps": 24,
+    "role": "separate reproducible timeline/2D composition pipeline, not the H2 Canvas engine"
   },
-  "creative_notes":{
-    "character":"near-black round head, light rim, expressive minimal face, slim dark limbs, colored shirt and simple shoes",
-    "world":"distinct interiors/exteriors, layered architecture and props, warm practical light against plum/charcoal shadows",
-    "motion":"anticipation, action, visible contact, follow-through, recovery; feet and hands stay attached to the world",
-    "music_arc":["sad piano","dark drone","intentional silence","hope pad","rising effort","resolution"],
-    "reference_channels":["https://www.youtube.com/@IfverseTales","https://www.youtube.com/@dayonefilmsofficial"]
+  "creative_notes": {
+    "character": "near-black round head, light rim, expressive minimal face, slim dark limbs, colored shirt and simple shoes",
+    "world": "distinct interiors/exteriors, layered architecture and props, warm practical light against plum/charcoal shadows",
+    "motion": "anticipation, action, visible contact, follow-through, recovery; feet and hands stay attached to the world",
+    "music_arc": [
+      "sad piano",
+      "dark drone",
+      "intentional silence",
+      "hope pad",
+      "rising effort",
+      "resolution"
+    ],
+    "reference_channels": [
+      "https://www.youtube.com/@IfverseTales",
+      "https://www.youtube.com/@dayonefilmsofficial"
+    ]
   },
-  "known_unverified":[
+  "known_unverified": [
     "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render.",
     "The exact canonical H2 master is not archived as a durable GitHub binary."
   ]
