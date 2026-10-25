@@ -10,3 +10,10 @@ Read this folder before designing another video. It is the long-term catalog of 
 - Inspect the actual video, not only its thumbnail or filename.
 
 Current production: [ONE MORE SCROLL manifest](one-more-scroll/manifest.json), with [QA state](one-more-scroll/QA.md). The original H2 MP4 was delivered in a prior ChatGPT session but is not yet binary content in GitHub; the repository's Remotion output is a different build.
+
+
+## Historical work and renderer-source preservation
+
+[Previous work catalog](previous-works-catalog.json) inventories video iterations and their exact source-workspace checksums. Entries are *not* permanently archived unless their storage status says a GitHub verification workflow passed. The archive helper stages verified copies into `video-library/previous-works/<asset-id>/`; a workflow creates contact sheets/metadata and confirms the bytes after push.
+
+The canonical H2 source ZIP is too large for ordinary Git history. Use `tools/video/publish_h2_source_release.ps1` to upload checksum-verified H2 source assets as a GitHub Release after downloading the matching files. The repository does not vendor full upstream Remotion, Blender or Krita source trees; `docs/TOOL_INVENTORY.md` separates what is in Git from session-only attachments.
