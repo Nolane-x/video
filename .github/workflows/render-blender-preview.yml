@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Blender and FFmpeg
         run: |
           sudo apt-get update
@@ -25,10 +25,16 @@ jobs:
         run: |
           mkdir -p out/blender
           BLENDER_OUTPUT="$PWD/out/blender/h2-style-study.mp4" blender -b --python tools/blender/render_h2_stage.py
+      - name: Validate Blender output
+        run: |
+          test -s out/blender/h2-style-study.mp4
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json out/blender/h2-style-study.mp4 | tee out/blender/metadata.json
       - name: Upload Blender preview
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: h2-blender-style-study
-          path: out/blender/h2-style-study.mp4
+          path: |
+            out/blender/h2-style-study.mp4
+            out/blender/metadata.json
           if-no-files-found: error
           retention-days: 7
