@@ -100,7 +100,7 @@ def main() -> int:
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     master = manifest["canonical_master"]
-    master["storage_status"] = "committed to GitHub repository by archive_h2_master.py"
+    master["storage_status"] = "validated and staged locally; awaiting commit/push and the GitHub verification workflow"
     master["repository_path"] = "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
     master["sha256"] = sha
     master["size_bytes"] = size
@@ -116,15 +116,10 @@ def main() -> int:
     }
     for item in manifest.get("prior_session_files", []):
         if item.get("file") == "one-more-scroll-h2-final.mp4":
-            item["storage"] = "GitHub repository binary at video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
+            item["storage"] = "validated/staged in local repository; waiting for push and GitHub verification"
             item["repository_path"] = master["repository_path"]
             item["sha256"] = sha
             item["size_bytes"] = size
-    manifest["known_unverified"] = [
-        issue for issue in manifest.get("known_unverified", [])
-        if "exact canonical H2 master is not archived" not in issue
-        and "exact H2 master is not archived as a durable GitHub binary" not in issue
-    ]
     manifest.setdefault("archived_h2_master", {})
     manifest["archived_h2_master"] = {
         "repository_path": master["repository_path"],
@@ -137,13 +132,6 @@ def main() -> int:
 
     # Update QA with import/probe evidence while leaving visual sign-off explicit.
     qa_text = QA.read_text(encoding="utf-8") if QA.exists() else ""
-    qa_text = qa_text.replace(
-        "- [ ] Archive the exact H2 master to durable GitHub storage.",
-        "- [x] Archive the exact H2 master to durable GitHub storage."
-    ).replace(
-        "- [ ] Record its SHA-256 and fresh ffprobe output.",
-        "- [x] Record its SHA-256 and fresh ffprobe output."
-    )
     if "Exact H2 master imported into GitHub" not in qa_text:
         qa_text += (
             "\n\n## Exact H2 master imported into GitHub\n"
@@ -156,22 +144,24 @@ def main() -> int:
     QA.write_text(qa_text, encoding="utf-8")
 
     # Remove stale "not archived" state text and replace it with the newly verified location.
-    state_path = REPO_ROOT / "docs" / "STATE.md"
-    if state_path.exists():
-        lines = state_path.read_text(encoding="utf-8").splitlines()
-        kept = [line for line in lines if "**Storage truth:**" not in line and "The exact H2 master SHA-256 is" not in line]
-        for i, line in enumerate(kept):
-            if line.startswith("- Related session attachments:"):
-                kept.insert(i + 1, f"- Exact H2 master archived at {master['repository_path']} (SHA-256 {sha}, {size:,} bytes). The Remotion render remains a separate file.")
-                break
-        state_path.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    # Stage the intended files without claiming they are remote before a push.
+    staged_paths = [
+        str(DEST.relative_to(REPO_ROOT)),
+        str((FILM_DIR / "one-more-scroll-h2-final.mp4.sha256").relative_to(REPO_ROOT)),
+        str((FILM_DIR / "original-h2-contact-sheet-shots.jpg").relative_to(REPO_ROOT)),
+        str((FILM_DIR / "original-h2-contact-sheet-overview.jpg").relative_to(REPO_ROOT)),
+        str(MANIFEST.relative_to(REPO_ROOT)),
+        str(QA.relative_to(REPO_ROOT)),
+        str((REPO_ROOT / "docs" / "STATE.md").relative_to(REPO_ROOT)),
+    ]
+    subprocess.run(["git", "add", "-f", *staged_paths], cwd=REPO_ROOT, check=True)
 
-    print("H2 master imported and validated:")
+    print("H2 master validated and staged locally (not yet archived on GitHub):")
     print(f"  path: {DEST.relative_to(REPO_ROOT)}")
     print(f"  size: {size:,} bytes")
     print(f"  SHA-256: {sha}")
     print("  generated per-shot and overview contact sheets")
-    print("Next: review the contact sheets, then git add/commit/push the generated binary, manifest and sheets.")
+    print("Next: review the staged files, commit and push them. The verify-archive-h2-master workflow will verify the remote file and only then mark it archived.")
     return 0
 
 
