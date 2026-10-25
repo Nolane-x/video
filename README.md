@@ -33,3 +33,13 @@ The Full HD H2 master previously delivered in ChatGPT is noted in the manifest b
 - [Video Showcase archive](.github/workflows/archive-video-showcase.yml) — creates a tagged Release with Remotion video and skill ZIP when the triggering render commit includes `[archive-video]`.
 
 Large video masters should be kept as Release assets, not ordinary Git blobs. The skill and manifest preserve a distinction between source-only changes, rendered output and visually reviewed output.
+
+## Downloads and current reference
+
+- **[Download the portable Video Production Master ZIP](video-library/video-production-master-skill.zip)** — reusable agent skill, cross-agent entrypoints, project/source map, tool inventory, state/handoff, Remotion source, storyboard and the archived reference render.
+- **[Open the latest archived Remotion MP4](video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4)** — 155.1 seconds, 1280×720, 24 fps. See [the current manifest](video-library/one-more-scroll/latest-remotion-release.json) and [QA notes](video-library/one-more-scroll/QA.md).
+- **[Current art-direction/production skill](.agents/skills/video-production-master/SKILL.md)** — canonical source for future AI sessions.
+- **[Tool inventory](docs/TOOL_INVENTORY.md)** — explicitly distinguishes checked-in projects from full app/source archives and older session-only video outputs.
+- **[Prior AI video catalog](video-library/previous-works-catalog.json)** — tracks historical MP4s by checksum and archive status.
+
+The portable ZIP contains the Remotion reference render, not the original H2 Canvas/Chromium master until that exact binary is downloaded and pushed through `tools/video/archive_h2_master.py`. See [the installation/import guide](docs/INSTALL_VIDEO_SKILL.md). Full H2 source ZIPs are published separately as verified GitHub Release assets by `tools/video/publish_h2_source_release.ps1`.
