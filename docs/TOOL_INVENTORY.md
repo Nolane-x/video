@@ -13,7 +13,7 @@ The private [h2-selfimprove-studio plugin](https://chatgpt.com/plugins/plugins_6
 | Remotion | Reproducible project at `video-projects/remotion/`, storyboard, React composition, procedural music/SFX source, render/QA workflows, and a persisted 155-second reference render | This is not the full upstream Remotion monorepo |
 | Blender | `tools/blender/render_h2_stage.py`, documentation and CI proof workflow | Not the Blender application or complete Blender source tree |
 | Krita | `tools/krita/README.md` and asset-authoring guidance | Not the Krita application or complete Krita source tree |
-| H2 SelfImprove Studio | Manifests and import/verification workflows; the original H2 master can be imported with `tools/video/archive_h2_master.py` | The complete H2 studio source/rig is not automatically present just because its prior source ZIP was attached |
+| H2 SelfImprove Studio | 51 UTF-8 source files from the private Plugin Creator release are mirrored under `integrations/h2-selfimprove-studio/`, including H2 skills, `kit/engine`, `packs/dem`, `packs/doodle`, renderer/audio/helpers; source manifest records plugin release and Git blob IDs | The original `.plugin` archive and master MP4 are not binary files in Git yet; this is not a full upstream Remotion/Blender/Krita application checkout |
 | Video production skill | `.agents/skills/video-production-master/`, Claude Code adapter, root AI instructions, QA templates, audio rules, story validator, state/handoff and archive workflows | This workflow still requires the correct renderer/runtime and actual assets to exist |
 | Video library | `video-library/`, versioned Remotion sample, artifact manifests/contact sheets, and a catalog of prior work | Only files with a repository path are durable in GitHub |
 
