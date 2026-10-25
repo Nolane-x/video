@@ -22,16 +22,17 @@ on:
       - "video-library/previous-works-catalog.json"
       - ".github/workflows/verify-archive-h2-master.yml"
       - "video-library/README.md"
-      - "video-library/one-more-scroll/**"
-      - "video-library/video-production-master-skill.zip"
-      - "video-library/video-production-master-skill.zip.sha256"
       - "tools/blender/**"
       - "tools/krita/**"
       - "video-projects/remotion/README.md"
       - "video-projects/remotion/src/**"
       - "video-projects/remotion/public/story/**"
       - "video-library/one-more-scroll/manifest.json"
-      - "video-library/one-more-scroll/renders/**/one-more-scroll-remotion-master.mp4"
+      - "video-library/one-more-scroll/README.md"
+      - "video-library/one-more-scroll/QA.md"
+      - "video-library/one-more-scroll/latest-remotion-release.json"
+      - "video-library/one-more-scroll/h2-source-release.json"
+      - "video-library/previous-works/**"
       - ".github/workflows/package-video-skill.yml"
   workflow_run:
     workflows:
@@ -46,7 +47,7 @@ permissions:
 
 concurrency:
   group: package-video-skill
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   bundle:
