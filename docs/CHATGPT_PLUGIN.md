@@ -10,6 +10,10 @@
 - Source input: `h2-selfimprove-studio.plugin` supplied in the production chat
 - Creation result: Plugin Creator reported `status=created` and release ID `pluginrel_6ade1c3ecb20819199def25125d2f89a`.
 
+## GitHub source mirror
+
+The 51 UTF-8 source files from this plugin release have been copied into `integrations/h2-selfimprove-studio/` in the repository. Start with [MIRROR-NOTES.md](../integrations/h2-selfimprove-studio/MIRROR-NOTES.md) and [SOURCE-MANIFEST.json](../integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json). This makes the H2 kit's source reviewable/versioned on GitHub even though the original `.plugin` archive itself is not committed as a binary.
+
 ## What the plugin contains
 
 The Plugin Creator successfully ingested the supplied archive and reported these principal components:
