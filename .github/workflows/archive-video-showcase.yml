@@ -85,10 +85,6 @@ jobs:
           ASSET_URL: https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/one-more-scroll-remotion-master.mp4
           SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.prep.outputs.tag }}
-          ASSET_URL: https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/one-more-scroll-remotion-master.mp4
-          SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
           TAG="${{ steps.prep.outputs.tag }}"
@@ -111,7 +107,7 @@ jobs:
           }
           with open("video-library/one-more-scroll/latest-remotion-release.json", "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2)
-            f.write("\\n")
+            f.write("\n")
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
