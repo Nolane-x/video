@@ -4,7 +4,7 @@ This repo itself is the canonical skill workspace. Start by cloning/opening `Nol
 
 ## ChatGPT Plugin Creator
 
-A private plugin has already been created from the uploaded H2 package: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Open that link in ChatGPT and ensure it is available to the current workspace. See `docs/CHATGPT_PLUGIN.md` for release ID and contents. Its confirmed version is 1.0.2; the cross-engine master skill in this repository remains the production policy of record.
+The private plugin [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) is active at **v1.1.0**, current release `pluginrel_6ade248942988191a57ff1059c818720` (confirmed by Plugin Creator on 2026-10-25). Open the link in ChatGPT and ensure it is available to the current workspace. See `docs/CHATGPT_PLUGIN.md` for release evidence and contents. The GitHub mirror preserves the v1.0.2 base source and keeps the v1.1.0 production overlay separately. The cross-engine master skill in this repository remains the production policy of record.
 
 ## Recommended use by agent family
 
