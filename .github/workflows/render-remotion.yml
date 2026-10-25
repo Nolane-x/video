@@ -115,8 +115,8 @@ jobs:
           import re
           from pathlib import Path
           report = Path("out/audio-loudness.txt").read_text(encoding="utf-8", errors="replace")
-          integrated = re.search(r"Integrated loudness:\\s*I:\\s*(-?\\d+(?:\\.\\d+)?) LUFS", report, re.S)
-          peak = re.search(r"True peak:\\s*Peak:\\s*(-?\\d+(?:\\.\\d+)?) dBFS", report, re.S)
+          integrated = re.search(r"Integrated loudness:\s*I:\s*(-?\d+(?:\.\d+)?) LUFS", report, re.S)
+          peak = re.search(r"True peak:\s*Peak:\s*(-?\d+(?:\.\d+)?) dBFS", report, re.S)
           if not integrated or not peak:
               raise SystemExit("Could not parse integrated loudness/true peak from FFmpeg ebur128 output")
           lufs, true_peak = float(integrated.group(1)), float(peak.group(1))
