@@ -34,8 +34,11 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - Workflow: `tools/krita/README.md`
 - Use for hand-authored expression sheets, props, texture and paintovers. It isn't a render dependency unless a workflow invokes it.
 
-### H2 Studio
-The full H2 source and its packed skill were used in the prior ChatGPT session but aren't a complete source checkout in this repo. This repository contains the separate Remotion project and procedural audio source. A new agent must locate the actual H2 archive/repository and read its bundled skill before claiming to use the native H2 renderer.
+### H2 SelfImprove Studio plugin and source mirror
+- Private ChatGPT plugin created via Plugin Creator: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), version 1.0.2, release `pluginrel_6ade1c3ecb20819199def25125d2f89a`.
+- 51 UTF-8 source files from that release are mirrored at `integrations/h2-selfimprove-studio/`, including the native H2 renderer entrypoint, rig, `dem` and `doodle` scene packs, skills, procedural audio and utility scripts. See `SOURCE-MANIFEST.json`.
+- The original `.plugin` archive itself and the original H2 master MP4 are not binary files in Git. The H2 renderer source mirror is in GitHub; native rendering still requires the appropriate runtime/dependencies.
+- This source is distinct from the Remotion project and from the complete upstream Remotion/Blender/Krita applications.
 
 ## Previously delivered H2 master (outside Git history)
 - File: `one-more-scroll-h2-final.mp4`
