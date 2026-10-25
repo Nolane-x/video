@@ -58,7 +58,10 @@ jobs:
             | tee release/SHA256SUMS.txt
           echo "run_number=${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
           echo "run_id=${{ github.event.workflow_run.id }}" >> "$GITHUB_OUTPUT"
+          echo "run_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> "$GITHUB_OUTPUT"
           echo "source_sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          echo "render_sha256=$(sha256sum release/one-more-scroll-remotion-master.mp4 | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "render_size_bytes=$(stat -c%s release/one-more-scroll-remotion-master.mp4)" >> "$GITHUB_OUTPUT"
           echo "archive_dir=video-library/one-more-scroll/renders/remotion-run-${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
 
       - name: Commit durable video and skill into the library
@@ -67,6 +70,9 @@ jobs:
           SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
           RUN_ID: ${{ steps.prep.outputs.run_id }}
           RUN_NUMBER: ${{ steps.prep.outputs.run_number }}
+          RUN_URL: ${{ steps.prep.outputs.run_url }}
+          RENDER_SHA256: ${{ steps.prep.outputs.render_sha256 }}
+          RENDER_SIZE_BYTES: ${{ steps.prep.outputs.render_size_bytes }}
           ARCHIVE_DIR: ${{ steps.prep.outputs.archive_dir }}
         run: |
           set -euo pipefail
@@ -83,26 +89,102 @@ jobs:
           cp release/video-production-master-skill.zip video-library/video-production-master-skill.zip
           cp release/video-production-master-skill.zip "$ARCHIVE_DIR/video-production-master-skill.zip"
           python - <<'PY'
-          import json, os
+          import json, os, re
+          from pathlib import Path
+
+          directory = Path(os.environ["ARCHIVE_DIR"])
+          metadata_path = directory / "metadata.json"
+          metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+          streams = metadata.get("streams", [])
+          video = next((x for x in streams if x.get("codec_type") == "video"), {})
+          audio = next((x for x in streams if x.get("codec_type") == "audio"), {})
+          duration = float(metadata.get("format", {}).get("duration", 0))
+          loudness_text = (directory / "audio-loudness.txt").read_text(encoding="utf-8", errors="replace") if (directory / "audio-loudness.txt").exists() else ""
+          integrated = re.search(r"Integrated loudness:\\s*I:\\s*(-?\\d+(?:\\.\\d+)?) LUFS", loudness_text, re.S)
+          peak = re.search(r"True peak:\\s*Peak:\\s*(-?\\d+(?:\\.\\d+)?) dBFS", loudness_text, re.S)
+          loudness = float(integrated.group(1)) if integrated else None
+          true_peak = float(peak.group(1)) if peak else None
+
           payload = {
             "project_id": "one-more-scroll",
             "artifact_kind": "remotion-reproducible-render",
-            "renderer": "Remotion CLI + procedural audio + FFmpeg mastering",
-            "video_path": os.path.join(os.environ["ARCHIVE_DIR"], "one-more-scroll-remotion-master.mp4"),
-            "contact_sheet_path": os.path.join(os.environ["ARCHIVE_DIR"], "contact-sheet-shots.jpg"),
-            "metadata_path": os.path.join(os.environ["ARCHIVE_DIR"], "metadata.json"),
+            "renderer": "Remotion CLI + procedural H2-style music/SFX generation + FFmpeg mastering",
+            "video_path": str(directory / "one-more-scroll-remotion-master.mp4"),
+            "contact_sheet_path": str(directory / "contact-sheet-shots.jpg"),
+            "overview_contact_sheet_path": str(directory / "contact-sheet-overview.jpg") if (directory / "contact-sheet-overview.jpg").exists() else None,
+            "metadata_path": str(metadata_path),
+            "audio_loudness_path": str(directory / "audio-loudness.txt") if (directory / "audio-loudness.txt").exists() else None,
             "skill_zip_path": "video-library/video-production-master-skill.zip",
             "source_commit": os.environ["SOURCE_SHA"],
             "workflow_run_id": os.environ["RUN_ID"],
+            "workflow_run_url": os.environ["RUN_URL"],
+            "sha256": os.environ["RENDER_SHA256"],
+            "size_bytes": int(os.environ["RENDER_SIZE_BYTES"]),
+            "duration_seconds": duration,
+            "resolution": f"{video.get('width')}x{video.get('height')}",
+            "fps": video.get("r_frame_rate"),
+            "video_codec": video.get("codec_name"),
+            "audio_codec": audio.get("codec_name"),
+            "audio_sample_rate_hz": int(audio["sample_rate"]) if audio.get("sample_rate") else None,
+            "audio_channels": audio.get("channels"),
+            "integrated_loudness_lufs": loudness,
+            "reported_true_peak_dbfs": true_peak,
+            "visual_qa_status": "technical checks passed and contact sheets generated; manual artistic/motion review still required",
             "note": "This is the repository's Remotion build, not the separately delivered H2 Canvas/Chromium master."
           }
-          with open("video-library/one-more-scroll/latest-remotion-release.json", "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2)
-            f.write("\n")
+          (Path("video-library/one-more-scroll/latest-remotion-release.json")).write_text(json.dumps(payload, indent=2) + "\\n", encoding="utf-8")
+
+          manifest_path = Path("video-library/one-more-scroll/manifest.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          manifest["latest_remotion_render"] = payload
+          manifest_path.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
+
+          qa_path = Path("video-library/one-more-scroll/QA.md")
+          qa = qa_path.read_text(encoding="utf-8")
+          heading = f"## Latest archived Remotion render — run {os.environ['RUN_NUMBER']}"
+          if heading not in qa:
+              qa += (
+                  "\\n\\n" + heading + "\\n"
+                  f"- MP4: `{payload['video_path']}`\\n"
+                  f"- Source commit: `{payload['source_commit']}`\\n"
+                  f"- Render CI: [{payload['workflow_run_id']}]({payload['workflow_run_url']})\\n"
+                  f"- SHA-256: `{payload['sha256']}` ({payload['size_bytes']:,} bytes)\\n"
+                  f"- Technical metadata: {duration:.3f}s, {payload['resolution']}, {payload['fps']}, {payload['video_codec']} + {payload['audio_codec']}.\\n"
+                  f"- Measured audio: {loudness if loudness is not None else 'unavailable'} LUFS integrated; true peak {true_peak if true_peak is not None else 'unavailable'} dBFS.\\n"
+                  "- Contact sheets were generated; visual/artistic sign-off is not inferred from CI success.\\n"
+              )
+          qa_path.write_text(qa, encoding="utf-8")
+
+          state_path = Path("docs/STATE.md")
+          state = state_path.read_text(encoding="utf-8")
+          state += (
+              f"\\n\\n## Latest archived Remotion render — run {os.environ['RUN_NUMBER']}\\n"
+              f"- MP4: `{payload['video_path']}`\\n"
+              f"- Source commit: `{payload['source_commit']}`; CI: [{payload['workflow_run_id']}]({payload['workflow_run_url']}).\\n"
+              f"- SHA-256: `{payload['sha256']}`; duration {duration:.3f}s; {payload['resolution']} at {payload['fps']}.\\n"
+              f"- Audio measurement: {loudness if loudness is not None else 'unavailable'} LUFS integrated; true peak {true_peak if true_peak is not None else 'unavailable'} dBFS.\\n"
+              "- Technical gates passed; contact sheets are available. Do not claim manual visual sign-off unless completed separately.\\n"
+          )
+          state_path.write_text(state, encoding="utf-8")
+
+          handoff_path = Path("docs/AI_HANDOFF.md")
+          handoff = handoff_path.read_text(encoding="utf-8")
+          handoff += (
+              f"\\n\\n## Latest archived Remotion reference\\n"
+              f"- Video: `{payload['video_path']}`\\n"
+              f"- Source commit: `{payload['source_commit']}`; render CI: [{payload['workflow_run_id']}]({payload['workflow_run_url']}).\\n"
+              f"- SHA-256: `{payload['sha256']}`; {duration:.3f}s, {payload['resolution']}, {payload['fps']}.\\n"
+              "- This is a Remotion render, not the H2 Canvas/Chromium master. Inspect contact sheets and motion proof before accepting artistic quality.\\n"
+          )
+          handoff_path.write_text(handoff, encoding="utf-8")
           PY
+Y
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$ARCHIVE_DIR" video-library/video-production-master-skill.zip video-library/one-more-scroll/latest-remotion-release.json
+          git add "$ARCHIVE_DIR" video-library/video-production-master-skill.zip \
+            video-library/one-more-scroll/latest-remotion-release.json \
+            video-library/one-more-scroll/manifest.json video-library/one-more-scroll/QA.md \
+            docs/STATE.md docs/AI_HANDOFF.md
           # Global .gitignore excludes rendered media by default; explicitly force-add the intended archived master.
           git add -f "$ARCHIVE_DIR/one-more-scroll-remotion-master.mp4"
           if git diff --cached --quiet; then
