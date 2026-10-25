@@ -24,23 +24,22 @@ jobs:
         working-directory: video-projects/remotion
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
+          package-manager-cache: false
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
       - name: Render MP4
         run: npm run render
-
       - name: Install FFmpeg for output validation
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
-
       - name: Validate MP4 and generate contact sheet
         run: |
           ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json out/one-more-scroll.mp4 | tee out/metadata.json
@@ -48,9 +47,8 @@ jobs:
           grep -q '"height": 720' out/metadata.json
           grep -q '"duration": "60.000000"' out/metadata.json
           ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/5,scale=320:-1,tile=4x3" -frames:v 1 out/contact-sheet.jpg
-
       - name: Upload render and QA outputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
           path: |
