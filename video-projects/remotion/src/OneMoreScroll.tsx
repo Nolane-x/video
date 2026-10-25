@@ -339,6 +339,177 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <path d="M0 548 H1280 M0 618 H1280" stroke="#6e576d" strokeWidth="3" opacity=".42" />
     </g>}
 
+    {setting === "locker" && <g>
+      <rect width="1280" height="720" fill="#211e29" />
+      <rect width="1280" height="555" fill="#38303c" />
+      <path d="M0 135 H1280 M0 505 H1280" stroke="#211d28" strokeWidth="13" />
+      <path d="M0 142 H1280 M0 512 H1280" stroke="#80667d" strokeWidth="3" opacity=".35" />
+      {Array.from({length:10},(_,i)=>{
+        const x=34+i*124;
+        return <g key={i}>
+          <rect x={x} y="165" width="108" height="326" rx="4" fill={i===3?"#5d4a60":"#4a3c4e"} stroke="#b29cb2" strokeWidth="3" />
+          <rect x={x+8} y="174" width="92" height="309" fill={i===3?"#282431":"#322a38"} stroke="#28212e" strokeWidth="2" />
+          <path d={"M"+(x+18)+" 198 H"+(x+88)+" M"+(x+18)+" 210 H"+(x+88)+" M"+(x+18)+" 222 H"+(x+88)} stroke="#746075" strokeWidth="3" opacity=".65" />
+          {Array.from({length:6},(_,j)=><path key={j} d={"M"+(x+23+j*11)+" 445 v21"} stroke="#1d1a24" strokeWidth="3" />)}
+          <circle cx={x+89} cy="334" r="4" fill="#d6b596" />
+        </g>;
+      })}
+      <rect x="0" y="555" width="1280" height="165" fill="url(#h2Road)" />
+      <path d="M0 561 H1280" stroke="#a18a9d" strokeWidth="3" opacity=".25" />
+      <rect x="300" y="495" width="390" height="28" rx="4" fill="#6c5a70" stroke="#322a38" strokeWidth="4" />
+      <path d="M330 523 V560 M660 523 V560" stroke="#322a38" strokeWidth="15" />
+      <Window x={1050} y={42} w={95} h={112} warm={true} />
+      <ellipse cx="1095" cy="205" rx="125" ry="140" fill="url(#h2WarmLamp)" opacity=".24" />
+    </g>}
+
+    {setting === "classroom" && <g>
+      <rect width="1280" height="720" fill="#27232f" />
+      <rect width="1280" height="530" fill="url(#h2Wall)" />
+      <Window x={58} y={60} w={130} h={170} warm={true} />
+      <Window x={228} y={60} w={130} h={170} warm={false} />
+      <rect x="470" y="90" width="495" height="270" rx="3" fill="#1c2428" stroke="#846d82" strokeWidth="8" />
+      <path d="M500 140 Q620 122 730 146 T925 135 M515 175 H890 M540 215 Q680 200 820 220" stroke="#c4c3ba" strokeWidth="3" opacity=".16" fill="none" />
+      <text x="527" y="292" fontSize="31" fontWeight="700" fill="#a7b5a4" opacity=".68">PAY ATTENTION</text>
+      <circle cx="1100" cy="105" r="43" fill="#d8c8b4" stroke="#554356" strokeWidth="7" />
+      <path d="M1100 105 L1100 77 M1100 105 L1121 119" stroke="#3b303d" strokeWidth="5" strokeLinecap="round" />
+      <path d="M0 542 H1280" stroke="#201d28" strokeWidth="12" />
+      {Array.from({length:4},(_,i)=>{
+        const x=80+i*300;
+        return <g key={i}>
+          <path d={"M"+x+" 435 h250 l-18 32 h-214Z"} fill="#786475" stroke="#312835" strokeWidth="5" />
+          <path d={"M"+(x+17)+" 465 v80 M"+(x+217)+" 465 v80"} stroke="#312835" strokeWidth="15" />
+          <rect x={x+82} y="401" width="92" height="30" rx="4" fill="#3e3c4c" />
+          <path d={"M"+(x+89)+" 409 H"+(x+168)} stroke="#9890a2" strokeWidth="3" opacity=".5" />
+        </g>;
+      })}
+      <rect x="0" y="570" width="1280" height="150" fill="#24212c" />
+    </g>}
+
+    {setting === "busStop" && <g>
+      <rect width="1280" height="720" fill="#28232f" />
+      <rect width="1280" height="545" fill="url(#h2Wall)" />
+      <Window x={46} y={55} w={92} h={130} warm={true} />
+      <Window x={180} y={55} w={92} h={130} warm={false} />
+      <Window x={1000} y={55} w={92} h={130} warm={true} />
+      <Window x={1135} y={55} w={92} h={130} warm={false} />
+      <path d="M0 236 H1280" stroke="#1b1922" strokeWidth="13" />
+      <rect x="260" y="233" width="610" height="18" fill="#8b7187" stroke="#2a2430" strokeWidth="5" />
+      <path d="M284 245 V526 M845 245 V526" stroke="#91839a" strokeWidth="10" />
+      <rect x="292" y="269" width="540" height="231" fill="#3d4857" opacity=".23" stroke="#a4a0b5" strokeWidth="4" />
+      <path d="M292 270 L832 500 M832 270 L292 500" stroke="#a4a0b5" strokeWidth="3" opacity=".11" />
+      <rect x="250" y="504" width="610" height="18" rx="4" fill="#6a596d" stroke="#302735" strokeWidth="4" />
+      <path d="M292 522 V570 M818 522 V570" stroke="#302735" strokeWidth="16" />
+      <rect x="885" y="160" width="68" height="170" rx="8" fill="#28232e" stroke="#bca5b0" strokeWidth="4" />
+      <rect x="897" y="174" width="44" height="32" rx="4" fill="#d1ab81" />
+      <text x="919" y="194" fontSize="10" fontWeight="800" fill="#332735" textAnchor="middle">BUS</text>
+      <path d="M0 550 H1280" stroke="#5f4b60" strokeWidth="4" />
+      <rect x="0" y="554" width="1280" height="166" fill="url(#h2Road)" />
+      <path d="M60 650 H330 M870 650 H1140" stroke="#b7a0a1" strokeWidth="3" opacity=".23" />
+      <ellipse cx={980+t*55} cy="520" rx="68" ry="14" fill="#e6b58d" opacity=".13" />
+    </g>}
+
+    {setting === "bathroom" && <g>
+      <rect width="1280" height="720" fill="#25232d" />
+      <rect width="1280" height="560" fill="#3b3340" />
+      {Array.from({length:8},(_,i)=><path key={"v"+i} d={"M"+(i*160)+" 0 V560"} stroke="#574b5d" strokeWidth="3" opacity=".6" />)}
+      {Array.from({length:5},(_,i)=><path key={"h"+i} d={"M0 "+(i*110)+" H1280"} stroke="#574b5d" strokeWidth="3" opacity=".6" />)}
+      <rect x="620" y="68" width="390" height="360" rx="5" fill="#101118" stroke="#b5a1b2" strokeWidth="11" />
+      <rect x="638" y="85" width="354" height="326" fill="#28303c" />
+      <path d="M650 112 L960 388" stroke="#c3bdcb" strokeWidth="7" opacity=".11" />
+      <rect x="240" y="420" width="810" height="58" rx="6" fill="#c4b8bb" stroke="#4f4053" strokeWidth="6" />
+      <path d="M270 477 V555 M1020 477 V555" stroke="#514455" strokeWidth="22" />
+      <ellipse cx="725" cy="454" rx="105" ry="16" fill="#f1ded0" opacity=".4" />
+      <path d="M686 452 V436 Q730 407 773 436 V452" fill="#d6c8ca" stroke="#625368" strokeWidth="4" />
+      <rect x="0" y="560" width="1280" height="160" fill="#24212c" />
+      <ellipse cx="810" cy="330" rx="150" ry="174" fill="url(#h2WarmLamp)" opacity=".18" />
+      <circle cx="810" cy="228" r="7" fill="#f4d6a3" />
+    </g>}
+
+    {setting === "kitchen" && <g>
+      <rect width="1280" height="720" fill="#28242f" />
+      <rect width="1280" height="555" fill="url(#h2Wall)" />
+      <Window x={88} y={62} w={148} h={185} warm={true} />
+      <rect x="340" y="80" width="210" height="190" fill="#4c3c4d" stroke="#8a7088" strokeWidth="5" />
+      <rect x="355" y="95" width="180" height="160" fill="#312a39" />
+      <path d="M445 95 V255" stroke="#78627a" strokeWidth="4" />
+      <rect x="610" y="80" width="210" height="190" fill="#4c3c4d" stroke="#8a7088" strokeWidth="5" />
+      <rect x="625" y="95" width="180" height="160" fill="#312a39" />
+      <path d="M715 95 V255" stroke="#78627a" strokeWidth="4" />
+      <rect x="830" y="105" width="160" height="380" rx="8" fill="#393342" stroke="#a08a9b" strokeWidth="5" />
+      <path d="M845 293 H975" stroke="#78677e" strokeWidth="4" />
+      <circle cx="960" cy="275" r="5" fill="#c7ad9d" /><circle cx="960" cy="320" r="5" fill="#c7ad9d" />
+      <rect x="0" y="455" width="1280" height="35" fill="#796678" stroke="#352b39" strokeWidth="5" />
+      <path d="M80 490 V570 M1180 490 V570" stroke="#342b38" strokeWidth="18" />
+      <rect x="420" y="414" width="75" height="39" rx="5" fill="#d2c4b6" stroke="#655268" strokeWidth="3" />
+      <ellipse cx="456" cy="414" rx="45" ry="14" fill="#f0c58e" opacity=".25" />
+      <rect x="0" y="578" width="1280" height="142" fill="#24212c" />
+    </g>}
+
+    {setting === "park" && <g>
+      <rect width="1280" height="720" fill="#302b39" />
+      <rect width="1280" height="520" fill={t<.5?"#3b3240":"#51414a"} />
+      <circle cx="1010" cy="190" r="88" fill="#e1b18d" opacity=".22" />
+      <path d="M0 370 L150 270 L270 350 L425 245 L575 350 L760 235 L915 350 L1100 250 L1280 345 V560 H0Z" fill="#292a36" />
+      <path d="M0 442 Q230 358 405 442 T815 432 T1280 433 V590 H0Z" fill="#343541" />
+      {Array.from({length:6},(_,i)=>{
+        const x=50+i*225;
+        return <g key={i}>
+          <path d={"M"+x+" 480 Q"+(x-35)+" 370 "+x+" 290 Q"+(x+45)+" 370 "+(x+26)+" 480Z"} fill="#202a29" />
+          <path d={"M"+(x+7)+" 475 V515"} stroke="#584444" strokeWidth="13" />
+          <circle cx={x} cy="350" r="69" fill={i%2?"#2c3831":"#27342f"} />
+          <circle cx={x+28} cy="391" r="48" fill="#2a352f" />
+        </g>;
+      })}
+      <path d="M0 520 Q280 485 520 545 T1000 522 T1280 535 V720 H0Z" fill="#413c49" />
+      <path d="M0 604 Q320 552 650 612 T1280 591" stroke="#9c7a8a" strokeWidth="4" fill="none" opacity=".24" />
+      <path d="M335 480 H570 V502 H335Z" fill="#7b6575" stroke="#28232f" strokeWidth="4" />
+      <path d="M362 502 V558 M548 502 V558" stroke="#29232e" strokeWidth="15" />
+      <ellipse cx="655" cy="572" rx="230" ry="32" fill="#edc19b" opacity=".045" />
+      <rect x="0" y="650" width="1280" height="70" fill="#282431" opacity=".65" />
+    </g>}
+
+    {setting === "gym" && <g>
+      <rect width="1280" height="720" fill="#22212b" />
+      <rect width="1280" height="550" fill="#312c39" />
+      {Array.from({length:7},(_,i)=><path key={i} d={"M"+(i*185)+" 0 V550"} stroke="#4b4051" strokeWidth="5" />)}
+      <path d="M0 138 H1280 M0 285 H1280 M0 432 H1280" stroke="#55485b" strokeWidth="4" opacity=".6" />
+      <rect x="885" y="65" width="20" height="150" fill="#1b1a22" />
+      <rect x="815" y="198" width="160" height="14" rx="7" fill="#655369" />
+      <path d="M895 211 V254" stroke="#b99eae" strokeWidth="7" />
+      <path d="M860 246 Q895 232 930 246 L945 415 Q946 445 912 455 L878 455 Q844 445 845 415Z" fill="#1c1a23" stroke="#ad94a6" strokeWidth="4" />
+      <path d="M851 285 H939 M848 405 H942" stroke="#514254" strokeWidth="5" />
+      <rect x="0" y="550" width="1280" height="170" fill="#25222d" />
+      <path d="M0 565 H1280 M0 620 H1280 M0 674 H1280" stroke="#6d5c6f" strokeWidth="3" opacity=".4" />
+      <rect x="120" y="445" width="180" height="22" rx="8" fill="#9a8495" />
+      <circle cx="144" cy="438" r="20" fill="#22212a" stroke="#b8a0b1" strokeWidth="4" />
+      <circle cx="276" cy="438" r="20" fill="#22212a" stroke="#b8a0b1" strokeWidth="4" />
+    </g>}
+
+    {setting === "library" && <g>
+      <rect width="1280" height="720" fill="#292530" />
+      <rect width="1280" height="558" fill="#3b313e" />
+      {Array.from({length:4},(_,i)=>{
+        const x=46+i*300;
+        return <g key={i}>
+          <rect x={x} y="70" width="255" height="430" fill="#2a222f" stroke="#8a6f88" strokeWidth="7" />
+          {Array.from({length:4},(_,r)=><g key={r}>
+            <path d={"M"+(x+5)+" "+(155+r*91)+" H"+(x+250)} stroke="#ab8c9d" strokeWidth="5" />
+            {Array.from({length:7},(_,k)=>{
+              const w=15+(k%3)*5; const bh=43+(k%4)*8; const bx=x+12+k*32; const by=151+r*91-bh;
+              return <rect key={k} x={bx} y={by} width={w} height={bh} rx="2" fill={["#644b61","#7c5669","#6b5d78","#ad896e","#465660"][((k+r)%5)]} stroke="#c3a6b4" strokeWidth="1.2" opacity=".85" />;
+            })}
+          </g>)}
+        </g>;
+      })}
+      <rect x="230" y="470" width="830" height="24" rx="5" fill="#7d687a" stroke="#342b39" strokeWidth="4" />
+      <path d="M260 494 V585 M1027 494 V585" stroke="#342b39" strokeWidth="18" />
+      <rect x="635" y="395" width="175" height="77" rx="4" fill="#292630" stroke="#a28a9e" strokeWidth="5" />
+      <rect x="649" y="408" width="147" height="51" fill="#e2ba8c" opacity=".22" />
+      <ellipse cx="720" cy="390" rx="100" ry="95" fill="url(#h2WarmLamp)" opacity=".45" />
+      <path d="M0 588 H1280" stroke="#655367" strokeWidth="4" />
+      <rect x="0" y="600" width="1280" height="120" fill="#24212c" />
+    </g>}
+
     {setting === "void" && <g>
       <rect width="1280" height="720" fill="#15131b" />
       <radialGradient id="voidSpot"><stop offset="0%" stopColor="#7f546f" stopOpacity=".2" /><stop offset="100%" stopColor="#15131b" stopOpacity="0" /></radialGradient>
