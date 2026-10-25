@@ -1,66 +1,47 @@
 # H2 Character Bible — Cinematic Stick-Figure Story Style
 
-## Target visual direction
+## The reference videos were reviewed shot-by-shot
 
-The attached user reference is the governing art-direction target: simple stylized stick-figure characters staged inside a richly composed, slightly defocused urban environment. Use the broad visual principles seen in the user's references to Ifverse Tales and Day One Films; do not reproduce a specific frame, character design, or shot.
+- **The Words You Never Forgot**: locker/hallway, character close-ups, mirror/shadow, bedroom, invading words, school/bus stop, statistics and an emotional recovery arc.
+- **What If You Were a Mentalist?**: many location changes, multiple characters, over-the-shoulder/reaction shots, inserts of relevant props, and wide/medium/close-up variation.
 
-References:
-- Ifverse Tales: https://www.youtube.com/@IfverseTales
-- Example story, "What If Your Reaction Time Was 10x Faster?": https://www.youtube.com/watch?v=MroF1XmHOZw
-- Day One Films: https://www.youtube.com/@dayonefilmsofficial
-- Third-party descriptions of Ifverse's format characterize it as stick-figure "what if" stories with cinematic story progression; descriptions of Day One Films emphasize short, moody self-improvement films with a recurring symbolic protagonist. Treat these as aesthetic references, not production-method claims.
+The target is not to copy frames or storylines. Learn the visual grammar: simple repeatable characters, but rich environments, clear actions, varied shot sizes, motivated camera movement and a story that progresses through pictures.
 
 ## Character
 
-- No photorealistic human characters and no detailed human skin/anatomy.
-- Use a recognisable symbolic stick figure: near-black round head, warm cream outline, high-contrast white eyes/mouth, simple brows, colored tunic/shirt, slender dark limbs with a thin light rim, small dark hands and shoes.
-- Give supporting characters a distinct shirt color and posture. Keep head scale, limb thickness, facial placement, and outline consistent shot-to-shot.
-- Expressions must read at thumbnail size: neutral, distracted, surprised, ashamed, determined, relieved.
-- Actions must be readable in silhouette. Do not rely on a camera zoom to imply action.
+- Symbolic stick figure: near-black round head, high-contrast eyes/mouth, warm pale outline, slim dark limbs, colored shirt and readable shoes/hands.
+- Keep the silhouette, head-to-body ratio, line thickness and facial placement consistent.
+- The protagonist's muted rose shirt represents the loop; muted ochre begins during recovery as a deliberate change.
+- Avoid photorealistic people, AI-looking gradients, pseudo-real skin and glossy synthetic materials.
 
-## Environment
+## Environment and camera
 
-- The background is intentionally richer than the character: apartment facades, windows, balconies, doors, stairways, rooms, desks, plants, lamps, street surfaces and small story props.
-- Use clear perspective and foreground/midground/background layering. Add modest background softness to separate planes, but preserve object readability.
-- Warm amber window/light pools contrast with muted plum/charcoal surroundings. Use restrained highlights and grounded shadows rather than all-over glow.
-- Keep characters physically grounded: feet contact the floor/steps, cast/contact shadows align to the light, objects meet the hand at the correct point.
-- Vary shot scale and angle: wide establishing shots, medium action shots, insert shots, reaction close-ups, silhouettes and quiet holds.
+- Purpose-built sets: bedroom, phone insert, street, bus stop, classroom, calendar, bathroom/mirror, word-storm, desk, kitchen, stairs, park, gym, cafe, bus, library, dawn and end card.
+- The environment carries the production value: architectural perspective, doors, windows, mullions, shelves, tables, lamps, plants, practical light and grounded shadows.
+- Contrast cool plum/charcoal surroundings with warm amber windows. Bloom and vignette remain restrained.
+- Vary wide establishing shots, medium actions, close reactions, inserts, silhouettes and holds. No repeating one backdrop across every shot.
+- Pan/zoom must be motivated by the action; do not use it as a substitute for animation.
 
-## Palette and image finishing
+## Action principles
 
-- Charcoal/plum architecture: #24212c through #4b3a49
-- Near-black character head/limbs: #17151e / #24212b
-- Warm cream outline and face details: #ead6bf / #f5eee3
-- Restrained shirt colors such as muted rose, coral, purple, or ochre; never random neon.
-- Warm amber practical lights; use bloom only near lamps/windows and only when motivated.
-- Avoid generic full-frame gradients, synthetic glossy materials, excessive radial glow, plastic pseudo-3D people, and floating UI unrelated to the story.
+Every action should read through anticipation -> action -> contact -> follow-through -> recovery:
+- Phone: hand and screen must align; eyes/head point at the device.
+- Writing: hand/pen meet the page; the other hand stabilizes the paper or desk.
+- Drinking: the cup reaches the mouth and the head reacts.
+- Tying shoes: bent posture and hands approach the laces.
+- Stairs: alternating feet land on visible treads; body height advances.
+- Punching: draw back, strike the bag, show contact, bag reacts, fist recovers.
+- Friend interaction: both characters orient toward one another; listener's body language differs from the speaker.
 
-## Motion and camera
+## H2 workflow
 
-Every shot should specify: action, emotional intent, camera framing, camera move (if motivated), contact point, start pose, anticipation, action, impact/contact, follow-through, recovery and exit pose.
-- Walk: alternating legs, opposite arm swing, controlled body bob and planted-foot moments.
-- Phone interaction: screen/phone moves with the hand; eyes/head orient toward it; wrist and elbow don't drift independently.
-- Stairs: feet land on visible steps and body height advances with each step.
-- Friend interaction: both characters orient toward each other and react with a slight delay.
-- Keep easing intentional. Use holds and contrast in pace; not every layer should drift at once.
-- Limit camera motion to motivated pans, tracking, pushes or reframing. Avoid automatic zoom on every shot.
-
-## Typography and HUD
-
-- Use an in-world metric only when the story needs one (e.g. attention/focus meter). Do not copy the IQ gauge or specific UI from the reference image.
-- Keep titles/subtitles small enough not to cover action. Use a stable safe zone and legible contrast.
-- Text should enter/exit with the story beat, not remain as a constant giant banner.
-
-## Audio and H2 workflow
-
-The initial Remotion composition is a visual style proof, not a final audio master. Respect the H2 package's story-led, text/music/SFX workflow; add voice-over only if the brief explicitly changes that rule. Use separate music/SFX tracks and preserve intentional silence.
+`public/story/shots.json` is the source of truth. Each shot defines `id`, time range, `tpl`, caption line, emotion, action, sound cues and animation `args`. Remotion renders the timeline; H2 procedural audio builds music/SFX; FFmpeg masters levels and validates output. The music arc is sad -> dark -> intentional silence -> hope -> rise -> resolve.
 
 ## QA gates
 
-Before a full-quality render:
-1. Inspect a contact sheet with wide / medium / close shot variety.
-2. Inspect every action's beginning, contact moment, and recovery.
-3. Check character scale, feet on floor, object contact, eye direction, and captions.
-4. Check backgrounds are detailed but not competing with the action.
-5. Check palette consistency, shot transitions, audio peaks/loudness, and final MP4 metadata.
-6. Reject the render if it reads as still images with zooms instead of character animation.
+1. Inspect a contact sheet with all 31 shots, not a handful of frames.
+2. Inspect action start/contact/recovery at actual motion frames.
+3. Check hands against props, feet against surfaces, shot variety, background hierarchy and transitions.
+4. Confirm subtitles do not cover the acting and that shadow intensity changes with the story.
+5. Validate 155s, 1280x720, 24fps, audio track, loudness and peaks.
+6. A successful render is a technical gate, not proof of artistic quality.

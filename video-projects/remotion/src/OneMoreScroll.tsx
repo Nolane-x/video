@@ -10,6 +10,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import shotPlan from "../public/story/shots.json";
 
 type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer";
 type Setting =
@@ -45,39 +46,7 @@ type Shot = {
 
 const FPS = 24;
 const SHOT_FRAMES = 120;
-const shots: Shot[] = [
-  {title:"ONE MORE SCROLL",subtitle:"It starts with one small decision.",setting:"bedroom",pose:"scroll",x0:760,x1:760,y0:-60,y1:-60,scale:1.28,shirt:"#c56d9b",shadow:.48,shadowX:970,zoom0:1,zoom1:1.08,pan0:10,pan1:-8,phone:true,dip:true},
-  {title:"THE NEXT THING",subtitle:"The feed always has one more thing.",setting:"phone",pose:"scroll",x0:885,x1:870,y0:0,y1:0,scale:1.12,shirt:"#c56d9b",shadow:.74,shadowX:1035,zoom0:1,zoom1:1.12,pan0:14,pan1:-8,phone:true,redWords:["ONE MORE","LATER"]},
-  {title:"WALKING, BUT NOT HERE",subtitle:"Your body moves. Your attention stays behind.",setting:"street",pose:"walk",x0:235,x1:985,y0:0,y1:0,scale:1.08,shirt:"#c56d9b",shadow:.79,shadowX:965,zoom0:1,zoom1:1.055,pan0:24,pan1:-34,phone:true,redWords:["SCROLL"]},
-  {title:"WAITING FOR NOTHING",subtitle:"You don't notice the world passing.",setting:"busStop",pose:"tired",x0:425,x1:420,y0:0,y1:0,scale:1.13,shirt:"#c56d9b",shadow:.68,shadowX:1000,zoom0:1,zoom1:1.09,pan0:2,pan1:-14,phone:true,day:"DAY 03"},
-  {title:"EVERYONE ELSE IS THERE",subtitle:"A room full of people can still feel empty.",setting:"classroom",pose:"scroll",x0:745,x1:745,y0:0,y1:0,scale:1.03,shirt:"#c56d9b",shadow:.62,shadowX:1035,zoom0:1,zoom1:1.06,pan0:8,pan1:-5,phone:true},
-  {title:"JUST FIVE MORE MINUTES",subtitle:"And then the night is gone.",setting:"bedroom",pose:"scroll",x0:810,x1:810,y0:-54,y1:-54,scale:1.32,shirt:"#c56d9b",shadow:.79,shadowX:955,zoom0:1.02,zoom1:1.14,pan0:0,pan1:-10,phone:true},
-  {title:"THE DAYS DISAPPEAR",subtitle:"One day becomes a habit.",setting:"calendar",pose:"slump",x0:290,x1:275,y0:0,y1:8,scale:1.18,shirt:"#c56d9b",shadow:.69,shadowX:1000,zoom0:1,zoom1:1.13,pan0:-4,pan1:-24,day:"DAY 07",dip:true},
-  {title:"THE MORNING AFTER",subtitle:"You promise it will be different tonight.",setting:"bathroom",pose:"tired",x0:450,x1:448,y0:0,y1:0,scale:1.24,shirt:"#c56d9b",shadow:.58,shadowX:900,zoom0:1,zoom1:1.09,pan0:0,pan1:-8,day:"6:12 AM"},
-  {title:"THE SHADOW GROWS",subtitle:"What you feed begins to follow you.",setting:"mirror",pose:"tired",x0:420,x1:410,y0:0,y1:0,scale:1.4,shirt:"#c56d9b",shadow:.98,shadowX:850,zoom0:1,zoom1:1.14,pan0:0,pan1:-18,redWords:["TOMORROW","ONE MORE","LATER"]},
-  {title:"IT KNOWS YOUR NAME",subtitle:"The voice starts sounding like your own.",setting:"mirror",pose:"slump",x0:470,x1:466,y0:0,y1:0,scale:1.56,shirt:"#c56d9b",shadow:.98,shadowX:830,zoom0:1.04,zoom1:1.18,pan0:0,pan1:-9,redWords:["NOT ENOUGH","LATER"]},
-  {title:"THE LOOP",subtitle:"Scroll. Regret. Promise. Repeat.",setting:"void",pose:"slump",x0:640,x1:640,y0:0,y1:0,scale:1.36,shirt:"#c56d9b",shadow:.95,shadowX:900,zoom0:1.03,zoom1:1.16,pan0:0,pan1:-9,redWords:["ONE MORE","TOMORROW","JUST ONCE","LATER"]},
-  {title:"NO BIG SPEECH",subtitle:"The change begins quietly.",setting:"phone",pose:"stand",x0:640,x1:640,y0:0,y1:0,scale:1.12,shirt:"#c56d9b",shadow:.48,shadowX:915,zoom0:1.06,zoom1:1.03,pan0:0,pan1:0,phone:true,dip:true},
-  {title:"PUT IT DOWN",subtitle:"Let the silence last a second.",setting:"bedroom",pose:"stand",x0:760,x1:720,y0:-6,y1:0,scale:1.18,shirt:"#c56d9b",shadow:.37,shadowX:1000,zoom0:1.06,zoom1:1,pan0:0,pan1:4,phoneOnDesk:true,dip:true},
-  {title:"START WITH ONE PAGE",subtitle:"Not a new life. One small action.",setting:"desk",pose:"write",x0:720,x1:715,y0:-8,y1:-8,scale:1.27,shirt:"#c56d9b",shadow:.34,shadowX:1000,zoom0:1,zoom1:1.08,pan0:2,pan1:-10,phoneOnDesk:true},
-  {title:"ONE LINE AT A TIME",subtitle:"You don't need to feel ready.",setting:"desk",pose:"write",x0:730,x1:730,y0:-8,y1:-8,scale:1.38,shirt:"#c56d9b",shadow:.27,shadowX:1040,zoom0:1.08,zoom1:1.18,pan0:-2,pan1:-14,phoneOnDesk:true,redWords:["BEGIN"]},
-  {title:"MAKE SPACE",subtitle:"Water. Air. A little movement.",setting:"kitchen",pose:"drink",x0:540,x1:555,y0:0,y1:0,scale:1.2,shirt:"#c56d9b",shadow:.23,shadowX:1000,zoom0:1,zoom1:1.06,pan0:0,pan1:-10},
-  {title:"TIE YOUR SHOES",subtitle:"The first step can be very small.",setting:"bedroom",pose:"tie",x0:565,x1:570,y0:20,y1:20,scale:1.22,shirt:"#c56d9b",shadow:.2,shadowX:1000,zoom0:1.04,zoom1:1.12,pan0:0,pan1:-4,day:"DAY 01"},
-  {title:"SHOW UP AGAIN",subtitle:"Progress is a direction, not a streak.",setting:"stairs",pose:"walk",x0:245,x1:855,y0:10,y1:-82,scale:1.1,shirt:"#d7a56d",shadow:.25,shadowX:1030,zoom0:1,zoom1:1.075,pan0:10,pan1:-18,day:"DAY 02"},
-  {title:"MOVE THROUGH THE FEELING",subtitle:"You can be tired and still begin.",setting:"park",pose:"walk",x0:240,x1:930,y0:0,y1:-4,scale:1.12,shirt:"#d7a56d",shadow:.21,shadowX:1040,zoom0:1,zoom1:1.055,pan0:22,pan1:-26},
-  {title:"MISS. RESET. TRY AGAIN.",subtitle:"Discipline is a practice, not a pose.",setting:"gym",pose:"punch",x0:610,x1:635,y0:0,y1:0,scale:1.25,shirt:"#d7a56d",shadow:.18,shadowX:1010,zoom0:1,zoom1:1.12,pan0:0,pan1:-9},
-  {title:"ONE MORE REP",subtitle:"Let your actions speak first.",setting:"gym",pose:"punch",x0:565,x1:590,y0:0,y1:0,scale:1.36,shirt:"#d7a56d",shadow:.12,shadowX:1030,zoom0:1.04,zoom1:1.16,pan0:0,pan1:-12},
-  {title:"LOOK UP",subtitle:"There is a world beyond the screen.",setting:"street",pose:"stand",x0:390,x1:410,y0:0,y1:0,scale:1.2,shirt:"#d7a56d",shadow:.09,shadowX:1050,zoom0:1.04,zoom1:1.1,pan0:0,pan1:-8,dip:true},
-  {title:"YOU ARE NOT ALONE",subtitle:"Some things become lighter when shared.",setting:"cafe",pose:"meet",x0:440,x1:458,y0:0,y1:0,scale:1.16,shirt:"#d7a56d",shadow:.12,shadowX:1010,zoom0:1,zoom1:1.045,pan0:-3,pan1:-8,friend:true,dip:true},
-  {title:"LISTEN",subtitle:"A real conversation pulls you back.",setting:"cafe",pose:"listen",x0:465,x1:465,y0:0,y1:0,scale:1.26,shirt:"#d7a56d",shadow:.08,shadowX:1040,zoom0:1.05,zoom1:1.13,pan0:0,pan1:-8,friend:true},
-  {title:"BE WHERE YOUR FEET ARE",subtitle:"Notice the people around you.",setting:"bus",pose:"walk",x0:340,x1:800,y0:0,y1:0,scale:1.05,shirt:"#d7a56d",shadow:.08,shadowX:1030,zoom0:1,zoom1:1.04,pan0:16,pan1:-25,friend:true},
-  {title:"PROTECT THE FIRST HOUR",subtitle:"Your attention belongs to you.",setting:"library",pose:"write",x0:730,x1:730,y0:0,y1:0,scale:1.2,shirt:"#d7a56d",shadow:.06,shadowX:1030,zoom0:1,zoom1:1.08,pan0:0,pan1:-7,day:"DAY 14"},
-  {title:"THE DAYS ADD UP",subtitle:"Small choices leave a mark.",setting:"calendar",pose:"stand",x0:310,x1:310,y0:0,y1:0,scale:1.08,shirt:"#d7a56d",shadow:.05,shadowX:1030,zoom0:1,zoom1:1.06,pan0:0,pan1:-8,day:"DAY 21"},
-  {title:"THE SHADOW SHRINKS",subtitle:"You don't have to obey every urge.",setting:"mirror",pose:"hero",x0:430,x1:448,y0:0,y1:0,scale:1.4,shirt:"#d7a56d",shadow:.07,shadowX:920,zoom0:1.05,zoom1:1.13,pan0:0,pan1:-8,redWords:["LATER"]},
-  {title:"A LIFE OUTSIDE THE LOOP",subtitle:"The world was here the whole time.",setting:"park",pose:"meet",x0:470,x1:485,y0:0,y1:0,scale:1.13,shirt:"#d7a56d",shadow:.025,shadowX:1100,zoom0:1,zoom1:1.06,pan0:5,pan1:-12,friend:true},
-  {title:"A DIFFERENT DIRECTION",subtitle:"Tomorrow begins with this moment.",setting:"dawn",pose:"walk",x0:450,x1:820,y0:0,y1:-10,scale:1.18,shirt:"#d7a56d",shadow:.018,shadowX:1100,zoom0:1,zoom1:1.055,pan0:12,pan1:-14},
-  {title:"YOUR ATTENTION IS YOUR LIFE",subtitle:"Choose where it goes.",setting:"end",pose:"hero",x0:640,x1:640,y0:0,y1:0,scale:.88,shirt:"#d7a56d",shadow:0,shadowX:900,zoom0:1,zoom1:1,pan0:0,pan1:0,dip:true},
-];;
+const shots: Shot[] = shotPlan.shots.map((entry) => entry.args as unknown as Shot);;
 
 const clampInterp = (v: number, input: number[], output: number[]) =>
   interpolate(v, input, output, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -475,9 +444,11 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <path d="M0 138 H1280 M0 285 H1280 M0 432 H1280" stroke="#55485b" strokeWidth="4" opacity=".6" />
       <rect x="885" y="65" width="20" height="150" fill="#1b1a22" />
       <rect x="815" y="198" width="160" height="14" rx="7" fill="#655369" />
-      <path d="M895 211 V254" stroke="#b99eae" strokeWidth="7" />
-      <path d="M860 246 Q895 232 930 246 L945 415 Q946 445 912 455 L878 455 Q844 445 845 415Z" fill="#1c1a23" stroke="#ad94a6" strokeWidth="4" />
-      <path d="M851 285 H939 M848 405 H942" stroke="#514254" strokeWidth="5" />
+      <g transform={"translate(" + (Math.sin(t * 19) * 4) + " 0) rotate(" + (Math.sin(t * 19) * 2.4) + " 895 211)"}>
+        <path d="M895 211 V254" stroke="#b99eae" strokeWidth="7" />
+        <path d="M860 246 Q895 232 930 246 L945 415 Q946 445 912 455 L878 455 Q844 445 845 415Z" fill="#1c1a23" stroke="#ad94a6" strokeWidth="4" />
+        <path d="M851 285 H939 M848 405 H942" stroke="#514254" strokeWidth="5" />
+      </g>
       <rect x="0" y="550" width="1280" height="170" fill="#25222d" />
       <path d="M0 565 H1280 M0 620 H1280 M0 674 H1280" stroke="#6d5c6f" strokeWidth="3" opacity=".4" />
       <rect x="120" y="445" width="180" height="22" rx="8" fill="#9a8495" />
@@ -604,20 +575,61 @@ const Character: React.FC<{
   const walking = pose === "walk" || pose === "run" || (pose === "meet" && companion);
   const phase = t * Math.PI * (pose === "run" ? 6.2 : 4.2);
   const swing = walking ? Math.sin(phase) : 0;
-  const bob = walking ? -Math.abs(Math.sin(phase)) * (pose === "run" ? 9 : 5) : pose === "scroll" ? Math.sin(t * Math.PI * 2) * 1.5 : pose === "drink" ? Math.sin(t * Math.PI * 2) * 1.2 : 0;
-  const lean = pose === "slump" ? 12 : pose === "scroll" ? 8 : pose === "tired" ? 6 : pose === "tie" ? 25 : pose === "punch" ? -7 : pose === "run" ? 15 : pose === "stretch" ? -4 : pose === "hero" || pose === "cheer" ? -4 : 0;
-  const headTilt = pose === "scroll" ? 15 : pose === "slump" || pose === "tired" ? 20 : pose === "tie" ? 25 : pose === "drink" ? 8 : pose === "hero" || pose === "cheer" ? -5 : pose === "meet" || pose === "listen" ? -8 : 0;
   const scrollReach = clampInterp(t, [0.05, 0.42, 0.78, 1], [0, 1, 0.35, 0.15]);
   const writeReach = clampInterp(t, [0.05, 0.6, 1], [0, 1, 0.7]);
-  const leftArm = pose === "scroll" ? -37 - scrollReach * 19 : pose === "write" ? -38 - writeReach * 26 : pose === "slump" || pose === "tired" ? 25 : pose === "tie" ? -56 : pose === "drink" ? -55 : pose === "punch" ? -66 : pose === "stretch" || pose === "cheer" ? -112 : pose === "hero" ? -32 : walking ? -18 + swing * (pose === "run" ? 37 : 27) : pose === "meet" && !companion ? -37 : -8;
-  const rightArm = pose === "scroll" ? 34 + scrollReach * 7 : pose === "write" ? 14 : pose === "slump" || pose === "tired" ? 36 : pose === "tie" ? -24 : pose === "drink" ? -65 : pose === "punch" ? 66 : pose === "stretch" || pose === "cheer" ? 112 : pose === "hero" ? 20 : walking ? 18 - swing * (pose === "run" ? 37 : 27) : pose === "meet" && companion ? -30 : pose === "meet" || pose === "listen" ? -24 : 9;
-  const leftLeg = walking ? (pose === "run" ? -30 : -22) + swing * (pose === "run" ? 40 : 31) : pose === "scroll" ? 25 : pose === "slump" ? 10 : pose === "tie" ? 38 : pose === "sit" ? 58 : pose === "punch" ? -8 : 0;
-  const rightLeg = walking ? (pose === "run" ? 30 : 22) - swing * (pose === "run" ? 40 : 31) : pose === "scroll" ? 31 : pose === "slump" ? 15 : pose === "tie" ? 42 : pose === "sit" ? 62 : pose === "punch" ? 14 : 0;
+  const drinkReach = clampInterp(t, [0.05, 0.34, 0.62, 1], [0, 1, 0.82, 0.28]);
+  const tieReach = clampInterp(t, [0.04, 0.4, 0.64, 1], [0, 1, 0.78, 0.7]);
+  const punchStrike = pose === "punch"
+    ? Math.max(Math.exp(-Math.pow((t - 0.32) / 0.09, 2)), Math.exp(-Math.pow((t - 0.76) / 0.09, 2)))
+    : 0;
+  const bob = walking ? -Math.abs(Math.sin(phase)) * (pose === "run" ? 9 : 5)
+    : pose === "scroll" ? Math.sin(t * Math.PI * 2) * 1.5
+    : pose === "drink" ? Math.sin(t * Math.PI * 2) * 1.2
+    : pose === "punch" ? -Math.abs(Math.sin(t * Math.PI * 2)) * 2.5 : 0;
+  const lean = pose === "slump" ? 12 : pose === "scroll" ? 8 : pose === "tired" ? 6
+    : pose === "tie" ? 25 * tieReach
+    : pose === "punch" ? -4 - 7 * punchStrike
+    : pose === "run" ? 15 : pose === "stretch" ? -4
+    : pose === "hero" || pose === "cheer" ? -4 : 0;
+  const headTilt = pose === "scroll" ? 15 : pose === "slump" || pose === "tired" ? 20
+    : pose === "tie" ? 5 + 20 * tieReach
+    : pose === "drink" ? 8 * drinkReach
+    : pose === "punch" ? -3 - 4 * punchStrike
+    : pose === "hero" || pose === "cheer" ? -5
+    : pose === "meet" || pose === "listen" ? -8 : 0;
+  const leftArm = pose === "scroll" ? 14
+    : pose === "write" ? -12 - writeReach * 3
+    : pose === "slump" || pose === "tired" ? 25
+    : pose === "tie" ? 32 + 8 * tieReach
+    : pose === "drink" ? 18
+    : pose === "punch" ? 22 + 5 * punchStrike
+    : pose === "stretch" || pose === "cheer" ? -112
+    : pose === "hero" ? -32
+    : walking ? -18 + swing * (pose === "run" ? 37 : 27)
+    : pose === "meet" && !companion ? -37 : -8;
+  const rightArm = pose === "scroll" ? -12 + scrollReach * 4
+    : pose === "write" ? -22 - writeReach * 5
+    : pose === "slump" || pose === "tired" ? 36
+    : pose === "tie" ? 25 + 8 * tieReach
+    : pose === "drink" ? -88 * drinkReach
+    : pose === "punch" ? 4 - 50 * punchStrike
+    : pose === "stretch" || pose === "cheer" ? 112
+    : pose === "hero" ? 20
+    : walking ? 18 - swing * (pose === "run" ? 37 : 27)
+    : pose === "meet" && companion ? -30
+    : pose === "meet" || pose === "listen" ? -24 : 9;
+  const leftLeg = walking ? (pose === "run" ? -30 : -22) + swing * (pose === "run" ? 40 : 31)
+    : pose === "scroll" ? 25 : pose === "slump" ? 10
+    : pose === "tie" ? 16 + 24 * tieReach
+    : pose === "sit" ? 58 : pose === "punch" ? -8 : 0;
+  const rightLeg = walking ? (pose === "run" ? 30 : 22) - swing * (pose === "run" ? 40 : 31)
+    : pose === "scroll" ? 31 : pose === "slump" ? 15
+    : pose === "tie" ? 20 + 22 * tieReach
+    : pose === "sit" ? 62 : pose === "punch" ? 14 : 0;
   const mouth = pose === "slump" || pose === "tired" ? "M-7 -137 Q0 -143 7 -137" : pose === "hero" ? "M-8 -137 Q0 -129 8 -137" : pose === "scroll" ? "M-6 -139 Q0 -137 6 -139" : "M-7 -137 H7";
   const blink = (Math.sin(t * 13.5 + (companion ? 2 : 0)) > 0.975) ? 0.25 : 1;
   const phonePulse = 0.82 + Math.sin(t * 12) * 0.1;
-  const handY = pose === "scroll" ? -62 : pose === "write" ? -49 : pose === "slump" ? -46 : -40;
-  const motionSpring = spring({ frame: Math.round(t * 36), fps: 24, config: { damping: 14, stiffness: 105, mass: 0.7 } });
+    const motionSpring = spring({ frame: Math.round(t * 36), fps: 24, config: { damping: 14, stiffness: 105, mass: 0.7 } });
   return (
     <svg width={180 * scale} height={270 * scale} viewBox="-90 -210 180 270" style={{
       position: "absolute", left: x - 90 * scale,
@@ -642,16 +654,29 @@ const Character: React.FC<{
         <path d="M-4 -104 V-82" stroke="#f0d5c1" strokeWidth="2.2" opacity=".8" />
         <circle cx="-4" cy="-78" r="2.1" fill="#f4dfca" />
       </g>
+      {pose === "tie" ? (
+        <g>
+          <path d="M-24 -105 Q-43 -70 -39 -32 L-35 16" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M-24 -105 Q-43 -70 -39 -32 L-35 16" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="-35" cy="16" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+          <path d="M24 -105 Q42 -68 39 -31 L35 16" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M24 -105 Q42 -68 39 -31 L35 16" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="35" cy="16" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+        </g>
+      ) : (
+        <>
       <g transform={"rotate(" + leftArm + " -24 -105)"}>
         <path d="M-24 -105 Q-42 -88 -46 -70 L-49 -48" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M-24 -105 Q-42 -88 -46 -70 L-49 -48" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="-49" cy={handY} r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+        <circle cx="-49" cy="-48" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
       </g>
       <g transform={"rotate(" + rightArm + " 24 -105)"}>
         <path d="M24 -105 Q42 -87 47 -68 L50 -47" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M24 -105 Q42 -87 47 -68 L50 -47" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="50" cy={handY} r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+        <circle cx="50" cy="-47" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
       </g>
+        </>
+      )}
       <g transform={"rotate(" + headTilt + " 0 -154)"}>
         <circle cx="0" cy="-154" r="37" fill="#17151e" stroke="#ead7c1" strokeWidth="3.2" />
         <ellipse cx="-12" cy="-156" rx="4.1" ry={5.2 * blink} fill="#f5eee3" />
@@ -662,17 +687,17 @@ const Character: React.FC<{
         {pose === "hero" && <path d="M-18 -179 L-8 -177 M8 -177 L18 -179" stroke="#f5eee3" strokeWidth="2.5" strokeLinecap="round" />}
       </g>
       {pose === "scroll" && !companion && (
-        <g transform={"translate(" + (47 + motionSpring * 2) + " " + (-64 + scrollReach * 4) + ") rotate(-12)"}>
+        <g transform={"translate(" + (57 + motionSpring * 2) + " " + (-58 + scrollReach * 4) + ") rotate(-12)"}>
           <rect x="-11" y="-25" width="22" height="42" rx="4" fill="#17151e" stroke="#ead7c1" strokeWidth="2.5" />
           <rect x="-7.5" y="-19" width="15" height="28" rx="2" fill="#a84f65" opacity={phonePulse} />
           <circle cx="0" cy="12" r="1.8" fill="#ead7c1" />
         </g>
       )}
       {pose === "write" && !companion && <g>
-        <path d="M47 -52 L67 -39" stroke="#ead7c1" strokeWidth="4" strokeLinecap="round" />
-        <path d={"M" + (66 + writeReach * 3) + " " + (39 - writeReach * 2) + " l10 7"} stroke="#d7b79b" strokeWidth="2.6" />
+        <path d="M54 -60 L75 -51" stroke="#ead7c1" strokeWidth="4" strokeLinecap="round" />
+        <path d={"M" + (73 + writeReach * 3) + " " + (-51 - writeReach * 2) + " l10 7"} stroke="#d7b79b" strokeWidth="2.6" />
       </g>}
-      {pose === "drink" && !companion && <g transform="translate(62 -92)">
+      {pose === "drink" && !companion && <g transform={"translate(" + (72 + drinkReach * 5) + " " + (-120 + drinkReach * 5) + ")"}>
         <path d="M-9 -14 H9 L7 10 Q0 16 -7 10Z" fill="#d6c8bb" stroke="#ead7c1" strokeWidth="2.2"/>
         <path d="M9 -10 Q20 -11 16 -1 Q14 5 8 4" fill="none" stroke="#ead7c1" strokeWidth="2.2"/>
         <path d="M-5 -9 H5" stroke="#9ab7be" strokeWidth="2" opacity=".7"/>
@@ -681,9 +706,9 @@ const Character: React.FC<{
         <path d="M-28 17 Q0 9 28 17" fill="none" stroke="#ead7c1" strokeWidth="3"/>
         <path d="M-18 25 Q0 16 18 25" fill="none" stroke="#c56d9b" strokeWidth="3"/>
       </g>}
-      {pose === "punch" && !companion && <g opacity={0.65 + Math.sin(t*18)*0.25}>
-        <path d="M72 -81 l22 -8 M74 -69 l27 0 M70 -58 l21 9" stroke="#f0c58f" strokeWidth="3" strokeLinecap="round"/>
-        <circle cx="73" cy="-69" r="3.5" fill="#f0c58f"/>
+      {pose === "punch" && !companion && <g opacity={0.15 + punchStrike * 0.8}>
+        <path d="M80 -84 l18 -7 M82 -72 l24 0 M79 -61 l17 8" stroke="#f0c58f" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="81" cy="-72" r="3.5" fill="#f0c58f"/>
       </g>}
       {pose === "stretch" && !companion && <path d="M-52 -134 l-12 -15 M52 -134 l12 -15" stroke="#ead7c1" strokeWidth="2.5" opacity=".55"/>}
       {pose === "cheer" && !companion && <g>
@@ -704,11 +729,11 @@ const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean 
     {setting === "desk" && <>
       <path d="M328 454 H976 V480 H328Z" fill="#9b7a85" stroke="#352936" strokeWidth="4" />
       <path d="M360 480 V580 M940 480 V580" stroke="#362b39" strokeWidth="18" />
-      <rect x="490" y="438" width="112" height="9" rx="3" fill="#e1d2c4" transform="rotate(-5 490 438)" />
-      <path d="M500 434 l14 -19 l12 18" fill="none" stroke="#c9b7aa" strokeWidth="3" />
+      <rect x="685" y="438" width="112" height="9" rx="3" fill="#e1d2c4" transform="rotate(-5 490 438)" />
+      <path d="M695 434 l14 -19 l12 18" fill="none" stroke="#c9b7aa" strokeWidth="3" />
       {phoneOnDesk && <g transform={"translate(" + (t * 8) + " 0)"}>
-        <rect x="798" y="417" width="28" height="49" rx="5" fill="#15141c" stroke="#dac7b4" strokeWidth="2" transform="rotate(10 812 441)" />
-        <rect x="804" y="424" width="16" height="34" rx="2" fill="#473a4e" transform="rotate(10 812 441)" />
+        <rect x="744" y="417" width="28" height="49" rx="5" fill="#15141c" stroke="#dac7b4" strokeWidth="2" transform="rotate(10 812 441)" />
+        <rect x="750" y="424" width="16" height="34" rx="2" fill="#473a4e" transform="rotate(10 812 441)" />
       </g>}
     </>}
     {setting === "cafe" && <>
@@ -894,7 +919,7 @@ export const OneMoreScroll: React.FC = () => {
         {shot.friend && <Character
           x={x + (shot.setting === "cafe" ? 270 : 220)}
           y={shot.setting === "cafe" ? 0 : 0}
-          pose="meet" t={Math.max(0, t - 0.12)} shirt="#6e59bd"
+          pose={shot.pose === "listen" ? "listen" : "meet"} t={Math.max(0, t - 0.12)} shirt="#6e59bd"
           scale={shot.setting === "cafe" ? 1.08 : 0.92} companion
         />}
         {shot.setting === "bus" && <>
@@ -908,6 +933,7 @@ export const OneMoreScroll: React.FC = () => {
         <Foreground setting={shot.setting} t={t} phoneOnDesk={shot.phoneOnDesk} />
       </div>
 
+      <div style={{position:"absolute",inset:0,zIndex:8,pointerEvents:"none",background:"radial-gradient(ellipse at 50% 44%, rgba(8,6,12,0) 34%, rgba(8,6,12,.30) 100%)"}} />
       {/* Cinematic letterbox; content stays inside a safe area. */}
       <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 12, background: "#09080d", zIndex: 20 }} />
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 13, background: "#09080d", zIndex: 20 }} />

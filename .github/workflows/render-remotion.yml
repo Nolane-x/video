@@ -102,7 +102,8 @@ jobs:
           assert abs(duration - 155.0) < 0.2, f"unexpected duration: {duration}"
           print(f"Validated: {duration:.3f}s, 1280x720, 24fps, audio={audio.get('codec_name')}")
           PY
-          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/10,scale=320:-1,tile=4x4" -frames:v 1 out/contact-sheet.jpg
+          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/5,scale=320:-1,tile=4x8" -frames:v 1 out/contact-sheet-shots.jpg
+          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 -vf "fps=1/10,scale=320:-1,tile=4x4" -frames:v 1 out/contact-sheet-overview.jpg
           ffmpeg -hide_banner -loglevel info -i out/one-more-scroll.mp4 -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
 
       - name: Upload render and QA outputs
@@ -111,7 +112,8 @@ jobs:
           name: one-more-scroll-remotion-mp4
           path: |
             video-projects/remotion/out/one-more-scroll.mp4
-            video-projects/remotion/out/contact-sheet.jpg
+            video-projects/remotion/out/contact-sheet-shots.jpg
+            video-projects/remotion/out/contact-sheet-overview.jpg
             video-projects/remotion/out/metadata.json
             video-projects/remotion/out/audio-loudness.txt
           if-no-files-found: error
