@@ -22,3 +22,17 @@ The current skill ZIP is intended as a convenient bundle of agent instructions, 
 ## Restoring a particular video
 
 Read `video-library/one-more-scroll/manifest.json`, `QA.md`, and `latest-remotion-release.json` first. The latest Remotion video stored in the repo is not interchangeable with the original H2 Canvas/Chromium master. Verify every path and renderer label before use.
+
+## Import the exact H2 master file
+
+The original H2 master is distinct from the Remotion reference video. Its expected checksum and technical metadata are recorded in the manifest. To move it from the prior ChatGPT attachment into durable GitHub storage:
+
+1. Download the exact file named one-more-scroll-h2-final.mp4 from the previous chat.
+2. From the root of a clone of this repository, run this PowerShell command (adjust the Downloads path if needed):
+
+   python tools/video/archive_h2_master.py "$env:USERPROFILE\Downloads\one-more-scroll-h2-final.mp4"
+
+3. The importer verifies SHA-256, file size, duration, resolution, FPS, codecs and audio format before copying it into video-library/one-more-scroll/. It also generates contact sheets and updates manifest/QA/state.
+4. Review the generated files, then commit and push the binary, checksum, contact sheets and updated documentation. The package workflow will update the portable skill ZIP to include the H2 master as well as the Remotion reference sample.
+
+Do not rename the Remotion render as the H2 master. If the checksum fails, stop; the input is not the exact canonical H2 file.
