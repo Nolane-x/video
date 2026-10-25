@@ -52,7 +52,7 @@ jobs:
             AGENTS.md CLAUDE.md .agents/skills/video-production-master \
             .claude/skills/video-production-master docs/STATE.md docs/AI_HANDOFF.md \
             docs/ART_DIRECTION_IFVERSE_DAYONE.md docs/VIDEO_PRODUCTION_STATE_SCHEMA.json \
-            tools/video/validate_story.py video-library
+            docs/INSTALL_VIDEO_SKILL.md tools/video/validate_story.py video-library
           sha256sum release/one-more-scroll-remotion-master.mp4 \
             release/contact-sheet-shots.jpg release/video-production-master-skill.zip \
             | tee release/SHA256SUMS.txt
