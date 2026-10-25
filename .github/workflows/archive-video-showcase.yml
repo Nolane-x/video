@@ -77,3 +77,44 @@ jobs:
             release/SHA256SUMS.txt#SHA256SUMS.txt \
             --title "ONE MORE SCROLL — Remotion render + production skill" \
             --notes "Reproducible Remotion output and production skill pinned to source commit ${{ github.event.workflow_run.head_sha }}. This is the repository's Remotion render, not the separately delivered H2 Canvas/Chromium master."
+
+      - name: Index the durable release in the video folder
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.prep.outputs.tag }}
+          ASSET_URL: https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/one-more-scroll-remotion-master.mp4
+          SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.prep.outputs.tag }}
+          ASSET_URL: https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/one-more-scroll-remotion-master.mp4
+          SOURCE_SHA: ${{ steps.prep.outputs.source_sha }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.prep.outputs.tag }}"
+          SOURCE_SHA="${{ steps.prep.outputs.source_sha }}"
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+          ASSET_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/one-more-scroll-remotion-master.mp4"
+          git fetch origin main
+          git checkout -B archive-index origin/main
+          python - <<'PY'
+          import json, os
+          payload = {
+            "project_id": "one-more-scroll",
+            "artifact_kind": "remotion-reproducible-render",
+            "renderer": "Remotion CLI + procedural audio + FFmpeg mastering",
+            "release_url": os.environ["RELEASE_URL"],
+            "video_asset_url": os.environ["ASSET_URL"],
+            "source_commit": os.environ["SOURCE_SHA"],
+            "workflow_run_id": os.environ["RUN_ID"],
+            "note": "This is the repository's Remotion build, not the separately delivered H2 Canvas/Chromium master."
+          }
+          with open("video-library/one-more-scroll/latest-remotion-release.json", "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+            f.write("\\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add video-library/one-more-scroll/latest-remotion-release.json
+          git commit -m "docs: index archived Remotion showcase release"
+          git push origin HEAD:main
