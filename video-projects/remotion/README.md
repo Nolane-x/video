@@ -22,3 +22,8 @@ The data-driven shot plan in `public/story/shots.json` is the source of truth. T
 - A passing export is only a technical gate.
 
 The Remotion workflow uploads video/QA as a temporary artifact. A commit message containing `[archive-video]` triggers the archive workflow, which copies the resulting Remotion render and the skill ZIP to a permanent GitHub Release. That release is still not the original H2 Canvas/Chromium master.
+
+
+## Persistent archive
+
+A render commit with `[archive-video]` in its commit message triggers the archive workflow after CI succeeds. It stores a versioned MP4, contact sheets, metadata/checksums and a skill ZIP under `video-library/one-more-scroll/renders/` and updates the folder's latest-render pointer. The archived MP4 is the Remotion pipeline output; it is not the original H2 Canvas/Chromium master.

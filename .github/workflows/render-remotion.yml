@@ -67,6 +67,9 @@ jobs:
           cp h2-audio/audio/sfx/breath_in.wav public/audio/
           cp h2-audio/audio/sfx/sting_low.wav public/audio/
 
+      - name: Validate storyboard schema and timing
+        run: python ../../tools/video/validate_story.py public/story/shots.json
+
       - name: Typecheck
         run: npm run typecheck
 

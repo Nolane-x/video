@@ -85,8 +85,8 @@ def main() -> None:
                 errors.append(f"{shot_id}: unsupported setting {args['setting']!r}")
             if args["pose"] not in POSES:
                 errors.append(f"{shot_id}: unsupported pose {args['pose']!r}")
-            if args["title"] != shot["args"].get("title"):
-                errors.append(f"{shot_id}: title field mismatch")
+            if args["subtitle"] != shot["line"]:
+                errors.append(f"{shot_id}: subtitle does not match the storyboard line")
             if not (0 < args["scale"] <= 3):
                 errors.append(f"{shot_id}: scale outside (0, 3]")
             if args["zoom0"] <= 0 or args["zoom1"] <= 0:
