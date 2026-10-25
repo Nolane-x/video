@@ -20,6 +20,11 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Krita: `tools/krita/README.md`
 - Film manifest: `video-library/one-more-scroll/manifest.json`
 
+## Tool and video inventory
+- Read `docs/TOOL_INVENTORY.md` and `video-library/previous-works-catalog.json` before assuming an app/source archive or old video is present.
+- `tools/video/archive_previous_works.py` stages prior clips by fixed SHA; the GitHub verification workflow marks them permanent only after the remote files are checked.
+- `tools/video/publish_h2_source_release.ps1` uploads the large H2 source packages to a versioned GitHub Release after checksum validation.
+
 ## Artifact truth
 The prior 155-second Full HD H2 master and source ZIP were delivered as attachments in an earlier ChatGPT session; metadata, SHA-256 and ffprobe results are recorded in the manifest. The exact H2 binary is still not committed here. The Remotion reference build has been persisted under `video-library/one-more-scroll/renders/remotion-run-31/`; this is a separate renderer output. Never conflate them.
 
