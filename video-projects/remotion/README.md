@@ -21,7 +21,7 @@ The data-driven shot plan in `public/story/shots.json` is the source of truth. T
 - Check audio peaks, loudness and intentional-silence segments.
 - A passing export is only a technical gate.
 
-The Remotion workflow uploads video/QA as a temporary artifact. A commit message containing `[archive-video]` triggers the archive workflow, which copies the resulting Remotion render and the skill ZIP to a permanent GitHub Release. That release is still not the original H2 Canvas/Chromium master.
+The Remotion workflow uploads video/QA as an Actions artifact, then the archive workflow commits the rendered MP4 (force-added despite the global media ignore rule), contact sheets, metadata, checksums and skill ZIP to `video-library/one-more-scroll/`. Keep this pipeline output clearly distinguished from the prior H2 Canvas/Chromium master. That release is still not the original H2 Canvas/Chromium master.
 
 
 ## Persistent archive
