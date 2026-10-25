@@ -7,6 +7,10 @@ description: End-to-end workflow for cinematic code-driven YouTube animation: st
 
 Persistent production memory for AI sessions in `Nolane-x/video`. This is a gated workflow, not a promise of automatic quality.
 
+## ChatGPT Plugin Creator integration
+
+The original H2 package has been made into a private ChatGPT plugin: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), currently version 1.0.2. The plugin preserves the H2 rig, `dem`/`doodle` packs, renderer, script skill and audio helpers. Read `docs/CHATGPT_PLUGIN.md` for exact scope and usage. Do not silently label that plugin update as version 1.1.0; only the v1.0.2 creation is confirmed.
+
 ## Read before acting
 Read `AGENTS.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, `video-library/README.md`, `video-library/previous-works-catalog.json`, the per-film manifest, Remotion README, character bible and live shot plan. Inspect current HEAD, recent commits, Actions, logs and artifacts. Then read these references: [visual language](references/visual-language.md), [engine selection](references/engine-selection.md), [production workflow](references/production-workflow.md), [animation QA](references/animation-qa.md), [audio/delivery](references/audio-delivery.md), [state restoration](references/state-restoration.md), [reusable prompts](references/reusable-prompts.md).
 
