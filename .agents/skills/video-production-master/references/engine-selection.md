@@ -2,6 +2,8 @@
 
 ## What's really in this repo
 
+The native H2 SelfImprove Studio plugin source is now mirrored under `integrations/h2-selfimprove-studio/` from Plugin Creator release `pluginrel_6ade1c3ecb20819199def25125d2f89a` (v1.0.2). It contains the H2 skills, renderer scripts, rig, `dem`/`doodle` packs, and procedural audio/helpers. See `integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json`. The original `.plugin` archive itself remains external; its text source files are versioned in the repo.
+
 The native H2 SelfImprove Studio plugin source has now been mirrored under `integrations/h2-selfimprove-studio/` from Plugin Creator release `pluginrel_6ade1c3ecb20819199def25125d2f89a` (v1.0.2). This includes the H2 skills, renderer scripts, rig, `dem`/`doodle` packs, and procedural audio/helpers. See `integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json`. The `.plugin` binary archive itself remains outside Git; the source files are present.
 The repo is `Nolane-x/video`, not a complete copy of all upstream apps or the full H2 source. It contains:
 - Remotion project: `video-projects/remotion`
