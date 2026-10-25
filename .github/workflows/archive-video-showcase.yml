@@ -103,6 +103,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$ARCHIVE_DIR" video-library/video-production-master-skill.zip video-library/one-more-scroll/latest-remotion-release.json
+          # Global .gitignore excludes rendered media by default; explicitly force-add the intended archived master.
+          git add -f "$ARCHIVE_DIR/one-more-scroll-remotion-master.mp4"
           if git diff --cached --quiet; then
             echo "Archive already committed; no changes."
             exit 0
