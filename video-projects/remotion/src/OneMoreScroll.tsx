@@ -14,7 +14,8 @@ import {
 type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer";
 type Setting =
   | "bedroom" | "phone" | "street" | "calendar" | "mirror" | "desk"
-  | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end";
+  | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end"
+  | "locker" | "classroom" | "busStop" | "bathroom" | "kitchen" | "park" | "gym" | "library";
 
 type Shot = {
   title: string;
