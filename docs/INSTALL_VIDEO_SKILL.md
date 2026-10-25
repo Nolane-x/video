@@ -2,6 +2,10 @@
 
 This repo itself is the canonical skill workspace. Start by cloning/opening `Nolane-x/video`, then tell the agent to follow root `AGENTS.md`.
 
+## ChatGPT Plugin Creator
+
+A private plugin has already been created from the uploaded H2 package: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Open that link in ChatGPT and ensure it is available to the current workspace. See `docs/CHATGPT_PLUGIN.md` for release ID and contents. Its confirmed version is 1.0.2; the cross-engine master skill in this repository remains the production policy of record.
+
 ## Recommended use by agent family
 
 - **Codex / OpenCode / agents honoring AGENTS.md:** read `AGENTS.md`, then `.agents/skills/video-production-master/SKILL.md`. Copy the complete `.agents/skills/video-production-master/` directory, not just the entrypoint.
