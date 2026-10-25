@@ -15,6 +15,7 @@ on:
       - "docs/INSTALL_VIDEO_SKILL.md"
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
+      - ".github/workflows/verify-archive-h2-master.yml"
       - "video-library/README.md"
       - "video-library/one-more-scroll/**"
       - "video-library/video-production-master-skill.zip"
@@ -27,6 +28,9 @@ on:
       - "video-library/one-more-scroll/manifest.json"
       - "video-library/one-more-scroll/renders/**/one-more-scroll-remotion-master.mp4"
       - ".github/workflows/package-video-skill.yml"
+  workflow_run:
+    workflows: ["Verify archived H2 master"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -38,6 +42,7 @@ concurrency:
 
 jobs:
   bundle:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -65,10 +70,13 @@ jobs:
              bundle/video-library/one-more-scroll/
           # Include the canonical H2 master too, once the checksum-verified import helper has archived it.
           if [ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ]; then
-            cp video-library/one-more-scroll/one-more-scroll-h2-final.mp4 bundle/video-library/one-more-scroll/
-            [ ! -f video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256 ] || cp video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256 bundle/video-library/one-more-scroll/
-            [ ! -f video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg ] || cp video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg bundle/video-library/one-more-scroll/
-            [ ! -f video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg ] || cp video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg bundle/video-library/one-more-scroll/
+            H2_PATH="video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
+            H2_SHA="$(sha256sum "$H2_PATH" | cut -d ' ' -f1)"
+            test "$H2_SHA" = "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f"
+            cp "$H2_PATH" bundle/video-library/one-more-scroll/
+            for f in one-more-scroll-h2-final.mp4.sha256 original-h2-master-metadata.json original-h2-contact-sheet-shots.jpg original-h2-contact-sheet-overview.jpg; do
+              [ ! -f "video-library/one-more-scroll/$f" ] || cp "video-library/one-more-scroll/$f" bundle/video-library/one-more-scroll/
+            done
           fi
           VIDEO_PATH="$(python -c 'import json; print(json.load(open("video-library/one-more-scroll/latest-remotion-release.json"))["video_path"])')"
           RENDER_DIR="$(dirname "$VIDEO_PATH")"
