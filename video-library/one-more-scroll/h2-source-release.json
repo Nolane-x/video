@@ -1,0 +1,39 @@
+{
+  "project_id": "one-more-scroll",
+  "status": "not_yet_uploaded",
+  "intended_release_tag": "h2-production-assets-v1",
+  "release_url": null,
+  "upload_script": "tools/video/publish_h2_source_release.ps1",
+  "instruction": "Run the script from a clone of Nolane-x/video after downloading the exact listed files from ChatGPT attachments. The script verifies SHA-256 and creates the Release; it stages this manifest locally but does not commit or push.",
+  "assets": [
+    {
+      "filename": "one-more-scroll-h2-final.mp4",
+      "size_bytes": 31547778,
+      "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
+      "role": "canonical H2 Canvas/Chromium master",
+      "status": "not yet a permanent release asset"
+    },
+    {
+      "filename": "one-more-scroll-h2-source.zip",
+      "size_bytes": 115875783,
+      "sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
+      "role": "H2 renderer/source package",
+      "status": "not yet a permanent release asset"
+    },
+    {
+      "filename": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+      "size_bytes": 115856962,
+      "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+      "role": "H2 source package with unverified fixes",
+      "status": "not yet a permanent release asset"
+    },
+    {
+      "filename": "h2-selfimprove-studio.plugin",
+      "size_bytes": 188342,
+      "sha256": "339b410a0535cd51525df9679e774e72515b483733e70c08be4f379a25b41bf3",
+      "role": "H2 plugin package",
+      "status": "not yet a permanent release asset"
+    }
+  ],
+  "warning": "The SHA-256 allow-list prevents similarly named but different videos/source packages from being uploaded as the canonical H2 assets."
+}
