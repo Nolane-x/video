@@ -27,3 +27,8 @@ The Remotion workflow uploads video/QA as an Actions artifact, then the archive 
 ## Persistent archive
 
 A render commit with `[archive-video]` in its commit message triggers the archive workflow after CI succeeds. It stores a versioned MP4, contact sheets, metadata/checksums and a skill ZIP under `video-library/one-more-scroll/renders/` and updates the folder's latest-render pointer. The archived MP4 is the Remotion pipeline output; it is not the original H2 Canvas/Chromium master.
+
+
+## Prior-work preservation
+
+The current reference render is embedded in `video-library/one-more-scroll/renders/`. Older iterations are indexed in `video-library/previous-works-catalog.json`. A later AI must check whether an entry is a committed repository file, a GitHub Release asset, or only an attachment from an older ChatGPT session. Don't claim to have watched a video if only its catalog entry/contact sheet was available.
