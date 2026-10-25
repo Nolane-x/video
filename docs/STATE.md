@@ -53,7 +53,7 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 
 ## Next priorities
 1. Verify current Remotion source and latest CI after skill/state additions.
-2. Archive a reproducible Remotion output plus skill ZIP as permanent GitHub Release assets using the archive workflow; triggering render commit must include `[archive-video]`.
-3. Add the exact original H2 MP4 to durable GitHub storage via a supported binary upload path. Do not confuse it with the Remotion release asset.
+2. Archive a reproducible Remotion output, contact sheets, metadata and skill ZIP inside `video-library/one-more-scroll/renders/` using the archive workflow; triggering render commit must include `[archive-video]`.
+3. The exact original H2 MP4 remains a separate binary-archive task; do not confuse it with the reproducible Remotion file committed by the workflow.
 4. Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.
