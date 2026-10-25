@@ -13,6 +13,8 @@ Simple reusable stick-figure characters staged in rich, cinematic environments. 
 - [Reusable skill](.agents/skills/video-production-master/SKILL.md)
 - [Current state](docs/STATE.md)
 - [Video catalog](video-library/README.md)
+- [Verified tools/source inventory](docs/TOOL_INVENTORY.md)
+- [Prior video catalog](video-library/previous-works-catalog.json)
 
 ## Production architecture
 - **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
