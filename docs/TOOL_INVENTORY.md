@@ -2,6 +2,10 @@
 
 This document prevents future AI sessions from confusing **a production project that uses a tool** with the complete upstream application/source tree.
 
+## ChatGPT plugin
+
+The private [h2-selfimprove-studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) was created by Plugin Creator from the user's supplied `.plugin` archive. Its contained H2 rig/packs are distinct from the checked-in Remotion project. Exact current release and activation notes: `docs/CHATGPT_PLUGIN.md`.
+
 ## In this GitHub repository
 
 | Component | What is actually present | What is not implied |
