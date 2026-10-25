@@ -1,0 +1,46 @@
+name: Render Remotion video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-projects/remotion/**"
+      - ".github/workflows/render-remotion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: remotion-render-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: video-projects/remotion
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: video-projects/remotion/package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Render MP4
+        run: npm run render
+      - name: Upload rendered video
+        uses: actions/upload-artifact@v4
+        with:
+          name: one-more-scroll-remotion-mp4
+          path: video-projects/remotion/out/one-more-scroll.mp4
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,10 @@
+[
+  {"id":"01","durationSeconds":7.5,"setting":"bedroom","action":"Character scrolls phone in bed","caption":"ONE MORE SCROLL","emotion":"compulsive curiosity","soundCues":["phone vibration","low mystery bed"]},
+  {"id":"02","durationSeconds":7.5,"setting":"void","action":"Phone attention grows; red shadow pulses","caption":"JUST ONE MINUTE","emotion":"temptation","soundCues":["notification","subtle pulse"]},
+  {"id":"03","durationSeconds":7.5,"setting":"calendar","action":"Calendar days pass while character slumps","caption":"THE DAYS DISAPPEAR","emotion":"regret","soundCues":["clock ticks","paper flips"]},
+  {"id":"04","durationSeconds":7.5,"setting":"void","action":"Character stands and chooses to reset","caption":"RESET TO ZERO","emotion":"decision","soundCues":["low impact","short riser"]},
+  {"id":"05","durationSeconds":7.5,"setting":"desk","action":"Character starts one page and puts the phone aside","caption":"START SMALL","emotion":"quiet commitment","soundCues":["page flip","soft click"]},
+  {"id":"06","durationSeconds":7.5,"setting":"stairs","action":"Character walks upward, with visible alternating steps","caption":"SHOW UP AGAIN","emotion":"effort","soundCues":["footsteps","triumphant lift"]},
+  {"id":"07","durationSeconds":7.5,"setting":"hall","action":"A friend enters; characters face one another","caption":"YOU ARE NOT ALONE","emotion":"connection","soundCues":["door open","warm cue"]},
+  {"id":"08","durationSeconds":7.5,"setting":"dawn","action":"Character looks ahead as red shadow fades","caption":"YOUR ATTENTION IS YOUR LIFE","emotion":"agency and hope","soundCues":["warm resolve","intentional breath"]}
+]
