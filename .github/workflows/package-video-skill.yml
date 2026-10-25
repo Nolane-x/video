@@ -15,6 +15,7 @@ on:
       - "docs/VIDEO_PRODUCTION_STATE_SCHEMA.json"
       - "docs/INSTALL_VIDEO_SKILL.md"
       - "docs/CHATGPT_PLUGIN.md"
+      - "integrations/h2-selfimprove-studio/**"
       - "docs/TOOL_INVENTORY.md"
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
@@ -66,6 +67,8 @@ jobs:
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
              docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md docs/CHATGPT_PLUGIN.md bundle/docs/
           cp tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/publish_h2_source_release.ps1 bundle/tools/video/
+          mkdir -p bundle/integrations
+          cp -R integrations/h2-selfimprove-studio bundle/integrations/
           cp video-library/README.md video-library/previous-works-catalog.json bundle/video-library/
           # Carry historical contact sheets/metadata in the portable bundle without duplicating every large MP4.
           if [ -d video-library/previous-works ]; then
@@ -118,6 +121,9 @@ jobs:
             "included_reference_render": "$VIDEO_PATH",
             "included_reference_render_sha256": "$(sha256sum "$VIDEO_PATH" | cut -d ' ' -f1)",
             "includes_original_h2_master": $([ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ] && echo true || echo false),
+            "chatgpt_plugin": "https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0",
+            "includes_h2_selfimprove_studio_source_mirror": true,
+            "h2_source_mirror": "integrations/h2-selfimprove-studio/",
             "prior_work_catalog": "video-library/previous-works-catalog.json",
             "prior_work_video_masters_embedded": false,
             "prior_work_contact_sheets_embedded": $([ -d video-library/previous-works ] && echo true || echo false),
@@ -144,6 +150,8 @@ jobs:
               "tools/video/archive_previous_works.py",
               "tools/video/publish_h2_source_release.ps1",
               "docs/TOOL_INVENTORY.md",
+              "integrations/h2-selfimprove-studio/.codex-plugin/plugin.json",
+              "integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json",
               "video-library/previous-works-catalog.json",
               "video-library/one-more-scroll/manifest.json",
               "video-library/one-more-scroll/h2-source-release.json",
