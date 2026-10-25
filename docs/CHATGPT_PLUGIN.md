@@ -14,6 +14,10 @@
 
 The 51 UTF-8 source files from this plugin release have been copied into `integrations/h2-selfimprove-studio/` in the repository. Start with [MIRROR-NOTES.md](../integrations/h2-selfimprove-studio/MIRROR-NOTES.md) and [SOURCE-MANIFEST.json](../integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json). This makes the H2 kit's source reviewable/versioned on GitHub even though the original `.plugin` archive itself is not committed as a binary.
 
+## GitHub source mirror
+
+The 51 UTF-8 source files from this Plugin Creator release are now mirrored under `integrations/h2-selfimprove-studio/`. See [MIRROR-NOTES.md](../integrations/h2-selfimprove-studio/MIRROR-NOTES.md) and [SOURCE-MANIFEST.json](../integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json). The mirror is versioned in GitHub even though the original `.plugin` archive itself is not committed as a binary.
+
 ## What the plugin contains
 
 The Plugin Creator successfully ingested the supplied archive and reported these principal components:
