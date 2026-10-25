@@ -1,6 +1,6 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-25 after successful render/archive. Verify live GitHub state and Actions before relying on it.
+Snapshot updated 2026-10-25 after successful render/archive and confirmed ChatGPT Plugin Creator update to v1.1.0. Verify live GitHub state and Actions before relying on it.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video
@@ -35,11 +35,11 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - Use for hand-authored expression sheets, props, texture and paintovers. It isn't a render dependency unless a workflow invokes it.
 
 ### H2 SelfImprove Studio plugin and source mirror
-- Private ChatGPT plugin created via Plugin Creator: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), version 1.0.2, release `pluginrel_6ade1c3ecb20819199def25125d2f89a`.
-- 51 UTF-8 source files from that release are mirrored at `integrations/h2-selfimprove-studio/`, including the native H2 renderer entrypoint, rig, `dem` and `doodle` scene packs, skills, procedural audio and utility scripts. See `SOURCE-MANIFEST.json`.
+- **Active private ChatGPT plugin: v1.1.0**, [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), current release `pluginrel_6ade248942988191a57ff1059c818720`; Plugin Creator confirmed `status=updated` on 2026-10-25.
+- GitHub build/validation: [Actions run 40207680206](https://github.com/Nolane-x/video/actions/runs/40207680206) succeeded for source commit `a58ed0a0ca85079435b61ef670fa62531cd7f502`. Plugin ZIP SHA-256: `84993b9eab1d61662cb5859214664b1ac93c1491d9dea6493886df2ab6914917`. [Release result](../integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md).
+- The source mirror at `integrations/h2-selfimprove-studio/` intentionally preserves 51 UTF-8 files from the v1.0.2 base release (`pluginrel_6ade1c3ecb20819199def25125d2f89a`). The v1.1.0 production addendum/references are in `integrations/h2-selfimprove-studio-production-overlay/`; do not relabel the base manifest as v1.1.0.
 - The original `.plugin` archive itself and the original H2 master MP4 are not binary files in Git. The H2 renderer source mirror is in GitHub; native rendering still requires the appropriate runtime/dependencies.
 - This source is distinct from the Remotion project and from the complete upstream Remotion/Blender/Krita applications.
-
 ## Previously delivered H2 master (outside Git history)
 - File: `one-more-scroll-h2-final.mp4`
 - Reported at delivery: about 155 seconds, 1920×1080, 24 fps, H.264 + AAC stereo 48 kHz.
