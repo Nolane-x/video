@@ -2,9 +2,9 @@
 
 ## What's really in this repo
 
-The native H2 SelfImprove Studio plugin source is now mirrored under `integrations/h2-selfimprove-studio/` from Plugin Creator release `pluginrel_6ade1c3ecb20819199def25125d2f89a` (v1.0.2). It contains the H2 skills, renderer scripts, rig, `dem`/`doodle` packs, and procedural audio/helpers. See `integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json`. The original `.plugin` archive itself remains external; its text source files are versioned in the repo.
+The active private H2 SelfImprove Studio ChatGPT plugin is v1.1.0 (release `pluginrel_6ade248942988191a57ff1059c818720`). The 51-file source mirror at `integrations/h2-selfimprove-studio/` intentionally preserves the v1.0.2 base release (`pluginrel_6ade1c3ecb20819199def25125d2f89a`); the production addendum and QA/handoff references for v1.1.0 live in `integrations/h2-selfimprove-studio-production-overlay/`. See `integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json` and `docs/CHATGPT_PLUGIN.md`. The original plugin binary archive remains external; source files and the production overlay are versioned in Git.
 
-The native H2 SelfImprove Studio plugin source has now been mirrored under `integrations/h2-selfimprove-studio/` from Plugin Creator release `pluginrel_6ade1c3ecb20819199def25125d2f89a` (v1.0.2). This includes the H2 skills, renderer scripts, rig, `dem`/`doodle` packs, and procedural audio/helpers. See `integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json`. The `.plugin` binary archive itself remains outside Git; the source files are present.
+
 The repo is `Nolane-x/video`, not a complete copy of all upstream apps or the full H2 source. It contains:
 - Remotion project: `video-projects/remotion`
 - Python music/SFX generators: `video-projects/remotion/h2-audio`
