@@ -812,26 +812,32 @@ const SoundCue: React.FC<{ file: string; from: number; duration: number; volume:
 
 const AudioDesign: React.FC = () => (
   <AbsoluteFill style={{ pointerEvents: "none" }}>
-    {/* H2 music arc: sad -> dark -> intentional silence -> hope -> rise -> resolve. */}
-    <MusicSlice file="bed_sad_Am_64bpm" from={0} duration={360} volume={0.28} />
-    <MusicSlice file="bed_dark_E_drone" from={360} duration={240} volume={0.22} />
-    {/* frames 600-719 are intentionally silent: the choice to put the phone down. */}
-    <MusicSlice file="bed_hope_F_76bpm" from={720} duration={240} volume={0.24} />
-    <MusicSlice file="bed_rise_Am_96bpm" from={960} duration={300} volume={0.25} />
-    <MusicSlice file="bed_resolve_C_70bpm" from={1260} duration={180} volume={0.28} />
+    {/* Full H2 emotional arc for a 155-second film: sad -> dark -> intentional silence -> hope -> rise -> resolve. */}
+    <MusicSlice file="bed_sad_Am_64bpm" from={0} duration={600} volume={0.28} />
+    <MusicSlice file="bed_dark_E_drone" from={600} duration={480} volume={0.22} />
+    {/* Frames 1080-1199 (45-50s) are intentionally silent: the moment the phone is put down. */}
+    <MusicSlice file="bed_hope_F_76bpm" from={1200} duration={600} volume={0.24} />
+    <MusicSlice file="bed_rise_Am_96bpm" from={1800} duration={1320} volume={0.25} />
+    <MusicSlice file="bed_resolve_C_70bpm" from={3120} duration={600} volume={0.28} />
 
-    {/* SFX are tied to the action beats, not sprinkled randomly. */}
+    {/* Action-timed SFX; the sound design tells the story without voice-over. */}
     <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
-    <SoundCue file="notif_msg" from={150} duration={12} volume={0.27} />
-    <SoundCue file="clock_tick" from={364} duration={96} volume={0.23} />
-    <SoundCue file="tempt_whisper" from={493} duration={40} volume={0.22} />
-    <SoundCue file="page_flip" from={672} duration={16} volume={0.26} />
-    <SoundCue file="footsteps" from={736} duration={78} volume={0.28} />
-    <SoundCue file="door_open" from={858} duration={32} volume={0.24} />
-    <SoundCue file="footsteps" from={990} duration={78} volume={0.22} />
-    <SoundCue file="glass_shatter" from={1144} duration={40} volume={0.3} />
-    <SoundCue file="breath_in" from={1210} duration={24} volume={0.24} />
-    <SoundCue file="sting_low" from={1360} duration={72} volume={0.22} />
+    <SoundCue file="notif_msg" from={158} duration={12} volume={0.27} />
+    <SoundCue file="rain_loop" from={250} duration={150} volume={0.12} />
+    <SoundCue file="clock_tick" from={760} duration={120} volume={0.21} />
+    <SoundCue file="tempt_swell" from={920} duration={54} volume={0.17} />
+    <SoundCue file="tempt_whisper" from={1012} duration={40} volume={0.22} />
+    <SoundCue file="page_flip" from={1540} duration={18} volume={0.26} />
+    <SoundCue file="footsteps" from={1840} duration={78} volume={0.27} />
+    <SoundCue file="footsteps" from={2075} duration={78} volume={0.23} />
+    <SoundCue file="punch_bag" from={2200} duration={18} volume={0.34} />
+    <SoundCue file="punch_bag" from={2280} duration={18} volume={0.31} />
+    <SoundCue file="breath_in" from={2355} duration={28} volume={0.22} />
+    <SoundCue file="door_open" from={2675} duration={40} volume={0.23} />
+    <SoundCue file="footsteps" from={2800} duration={78} volume={0.2} />
+    <SoundCue file="glass_shatter" from={3370} duration={42} volume={0.28} />
+    <SoundCue file="breath_in" from={3530} duration={24} volume={0.22} />
+    <SoundCue file="sting_low" from={3615} duration={72} volume={0.22} />
   </AbsoluteFill>
 );
 
