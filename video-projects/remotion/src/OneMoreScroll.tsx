@@ -234,7 +234,7 @@ const Character: React.FC<{x: number; y: number; pose: Pose; t: number; shirt: s
   const mouth = pose === "slump" ? "M-7 -137 Q0 -142 7 -137" : pose === "hero" ? "M-8 -137 Q0 -129 8 -137" : pose === "scroll" ? "M-6 -139 Q0 -137 6 -139" : "M-7 -137 H7";
   const handY = pose === "scroll" ? -70 : pose === "write" ? -50 : pose === "slump" ? -46 : -40;
   return (
-    <svg width="180" height="270" viewBox="-90 -210 180 270" style={{position:"absolute",left:x-90,top:323+y+bob,width:180*scale,height:270*scale,overflow:"visible",transformOrigin:"50% 100%",zIndex:4}}>
+    <svg width="180" height="270" viewBox="-90 -210 180 270" style={{position:"absolute",left:x-90*scale,top:323+y+bob-247*(scale-1),width:180*scale,height:270*scale,overflow:"visible",transformOrigin:"50% 100%",zIndex:4}}>
       {/* Ground contact shadow keeps feet anchored to the environment. */}
       <ellipse cx="0" cy="28" rx={walking?39:32} ry="7" fill="#17151f" opacity=".45"/>
       {/* Legs use a warm outline and a dark inner stroke, matching the reference style. */}
@@ -336,8 +336,8 @@ export const OneMoreScroll: React.FC = () => {
         <ShadowFigure x={ghostX} strength={shot.shadow} frame={frame}/>
         <div style={{position:"absolute",left:0,right:0,bottom:126,height:110,background:"linear-gradient(180deg,transparent,rgba(17,15,22,.16))",pointerEvents:"none"}}/>
         {/* Companion stays behind the protagonist and shares the same ground plane. */}
-        {shot.friend && <Character x={x+236} y={0} pose="meet" t={t} shirt="#6e59bd" scale={.91} companion/>}
-        <Character x={x} y={shot.y} pose={shot.pose} t={t} shirt={shot.shirt}/>
+        {shot.friend && <Character x={x+236} y={0} pose="meet" t={t} shirt="#6e59bd" scale={1.22} companion/>}
+        <Character x={x} y={shot.y} pose={shot.pose} t={t} shirt={shot.shirt} scale={1.45}/>
         {/* A restrained pool of warm light anchors the characters to the street. */}
         <div style={{position:"absolute",left:x-105,top:572,width:210,height:22,borderRadius:"50%",background:"rgba(234,190,145,.08)",filter:"blur(8px)"}}/>
       </div>
