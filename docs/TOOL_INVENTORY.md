@@ -36,3 +36,7 @@ Do not blindly commit the complete upstream Remotion/Blender/Krita source ZIPs i
 ## Prior rendered video assets
 
 See [previous-works-catalog.json](../video-library/previous-works-catalog.json). Each entry distinguishes ChatGPT/session storage from files actually committed in `video-library/previous-works/`. The historical iterations are comparison material, not all approved as final quality. Review their video/contact sheets before reusing them.
+
+To import a downloaded set of previous MP4s, run `tools/video/archive_previous_works.py --source-dir <folder>`; it checks every hash before staging. Commit/push the result and let the “Verify previous AI video assets” workflow finish before calling those files archived.
+
+To preserve the H2 engine/source ZIPs without putting 115 MB files into Git history, run `tools/video/publish_h2_source_release.ps1 -AssetsDir <folder>` from a clone of this repo after downloading the exact files from ChatGPT attachments. It verifies each SHA-256 and uploads them as GitHub Release assets. The script writes a release manifest that must then be committed/pushed. Do not re-upload the full upstream Remotion, Blender or Krita app source archives as part of the H2 release.
