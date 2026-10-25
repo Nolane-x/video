@@ -84,7 +84,7 @@ jobs:
       - name: Normalize final audio
         run: |
           ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 \
-            -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k \
+            -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
             -movflags +faststart out/master.mp4
           mv out/master.mp4 out/one-more-scroll.mp4
 
