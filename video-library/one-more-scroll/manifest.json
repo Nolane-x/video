@@ -1,0 +1,52 @@
+{
+  "title":"ONE MORE SCROLL",
+  "project_id":"one-more-scroll",
+  "creative_target":"cinematic stick-figure self-improvement short film",
+  "canonical_master":{
+    "file_name":"one-more-scroll-h2-final.mp4",
+    "renderer":"H2 Canvas/Chromium pipeline with FFmpeg audio mastering",
+    "duration_seconds":155,
+    "width":1920,
+    "height":1080,
+    "fps":24,
+    "video_codec":"H.264",
+    "audio_codec":"AAC",
+    "audio":"stereo 48 kHz",
+    "integrated_loudness_target_lufs":-14,
+    "reported_true_peak_dbfs":-2.4,
+    "storage_status":"prior ChatGPT attachment; not yet committed as a binary GitHub file or permanent Release asset",
+    "do_not_misrepresent":"This H2 master is not the same file as the repository's Remotion render."
+  },
+  "prior_session_files":[
+    {"file":"one-more-scroll-h2-final.mp4","kind":"master","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-preview-30s.mp4","kind":"preview","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-thumbnail.png","kind":"thumbnail","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-contact-sheet-1.jpg","kind":"contact-sheet shots 1-16","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-contact-sheet-2.jpg","kind":"contact-sheet shots 17-31","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-QA-report.md","kind":"QA report","storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-source.zip","kind":"source","approx_size_bytes":115875783,"storage":"ChatGPT attachment"},
+    {"file":"one-more-scroll-h2-source-v2-scene-fixes.zip","kind":"source with later fixes","approx_size_bytes":115856962,"storage":"ChatGPT attachment; fresh full render not verified"}
+  ],
+  "remotion_project":{
+    "directory":"video-projects/remotion",
+    "composition":"OneMoreScroll",
+    "storyboard":"video-projects/remotion/public/story/shots.json",
+    "source":"video-projects/remotion/src/OneMoreScroll.tsx",
+    "workflow":".github/workflows/render-remotion.yml",
+    "intended_duration_seconds":155,
+    "intended_resolution":"1280x720",
+    "fps":24,
+    "role":"separate reproducible timeline/2D composition pipeline, not the H2 Canvas engine"
+  },
+  "creative_notes":{
+    "character":"near-black round head, light rim, expressive minimal face, slim dark limbs, colored shirt and simple shoes",
+    "world":"distinct interiors/exteriors, layered architecture and props, warm practical light against plum/charcoal shadows",
+    "motion":"anticipation, action, visible contact, follow-through, recovery; feet and hands stay attached to the world",
+    "music_arc":["sad piano","dark drone","intentional silence","hope pad","rising effort","resolution"],
+    "reference_channels":["https://www.youtube.com/@IfverseTales","https://www.youtube.com/@dayonefilmsofficial"]
+  },
+  "known_unverified":[
+    "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render.",
+    "The exact canonical H2 master is not archived as a durable GitHub binary."
+  ]
+}

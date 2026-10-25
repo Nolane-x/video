@@ -1,0 +1,23 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Video Production State",
+  "type":"object",
+  "required":["project_id","updated_at_utc","source_commit","engine","artifacts","known_issues","next_actions"],
+  "properties":{
+    "project_id":{"type":"string"},
+    "updated_at_utc":{"type":"string"},
+    "source_commit":{"type":"string"},
+    "engine":{"enum":["H2 Canvas/Chromium","Remotion","Blender","FFmpeg assembly","mixed","unknown"]},
+    "artifacts":{"type":"array","items":{"type":"object","required":["file_or_url","kind","storage_status"],"properties":{
+      "file_or_url":{"type":"string"},
+      "kind":{"enum":["master","preview","contact-sheet","source","metadata","QA","release","skill"]},
+      "storage_status":{"type":"string"},
+      "sha256":{"type":"string"},
+      "duration_seconds":{"type":"number"},
+      "resolution":{"type":"string"},
+      "fps":{"type":"number"}
+    }}},
+    "known_issues":{"type":"array","items":{"type":"string"}},
+    "next_actions":{"type":"array","items":{"type":"string"}}
+  }
+}

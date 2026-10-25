@@ -1,43 +1,33 @@
 # Nolane Video Studio
 
-Code-first video production workspace for H2 SelfImprove Studio.
+Code-first production workspace for cinematic, story-led YouTube animation.
 
-## Goals
+## Start here for every new AI session
 
-- Use Remotion for timeline, typography, SVG/2D rig animation, composition, and final MP4 rendering.
-- Keep the H2 minimalist character style: simple cream character, charcoal backgrounds, restrained red accent, intentional negative space, and text-driven storytelling.
-- Use Blender only where a scene benefits from 2.5D/3D camera, lighting, or rigged motion.
-- Use Krita for hand-authored character sheets, expressions, props, textures, and paint-over assets.
-- Prefer local/open-source tools and deterministic rendering over paid per-clip AI video generation.
-- Validate output using rendered stills, contact sheets, frame checks, audio checks, and an explicit QA checklist.
+**Read [AGENTS.md](AGENTS.md) first**, then the [Video Production Master skill](.agents/skills/video-production-master/SKILL.md), [current project state](docs/STATE.md), [AI handoff](docs/AI_HANDOFF.md), and [video library](video-library/README.md). These files are the persistent creative and technical memory; don't rely on previous chat history alone.
 
-## Important scope decision
+## Canonical visual direction
+Simple reusable stick-figure characters staged in rich, cinematic environments. Warm practical windows against plum/charcoal shadow; architecture and props; varied shot sizes; motivated camera; visible acting/contact; purposeful sound design. The user rejected generic gradient/flat-SVG output and pseudo-real AI humans.
 
-This repository should store **our own project code, production scripts, configurations, story assets, and setup instructions**. It should not vendor entire upstream Remotion, Blender, or Krita source repositories or commit huge split archives. Install those tools through their official package/install mechanisms instead. This keeps licensing, repository size, updates, and CI manageable.
-
-## Visual direction
-
-The current direction takes high-level inspiration from [Ifverse Tales](https://www.youtube.com/@IfverseTales) and [Day One Films](https://www.youtube.com/@dayonefilmsofficial), while keeping H2's own character and story design. See [docs/ART_DIRECTION_IFVERSE_DAYONE.md](docs/ART_DIRECTION_IFVERSE_DAYONE.md) for the visual brief and acceptance checklist. The character should remain a simple stylized stick-figure; the environment, lighting, composition, camera and actions carry the cinematic quality.
+- [Visual reference analysis](docs/ART_DIRECTION_IFVERSE_DAYONE.md)
+- [Reusable skill](.agents/skills/video-production-master/SKILL.md)
+- [Current state](docs/STATE.md)
+- [Video catalog](video-library/README.md)
 
 ## Production architecture
+- **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
+- **Remotion:** timeline, text, frame-driven composition, compositing and CI. Project: [video-projects/remotion](video-projects/remotion).
+- **Blender:** selected 2.5D/3D shots when depth, camera, light or rigging adds value. [tools/blender](tools/blender).
+- **Krita:** deliberately authored art assets and paintovers. [tools/krita](tools/krita).
+- **FFmpeg/ffprobe:** mastering and technical validation.
 
-1. **Story & art direction** — premise, character bible, shot list, emotional beats, palette, camera intention.
-2. **Asset creation** — SVG/React for deterministic shapes; Krita for hand-authored assets; Blender for selected 2.5D/3D shots.
-3. **Animation** — Remotion frame-driven timeline, explicit keyframes, easing, anticipation, follow-through, and contact checks.
-4. **Audio** — dedicated music/SFX tracks; planned silence where dramaturgically useful; loudness and clipping checks.
-5. **Quality gates** — render a contact sheet, inspect keyframes and transitions, run typecheck/tests, validate MP4 metadata and audio.
-6. **Delivery** — render MP4 and publish it as a GitHub Actions artifact, not as a large binary committed into Git.
+## Important distinction
+The Full HD H2 master previously delivered in ChatGPT is noted in the manifest but is not yet committed as a binary file in this repository. The Remotion pipeline generates a separate reproducible render. Do not conflate engines or claim an asset is archived until its permanent URL/checksum is verified.
 
-## Render pipelines
+## Workflows
+- [Remotion render](.github/workflows/render-remotion.yml) — generates music/SFX, typechecks, renders, masters audio, validates metadata and uploads QA.
+- [Blender proof](.github/workflows/render-blender-preview.yml)
+- [H2 runtime package](.github/workflows/prepare-h2-runtime.yml)
+- [Video Showcase archive](.github/workflows/archive-video-showcase.yml) — creates a tagged Release with Remotion video and skill ZIP when the triggering render commit includes `[archive-video]`.
 
-- **Remotion:** [video-projects/remotion](video-projects/remotion) is the main text/2D animation timeline. Push changes there to start the render workflow; the resulting MP4 is uploaded as a GitHub Actions artifact.
-- **Blender:** [tools/blender](tools/blender) contains an optional headless 2.5D/3D style study. The Blender workflow renders a short proof to an artifact.
-- **Krita:** [tools/krita](tools/krita) documents the hand-authored asset workflow. Krita source files and exports should only be committed when intentionally created and licensed for the project.
-
-## Local setup
-
-See [docs/SETUP.md](docs/SETUP.md), [docs/WORKFLOW.md](docs/WORKFLOW.md), and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md).
-
-## Rights & attribution
-
-Follow each tool's license and only commit assets that we created or are authorized to redistribute. See [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md).
+Large video masters should be kept as Release assets, not ordinary Git blobs. The skill and manifest preserve a distinction between source-only changes, rendered output and visually reviewed output.

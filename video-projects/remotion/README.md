@@ -1,30 +1,24 @@
 # Remotion sample: One More Scroll
 
-This is the first executable Remotion composition in the repository. It is a **silent 60-second motion prototype**, not yet a finished YouTube master: the purpose of this baseline is to prove that real Remotion can typecheck, render on a GitHub-hosted runner, and produce a downloadable MP4 artifact.
+This is the repository's reproducible Remotion composition. It is a separate pipeline from the H2 Canvas/Chromium master, not a relabeling of that file.
 
 ## Local run
-
 ```powershell
 npm install
 npm run typecheck
 npm run dev
 npm run render
 ```
-
 Output: `out/one-more-scroll.mp4`.
 
-## Character and visual direction
+## Current plan
+The data-driven shot plan in `public/story/shots.json` is the source of truth. The current intended plan is 31 shots × 5 seconds = 155 seconds at 24 fps and 1280×720, with procedural H2-style music/SFX generation. Check current JSON and CI logs before relying on these values.
 
-The character is a symbolic mascot (cream round head, slate body, simple eyes and line limbs) rather than a realistic person. The palette is charcoal, warm cream, muted slate, a restrained red temptation accent, and a warmer dawn ending. Eight 7.5-second shots form a 60-second timeline.
+## Required production QA
+- Read root `AGENTS.md` and `.agents/skills/video-production-master/SKILL.md`.
+- Inspect the full contact sheet and moving tests around hard contacts.
+- Check hand/phone and pen/page, cup/mouth, feet/stairs, fist/bag, and shot/crop continuity.
+- Check audio peaks, loudness and intentional-silence segments.
+- A passing export is only a technical gate.
 
-See `public/story/bible.md` for the character rules and `public/story/shots.json` for the shot plan.
-
-## Before using as a published video
-
-- Add approved music and SFX to `public/audio/` and place them on distinct timeline tracks.
-- Replace placeholder actions with reviewed, continuous poses (hand/phone contact, alternating feet on stairs, contact/recovery in action beats).
-- Render and visually inspect a contact sheet, including every shot boundary.
-- Verify voice/caption timing, audio loudness and peaks, final metadata, and license/attribution records.
-- Keep the H2 visual style restrained; don't add realistic human characters or glossy AI gradients by default.
-
-The GitHub Actions job renders this composition and uploads the MP4 as an artifact. Artifact retention is temporary (7 days), so download any render you want to keep.
+The Remotion workflow uploads video/QA as a temporary artifact. A commit message containing `[archive-video]` triggers the archive workflow, which copies the resulting Remotion render and the skill ZIP to a permanent GitHub Release. That release is still not the original H2 Canvas/Chromium master.

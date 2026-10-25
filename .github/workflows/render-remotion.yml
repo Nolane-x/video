@@ -117,4 +117,4 @@ jobs:
             video-projects/remotion/out/metadata.json
             video-projects/remotion/out/audio-loudness.txt
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90

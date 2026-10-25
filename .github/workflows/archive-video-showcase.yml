@@ -1,0 +1,79 @@
+name: Archive video and production skill
+
+on:
+  workflow_run:
+    workflows: ["Render Remotion video"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && contains(github.event.workflow_run.head_commit.message, '[archive-video]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact render commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Download render and QA outputs from the successful run
+        uses: actions/download-artifact@v7
+        with:
+          name: one-more-scroll-remotion-mp4
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: downloaded
+
+      - name: Prepare release contents
+        id: prep
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          VIDEO="$(find downloaded -type f -name 'one-more-scroll.mp4' -print -quit)"
+          SHEETS="$(find downloaded -type f -name 'contact-sheet-shots.jpg' -print -quit)"
+          OVERVIEW="$(find downloaded -type f -name 'contact-sheet-overview.jpg' -print -quit)"
+          META="$(find downloaded -type f -name 'metadata.json' -print -quit)"
+          LOUDNESS="$(find downloaded -type f -name 'audio-loudness.txt' -print -quit)"
+          test -n "$VIDEO" && test -s "$VIDEO"
+          test -n "$SHEETS" && test -s "$SHEETS"
+          test -n "$META" && test -s "$META"
+          cp "$VIDEO" release/one-more-scroll-remotion-master.mp4
+          cp "$SHEETS" release/contact-sheet-shots.jpg
+          [ -z "$OVERVIEW" ] || cp "$OVERVIEW" release/contact-sheet-overview.jpg
+          cp "$META" release/metadata.json
+          [ -z "$LOUDNESS" ] || cp "$LOUDNESS" release/audio-loudness.txt
+          zip -qr release/video-production-master-skill.zip \
+            AGENTS.md .agents/skills/video-production-master docs/STATE.md docs/AI_HANDOFF.md \
+            docs/ART_DIRECTION_IFVERSE_DAYONE.md video-library
+          sha256sum release/one-more-scroll-remotion-master.mp4 \
+            release/contact-sheet-shots.jpg release/video-production-master-skill.zip \
+            | tee release/SHA256SUMS.txt
+          echo "tag=showcase-remotion-${{ github.event.workflow_run.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "source_sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create a source-pinned Git tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git tag "${{ steps.prep.outputs.tag }}" "${{ steps.prep.outputs.source_sha }}"
+          git push origin "${{ steps.prep.outputs.tag }}"
+
+      - name: Publish permanent release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.prep.outputs.tag }}" \
+            release/one-more-scroll-remotion-master.mp4#one-more-scroll-remotion-master.mp4 \
+            release/contact-sheet-shots.jpg#contact-sheet-shots.jpg \
+            release/contact-sheet-overview.jpg#contact-sheet-overview.jpg \
+            release/metadata.json#metadata.json \
+            release/audio-loudness.txt#audio-loudness.txt \
+            release/video-production-master-skill.zip#video-production-master-skill.zip \
+            release/SHA256SUMS.txt#SHA256SUMS.txt \
+            --title "ONE MORE SCROLL — Remotion render + production skill" \
+            --notes "Reproducible Remotion output and production skill pinned to source commit ${{ github.event.workflow_run.head_sha }}. This is the repository's Remotion render, not the separately delivered H2 Canvas/Chromium master."
