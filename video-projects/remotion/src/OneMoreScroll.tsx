@@ -1,9 +1,12 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Audio,
   Easing,
   interpolate,
+  Sequence,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -656,6 +659,50 @@ const Caption: React.FC<{ title: string; subtitle: string; t: number; isEnd: boo
   );
 };
 
+
+const MusicSlice: React.FC<{ file: string; from: number; duration: number; volume: number }> = ({ file, from, duration, volume }) => (
+  <Sequence from={from} durationInFrames={duration}>
+    <Audio
+      src={staticFile("audio/" + file + ".wav")}
+      volume={(f) => volume * clampInterp(f, [0, 18, Math.max(19, duration - 18), duration], [0, 1, 1, 0])}
+    />
+  </Sequence>
+);
+
+const SoundCue: React.FC<{ file: string; from: number; duration: number; volume: number }> = ({ file, from, duration, volume }) => (
+  <Sequence from={from} durationInFrames={duration}>
+    <Audio
+      src={staticFile("audio/" + file + ".wav")}
+      volume={(f) => volume * clampInterp(f, [0, Math.min(3, duration - 1), Math.max(4, duration - 3), duration], [0, 1, 1, 0])}
+    />
+  </Sequence>
+);
+
+const AudioDesign: React.FC = () => (
+  <AbsoluteFill style={{ pointerEvents: "none" }}>
+    {/* H2 music arc: sad -> dark -> intentional silence -> hope -> rise -> resolve. */}
+    <MusicSlice file="bed_sad_Am_64bpm" from={0} duration={360} volume={0.28} />
+    <MusicSlice file="bed_dark_E_drone" from={360} duration={240} volume={0.22} />
+    {/* frames 600-719 are intentionally silent: the choice to put the phone down. */}
+    <MusicSlice file="bed_hope_F_76bpm" from={720} duration={240} volume={0.24} />
+    <MusicSlice file="bed_rise_Am_96bpm" from={960} duration={300} volume={0.25} />
+    <MusicSlice file="bed_resolve_C_70bpm" from={1260} duration={180} volume={0.28} />
+
+    {/* SFX are tied to the action beats, not sprinkled randomly. */}
+    <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
+    <SoundCue file="notif_msg" from={150} duration={12} volume={0.27} />
+    <SoundCue file="clock_tick" from={364} duration={96} volume={0.23} />
+    <SoundCue file="tempt_whisper" from={493} duration={40} volume={0.22} />
+    <SoundCue file="page_flip" from={672} duration={16} volume={0.26} />
+    <SoundCue file="footsteps" from={736} duration={78} volume={0.28} />
+    <SoundCue file="door_open" from={858} duration={32} volume={0.24} />
+    <SoundCue file="footsteps" from={990} duration={78} volume={0.22} />
+    <SoundCue file="glass_shatter" from={1144} duration={40} volume={0.3} />
+    <SoundCue file="breath_in" from={1210} duration={24} volume={0.24} />
+    <SoundCue file="sting_low" from={1360} duration={72} volume={0.22} />
+  </AbsoluteFill>
+);
+
 export const OneMoreScroll: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -742,6 +789,7 @@ export const OneMoreScroll: React.FC = () => {
       </>}
 
       <Caption title={shot.title} subtitle={shot.subtitle} t={t} isEnd={isEnd} />
+      <AudioDesign />
       <div style={{ position: "absolute", inset: 0, backgroundColor: "#100e16", opacity: 1 - visibility, pointerEvents: "none", zIndex: 30 }} />
     </AbsoluteFill>
   );
