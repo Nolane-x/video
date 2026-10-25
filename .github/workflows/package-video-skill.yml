@@ -13,8 +13,12 @@ on:
       - "docs/ART_DIRECTION_IFVERSE_DAYONE.md"
       - "docs/VIDEO_PRODUCTION_STATE_SCHEMA.json"
       - "docs/INSTALL_VIDEO_SKILL.md"
+      - "docs/TOOL_INVENTORY.md"
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
+      - "tools/video/archive_previous_works.py"
+      - ".github/workflows/verify-previous-works.yml"
+      - "video-library/previous-works-catalog.json"
       - ".github/workflows/verify-archive-h2-master.yml"
       - "video-library/README.md"
       - "video-library/one-more-scroll/**"
@@ -29,7 +33,9 @@ on:
       - "video-library/one-more-scroll/renders/**/one-more-scroll-remotion-master.mp4"
       - ".github/workflows/package-video-skill.yml"
   workflow_run:
-    workflows: ["Verify archived H2 master"]
+    workflows:
+      - "Verify archived H2 master"
+      - "Verify previous AI video assets"
     types: [completed]
   workflow_dispatch:
 
@@ -59,9 +65,16 @@ jobs:
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
-             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md bundle/docs/
-          cp tools/video/validate_story.py tools/video/archive_h2_master.py bundle/tools/video/
-          cp video-library/README.md bundle/video-library/
+             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md bundle/docs/
+          cp tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py bundle/tools/video/
+          cp video-library/README.md video-library/previous-works-catalog.json bundle/video-library/
+          # Carry historical contact sheets/metadata in the portable bundle without duplicating every large MP4.
+          if [ -d video-library/previous-works ]; then
+            while IFS= read -r -d '' file; do
+              mkdir -p "bundle/$(dirname "$file")"
+              cp "$file" "bundle/$file"
+            done < <(find video-library/previous-works -type f \( -name 'contact-sheet.jpg' -o -name 'overview-sheet.jpg' -o -name 'metadata.json' -o -name '*.sha256' \) -print0)
+          fi
           mkdir -p bundle/video-library/one-more-scroll
           cp video-library/one-more-scroll/README.md \
              video-library/one-more-scroll/manifest.json \
@@ -101,7 +114,10 @@ jobs:
             "included_reference_render": "$VIDEO_PATH",
             "included_reference_render_sha256": "$(sha256sum "$VIDEO_PATH" | cut -d ' ' -f1)",
             "includes_original_h2_master": $([ -s video-library/one-more-scroll/one-more-scroll-h2-final.mp4 ] && echo true || echo false),
-            "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py"],
+            "prior_work_catalog": "video-library/previous-works-catalog.json",
+            "prior_work_video_masters_embedded": false,
+            "prior_work_contact_sheets_embedded": $([ -d video-library/previous-works ] && echo true || echo false),
+            "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py", "tools/video/archive_previous_works.py"],
             "important": "The included Remotion render is not the original H2 Canvas/Chromium master. The full upstream Remotion, Blender and Krita application source trees are not vendored."
           }
           JSON
@@ -120,6 +136,9 @@ jobs:
               "tools/blender/render_h2_stage.py",
               "tools/krita/README.md",
               "tools/video/archive_h2_master.py",
+              "tools/video/archive_previous_works.py",
+              "docs/TOOL_INVENTORY.md",
+              "video-library/previous-works-catalog.json",
               "video-library/one-more-scroll/manifest.json",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
