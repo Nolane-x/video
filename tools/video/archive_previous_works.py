@@ -2,7 +2,7 @@
 """Stage prior AI video outputs into the video library with exact SHA-256 checks.
 
 Example (PowerShell):
-  python tools/video/archive_previous_works.py --source-dir "$env:USERPROFILE\Downloads\video-previous-works-import-pack\assets"
+  python tools/video/archive_previous_works.py --source-dir "$env:USERPROFILE\\Downloads\\video-previous-works-import-pack\\assets"
 
 This copies only catalog entries with archive_enabled=true. It never reports remote archival:
 the user must commit/push the staged files, then Verify previous AI video assets validates them on GitHub.
