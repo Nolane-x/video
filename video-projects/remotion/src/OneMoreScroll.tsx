@@ -11,7 +11,7 @@ import {
   useVideoConfig,
 } from "remotion";
 
-type Pose = "scroll" | "slump" | "stand" | "walk" | "write" | "meet" | "hero" | "tired";
+type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer";
 type Setting =
   | "bedroom" | "phone" | "street" | "calendar" | "mirror" | "desk"
   | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end";
@@ -45,95 +45,38 @@ type Shot = {
 const FPS = 24;
 const SHOT_FRAMES = 120;
 const shots: Shot[] = [
-  {
-    title: "ONE MORE SCROLL",
-    subtitle: "It starts with one small decision.",
-    setting: "bedroom", pose: "scroll", x0: 760, x1: 760, y0: -60, y1: -60,
-    scale: 1.28, shirt: "#c56d9b", shadow: 0.48, shadowX: 970,
-    zoom0: 1.0, zoom1: 1.08, pan0: 10, pan1: -8, phone: true, dip: true,
-  },
-  {
-    title: "JUST ONE MINUTE",
-    subtitle: "The next scroll never feels like the last.",
-    setting: "phone", pose: "scroll", x0: 885, x1: 870, y0: 0, y1: 0,
-    scale: 1.12, shirt: "#c56d9b", shadow: 0.74, shadowX: 1035,
-    zoom0: 1.0, zoom1: 1.12, pan0: 14, pan1: -8, phone: true,
-    redWords: ["ONE MORE", "LATER"],
-  },
-  {
-    title: "TIME DOESN'T WAIT",
-    subtitle: "The world keeps moving around you.",
-    setting: "street", pose: "walk", x0: 235, x1: 985, y0: 0, y1: 0,
-    scale: 1.08, shirt: "#c56d9b", shadow: 0.79, shadowX: 965,
-    zoom0: 1.0, zoom1: 1.055, pan0: 24, pan1: -34, phone: true,
-    redWords: ["SCROLL"],
-  },
-  {
-    title: "THE DAYS DISAPPEAR",
-    subtitle: "One day becomes a habit.",
-    setting: "calendar", pose: "slump", x0: 300, x1: 282, y0: 0, y1: 8,
-    scale: 1.18, shirt: "#c56d9b", shadow: 0.68, shadowX: 1010,
-    zoom0: 1.0, zoom1: 1.13, pan0: -4, pan1: -24, day: "DAY 07", dip: true,
-  },
-  {
-    title: "THE SHADOW GROWS",
-    subtitle: "What you feed begins to follow you.",
-    setting: "mirror", pose: "tired", x0: 425, x1: 410, y0: 0, y1: 0,
-    scale: 1.42, shirt: "#c56d9b", shadow: 0.98, shadowX: 850,
-    zoom0: 1.0, zoom1: 1.14, pan0: 0, pan1: -18,
-    redWords: ["TOMORROW", "ONE MORE", "LATER"],
-  },
-  {
-    title: "PUT IT DOWN",
-    subtitle: "Make room for one small thing.",
-    setting: "desk", pose: "write", x0: 735, x1: 735, y0: -8, y1: -8,
-    scale: 1.27, shirt: "#c56d9b", shadow: 0.36, shadowX: 1000,
-    zoom0: 1.0, zoom1: 1.06, pan0: 2, pan1: -10, phoneOnDesk: true, dip: true,
-  },
-  {
-    title: "START SMALL",
-    subtitle: "One step is still progress.",
-    setting: "stairs", pose: "walk", x0: 245, x1: 855, y0: 10, y1: -82,
-    scale: 1.1, shirt: "#c56d9b", shadow: 0.25, shadowX: 1030,
-    zoom0: 1.0, zoom1: 1.075, pan0: 10, pan1: -18, day: "DAY 01",
-  },
-  {
-    title: "LOOK UP",
-    subtitle: "The people beside you matter.",
-    setting: "cafe", pose: "meet", x0: 445, x1: 460, y0: 0, y1: 0,
-    scale: 1.16, shirt: "#c56d9b", shadow: 0.14, shadowX: 1020,
-    zoom0: 1.0, zoom1: 1.045, pan0: -3, pan1: -8, friend: true, dip: true,
-  },
-  {
-    title: "SHOW UP AGAIN",
-    subtitle: "Return to the things that make you human.",
-    setting: "bus", pose: "walk", x0: 365, x1: 760, y0: 0, y1: 0,
-    scale: 1.04, shirt: "#c56d9b", shadow: 0.1, shadowX: 1010,
-    zoom0: 1.0, zoom1: 1.035, pan0: 16, pan1: -25, friend: true,
-  },
-  {
-    title: "CHOOSE AGAIN",
-    subtitle: "You can interrupt the loop.",
-    setting: "void", pose: "stand", x0: 650, x1: 650, y0: 0, y1: 0,
-    scale: 1.42, shirt: "#c56d9b", shadow: 0.18, shadowX: 900,
-    zoom0: 1.04, zoom1: 1.16, pan0: 0, pan1: -10,
-    redWords: ["NOT TODAY", "ONE STEP"], dip: true,
-  },
-  {
-    title: "A DIFFERENT DIRECTION",
-    subtitle: "Tomorrow begins with this moment.",
-    setting: "dawn", pose: "walk", x0: 500, x1: 790, y0: 0, y1: -10,
-    scale: 1.18, shirt: "#c56d9b", shadow: 0.035, shadowX: 1050,
-    zoom0: 1.0, zoom1: 1.055, pan0: 12, pan1: -14,
-  },
-  {
-    title: "YOUR ATTENTION IS YOUR LIFE",
-    subtitle: "Choose where it goes.",
-    setting: "end", pose: "hero", x0: 640, x1: 640, y0: 0, y1: 0,
-    scale: 0.88, shirt: "#c56d9b", shadow: 0.0, shadowX: 900,
-    zoom0: 1.0, zoom1: 1.0, pan0: 0, pan1: 0, dip: true,
-  },
-];
+  {title:"ONE MORE SCROLL",subtitle:"It starts with one small decision.",setting:"bedroom",pose:"scroll",x0:760,x1:760,y0:-60,y1:-60,scale:1.28,shirt:"#c56d9b",shadow:.48,shadowX:970,zoom0:1,zoom1:1.08,pan0:10,pan1:-8,phone:true,dip:true},
+  {title:"THE NEXT THING",subtitle:"The feed always has one more thing.",setting:"phone",pose:"scroll",x0:885,x1:870,y0:0,y1:0,scale:1.12,shirt:"#c56d9b",shadow:.74,shadowX:1035,zoom0:1,zoom1:1.12,pan0:14,pan1:-8,phone:true,redWords:["ONE MORE","LATER"]},
+  {title:"WALKING, BUT NOT HERE",subtitle:"Your body moves. Your attention stays behind.",setting:"street",pose:"walk",x0:235,x1:985,y0:0,y1:0,scale:1.08,shirt:"#c56d9b",shadow:.79,shadowX:965,zoom0:1,zoom1:1.055,pan0:24,pan1:-34,phone:true,redWords:["SCROLL"]},
+  {title:"WAITING FOR NOTHING",subtitle:"You don't notice the world passing.",setting:"busStop",pose:"tired",x0:425,x1:420,y0:0,y1:0,scale:1.13,shirt:"#c56d9b",shadow:.68,shadowX:1000,zoom0:1,zoom1:1.09,pan0:2,pan1:-14,phone:true,day:"DAY 03"},
+  {title:"EVERYONE ELSE IS THERE",subtitle:"A room full of people can still feel empty.",setting:"classroom",pose:"scroll",x0:745,x1:745,y0:0,y1:0,scale:1.03,shirt:"#c56d9b",shadow:.62,shadowX:1035,zoom0:1,zoom1:1.06,pan0:8,pan1:-5,phone:true},
+  {title:"JUST FIVE MORE MINUTES",subtitle:"And then the night is gone.",setting:"bedroom",pose:"scroll",x0:810,x1:810,y0:-54,y1:-54,scale:1.32,shirt:"#c56d9b",shadow:.79,shadowX:955,zoom0:1.02,zoom1:1.14,pan0:0,pan1:-10,phone:true},
+  {title:"THE DAYS DISAPPEAR",subtitle:"One day becomes a habit.",setting:"calendar",pose:"slump",x0:290,x1:275,y0:0,y1:8,scale:1.18,shirt:"#c56d9b",shadow:.69,shadowX:1000,zoom0:1,zoom1:1.13,pan0:-4,pan1:-24,day:"DAY 07",dip:true},
+  {title:"THE MORNING AFTER",subtitle:"You promise it will be different tonight.",setting:"bathroom",pose:"tired",x0:450,x1:448,y0:0,y1:0,scale:1.24,shirt:"#c56d9b",shadow:.58,shadowX:900,zoom0:1,zoom1:1.09,pan0:0,pan1:-8,day:"6:12 AM"},
+  {title:"THE SHADOW GROWS",subtitle:"What you feed begins to follow you.",setting:"mirror",pose:"tired",x0:420,x1:410,y0:0,y1:0,scale:1.4,shirt:"#c56d9b",shadow:.98,shadowX:850,zoom0:1,zoom1:1.14,pan0:0,pan1:-18,redWords:["TOMORROW","ONE MORE","LATER"]},
+  {title:"IT KNOWS YOUR NAME",subtitle:"The voice starts sounding like your own.",setting:"mirror",pose:"slump",x0:470,x1:466,y0:0,y1:0,scale:1.56,shirt:"#c56d9b",shadow:.98,shadowX:830,zoom0:1.04,zoom1:1.18,pan0:0,pan1:-9,redWords:["NOT ENOUGH","LATER"]},
+  {title:"THE LOOP",subtitle:"Scroll. Regret. Promise. Repeat.",setting:"void",pose:"slump",x0:640,x1:640,y0:0,y1:0,scale:1.36,shirt:"#c56d9b",shadow:.95,shadowX:900,zoom0:1.03,zoom1:1.16,pan0:0,pan1:-9,redWords:["ONE MORE","TOMORROW","JUST ONCE","LATER"]},
+  {title:"NO BIG SPEECH",subtitle:"The change begins quietly.",setting:"phone",pose:"stand",x0:640,x1:640,y0:0,y1:0,scale:1.12,shirt:"#c56d9b",shadow:.48,shadowX:915,zoom0:1.06,zoom1:1.03,pan0:0,pan1:0,phone:true,dip:true},
+  {title:"PUT IT DOWN",subtitle:"Let the silence last a second.",setting:"bedroom",pose:"stand",x0:760,x1:720,y0:-6,y1:0,scale:1.18,shirt:"#c56d9b",shadow:.37,shadowX:1000,zoom0:1.06,zoom1:1,pan0:0,pan1:4,phoneOnDesk:true,dip:true},
+  {title:"START WITH ONE PAGE",subtitle:"Not a new life. One small action.",setting:"desk",pose:"write",x0:720,x1:715,y0:-8,y1:-8,scale:1.27,shirt:"#c56d9b",shadow:.34,shadowX:1000,zoom0:1,zoom1:1.08,pan0:2,pan1:-10,phoneOnDesk:true},
+  {title:"ONE LINE AT A TIME",subtitle:"You don't need to feel ready.",setting:"desk",pose:"write",x0:730,x1:730,y0:-8,y1:-8,scale:1.38,shirt:"#c56d9b",shadow:.27,shadowX:1040,zoom0:1.08,zoom1:1.18,pan0:-2,pan1:-14,phoneOnDesk:true,redWords:["BEGIN"]},
+  {title:"MAKE SPACE",subtitle:"Water. Air. A little movement.",setting:"kitchen",pose:"drink",x0:540,x1:555,y0:0,y1:0,scale:1.2,shirt:"#c56d9b",shadow:.23,shadowX:1000,zoom0:1,zoom1:1.06,pan0:0,pan1:-10},
+  {title:"TIE YOUR SHOES",subtitle:"The first step can be very small.",setting:"bedroom",pose:"tie",x0:565,x1:570,y0:20,y1:20,scale:1.22,shirt:"#c56d9b",shadow:.2,shadowX:1000,zoom0:1.04,zoom1:1.12,pan0:0,pan1:-4,day:"DAY 01"},
+  {title:"SHOW UP AGAIN",subtitle:"Progress is a direction, not a streak.",setting:"stairs",pose:"walk",x0:245,x1:855,y0:10,y1:-82,scale:1.1,shirt:"#d7a56d",shadow:.25,shadowX:1030,zoom0:1,zoom1:1.075,pan0:10,pan1:-18,day:"DAY 02"},
+  {title:"MOVE THROUGH THE FEELING",subtitle:"You can be tired and still begin.",setting:"park",pose:"walk",x0:240,x1:930,y0:0,y1:-4,scale:1.12,shirt:"#d7a56d",shadow:.21,shadowX:1040,zoom0:1,zoom1:1.055,pan0:22,pan1:-26},
+  {title:"MISS. RESET. TRY AGAIN.",subtitle:"Discipline is a practice, not a pose.",setting:"gym",pose:"punch",x0:610,x1:635,y0:0,y1:0,scale:1.25,shirt:"#d7a56d",shadow:.18,shadowX:1010,zoom0:1,zoom1:1.12,pan0:0,pan1:-9},
+  {title:"ONE MORE REP",subtitle:"Let your actions speak first.",setting:"gym",pose:"punch",x0:565,x1:590,y0:0,y1:0,scale:1.36,shirt:"#d7a56d",shadow:.12,shadowX:1030,zoom0:1.04,zoom1:1.16,pan0:0,pan1:-12},
+  {title:"LOOK UP",subtitle:"There is a world beyond the screen.",setting:"street",pose:"stand",x0:390,x1:410,y0:0,y1:0,scale:1.2,shirt:"#d7a56d",shadow:.09,shadowX:1050,zoom0:1.04,zoom1:1.1,pan0:0,pan1:-8,dip:true},
+  {title:"YOU ARE NOT ALONE",subtitle:"Some things become lighter when shared.",setting:"cafe",pose:"meet",x0:440,x1:458,y0:0,y1:0,scale:1.16,shirt:"#d7a56d",shadow:.12,shadowX:1010,zoom0:1,zoom1:1.045,pan0:-3,pan1:-8,friend:true,dip:true},
+  {title:"LISTEN",subtitle:"A real conversation pulls you back.",setting:"cafe",pose:"listen",x0:465,x1:465,y0:0,y1:0,scale:1.26,shirt:"#d7a56d",shadow:.08,shadowX:1040,zoom0:1.05,zoom1:1.13,pan0:0,pan1:-8,friend:true},
+  {title:"BE WHERE YOUR FEET ARE",subtitle:"Notice the people around you.",setting:"bus",pose:"walk",x0:340,x1:800,y0:0,y1:0,scale:1.05,shirt:"#d7a56d",shadow:.08,shadowX:1030,zoom0:1,zoom1:1.04,pan0:16,pan1:-25,friend:true},
+  {title:"PROTECT THE FIRST HOUR",subtitle:"Your attention belongs to you.",setting:"library",pose:"write",x0:730,x1:730,y0:0,y1:0,scale:1.2,shirt:"#d7a56d",shadow:.06,shadowX:1030,zoom0:1,zoom1:1.08,pan0:0,pan1:-7,day:"DAY 14"},
+  {title:"THE DAYS ADD UP",subtitle:"Small choices leave a mark.",setting:"calendar",pose:"stand",x0:310,x1:310,y0:0,y1:0,scale:1.08,shirt:"#d7a56d",shadow:.05,shadowX:1030,zoom0:1,zoom1:1.06,pan0:0,pan1:-8,day:"DAY 21"},
+  {title:"THE SHADOW SHRINKS",subtitle:"You don't have to obey every urge.",setting:"mirror",pose:"hero",x0:430,x1:448,y0:0,y1:0,scale:1.4,shirt:"#d7a56d",shadow:.07,shadowX:920,zoom0:1.05,zoom1:1.13,pan0:0,pan1:-8,redWords:["LATER"]},
+  {title:"A LIFE OUTSIDE THE LOOP",subtitle:"The world was here the whole time.",setting:"park",pose:"meet",x0:470,x1:485,y0:0,y1:0,scale:1.13,shirt:"#d7a56d",shadow:.025,shadowX:1100,zoom0:1,zoom1:1.06,pan0:5,pan1:-12,friend:true},
+  {title:"A DIFFERENT DIRECTION",subtitle:"Tomorrow begins with this moment.",setting:"dawn",pose:"walk",x0:450,x1:820,y0:0,y1:-10,scale:1.18,shirt:"#d7a56d",shadow:.018,shadowX:1100,zoom0:1,zoom1:1.055,pan0:12,pan1:-14},
+  {title:"YOUR ATTENTION IS YOUR LIFE",subtitle:"Choose where it goes.",setting:"end",pose:"hero",x0:640,x1:640,y0:0,y1:0,scale:.88,shirt:"#d7a56d",shadow:0,shadowX:900,zoom0:1,zoom1:1,pan0:0,pan1:0,dip:true},
+];;
 
 const clampInterp = (v: number, input: number[], output: number[]) =>
   interpolate(v, input, output, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
