@@ -71,3 +71,11 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 3. Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but this archive turn did not sign off the video on artistic criteria. Consider an audio-only remaster because measured true peak is -1.2 dBFS, slightly above the conservative -1.5 dBTP target.
 4. Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.
+
+
+## Latest archived Remotion render — run 36
+- MP4: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`
+- Source commit: `e766c5f407cf4bbd175c28d306acc99c6d8aa609`; CI: [40200152650](https://github.com/Nolane-x/video/actions/runs/40200152650).
+- SHA-256: `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`; duration 155.100s; 1280x720 at 24/1.
+- Audio measurement: -14.5 LUFS integrated; true peak -2.3 dBFS.
+- Technical gates passed; contact sheets are available. Do not claim manual visual sign-off unless completed separately.

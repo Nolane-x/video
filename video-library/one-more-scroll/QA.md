@@ -37,3 +37,13 @@ The delivered master and later source-v2 are different versions. The prior maste
 - Audio measurement: -14.5 LUFS integrated, 7.2 LU LRA, true peak reported -1.2 dBFS. The last value is 0.3 dB higher than the conservative target; consider a remaster if publishing.
 - Full shot sheet: `renders/remotion-run-31/contact-sheet-shots.jpg`; overview: `renders/remotion-run-31/contact-sheet-overview.jpg`.
 - **Do not label this as the H2 master.** A fresh visual/motion review is still needed before calling it a visually approved master.
+
+
+## Latest archived Remotion render — run 36
+- MP4: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`
+- Source commit: `e766c5f407cf4bbd175c28d306acc99c6d8aa609`
+- Render CI: [40200152650](https://github.com/Nolane-x/video/actions/runs/40200152650)
+- SHA-256: `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765` (17,447,061 bytes)
+- Technical metadata: 155.100s, 1280x720, 24/1, h264 + aac.
+- Measured audio: -14.5 LUFS integrated; true peak -2.3 dBFS.
+- Contact sheets were generated; visual/artistic sign-off is not inferred from CI success.
