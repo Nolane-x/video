@@ -120,30 +120,30 @@ def main() -> int:
             item["repository_path"] = master["repository_path"]
             item["sha256"] = sha
             item["size_bytes"] = size
-    manifest.setdefault("archived_h2_master", {})
-    manifest["archived_h2_master"] = {
+    manifest.pop("archived_h2_master", None)
+    manifest["pending_h2_master_archive"] = {
         "repository_path": master["repository_path"],
         "sha256": sha,
         "size_bytes": size,
-        "imported_by": "tools/video/archive_h2_master.py",
+        "prepared_by": "tools/video/archive_h2_master.py",
+        "status": "validated and staged locally; awaiting push and remote verification",
         "note": "Original H2 Canvas/Chromium master; keep separate from the Remotion render."
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     # Update QA with import/probe evidence while leaving visual sign-off explicit.
     qa_text = QA.read_text(encoding="utf-8") if QA.exists() else ""
-    if "Exact H2 master imported into GitHub" not in qa_text:
+    if "H2 master validated locally for archive" not in qa_text:
         qa_text += (
-            "\n\n## Exact H2 master imported into GitHub\n"
-            f"- Repository path: {master['repository_path']}\n"
+            "\n\n## H2 master validated locally for archive (not yet remote)\n"
+            f"- Intended repository path: {master['repository_path']}\n"
             f"- SHA-256: {sha}\n"
             f"- Size: {size:,} bytes\n"
             f"- ffprobe: {duration:.3f}s, 1920x1080, 24 fps, H.264 + AAC stereo 48 kHz.\n"
-            "- Contact sheets were generated. This confirms import/integrity, not artistic sign-off; inspect the previously noted face, shoe-tying and staircase issues.\n"
+            "- Contact sheets were generated. This is a local integrity check, not proof of GitHub upload or artistic sign-off. Commit and push the staged files; the GitHub verification workflow then records the remote archive status.\n"
         )
     QA.write_text(qa_text, encoding="utf-8")
 
-    # Remove stale "not archived" state text and replace it with the newly verified location.
     # Stage the intended files without claiming they are remote before a push.
     staged_paths = [
         str(DEST.relative_to(REPO_ROOT)),
