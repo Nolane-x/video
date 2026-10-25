@@ -32,3 +32,8 @@ A render commit with `[archive-video]` in its commit message triggers the archiv
 ## Prior-work preservation
 
 The current reference render is embedded in `video-library/one-more-scroll/renders/`. Older iterations are indexed in `video-library/previous-works-catalog.json`. A later AI must check whether an entry is a committed repository file, a GitHub Release asset, or only an attachment from an older ChatGPT session. Don't claim to have watched a video if only its catalog entry/contact sheet was available.
+
+
+## Archive verification checkpoint
+
+The next render from this source is intended to be a durable reference output. A successful render run whose commit message includes `[archive-video]` should be followed by the archive workflow, which stores the render/contact sheets/metadata in `video-library/one-more-scroll/renders/`. That stored Remotion file remains distinct from the original H2 Canvas/Chromium master.
