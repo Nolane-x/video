@@ -1,0 +1,202 @@
+name: Verify archived H2 master
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-h2-master
+  cancel-in-progress: false
+
+jobs:
+  verify-and-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Install FFmpeg tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Verify exact H2 master and update metadata
+        env:
+          VERIFY_RUN_ID: ${{ github.run_id }}
+          VERIFY_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+
+          video = Path("video-library/one-more-scroll/one-more-scroll-h2-final.mp4")
+          expected_sha = "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f"
+          expected_size = 31_547_778
+          if not video.is_file():
+              raise SystemExit(f"Missing H2 master: {video}")
+          size = video.stat().st_size
+          h = hashlib.sha256()
+          with video.open("rb") as stream:
+              for block in iter(lambda: stream.read(1024 * 1024), b""):
+                  h.update(block)
+          sha = h.hexdigest()
+          if size != expected_size:
+              raise SystemExit(f"Unexpected H2 master size: {size}; expected {expected_size}")
+          if sha != expected_sha:
+              raise SystemExit(f"Canonical H2 SHA-256 mismatch: {sha}")
+
+          probe = json.loads(subprocess.check_output([
+              "ffprobe", "-v", "error", "-show_entries",
+              "format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels",
+              "-of", "json", str(video)
+          ], text=True))
+          streams = probe.get("streams", [])
+          v = next((x for x in streams if x.get("codec_type") == "video"), None)
+          a = next((x for x in streams if x.get("codec_type") == "audio"), None)
+          duration = float(probe.get("format", {}).get("duration", 0))
+          if not v or not a:
+              raise SystemExit("Canonical H2 master must contain video and audio")
+          if (v.get("codec_name"), v.get("width"), v.get("height"), v.get("r_frame_rate")) != ("h264", 1920, 1080, "24/1"):
+              raise SystemExit(f"Unexpected video stream: {v}")
+          if (a.get("codec_name"), a.get("sample_rate"), a.get("channels")) != ("aac", "48000", 2):
+              raise SystemExit(f"Unexpected audio stream: {a}")
+          if abs(duration - 155.0) > 0.1:
+              raise SystemExit(f"Unexpected H2 duration: {duration}")
+
+          root = video.parent
+          (root / "one-more-scroll-h2-final.mp4.sha256").write_text(
+              f"{sha}  {video.name}\n", encoding="utf-8"
+          )
+          meta = {
+              "verified_by_workflow_run_id": os.environ["VERIFY_RUN_ID"],
+              "verification_run_url": os.environ["VERIFY_RUN_URL"],
+              "sha256": sha, "size_bytes": size,
+              "duration_seconds": duration,
+              "video": v, "audio": a,
+              "renderer": "H2 Canvas/Chromium + FFmpeg mastering",
+              "note": "This master is distinct from the Remotion reference render."
+          }
+          (root / "original-h2-master-metadata.json").write_text(
+              json.dumps(meta, indent=2) + "\n", encoding="utf-8"
+          )
+          subprocess.run([
+              "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video),
+              "-vf", "fps=1/5,scale=320:-1,tile=4x8", "-frames:v", "1",
+              str(root / "original-h2-contact-sheet-shots.jpg")
+          ], check=True)
+          subprocess.run([
+              "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video),
+              "-vf", "fps=1/10,scale=320:-1,tile=4x4", "-frames:v", "1",
+              str(root / "original-h2-contact-sheet-overview.jpg")
+          ], check=True)
+
+          manifest_path = root / "manifest.json"
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          master = manifest["canonical_master"]
+          master.update({
+              "storage_status": "archived in GitHub and verified by workflow run " + os.environ["VERIFY_RUN_ID"],
+              "repository_path": str(video).replace("\\", "/"),
+              "sha256": sha, "size_bytes": size,
+              "duration_seconds": duration,
+              "width": v["width"], "height": v["height"], "fps": v["r_frame_rate"],
+              "video_codec": v["codec_name"], "audio_codec": a["codec_name"],
+              "audio": "stereo 48 kHz",
+              "fresh_probe": {
+                  "duration_seconds": duration, "width": v["width"], "height": v["height"],
+                  "fps": v["r_frame_rate"], "video_codec": v["codec_name"],
+                  "audio_codec": a["codec_name"], "audio_sample_rate_hz": int(a["sample_rate"]),
+                  "audio_channels": a["channels"]
+              }
+          })
+          manifest.pop("pending_h2_master_archive", None)
+          manifest["archived_h2_master"] = {
+              "repository_path": str(video).replace("\\", "/"),
+              "sha256": sha, "size_bytes": size,
+              "verified_by_workflow_run_id": os.environ["VERIFY_RUN_ID"],
+              "verification_run_url": os.environ["VERIFY_RUN_URL"],
+              "note": "Original H2 Canvas/Chromium master; keep separate from the Remotion render."
+          }
+          manifest["prior_session_files"] = [
+              ({**item,
+                "storage": "GitHub repository binary verified by Actions",
+                "repository_path": str(video).replace("\\", "/"),
+                "sha256": sha, "size_bytes": size}
+               if item.get("file") == video.name else item)
+              for item in manifest.get("prior_session_files", [])
+          ]
+          manifest["known_unverified"] = [
+              x for x in manifest.get("known_unverified", [])
+              if "exact canonical H2 master is not archived" not in x
+              and "exact H2 master is not archived as a durable GitHub binary" not in x
+          ]
+          manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+          qa_path = root / "QA.md"
+          qa = qa_path.read_text(encoding="utf-8")
+          qa = qa.replace("- [ ] Archive the exact H2 master to durable GitHub storage.",
+                          "- [x] Archive the exact H2 master to durable GitHub storage.")
+          qa = qa.replace("- [ ] Record its SHA-256 and fresh ffprobe output.",
+                          "- [x] Record its SHA-256 and fresh ffprobe output.")
+          if "## H2 master archived and verified by GitHub Actions" not in qa:
+              qa += (
+                  "\n\n## H2 master archived and verified by GitHub Actions\n"
+                  f"- Repository file: `{video}`\n"
+                  f"- SHA-256: `{sha}` ({size:,} bytes)\n"
+                  f"- ffprobe: {duration:.3f}s, 1920×1080, 24 fps, H.264 + AAC stereo 48 kHz.\n"
+                  f"- Verification workflow: {os.environ['VERIFY_RUN_URL']}\n"
+                  "- Contact sheets and machine-readable metadata were generated by the runner. This confirms technical integrity, not artistic sign-off.\n"
+              )
+          qa_path.write_text(qa, encoding="utf-8")
+
+          state_path = Path("docs/STATE.md")
+          state = state_path.read_text(encoding="utf-8")
+          state = state.replace(
+              "- **Storage truth:** these were delivered as ChatGPT attachments; they are not committed binary files in this repo.",
+              f"- **Storage truth:** the exact H2 master is archived at `{video}`, SHA-256 `{sha}`, and verified by [workflow run {os.environ['VERIFY_RUN_ID']}]({os.environ['VERIFY_RUN_URL']}). The source ZIPs remain prior-session attachments until separately archived."
+          )
+          state = state.replace(
+              "The exact original H2 MP4 remains a separate binary-archive task; do not confuse it with the reproducible Remotion file committed by the workflow.",
+              f"The exact original H2 MP4 is now archived at `{video}` and verified by Actions. Keep it distinct from the reproducible Remotion render."
+          )
+          state_path.write_text(state, encoding="utf-8")
+
+          handoff_path = Path("docs/AI_HANDOFF.md")
+          handoff = handoff_path.read_text(encoding="utf-8")
+          handoff = handoff.replace(
+              "The prior 155-second Full HD H2 master and source ZIP were delivered as attachments in an earlier ChatGPT session; metadata, SHA-256 and ffprobe results are recorded in the manifest. The exact H2 binary is still not committed here. The Remotion reference build has been persisted under `video-library/one-more-scroll/renders/remotion-run-31/`; this is a separate renderer output. Never conflate them.",
+              f"The exact 155-second Full HD H2 master is archived at `{video}` and verified by workflow run {os.environ['VERIFY_RUN_ID']}. The source ZIP remains external to GitHub until uploaded separately. The Remotion reference build under `video-library/one-more-scroll/renders/remotion-run-31/` is a separate renderer output. Never conflate them."
+          )
+          handoff_path.write_text(handoff, encoding="utf-8")
+          print(f"Verified original H2 master {sha} ({size} bytes), duration {duration:.3f}s.")
+          PY
+
+      - name: Commit verified archive metadata and contact sheets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f video-library/one-more-scroll/one-more-scroll-h2-final.mp4
+          git add video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256 \
+            video-library/one-more-scroll/original-h2-master-metadata.json \
+            video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg \
+            video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg \
+            video-library/one-more-scroll/manifest.json video-library/one-more-scroll/QA.md \
+            docs/STATE.md docs/AI_HANDOFF.md
+          if git diff --cached --quiet; then
+            echo "H2 archive is already verified and current."
+            exit 0
+          fi
+          git commit -m "build: verify and index original H2 master archive"
+          git push origin HEAD:main
