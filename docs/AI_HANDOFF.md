@@ -18,8 +18,8 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Audio generators: `video-projects/remotion/h2-audio`
 - Blender: `tools/blender/render_h2_stage.py`
 - Krita: `tools/krita/README.md`
-- H2 source mirror: `integrations/h2-selfimprove-studio/`
-- Private ChatGPT plugin: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), see `docs/CHATGPT_PLUGIN.md`
+- H2 source mirror: `integrations/h2-selfimprove-studio/` (51-file v1.0.2 base); v1.1.0 production overlay: `integrations/h2-selfimprove-studio-production-overlay/`.
+- Active private ChatGPT plugin: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) — v1.1.0, current release `pluginrel_6ade248942988191a57ff1059c818720` (Plugin Creator update confirmed 2026-10-25); see `docs/CHATGPT_PLUGIN.md` and `integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md`.
 - Film manifest: `video-library/one-more-scroll/manifest.json`
 
 ## Tool and video inventory
