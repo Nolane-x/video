@@ -59,6 +59,12 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`.
 - Portable skill bundle: `video-library/video-production-master-skill.zip`, which the new packaging workflow is updating to include the current video and the instructions/source.
 
+## Prior work catalog and reusable archive tooling
+- The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.
+- The prior-works import tool is `tools/video/archive_previous_works.py`. It stages matched video attachments by hash; GitHub workflow then verifies remote bytes and generates contact sheets.
+- The H2 source publisher is `tools/video/publish_h2_source_release.ps1`; source ZIPs should be stored as verified GitHub Release assets, not huge regular Git blobs.
+- The current portable skill ZIP intentionally includes the Remotion reference video and, after checksum-verified import, the canonical H2 MP4. It does not bundle every historical video clip to avoid exceeding GitHub's single-file size limit. Clone the repo or inspect the catalog for the rest.
+
 ## Next priorities
 1. Complete the portable skill package workflow and verify the ZIP contains the actual MP4 as well as skill/source docs.
 2. Import the exact H2 master binary using `tools/video/archive_h2_master.py` once the attachment is downloaded to a local path, then commit/push the resulting video, checksum and contact sheets.
