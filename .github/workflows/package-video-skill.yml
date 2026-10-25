@@ -14,6 +14,7 @@ on:
       - "docs/ART_DIRECTION_IFVERSE_DAYONE.md"
       - "docs/VIDEO_PRODUCTION_STATE_SCHEMA.json"
       - "docs/INSTALL_VIDEO_SKILL.md"
+      - "docs/CHATGPT_PLUGIN.md"
       - "docs/TOOL_INVENTORY.md"
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
@@ -63,7 +64,7 @@ jobs:
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
-             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md bundle/docs/
+             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md docs/CHATGPT_PLUGIN.md bundle/docs/
           cp tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/publish_h2_source_release.ps1 bundle/tools/video/
           cp video-library/README.md video-library/previous-works-catalog.json bundle/video-library/
           # Carry historical contact sheets/metadata in the portable bundle without duplicating every large MP4.
