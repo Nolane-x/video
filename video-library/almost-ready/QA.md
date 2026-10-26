@@ -46,6 +46,9 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 - Targeted visual review: B10 now shows the peer reaching with the held portfolio; B22 shows a timed green SENT confirmation; B19 walking action, B13 deadline change and B27 receding shadow were sampled frame by frame.
 - Remaining visual finding: B24's girl stood up abruptly when pointing. A new seated-pointing pose has been added to the character rig; run #11 is rerendering it. Full-length start-to-finish artistic approval remains pending.
 
-## Current candidate — render #11
-- Workflow: [run #11](https://github.com/Nolane-x/video/actions/runs/40354490453), source commit `e9e92b631855fac2b72379e4442bb6c0873f9e44`.
-- It retains the timed send confirmation and visible portfolio and changes the café gesture to a seated pointing pose. Await its own render, QA, artifact and motion proof results before promoting it over run #9.
+
+
+## Final candidate — render #13
+- Workflow: [run #13](https://github.com/Nolane-x/video/actions/runs/40417564202), source commit `cf3050b81bab6163ea8793c641b21d98e4eead84`.
+- Added a larger, illustrated portfolio folder hand prop for the classroom-sharing beat (B10), while preserving the seated pointing pose in the café (B24) and timed SENT confirmation (B22). Final render and QA are pending.
+- The last confirmed technical baseline is run #11: [workflow](https://github.com/Nolane-x/video/actions/runs/40354490453), artifact `12664834346`. Full-length artistic sign-off still requires a start-to-finish watch with audio.
