@@ -25,6 +25,7 @@ on:
       - ".github/workflows/verify-previous-works.yml"
       - ".github/workflows/verify-archive-h2-master.yml"
       - "video-library/README.md"
+      - "video-library/reference-clips.json"
       - "tools/blender/**"
       - "tools/krita/**"
       - "video-projects/remotion/README.md"
@@ -71,7 +72,7 @@ jobs:
           mkdir -p bundle/integrations
           cp -R integrations/h2-selfimprove-studio bundle/integrations/
           cp -R integrations/h2-selfimprove-studio-production-overlay bundle/integrations/
-          cp video-library/README.md video-library/previous-works-catalog.json bundle/video-library/
+          cp video-library/README.md video-library/previous-works-catalog.json video-library/reference-clips.json bundle/video-library/
           # Carry historical contact sheets/metadata in the portable bundle without duplicating every large MP4.
           if [ -d video-library/previous-works ]; then
             while IFS= read -r -d '' file; do
@@ -132,6 +133,8 @@ jobs:
             "includes_h2_production_overlay": true,
             "h2_production_overlay": "integrations/h2-selfimprove-studio-production-overlay/",
             "prior_work_catalog": "video-library/previous-works-catalog.json",
+            "user_reference_clips_manifest": "video-library/reference-clips.json",
+            "offline_user_reference_video_files_embedded": false,
             "prior_work_video_masters_embedded": false,
             "prior_work_contact_sheets_embedded": $([ -d video-library/previous-works ] && echo true || echo false),
             "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py", "tools/video/archive_previous_works.py"],
@@ -167,6 +170,7 @@ jobs:
               "integrations/h2-selfimprove-studio-production-overlay/references/one-more-scroll-case-study.md",
               "integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md",
               "video-library/previous-works-catalog.json",
+              "video-library/reference-clips.json",
               "video-library/one-more-scroll/manifest.json",
               "video-library/one-more-scroll/h2-source-release.json",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
