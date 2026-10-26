@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+"""Idempotent, schema-checked art-direction pass for ALMOST READY."""
+from __future__ import annotations
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+if len(sys.argv) != 2:
+    raise SystemExit("usage: tune_story.py path/to/story/shots.json")
+
+path = Path(sys.argv[1])
+story = json.loads(path.read_text(encoding="utf-8"))
+shots = story.get("shots")
+if not isinstance(shots, list) or len(shots) != 29:
+    raise SystemExit(f"Expected 29 shots, found {len(shots) if isinstance(shots, list) else 'invalid'}")
+by_id = {s.get("id", "").lower(): s for s in shots}
+expected = {f"b{i:02d}" for i in range(1, 30)}
+if set(by_id) != expected:
+    raise SystemExit("Shot IDs drifted: " + ", ".join(sorted(set(by_id) ^ expected)))
+
+def cap(kind: str, text: str, at: float = 0.3, dur: float = 5.25,
+        x: float = 0.5, y: float = 0.105, size: int = 55,
+        max_w: float = 0.82, **extra: Any) -> dict[str, Any]:
+    return {"kind": kind, "t": text, "at": at, "dur": dur,
+            "x": x, "y": y, "size": size, "maxW": max_w, **extra}
+
+def narr(text: str, at: float = 0.3, dur: float = 5.25, **extra: Any) -> dict[str, Any]:
+    return cap("narr", text, at, dur, **extra)
+
+def tempting(text: str, at: float = 0.5, dur: float = 4.5, **extra: Any) -> dict[str, Any]:
+    return cap("tempt", text, at, dur, y=extra.pop("y", 0.31),
+               size=extra.pop("size", 46), max_w=extra.pop("max_w", 0.65), **extra)
+
+def actor(who: str, x: Any, pose: str = "stand", face: str = "neutral", **extra: Any) -> dict[str, Any]:
+    return {"who": who, "x": x, "pose": pose, "face": face, **extra}
+
+def cam(x: float, y: float, z1: float = 1.08, dur: float = 5.4) -> dict[str, Any]:
+    return {"from": [x, y, 1.0], "to": [x, y, z1], "at": 0.25, "dur": dur}
+
+def bedroom(sky: str = "night", **extra: Any) -> dict[str, Any]:
+    return {"sky": sky, "stage": True, "bedX": 0.12, "bedW": 0.25,
+            "windowX": 0.42, "deskX": 0.72, "laptop": True,
+            "lamp": True, "calendar": False, "clock": False, **extra}
+
+def apply(sid: str, tpl: str, args: dict[str, Any], transition: dict[str, Any] | None = None) -> None:
+    s = by_id[sid]
+    s["tpl"] = tpl
+    s["args"] = args
+    if transition is not None:
+        s["in"] = transition
+    else:
+        s["in"] = {"type": "cut"}
+
+# B01 — a sparse hook, not a busy title graphic.
+apply("b01", "black", {
+    "dust": True, "line": False,
+    "texts": [cap("big", "He was always one revision away.", 0.25, 3.45,
+                  y=0.47, size=86, max_w=0.86)]
+})
+
+# B02 — establish a consistent, richly staged bedroom studio.
+apply("b02", "scene", {
+    "set": "bedroom", "setArgs": bedroom("night", door=True, doorOpen=0.08),
+    "actors": [actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.12)],
+    "hud": {"rows": [{"label": "DAYS LEFT", "n": 5}]},
+    "cam": cam(0.60, 0.57, 1.08),
+    "texts": [narr("The deadline was five days away.", 0.35, 5.25)]
+})
+
+# B03 — native notebook drawing with a visible, timed pen contact.
+apply("b03", "note", {
+    "text": "FIRST DRAFT", "at": 0.45, "cps": 5.0, "x": 0.5, "y": 0.52, "s": 0.88,
+    "cam": cam(0.5, 0.52, 1.07),
+    "texts": [narr("The first draft felt alive.", 0.35, 5.3)]
+})
+
+# B04 — face reaction after the first flaw; the screen/page light cools the mood.
+apply("b04", "face", {
+    "who": "hero", "face": "worried", "faceAt": [[0.0, "neutral"], [2.4, "worried"]],
+    "look": -0.12, "h": 1.22, "x": 0.5, "y": 0.50,
+    "bg": "bedroom", "setArgs": bedroom("night"),
+    "cam": cam(0.5, 0.52, 1.06),
+    "texts": [narr("Then he found one imperfect line.", 0.35, 5.3)]
+})
+
+# B05 — the temptation has a physical position behind the hero, not just text.
+apply("b05", "scene", {
+    "set": "bedroom", "setArgs": bedroom("night"),
+    "actors": [
+        actor("hero", "desk.seat", "type", "worried", facing=1),
+        actor("voice", 0.89, "reach", "grin", facing=-1, at=0.35, scale=0.70)
+    ],
+    "cam": cam(0.68, 0.58, 1.12),
+    "texts": [tempting("just one small correction.", 0.45, 4.95)]
+})
+
+# B06 — actual laptop insert for the deadline, never a fake phone screen.
+apply("b06", "laptop", {
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.50,
+    "w": 0.78, "h": 0.66, "subject": "PORTFOLIO APPLICATION",
+    "sender": "Studio Review", "body": "Final submissions close Friday at 11:59 PM.",
+    "cam": cam(0.5, 0.5, 1.04),
+    "texts": [narr("The deadline was already real.", 0.35, 5.2)]
+})
+
+# B07 — a tighter over-shoulder staging; keep the shadow away from the text lane.
+apply("b07", "scene", {
+    "set": "bedroom", "setArgs": bedroom("night"),
+    "actors": [
+        actor("hero", "desk.seat", "type", "tired", facing=1, look=0.1),
+        actor("voice", 0.91, "reach", "grin", facing=-1, at=0.2, scale=0.76)
+    ],
+    "hud": {"rows": [{"label": "EDITS", "n": 12}]},
+    "cam": cam(0.70, 0.60, 1.24),
+    "texts": [tempting("nobody needs to see it yet.", 0.45, 4.95, x=0.78, y=0.32)]
+})
+
+# B08 — the revision counter grows while the shared count stays at zero.
+apply("b08", "calendar", {
+    "month": "NOV", "from": 1, "to": 12, "at": 0.3, "dur": 5.1,
+    "mode": "x", "color": "#d79b42", "s": 0.61,
+    "hud": {"rows": [
+        {"label": "EDITS", "from": 1, "to": 12, "at": 0.3, "dur": 5.1},
+        {"label": "SHARED", "n": 0}
+    ]},
+    "cam": cam(0.5, 0.53, 1.08),
+    "texts": [narr("One correction became twelve.", 0.35, 5.3)]
+})
+
+# B09 — an insert of version 19, with correct page/pen staging.
+apply("b09", "note", {
+    "text": "VERSION 19", "at": 0.4, "cps": 5.1, "s": 0.90,
+    "cam": cam(0.5, 0.52, 1.13),
+    "hud": {"rows": [{"label": "EDITS", "n": 19}, {"label": "SHARED", "n": 0}]},
+    "texts": [narr("Every fix uncovered another flaw.", 0.35, 5.3)]
+})
+
+# B10 — peers visibly share; the protagonist stays in the less-lit foreground.
+apply("b10", "scene", {
+    "set": "classroom",
+    "setArgs": {"sky": "dusk", "board": "SHOWCASE FRIDAY", "desks": [0.20, 0.45, 0.70]},
+    "actors": [
+        actor("hero", 0.31, "stand", "worried", facing=1, scale=0.96, z=1),
+        actor("girl", 0.72, "wave", "smile", facing=-1, scale=0.92, at=0.15)
+    ],
+    "cam": cam(0.49, 0.57, 1.04),
+    "texts": [narr("Everyone else had something to show.", 0.35, 5.3)]
+})
+
+# B11 — a readable phone feed establishes comparison without overloading the screen.
+apply("b11", "phone", {
+    "screen": "feed", "posts": ["mountain", "city", "sneakers"],
+    "x": 0.38, "y": 0.53, "h": 0.90, "hands": True, "tilt": -0.10,
+    "bg": "bedroom", "setArgs": bedroom("night"),
+    "cam": cam(0.5, 0.55, 1.04),
+    "texts": [narr("Their finished work appeared everywhere.", 0.3, 5.3, x=0.80, y=0.49, size=49, max_w=0.31)]
+})
+
+# B12 — autosave is not submission.
+apply("b12", "laptop", {
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.5,
+    "w": 0.79, "h": 0.68, "subject": "MY PORTFOLIO — DRAFT 47",
+    "sender": "Autosave", "body": "Last saved at 11:38 PM. Not submitted.",
+    "cam": cam(0.5, 0.5, 1.08),
+    "texts": [narr("He kept saving instead of sending.", 0.35, 5.25)]
+})
+
+# B13 — preserve the clock insert and time transition as a separate action.
+apply("b13", "clock", {
+    "time": "11:58", "timeAt": [[3.0, "11:59"]], "ring": False,
+    "s": 0.77, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.12),
+    "texts": [narr("The minutes began to sprint.", 0.35, 5.3)]
+})
+
+# B14 — the voice is close and dominant at the low point.
+apply("b14", "scene", {
+    "set": "void", "setArgs": {"spot": 0.53, "gy": 0.81},
+    "actors": [
+        actor("hero", 0.38, "slump", "scared", facing=1, scale=1.02),
+        actor("voice", 0.69, "reach", "grin", facing=-1, at=0.15, scale=1.06, glow="#cf9747")
+    ],
+    "cam": cam(0.52, 0.55, 1.13),
+    "texts": [tempting("they'll notice every mistake.", 0.45, 4.9, x=0.75, y=0.31)]
+})
+
+# B15 — deadline count reaches zero; the two lines do not collide.
+apply("b15", "black", {
+    "dust": False, "line": False, "cy": 0.43,
+    "hud": {"rows": [{"label": "MINUTES LEFT", "from": 1, "to": 0, "at": 0.25, "dur": 1.6}]},
+    "texts": [
+        cap("narr", "At 11:59, the window closed.", 0.3, 2.25, y=0.36, size=65, max_w=0.85),
+        cap("big", "His draft was still open.", 2.85, 2.75, y=0.57, size=82, max_w=0.88)
+    ]
+}, {"type": "dip", "dur": 0.25})
+
+# B16 — a closed portal, visibly legible on the computer.
+apply("b16", "laptop", {
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.5,
+    "w": 0.82, "h": 0.70, "subject": "SUBMISSION WINDOW CLOSED",
+    "sender": "Portfolio Portal", "body": "This application is no longer accepting files.",
+    "cam": cam(0.5, 0.5, 1.09),
+    "texts": [narr("He had polished it for no one.", 0.35, 5.25)]
+})
+
+# B17 — intentional silence after the emotional reveal.
+apply("b17", "black", {
+    "dust": False, "line": False, "cy": 0.43,
+    "texts": [
+        cap("narr", "He wasn't afraid of bad work.", 0.25, 2.4, y=0.35, size=66, max_w=0.87),
+        cap("big", "He was afraid of being seen.", 3.05, 2.55, y=0.57, size=80, max_w=0.88)
+    ]
+}, {"type": "dip", "dur": 0.3})
+
+# B18 — the human connection is a real message and a new sound bed.
+apply("b18", "phone", {
+    "screen": "chat", "name": "Mina",
+    "messages": [{"text": "still want to see what you made?", "me": False, "at": 0.55}],
+    "x": 0.43, "y": 0.53, "h": 0.91, "hands": True, "tilt": -0.04,
+    "bg": "bedroom", "setArgs": bedroom("dawn"),
+    "cam": cam(0.5, 0.53, 1.04),
+    "texts": [narr("Someone still wanted to see it.", 0.35, 5.2, x=0.80, y=0.5, size=49, max_w=0.32)]
+}, {"type": "dip", "dur": 0.4})
+
+# B19 — stand and walk to the desk; the turn is visible in body and light.
+apply("b19", "scene", {
+    "set": "bedroom", "setArgs": bedroom("dawn", door=True, doorOpen=0.4),
+    "actors": [actor("hero", 0.30, "stand", "determined", facing=1,
+                     walk={"to": "desk.seat", "at": 0.35, "dur": 2.8, "speed": 0.78})],
+    "cam": cam(0.53, 0.57, 1.12),
+    "texts": [narr("He opened the file one last time.", 0.35, 5.25)]
+})
+
+# B20 — the written rule is the action; the hand must track the current line.
+apply("b20", "note", {
+    "text": "GOOD ENOUGH\nTO SHARE.", "at": 0.45, "cps": 6.2,
+    "x": 0.5, "y": 0.52, "s": 0.92, "cam": cam(0.5, 0.52, 1.10),
+    "texts": [narr("He made one rule for himself.", 0.35, 5.2)]
+})
+
+# B21 — deliberate desk composition, real typing posture; sent count is still zero.
+apply("b21", "scene", {
+    "set": "bedroom", "setArgs": bedroom("dawn", phoneOnDesk={"x": 0.14}),
+    "actors": [actor("hero", "desk.seat", "type", "determined", facing=1, look=0.10)],
+    "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 0}]},
+    "cam": cam(0.69, 0.60, 1.24),
+    "texts": [narr("He chose the version he had.", 0.35, 5.2)]
+})
+
+# B22 — the outgoing email is visible on laptop; sent is now one.
+apply("b22", "laptop", {
+    "bg": "bedroom", "setArgs": bedroom("dawn"), "x": 0.5, "y": 0.5,
+    "w": 0.82, "h": 0.70, "subject": "Portfolio — first look",
+    "sender": "To: Mina", "body": "Sent. It's not finished. I wanted you to see it.",
+    "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 1}]},
+    "cam": cam(0.5, 0.5, 1.08),
+    "texts": [narr("He sent it before he could retreat.", 0.35, 5.25)]
+})
+
+# B23 — response arrives after send; the notification is not the ending by itself.
+apply("b23", "phone", {
+    "screen": "chat", "name": "Mina",
+    "messages": [{"text": "it's rough. it's interesting. keep going.", "me": False, "at": 0.55}],
+    "x": 0.43, "y": 0.53, "h": 0.91, "hands": True,
+    "bg": "bedroom", "setArgs": bedroom("dawn"),
+    "hud": {"rows": [{"label": "SHARED", "n": 1}]},
+    "cam": cam(0.5, 0.52, 1.05),
+    "texts": [narr("A real person answered the work.", 0.35, 5.2, x=0.80, y=0.5, size=49, max_w=0.32)]
+})
+
+# B24 — true two-person café geography and reciprocal eye-lines.
+apply("b24", "scene", {
+    "set": "cafe", "setArgs": {"lampX": 0.50, "tableW": 0.28},
+    "actors": [
+        actor("hero", "table.left", "sit", "worried", facing=1, scale=0.88,
+              faceAt=[[0.0, "worried"], [3.0, "neutral"]]),
+        actor("girl", "table.right", "sit", "smile", facing=-1, scale=0.88, at=0.12)
+    ],
+    "cam": cam(0.5, 0.55, 1.06),
+    "texts": [narr("Her first question was about the idea.", 0.35, 5.25)]
+})
+
+# B25 — studio critique; hero is no longer hidden at the back of the room.
+apply("b25", "scene", {
+    "set": "classroom",
+    "setArgs": {"sky": "dawn", "board": "MAKE  /  SHARE  /  LEARN", "desks": [0.20, 0.46, 0.72]},
+    "actors": [
+        actor("hero", 0.40, "stand", "determined", facing=1, scale=0.97),
+        actor("girl", 0.72, "stand", "smile", facing=-1, scale=0.92, at=0.12)
+    ],
+    "cam": cam(0.54, 0.56, 1.08),
+    "texts": [narr("The room didn't collapse around him.", 0.35, 5.25)]
+})
+
+# B26 — motivated lateral walk through the city at dawn, not zoom-only movement.
+apply("b26", "scene", {
+    "set": "city", "setArgs": {"time": "dawn", "scroll": 1.0, "birds": True, "lamps": [0.18, 0.84]},
+    "actors": [actor("hero", 0.18, "stand", "neutral", facing=1,
+                     walk={"to": 0.78, "at": 0.25, "dur": 4.3, "speed": 0.78})],
+    "cam": cam(0.5, 0.56, 1.05),
+    "texts": [narr("A few flaws survived the journey.", 0.35, 5.25)]
+})
+
+# B27 — the old voice returns small; the hero keeps working.
+apply("b27", "scene", {
+    "set": "bedroom", "setArgs": bedroom("dawn"),
+    "actors": [
+        actor("hero", "desk.seat", "type", "determined", facing=1, look=0.1),
+        actor("voice", 0.93, "reach", "grin", facing=-1, at=0.25,
+              scale=0.40, out=4.8, fade=0.85, glow="#8f724d")
+    ],
+    "cam": cam(0.69, 0.60, 1.20),
+    "texts": [
+        narr("He still heard the old voice.", 0.25, 1.35, y=0.105, size=53),
+        tempting("one more tiny fix.", 1.85, 1.30, x=0.80, y=0.30, size=42),
+        narr("He didn't have to obey it.", 3.55, 2.15, y=0.105, size=53)
+    ]
+})
+
+# B28 — distinct end-card hierarchy, no copied thumbnail text treatment.
+apply("b28", "card", {
+    "word": "RELEASE.", "sub": "Finished can find its people.",
+    "sub2": "Let it leave your hands.", "at": 0.3,
+    "typeDur": 1.25, "size": 0.15,
+    "texts": []
+}, {"type": "dip", "dur": 0.45})
+
+# B29 — natural in-world CTA rather than simulated Like/Subscribe buttons.
+apply("b29", "scene", {
+    "set": "bedroom", "setArgs": bedroom("dawn", door=True, doorOpen=0.7),
+    "actors": [actor("hero", 0.53, "wave", "smile", facing=1, scale=0.94)],
+    "cam": cam(0.52, 0.55, 1.04),
+    "texts": [narr("If this hit, like and subscribe.", 0.35, 5.2)]
+})
+
+# Validate captions and global timing after the authored pass.
+previous_end = 0.0
+for s in shots:
+    assert abs(float(s["start"]) - previous_end) < 0.01, f"Gap/overlap before {s['id']}"
+    assert float(s["end"]) > float(s["start"]), f"Invalid shot duration: {s['id']}"
+    d = float(s["end"]) - float(s["start"])
+    for tx in s.get("args", {}).get("texts", []):
+        at = float(tx.get("at", 0.3))
+        dur = float(tx.get("dur", d - at - 0.1))
+        assert at >= 0 and dur > 0 and at + dur <= d + 0.02, (
+            f"{s['id']} text outside shot: {tx.get('t')!r}; at={at}, dur={dur}, shot={d}"
+        )
+    previous_end = float(s["end"])
+assert abs(previous_end - 172.0) < 0.02, f"Expected 172.0 s, got {previous_end}"
+assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"
+assert by_id["b13"]["tpl"] == "clock" and ["11:59" in str(by_id["b13"]["args"].get("timeAt"))]
+assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
+assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1
+assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
+assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
+story["duration"] = 172.0
+path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+print("ART-DIRECTION QA PASS: 29 shots, 172.0s, desk/pen/clock/deadline/send/reply/cafe/voice gates passed")
+for sid in ("b03", "b05", "b10", "b13", "b15", "b16", "b18", "b20", "b21", "b22", "b23", "b24", "b27"):
+    s = by_id[sid]
+    print(f"  {sid}: {s['tpl']} / {s['start']:.1f}-{s['end']:.1f}s / {s.get('scene', '')[:60]}")
