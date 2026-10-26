@@ -3,7 +3,7 @@
   "title": "ALMOST READY — An Animated Short Film",
   "project_id": "almost-ready",
   "created_at": "2026-10-26",
-  "status": "render_v11_in_progress_after_v9_technical_pass",
+  "status": "final_candidate_rerendering_portfolio_prop",
   "creative_target": "cinematic story-led stick-figure short about perfectionism and fear of being seen",
   "language": "English",
   "voiceover": false,
@@ -35,13 +35,13 @@
     "full_length_artistic_review": "pending"
   },
   "render": {
-    "workflow_run_id": 40354490453,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40354490453",
-    "source_commit": "e9e92b631855fac2b72379e4442bb6c0873f9e44",
+    "workflow_run_id": 40417564202,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40417564202",
+    "source_commit": "cf3050b81bab6163ea8793c641b21d98e4eead84",
     "master_sha256": null,
     "review_bundle_sha256": null,
     "artifact_id": null,
-    "artifact_storage": "Last passing candidate run #9 is retained in Actions until 2026-11-25; render #11 adds a seated pointing pose for more natural café blocking",
+    "artifact_storage": "Run #11 is retained as a technical baseline; run #13 adds a readable portfolio folder prop and keeps the seated café pose",
     "latest_technical_pass": {
       "workflow_run_id": 40353275695,
       "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40353275695",
