@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "title": "ALMOST READY — An Animated Short Film",
+  "project_id": "almost-ready",
+  "created_at": "2026-10-26",
+  "status": "source_prepared_pending_ci_render",
+  "creative_target": "cinematic story-led stick-figure short about perfectionism and fear of being seen",
+  "language": "English",
+  "voiceover": false,
+  "aspect_ratio": "16:9",
+  "runtime_target_seconds": 172,
+  "shots_target": 29,
+  "renderer": "H2 SelfImprove Studio native Canvas/Chromium + FFmpeg audio mastering",
+  "source": {
+    "script": "video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt",
+    "config": "video-projects/h2-selfimprove/almost-ready/config.json",
+    "art_bible": "video-projects/h2-selfimprove/almost-ready/story/bible.md",
+    "art_direction": "video-projects/h2-selfimprove/almost-ready/tune_story.py",
+    "workflow": ".github/workflows/render-selfimprove-almost-ready.yml"
+  },
+  "story": {
+    "hook": "He was always one revision away.",
+    "counter": "EDITS rises while SHARED remains 0; the deadline visibly reaches 0",
+    "turning_point": "A real friend asks to see the work, so he shares an imperfect version",
+    "end_card": "RELEASE. / Finished can find its people. / Let it leave your hands."
+  },
+  "quality_gates": {
+    "native_h2_only": true,
+    "29_shots_and_zero_timeline_gaps": true,
+    "full_contact_sheets": true,
+    "motion_proofs_with_audio": 12,
+    "ffprobe_exact_final_mp4": true,
+    "ebu_r128_target_lufs": -14,
+    "true_peak_ceiling_dbfs": -1,
+    "full_length_artistic_review": "pending"
+  },
+  "render": {
+    "workflow_run_id": null,
+    "workflow_run_url": null,
+    "source_commit": null,
+    "master_sha256": null,
+    "review_bundle_sha256": null,
+    "artifact_id": null,
+    "artifact_storage": "not rendered yet"
+  },
+  "known_limits": [
+    "The H2 character and prop rig must be verified in the rendered scene; source assertions do not establish visible contact.",
+    "The laptop/phone UI templates are stylized inserts; review text readability at 1920x1080.",
+    "The complete film must be watched with audio before artistic approval."
+  ]
+}
