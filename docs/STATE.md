@@ -50,6 +50,12 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - The current Remotion reference render is `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`, SHA-256 `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
 
+## Source-v3 shoe-tying fix in progress
+- Focused preview [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327) passed; the review contact sheet showed a forward lean and alternating hand angles in the shoe area.
+- Full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed the pinned request/patch guard, source ZIP SHA/ZIP integrity, patch application, JS/Python/JSON validation, full-timeline browser smoke, contact-sheet generation, and audio WAV validation. Current step remains the 155-second full-resolution H2 render.
+- Patch provenance: `tools/video/patch_h2_shoelace_scene.py`, commit `05a2027cebdc83cedc1002992198d9404f253647`; request JSON `video-library/one-more-scroll/h2-source-v3-render-request.json`; render status and source lineage in `video-library/one-more-scroll/h2-source-release.json` and `manifest.json`.
+- The portable bundle most recently passed as [run 40281626988](https://github.com/Nolane-x/video/actions/runs/40281626988) with 176 entries; subsequent state/QA/manifest updates are rebuilding it. Keep H2 master and source-v2 candidate immutable until source-v3 is technically verified and explicitly approved after full-motion/audio review.
+
 ## Historical CI evidence
 Earlier in the conversation:
 - Remotion render run 40186281738 succeeded for an earlier 31-shot Remotion version.
