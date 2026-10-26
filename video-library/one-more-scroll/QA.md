@@ -64,6 +64,12 @@ The delivered master and later source-v2 are different versions. The prior maste
 
 
 
+## H2 source-v2 audio pipeline note — 2026-10-26
+- Both source ZIPs contain the pre-rendered music beds and SFX WAVs used by the story. The current render workflow validates those assets and mixes them with `tools/mix.py`.
+- The packaged `packs/dem/audio.py` imports `synth` and `music` modules that are not present in the source ZIPs. Do not report that the music generator ran or attempt to use that script standalone unless those missing Python modules are supplied and verified.
+- In the source-v2 render workflow, the log named `h2-audio-generation.log` is an **audio-asset validation log**, not evidence of fresh music synthesis. The final video is still mixed from the audio WAV files included in the verified source archive.
+- This packaging gap does not block a render when all referenced WAV files exist, as was confirmed for the current 5 music beds and 45 story SFX cues. It does remain a source-reproducibility limitation to resolve separately.
+
 ## H2 source archives — published and verified
 - [x] Original source ZIP: [download](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source.zip), 115,875,783 bytes, SHA-256 `f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b`.
 - [x] Source-v2 with scene fixes: [download](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip), 115,856,962 bytes, SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
