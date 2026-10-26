@@ -271,6 +271,16 @@ tpl('laptop', (g, lt, info, a) => {
       c.lineTo(sx + sw + sw * 0.105, sy + sh + h * 0.105); c.lineTo(sx - sw * 0.105, sy + sh + h * 0.105); c.closePath();
     }, { fill: '#333741', line: '#737783', lw: 2, la: 1 });
     box(g, cx - sw * 0.12, sy + sh + h * 0.047, sw * 0.24, h * 0.018, { fill: '#666b77', line: null, r: 4, la: 0.7 });
+    // Optional send-confirmation state for narrative email actions. It appears only
+    // after sentAt and gives the audience a visible cause-and-effect beat.
+    if (a.sentAt !== undefined && lt >= a.sentAt) {
+      const q = clamp((lt - a.sentAt) / 0.28);
+      const tw = sw * 0.245, th = sh * 0.145;
+      const tx = sx + sw - tw - sw * 0.035;
+      const ty = sy + sh * 0.70 + (1 - q) * 18;
+      box(g, tx, ty, tw, th, { fill: '#183329', line: '#5dbd85', r: 9, lw: 2, la: 0.96 * q });
+      text(g, '✓  SENT', tx + tw * 0.5, ty + th * 0.56, { size: Math.max(18, h * 0.038), font: FONT_UI, weight: 700, color: '#baf0cc', a: q });
+    }
     drawFx(g, lt, info, (a.fx || []).filter((f) => !['flash', 'pulse', 'dark', 'glitch'].includes(f.kind)));
   });
   overlays(g, lt, info, {});
