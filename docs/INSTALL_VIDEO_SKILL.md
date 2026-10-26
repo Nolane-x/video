@@ -27,20 +27,11 @@ The current skill ZIP is intended as a convenient bundle of agent instructions, 
 
 Read `video-library/one-more-scroll/manifest.json`, `QA.md`, and `latest-remotion-release.json` first. The latest Remotion video stored in the repo is not interchangeable with the original H2 Canvas/Chromium master. Verify every path and renderer label before use.
 
-## Import the exact H2 master file
+## Canonical H2 master — already archived
 
-The original H2 master is distinct from the Remotion reference video. Its expected checksum and technical metadata are recorded in the manifest. To move it from the prior ChatGPT attachment into durable GitHub storage:
+The exact H2 master is already stored at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4` (31,547,778 bytes), SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`. GitHub Actions [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143) validated the checksum, duration, dimensions, frame rate, codecs and audio format, and generated metadata/contact sheets. The current portable skill ZIP includes this H2 master and a separate Remotion run-36 reference render. Do not repeat the import to restore current state, and never label the Remotion render as H2.
 
-1. Download the exact file named one-more-scroll-h2-final.mp4 from the previous chat.
-2. From the root of a clone of this repository, run this PowerShell command (adjust the Downloads path if needed):
-
-   python tools/video/archive_h2_master.py "$env:USERPROFILE\Downloads\one-more-scroll-h2-final.mp4"
-
-3. The importer verifies SHA-256, file size, duration, resolution, FPS, codecs and audio format before copying it into video-library/one-more-scroll/. It also generates contact sheets and updates manifest/QA/state.
-4. Review the generated files, then commit and push the binary, checksum, contact sheets and updated documentation. The package workflow will update the portable skill ZIP to include the H2 master as well as the Remotion reference sample.
-
-Do not rename the Remotion render as the H2 master. If the checksum fails, stop; the input is not the exact canonical H2 file.
-
+If a fresh repository clone is missing the binary, fetch/update `main` first and verify the local copy against `video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256`. `tools/video/archive_h2_master.py` remains available for importing the exact allow-listed attachment into a clone when truly needed; stop on any checksum mismatch. The H2 source ZIPs (`one-more-scroll-h2-source.zip` and source-v2) are separate large assets and remain unarchived until supplied and published through the source-release helper.
 
 ## Archive previous videos and the H2 source code
 
@@ -55,7 +46,7 @@ Review the staged files, commit and push them. Wait for the “Verify previous A
 The full H2 renderer/source ZIP is larger than a sensible Git blob. To preserve it as a durable Release asset, download the exact `one-more-scroll-h2-source.zip` and related files to a local folder, then run:
 
 ```powershell
-.	oolsideopublish_h2_source_release.ps1 -AssetsDir "$env:USERPROFILE\Downloads\h2-production-assets"
+   .\tools\video\publish_h2_source_release.ps1 -AssetsDir "$env:USERPROFILE\Downloads\h2-production-assets"
 ```
 
 The publisher requires GitHub CLI authentication, checks each file against a fixed SHA-256 allow-list, creates a versioned GitHub Release and stages `h2-source-release.json`. Commit/push that manifest after reviewing it. The source-v2 archive has extra scene fixes that were not verified by a complete render; do not treat that archive as a new final master.
