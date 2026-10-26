@@ -82,7 +82,7 @@ apply("b03", "scene", {
     "set": "classroom", "setArgs": classroom("day"),
     "actors": [
         actor("hero", 0.43, "reach", "smile", facing=-1, scale=0.98),
-        actor("friend", 0.69, "reach", "neutral", facing=-1, scale=0.91, hold="book")
+        actor("friend", 0.69, "reach", "neutral", facing=-1, scale=0.91, hold="portfolio")
     ],
     "cam": cam(0.53, 0.56, 1.10),
     "texts": [narr("“Could you cover this?”", size=56)]
@@ -92,7 +92,7 @@ apply("b03", "scene", {
 apply("b04", "scene", {
     "set": "classroom", "setArgs": classroom("day"),
     "actors": [
-        actor("hero", 0.36, "carry", "neutral", facing=1, scale=0.96),
+        actor("hero", 0.36, "carry", "neutral", facing=1, scale=0.96, hold="portfolio"),
         actor("girl", 0.70, "reach", "smile", facing=-1, scale=0.90),
         actor("friend2", 0.87, "point", "neutral", facing=-1, scale=0.70)
     ],
@@ -114,7 +114,7 @@ apply("b05", "laptop", {
 apply("b06", "scene", {
     "set": "classroom", "setArgs": classroom("day"),
     "actors": [
-        actor("hero", 0.47, "carry", "worried", facing=1, scale=1.00),
+        actor("hero", 0.47, "carry", "worried", facing=1, scale=1.00, hold="portfolio"),
         actor("friend", 0.19, "reach", "neutral", facing=1, scale=0.76),
         actor("girl", 0.79, "reach", "smile", facing=-1, scale=0.79)
     ],
@@ -146,7 +146,7 @@ apply("b08", "scene", {
 apply("b09", "scene", {
     "set": "city", "setArgs": {"sky": "dusk", "stage": True},
     "actors": [
-        actor("hero", 0.48, "carry", "tired", facing=1, scale=1.03),
+        actor("hero", 0.48, "carry", "tired", facing=1, scale=1.03, hold="portfolio"),
         actor("friend", 0.79, "open", "smile", facing=1, scale=0.75)
     ],
     "cam": cam(0.52, 0.56, 1.10),
@@ -273,7 +273,7 @@ apply("b21", "scene", {
     "set": "classroom", "setArgs": classroom("day"),
     "actors": [
         actor("hero", "desk.seat", "sitdesk", "relaxed", facing=1, scale=0.96),
-        actor("girl", 0.70, "carry", "neutral", facing=1, scale=0.91),
+        actor("girl", 0.70, "carry", "neutral", facing=1, scale=0.91, hold="portfolio"),
         actor("friend2", 0.86, "reach", "smile", facing=-1, scale=0.75)
     ],
     "cam": cam(0.56, 0.58, 1.10),
