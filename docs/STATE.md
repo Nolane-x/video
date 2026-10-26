@@ -102,3 +102,14 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - SHA-256: `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`; duration 155.100s; 1280x720 at 24/1.
 - Audio measurement: -14.5 LUFS integrated; true peak -2.3 dBFS.
 - Technical gates passed; contact sheets are available. Do not claim manual visual sign-off unless completed separately.
+
+
+
+## Next active film — ALMOST READY (source committed, render pending)
+
+- Manifest: [video-library/almost-ready/manifest.json](../video-library/almost-ready/manifest.json); QA ledger: [video-library/almost-ready/QA.md](../video-library/almost-ready/QA.md).
+- Original screenplay: [01-PHIM-the-almost-ready.txt](../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt); authored art-direction pass: [tune_story.py](../video-projects/h2-selfimprove/almost-ready/tune_story.py).
+- Creative focus: perfectionism and fear of being seen; the hero's edit counter rises while the shared count stays at zero, misses the submission window, then takes the smaller but real step of sharing an imperfect version with Mina.
+- Target: 29 shots, 172 seconds, English on-screen text, no voice-over, 16:9 1080p at 24 fps; native H2 Canvas/Chromium plus FFmpeg audio mastering.
+- Dedicated workflow: `.github/workflows/render-selfimprove-almost-ready.yml`. Initial status is source-only until the actual render, contact sheets, 12 motion proofs, ffprobe and EBU R128 gates are verified.
+- Keep `THE FIRST HOUR` separate; its full-length artistic review and durable release archival remain pending. Do not overwrite the canonical `ONE MORE SCROLL` H2 master.
