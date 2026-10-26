@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "video-library/one-more-scroll/h2-source-v3-render-request.json"
+      - ".github/workflows/verify-h2-source-v3.yml"
   workflow_dispatch:
 
 permissions:
@@ -12,7 +13,7 @@ permissions:
 
 concurrency:
   group: h2-source-v3-candidate-render
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   render-candidate:
@@ -23,6 +24,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: main
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
