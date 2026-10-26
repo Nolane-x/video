@@ -64,8 +64,10 @@ def tag(b, *names):
         for k, v in b["tags"].items():
             if k.startswith(n): return v
     return None
-SETS = [("phòng ngủ", "bedroom"), ("giường", "bedroom"), ("bedroom", "bedroom"), ("thành phố", "city"), ("city", "city"), ("phố", "street"), ("mưa", "street"), ("trạm xe", "street"), ("street", "street"),
-        ("tủ đồ", "lockers"), ("hành lang", "lockers"), ("locker", "lockers"), ("lớp", "classroom"), ("class", "classroom"), ("sân bóng", "court"), ("court", "court"), ("quán", "cafe"), ("cà phê", "cafe"), ("cafe", "cafe"),
+SETS = [("phòng ngủ", "bedroom"), ("giường", "bedroom"), ("bedroom", "bedroom"), ("thành phố", "city"), ("city", "city"),
+        # Specific location cues must precede generic weather cues (e.g. "cafe in the rain" is still a cafe).
+        ("quán", "cafe"), ("cà phê", "cafe"), ("cafe", "cafe"), ("phố", "street"), ("mưa", "street"), ("trạm xe", "street"), ("street", "street"),
+        ("tủ đồ", "lockers"), ("hành lang", "lockers"), ("locker", "lockers"), ("lớp", "classroom"), ("class", "classroom"), ("sân bóng", "court"), ("court", "court"),
         ("phòng tập", "gym"), ("gym", "gym"), ("bao cát", "gym"), ("cầu thang", "stairs"), ("stairs", "stairs"), ("đồi", "hill"), ("núi", "hill"), ("hoàng hôn", "hill"), ("hill", "hill"), ("gương", "mirror"), ("mirror", "mirror"),
         ("bếp", "kitchen"), ("kitchen", "kitchen"), ("cửa", "doorway"), ("door", "doorway"), ("khoảng tối", "void"), ("void", "void"), ("đèn rọi", "void")]
 def guess(scene):
@@ -104,7 +106,10 @@ def hints(scene, st, texts):
     m = re.search(r"lịch(?: tháng)? ?([a-z]{3})?[^,;]*?tô (\d+)", s)
     if m and st == "bedroom": sa["calendar"] = {"month": (m.group(1) or "oct").upper(), "fill": int(m.group(2))}
     if "đèn bàn" in s and not re.search(r"đèn bàn tắt", s): sa["lamp"] = True
-    if "laptop" in s or "máy tính" in s: sa["laptop"] = True
+    if "laptop" in s or "máy tính" in s:
+        sa["laptop"] = True
+        # Keep desk/laptop in the active composition; the old far-right default hid the action at wide scale.
+        if st == "bedroom": sa.setdefault("deskX", 0.70)
     if "bình minh" in s: sa["sky" if st == "bedroom" else "time"] = "dawn"
     elif "hoàng hôn" in s and st == "city": sa["time"] = "dusk"
     elif re.search(r"\bđêm\b", s) and st == "city": sa["time"] = "night"
@@ -112,10 +117,13 @@ def hints(scene, st, texts):
     if "cửa neon" in s or "neon" in s and st == "street": sa["neonDoor"] = 0.3
     if "chim" in s and st == "city": sa["birds"] = True
     who = "band" if "băng đô" in s else "hooded" if "trùm mũ" in s else "hoodie" if "hoodie" in s else "hero"
-    face = next((f for k, f in [("khóc", "cry"), ("sợ", "scared"), ("sốc", "shock"), ("buồn", "sad"), ("mệt", "tired"), ("quyết tâm", "determined"), ("gồng", "effort"), ("cười", "smile"), ("trống rỗng", "empty"), ("lo", "worried"), ("giận", "angry")] if k in s), "neutral")
-    if st == "bedroom" and re.search(r"nằm|ngủ trong chăn|trong chăn", s):
+    face = next((f for k, f in [("khóc", "cry"), ("sợ", "scared"), ("sốc", "shock"), ("buồn", "sad"), ("mệt", "tired"), ("gục", "tired"), ("cúi đầu", "tired"), ("quyết tâm", "determined"), ("gồng", "effort"), ("cười", "smile"), ("trống rỗng", "empty"), ("lo", "worried"), ("giận", "angry")] if k in s), "neutral")
+    # Do not infer a sleeping protagonist merely because a prop (e.g. a phone) is described as lying down.
+    if st == "bedroom" and re.search(r"(?:\bcậu\b|\banh ta\b|nhân vật|hero).{0,24}(?:nằm|ngủ|trong chăn)|(?:ngủ trong chăn|ngủ trên giường|người nằm trên giường)", s):
         acts["bed"] = {"face": "sleep" if "ngủ" in s and "không ngủ" not in s else face}
         if "với tay" in s: acts["bed"]["arm"] = {"at": 0.8}
+    elif re.search(r"ôm đầu|hai tay ôm đầu", s): actors.append({"who": who, "x": 0.45, "pose": "headhold", "face": face})
+    elif re.search(r"đấm bao cát|đấm vào bao cát|punch bag", s): actors.append({"who": who, "x": 0.42, "pose": "punch", "face": "determined", "facing": 1})
     elif re.search(r"ngồi mép giường|ngồi trên giường", s): actors.append({"who": who, "x": "bed.sit", "pose": "sitphone" if "điện thoại" in s else "sitsad" if face in ("sad", "cry", "empty") else "sit", "face": face, **({"hold": "phone", "glowFace": "#9fb6ff"} if "điện thoại" in s else {})})
     elif re.search(r"ngồi bàn|ngồi ở bàn", s) and st == "bedroom": actors.append({"who": who, "x": "desk.seat", "pose": "sitdesk", "face": face, "facing": 1})
     elif re.search(r"chạy", s): actors.append({"who": who, "x": 0.15, "run": {"to": 0.85}, "face": "determined"})
@@ -124,7 +132,7 @@ def hints(scene, st, texts):
     elif re.search(r"\bcậu\b|nhân vật|anh ta|\bhe\b", s): actors.append({"who": who, "x": 0.45, "pose": "phone" if "điện thoại" in s else "slump" if face in ("sad", "tired", "empty") else "stand", "face": face, **({"hold": "phone", "glowFace": "#9fb6ff"} if "điện thoại" in s else {})})
     if "bóng đen" in s or any(x["kind"] == "tempt" for x in texts):
         actors.append({"who": "voice", "x": 0.62 if not actors else min(0.85, (actors[0]["x"] if isinstance(actors[0]["x"], float) else 0.55) + 0.14), "pose": "reach" if "vai" in s or "với" in s else "stand", "facing": -1, "at": 0.3})
-    for k, w in [("bạn bè", "friend"), ("cô gái", "girl"), ("mẹ", "mom"), ("bố", "dad")]:
+    for k, w in [("bạn bè", "friend"), ("người bạn", "friend"), ("bạn thân", "friend"), ("jay", "friend"), ("cô gái", "girl"), ("mẹ", "mom"), ("bố", "dad")]:
         if k in s: actors.append({"who": w, "x": 0.72, "pose": "stand", "face": "neutral", "facing": -1})
     if actors: acts["actors"] = actors
     return sa, acts
@@ -191,6 +199,15 @@ for b in beats:
             if sa: args["setArgs"] = sa
             if acts.get("bed"): args["bed"] = acts.pop("bed")
             if acts.get("actors"): args["actors"] = acts["actors"]
+        if tp == "note":
+            # Transfer the actual quoted writing from the scene description into the illustrated notebook.
+            quoted = re.search(r'[“"]([^”"]+)[”"]', scene)
+            if quoted:
+                value = quoted.group(1).strip()
+                lines = [x.strip() for x in re.findall(r"[^.!?]+[.!?]?", value) if x.strip()]
+                args["text"] = "\\n".join(lines) if len(lines) > 1 else value
+                args["at"] = 0.45
+                args["cps"] = 7.5
         if tp == "clock":
             sl = low(scene); tms = re.findall(r"(\d{1,2}:\d{2})", sl)
             if tms: args["time"] = tms[0]
