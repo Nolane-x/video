@@ -17,7 +17,8 @@ SHOTS = Path("projects/one-more-scroll-h2/story/shots.json")
 OLD_ARM = "const arm = (k, ang) => seg2(sx(k), shY, ang[0], 12.5 * U, ang[1], 12 * U, f);"
 NEW_ARM = "const arm = (k, ang) => seg2(sx(k), shY, ang[0], 12.5 * U * (p.armScale || 1), ang[1], 12 * U * (p.armScale || 1), f);"
 POSE_LINE = "  knees:    { aF: [0.9, 1.8], aB: [0.8, 1.7], lF: [2.3, -0.15], lB: [2.2, -0.2], drop: 26, lean: 0.25, head: [3, 4] },   // ngoi bo goi duoi dat"
-TIE_POSE = "  tieShoes: { aF: [-0.18, -0.18], aB: [0.32, 0.4], lF: [2.3, -0.15], lB: [2.2, -0.2], drop: 26, lean: 0.25, head: [3, 4], armScale: 1.42 }, // both hands reach the floor-level shoe laces"
+TIE_POSE = "  tieShoes: { aF: [-0.18, -0.18], aB: [0.32, 0.4], lF: [2.3, -0.15], lB: [2.2, -0.2], drop: 26, lean: 0.68, head: [5, 10], armScale: 1.42 }, // torso and head lean forward over the shoe laces"
+TIE_POSE_ALT = "  tieShoesAlt: { aF: [-0.5, -0.35], aB: [0.52, 0.52], lF: [2.3, -0.15], lB: [2.2, -0.2], drop: 26, lean: 0.68, head: [5, 10], armScale: 1.42 }, // small alternating hand motion while tightening the laces"
 
 
 def sha256(path: Path) -> str:
@@ -38,7 +39,9 @@ def patch(root: Path) -> dict:
     if "tieShoes: {" not in bean:
         if POSE_LINE not in bean:
             raise SystemExit("Expected knees pose declaration not found; refusing an unsafe patch.")
-        bean = bean.replace(POSE_LINE, POSE_LINE + "\n" + TIE_POSE, 1)
+        bean = bean.replace(POSE_LINE, POSE_LINE + "\n" + TIE_POSE + "\n" + TIE_POSE_ALT, 1)
+    elif "tieShoesAlt: {" not in bean:
+        bean = bean.replace(TIE_POSE, TIE_POSE + "\n" + TIE_POSE_ALT, 1)
     if NEW_ARM not in bean:
         if OLD_ARM not in bean:
             raise SystemExit("Expected arm() function not found; refusing an unsafe patch.")
@@ -55,18 +58,23 @@ def patch(root: Path) -> dict:
     actor["pose"] = "kneel"
     actor["poseAt"] = [
         [0.0, "kneel"],
-        [0.65, "knees"],
-        [1.0, "tieShoes"],
-        [3.5, "tieShoes"],
-        [4.1, "kneel"],
+        [0.25, "knees"],
+        [0.55, "tieShoes"],
+        [1.0, "tieShoesAlt"],
+        [1.45, "tieShoes"],
+        [1.9, "tieShoesAlt"],
+        [2.35, "tieShoes"],
+        [2.8, "tieShoesAlt"],
+        [3.25, "tieShoes"],
+        [3.7, "kneel"],
     ]
     # Keep the lace prop at the feet/hands' meeting point and preserve the source-v2 set.
     shot["args"].setdefault("setArgs", {})["shoelace"] = True
     shot["args"]["setArgs"]["shoeX"] = 0.72
     shot["notes"] = (
-        "P1 fix: after a short kneeling settle, both hands extend to the floor-level "
-        "shoe laces for a sustained tying action. Keep both shoes, hands and feet visible; "
-        "verify the contact in the moving preview before a full render."
+        "P1 fix: settle into a forward-leaning kneel, lower both hands to the laces, and "
+        "alternate a small left/right hand motion while tightening. Keep face, both shoes, "
+        "hands and feet visible; verify clear contact in the moving preview before a full render."
     )
     shots_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -74,16 +82,18 @@ def patch(root: Path) -> dict:
     patched_bean = bean_path.read_text(encoding="utf-8")
     patched_shots = json.loads(shots_path.read_text(encoding="utf-8"))
     patched_shot = next(s for s in patched_shots["shots"] if s["id"] == "b17")
-    assert "tieShoes: {" in patched_bean and NEW_ARM in patched_bean
-    assert [1.0, "tieShoes"] in patched_shot["args"]["actors"][0]["poseAt"]
+    assert "tieShoes: {" in patched_bean and "tieShoesAlt: {" in patched_bean and NEW_ARM in patched_bean
+    patched_actor = next(a for a in patched_shot["args"]["actors"] if a.get("who") == "hoodie")
+    assert [0.55, "tieShoes"] in patched_actor["poseAt"]
+    assert [1.0, "tieShoesAlt"] in patched_actor["poseAt"]
     return {
         "status": "patch_applied",
         "source_v2_story": "31 shots / 155 seconds",
         "patched_shot_id": "b17",
-        "pose": "tieShoes",
-        "pose_duration_seconds": 2.5,
+        "pose": "tieShoes/tieShoesAlt",
+        "pose_duration_seconds": 3.15,
         "arms_scale": 1.42,
-        "arm_reach": "both arms angled toward the floor-level laces; contact must be checked visually",
+        "arm_reach": "forward-leaning torso/head, both hands near floor-level laces, alternating wrist/arm angles; contact must be checked visually",
         "bean_js_sha256": sha256(bean_path),
         "shots_json_sha256": sha256(shots_path),
         "safety": "does not edit the canonical H2 master or the archived source-v2 ZIP"
