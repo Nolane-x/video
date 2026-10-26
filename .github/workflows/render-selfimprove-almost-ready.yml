@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-almost-ready-v1
+  group: h2-selfimprove-almost-ready-v2
   cancel-in-progress: true
 
 jobs:
