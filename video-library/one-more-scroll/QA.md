@@ -76,3 +76,21 @@ The delivered master and later source-v2 are different versions. The prior maste
 - [x] Both ZIP CRC/integrity tests, expected file inventory, 31-shot / 155-second story metadata, byte sizes and SHA-256 checks passed in [Actions run 40274927974](https://github.com/Nolane-x/video/actions/runs/40274927974).
 - [ ] Render source-v2 through the real H2 Canvas/Chromium engine, review its complete moving footage and decide whether it is ready to replace the canonical master. The current master is not overwritten by source ZIP upload.
 
+
+
+## Source-v2 full render — technical pass; artistic sign-off pending
+- [x] Source archive checksum/ZIP integrity verified.
+- [x] JavaScript, Python and story JSON checks passed.
+- [x] Browser smoke test completed across 3,720 frames with no reported render errors.
+- [x] Two 31-shot contact sheets generated.
+- [x] The story's five pre-rendered music beds and 45 SFX cues were validated; audio was mixed from included WAVs.
+- [x] Full H2 render and final audio mix passed technical stream validation.
+- [x] Candidate uploaded as a **separate** release asset; canonical master preserved unchanged.
+- Candidate: [one-more-scroll-h2-source-v2-render-candidate.mp4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4)
+- Review package: [h2-source-v2-render-review.zip](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip)
+- CI run: [40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292)
+- Candidate SHA-256: `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`; size 33,396,438 bytes.
+- ffprobe: 155.000s, 1920×1080, 24 fps, H.264 + AAC stereo 48 kHz.
+- **Not yet artistically approved.** The contact sheets show the staircase head crop appears corrected in the sampled frame at about 85 seconds. The shoe-tying pose is low/crouched but still needs playback to verify real hand-to-shoe contact. Review close-up pacing near 35–45 and 70 seconds, transitions, sync, and the full emotional arc.
+- Do not replace `one-more-scroll-h2-final.mp4` until the entire candidate has been watched with audio and explicitly approved.
+
