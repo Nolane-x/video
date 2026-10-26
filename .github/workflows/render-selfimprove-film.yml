@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v6
+  group: h2-selfimprove-the-first-hour-v7
   cancel-in-progress: true
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         with:
           ref: main
       - name: Verify system render dependencies
-        timeout-minutes: 4
+        timeout-minutes: 10
         run: |
           set -euo pipefail
           missing=0
@@ -40,8 +40,8 @@ jobs:
             fi
           done
           if [ "$missing" -ne 0 ]; then
-            timeout 120s sudo apt-get update
-            timeout 120s sudo apt-get install -y ffmpeg zip unzip
+            timeout 300s sudo apt-get update
+            timeout 300s sudo apt-get install -y --no-install-recommends ffmpeg zip unzip
           fi
           for bin in ffmpeg zip unzip; do
             command -v "$bin"
