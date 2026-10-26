@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: h2-selfimprove-the-first-hour
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   render-film:
@@ -25,11 +25,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: Install system render dependencies
+      - name: Verify system render dependencies
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg zip unzip
+          missing=0
+          for bin in ffmpeg zip unzip; do
+            if ! command -v "$bin" >/dev/null 2>&1; then
+              echo "Missing system dependency: $bin"
+              missing=1
+            else
+              "$bin" -version 2>/dev/null | head -n 1 || true
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg zip unzip
+          fi
       - name: Set up Node and Python
         uses: actions/setup-node@v4
         with:
@@ -42,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
           python -m pip install numpy scipy soundfile
           python audio/build_audio.py
       - name: Generate H2 story from approved 01-PHIM script
@@ -58,7 +69,7 @@ jobs:
           p=Path("projects/the-first-hour/story/shots.json")
           d=json.loads(p.read_text())
           d["duration"]=d["shots"][-1]["end"]
-          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n")
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\\n")
           print(f"Built {len(d['shots'])} H2 shots; duration={d['duration']}s")
           PY
       - name: Validate full timeline and render contact sheets
@@ -111,7 +122,7 @@ jobs:
           assert abs(float(d["format"]["duration"])-172.0)<3.0, f"Unexpected runtime: {d['format']['duration']}"
           print(f"PASS: {d['format']['duration']}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz")
           PY
-          grep -E "I: *-1[3456]\.[0-9]+ LUFS|Peak: *-?[0-9]+\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
+          grep -E "I: *-1[3456]\\.[0-9]+ LUFS|Peak: *-?[0-9]+\\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
       - name: Upload video, preview and QA bundle
         uses: actions/upload-artifact@v4
         with:
