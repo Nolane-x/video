@@ -266,7 +266,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          cd /tmp/h2-review-v3-v3
+          cd /tmp/h2-review-v3
           cp h2-browser-check.log h2-contact-sheet.log h2-audio-generation.log h2-full-render.log h2-audio-mix.log h2-audio-ebur128.log payload/
           (cd payload && sha256sum *.jpg *.mp4 *.json patch_h2_shoelace_scene.py > SHA256SUMS.txt)
           zip -qr h2-source-v3-shoelace-fix-review.zip payload
