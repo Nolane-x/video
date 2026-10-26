@@ -37,8 +37,15 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 
 
 
-## Current candidate — render #9
-- Workflow: [run #9](https://github.com/Nolane-x/video/actions/runs/40353275695), source commit `a0ecaec8a85585a2bbf1127c1a5a517b138bce22`.
-- It includes the timed laptop SENT confirmation, a physically extended held portfolio during the peer-sharing scene, and a timed point/response beat in the café. The workflow also uses bounded apt retries because the current Ubuntu 24.04 hosted image did not have FFmpeg installed.
-- Render result and new artifact SHA are pending. The run #3 baseline remains the last known technical pass; do not describe run #9 as passed until its own logs and artifact are verified.
-- Runs #5 and #6 were canceled when revisions were committed. Runs #7 and #8 failed during dependency setup after the temporary fast-fail change correctly exposed that FFmpeg was absent; the bounded installation step has now been restored.
+
+
+## Technical pass — render #9, before seated café pose refinement
+- Workflow: [run #9](https://github.com/Nolane-x/video/actions/runs/40353275695), source commit `a0ecaec8a85585a2bbf1127c1a5a517b138bce22`, artifact ID `12664692803` (available until 2026-11-25).
+- Master SHA-256: `d63ec757fe1f81b281df0706684316955b48e545aaa09c369a0219da8d3ddfcc`. Review-bundle SHA-256: `b9279347809a1b4765399b7706d9c34a20022971af4d5f798de1543996c28c04`.
+- Final MP4 technical gates passed: 172.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; integrated loudness `-14.0 LUFS`, true peak `-1.9 dBFS`. All 25 listed checksums validated and 12 motion proofs include A/V for approximately six seconds each.
+- Targeted visual review: B10 now shows the peer reaching with the held portfolio; B22 shows a timed green SENT confirmation; B19 walking action, B13 deadline change and B27 receding shadow were sampled frame by frame.
+- Remaining visual finding: B24's girl stood up abruptly when pointing. A new seated-pointing pose has been added to the character rig; run #11 is rerendering it. Full-length start-to-finish artistic approval remains pending.
+
+## Current candidate — render #11
+- Workflow: [run #11](https://github.com/Nolane-x/video/actions/runs/40354490453), source commit `e9e92b631855fac2b72379e4442bb6c0873f9e44`.
+- It retains the timed send confirmation and visible portfolio and changes the café gesture to a seated pointing pose. Await its own render, QA, artifact and motion proof results before promoting it over run #9.
