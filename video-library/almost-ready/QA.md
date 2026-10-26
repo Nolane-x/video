@@ -35,6 +35,10 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 - Contact sheets and a frame-by-frame sampled montage were inspected. Improvements identified and applied to the next render: the student should physically reach with a held book while showing work; the laptop must show an animated SENT confirmation after the message is submitted.
 - Artistic sign-off remains pending until the final improved master has its targeted proofs reviewed and the whole film is watched end-to-end with audio.
 
-## Improved candidate in progress
-- Workflow: [run #5](https://github.com/Nolane-x/video/actions/runs/40351517634), source commit `b4623afa5f65bb45091ba517912eff1c09595993`.
-- It includes the timed SENT UI confirmation and revised peer-sharing pose. Its technical and visual status is not yet known; do not treat the baseline master as the final approved export.
+
+
+## Current candidate — render #9
+- Workflow: [run #9](https://github.com/Nolane-x/video/actions/runs/40353275695), source commit `a0ecaec8a85585a2bbf1127c1a5a517b138bce22`.
+- It includes the timed laptop SENT confirmation, a physically extended held portfolio during the peer-sharing scene, and a timed point/response beat in the café. The workflow also uses bounded apt retries because the current Ubuntu 24.04 hosted image did not have FFmpeg installed.
+- Render result and new artifact SHA are pending. The run #3 baseline remains the last known technical pass; do not describe run #9 as passed until its own logs and artifact are verified.
+- Runs #5 and #6 were canceled when revisions were committed. Runs #7 and #8 failed during dependency setup after the temporary fast-fail change correctly exposed that FFmpeg was absent; the bounded installation step has now been restored.
