@@ -39,14 +39,22 @@ jobs:
             "one-more-scroll-h2-source.zip",
             "one-more-scroll-h2-source-v2-scene-fixes.zip",
             "one-more-scroll-h2-source-v2-render-candidate.mp4",
-            "h2-source-v2-render-review.zip"
+            "h2-source-v2-render-review.zip",
+            "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+            "h2-source-v3-shoelace-fix-review.zip"
           }
           missing=required-names
           if missing: raise SystemExit("Source-release manifest is missing assets: "+", ".join(sorted(missing)))
           candidate=data["source_v2_render_candidate"]
           assert candidate.get("status")=="technical_render_and_stream_validation_passed"
           assert candidate.get("is_canonical_master") is False
-          print("Source-release manifest is valid; candidate remains a separate non-canonical master.")
+          candidate3=data.get("source_v3_render_candidate", {})
+          assert candidate3.get("status")=="technical_render_and_stream_validation_passed"
+          assert candidate3.get("is_canonical_master") is False
+          assert candidate3.get("candidate_filename")=="one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4"
+          assert candidate3.get("review_bundle_filename")=="h2-source-v3-shoelace-fix-review.zip"
+          assert candidate3.get("patch_commit")=="05a2027cebdc83cedc1002992198d9404f253647"
+          print("Source-release manifest is valid; source-v2 and source-v3 candidates remain separate from the canonical master.")
           PY
           gh release upload h2-production-assets-v1 \
             video-library/one-more-scroll/h2-source-release.json \
