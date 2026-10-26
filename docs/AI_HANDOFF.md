@@ -6,7 +6,7 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 ## Creative decisions to preserve
 - User wants cinematic story-led stick-figure video, not generic AI-looking colors or flat repeated SVG backgrounds.
 - Simple character; rich environment; warm practical lighting; motivated camera/editing; expressive action; visible contact; intentional sound arc.
-- References: user-provided videos and Ifverse Tales / Day One Films. Study techniques; don't copy assets.
+- References: first consult `video-library/reference-clips.json` for the user's exact examples “The Words You Never Forgot” (https://www.youtube.com/watch?v=qyFUAlGMxSE) and “What If You Were a Mentalist?” (https://www.youtube.com/watch?v=XexSnQTMMhw), plus Ifverse Tales / Day One Films. Verify the sources are accessible and actually watch them before making timestamped claims; don't copy assets.
 - The user expects honesty: “file exported” is not “visual QA passed.”
 - Never confuse H2 Canvas/Chromium render with Remotion or Blender output.
 
@@ -23,12 +23,12 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Film manifest: `video-library/one-more-scroll/manifest.json`
 
 ## Tool and video inventory
-- Read `docs/TOOL_INVENTORY.md` and `video-library/previous-works-catalog.json` before assuming an app/source archive or old video is present.
+- Read `docs/TOOL_INVENTORY.md`, `video-library/previous-works-catalog.json`, and `video-library/reference-clips.json` before assuming a tool, source archive, old clip, or reference MP4 is present.
 - `tools/video/archive_previous_works.py` stages prior clips by fixed SHA; the GitHub verification workflow marks them permanent only after the remote files are checked.
 - `tools/video/publish_h2_source_release.ps1` uploads the large H2 source packages to a versioned GitHub Release after checksum validation.
 
 ## Artifact truth
-The exact 155-second Full HD H2 master is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4` and verified by workflow run 40271825143. The source ZIP remains external to GitHub until uploaded separately. The Remotion reference build under `video-library/one-more-scroll/renders/remotion-run-31/` is a separate renderer output. Never conflate them.
+The exact 155-second Full HD H2 master is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The original H2 source ZIPs remain external to GitHub pending separate verified uploads. The Remotion reference render at `video-library/one-more-scroll/renders/remotion-run-36/` is a different renderer/output. Never conflate them.
 
 ## End-of-session
 Run checks; inspect contact sheets and motion proofs; record exact renderer, commit, run URL, artifact storage/expiry, audio measures, defects and next actions. Update `docs/STATE.md`, this file and the per-video manifest.
