@@ -37,7 +37,7 @@ ACCENT: amber
 [B12] 5s | CẢNH: cận mặt cậu, cố nở nụ cười lịch sự trong khi đôi mắt đã kiệt sức | NHẠC: dark
 > He called it being dependable.
 
-[B13] 5s | CẢNH: quán cà phê, người bạn ngồi đối diện nhìn cậu thật lâu, cậu vẫn giữ nụ cười quen thuộc | SFX: cup_set@0.8
+[B13] 5s | CẢNH: quán cà phê, người bạn ngồi đối diện nhìn cậu thật lâu, cậu vẫn giữ nụ cười quen thuộc | SFX: ding_soft@0.8
 > When someone asked how he was, he smiled.
 
 [B14] 5s | CẢNH: khoảng tối với một vùng sáng duy nhất, cậu cúi gập người dưới sức nặng vô hình | SFX: breath_in@0.4, boom_deep@2.2
