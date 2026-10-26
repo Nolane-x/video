@@ -52,7 +52,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: package-video-skill
+  group: package-video-skill-v2
   cancel-in-progress: true
 
 jobs:
