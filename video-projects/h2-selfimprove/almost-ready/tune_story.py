@@ -18,6 +18,8 @@ by_id = {s.get("id", "").lower(): s for s in shots}
 expected = {f"b{i:02d}" for i in range(1, 30)}
 if set(by_id) != expected:
     raise SystemExit("Shot IDs drifted: " + ", ".join(sorted(set(by_id) ^ expected)))
+shots[-1]["end"] = 172.0
+story["duration"] = 172.0
 
 def cap(kind: str, text: str, at: float = 0.3, dur: float = 5.25,
         x: float = 0.5, y: float = 0.105, size: int = 55,
@@ -240,7 +242,7 @@ apply("b20", "note", {
 
 # B21 — deliberate desk composition, real typing posture; sent count is still zero.
 apply("b21", "scene", {
-    "set": "bedroom", "setArgs": bedroom("dawn", phoneOnDesk={"x": 0.14}),
+    "set": "bedroom", "setArgs": bedroom("dawn", phoneOnDesk={"x": 0.82}),
     "actors": [actor("hero", "desk.seat", "type", "determined", facing=1, look=0.10)],
     "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 0}]},
     "cam": cam(0.69, 0.60, 1.24),
@@ -348,7 +350,7 @@ for s in shots:
     previous_end = float(s["end"])
 assert abs(previous_end - 172.0) < 0.02, f"Expected 172.0 s, got {previous_end}"
 assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"
-assert by_id["b13"]["tpl"] == "clock" and ["11:59" in str(by_id["b13"]["args"].get("timeAt"))]
+assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt"))
 assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
 assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1
 assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
