@@ -1,6 +1,19 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-26 after source-v3 render/mix/audio checks passed once; release packaging failed on a missing patch file in the review payload. A corrected retry is now running; the canonical H2 master remains unchanged. Check linked GitHub Actions for the latest run status.
+Snapshot updated 2026-10-26 after **THE FIRST HOUR** H2 render candidate passed the complete CI pipeline (run #26). Technical QA and targeted visual/motion spot-checks passed. The complete 172-second film has **not** yet had a real-time, start-to-finish artistic review with audio; keep artistic sign-off pending. The previously archived ONE MORE SCROLL canonical master remains unchanged.
+
+## Latest active film — THE FIRST HOUR
+
+- Manifest: [video-library/the-first-hour/manifest.json](../video-library/the-first-hour/manifest.json); QA notes: [video-library/the-first-hour/QA.md](../video-library/the-first-hour/QA.md).
+- Engine: native H2 SelfImprove Studio Canvas/Chromium render + FFmpeg mix/master; not Remotion.
+- Source commit: `6eba384b4babde94f030371d5c9904c483fcbef3`.
+- CI: [run #26 — passed](https://github.com/Nolane-x/video/actions/runs/40329265743), every workflow step green.
+- Master: 172.000 s, H.264 1920×1080 @24/1, AAC 48 kHz stereo; integrated loudness −14.1 LUFS, LRA 6.8 LU, true peak −2.5 dBFS.
+- MP4 SHA-256: `75b4172e47735368bb0070b50273ce12fb0248a460a5930c78cd19abb26e82a8`; 26,696,094 bytes.
+- Review ZIP SHA-256: `e0e514ee6cd048ad2d389a536c6c899297f77755e7d551cfd303193435dbfa3f`; includes the master, preview, two full shot sheets, reports and 12 six-second audio/video motion proofs. All 24 checksums listed inside the review bundle were verified locally.
+- Actions artifact: [the-first-hour-h2-selfimprove-26](https://github.com/Nolane-x/video/actions/runs/40329265743), artifact ID `12653272820`, ZIP SHA-256 `f7b6c6b6cac7ac0f76d10856d8a6e0c62d9351f9ba249ed3162feab9c2acef2a`. This is temporary Actions storage, **not** a durable release archive yet.
+- Visual sampling: both 29-shot contact sheets reviewed; notebook writing (b20) and punch-bag (b25) motion proofs inspected. The notebook no longer leaks characters from the next line; the bag visibly tilts/recoils at timed impacts after the gym-set wiring fix. The other 10 proof files are stream/duration validated, not all individually watched.
+- Next gate: full 172-second playback with audio, checking transitions, text readability, acting, all prop contacts and sound/story pacing; then archive the candidate to a durable release and update its status. Do not mark fully artistically approved based on CI or contact sheets alone.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video

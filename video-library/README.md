@@ -11,7 +11,7 @@ User-selected external visual references are indexed in [`reference-clips.json`]
 - Never mark an artifact archived until its URL works and checksum/metadata are recorded.
 - Inspect the actual video, not only its thumbnail or filename.
 
-Current production: [ONE MORE SCROLL manifest](one-more-scroll/manifest.json), with [QA state](one-more-scroll/QA.md). The original H2 MP4 is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The Remotion output is a different build.
+Current active candidate: [THE FIRST HOUR manifest](the-first-hour/manifest.json), with [QA notes](the-first-hour/QA.md). Its full-length H2 master passed technical QA in [Actions run #26](https://github.com/Nolane-x/video/actions/runs/40329265743), but remains awaiting a complete start-to-finish artistic watch with audio and durable release archival. Historical/canonical project: [ONE MORE SCROLL manifest](one-more-scroll/manifest.json), with [QA state](one-more-scroll/QA.md). The original H2 MP4 is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The Remotion output is a different build.
 
 
 ## Historical work and renderer-source preservation

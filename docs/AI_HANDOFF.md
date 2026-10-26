@@ -1,5 +1,13 @@
 # AI session handoff
 
+## Current active film — verify this before resuming old projects
+- The current candidate is **THE FIRST HOUR — An Animated Short Film**, built with native H2 Canvas/Chromium + FFmpeg, not the separate Remotion pipeline.
+- Latest passed CI: [run #26](https://github.com/Nolane-x/video/actions/runs/40329265743), source commit `6eba384b4babde94f030371d5c9904c483fcbef3`.
+- Manifest: `video-library/the-first-hour/manifest.json`; review notes: `video-library/the-first-hour/QA.md`.
+- Master SHA-256: `75b4172e47735368bb0070b50273ce12fb0248a460a5930c78cd19abb26e82a8`; 172.000 s, 1920×1080 @24/1, H.264 + AAC stereo 48 kHz; EBU R128 on the exact MP4: −14.1 LUFS, LRA 6.8 LU, true peak −2.5 dBFS.
+- All 12 motion-proof files exist and passed audio/video stream + duration checks. Still-sheet review and focused motion spot-checks were made for b20 writing and b25 punch-bag reaction. Full-length artistic playback is still pending.
+- Artifact run #26 (ID `12653272820`) is temporary GitHub Actions storage, not durable release archival. Before calling the project finished, complete full playback with audio and archive the approved candidate plus review ZIP to a durable release. Do not confuse this project with or overwrite the archived ONE MORE SCROLL master.
+
 ## First reads
 Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, and `video-library/one-more-scroll/manifest.json`.
 
