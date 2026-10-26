@@ -113,7 +113,7 @@ jobs:
           assert shots["b26"]["args"].get("setArgs", {}).get("tableW") == 0.26, "Cafe staging is missing"
           assert shots["b15"]["args"].get("hud", {}).get("rows", [{}])[0].get("reset", {}).get("to") == 0, "DAY reset is missing"
           assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2
-          assert by_id["b25"]["args"].get("actors", [{}])[0].get("pose") == "punch", "Workout action is missing"
+          assert any(p[1] == "punch" for p in by_id["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Workout action is missing"
           assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
           assert by_id["b29"]["tpl"] == "scene", "End card must not use a simulated platform UI"
           assert "voice" not in [a.get("who") for a in by_id["b16"]["args"].get("actors", [])], "Shadow must be absent at the turning point"
