@@ -33,28 +33,19 @@ jobs:
         with:
           ref: main
       - name: Verify system render dependencies
-        timeout-minutes: 10
+        timeout-minutes: 2
         run: |
           set -euo pipefail
-          missing=0
+          # GitHub's hosted Ubuntu runner provides FFmpeg and ZIP tools; do not depend on
+          # apt mirrors during the render. Fail fast with an actionable diagnostic.
           for bin in ffmpeg zip unzip; do
             if ! command -v "$bin" >/dev/null 2>&1; then
-              echo "Missing system dependency: $bin"
-              missing=1
-            else
-              echo "Found $bin at $(command -v "$bin")"
+              echo "::error::Required preinstalled system tool is missing: $bin"
+              exit 1
             fi
-          done
-          if [ "$missing" -ne 0 ]; then
-            timeout 300s sudo apt-get update
-            timeout 300s sudo apt-get install -y --no-install-recommends ffmpeg zip unzip
-          fi
-          for bin in ffmpeg zip unzip; do
-            command -v "$bin"
+            echo "Found $bin at $(command -v "$bin")"
           done
           ffmpeg -version | head -n 1 || true
-          zip -v | head -n 1 || true
-          unzip -v | head -n 1 || true
       - name: Set up Node and Python
         uses: actions/setup-node@v4
         with:
