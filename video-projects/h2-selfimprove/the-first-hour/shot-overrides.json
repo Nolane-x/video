@@ -1,0 +1,1650 @@
+{
+  "schema_version": 1,
+  "project": "the-first-hour",
+  "duration": 172,
+  "purpose": "Hand-authored native H2 shot overrides. Preserve the approved 01-PHIM dialogue and timings; correct acting, geography, framing, continuity, and readable captions.",
+  "shots": {
+    "b01": {
+      "tpl": "black",
+      "args": {
+        "dust": true,
+        "line": false,
+        "texts": [
+          {
+            "kind": "big",
+            "t": "He kept promising himself one clean morning.",
+            "at": 0.25,
+            "dur": 3.45,
+            "x": 0.5,
+            "y": 0.48,
+            "size": 88,
+            "maxW": 0.84
+          }
+        ]
+      }
+    },
+    "b02": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "moon",
+          "clock": "7:00",
+          "ring": true,
+          "desk": false,
+          "calendar": false,
+          "lamp": false
+        },
+        "bed": {
+          "face": "sleep",
+          "zzz": false
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        },
+        "cam": {
+          "from": [
+            0.42,
+            0.55,
+            1
+          ],
+          "to": [
+            0.42,
+            0.55,
+            1.04
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Every morning began with a plan.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "top",
+            "size": 55,
+            "maxW": 0.76
+          }
+        ]
+      }
+    },
+    "b03": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "moon",
+          "clock": "7:00",
+          "ring": true,
+          "bedX": 0.27,
+          "bedW": 0.38,
+          "desk": false,
+          "calendar": false,
+          "lamp": false
+        },
+        "bed": {
+          "face": "sleep",
+          "arm": {
+            "at": 0.55,
+            "dur": 1.5
+          }
+        },
+        "cam": {
+          "from": [
+            0.29,
+            0.64,
+            1.12
+          ],
+          "to": [
+            0.29,
+            0.64,
+            1.28
+          ],
+          "at": 0,
+          "dur": 5,
+          "ease": "sine"
+        },
+        "texts": [
+          {
+            "kind": "tempt",
+            "t": "five more minutes.",
+            "at": 0.65,
+            "dur": 3.2,
+            "x": 0.67,
+            "y": 0.25,
+            "size": 50
+          }
+        ]
+      }
+    },
+    "b04": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "moon",
+          "clock": false,
+          "calendar": false,
+          "lamp": false,
+          "desk": false
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "bed.sit",
+            "pose": "sitphone",
+            "face": "tired",
+            "hold": "phone",
+            "glowFace": "#9fb6ff",
+            "h": 0.46
+          },
+          {
+            "who": "voice",
+            "x": 0.69,
+            "pose": "reach",
+            "face": "grin",
+            "facing": -1,
+            "h": 0.5,
+            "scale": 1.08,
+            "behind": true,
+            "at": 0.25
+          }
+        ],
+        "cam": {
+          "from": [
+            0.5,
+            0.55,
+            1
+          ],
+          "to": [
+            0.53,
+            0.54,
+            1.08
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "tempt",
+            "t": "you deserve a little break.",
+            "at": 0.4,
+            "dur": 3.4,
+            "x": 0.68,
+            "y": 0.22,
+            "size": 46
+          }
+        ]
+      }
+    },
+    "b05": {
+      "tpl": "phone",
+      "args": {
+        "screen": "feed",
+        "posts": [
+          "game",
+          "burger",
+          "selfie",
+          "car"
+        ],
+        "hold": 0.58,
+        "scroll": 270,
+        "h": 0.89,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "moon"
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "One clip became a hundred.",
+            "at": 0.35,
+            "dur": 5.1,
+            "size": 52
+          }
+        ]
+      }
+    },
+    "b06": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "moon",
+          "clock": false,
+          "calendar": false,
+          "deskX": 0.72,
+          "laptop": true,
+          "laptopColor": "#9fb6ff",
+          "lamp": true
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "pose": "sitdesk",
+            "face": "tired",
+            "facing": 1,
+            "h": 0.47,
+            "look": 0.7
+          },
+          {
+            "who": "voice",
+            "x": 0.84,
+            "pose": "reach",
+            "face": "grin",
+            "facing": -1,
+            "h": 0.45,
+            "scale": 0.92,
+            "behind": true,
+            "at": 0.3
+          }
+        ],
+        "cam": {
+          "from": [
+            0.72,
+            0.57,
+            1.02
+          ],
+          "to": [
+            0.72,
+            0.57,
+            1.1
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 3
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "tempt",
+            "t": "start when you feel ready.",
+            "at": 0.45,
+            "dur": 3.3,
+            "x": 0.8,
+            "y": 0.23,
+            "size": 45
+          }
+        ]
+      }
+    },
+    "b07": {
+      "tpl": "phone",
+      "args": {
+        "screen": "reel",
+        "art": "game",
+        "from": 9580,
+        "speed": 10,
+        "total": 10000,
+        "h": 0.92,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "night"
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "The hours disappeared without a sound.",
+            "at": 0.35,
+            "dur": 5.1,
+            "size": 50
+          }
+        ]
+      }
+    },
+    "b08": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "night",
+          "clock": false,
+          "calendar": {
+            "month": "NOV",
+            "fill": 12,
+            "mode": "x",
+            "color": "#d5a34c"
+          },
+          "calX": 0.84,
+          "deskX": 0.7,
+          "laptop": true,
+          "laptopColor": "#59617a",
+          "lamp": false
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "pose": "sitsad",
+            "face": "tired",
+            "facing": 1,
+            "h": 0.47,
+            "rot": 0.02
+          }
+        ],
+        "cam": {
+          "from": [
+            0.72,
+            0.54,
+            1.02
+          ],
+          "to": [
+            0.75,
+            0.53,
+            1.12
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 12
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "His plans gathered dust.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 56,
+            "maxW": 0.75
+          }
+        ]
+      }
+    },
+    "b09": {
+      "tpl": "face",
+      "args": {
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "night",
+          "lamp": false
+        },
+        "who": "hoodie",
+        "face": "tired",
+        "bloodshot": true,
+        "bags": true,
+        "glowFace": "#9fb6ff",
+        "x": 0.43,
+        "y": 0.53,
+        "h": 1.12,
+        "pose": "slump",
+        "look": 0.25,
+        "actors": [
+          {
+            "who": "voice",
+            "x": 0.78,
+            "y": 0.8,
+            "h": 0.34,
+            "pose": "grin",
+            "face": "grin",
+            "facing": -1,
+            "scale": 0.72,
+            "glow": "#d5a34c",
+            "at": 0.2
+          }
+        ],
+        "texts": [
+          {
+            "kind": "tempt",
+            "t": "everyone does this.",
+            "at": 0.5,
+            "dur": 2.8,
+            "x": 0.76,
+            "y": 0.2,
+            "size": 47
+          }
+        ]
+      }
+    },
+    "b10": {
+      "tpl": "scene",
+      "args": {
+        "set": "city",
+        "setArgs": {
+          "time": "night",
+          "lit": 0.46,
+          "n": 18
+        },
+        "actors": [
+          {
+            "who": "hoodie",
+            "x": 0.17,
+            "walk": {
+              "to": 0.78,
+              "at": 0.25,
+              "dur": 5.1,
+              "speed": 0.9
+            },
+            "face": "tired",
+            "pose": "phone",
+            "hold": "phone",
+            "glowFace": "#9fb6ff",
+            "h": 0.48,
+            "look": -0.35
+          }
+        ],
+        "cam": {
+          "from": [
+            0.45,
+            0.55,
+            1
+          ],
+          "to": [
+            0.61,
+            0.55,
+            1.08
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 30
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Life kept moving around him.",
+            "at": 0.4,
+            "dur": 5.1,
+            "pos": "top",
+            "size": 54,
+            "maxW": 0.75
+          }
+        ]
+      }
+    },
+    "b11": {
+      "tpl": "phone",
+      "args": {
+        "screen": "chat",
+        "name": "Jay",
+        "messages": [
+          {
+            "text": "still coming tonight?",
+            "me": false,
+            "at": 0.85
+          }
+        ],
+        "h": 0.88,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "city",
+        "setArgs": {
+          "time": "night"
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "His friends stopped asking twice.",
+            "at": 0.35,
+            "dur": 5.1,
+            "size": 47
+          }
+        ]
+      }
+    },
+    "b12": {
+      "tpl": "phone",
+      "args": {
+        "screen": "email",
+        "from": "Recruiting",
+        "subject": "Update on your application",
+        "preview": "We have decided to move forward with another candidate.",
+        "rows": [
+          {
+            "from": "Recruiting",
+            "subject": "Application update",
+            "preview": "We have decided to move forward with another candidate.",
+            "hl": true
+          },
+          {
+            "from": "Jay",
+            "subject": "Are you okay?",
+            "preview": "Haven't heard from you lately.",
+            "hl": false
+          },
+          {
+            "from": "Newsletter",
+            "subject": "This week",
+            "preview": "Five things you may have missed.",
+            "hl": false
+          }
+        ],
+        "h": 0.9,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "night"
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "The opportunity went to someone else.",
+            "at": 0.35,
+            "dur": 5.1,
+            "size": 47
+          }
+        ]
+      }
+    },
+    "b13": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "night",
+          "calendar": {
+            "month": "DEC",
+            "fill": 31,
+            "mode": "x",
+            "color": "#d5a34c"
+          },
+          "calX": 0.76,
+          "bed": false,
+          "desk": false,
+          "lamp": false,
+          "clock": false,
+          "window": false,
+          "dim": 0.16
+        },
+        "actors": [
+          {
+            "who": "hoodie",
+            "x": 0.59,
+            "pose": "reach",
+            "face": "empty",
+            "facing": 1,
+            "h": 0.42,
+            "look": 0.8
+          }
+        ],
+        "cam": {
+          "from": [
+            0.72,
+            0.39,
+            1.22
+          ],
+          "to": [
+            0.72,
+            0.39,
+            1.38
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 412
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Four hundred mornings.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 58,
+            "maxW": 0.68
+          }
+        ]
+      }
+    },
+    "b14": {
+      "tpl": "scene",
+      "args": {
+        "set": "void",
+        "setArgs": {
+          "spot": 0.47,
+          "dim": 0.08
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": 0.44,
+            "pose": "headhold",
+            "face": "empty",
+            "facing": 1,
+            "h": 0.49,
+            "scale": 1.05
+          },
+          {
+            "who": "voice",
+            "x": 0.61,
+            "pose": "stand",
+            "face": "grin",
+            "facing": -1,
+            "h": 0.58,
+            "scale": 1.15,
+            "behind": true,
+            "glow": "#d5a34c",
+            "at": 0.25
+          }
+        ],
+        "lights": [
+          {
+            "x": 0.46,
+            "y": 0.35,
+            "r": 0.38,
+            "color": "#d5a34c",
+            "a": 0.16
+          }
+        ],
+        "cam": {
+          "from": [
+            0.5,
+            0.56,
+            1
+          ],
+          "to": [
+            0.5,
+            0.56,
+            1.08
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 412
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "And nothing had changed.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 58,
+            "maxW": 0.74
+          }
+        ]
+      }
+    },
+    "b15": {
+      "tpl": "black",
+      "args": {
+        "line": false,
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "He finally saw the cost.",
+            "at": 0.35,
+            "dur": 2,
+            "x": 0.5,
+            "y": 0.39,
+            "size": 62,
+            "maxW": 0.8
+          },
+          {
+            "kind": "big",
+            "t": "He had been absent from his own life.",
+            "at": 2.65,
+            "dur": 3.1,
+            "x": 0.5,
+            "y": 0.57,
+            "size": 91,
+            "maxW": 0.82
+          }
+        ]
+      },
+      "in": {
+        "type": "dip",
+        "dur": 0.3
+      }
+    },
+    "b16": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": false,
+          "lamp": false,
+          "deskX": 0.72,
+          "laptop": false,
+          "door": false,
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": 0.48,
+            "pose": "relaxed",
+            "face": "empty",
+            "facing": -1,
+            "look": -0.4,
+            "h": 0.47
+          }
+        ],
+        "cam": {
+          "from": [
+            0.48,
+            0.53,
+            1
+          ],
+          "to": [
+            0.47,
+            0.52,
+            1.05
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Then one message reached him.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 55,
+            "maxW": 0.76
+          }
+        ]
+      },
+      "in": {
+        "type": "dip",
+        "dur": 0.6
+      }
+    },
+    "b17": {
+      "tpl": "phone",
+      "args": {
+        "screen": "chat",
+        "name": "Jay",
+        "messages": [
+          {
+            "text": "miss you, man. coffee today?",
+            "me": false,
+            "at": 0.75
+          }
+        ],
+        "h": 0.9,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "dawn"
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "A real person still remembered him.",
+            "at": 0.35,
+            "dur": 5.1,
+            "size": 49
+          }
+        ]
+      }
+    },
+    "b18": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": false,
+          "lamp": false,
+          "deskX": 0.72,
+          "laptop": false,
+          "door": true,
+          "doorX": 0.93,
+          "doorOpen": 0.18,
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": 0.48,
+            "poseAt": [
+              [
+                0.2,
+                "phone"
+              ],
+              [
+                1.5,
+                "reach"
+              ],
+              [
+                3,
+                "open"
+              ],
+              [
+                4.3,
+                "relaxed"
+              ]
+            ],
+            "faceAt": [
+              [
+                0.2,
+                "tired"
+              ],
+              [
+                2.8,
+                "neutral"
+              ],
+              [
+                4.2,
+                "determined"
+              ]
+            ],
+            "pose": "phone",
+            "face": "tired",
+            "facing": 1,
+            "h": 0.47,
+            "lookAt": [
+              [
+                0.2,
+                -0.1
+              ],
+              [
+                3.5,
+                0.5
+              ]
+            ],
+            "at": 0.1
+          }
+        ],
+        "cam": {
+          "from": [
+            0.55,
+            0.55,
+            1
+          ],
+          "to": [
+            0.57,
+            0.53,
+            1.07
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "He did one small thing differently.",
+            "at": 0.35,
+            "dur": 5.1,
+            "pos": "bottom",
+            "size": 53,
+            "maxW": 0.76
+          }
+        ]
+      }
+    },
+    "b19": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": false,
+          "lamp": true,
+          "deskX": 0.72,
+          "laptop": true,
+          "laptopColor": "#d6c69b",
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "pose": "relaxed",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.47,
+            "look": 0.5
+          }
+        ],
+        "cam": {
+          "from": [
+            0.68,
+            0.57,
+            1
+          ],
+          "to": [
+            0.68,
+            0.57,
+            1.07
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "No grand promise. Just one hour.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 55,
+            "maxW": 0.74
+          }
+        ]
+      }
+    },
+    "b20": {
+      "tpl": "note",
+      "args": {
+        "text": "ONE TASK.\nTEN MINUTES.",
+        "at": 0.35,
+        "cps": 7.5,
+        "s": 0.92,
+        "x": 0.5,
+        "y": 0.5,
+        "cam": {
+          "from": [
+            0.5,
+            0.52,
+            1
+          ],
+          "to": [
+            0.5,
+            0.52,
+            1.04
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "He made the next step smaller.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 49,
+            "maxW": 0.77
+          }
+        ]
+      }
+    },
+    "b21": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": false,
+          "lamp": true,
+          "deskX": 0.72,
+          "laptop": true,
+          "laptopColor": "#c5d8f0",
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "pose": "sitdesk",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.5,
+            "look": 0.7,
+            "poseAt": [
+              [
+                0.1,
+                "sitdesk"
+              ],
+              [
+                2.2,
+                "sitdesk"
+              ],
+              [
+                3,
+                "reach"
+              ],
+              [
+                4,
+                "sitdesk"
+              ]
+            ]
+          }
+        ],
+        "cam": {
+          "from": [
+            0.69,
+            0.59,
+            1.02
+          ],
+          "to": [
+            0.71,
+            0.58,
+            1.15
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Ten minutes became thirty.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 56,
+            "maxW": 0.75
+          }
+        ]
+      }
+    },
+    "b22": {
+      "tpl": "phone",
+      "args": {
+        "screen": "lock",
+        "time": "7:18",
+        "date": "MONDAY",
+        "notes": [
+          {
+            "app": "Messages",
+            "text": "New message",
+            "at": 0.9
+          }
+        ],
+        "h": 0.84,
+        "x": 0.37,
+        "y": 0.52,
+        "tilt": -0.04,
+        "bg": "bedroom",
+        "setArgs": {
+          "sky": "dawn"
+        },
+        "texts": [
+          {
+            "kind": "tempt",
+            "t": "you can check it now.",
+            "at": 0.55,
+            "dur": 2.6,
+            "x": 0.77,
+            "y": 0.25,
+            "size": 43
+          }
+        ]
+      }
+    },
+    "b23": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": false,
+          "lamp": true,
+          "deskX": 0.72,
+          "laptop": true,
+          "laptopColor": "#c5d8f0",
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "poseAt": [
+              [
+                0.2,
+                "phone"
+              ],
+              [
+                1.25,
+                "reach"
+              ],
+              [
+                2.25,
+                "sitdesk"
+              ]
+            ],
+            "faceAt": [
+              [
+                0.2,
+                "worried"
+              ],
+              [
+                2.2,
+                "determined"
+              ]
+            ],
+            "pose": "sitdesk",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.49,
+            "look": 0.7
+          },
+          {
+            "who": "voice",
+            "x": 0.83,
+            "poseAt": [
+              [
+                0.3,
+                "reach"
+              ],
+              [
+                1.5,
+                "stand"
+              ],
+              [
+                2.6,
+                "slump"
+              ]
+            ],
+            "face": "grin",
+            "facing": -1,
+            "h": 0.35,
+            "scale": 0.65,
+            "behind": true,
+            "at": 0.3,
+            "out": 3.4,
+            "fade": 1.4,
+            "glow": "#d5a34c"
+          }
+        ],
+        "cam": {
+          "from": [
+            0.7,
+            0.58,
+            1.04
+          ],
+          "to": [
+            0.71,
+            0.58,
+            1.12
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "This time, he let the feeling pass.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 54,
+            "maxW": 0.76
+          }
+        ]
+      }
+    },
+    "b24": {
+      "tpl": "scene",
+      "args": {
+        "set": "city",
+        "setArgs": {
+          "time": "dawn",
+          "lit": 0.32,
+          "n": 18
+        },
+        "actors": [
+          {
+            "who": "band",
+            "x": 0.15,
+            "run": {
+              "to": 0.84,
+              "at": 0.25,
+              "dur": 5.1,
+              "speed": 1.35
+            },
+            "face": "determined",
+            "pose": "stand",
+            "facing": 1,
+            "h": 0.49
+          }
+        ],
+        "cam": {
+          "from": [
+            0.46,
+            0.55,
+            1
+          ],
+          "to": [
+            0.59,
+            0.54,
+            1.08
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 7
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "Small wins began to stack.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "top",
+            "size": 55,
+            "maxW": 0.74
+          }
+        ]
+      }
+    },
+    "b25": {
+      "tpl": "scene",
+      "args": {
+        "set": "gym",
+        "setArgs": {
+          "bag": true,
+          "bagX": 0.64,
+          "swing": 0.18,
+          "barbell": false,
+          "spot": 0.47
+        },
+        "actors": [
+          {
+            "who": "band",
+            "x": 0.4,
+            "poseAt": [
+              [
+                0.3,
+                "guard"
+              ],
+              [
+                1,
+                "punch"
+              ],
+              [
+                1.75,
+                "guard"
+              ],
+              [
+                2.65,
+                "punch"
+              ],
+              [
+                3.35,
+                "guard"
+              ],
+              [
+                4.5,
+                "relaxed"
+              ]
+            ],
+            "faceAt": [
+              [
+                0.3,
+                "determined"
+              ]
+            ],
+            "pose": "guard",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.5,
+            "look": 0.8
+          }
+        ],
+        "cam": {
+          "from": [
+            0.52,
+            0.56,
+            1.02
+          ],
+          "to": [
+            0.53,
+            0.55,
+            1.1
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 7
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "He stopped waiting to feel different.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 51,
+            "maxW": 0.78
+          }
+        ]
+      }
+    },
+    "b26": {
+      "tpl": "scene",
+      "args": {
+        "set": "cafe",
+        "setArgs": {
+          "lampX": 0.5,
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "band",
+            "x": "table.left",
+            "pose": "sit",
+            "face": "smile",
+            "facing": 1,
+            "h": 0.45,
+            "look": 0.55
+          },
+          {
+            "who": "friend",
+            "x": "table.right",
+            "pose": "sit",
+            "face": "smile",
+            "facing": -1,
+            "h": 0.45,
+            "look": -0.55
+          }
+        ],
+        "cam": {
+          "from": [
+            0.5,
+            0.54,
+            1
+          ],
+          "to": [
+            0.5,
+            0.54,
+            1.04
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 14
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "He came back into the room.",
+            "at": 0.35,
+            "dur": 5.15,
+            "pos": "bottom",
+            "size": 56,
+            "maxW": 0.72
+          }
+        ]
+      }
+    },
+    "b27": {
+      "tpl": "scene",
+      "args": {
+        "set": "bedroom",
+        "setArgs": {
+          "sky": "dawn",
+          "clock": false,
+          "calendar": {
+            "month": "JAN",
+            "fill": 23,
+            "mode": "fill",
+            "color": "#d5a34c"
+          },
+          "calX": 0.83,
+          "deskX": 0.7,
+          "laptop": true,
+          "lamp": true,
+          "dim": 0.01
+        },
+        "actors": [
+          {
+            "who": "band",
+            "x": "desk.seat",
+            "pose": "sitdesk",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.48,
+            "look": 0.7
+          },
+          {
+            "who": "voice",
+            "x": 0.76,
+            "y": 0.8,
+            "poseAt": [
+              [
+                0.2,
+                "stand"
+              ],
+              [
+                1.5,
+                "reach"
+              ],
+              [
+                3,
+                "slump"
+              ]
+            ],
+            "face": "grin",
+            "facing": -1,
+            "h": 0.38,
+            "scale": 0.62,
+            "behind": true,
+            "at": 0.25,
+            "out": 3.7,
+            "fade": 1.1,
+            "glow": "#d5a34c"
+          }
+        ],
+        "cam": {
+          "from": [
+            0.68,
+            0.56,
+            1.02
+          ],
+          "to": [
+            0.69,
+            0.56,
+            1.12
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "fx": [
+          {
+            "kind": "shards",
+            "at": 2.55,
+            "dur": 1.5,
+            "x": 0.76,
+            "y": 0.39,
+            "color": "#d5a34c",
+            "seed": 8
+          }
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 14
+            }
+          ]
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "The voice returned.",
+            "at": 0.25,
+            "dur": 1.35,
+            "x": 0.5,
+            "y": 0.15,
+            "size": 51,
+            "maxW": 0.7
+          },
+          {
+            "kind": "tempt",
+            "t": "just one more scroll.",
+            "at": 1.65,
+            "dur": 2,
+            "x": 0.78,
+            "y": 0.29,
+            "size": 43
+          },
+          {
+            "kind": "narr",
+            "t": "But it sounded smaller now.",
+            "at": 4.05,
+            "dur": 1.65,
+            "x": 0.5,
+            "y": 0.18,
+            "size": 49,
+            "maxW": 0.72
+          }
+        ]
+      }
+    },
+    "b28": {
+      "tpl": "card",
+      "args": {
+        "word": "THE FIRST HOUR.",
+        "sub": "Your life starts in minutes.",
+        "sub2": "Take the first one.",
+        "sub2At": 3,
+        "type": true,
+        "typeDur": 1.3,
+        "size": 0.14
+      }
+    },
+    "b29": {
+      "tpl": "scene",
+      "args": {
+        "set": "doorway",
+        "setArgs": {
+          "doorX": 0.68,
+          "doorOpen": 0.92,
+          "dim": 0.04
+        },
+        "actors": [
+          {
+            "who": "band",
+            "x": 0.39,
+            "poseAt": [
+              [
+                0.2,
+                "stand"
+              ],
+              [
+                2.6,
+                "wave"
+              ]
+            ],
+            "faceAt": [
+              [
+                0.2,
+                "smile"
+              ]
+            ],
+            "pose": "stand",
+            "face": "smile",
+            "facing": 1,
+            "h": 0.48,
+            "look": 0.2
+          }
+        ],
+        "cam": {
+          "from": [
+            0.5,
+            0.54,
+            1
+          ],
+          "to": [
+            0.51,
+            0.54,
+            1.05
+          ],
+          "at": 0,
+          "dur": 6
+        },
+        "texts": [
+          {
+            "kind": "narr",
+            "t": "If this hit, like and subscribe.",
+            "at": 0.35,
+            "dur": 5.1,
+            "pos": "bottom",
+            "size": 54,
+            "maxW": 0.78
+          }
+        ]
+      }
+    }
+  }
+}
