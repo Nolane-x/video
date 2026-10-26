@@ -44,6 +44,7 @@ export const POSES = {
   punch:    { aF: [1.55, 1.55], aB: [0.4, 2.5], lF: [0.35, -0.1], lB: [-0.35, 0.05], lean: 0.18, drop: 4 },
   lift:     { aF: [2.95, 3.1], aB: [-2.95, -3.1], lF: [0.25, 0], lB: [-0.25, 0], drop: 3 },                // nang ta qua dau
   sit:      { aF: [0.35, 1.3], aB: [0.2, 1.2], lF: [1.5, 0.05], lB: [1.45, 0.0], drop: 15, lean: -0.05 },  // ngoi ghe / mep giuong
+  sitpoint: { aF: [1.45, 1.5], aB: [0.2, 1.2], lF: [1.5, 0.05], lB: [1.45, 0.0], drop: 15, lean: -0.05 },  // seated pointing gesture without standing up
   sitphone: { aF: [0.6, 2.5], aB: [0.4, 2.3], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.12, head: [2, 3] },
   sitdesk:  { aF: [1.0, 1.55], aB: [0.9, 1.5], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.22 },     // cui viet / doc
   type:     { aF: [2.42, 1.55], aB: [2.32, 1.50], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.22, head: [0, 1] }, // seated typing
