@@ -25,6 +25,7 @@ on:
       - ".github/workflows/verify-previous-works.yml"
       - ".github/workflows/verify-archive-h2-master.yml"
       - ".github/workflows/verify-h2-source-v2.yml"
+      - ".github/workflows/sync-h2-source-release-manifest.yml"
       - "video-library/README.md"
       - "video-library/previous-works-catalog.json"
       - "video-library/reference-clips.json"
@@ -72,7 +73,7 @@ jobs:
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library bundle/.github/workflows
           cp README.md AGENTS.md CLAUDE.md bundle/
-          cp .github/workflows/verify-h2-source-v2.yml bundle/.github/workflows/
+          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
@@ -149,6 +150,7 @@ jobs:
             "h2_source_release_url": "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1",
             "h2_source_zip_binaries_embedded": false,
             "source_v2_candidate_workflow": ".github/workflows/verify-h2-source-v2.yml",
+            "h2_source_release_manifest_sync_workflow": ".github/workflows/sync-h2-source-release-manifest.yml",
             "user_reference_clips_manifest": "video-library/reference-clips.json",
             "offline_user_reference_video_files_embedded": false,
             "canonical_h2_qa_report": "video-library/one-more-scroll/QA.md",
@@ -199,6 +201,7 @@ jobs:
               "video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg",
               "video-library/one-more-scroll/h2-source-release.json",
               ".github/workflows/verify-h2-source-v2.yml",
+              ".github/workflows/sync-h2-source-release-manifest.yml",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
           with zipfile.ZipFile(path) as archive:
@@ -243,6 +246,8 @@ jobs:
                   raise SystemExit("Source ZIPs must remain separate release assets, not duplicated in the portable ZIP")
               if ".github/workflows/verify-h2-source-v2.yml" not in names:
                   raise SystemExit("The source-v2 candidate render workflow is missing from the portable package")
+              if ".github/workflows/sync-h2-source-release-manifest.yml" not in names:
+                  raise SystemExit("The H2 source release manifest sync workflow is missing from the portable package")
               if bundle_manifest.get("includes_original_h2_master") is not True:
                   raise SystemExit("Bundle manifest must mark the canonical H2 master as included")
               if bundle_manifest.get("canonical_h2_master_sha256") != expected_h2_sha:
