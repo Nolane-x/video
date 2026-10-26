@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "project_id": "one-more-scroll",
+  "status": "preview_passed_ready_for_full_render",
+  "requested_at_utc": "2026-10-26T06:32:00Z",
+  "source_archive": {
+    "filename": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+    "release_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip",
+    "size_bytes": 115856962,
+    "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014"
+  },
+  "patch": {
+    "path": "tools/video/patch_h2_shoelace_scene.py",
+    "commit": "05a2027cebdc83cedc1002992198d9404f253647",
+    "description": "Add a forward-leaning tieShoes/tieShoesAlt pose, larger but floor-safe arm reach, early transition to the shoes, and alternating wrist/arm angles for a readable 3.15-second tying action."
+  },
+  "preview": {
+    "workflow_run_id": "40280228327",
+    "workflow_url": "https://github.com/Nolane-x/video/actions/runs/40280228327",
+    "artifact_id": "12631863154",
+    "artifact_name": "h2-source-v3-shoelace-preview",
+    "artifact_retention_days": 30,
+    "contact_sheet_artifact_download": "https://github.com/Nolane-x/video/actions/runs/40280228327",
+    "status": "success",
+    "focused_duration_seconds": 5,
+    "resolution": "1920x1080",
+    "fps": 24,
+    "frames_sampled": 20,
+    "visual_observation": "The latest contact sheet shows the protagonist leaning forward from about 80.5 seconds and both hands at the shoe/foot area while wrist angles alternate; this focused preview passed technical checks. Full-film artistic approval remains pending."
+  },
+  "expected_output": {
+    "candidate_filename": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "review_filename": "h2-source-v3-shoelace-fix-review.zip",
+    "duration_seconds": 155,
+    "width": 1920,
+    "height": 1080,
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "audio_sample_rate_hz": 48000,
+    "audio_channels": 2
+  },
+  "release_tag": "h2-production-assets-v1",
+  "safety": {
+    "canonical_master_must_remain_unchanged": true,
+    "promote_after_technical_checks_only": false,
+    "require_full_motion_and_audio_review": true,
+    "note": "This request authorizes a candidate render only. The existing H2 master is preserved. Do not replace it until the full 155-second candidate is watched with audio and explicitly approved."
+  }
+}
