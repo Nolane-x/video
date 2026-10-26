@@ -237,7 +237,7 @@ jobs:
               overlay_skill = "integrations/h2-selfimprove-studio-production-overlay/SKILL-ADDENDUM.md"
               if overlay_skill not in names:
                   raise SystemExit("H2 production overlay was not packaged")
-              print(f"Verified portable ZIP: {len(names)} entries; Remotion MP4 {info.file_size:,} bytes; H2 production overlay present; active plugin v1.1.0; original H2 master included={has_h2}.")
+              print(f"Verified portable ZIP: {len(names)} entries; Remotion MP4 {info.file_size:,} bytes; H2 production overlay present; active plugin v1.1.0; original H2 master included=True.")
           PY
           ls -lh video-production-master-skill.zip "$DEST/one-more-scroll-remotion-master.mp4"
           sha256sum video-production-master-skill.zip | tee video-production-master-skill.zip.sha256
