@@ -16,3 +16,9 @@ The archive and its SHA-256/ffprobe evidence are recorded in `manifest.json`, `Q
 
 
 Corrected source-v3 full render rerun: [40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324). The first render passed technical video/audio checks but the review ZIP checksum step failed because the patch script was not copied into its payload. The rerun fixes this packaging step; canonical H2 master remains untouched.
+
+## Latest H2 source-v3 status — technical pass, artistic review pending
+- [Candidate MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4) — 155s, 1920×1080/24, H.264 + AAC 48 kHz stereo; SHA-256 `761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f`.
+- [Review ZIP](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip) — contact sheets, logs, technical report, pinned patch and checksum list; SHA-256 `56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745`.
+- Workflow [40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) passed render, ffprobe, EBU R128 and release publishing. Audio: −14.0 LUFS integrated, 6.9 LU LRA, −2.4 dBFS true peak.
+- Full candidate playback with audio is still required to verify hand-to-shoe contact and action timing. The canonical H2 master remains untouched.
