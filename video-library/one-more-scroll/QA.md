@@ -62,3 +62,11 @@ The delivered master and later source-v2 are different versions. The prior maste
 - Risks still visible in the sampled frames: very tight protagonist close-ups around roughly 35–45 seconds and around 70 seconds can feel abrupt; the stair-climbing frame around 85 seconds appears to clip the top of the protagonist's head; the shoe-tying beat around 80–85 seconds still needs a moving proof showing clear hand-to-shoe contact and correct body mechanics.
 - No artistic pass is granted from this sampling. Before publishing or calling the master final-quality, watch the entire MP4 with audio, inspect transitions and synchronization, and verify the flagged close-up, shoe-contact and staircase-crop shots. Apply fixes to source-v2 and re-render through the actual H2 engine; do not silently alter or relabel the archived canonical master.
 
+
+
+## H2 source archives — published and verified
+- [x] Original source ZIP: [download](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source.zip), 115,875,783 bytes, SHA-256 `f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b`.
+- [x] Source-v2 with scene fixes: [download](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip), 115,856,962 bytes, SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
+- [x] Both ZIP CRC/integrity tests, expected file inventory, 31-shot / 155-second story metadata, byte sizes and SHA-256 checks passed in [Actions run 40274927974](https://github.com/Nolane-x/video/actions/runs/40274927974).
+- [ ] Render source-v2 through the real H2 Canvas/Chromium engine, review its complete moving footage and decide whether it is ready to replace the canonical master. The current master is not overwritten by source ZIP upload.
+
