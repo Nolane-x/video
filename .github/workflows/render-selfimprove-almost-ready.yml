@@ -1,0 +1,254 @@
+name: Render H2 SelfImprove — Almost Ready
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt"
+      - "video-projects/h2-selfimprove/almost-ready/**"
+      - ".github/workflows/render-selfimprove-almost-ready.yml"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
+  pull_request:
+    paths:
+      - "video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt"
+      - "video-projects/h2-selfimprove/almost-ready/**"
+      - ".github/workflows/render-selfimprove-almost-ready.yml"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h2-selfimprove-almost-ready-v1
+  cancel-in-progress: true
+
+jobs:
+  render-film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout H2 source and project
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify system render dependencies
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          missing=0
+          for bin in ffmpeg zip unzip; do
+            if ! command -v "$bin" >/dev/null 2>&1; then
+              echo "Missing system dependency: $bin"
+              missing=1
+            else
+              echo "Found $bin at $(command -v "$bin")"
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            timeout 300s sudo apt-get update
+            timeout 300s sudo apt-get install -y --no-install-recommends ffmpeg zip unzip
+          fi
+          for bin in ffmpeg zip unzip; do
+            command -v "$bin"
+          done
+          ffmpeg -version | head -n 1 || true
+          zip -v | head -n 1 || true
+          unzip -v | head -n 1 || true
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native H2 kit dependencies
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install chromium
+          python -m pip install numpy scipy soundfile
+          python audio/build_audio.py
+      - name: Generate storyboard and apply authored art direction
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/phim.py --project projects/almost-ready --phim ../../../../../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt --force
+          cp ../../../../../video-projects/h2-selfimprove/almost-ready/config.json projects/almost-ready/config.json
+          cp ../../../../../video-projects/h2-selfimprove/almost-ready/story/bible.md projects/almost-ready/story/bible.md
+          python ../../../../../video-projects/h2-selfimprove/almost-ready/tune_story.py projects/almost-ready/story/shots.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          project = Path("projects/almost-ready")
+          story = json.loads((project / "story/shots.json").read_text(encoding="utf-8"))
+          source = Path("../../../../../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt").read_text(encoding="utf-8")
+          shots = story["shots"]
+          expected = [f"b{i:02d}" for i in range(1, 30)]
+          assert [s["id"] for s in shots] == expected, "Shot IDs/order drifted"
+          assert abs(float(story["duration"]) - 172.0) < 0.01
+          assert abs(float(shots[-1]["end"]) - 172.0) < 0.02
+          assert "He was always one revision away." in source
+          assert "He was afraid of being seen." in source
+          assert "RELEASE." in source
+          templates = {"scene", "phone", "clock", "calendar", "face", "note", "black", "card", "laptop"}
+          previous = 0.0
+          for shot in shots:
+              assert shot["tpl"] in templates, f"Unknown native H2 template {shot['tpl']} in {shot['id']}"
+              start, end = float(shot["start"]), float(shot["end"])
+              assert abs(start - previous) < 0.01, f"Gap/overlap before {shot['id']}"
+              assert end > start
+              for tx in shot.get("args", {}).get("texts", []):
+                  at, dur = float(tx.get("at", 0.3)), float(tx.get("dur", end - start - 0.1))
+                  assert at >= 0 and dur > 0 and at + dur <= end - start + 0.02, f"Caption overflow: {shot['id']} / {tx.get('t')}"
+              previous = end
+          assert abs(previous - 172.0) < 0.02
+          by_id = {s["id"]: s for s in shots}
+          assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"
+          assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt"))
+          assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
+          assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1
+          assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
+          assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
+          cfg = json.loads((project / "config.json").read_text(encoding="utf-8"))
+          assert cfg["aspect"] == "16:9" and cfg["resolution"] == "1080p" and cfg["fps"] == 24
+          print("STORY QA PASS: 29 shots, 172.000 seconds, native templates, captions, deadline and human-response gates passed")
+          PY
+      - name: Validate full timeline and render contact sheets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/almost-ready --check --scale 0.25
+          node render.mjs --project projects/almost-ready --sheet --scale 0.5 --at 0.75
+      - name: Build music and SFX mix, then render 30-second audio preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/mix.py --project projects/almost-ready --no-video
+          node render.mjs --project projects/almost-ready --from 0 --to 30 --scale 0.5
+      - name: Full H2 silent render
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/almost-ready --workers 4 --crf 18
+      - name: Mix mastered audio into final MP4
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/dist/almost-ready"
+          python tools/mix.py --project projects/almost-ready
+          cp projects/almost-ready/out/*.mp4 "$GITHUB_WORKSPACE/dist/almost-ready/the-almost-ready-h2-selfimprove.mp4"
+          cp projects/almost-ready/build/preview.mp4 "$GITHUB_WORKSPACE/dist/almost-ready/preview-30s.mp4"
+          cp projects/almost-ready/story/shots.json "$GITHUB_WORKSPACE/dist/almost-ready/shots.json"
+          cp projects/almost-ready/story/bible.md "$GITHUB_WORKSPACE/dist/almost-ready/bible.md"
+          cp projects/almost-ready/config.json "$GITHUB_WORKSPACE/dist/almost-ready/config.json"
+          cp ../../../../../video-projects/h2-selfimprove/almost-ready/tune_story.py "$GITHUB_WORKSPACE/dist/almost-ready/tune_story.py"
+          cp ../../../../../video-library/almost-ready/02-PACKAGE-almost-ready.md "$GITHUB_WORKSPACE/dist/almost-ready/"
+          cp ../../../../../video-library/almost-ready/03-THUMB-PROMPT-almost-ready.txt "$GITHUB_WORKSPACE/dist/almost-ready/"
+          cp ../../../../../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt "$GITHUB_WORKSPACE/dist/almost-ready/01-PHIM-almost-ready.txt"
+          cp projects/almost-ready/build/sheets/*.jpg "$GITHUB_WORKSPACE/dist/almost-ready/"
+          ffprobe -v error -show_streams -show_format -of json "$GITHUB_WORKSPACE/dist/almost-ready/the-almost-ready-h2-selfimprove.mp4" > "$GITHUB_WORKSPACE/dist/almost-ready/ffprobe.json"
+          ffmpeg -hide_banner -nostats -i "$GITHUB_WORKSPACE/dist/almost-ready/the-almost-ready-h2-selfimprove.mp4" -af ebur128=peak=true -f null - 2> "$GITHUB_WORKSPACE/dist/almost-ready/ebur128.log"
+          mkdir -p "$GITHUB_WORKSPACE/dist/almost-ready/proofs"
+          VIDEO="$GITHUB_WORKSPACE/dist/almost-ready/the-almost-ready-h2-selfimprove.mp4"
+          PROOFS="$GITHUB_WORKSPACE/dist/almost-ready/proofs"
+          for spec in \
+            "b03-first-draft:10" \
+            "b05-first-correction:22" \
+            "b08-revision-counter:40" \
+            "b10-studio-comparison:52" \
+            "b13-deadline-clock:70" \
+            "b15-deadline-collapse:82" \
+            "b18-friend-message:100" \
+            "b19-turning-action:106" \
+            "b22-send-to-mina:124" \
+            "b23-response:130" \
+            "b24-cafe-conversation:136" \
+            "b27-voice-recedes:154"; do
+            name="${spec%%:*}"
+            start="${spec##*:}"
+            ffmpeg -hide_banner -loglevel error -y -ss "$start" -i "$VIDEO" -t 6 \
+              -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p \
+              -c:a aac -b:a 128k -movflags +faststart "$PROOFS/$name.mp4"
+          done
+          cat > "$GITHUB_WORKSPACE/dist/almost-ready/MOTION-PROOFS.md" <<'EOF'
+          # ALMOST READY — motion proof index
+
+          These six-second clips are cut from the actual mastered H2 output with audio.
+
+          | Proof | Start | What to inspect |
+          |---|---:|---|
+          | b03-first-draft | 00:10 | Pen-to-page contact and visible writing reveal |
+          | b05-first-correction | 00:22 | Hero revises; shadow enters with a motivated cause |
+          | b08-revision-counter | 00:40 | Calendar/revision escalation |
+          | b10-studio-comparison | 00:52 | Peer/hero staging and readable eye-lines |
+          | b13-deadline-clock | 01:10 | 11:58 to 11:59 clock change |
+          | b15-deadline-collapse | 01:22 | Counter reaches zero; separated captions and silence |
+          | b18-friend-message | 01:40 | Message legibility and narrative turning point |
+          | b19-turning-action | 01:46 | Body moves toward the desk |
+          | b22-send-to-mina | 02:04 | Sent message is visible as the action |
+          | b23-response | 02:10 | Human reply follows the send |
+          | b24-cafe-conversation | 02:16 | Two seated characters, table anchors and eye-lines |
+          | b27-voice-recedes | 02:34 | Shadow scale/fade and hero continues working |
+
+          Presence of motion proofs supports targeted review, not artistic sign-off.
+          EOF
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist" / "almost-ready" / "proofs"
+          proofs = sorted(root.glob("*.mp4"))
+          assert len(proofs) == 12, f"Expected 12 motion proofs under {root}, got {len(proofs)}"
+          for clip in proofs:
+              meta = json.loads(subprocess.check_output([
+                  "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)
+              ], text=True))
+              video = [s for s in meta["streams"] if s.get("codec_type") == "video"]
+              audio = [s for s in meta["streams"] if s.get("codec_type") == "audio"]
+              duration = float(meta["format"]["duration"])
+              assert video and audio, f"Motion proof has no audio/video stream: {clip.name}"
+              assert 5.75 <= duration <= 6.20, f"Unexpected proof duration {duration}: {clip.name}"
+          print(f"MOTION PROOFS PASS: {len(proofs)} audio/video clips, each approximately 6 seconds")
+          PY
+          (cd "$GITHUB_WORKSPACE/dist/almost-ready" && sha256sum *.mp4 *.json *.txt *.md *.jpg *.log proofs/*.mp4 > SHA256SUMS.txt)
+          cd "$GITHUB_WORKSPACE"
+          zip -qr dist/almost-ready-review.zip dist/almost-ready
+      - name: Validate exported MP4 and report
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("dist/almost-ready/ffprobe.json")
+          d=json.loads(p.read_text())
+          v=[s for s in d["streams"] if s.get("codec_type")=="video"]
+          a=[s for s in d["streams"] if s.get("codec_type")=="audio"]
+          assert v and a, "Final MP4 must contain both video and audio streams"
+          assert int(v[0]["width"])==1920 and int(v[0]["height"])==1080, f"Unexpected resolution: {v[0].get('width')}x{v[0].get('height')}"
+          assert abs(float(d["format"]["duration"])-172.0)<0.15, f"Unexpected runtime: {d['format']['duration']}"
+          assert v[0].get("r_frame_rate") == "24/1", f"Unexpected frame rate: {v[0].get('r_frame_rate')}"
+          assert a[0].get("sample_rate") == "48000" and int(a[0].get("channels", 0)) == 2, "Audio must be 48 kHz stereo"
+          log=Path("dist/almost-ready/ebur128.log").read_text(errors="replace")
+          import re
+          m_i=re.search(r"^\s*I:\s*(-?[0-9]+\.[0-9]+)\s*LUFS\s*$", log, re.M)
+          m_p=re.search(r"^\s*Peak:\s*(-?[0-9]+\.[0-9]+)\s*dBFS\s*$", log, re.M)
+          assert m_i and m_p, "EBU R128 summary is missing integrated loudness or peak"
+          integrated=float(m_i.group(1)); peak=float(m_p.group(1))
+          assert -15.0 <= integrated <= -13.0, f"Integrated loudness outside -14 LUFS ±1: {integrated}"
+          assert peak <= -1.0, f"True peak ceiling exceeded (-1.0 dBFS): {peak}"
+          mixer_source = Path("integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py").read_text(encoding="utf-8")
+          assert 'TP=-2.5' in mixer_source, "Mastering must reserve AAC true-peak headroom"
+          assert 'alimiter=limit=0.65:level=false' in mixer_source, "Final limiter must protect the -1 dBFS release ceiling"
+          print(f"PASS: {float(d['format']['duration']):.3f}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz stereo; I={integrated:.1f} LUFS; peak={peak:.1f} dBFS")
+          PY
+      - name: Upload video, preview and QA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: almost-ready-h2-selfimprove-${{ github.run_number }}
+          path: |
+            dist/almost-ready/the-almost-ready-h2-selfimprove.mp4
+            dist/almost-ready-review.zip
+            dist/almost-ready/
+          if-no-files-found: error
+          retention-days: 30
