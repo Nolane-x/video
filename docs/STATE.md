@@ -57,7 +57,7 @@ Earlier in the conversation:
 These are historical identifiers, not proof about current HEAD. Check the live Actions page.
 
 ## Verified latest state
-- Remotion render CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio normalization, metadata and contact-sheet generation.
+- Earlier Remotion run-31 CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio processing, metadata and contact-sheet generation. The later archived reference is run 36; its render CI is [40200152650](https://github.com/Nolane-x/video/actions/runs/40200152650).
 - H2 archive verification: [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143) — passed SHA-256, file-size, codec, resolution, FPS, duration and audio-format checks; generated contact sheets and metadata.
 - Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`.
 - Portable skill bundle: [`video-library/video-production-master-skill.zip`](../video-library/video-production-master-skill.zip). Packaging [run 40272461637](https://github.com/Nolane-x/video/actions/runs/40272461637) passed ZIP integrity and required-file checks: 168 entries, Remotion run-36 render, original H2 master, reference-clips manifest, H2 v1.1.0 production overlay and active Plugin Creator v1.1.0 release metadata. The authoritative checksum is the adjacent sidecar `video-library/video-production-master-skill.zip.sha256`; this state file is itself packaged, so embedding the ZIP's exact checksum here would make it self-referential.
