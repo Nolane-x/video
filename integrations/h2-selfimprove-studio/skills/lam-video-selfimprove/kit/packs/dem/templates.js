@@ -176,7 +176,26 @@ tpl('phone', (g, lt, info, a) => {
   overlays(g, lt, { ...info, args: { ...a, texts: side } }, {});
 });
 // ---------- clock: dong ho bao thuc to. args: time, timeAt [[giay, "5:01"]], ring, blink
-tpl('clock', (g, lt, info, a) => { camera(g, lt, info, () => { fillAll(g, '#0d0d10'); bigClock(g, fx(a.x, 0.5), fy(a.y, 0.52), fs(a.s, 0.55), { time: at(lt, a.timeAt, a.time ?? '5:00'), ring: a.ring, blink: a.blink, t: lt, color: a.color }); drawFx(g, lt, info, (a.fx || []).filter((f) => !['flash', 'pulse', 'dark', 'glitch'].includes(f.kind))); }); overlays(g, lt, info, {}); });
+tpl('clock', (g, lt, info, a) => {
+  camera(g, lt, info, () => {
+    fillAll(g, '#0d0d10');
+    const cx = fx(a.x, 0.5), cy = fy(a.y, 0.52), s = fs(a.s, 0.55);
+    let handX = cx + s * 0.24, handY = cy - s * 0.40;
+    if (a.reach && lt >= (a.handAt ?? 0.45)) {
+      const k = ease.out(clamp((lt - (a.handAt ?? 0.45)) / Math.max(0.1, a.handDur ?? 1.6)));
+      handX = lerp(E.W * 0.91, cx + s * 0.24, k);
+      handY = lerp(E.H * 0.93, cy - s * 0.40, k);
+      g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+      g.strokeStyle = '#51535a'; g.lineWidth = s * 0.105;
+      g.beginPath(); g.moveTo(E.W * 0.93, E.H * 0.94); g.quadraticCurveTo(E.W * 0.93, E.H * 0.73, handX, handY); g.stroke();
+      g.strokeStyle = '#d8d2c7'; g.lineWidth = s * 0.075; g.stroke(); g.restore();
+    }
+    bigClock(g, cx, cy, s, { time: at(lt, a.timeAt, a.time ?? '5:00'), ring: a.ring, blink: a.blink, t: lt, color: a.color });
+    if (a.reach && lt >= (a.handAt ?? 0.45)) bigHand(g, handX, handY, s * 0.095, { rot: 0.62, sleeve: '#d2d0ca' });
+    drawFx(g, lt, info, (a.fx || []).filter((f) => !['flash', 'pulse', 'dark', 'glitch'].includes(f.kind)));
+  });
+  overlays(g, lt, info, {});
+});
 // ---------- calendar: lich to. args: month, from, to (so o danh dau, dem dan), mode x|fill, reset {at}
 tpl('calendar', (g, lt, info, a) => { camera(g, lt, info, () => { fillAll(g, '#121216'); const w = fs(a.s, 0.4) * (E.vertical ? 1.6 : 1); let n = Math.round(lerp(a.from ?? 0, a.to ?? a.from ?? 0, ease.inOut(clamp((lt - (a.at ?? 0.3)) / (a.dur ?? Math.max(0.5, info.dur * 0.7)))))); if (a.reset && lt >= a.reset.at) n = Math.round(lerp(n, 0, clamp((lt - a.reset.at) / 0.5))); calendar(g, E.W / 2 - w / 2, E.H * 0.56 - w * 0.55, w, { month: a.month, fill: n, mode: a.mode, color: a.color }); }); overlays(g, lt, info, {}); });
 // ---------- face: can mat (tu nguc len). args: who, face, faceAt, look, lookAt, tears, sweat, bg (boi canh mo), glowFace, x
@@ -221,6 +240,42 @@ tpl('card', (g, lt, info, a) => {
   if (a.sub2) { const q = clamp((lt - (a.sub2At ?? u0 + 1.5)) / 0.5); text(g, a.sub2, E.W / 2, y, { size: size * 0.3, font: FONT_NARR, weight: 700, color: accent(), a: q, glowColor: alpha(accent(), 0.5) }); }
   drawTexts(g, lt, info, a.texts);
 });
+// ---------- laptop: close, legible message on the actual computer (not a phone UI).
+tpl('laptop', (g, lt, info, a) => {
+  camera(g, lt, info, () => {
+    if (a.bg) blurBg(g, a.bg, a.setArgs, 0.38); else fillAll(g, '#0d0e12');
+    const cx = fx(a.x, 0.5), cy = fy(a.y, 0.50), w = fx(a.w, 0.74), h = fs(a.h, 0.50);
+    const sx = cx - w / 2, sy = cy - h * 0.43, sw = w, sh = h * 0.67;
+    light(g, cx, sy + sh * 0.48, sh * 1.45, '#9fb6ff', 0.10);
+    box(g, sx - 12, sy - 12, sw + 24, sh + 24, { fill: '#08090d', line: '#5a5d68', r: 18, lw: 4 });
+    box(g, sx, sy, sw, sh, { fill: '#14161d', line: '#757984', r: 7, lw: 2 });
+    const topH = sh * 0.14;
+    box(g, sx, sy, sw, topH, { fill: '#252833', line: null, r: 6 });
+    text(g, 'MAIL', sx + 34, sy + topH * 0.68, { size: Math.max(22, h * 0.050), font: FONT_UI, weight: 700, color: '#e8e8eb', align: 'left', spacing: 2 });
+    text(g, 'INBOX  /  02', sx + sw * 0.24, sy + topH * 0.68, { size: Math.max(18, h * 0.038), font: FONT_UI, weight: 600, color: '#aeb2be', align: 'left' });
+    const sideW = sw * 0.21;
+    box(g, sx, sy + topH, sideW, sh - topH, { fill: '#191b22', line: null });
+    text(g, 'Inbox', sx + 24, sy + topH + 42, { size: Math.max(20, h * 0.042), font: FONT_UI, weight: 700, color: '#d8dbe4', align: 'left' });
+    text(g, 'Starred', sx + 24, sy + topH + 82, { size: Math.max(18, h * 0.034), font: FONT_UI, weight: 600, color: '#858a98', align: 'left' });
+    text(g, 'Sent', sx + 24, sy + topH + 118, { size: Math.max(18, h * 0.034), font: FONT_UI, weight: 600, color: '#858a98', align: 'left' });
+    const mx = sx + sideW + 32, mainW = sw - sideW - 58, headY = sy + topH + 38;
+    text(g, a.subject || 'Application update', mx, headY, { size: Math.max(24, h * 0.057), font: FONT_UI, weight: 700, color: '#f0f1f4', align: 'left' });
+    text(g, a.sender || 'Recruiting Team', mx, headY + h * 0.085, { size: Math.max(18, h * 0.036), font: FONT_UI, weight: 700, color: '#c6cad3', align: 'left' });
+    ln(g, [[mx, headY + h * 0.108], [mx + mainW, headY + h * 0.108]], { color: '#414551', lw: 2, la: 0.9 });
+    const body = a.body || 'We have decided to move forward with another candidate.';
+    const bodySize = Math.max(20, h * 0.041);
+    const bodyLines = wrap(g, body, mainW - 6, bodySize, FONT_UI, 600).slice(0, 4);
+    bodyLines.forEach((line, i) => text(g, line, mx, headY + h * 0.17 + i * bodySize * 1.38, { size: bodySize, font: FONT_UI, weight: 600, color: '#d9dce4', align: 'left' }));
+    obj(g, (c) => {
+      c.moveTo(sx - sw * 0.055, sy + sh + 12); c.lineTo(sx + sw + sw * 0.055, sy + sh + 12);
+      c.lineTo(sx + sw + sw * 0.105, sy + sh + h * 0.105); c.lineTo(sx - sw * 0.105, sy + sh + h * 0.105); c.closePath();
+    }, { fill: '#333741', line: '#737783', lw: 2, la: 1 });
+    box(g, cx - sw * 0.12, sy + sh + h * 0.047, sw * 0.24, h * 0.018, { fill: '#666b77', line: null, r: 4, la: 0.7 });
+    drawFx(g, lt, info, (a.fx || []).filter((f) => !['flash', 'pulse', 'dark', 'glitch'].includes(f.kind)));
+  });
+  overlays(g, lt, info, {});
+});
+
 // ---------- cta: man xin dang ky cuoi phim. args: line ("If this hit, like and subscribe."), line2, who (nhan vat vay tay)
 tpl('cta', (g, lt, info, a) => {
   fillAll(g, '#0f0f12'); light(g, E.W / 2, E.H * 0.6, E.H * 0.6, '#ffffff', 0.05);
@@ -235,4 +290,4 @@ tpl('cta', (g, lt, info, a) => {
   bean(g, E.W / 2, (E.vertical ? E.H * 0.72 : S.bottom - 40), E.H * (E.vertical ? 0.16 : 0.2), { who: a.who || 'hero', pose: lt > 2.8 ? 'wave' : 'stand', face: lt > 2.8 ? 'smile' : 'neutral', t: lt, look: 0 });
 });
 
-export const TEMPLATE_LIST = ['scene', 'phone', 'clock', 'calendar', 'face', 'note', 'black', 'card', 'cta'];
+export const TEMPLATE_LIST = ['scene', 'phone', 'clock', 'calendar', 'face', 'note', 'black', 'card', 'laptop', 'cta'];

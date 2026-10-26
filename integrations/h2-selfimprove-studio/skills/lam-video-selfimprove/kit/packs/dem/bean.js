@@ -46,6 +46,7 @@ export const POSES = {
   sit:      { aF: [0.35, 1.3], aB: [0.2, 1.2], lF: [1.5, 0.05], lB: [1.45, 0.0], drop: 15, lean: -0.05 },  // ngoi ghe / mep giuong
   sitphone: { aF: [0.6, 2.5], aB: [0.4, 2.3], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.12, head: [2, 3] },
   sitdesk:  { aF: [1.0, 1.55], aB: [0.9, 1.5], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.22 },     // cui viet / doc
+  type:     { aF: [2.42, 1.55], aB: [2.32, 1.50], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.22, head: [0, 1] }, // seated typing
   sitsad:   { aF: [0.5, 1.5], aB: [0.4, 1.4], lF: [1.5, 0.05], lB: [1.45, 0], drop: 15, lean: 0.3, head: [3, 6] },
   knees:    { aF: [0.9, 1.8], aB: [0.8, 1.7], lF: [2.3, -0.15], lB: [2.2, -0.2], drop: 26, lean: 0.25, head: [3, 4] },   // ngoi bo goi duoi dat
   kneel:    { aF: [0.3, 0.2], aB: [0.1, 0.1], lF: [1.4, -0.1], lB: [0.0, -1.5], drop: 13, lean: 0.15, head: [2, 4] },
@@ -87,6 +88,11 @@ export function bean(g, x, y, h, o = {}) {
   const skin = sh ? '#050507' : (o.skin || PAL.hero), edge = sh ? alpha(o.glow || accent(), 0.85) : (o.edge || PAL.heroLine), lw = sh ? Math.max(1.2, 0.9 * U) : Math.max(1.6, 2.2 * U / 2.4);
   const glowC = o.glow || (sh ? accent() : null);
   let p = poseOf(o.pose || 'stand', o.fromPose, o.poseK ?? 1);
+  // Tiny alternating wrist motion makes the work pose read as typing, not a static reach.
+  if (o.pose === 'type') {
+    const q = Math.sin(t * 15) * 0.17;
+    p = { ...p, aF: [p.aF[0] + q, p.aF[1] - q * 0.6], aB: [p.aB[0] - q, p.aB[1] + q * 0.6] };
+  }
   if (o.walk || o.run) p = gait(p, t, o.walk || o.run, !!o.run);
   const breathe = Math.sin(t * 2.1 + (o.seed || 0)) * 0.6 * U;
   const drop = (p.drop || 0) * U - (p.bounce || 0) * U * -1 * 0, bounce = (p.bounce || 0) * U;

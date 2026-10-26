@@ -33,7 +33,8 @@
           "ring": true,
           "desk": false,
           "calendar": false,
-          "lamp": false
+          "lamp": false,
+          "stage": true
         },
         "bed": {
           "face": "sleep",
@@ -75,40 +76,29 @@
       }
     },
     "b03": {
-      "tpl": "scene",
+      "tpl": "clock",
       "args": {
-        "set": "bedroom",
-        "setArgs": {
-          "sky": "moon",
-          "clock": "7:00",
-          "ring": true,
-          "bedX": 0.27,
-          "bedW": 0.38,
-          "desk": false,
-          "calendar": false,
-          "lamp": false
-        },
-        "bed": {
-          "face": "sleep",
-          "arm": {
-            "at": 0.55,
-            "dur": 1.5
-          }
-        },
+        "time": "7:00",
+        "ring": true,
+        "reach": true,
+        "handAt": 0.45,
+        "handDur": 1.6,
+        "s": 0.55,
+        "x": 0.5,
+        "y": 0.52,
         "cam": {
           "from": [
-            0.29,
-            0.64,
-            1.12
+            0.5,
+            0.52,
+            1
           ],
           "to": [
-            0.29,
-            0.64,
-            1.28
+            0.5,
+            0.51,
+            1.12
           ],
           "at": 0,
-          "dur": 5,
-          "ease": "sine"
+          "dur": 5.8
         },
         "texts": [
           {
@@ -116,11 +106,19 @@
             "t": "five more minutes.",
             "at": 0.65,
             "dur": 3.2,
-            "x": 0.67,
-            "y": 0.25,
-            "size": 50
+            "x": 0.72,
+            "y": 0.18,
+            "size": 46
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        }
       }
     },
     "b04": {
@@ -132,7 +130,8 @@
           "clock": false,
           "calendar": false,
           "lamp": false,
-          "desk": false
+          "desk": false,
+          "stage": true
         },
         "actors": [
           {
@@ -180,7 +179,15 @@
             "y": 0.22,
             "size": 46
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        }
       }
     },
     "b05": {
@@ -201,7 +208,8 @@
         "tilt": -0.04,
         "bg": "bedroom",
         "setArgs": {
-          "sky": "moon"
+          "sky": "moon",
+          "stage": true
         },
         "texts": [
           {
@@ -211,7 +219,15 @@
             "dur": 5.1,
             "size": 52
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        }
       }
     },
     "b06": {
@@ -225,43 +241,44 @@
           "deskX": 0.72,
           "laptop": true,
           "laptopColor": "#9fb6ff",
-          "lamp": true
+          "lamp": true,
+          "stage": true
         },
         "actors": [
           {
-            "who": "hero",
+            "who": "hoodie",
             "x": "desk.seat",
             "pose": "sitdesk",
             "face": "tired",
             "facing": 1,
-            "h": 0.47,
-            "look": 0.7
+            "h": 0.34,
+            "look": 0.5
           },
           {
             "who": "voice",
-            "x": 0.84,
+            "x": 0.83,
             "pose": "reach",
             "face": "grin",
             "facing": -1,
-            "h": 0.45,
-            "scale": 0.92,
+            "h": 0.43,
+            "scale": 0.9,
             "behind": true,
             "at": 0.3
           }
         ],
         "cam": {
           "from": [
-            0.72,
+            0.67,
             0.57,
-            1.02
+            1
           ],
           "to": [
-            0.72,
-            0.57,
-            1.1
+            0.68,
+            0.56,
+            1.18
           ],
           "at": 0,
-          "dur": 6
+          "dur": 5.8
         },
         "hud": {
           "rows": [
@@ -298,7 +315,8 @@
         "tilt": -0.04,
         "bg": "bedroom",
         "setArgs": {
-          "sky": "night"
+          "sky": "night",
+          "stage": true
         },
         "texts": [
           {
@@ -308,7 +326,15 @@
             "dur": 5.1,
             "size": 50
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 3
+            }
+          ]
+        }
       }
     },
     "b08": {
@@ -324,36 +350,39 @@
             "mode": "x",
             "color": "#d5a34c"
           },
-          "calX": 0.84,
-          "deskX": 0.7,
+          "calX": 0.83,
+          "deskX": 0.72,
           "laptop": true,
           "laptopColor": "#59617a",
-          "lamp": false
+          "lamp": false,
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28
         },
         "actors": [
           {
-            "who": "hero",
+            "who": "hoodie",
             "x": "desk.seat",
-            "pose": "sitsad",
+            "pose": "sitdesk",
             "face": "tired",
             "facing": 1,
-            "h": 0.47,
-            "rot": 0.02
+            "h": 0.34,
+            "look": 0.75
           }
         ],
         "cam": {
           "from": [
-            0.72,
-            0.54,
-            1.02
+            0.68,
+            0.56,
+            1
           ],
           "to": [
-            0.75,
-            0.53,
-            1.12
+            0.69,
+            0.55,
+            1.14
           ],
           "at": 0,
-          "dur": 6
+          "dur": 5.8
         },
         "hud": {
           "rows": [
@@ -382,7 +411,8 @@
         "bg": "bedroom",
         "setArgs": {
           "sky": "night",
-          "lamp": false
+          "lamp": false,
+          "stage": true
         },
         "who": "hoodie",
         "face": "tired",
@@ -418,7 +448,15 @@
             "y": 0.2,
             "size": 47
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 12
+            }
+          ]
+        }
       }
     },
     "b10": {
@@ -511,43 +549,48 @@
             "dur": 5.1,
             "size": 47
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 30
+            }
+          ]
+        }
       }
     },
     "b12": {
-      "tpl": "phone",
+      "tpl": "laptop",
       "args": {
-        "screen": "email",
-        "from": "Recruiting",
-        "subject": "Update on your application",
-        "preview": "We have decided to move forward with another candidate.",
-        "rows": [
-          {
-            "from": "Recruiting",
-            "subject": "Application update",
-            "preview": "We have decided to move forward with another candidate.",
-            "hl": true
-          },
-          {
-            "from": "Jay",
-            "subject": "Are you okay?",
-            "preview": "Haven't heard from you lately.",
-            "hl": false
-          },
-          {
-            "from": "Newsletter",
-            "subject": "This week",
-            "preview": "Five things you may have missed.",
-            "hl": false
-          }
-        ],
-        "h": 0.9,
-        "x": 0.37,
-        "y": 0.52,
-        "tilt": -0.04,
         "bg": "bedroom",
         "setArgs": {
-          "sky": "night"
+          "sky": "night",
+          "stage": true,
+          "deskX": 0.72,
+          "laptop": true,
+          "lamp": true
+        },
+        "subject": "Application update",
+        "sender": "Recruiting Team",
+        "body": "We have decided to move forward with another candidate.",
+        "w": 0.74,
+        "h": 0.5,
+        "x": 0.5,
+        "y": 0.5,
+        "cam": {
+          "from": [
+            0.5,
+            0.5,
+            1
+          ],
+          "to": [
+            0.5,
+            0.5,
+            1.07
+          ],
+          "at": 0,
+          "dur": 5.8
         },
         "texts": [
           {
@@ -555,9 +598,19 @@
             "t": "The opportunity went to someone else.",
             "at": 0.35,
             "dur": 5.1,
-            "size": 47
+            "pos": "bottom",
+            "size": 48,
+            "maxW": 0.78
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 30
+            }
+          ]
+        }
       }
     },
     "b13": {
@@ -578,7 +631,8 @@
           "lamp": false,
           "clock": false,
           "window": false,
-          "dim": 0.16
+          "dim": 0.16,
+          "stage": true
         },
         "actors": [
           {
@@ -726,7 +780,19 @@
             "size": 91,
             "maxW": 0.82
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 412,
+              "reset": {
+                "at": 1.5,
+                "to": 0
+              }
+            }
+          ]
+        }
       },
       "in": {
         "type": "dip",
@@ -739,38 +805,42 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
-          "calendar": false,
-          "lamp": false,
-          "deskX": 0.72,
+          "stage": true,
+          "bedX": 0.17,
+          "bedW": 0.29,
+          "windowX": 0.42,
+          "deskX": 0.74,
           "laptop": false,
+          "calendar": false,
+          "clock": false,
+          "lamp": false,
           "door": false,
           "dim": 0.01
         },
         "actors": [
           {
             "who": "hero",
-            "x": 0.48,
-            "pose": "relaxed",
-            "face": "empty",
-            "facing": -1,
-            "look": -0.4,
-            "h": 0.47
+            "x": "bed.sit",
+            "pose": "sit",
+            "face": "neutral",
+            "facing": 1,
+            "look": -0.2,
+            "h": 0.34
           }
         ],
         "cam": {
           "from": [
-            0.48,
-            0.53,
+            0.45,
+            0.5,
             1
           ],
           "to": [
-            0.47,
-            0.52,
-            1.05
+            0.46,
+            0.5,
+            1.07
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "texts": [
           {
@@ -779,10 +849,18 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 55,
-            "maxW": 0.76
+            "size": 53,
+            "maxW": 0.78
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 0
+            }
+          ]
+        }
       },
       "in": {
         "type": "dip",
@@ -807,7 +885,8 @@
         "tilt": -0.04,
         "bg": "bedroom",
         "setArgs": {
-          "sky": "dawn"
+          "sky": "dawn",
+          "stage": true
         },
         "texts": [
           {
@@ -817,7 +896,15 @@
             "dur": 5.1,
             "size": 49
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 0
+            }
+          ]
+        }
       }
     },
     "b18": {
@@ -826,82 +913,47 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
-          "calendar": false,
-          "lamp": false,
+          "stage": true,
+          "bedX": 0.15,
+          "bedW": 0.29,
+          "windowX": 0.48,
           "deskX": 0.72,
           "laptop": false,
-          "door": true,
-          "doorX": 0.93,
-          "doorOpen": 0.18,
-          "dim": 0.01
+          "calendar": false,
+          "clock": false,
+          "lamp": true,
+          "door": false
         },
         "actors": [
           {
             "who": "hero",
-            "x": 0.48,
-            "poseAt": [
-              [
-                0.2,
-                "phone"
-              ],
-              [
-                1.5,
-                "reach"
-              ],
-              [
-                3,
-                "open"
-              ],
-              [
-                4.3,
-                "relaxed"
-              ]
-            ],
-            "faceAt": [
-              [
-                0.2,
-                "tired"
-              ],
-              [
-                2.8,
-                "neutral"
-              ],
-              [
-                4.2,
-                "determined"
-              ]
-            ],
+            "x": 0.64,
             "pose": "open",
-            "face": "tired",
-            "facing": 1,
-            "h": 0.47,
-            "lookAt": [
-              [
-                0.2,
-                -0.1
-              ],
-              [
-                3.5,
-                0.5
-              ]
-            ],
-            "at": 0.1
+            "face": "determined",
+            "facing": -1,
+            "at": 0.15,
+            "h": 0.34,
+            "walk": {
+              "to": 0.43,
+              "at": 0.25,
+              "dur": 2.8,
+              "speed": 0.72
+            }
           }
         ],
         "cam": {
           "from": [
-            0.55,
-            0.55,
+            0.52,
+            0.5,
             1
           ],
           "to": [
-            0.57,
-            0.53,
-            1.07
+            0.52,
+            0.5,
+            1.18
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "texts": [
           {
@@ -910,10 +962,18 @@
             "at": 0.35,
             "dur": 5.1,
             "pos": "bottom",
-            "size": 53,
-            "maxW": 0.76
+            "size": 51,
+            "maxW": 0.78
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 0
+            }
+          ]
+        }
       }
     },
     "b19": {
@@ -922,12 +982,16 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
-          "calendar": false,
-          "lamp": true,
-          "deskX": 0.72,
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28,
+          "windowX": 0.34,
+          "deskX": 0.7,
           "laptop": true,
           "laptopColor": "#d6c69b",
+          "lamp": true,
+          "calendar": false,
+          "clock": false,
           "dim": 0.01
         },
         "actors": [
@@ -937,7 +1001,7 @@
             "pose": "relaxed",
             "face": "determined",
             "facing": 1,
-            "h": 0.47,
+            "h": 0.34,
             "walk": {
               "to": "desk.seat",
               "at": 0.35,
@@ -948,17 +1012,17 @@
         ],
         "cam": {
           "from": [
-            0.68,
-            0.57,
+            0.55,
+            0.6,
             1
           ],
           "to": [
-            0.68,
             0.57,
-            1.07
+            0.59,
+            1.12
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "hud": {
           "rows": [
@@ -985,24 +1049,24 @@
       "tpl": "note",
       "args": {
         "text": "ONE TASK.\nTEN MINUTES.",
-        "at": 0.35,
+        "at": 0.45,
         "cps": 7.5,
-        "s": 0.92,
+        "s": 0.96,
         "x": 0.5,
         "y": 0.5,
         "cam": {
           "from": [
             0.5,
-            0.52,
+            0.51,
             1
           ],
           "to": [
             0.5,
-            0.52,
-            1.04
+            0.51,
+            1.08
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "texts": [
           {
@@ -1011,10 +1075,18 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 49,
-            "maxW": 0.77
+            "size": 46,
+            "maxW": 0.84
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        }
       }
     },
     "b21": {
@@ -1023,56 +1095,60 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
-          "calendar": false,
-          "lamp": true,
-          "deskX": 0.72,
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28,
+          "windowX": 0.34,
+          "deskX": 0.7,
           "laptop": true,
           "laptopColor": "#c5d8f0",
+          "lamp": true,
+          "calendar": false,
+          "clock": false,
           "dim": 0.01
         },
         "actors": [
           {
             "who": "hero",
             "x": "desk.seat",
-            "pose": "sitdesk",
+            "pose": "type",
             "face": "determined",
             "facing": 1,
-            "h": 0.5,
-            "look": 0.7,
+            "look": 0.15,
+            "h": 0.33,
             "poseAt": [
               [
                 0.1,
-                "sitdesk"
+                "type"
               ],
               [
                 2.2,
-                "sitdesk"
+                "type"
               ],
               [
                 3,
-                "reach"
+                "type"
               ],
               [
                 4,
-                "sitdesk"
+                "type"
               ]
             ]
           }
         ],
         "cam": {
           "from": [
-            0.69,
-            0.59,
-            1.02
+            0.66,
+            0.62,
+            1
           ],
           "to": [
-            0.71,
-            0.58,
-            1.15
+            0.66,
+            0.62,
+            1.28
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "hud": {
           "rows": [
@@ -1096,7 +1172,7 @@
       }
     },
     "b22": {
-      "tpl": "phone",
+      "tpl": "scene",
       "args": {
         "screen": "lock",
         "time": "7:18",
@@ -1114,7 +1190,24 @@
         "tilt": -0.04,
         "bg": "bedroom",
         "setArgs": {
-          "sky": "dawn"
+          "sky": "dawn",
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28,
+          "windowX": 0.34,
+          "deskX": 0.7,
+          "laptop": true,
+          "laptopColor": "#c5d8f0",
+          "lamp": true,
+          "calendar": false,
+          "clock": false,
+          "dim": 0.01,
+          "phoneOnDesk": {
+            "x": 0.78,
+            "vibrate": true,
+            "vibrateAt": 0,
+            "vibrateUntil": 5.6
+          }
         },
         "texts": [
           {
@@ -1122,37 +1215,86 @@
             "t": "you can check it now.",
             "at": 0.55,
             "dur": 2.6,
-            "x": 0.77,
-            "y": 0.25,
-            "size": 43
+            "x": 0.84,
+            "y": 0.21,
+            "size": 44
           }
         ],
         "cam": {
           "from": [
-            0.5,
-            0.52,
+            0.69,
+            0.56,
             1
           ],
           "to": [
-            0.5,
-            0.52,
-            1.08
+            0.7,
+            0.55,
+            1.15
           ],
           "at": 0.25,
-          "dur": 4.9
+          "dur": 5.4
         },
         "shake": [
           {
-            "at": 1,
-            "amt": 1.5,
-            "dur": 0.65
+            "at": 0.9,
+            "amt": 1.1,
+            "dur": 0.5
           },
           {
-            "at": 3.3,
-            "amt": 1,
-            "dur": 0.5
+            "at": 3,
+            "amt": 0.8,
+            "dur": 0.4
           }
-        ]
+        ],
+        "set": "bedroom",
+        "actors": [
+          {
+            "who": "hero",
+            "x": "desk.seat",
+            "pose": "type",
+            "face": "determined",
+            "facing": 1,
+            "h": 0.33,
+            "lookAt": [
+              [
+                0.1,
+                0.1
+              ],
+              [
+                1,
+                0.85
+              ],
+              [
+                2,
+                0.35
+              ],
+              [
+                3.2,
+                0.15
+              ]
+            ]
+          },
+          {
+            "who": "voice",
+            "x": 0.91,
+            "y": 0.78,
+            "pose": "reach",
+            "face": "grin",
+            "facing": -1,
+            "h": 0.36,
+            "scale": 0.64,
+            "behind": true,
+            "at": 0.5
+          }
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 1
+            }
+          ]
+        }
       }
     },
     "b23": {
@@ -1161,22 +1303,40 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
-          "calendar": false,
-          "lamp": true,
-          "deskX": 0.72,
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28,
+          "windowX": 0.34,
+          "deskX": 0.7,
           "laptop": true,
           "laptopColor": "#c5d8f0",
-          "dim": 0.01
+          "lamp": true,
+          "calendar": false,
+          "clock": false,
+          "dim": 0.01,
+          "phoneOnDesk": {
+            "x": 0.765,
+            "vibrate": false,
+            "slide": {
+              "at": 0.55,
+              "dur": 0.55,
+              "dx": 0.035
+            }
+          }
         },
         "actors": [
           {
             "who": "hero",
             "x": "desk.seat",
+            "pose": "type",
             "poseAt": [
               [
                 0.2,
-                "phone"
+                "type"
+              ],
+              [
+                0.78,
+                "reach"
               ],
               [
                 1.25,
@@ -1184,28 +1344,31 @@
               ],
               [
                 2.25,
-                "sitdesk"
+                "type"
               ]
             ],
-            "faceAt": [
+            "face": "determined",
+            "facing": 1,
+            "h": 0.33,
+            "lookAt": [
               [
                 0.2,
-                "worried"
+                0.6
+              ],
+              [
+                1,
+                0.95
               ],
               [
                 2.2,
-                "determined"
+                0.2
               ]
-            ],
-            "pose": "sitdesk",
-            "face": "determined",
-            "facing": 1,
-            "h": 0.49,
-            "look": 0.7
+            ]
           },
           {
             "who": "voice",
-            "x": 0.83,
+            "x": 0.91,
+            "y": 0.8,
             "poseAt": [
               [
                 0.3,
@@ -1222,28 +1385,28 @@
             ],
             "face": "grin",
             "facing": -1,
-            "h": 0.35,
-            "scale": 0.65,
+            "h": 0.34,
+            "scale": 0.55,
             "behind": true,
             "at": 0.3,
-            "out": 3.4,
-            "fade": 1.4,
+            "out": 3,
+            "fade": 1.25,
             "glow": "#d5a34c"
           }
         ],
         "cam": {
           "from": [
-            0.7,
-            0.58,
-            1.04
+            0.69,
+            0.57,
+            1
           ],
           "to": [
-            0.71,
-            0.58,
-            1.12
+            0.7,
+            0.56,
+            1.18
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "hud": {
           "rows": [
@@ -1332,15 +1495,22 @@
         "set": "gym",
         "setArgs": {
           "bag": true,
-          "bagX": 0.64,
-          "swing": 0.18,
+          "bagX": 0.5,
+          "swing": 0.012,
+          "impacts": [
+            1.05,
+            2.7
+          ],
+          "impactSwing": 0.15,
+          "spark": "#e8c28a",
           "barbell": false,
-          "spot": 0.47
+          "spot": 0.48
         },
         "actors": [
           {
             "who": "band",
             "x": 0.4,
+            "pose": "guard",
             "poseAt": [
               [
                 0.3,
@@ -1367,32 +1537,31 @@
                 "relaxed"
               ]
             ],
+            "face": "determined",
             "faceAt": [
               [
                 0.3,
                 "determined"
               ]
             ],
-            "pose": "punch",
-            "face": "determined",
             "facing": 1,
-            "h": 0.5,
+            "h": 0.43,
             "look": 0.8
           }
         ],
         "cam": {
           "from": [
-            0.52,
-            0.56,
-            1.02
+            0.49,
+            0.57,
+            1
           ],
           "to": [
-            0.53,
-            0.55,
-            1.1
+            0.5,
+            0.56,
+            1.12
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "hud": {
           "rows": [
@@ -1412,6 +1581,17 @@
             "size": 51,
             "maxW": 0.78
           }
+        ],
+        "fx": [
+          {
+            "kind": "speed",
+            "at": 0.65,
+            "dur": 4.8,
+            "x": 0.48,
+            "y": 0.52,
+            "color": "#e2a34a",
+            "dir": -1
+          }
         ]
       }
     },
@@ -1421,7 +1601,7 @@
         "set": "cafe",
         "setArgs": {
           "lampX": 0.5,
-          "dim": 0.01
+          "tableW": 0.26
         },
         "actors": [
           {
@@ -1430,8 +1610,9 @@
             "pose": "sit",
             "face": "smile",
             "facing": 1,
-            "h": 0.45,
-            "look": 0.55
+            "h": 0.34,
+            "look": 0.45,
+            "scale": 0.95
           },
           {
             "who": "friend",
@@ -1439,23 +1620,25 @@
             "pose": "sit",
             "face": "smile",
             "facing": -1,
-            "h": 0.45,
-            "look": -0.55
+            "h": 0.34,
+            "look": -0.45,
+            "scale": 0.95,
+            "at": 0.18
           }
         ],
         "cam": {
           "from": [
             0.5,
-            0.54,
+            0.55,
             1
           ],
           "to": [
             0.5,
-            0.54,
-            1.04
+            0.55,
+            1.07
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "hud": {
           "rows": [
@@ -1484,7 +1667,14 @@
         "set": "bedroom",
         "setArgs": {
           "sky": "dawn",
-          "clock": false,
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28,
+          "windowX": 0.34,
+          "deskX": 0.7,
+          "laptop": true,
+          "laptopColor": "#c5d8f0",
+          "lamp": true,
           "calendar": {
             "month": "JAN",
             "fill": 23,
@@ -1492,71 +1682,55 @@
             "color": "#d5a34c"
           },
           "calX": 0.83,
-          "deskX": 0.7,
-          "laptop": true,
-          "lamp": true,
+          "clock": false,
           "dim": 0.01
         },
         "actors": [
           {
             "who": "band",
             "x": "desk.seat",
-            "pose": "sitdesk",
+            "pose": "type",
             "face": "determined",
             "facing": 1,
-            "h": 0.48,
-            "look": 0.7
+            "look": 0.15,
+            "h": 0.32
           },
           {
             "who": "voice",
-            "x": 0.76,
-            "y": 0.8,
-            "poseAt": [
-              [
-                0.2,
-                "stand"
-              ],
-              [
-                1.5,
-                "reach"
-              ],
-              [
-                3,
-                "slump"
-              ]
-            ],
+            "x": 0.91,
+            "pose": "reach",
             "face": "grin",
             "facing": -1,
-            "h": 0.38,
-            "scale": 0.62,
+            "h": 0.34,
+            "scale": 0.42,
             "behind": true,
-            "at": 0.25,
-            "out": 3.7,
-            "fade": 1.1,
+            "at": 0.2,
+            "out": 5.2,
+            "fade": 0.55,
             "glow": "#d5a34c"
           }
         ],
         "cam": {
           "from": [
-            0.68,
-            0.56,
-            1.02
+            0.66,
+            0.62,
+            1
           ],
           "to": [
-            0.69,
-            0.56,
-            1.12
+            0.66,
+            0.62,
+            1.28
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "fx": [
           {
             "kind": "shards",
-            "at": 2.55,
-            "dur": 1.5,
-            "x": 0.76,
-            "y": 0.39,
+            "at": 2.65,
+            "dur": 1.45,
+            "x": 0.91,
+            "y": 0.45,
             "color": "#d5a34c",
             "seed": 8
           }
@@ -1573,31 +1747,31 @@
           {
             "kind": "narr",
             "t": "The voice returned.",
-            "at": 0.25,
-            "dur": 1.35,
+            "at": 0.35,
+            "dur": 1.45,
             "x": 0.5,
-            "y": 0.15,
-            "size": 51,
-            "maxW": 0.7
+            "y": 0.105,
+            "size": 55,
+            "maxW": 0.82
           },
           {
             "kind": "tempt",
             "t": "just one more scroll.",
-            "at": 1.65,
-            "dur": 2,
-            "x": 0.78,
-            "y": 0.29,
-            "size": 43
+            "at": 2,
+            "dur": 1.35,
+            "x": 0.8,
+            "y": 0.31,
+            "size": 44
           },
           {
             "kind": "narr",
             "t": "But it sounded smaller now.",
-            "at": 4.05,
-            "dur": 1.65,
+            "at": 3.75,
+            "dur": 1.95,
             "x": 0.5,
-            "y": 0.18,
-            "size": 49,
-            "maxW": 0.72
+            "y": 0.105,
+            "size": 55,
+            "maxW": 0.82
           }
         ]
       }
@@ -1621,12 +1795,12 @@
         "setArgs": {
           "doorX": 0.68,
           "doorOpen": 0.92,
-          "dim": 0.04
+          "dim": 0.02
         },
         "actors": [
           {
             "who": "band",
-            "x": 0.39,
+            "x": 0.4,
             "poseAt": [
               [
                 0.2,
@@ -1646,8 +1820,8 @@
             "pose": "stand",
             "face": "smile",
             "facing": 1,
-            "h": 0.48,
-            "look": 0.2
+            "h": 0.4,
+            "look": 0.15
           }
         ],
         "cam": {
@@ -1659,10 +1833,10 @@
           "to": [
             0.51,
             0.54,
-            1.05
+            1.06
           ],
-          "at": 0,
-          "dur": 6
+          "at": 0.25,
+          "dur": 5.4
         },
         "texts": [
           {
@@ -1671,10 +1845,18 @@
             "at": 0.35,
             "dur": 5.1,
             "pos": "bottom",
-            "size": 54,
-            "maxW": 0.78
+            "size": 52,
+            "maxW": 0.8
           }
-        ]
+        ],
+        "hud": {
+          "rows": [
+            {
+              "label": "DAY",
+              "n": 14
+            }
+          ]
+        }
       }
     }
   }

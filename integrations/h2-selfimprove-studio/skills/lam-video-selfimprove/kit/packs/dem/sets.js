@@ -83,10 +83,29 @@ export function door(g, x, gy, w, h, o = {}) {
   else { oval(g, x + w * 0.35, gy - h * 0.48, 5, 5, { fill: '#9a9da6', line: null }); }
 }
 export function punchBag(g, x, y, s, o = {}) {
-  const sw = Math.sin((o.t || 0) * 5) * (o.swing ?? 0.04);
-  g.save(); g.translate(x, y); g.rotate(sw); ln(g, [[0, 0], [0, s * 0.2]], { lw: 3, color: '#777' });
-  box(g, -s * 0.18, s * 0.2, s * 0.36, s * 0.8, { fill: o.color || '#c4302b', line: '#5e1512', r: s * 0.12, la: 1 }); g.restore();
+  const t = o.t || 0;
+  let recoil = 0;
+  for (const at of (o.impacts || [])) {
+    const d = t - at;
+    if (d >= 0 && d < 1.5) recoil += Math.sin(d * 12.5) * Math.exp(-d * 2.1) * (o.impactSwing ?? 0.15);
+  }
+  const sw = Math.sin(t * 5) * (o.swing ?? 0.025) + recoil;
+  g.save(); g.translate(x, y); g.rotate(sw);
+  ln(g, [[0, 0], [0, s * 0.2]], { lw: 3, color: '#777' });
+  box(g, -s * 0.18, s * 0.2, s * 0.36, s * 0.8, { fill: o.color || '#c4302b', line: '#5e1512', r: s * 0.12, la: 1 });
+  g.restore();
   light(g, x, y + s * 0.6, s * 0.7, o.color || '#c4302b', 0.12);
+  const hitAt = (o.impacts || []).find(at => t >= at && t - at < 0.16);
+  if (hitAt !== undefined) {
+    g.save(); g.globalCompositeOperation = 'lighter'; g.strokeStyle = alpha(o.spark || '#e8c28a', 0.8); g.lineWidth = 2.2;
+    const age = t - hitAt;
+    for (let i = 0; i < 5; i++) {
+      const a = -0.7 + i * 0.35, r = s * (0.22 + age * 0.35);
+      g.beginPath(); g.moveTo(x + Math.cos(a) * r, y + s * 0.45 + Math.sin(a) * r * 0.4);
+      g.lineTo(x + Math.cos(a) * (r + s * 0.07), y + s * 0.45 + Math.sin(a) * (r + s * 0.07) * 0.4); g.stroke();
+    }
+    g.restore();
+  }
 }
 export function barbell(g, x, gy, s) { ln(g, [[x - s * 0.7, gy - s * 0.18], [x + s * 0.7, gy - s * 0.18]], { lw: 6, color: '#8a8d96', la: 1 }); for (const d of [-1, 1]) for (let i = 0; i < 2; i++) box(g, x + d * s * (0.5 + i * 0.09) - 9, gy - s * 0.18 - s * (0.18 - i * 0.04), 18, s * (0.36 - i * 0.08), { fill: '#202127', r: 4 }); }
 export function plant(g, x, gy, s) { box(g, x - s * 0.18, gy - s * 0.3, s * 0.36, s * 0.3, { fill: '#7a5340', r: 3 }); const r = rng(4); for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (r() - 0.5) * 1.6; obj(g, (c) => c.ellipse(x + Math.cos(a) * s * 0.3, gy - s * 0.3 + Math.sin(a) * s * 0.35, s * 0.07, s * 0.24, a + Math.PI / 2, 0, 7), { fill: '#4f7a4e', line: '#2c4a2c', la: 0.6 }); } }
@@ -114,28 +133,92 @@ export function set(g, kind = 'bedroom', o = {}) {
     case 'bedroom': {
       wall(g); floor(g, gy);
       const bx = VX(o.bedX ?? 0.27), bw = E.vertical ? E.W * 0.5 : X(o.bedW ?? 0.33), bh = E.H * 0.11;
-      // cua so + chum trang
-      const wx = VX(o.windowX ?? 0.5), wy = Y(0.24), ww = E.vertical ? E.W * 0.26 : X(0.115), wh = Y(0.2);
-      if (o.window !== false) { windowBox(g, wx, wy, ww, wh, { sky: o.sky || 'moon', t }); if ((o.sky || 'moon') === 'moon' || o.sky === 'dawn') beam(g, wx + ww / 2, wy + wh, bx + bw * 0.2, bx + bw * 0.9, gy + 30, o.sky === 'dawn' ? '#ffb48a' : '#c8d4ff', 0.07); }
-      // lich + ban hoc
-      if (o.calendar !== false && !E.vertical) calendar(g, X(o.calX ?? 0.79), Y(0.26), X(0.055), o.calendar || {});
+      if (o.stage) {
+        for (const q of [0.035, 0.235, 0.47, 0.765, 0.965]) ln(g, [[X(q), Y(0.10)], [X(q), gy - 28]], { color: '#56515e', lw: 2, la: 0.28 });
+        ln(g, [[0, Y(0.145)], [E.W, Y(0.145)]], { color: '#514b58', lw: 3, la: 0.32 });
+        ln(g, [[0, gy - 24], [E.W, gy - 24]], { color: '#59535f', lw: 4, la: 0.46 });
+        for (let i = -3; i <= 3; i++) ln(g, [[E.W * 0.5 + i * E.W * 0.045, gy + 8], [E.W * 0.5 + i * E.W * 0.22, E.H + 25]], { color: '#3d3c45', lw: 2, la: 0.20 });
+        box(g, bx - 42, gy - 14, bw + 165, 54, { fill: '#191922', line: '#45414e', r: 10, la: 0.72, lw: 2 });
+      }
+      const wx = VX(o.windowX ?? 0.5), wy = Y(0.24), ww = E.vertical ? E.W * 0.26 : X(o.windowW ?? (o.stage ? 0.16 : 0.115)), wh = Y(0.2);
+      if (o.window !== false) {
+        windowBox(g, wx, wy, ww, wh, { sky: o.sky || 'moon', t });
+        if ((o.sky || 'moon') === 'moon' || o.sky === 'dawn') beam(g, wx + ww / 2, wy + wh, bx + bw * 0.2, bx + bw * 0.9, gy + 30, o.sky === 'dawn' ? '#ffb48a' : '#c8d4ff', 0.07);
+        if (o.stage) {
+          const top = wy - 13, bottom = wy + wh + 27;
+          obj(g, (c) => {
+            c.moveTo(wx - 15, top); c.lineTo(wx + ww * 0.20, top); c.lineTo(wx + ww * 0.17, bottom - 3);
+            c.quadraticCurveTo(wx + ww * 0.08, bottom - 18, wx - 15, bottom); c.closePath();
+          }, { fill: '#302737', line: '#64536a', lw: 2, la: 0.96 });
+          obj(g, (c) => {
+            c.moveTo(wx + ww * 0.80, top); c.lineTo(wx + ww + 15, top); c.lineTo(wx + ww + 15, bottom);
+            c.quadraticCurveTo(wx + ww * 0.91, bottom - 12, wx + ww * 0.82, bottom - 3); c.closePath();
+          }, { fill: '#302737', line: '#64536a', lw: 2, la: 0.96 });
+          box(g, wx - 18, wy - 15, ww + 36, 7, { fill: '#62556a', line: '#85728a', r: 3, la: 0.85 });
+          box(g, wx - 12, wy + wh + 8, ww + 24, 12, { fill: '#56515d', line: '#7c7583', r: 3, la: 0.88 });
+          for (const q of [0.04, 0.13, 0.87, 0.96]) ln(g, [[wx + ww * q, wy + 3], [wx + ww * q, wy + wh - 2]], { color: '#8f7f91', lw: 2, la: 0.22 });
+        }
+      }
+      if (o.calendar !== false && !E.vertical) calendar(g, X(o.calX ?? 0.79), Y(0.26), X(o.stage ? 0.065 : 0.055), o.calendar || {});
       if (o.desk !== false && !E.vertical) {
-        const dx = X(o.deskX ?? 0.84), dw = X(0.15), dh = E.H * 0.17; table(g, dx, gy, dw, dh); chair(g, dx - dw * 0.15, gy, E.H * 0.2, -1); books(g, dx + dw * 0.18, gy - dh, 60); deskLamp(g, dx - dw * 0.38, gy - dh, 90, o.lamp);
-        if (o.laptop) laptop(g, dx - dw * 0.02, gy - dh, 70, { on: o.laptop !== 'off', t, color: o.laptopColor });
-        M.desk = { seat: [dx - dw * 0.15, gy], top: [dx, gy - dh] };
+        const dx = X(o.deskX ?? 0.84), dw = X(o.deskW ?? (o.stage ? 0.22 : 0.15)), dh = E.H * (o.stage ? 0.20 : 0.17);
+        table(g, dx, gy, dw, dh, { fill: o.stage ? '#403542' : '#3a3d45' });
+        const chairX = dx - dw * (o.stage ? 0.32 : 0.15);
+        chair(g, chairX, gy, E.H * (o.stage ? 0.14 : 0.20), -1);
+        if (!o.phoneOnDesk) books(g, dx + dw * (o.stage ? 0.31 : 0.18), gy - dh, o.stage ? E.H * 0.065 : 60);
+        deskLamp(g, dx - dw * 0.35, gy - dh, o.stage ? E.H * 0.085 : 90, o.lamp);
+        if (o.laptop) laptop(g, dx + dw * (o.stage ? 0.02 : -0.02), gy - dh, o.stage ? E.H * 0.10 : 70, { on: o.laptop !== 'off', t, color: o.laptopColor });
+        if (o.stage && !o.phoneOnDesk) {
+          box(g, dx - dw * 0.40, gy - dh - 8, dw * 0.19, 8, { fill: '#d5d0c3', line: '#7c7780', r: 2, la: 0.82 });
+          ln(g, [[dx - dw * 0.38, gy - dh - 5], [dx - dw * 0.24, gy - dh - 5]], { color: '#77727b', lw: 1.3, la: 0.7 });
+        }
+        let phonePos = null;
+        if (o.phoneOnDesk) {
+          const pCfg = typeof o.phoneOnDesk === 'object' ? o.phoneOnDesk : {};
+          let px = pCfg.x !== undefined ? X(pCfg.x) : dx + dw * 0.30;
+          if (pCfg.slide) {
+            const slideK = ease.inOut(clamp((t - (pCfg.slide.at ?? 0.5)) / Math.max(0.1, pCfg.slide.dur ?? 0.5)));
+            px += X(pCfg.slide.dx ?? 0) * slideK;
+          }
+          const vibrating = !!pCfg.vibrate && t >= (pCfg.vibrateAt ?? 0) && t <= (pCfg.vibrateUntil ?? 6);
+          const jitter = vibrating ? Math.sin(t * 54) * 4.5 : 0;
+          const py = gy - dh - 7;
+          g.save(); g.translate(px + jitter, py); g.rotate(vibrating ? Math.sin(t * 54) * 0.025 : -0.035);
+          box(g, -49, -30, 98, 60, { fill: '#0b0d12', line: '#7d8391', r: 9, lw: 3 });
+          box(g, -41, -23, 82, 46, { fill: vibrating ? '#28334a' : '#20242d', line: '#444b5b', r: 6, lw: 1.5 });
+          oval(g, -27, -10, 4, 4, { fill: '#9fb6ff', line: null });
+          ln(g, [[-18, -10], [25, -10]], { color: '#c2c8d6', lw: 2, la: 0.72 });
+          ln(g, [[-27, 1], [22, 1]], { color: '#8d94a4', lw: 2, la: 0.60 });
+          if (vibrating) {
+            ln(g, [[-58, -9], [-66, -16]], { color: '#9fb6ff', lw: 3, la: 0.8 });
+            ln(g, [[58, -9], [66, -16]], { color: '#9fb6ff', lw: 3, la: 0.8 });
+          }
+          g.restore(); phonePos = [px, py];
+        }
+        M.desk = { seat: [chairX, gy], top: [dx, gy - dh], laptop: [dx + dw * (o.stage ? 0.02 : -0.02), gy - dh], phone: phonePos };
       }
       if (o.door) door(g, X(o.doorX ?? 0.95), gy, X(0.07), E.H * 0.42, { open: o.doorOpen });
-      // tu dau giuong + dong ho
       const nx = bx - E.W * (E.vertical ? 0.1 : 0.045);
-      box(g, nx - 50, gy - 95, 100, 95, { fill: '#26272d', r: 6 }); ln(g, [[nx - 40, gy - 55], [nx + 40, gy - 55]], { lw: 1.5, la: 0.5 }); oval(g, nx, gy - 30, 4, 4, { fill: '#888', line: null });
+      box(g, nx - 50, gy - 95, 100, 95, { fill: '#26272d', r: 6 });
+      ln(g, [[nx - 40, gy - 55], [nx + 40, gy - 55]], { lw: 1.5, la: 0.5 });
+      oval(g, nx, gy - 30, 4, 4, { fill: '#888', line: null });
       if (o.clock !== false) digitClock(g, nx, gy - 97, 62, { time: o.clock ?? '3:17', ring: o.ring, blink: o.blink, t });
       M.clock = [nx, gy - 130];
-      // giuong
-      ln(g, [[bx, gy], [bx, gy - E.H * 0.25]], { lw: 9, color: '#33353d', la: 1 }); ln(g, [[bx, gy - E.H * 0.25], [bx, gy - E.H * 0.13]], { lw: 3, la: 0.5 });
-      box(g, bx, gy - bh, bw, bh * 0.55, { fill: '#2c2e35', r: 4 }); ln(g, [[bx + bw - 6, gy - bh * 0.5], [bx + bw - 6, gy]], { lw: 6, color: '#33353d', la: 1 });
+      ln(g, [[bx, gy], [bx, gy - E.H * 0.25]], { lw: 9, color: '#33353d', la: 1 });
+      ln(g, [[bx, gy - E.H * 0.25], [bx, gy - E.H * 0.13]], { lw: 3, la: 0.5 });
+      box(g, bx, gy - bh, bw, bh * 0.55, { fill: '#2c2e35', r: 4 });
+      ln(g, [[bx + bw - 6, gy - bh * 0.5], [bx + bw - 6, gy]], { lw: 6, color: '#33353d', la: 1 });
       M.bed = { head: [bx + bw * 0.1, gy - bh - 22], sit: [bx + bw * 0.62, gy], lie: [bx + bw * 0.4, gy - bh], x0: bx, x1: bx + bw, top: gy - bh };
       M.pillow = () => oval(g, bx + bw * 0.1, gy - bh - 6, bw * 0.09, 16, { fill: PAL.pillow });
-      M.blanket = (occupied) => obj(g, (c) => { c.moveTo(bx + bw * (occupied ? 0.17 : 0.24), gy - bh + 4); if (occupied) { c.quadraticCurveTo(bx + bw * 0.19, gy - bh - 34, bx + bw * 0.35, gy - bh - 28); c.quadraticCurveTo(bx + bw * 0.6, gy - bh - 36, bx + bw * 0.8, gy - bh - 18); } else c.quadraticCurveTo(bx + bw * 0.6, gy - bh - 14, bx + bw * 0.95, gy - bh - 4); c.lineTo(bx + bw * 0.98, gy - bh + bh * 0.5); c.lineTo(bx + bw * 0.16, gy - bh + bh * 0.5); c.closePath(); }, { fill: PAL.blanket, line: '#8c95b5', la: 0.5 });
+      M.blanket = (occupied) => obj(g, (c) => {
+        c.moveTo(bx + bw * (occupied ? 0.17 : 0.24), gy - bh + 4);
+        if (occupied) {
+          c.quadraticCurveTo(bx + bw * 0.19, gy - bh - 34, bx + bw * 0.35, gy - bh - 28);
+          c.quadraticCurveTo(bx + bw * 0.6, gy - bh - 36, bx + bw * 0.8, gy - bh - 18);
+        } else c.quadraticCurveTo(bx + bw * 0.6, gy - bh - 14, bx + bw * 0.95, gy - bh - 4);
+        c.lineTo(bx + bw * 0.98, gy - bh + bh * 0.5);
+        c.lineTo(bx + bw * 0.16, gy - bh + bh * 0.5); c.closePath();
+      }, { fill: PAL.blanket, line: '#8c95b5', la: 0.5 });
       if (!o.occupied) { M.pillow(); M.blanket(false); }
       break; }
     case 'city': {
@@ -177,11 +260,32 @@ export function set(g, kind = 'bedroom', o = {}) {
       break; }
     case 'cafe': {
       wall(g, '#2a2019', '#33271f'); floor(g, gy, '#241b15');
-      const wx = X(0.22), ww = X(0.56); box(g, wx, Y(0.16), ww, Y(0.42), { fill: '#141821', line: '#6b5644', r: 4 }); g.save(); g.beginPath(); g.rect(wx, Y(0.16), ww, Y(0.42)); g.clip(); skyline(g, Y(0.58), { color: '#1d2230', seed: 13, n: 9, hmin: 0.12, hvar: 0.2, lit: 0.35 }); rain(g, t, { n: 70, a: 0.3 }); g.restore();
+      const wx = X(0.22), ww = X(0.56);
+      box(g, wx, Y(0.16), ww, Y(0.42), { fill: '#141821', line: '#6b5644', r: 4 });
+      g.save(); g.beginPath(); g.rect(wx, Y(0.16), ww, Y(0.42)); g.clip();
+      skyline(g, Y(0.58), { color: '#1d2230', seed: 13, n: 9, hmin: 0.12, hvar: 0.2, lit: 0.35 });
+      rain(g, t, { n: 70, a: 0.3 }); g.restore();
       ln(g, [[wx + ww / 2, Y(0.16)], [wx + ww / 2, Y(0.58)]], { lw: 4, color: '#6b5644', la: 1 });
-      const lx = X(o.lampX ?? 0.5); ln(g, [[lx, -10], [lx, Y(0.2)]], { lw: 2, color: '#666' }); obj(g, (c) => { c.moveTo(lx - 40, Y(0.26)); c.lineTo(lx + 40, Y(0.26)); c.lineTo(lx + 12, Y(0.2)); c.lineTo(lx - 12, Y(0.2)); c.closePath(); }, { fill: '#c99a3a', line: null }); light(g, lx, Y(0.27), E.H * 0.55, PAL.lamp, 0.45);
-      table(g, lx, gy, 260, E.H * 0.2, { fill: '#5a3f2c' }); M.table = { left: [lx - 190, gy], right: [lx + 190, gy], top: gy - E.H * 0.2 };
+      const lx = X(o.lampX ?? 0.5);
+      ln(g, [[lx, -10], [lx, Y(0.2)]], { lw: 2, color: '#666' });
+      obj(g, (c) => { c.moveTo(lx - 40, Y(0.26)); c.lineTo(lx + 40, Y(0.26)); c.lineTo(lx + 12, Y(0.2)); c.lineTo(lx - 12, Y(0.2)); c.closePath(); }, { fill: '#c99a3a', line: null });
+      light(g, lx, Y(0.27), E.H * 0.55, PAL.lamp, 0.45);
+      const tw = E.W * (o.tableW ?? 0.26), th = E.H * 0.20;
+      const leftX = lx - tw * 0.68, rightX = lx + tw * 0.68;
+      chair(g, leftX, gy, E.H * 0.16, -1); chair(g, rightX, gy, E.H * 0.16, 1);
+      table(g, lx, gy, tw, th, { fill: '#5a3f2c' });
+      for (const cupX of [lx - tw * 0.25, lx + tw * 0.25]) {
+        box(g, cupX - 23, gy - th - 55, 46, 50, { fill: '#ded7c9', line: '#786a5c', r: 7, lw: 2 });
+        oval(g, cupX, gy - th - 54, 19, 4, { fill: '#4d3a2b', line: '#a99579', lw: 1.5 });
+        g.save(); g.strokeStyle = alpha('#ead8bd', 0.35); g.lineWidth = 2.2;
+        for (let k = 0; k < 2; k++) {
+          const sx = cupX - 8 + k * 15, wob = Math.sin(t * 2.5 + k) * 4;
+          g.beginPath(); g.moveTo(sx, gy - th - 59); g.bezierCurveTo(sx - 10, gy - th - 75, sx + 10 + wob, gy - th - 83, sx + wob, gy - th - 94); g.stroke();
+        }
+        g.restore();
+      }
       plant(g, X(0.9), gy, 160);
+      M.table = { left: [leftX, gy], right: [rightX, gy], top: gy - th };
       break; }
     case 'gym': {
       wall(g, '#141417', '#1a1a1e'); floor(g, gy, '#111114'); for (let i = 0; i < 8; i++) ln(g, [[X(i / 7), gy], [X(i / 7) + (i - 3.5) * 40, E.H]], { lw: 1, la: 0.12 });

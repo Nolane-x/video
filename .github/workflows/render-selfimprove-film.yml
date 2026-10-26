@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: h2-selfimprove-the-first-hour-v2
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   render-film:
@@ -102,6 +102,16 @@ jobs:
           assert by_id["b11"]["args"].get("messages", [{}])[0].get("text") == "still coming tonight?"
           assert by_id["b17"]["args"].get("messages", [{}])[0].get("text") == "miss you, man. coffee today?"
           assert by_id["b20"]["tpl"] == "note" and "ONE TASK." in by_id["b20"]["args"].get("text", "") and "TEN MINUTES." in by_id["b20"]["args"].get("text", "")
+          assert shots["b03"]["tpl"] == "clock" and shots["b03"]["args"].get("reach") is True, "Alarm-hand hesitation insert is missing"
+          assert shots["b06"]["args"].get("actors", [{}])[0].get("x") == "desk.seat", "Hero is not staged at the desk in B06"
+          assert shots["b12"]["tpl"] == "laptop", "Rejection email must be shown on a laptop, not a phone"
+          assert shots["b21"]["args"].get("actors", [{}])[0].get("pose") == "type", "Typing action is missing"
+          assert shots["b22"]["tpl"] == "scene" and shots["b22"]["args"].get("setArgs", {}).get("phoneOnDesk"), "Desk phone interaction is missing"
+          assert shots["b23"]["args"].get("setArgs", {}).get("phoneOnDesk", {}).get("slide"), "Phone-slide-away action is missing"
+          assert any(p[1] == "punch" for p in shots["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Punch action is missing"
+          assert shots["b25"]["args"].get("setArgs", {}).get("impacts") == [1.05, 2.7], "Punch impact timing is missing"
+          assert shots["b26"]["args"].get("setArgs", {}).get("tableW") == 0.26, "Cafe staging is missing"
+          assert shots["b15"]["args"].get("hud", {}).get("rows", [{}])[0].get("reset", {}).get("to") == 0, "DAY reset is missing"
           assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2
           assert by_id["b25"]["args"].get("actors", [{}])[0].get("pose") == "punch", "Workout action is missing"
           assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
