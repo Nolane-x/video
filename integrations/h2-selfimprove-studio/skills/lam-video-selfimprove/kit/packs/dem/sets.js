@@ -87,7 +87,7 @@ export function punchBag(g, x, y, s, o = {}) {
   let recoil = 0;
   for (const at of (o.impacts || [])) {
     const d = t - at;
-    if (d >= 0 && d < 1.5) recoil += Math.sin(d * 12.5) * Math.exp(-d * 2.1) * (o.impactSwing ?? 0.15);
+    if (d >= 0 && d < 1.5) recoil += Math.sin(d * 7.5) * Math.exp(-d * 1.6) * (o.impactSwing ?? 0.22);
   }
   const sw = Math.sin(t * 5) * (o.swing ?? 0.025) + recoil;
   g.save(); g.translate(x, y); g.rotate(sw);

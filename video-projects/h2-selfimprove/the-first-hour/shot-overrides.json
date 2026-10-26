@@ -1502,12 +1502,12 @@
         "setArgs": {
           "bag": true,
           "bagX": 0.5,
-          "swing": 0.012,
+          "swing": 0.008,
           "impacts": [
             1.05,
             2.7
           ],
-          "impactSwing": 0.15,
+          "impactSwing": 0.26,
           "spark": "#e8c28a",
           "barbell": false,
           "spot": 0.48
@@ -1591,12 +1591,33 @@
         "fx": [
           {
             "kind": "speed",
-            "at": 0.65,
-            "dur": 4.8,
+            "at": 0.93,
+            "dur": 0.24,
             "x": 0.48,
             "y": 0.52,
             "color": "#e2a34a",
             "dir": -1
+          },
+          {
+            "kind": "speed",
+            "at": 2.58,
+            "dur": 0.24,
+            "x": 0.48,
+            "y": 0.52,
+            "color": "#e2a34a",
+            "dir": -1
+          }
+        ],
+        "shake": [
+          {
+            "at": 1.05,
+            "amt": 1,
+            "dur": 0.16
+          },
+          {
+            "at": 2.7,
+            "amt": 0.85,
+            "dur": 0.16
           }
         ]
       }

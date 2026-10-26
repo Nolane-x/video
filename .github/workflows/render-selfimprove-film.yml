@@ -111,6 +111,9 @@ jobs:
           assert shots["b23"]["args"].get("setArgs", {}).get("phoneOnDesk", {}).get("slide"), "Phone-slide-away action is missing"
           assert any(p[1] == "punch" for p in shots["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Punch action is missing"
           assert shots["b25"]["args"].get("setArgs", {}).get("impacts") == [1.05, 2.7], "Punch impact timing is missing"
+          assert shots["b25"]["args"].get("setArgs", {}).get("impactSwing", 0) >= 0.25, "Punch-bag recoil is too subtle"
+          pulses = [f for f in shots["b25"]["args"].get("fx", []) if f.get("kind") == "speed" and f.get("dur", 99) < 0.5]
+          assert len(pulses) == 2, "Punch speed accents must be short and impact-timed"
           assert shots["b26"]["args"].get("setArgs", {}).get("tableW") == 0.26, "Cafe staging is missing"
           assert shots["b15"]["args"].get("hud", {}).get("rows", [{}])[0].get("reset", {}).get("to") == 0, "DAY reset is missing"
           assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2

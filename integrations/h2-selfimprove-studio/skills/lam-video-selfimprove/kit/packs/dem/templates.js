@@ -180,10 +180,10 @@ tpl('clock', (g, lt, info, a) => {
   camera(g, lt, info, () => {
     fillAll(g, '#0d0d10');
     const cx = fx(a.x, 0.5), cy = fy(a.y, 0.52), s = fs(a.s, 0.55);
-    let handX = cx + s * 0.13, handY = cy - s * 0.40;
+    let handX = cx + s * 0.02, handY = cy - s * 0.40;
     if (a.reach && lt >= (a.handAt ?? 0.45)) {
       const k = ease.out(clamp((lt - (a.handAt ?? 0.45)) / Math.max(0.1, a.handDur ?? 1.6)));
-      handX = lerp(E.W * 0.91, cx + s * 0.13, k);
+      handX = lerp(E.W * 0.91, cx + s * 0.02, k);
       handY = lerp(E.H * 0.93, cy - s * 0.40, k);
       g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
       g.strokeStyle = '#51535a'; g.lineWidth = s * 0.105;
