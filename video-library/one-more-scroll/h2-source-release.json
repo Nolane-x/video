@@ -30,6 +30,21 @@
       "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
       "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip",
       "status": "sha256 verified before upload; ZIP integrity test passed; 58 entries; full render/artistic QA was pending at publication"
+    },
+    {
+      "filename": "one-more-scroll-h2-source-v2-render-candidate.mp4",
+      "role": "full-length H2 render from scene-fixes source-v2; technical validation passed, not yet artistically approved",
+      "size_bytes": 33396438,
+      "sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7",
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4",
+      "status": "full 155-second H2 render completed; ffprobe validation passed; human moving-picture QA still pending"
+    },
+    {
+      "filename": "h2-source-v2-render-review.zip",
+      "role": "contact sheets, render/mix/browser logs, candidate metadata report and checksum list",
+      "size_bytes": 33673738,
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip",
+      "status": "ZIP integrity check passed; review contents include two contact sheets and SHA256SUMS.txt"
     }
   ],
   "checksum_list_asset": {
@@ -46,8 +61,59 @@
   "source_v2_render_candidate": {
     "workflow_path": ".github/workflows/verify-h2-source-v2.yml",
     "workflow_url": "https://github.com/Nolane-x/video/blob/main/.github/workflows/verify-h2-source-v2.yml",
-    "status": "pending",
-    "policy": "Render source-v2 to a separate candidate asset. Do not replace the canonical H2 master until full-motion QA and explicit artistic sign-off pass."
+    "workflow_run_id": "40276064292",
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40276064292",
+    "status": "technical_render_and_stream_validation_passed",
+    "source_archive": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+    "source_archive_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+    "candidate_file": "one-more-scroll-h2-source-v2-render-candidate.mp4",
+    "candidate_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4",
+    "candidate_size_bytes": 33396438,
+    "candidate_sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7",
+    "duration_seconds": 155,
+    "video": {
+      "codec_name": "h264",
+      "width": 1920,
+      "height": 1080,
+      "r_frame_rate": "24/1"
+    },
+    "audio": {
+      "codec_name": "aac",
+      "sample_rate": "48000",
+      "channels": 2
+    },
+    "review_bundle_file": "h2-source-v2-render-review.zip",
+    "review_bundle_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip",
+    "review_bundle_size_bytes": 33673738,
+    "technical_gates": {
+      "source_sha_and_zip_integrity": true,
+      "js_python_json_validation": true,
+      "browser_smoke_test_frames": 3720,
+      "browser_smoke_test_error_count": 0,
+      "contact_sheets_generated": true,
+      "packaged_music_beds_validated": 5,
+      "story_sfx_cues_validated": 45,
+      "full_render": true,
+      "audio_mix": true,
+      "final_ffprobe_validation": true,
+      "release_asset_presence_verified": true
+    },
+    "sampled_visual_observations": {
+      "method": "Reviewed the two source-v2 contact sheets sampled at approximately the midpoint of each of 31 shots. This is not a complete moving-picture review.",
+      "positives": [
+        "The sampled staircase frame around 85 seconds no longer visibly clips the protagonist's head.",
+        "The revised shoe-tying shot has a low crouched pose, but a still frame cannot prove finger-to-shoe contact.",
+        "The film maintains distinct environments and the dark charcoal/plum versus warm sunset lighting progression."
+      ],
+      "remaining_checks": [
+        "Watch the full candidate with audio and verify action timing/contact, especially the shoe-tying beat around 80 seconds.",
+        "Review the tight protagonist close-ups around 35–45 seconds and around 70 seconds for deliberate pacing.",
+        "Inspect transitions, audio synchronization and the whole emotional arc before approving."
+      ]
+    },
+    "artistic_signoff": "pending human review of full motion; candidate is not the canonical master",
+    "is_canonical_master": false,
+    "canonical_master_must_remain": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
   },
-  "portable_bundle_policy": "Include this metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle."
+  "portable_bundle_policy": "Include this verified candidate/review metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle."
 }
