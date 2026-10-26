@@ -208,5 +208,6 @@
     "is_canonical_master": false,
     "canonical_master_must_remain_unchanged": true,
     "note": "Technical CI success is not artistic approval; do not replace canonical H2 master without explicit approval."
-  }
+  },
+  "checksum_list_policy": "SHA256SUMS.txt is regenerated from this manifest's asset SHA-256 values and cross-checked against the published GitHub Release asset digests."
 }
