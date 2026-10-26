@@ -1,0 +1,26 @@
+{
+  "verified_by_workflow_run_id": "40271825143",
+  "verification_run_url": "https://github.com/Nolane-x/video/actions/runs/40271825143",
+  "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
+  "size_bytes": 31547778,
+  "duration_seconds": 155.0,
+  "video": {
+    "codec_name": "h264",
+    "codec_type": "video",
+    "width": 1920,
+    "height": 1080,
+    "r_frame_rate": "24/1",
+    "side_data_list": [
+      {}
+    ]
+  },
+  "audio": {
+    "codec_name": "aac",
+    "codec_type": "audio",
+    "sample_rate": "48000",
+    "channels": 2,
+    "r_frame_rate": "0/0"
+  },
+  "renderer": "H2 Canvas/Chromium + FFmpeg mastering",
+  "note": "This master is distinct from the Remotion reference render."
+}

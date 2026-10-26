@@ -9,7 +9,7 @@ Read this folder before designing another video. It is the long-term catalog of 
 - Never mark an artifact archived until its URL works and checksum/metadata are recorded.
 - Inspect the actual video, not only its thumbnail or filename.
 
-Current production: [ONE MORE SCROLL manifest](one-more-scroll/manifest.json), with [QA state](one-more-scroll/QA.md). The original H2 MP4 was delivered in a prior ChatGPT session but is not yet binary content in GitHub; the repository's Remotion output is a different build.
+Current production: [ONE MORE SCROLL manifest](one-more-scroll/manifest.json), with [QA state](one-more-scroll/QA.md). The original H2 MP4 is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The Remotion output is a different build.
 
 
 ## Historical work and renderer-source preservation

@@ -5,38 +5,39 @@
   "canonical_master": {
     "file_name": "one-more-scroll-h2-final.mp4",
     "renderer": "H2 Canvas/Chromium pipeline with FFmpeg audio mastering",
-    "duration_seconds": 155,
+    "duration_seconds": 155.0,
     "width": 1920,
     "height": 1080,
-    "fps": 24,
-    "video_codec": "H.264",
-    "audio_codec": "AAC",
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
     "audio": "stereo 48 kHz",
     "integrated_loudness_target_lufs": -14,
     "reported_true_peak_dbfs": -2.4,
-    "storage_status": "prior ChatGPT attachment exists in current workspace and has been probed/hashed; not yet committed as a binary GitHub file",
+    "storage_status": "archived in GitHub and verified by workflow run 40271825143",
     "do_not_misrepresent": "This H2 master is not the same file as the repository's Remotion render.",
     "size_bytes": 31547778,
     "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
     "fresh_probe": {
-      "duration_seconds": 155,
+      "duration_seconds": 155.0,
       "width": 1920,
       "height": 1080,
       "fps": "24/1",
       "video_codec": "h264",
       "audio_codec": "aac",
       "audio_sample_rate_hz": 48000,
-      "audio_channels": 2,
-      "source": "ffprobe run on exact prior-session attachment during 2026-10-25 session"
-    }
+      "audio_channels": 2
+    },
+    "repository_path": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
   },
   "prior_session_files": [
     {
       "file": "one-more-scroll-h2-final.mp4",
       "kind": "master",
-      "storage": "ChatGPT attachment",
+      "storage": "GitHub repository binary verified by Actions",
       "size_bytes": 31547778,
-      "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f"
+      "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
+      "repository_path": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
     },
     {
       "file": "one-more-scroll-h2-preview-30s.mp4",
@@ -114,8 +115,7 @@
     ]
   },
   "known_unverified": [
-    "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render.",
-    "The exact canonical H2 master is not archived as a durable GitHub binary."
+    "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render."
   ],
   "latest_remotion_render": {
     "project_id": "one-more-scroll",
@@ -143,5 +143,13 @@
     "reported_true_peak_dbfs": -2.3,
     "visual_qa_status": "technical checks passed and contact sheets generated; manual artistic/motion review still required",
     "note": "This is the repository's Remotion build, not the separately delivered H2 Canvas/Chromium master."
+  },
+  "archived_h2_master": {
+    "repository_path": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4",
+    "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
+    "size_bytes": 31547778,
+    "verified_by_workflow_run_id": "40271825143",
+    "verification_run_url": "https://github.com/Nolane-x/video/actions/runs/40271825143",
+    "note": "Original H2 Canvas/Chromium master; keep separate from the Remotion render."
   }
 }

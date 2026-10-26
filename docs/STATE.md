@@ -40,13 +40,13 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - The source mirror at `integrations/h2-selfimprove-studio/` intentionally preserves 51 UTF-8 files from the v1.0.2 base release (`pluginrel_6ade1c3ecb20819199def25125d2f89a`). The v1.1.0 production addendum/references are in `integrations/h2-selfimprove-studio-production-overlay/`; do not relabel the base manifest as v1.1.0.
 - The original `.plugin` archive itself and the original H2 master MP4 are not binary files in Git. The H2 renderer source mirror is in GitHub; native rendering still requires the appropriate runtime/dependencies.
 - This source is distinct from the Remotion project and from the complete upstream Remotion/Blender/Krita applications.
-## Previously delivered H2 master (outside Git history)
+## Canonical H2 master (archived and verified in GitHub)
 - File: `one-more-scroll-h2-final.mp4`
 - Reported at delivery: about 155 seconds, 1920×1080, 24 fps, H.264 + AAC stereo 48 kHz.
 - Audio target reported about -14 LUFS; reported true peak about -2.4 dBFS.
 - Related session attachments: 30-second preview, thumbnail, two contact sheets, QA report, source ZIP (~115.9 MB) and source-v2 ZIP (~115.9 MB).
-- **Storage truth:** these were delivered as ChatGPT attachments; they are not committed binary files in this repo. Source-v2 includes fixes that had not been verified by a new full render due to local Chromium navigation restrictions. Do not claim those fixes are in the master.
-- The exact H2 master SHA-256 is `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, size 31,547,778 bytes. It has been freshly probed in the current workspace, but the binary itself is not yet committed to GitHub. Use `tools/video/archive_h2_master.py` after downloading that exact attachment to import it with checksum validation.
+- **Storage truth:** the exact H2 master is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The source ZIPs remain external until separately uploaded as Release assets. Source-v2 includes fixes that had not been verified by a new full render due to local Chromium navigation restrictions. Do not claim those fixes are in the master.
+- Exact H2 master: `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, 31,547,778 bytes. GitHub Actions verified its SHA, codec, dimensions, FPS, duration and audio format in [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143).
 - The repository's Remotion reference render **is now persisted** at `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`. Its SHA-256 is `cba900cebb306acc42fa3f741f7c7d008e9a04400a867a87402dcdf8090ac3e3`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
 
