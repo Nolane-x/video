@@ -1,0 +1,21 @@
+{
+  "title": "ALMOST READY | An Animated Short Film",
+  "aspect": "16:9",
+  "resolution": "1080p",
+  "fps": 24,
+  "pack": "dem",
+  "style": "flat",
+  "captions": false,
+  "lang": "en",
+  "accent": "amber",
+  "bars": "scope",
+  "duration": 172,
+  "music": {
+    "enabled": true,
+    "gainDb": -12
+  },
+  "sfx": {
+    "enabled": true,
+    "gainDb": -4
+  }
+}
