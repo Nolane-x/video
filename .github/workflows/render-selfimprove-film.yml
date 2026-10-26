@@ -67,18 +67,60 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=Path("projects/the-first-hour/story/shots.json")
-          d=json.loads(p.read_text(encoding="utf-8"))
-          shots={s["id"]:s for s in d["shots"]}
-          assert len(shots)==29, f"Expected 29 shots, got {len(shots)}"
-          assert shots["b20"]["tpl"]=="note" and "ONE TASK." in shots["b20"]["args"].get("text","") and "TEN MINUTES." in shots["b20"]["args"].get("text",""), "Notebook text is not mapped"
-          assert shots["b26"]["args"].get("set")=="cafe" and len(shots["b26"]["args"].get("actors",[]))>=2, "Café connection blocking is missing"
-          assert shots["b25"]["args"].get("actors",[{}])[0].get("pose")=="punch", "Workout action is missing"
-          assert shots["b21"]["args"].get("setArgs",{}).get("laptop") is True, "Work prop is missing"
-          t1,t2=shots["b15"]["args"]["texts"]
-          assert t1["at"]+t1["dur"] <= t2["at"], "B15 title text overlaps"
-          d["duration"]=d["shots"][-1]["end"]
-          print(f"ART-DIRECTION QA PASS: {len(shots)} shots; {d['duration']}s; notebook/café/action/text-overlap guards passed")
+          project = Path("projects/the-first-hour")
+          story_path = project / "story/shots.json"
+          story = json.loads(story_path.read_text(encoding="utf-8"))
+          patch_path = Path("../../../../../video-projects/h2-selfimprove/the-first-hour/shot-overrides.json")
+          patch = json.loads(patch_path.read_text(encoding="utf-8"))
+          shots = {s["id"]: s for s in story["shots"]}
+          expected = {f"b{i:02d}" for i in range(1, 30)}
+          assert set(shots) == expected, "The 29 source shot IDs drifted"
+          assert set(patch["shots"]) == expected, "Shot override coverage must be exact"
+          assert len(shots) == 29
+          for shot_id, override in patch["shots"].items():
+              shot = shots[shot_id]
+              shot["tpl"] = override["tpl"]
+              shot["args"] = override["args"]
+              if "in" in override:
+                  shot["in"] = override["in"]
+          duration = float(patch["duration"])
+          assert duration == 172.0
+          assert abs(float(story["shots"][-1]["start"]) - (duration - 6.0)) < 0.01
+          story["shots"][-1]["end"] = duration
+          story["duration"] = duration
+          # Preserve the approved script text while ensuring every overlay fits its shot.
+          for shot in story["shots"]:
+              shot_duration = float(shot["end"]) - float(shot["start"])
+              for tx in shot.get("args", {}).get("texts", []):
+                  at = float(tx.get("at", 0.3))
+                  dur = float(tx.get("dur", shot_duration - at - 0.1))
+                  assert at >= 0 and dur > 0 and at + dur <= shot_duration + 0.02, (
+                      f"{shot['id']} caption outside shot: {tx.get('t')!r}, at={at}, dur={dur}, shot={shot_duration}"
+                  )
+          # Production regression checks: the errors found in the first render must not return.
+          by_id = {s["id"]: s for s in story["shots"]}
+          assert by_id["b11"]["args"].get("messages", [{}])[0].get("text") == "still coming tonight?"
+          assert by_id["b17"]["args"].get("messages", [{}])[0].get("text") == "miss you, man. coffee today?"
+          assert by_id["b20"]["tpl"] == "note" and "ONE TASK." in by_id["b20"]["args"].get("text", "") and "TEN MINUTES." in by_id["b20"]["args"].get("text", "")
+          assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2
+          assert by_id["b25"]["args"].get("actors", [{}])[0].get("pose") == "punch", "Workout action is missing"
+          assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
+          assert by_id["b29"]["tpl"] == "scene", "End card must not use a simulated platform UI"
+          assert "voice" not in [a.get("who") for a in by_id["b16"]["args"].get("actors", [])], "Shadow must be absent at the turning point"
+          t1, t2 = by_id["b15"]["args"]["texts"]
+          assert t1["at"] + t1["dur"] <= t2["at"], "B15 title text overlaps"
+          previous_end = 0.0
+          for shot in story["shots"]:
+              assert abs(float(shot["start"]) - previous_end) < 0.01, f"Timeline gap/overlap before {shot['id']}"
+              assert float(shot["end"]) > float(shot["start"]), f"Invalid duration for {shot['id']}"
+              previous_end = float(shot["end"])
+          assert abs(previous_end - duration) < 0.01
+          story_path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          config_path = project / "config.json"
+          config = json.loads(config_path.read_text(encoding="utf-8"))
+          config["duration"] = duration
+          config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(f"ART-DIRECTION QA PASS: 29 curated shots; {duration:.1f}s; message/contact, workout, café, turning-point, ending, caption and timeline guards passed")
           PY
       - name: Validate full timeline and render contact sheets
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
@@ -106,6 +148,7 @@ jobs:
           cp projects/the-first-hour/out/*.mp4 "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4"
           cp projects/the-first-hour/build/preview.mp4 "$GITHUB_WORKSPACE/dist/the-first-hour/preview-30s.mp4"
           cp projects/the-first-hour/story/shots.json "$GITHUB_WORKSPACE/dist/the-first-hour/shots.json"
+          cp ../../../../../video-projects/h2-selfimprove/the-first-hour/shot-overrides.json "$GITHUB_WORKSPACE/dist/the-first-hour/shot-overrides.json"
           cp projects/the-first-hour/story/bible.md "$GITHUB_WORKSPACE/dist/the-first-hour/bible.md"
           cp projects/the-first-hour/config.json "$GITHUB_WORKSPACE/dist/the-first-hour/config.json"
           cp ../../../../../video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt "$GITHUB_WORKSPACE/dist/the-first-hour/01-PHIM-the-first-hour.txt"
@@ -127,10 +170,19 @@ jobs:
           a=[s for s in d["streams"] if s.get("codec_type")=="audio"]
           assert v and a, "Final MP4 must contain both video and audio streams"
           assert int(v[0]["width"])==1920 and int(v[0]["height"])==1080, f"Unexpected resolution: {v[0].get('width')}x{v[0].get('height')}"
-          assert abs(float(d["format"]["duration"])-172.0)<3.0, f"Unexpected runtime: {d['format']['duration']}"
-          print(f"PASS: {d['format']['duration']}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz")
+          assert abs(float(d["format"]["duration"])-172.0)<0.15, f"Unexpected runtime: {d['format']['duration']}"
+          assert v[0].get("r_frame_rate") == "24/1", f"Unexpected frame rate: {v[0].get('r_frame_rate')}"
+          assert a[0].get("sample_rate") == "48000" and int(a[0].get("channels", 0)) == 2, "Audio must be 48 kHz stereo"
+          log=Path("dist/the-first-hour/ebur128.log").read_text(errors="replace")
+          import re
+          m_i=re.search(r"^\\s*I:\\s*(-?[0-9]+\\.[0-9]+)\\s*LUFS\\s*$", log, re.M)
+          m_p=re.search(r"^\\s*Peak:\\s*(-?[0-9]+\\.[0-9]+)\\s*dBFS\\s*$", log, re.M)
+          assert m_i and m_p, "EBU R128 summary is missing integrated loudness or peak"
+          integrated=float(m_i.group(1)); peak=float(m_p.group(1))
+          assert -15.0 <= integrated <= -13.0, f"Integrated loudness outside -14 LUFS ±1: {integrated}"
+          assert peak <= -1.0, f"True peak ceiling exceeded (-1.0 dBFS): {peak}"
+          print(f"PASS: {float(d['format']['duration']):.3f}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz stereo; I={integrated:.1f} LUFS; peak={peak:.1f} dBFS")
           PY
-          grep -E "I: *-1[3456]\.[0-9]+ LUFS|Peak: *-?[0-9]+\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
       - name: Upload video, preview and QA bundle
         uses: actions/upload-artifact@v4
         with:
