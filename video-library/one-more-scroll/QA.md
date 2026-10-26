@@ -99,8 +99,10 @@ The delivered master and later source-v2 are different versions. The prior maste
 
 
 
-## Source-v3 shoe-tying correction — full render in progress
+## Source-v3 shoe-tying correction — corrected full-render rerun
 - Focused preview [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327) passed five-second 1080p/24 H.264 validation and generated a 20-frame contact sheet.
-- Full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed the request/patch pin guard, source archive SHA/ZIP validation, patch application, JS/Python/JSON checks, full-timeline browser smoke, source-v3 contact sheets and audio-WAV coverage. It is currently rendering the full-length silent master.
+- First full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) succeeded through full silent render, audio mix/ffprobe, and EBU R128: **-14.0 LUFS integrated**, **6.9 LU LRA**, **-2.4 dBFS true peak**. It failed only during review ZIP checksum creation because the pinned patch script was not copied to the payload. No source-v3 candidate or review ZIP was published by that attempt.
+- Corrected rerun [run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) has re-passed the request/patch guard, source ZIP SHA/ZIP integrity, patch application, and JavaScript/Python/JSON validation; it is currently running the browser smoke check across the source-v3 timeline.
+- The release packaging step now copies `tools/video/patch_h2_shoelace_scene.py` into `payload/` before checksumming, validates the expected MP4/report are present, and uploads a 30-day convenience artifact even if a later step fails.
 - Source patch: `tools/video/patch_h2_shoelace_scene.py` at pinned commit `05a2027cebdc83cedc1002992198d9404f253647`; base source-v2 archive SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
-- Keep the original H2 master and the source-v2 candidate unchanged. A source-v3 output is a candidate only; final technical metadata, audio loudness, asset hashes, and a complete motion/audio review are still required.
+- Keep the original H2 master and source-v2 candidate unchanged. Source-v3 is not artistically approved until its published full-length MP4 is reviewed with audio, including shoe-hand contact and action timing.
