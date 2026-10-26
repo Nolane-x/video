@@ -45,7 +45,7 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - Reported at delivery: about 155 seconds, 1920×1080, 24 fps, H.264 + AAC stereo 48 kHz.
 - Audio target reported about -14 LUFS; reported true peak about -2.4 dBFS.
 - Related session attachments: 30-second preview, thumbnail, two contact sheets, QA report, source ZIP (~115.9 MB) and source-v2 ZIP (~115.9 MB).
-- **Storage truth:** the canonical H2 master is archived in Git and the original source plus source-v2 ZIPs are archived as verified [GitHub Release assets](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1). Source SHA-256 values and download URLs are in `video-library/one-more-scroll/h2-source-release.json`. Source-v2 contains the facial timing, shoe-prop and staircase-camera changes, but must remain a candidate until a fresh H2 full render and moving-picture QA pass.
+- **Storage truth:** the canonical H2 master is archived in Git and the original source plus source-v2 ZIPs are archived as verified [GitHub Release assets](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1). Source-v2 has now been rendered fully and passed technical stream validation; candidate MP4, SHA-256, report and review bundle are recorded in `video-library/one-more-scroll/h2-source-release.json`. It remains a separate candidate until a human reviews the entire moving picture with audio and gives explicit artistic sign-off.
 - Exact H2 master: `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, 31,547,778 bytes. GitHub Actions verified its SHA, codec, dimensions, FPS, duration and audio format in [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143).
 - The current Remotion reference render is `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`, SHA-256 `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
@@ -70,11 +70,17 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 
 ## Next priorities
 1. **Completed:** Portable package rebuilt and verified in [run 40272019747](https://github.com/Nolane-x/video/actions/runs/40272019747); includes both the H2 master and Remotion render, source/docs, tool inventory, H2 production overlay and plugin release metadata. The reference manifest is `video-library/reference-clips.json`.
-2. **Completed:** The canonical master and both H2 source ZIPs are archived; source Release: [h2-production-assets-v1](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1), uploaded after checksum/ZIP validation by [run 40274927974](https://github.com/Nolane-x/video/actions/runs/40274927974). Next: run the source-v2 H2 engine workflow and review the candidate before any promotion to canonical master.
+2. **Completed:** The canonical master and both H2 source ZIPs are archived. Source-v2 rendered successfully in [run 40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292): 155.000s, 1920×1080@24fps, H.264 + AAC 48 kHz stereo; candidate SHA-256 `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`. Next: watch the full candidate with audio, review the contact/action and pacing risks, then decide whether it is approved to replace the canonical master.
 3. **Open:** Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but artistic QA is not signed off. The latest run 36 measured -14.5 LUFS integrated and -2.3 dBFS true peak, within the configured conservative peak gate. Run 31's older -1.2 dBFS peak is historical, not the current master.
 4. **Open:** Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
-5. Update state and film manifest after every verified render.
+5. Update state, handoff and film manifest after every verified render. Latest H2 source-v2 candidate is technical-pass / artistic-sign-off-pending; never promote it automatically.
 
+
+## Latest H2 source-v2 render candidate
+- Workflow: [40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292) — full 155-second render, audio mix, stream validation and Release upload passed.
+- Candidate: [download MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4); review bundle: [ZIP](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip).
+- SHA-256: `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`; size 33,396,438 bytes; 155.000s; 1920×1080 @24fps; H.264 + AAC stereo 48 kHz.
+- This is a technically validated candidate. Artistic approval remains open after contact-sheet sampling; full playback with audio and moving-action review are still needed.
 
 ## Latest archived Remotion render — run 36
 - MP4: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`
