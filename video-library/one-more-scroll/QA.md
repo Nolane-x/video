@@ -1,6 +1,6 @@
 # ONE MORE SCROLL — QA state
 
-This documents the prior H2 delivery; re-verify against the actual MP4 before a new release.
+The canonical H2 MP4 is now present in GitHub and technically verified. The checks below distinguish file integrity from artistic review; a successful probe does not mean the film has passed visual sign-off.
 
 ## Reported technical output
 - About 155 seconds, 1920×1080, 24 fps.
@@ -8,7 +8,7 @@ This documents the prior H2 delivery; re-verify against the actual MP4 before a 
 - Loudness target about -14 LUFS; true peak reported about -2.4 dBFS.
 - 31-shot story, generated music/SFX and intentional silence after the phone-down choice.
 
-These are reported readings from the prior delivery, not a fresh probe of a binary currently in GitHub.
+The GitHub Actions probe confirms duration, resolution, frame rate, codecs and audio format. Loudness/true-peak figures above remain reported delivery measurements; they have not been remeasured in this verification workflow.
 
 ## Positive decisions to preserve
 - Native H2 Canvas/Chromium renderer for delivered H2 master, not the earlier homemade SVG demo.
@@ -22,6 +22,7 @@ The delivered master and later source-v2 are different versions. The prior maste
 ## Open release gates
 - [x] Archive the exact H2 master to durable GitHub storage.
 - [x] Record its SHA-256 and fresh ffprobe output.
+- [ ] Complete a human moving-picture review of the H2 master, including contact/cropping, transitions and sound/story arc.
 - [ ] Re-render source-v2 with the real H2 engine.
 - [ ] Inspect all fixed shots and transitions.
 
