@@ -119,7 +119,8 @@
     ]
   },
   "known_unverified": [
-    "Source-v2 fixes for facial expression, shoe tying and staircase framing were not verified by a complete new H2 render."
+    "Source-v2 and source-v3 renders passed technical stream/audio checks, but full-motion artistic sign-off remains pending.",
+    "Source-v3 shoe-tying hand-to-shoe contact and timing require playback review; contact sheets cannot establish contact by themselves."
   ],
   "latest_remotion_render": {
     "project_id": "one-more-scroll",
@@ -164,10 +165,11 @@
     "source_asset_count": 2,
     "original_source_sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
     "source_v2_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
-    "source_v2_full_render_status": "pending; do not mark as artistically approved",
+    "source_v2_full_render_status": "technical render and stream validation passed; artistic sign-off pending",
     "candidate_sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7",
     "candidate_technical_status": "passed",
-    "candidate_artistic_status": "pending"
+    "candidate_artistic_status": "pending",
+    "source_v3_full_render_status": "technical render and stream validation passed in workflow run 40286913324; artistic sign-off pending"
   },
   "source_v2_render_candidate": {
     "file_name": "one-more-scroll-h2-source-v2-render-candidate.mp4",
@@ -215,22 +217,47 @@
     "patch_commit": "05a2027cebdc83cedc1002992198d9404f253647",
     "render_request_path": "video-library/one-more-scroll/h2-source-v3-render-request.json",
     "preview_workflow_run_id": "40280228327",
-    "full_render_workflow_run_id": "40281627022",
-    "full_render_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40281627022",
-    "status": "full_render_in_progress",
+    "preview_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40280228327",
+    "full_render_workflow_run_id": "40286913324",
+    "full_render_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40286913324",
+    "status": "technical_render_and_stream_validation_passed",
     "technical_prechecks_passed": [
       "request and pinned patch guard",
-      "source archive SHA-256 and ZIP integrity",
-      "deterministic shoe-tying patch applied",
-      "JS/Python/story JSON validation",
+      "source ZIP SHA-256 and integrity",
+      "deterministic patch application",
+      "JavaScript, Python and story JSON validation",
       "full-timeline browser smoke test",
       "source-v3 contact sheets",
-      "five music beds and 45 SFX cues validated"
+      "five music beds and 45 SFX cues validated",
+      "full 155-second 1080p/24 H2 render completed",
+      "H.264 video and AAC stereo 48 kHz stream metadata verified with ffprobe",
+      "EBU R128 loudness and true-peak measurement completed",
+      "candidate and review ZIP published as separate Release assets"
     ],
-    "expected_candidate": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
-    "expected_review_bundle": "h2-source-v3-shoelace-fix-review.zip",
+    "candidate_filename": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "candidate_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "candidate_size_bytes": 33409690,
+    "candidate_sha256": "761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f",
+    "sha256": "761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f",
+    "review_bundle_filename": "h2-source-v3-shoelace-fix-review.zip",
+    "review_bundle_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip",
+    "review_bundle_size_bytes": 33709840,
+    "review_bundle_sha256": "56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745",
+    "duration_seconds": 155,
+    "width": 1920,
+    "height": 1080,
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "audio": "stereo 48 kHz",
+    "audio_measurement": {
+      "method": "FFmpeg ebur128=peak=true on the exact released candidate MP4",
+      "integrated_loudness_lufs": -14,
+      "loudness_range_lu": 6.9,
+      "true_peak_dbfs": -2.4
+    },
     "is_canonical_master": false,
     "canonical_master_must_remain_unchanged": true,
-    "artistic_signoff": "pending"
+    "artistic_signoff": "pending human review of full moving picture and audio"
   }
 }

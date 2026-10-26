@@ -36,12 +36,15 @@ The exact 155-second Full HD H2 master is archived at `video-library/one-more-sc
 - Technical pass: 155.000s, 1920×1080 @24fps, H.264 + AAC stereo 48 kHz; SHA-256 `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`.
 - Contact-sheet sampling suggests the staircase head crop is improved; shoe-to-hand contact and tight close-up pacing still need full-motion review. Do not replace the canonical H2 master until someone watches the full candidate with audio and explicitly approves it.
 
-## Source-v3 shoe-tying fix — corrected full render rerun
-- Focused preview passed in [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327); see the `h2-source-v3-shoelace-preview` artifact for MP4/contact sheet.
-- First full run [40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) successfully rendered/mixed the candidate and passed ffprobe + EBU R128 (-14.0 LUFS integrated, 6.9 LU LRA, -2.4 dBFS true peak), but failed at review packaging because `patch_h2_shoelace_scene.py` was missing from the payload at checksum time. No candidate/review Release assets were published in that attempt.
-- Corrected full rerun: [40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324). The workflow now explicitly copies the pinned patch into the review payload before generating checksums and uploads a short-retention artifact even if a later step fails.
-- Patch source: `tools/video/patch_h2_shoelace_scene.py`, pinned commit `05a2027cebdc83cedc1002992198d9404f253647`. Render request: `video-library/one-more-scroll/h2-source-v3-render-request.json`.
-- Once run 40286913324 completes, verify 155-second 1080p/24 H.264 + AAC stereo 48 kHz metadata, EBU R128, Release candidate/review asset presence and hashes, update manifests, then inspect full motion/audio. Never replace the canonical H2 master without explicit artistic approval.
+## Source-v3 shoe-tying fix — full render, stream/audio QA and release packaging passed
+- Preview passed in [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327).
+- Corrected full render and Release publication passed all required steps in [run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324); first attempt [40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) failed only because the patch script was missing from the review payload at checksum time.
+- Candidate: [download source-v3 H2 MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4); SHA-256 `761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f`, 33,409,690 bytes.
+- Review ZIP: [download source-v3 review bundle](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip); SHA-256 `56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745`, 33,709,840 bytes. Includes contact sheets, browser/render/mix/EBU logs, metadata report, pinned patch and SHA256SUMS.txt.
+- Verified: 155s, 1920×1080 @24fps, H.264 + AAC stereo 48 kHz. EBU R128: −14.0 LUFS integrated, 6.9 LU LRA, −2.4 dBFS true peak.
+- Base archive SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`; patch `tools/video/patch_h2_shoelace_scene.py` pinned to `05a2027cebdc83cedc1002992198d9404f253647`.
+- Technical validation **passed**; full-motion artistic sign-off **pending**. Review hand-to-shoe contact, action timing, close-up rhythm, transitions, audio sync and emotional arc. Do not replace the canonical H2 master until the entire candidate has been watched with audio and explicitly approved.
+- Canonical master SHA-256 remains `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`.
 
 ## End-of-session
 Run checks; inspect contact sheets and motion proofs; record exact renderer, commit, run URL, artifact storage/expiry, audio measures, defects and next actions. Update `docs/STATE.md`, this file and the per-video manifest.

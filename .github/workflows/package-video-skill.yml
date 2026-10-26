@@ -251,7 +251,19 @@ jobs:
               release_assets = {item.get("filename"): item for item in release_manifest.get("assets", [])}
               if release_assets.get("one-more-scroll-h2-source.zip", {}).get("sha256") != "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b":
                   raise SystemExit("Original H2 source release checksum is missing or stale")
-              if release_assets.get("one-more-scroll-h2-source-v2-scene-fixes.zip", {}).get("sha256") != "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014":
+              source_v3 = release_manifest.get("source_v3_render_candidate", {})
+    if source_v3.get("status") != "technical_render_and_stream_validation_passed":
+        raise SystemExit("H2 source-v3 candidate has not passed full render/stream validation")
+    if source_v3.get("is_canonical_master") is not False:
+        raise SystemExit("Source-v3 must remain a separate non-canonical candidate")
+    for key, sha_key in [("candidate_filename", "candidate_sha256"), ("review_bundle_filename", "review_bundle_sha256")]:
+        filename = source_v3.get(key)
+        expected = source_v3.get(sha_key)
+        listed = release_assets.get(filename, {}) if filename else {}
+        if not filename or not expected or listed.get("sha256") != expected:
+            raise SystemExit(f"Source-v3 manifest asset/checksum mismatch: {filename}")
+
+    if release_assets.get("one-more-scroll-h2-source-v2-scene-fixes.zip", {}).get("sha256") != "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014":
                   raise SystemExit("H2 source-v2 release checksum is missing or stale")
               bundle_manifest = json.loads(archive.read("VIDEO_PRODUCTION_BUNDLE_MANIFEST.json"))
               if bundle_manifest.get("h2_source_release_url") != "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1":

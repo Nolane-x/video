@@ -63,10 +63,19 @@ Earlier in the conversation:
 These are historical identifiers, not proof about current HEAD. Check the live Actions page.
 
 ## Verified latest state
-- Earlier Remotion run-31 CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio processing, metadata and contact-sheet generation. The later archived reference is run 36; its render CI is [40200152650](https://github.com/Nolane-x/video/actions/runs/40200152650).
-- H2 archive verification: [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143) — passed SHA-256, file-size, codec, resolution, FPS, duration and audio-format checks; generated contact sheets and metadata.
-- Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`.
-- Portable skill bundle: [`video-library/video-production-master-skill.zip`](../video-library/video-production-master-skill.zip). Packaging [run 40282799904](https://github.com/Nolane-x/video/actions/runs/40282799904) passed ZIP integrity and required-file checks: 176 entries, Remotion run-36 render, canonical H2 master, source-release manifest with candidate SHA-256/EBU R128 metrics, user reference-clips manifest, H2 v1.1.0 production overlay and source-v2 render workflow. The adjacent `.sha256` sidecar is authoritative; this state file is itself packaged, so embedding the ZIP's exact checksum here would be self-referential.
+- **H2 source-v3 full render and Release packaging passed:** [workflow run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324), all required steps successful, including the previously failing review-bundle checksum/publish step.
+- Candidate: [source-v3 H2 MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4), SHA-256 `761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f`, 33,409,690 bytes. Review ZIP: [source-v3 review package](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip), SHA-256 `56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745`, 33,709,840 bytes.
+- Verified streams: 155.000s, 1920×1080 @24fps, H.264 + AAC stereo 48 kHz. EBU R128: −14.0 LUFS integrated, 6.9 LU LRA, −2.4 dBFS true peak.
+- First attempt [40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed rendering/audio but omitted the pinned patch script from the review payload. The corrected workflow copies the patch before checksum generation, verifies required files and uploads the candidate/review assets separately.
+- Portable skill package last passed in [run 40287442899](https://github.com/Nolane-x/video/actions/runs/40287442899): ZIP integrity, 176 entries, Remotion run-36 sample, canonical H2 master, H2 production overlay and plugin v1.1.0 all verified. That build's sidecar SHA-256 was `cf6257467655f73fedd715cf5ce2380c73aa30b855df1b6ae6605945d67f8635`; this manifest/docs change triggers a fresh package build, so recheck the newest run and sidecar.
+- Canonical H2 master remains unchanged: `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`. Source-v2 and source-v3 are separate non-canonical candidates.
+- Source-v3 is a **technical pass, not artistic sign-off**. Full playback with audio must verify shoe-to-hand contact, action timing, pacing, transitions, sync and emotional arc.
+
+## Next priorities
+1. Watch the complete source-v3 MP4 with audio and inspect the shoe-tying motion.
+2. Review close-up rhythm around 35–45 and ~70 seconds, transitions, sync and narrative arc; log defects with timestamps.
+3. Only explicit artistic approval may promote a candidate; preserve the current master/hash until then.
+4. Verify the fresh portable bundle after manifest sync and confirm its entry count and sidecar.
 
 ## Prior work catalog and reusable archive tooling
 - The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.

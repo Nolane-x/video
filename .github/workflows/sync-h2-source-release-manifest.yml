@@ -56,8 +56,21 @@ jobs:
           assert candidate3.get("patch_commit")=="05a2027cebdc83cedc1002992198d9404f253647"
           print("Source-release manifest is valid; source-v2 and source-v3 candidates remain separate from the canonical master.")
           PY
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("video-library/one-more-scroll/h2-source-release.json").read_text())
+          lines=[]
+          for item in sorted(data.get("assets",[]), key=lambda x:x.get("filename","")):
+              sha=item.get("sha256")
+              name=item.get("filename")
+              if sha and name: lines.append(f"{sha}  {name}")
+          if not lines: raise SystemExit("No checksum-verified release assets found in the source manifest.")
+          Path("SHA256SUMS.txt").write_text("\\n".join(lines)+"\\n")
+          print(f"Generated Release SHA256SUMS.txt for {len(lines)} manifest assets.")
+          PY
           gh release upload h2-production-assets-v1 \
-            video-library/one-more-scroll/h2-source-release.json \
+            video-library/one-more-scroll/h2-source-release.json SHA256SUMS.txt \
             --repo Nolane-x/video --clobber
           gh api repos/Nolane-x/video/releases/tags/h2-production-assets-v1 > /tmp/h2-release.json
           python - <<'PY'
@@ -70,5 +83,13 @@ jobs:
               raise SystemExit("Updated source-release manifest is missing from GitHub Release.")
           if assets["h2-source-release.json"]["size"] != local.stat().st_size:
               raise SystemExit("Uploaded source-release manifest size does not match the local authoritative file.")
+          data=json.loads(local.read_text())
+          for item in data.get("assets",[]):
+              expected=item.get("sha256")
+              remote=assets.get(item.get("filename",""),{}).get("digest")
+              if expected and remote and remote.removeprefix("sha256:") != expected:
+                  raise SystemExit(f"Release SHA-256 differs from manifest for {item['filename']}: {remote} != {expected}")
+          if "SHA256SUMS.txt" not in assets: raise SystemExit("Updated Release checksum list is missing.")
+          print("Uploaded source manifest and checksum list; release digests match the manifest.")
           print("Updated Release manifest URL:",assets["h2-source-release.json"]["browser_download_url"])
           PY

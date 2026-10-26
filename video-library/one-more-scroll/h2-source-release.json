@@ -44,7 +44,24 @@
       "role": "contact sheets, render/mix/browser logs, candidate metadata report and checksum list",
       "size_bytes": 33673738,
       "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip",
-      "status": "ZIP integrity check passed; review contents include two contact sheets and SHA256SUMS.txt"
+      "status": "ZIP integrity check passed; review contents include two contact sheets and SHA256SUMS.txt",
+      "sha256": "ee3090662575989259dd0144f0aaa0d05750730ac75db271a42a22399335fa53"
+    },
+    {
+      "filename": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+      "role": "full-length H2 source-v3 candidate; technically validated, artistic approval pending",
+      "size_bytes": 33409690,
+      "sha256": "761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f",
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+      "status": "full render, ffprobe and EBU R128 passed in run 40286913324; non-canonical candidate"
+    },
+    {
+      "filename": "h2-source-v3-shoelace-fix-review.zip",
+      "role": "source-v3 render report, contact sheets, logs, pinned patch script and checksums",
+      "size_bytes": 33709840,
+      "sha256": "56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745",
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip",
+      "status": "published and ZIP integrity validated in run 40286913324"
     }
   ],
   "checksum_list_asset": {
@@ -137,8 +154,9 @@
   "source_v3_render_candidate": {
     "workflow_path": ".github/workflows/verify-h2-source-v3.yml",
     "workflow_url": "https://github.com/Nolane-x/video/blob/main/.github/workflows/verify-h2-source-v3.yml",
-    "workflow_run_id": "40281627022",
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40281627022",
+    "workflow_run_id": "40286913324",
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40286913324",
+    "workflow_run_conclusion": "success",
     "request_path": "video-library/one-more-scroll/h2-source-v3-render-request.json",
     "request_status": "preview_passed_ready_for_full_render",
     "source_archive": "one-more-scroll-h2-source-v2-scene-fixes.zip",
@@ -147,8 +165,7 @@
     "patch_commit": "05a2027cebdc83cedc1002992198d9404f253647",
     "preview_workflow_run_id": "40280228327",
     "preview_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40280228327",
-    "status": "full_render_in_progress",
-    "current_step": "Render source-v3 full-length silent master",
+    "status": "technical_render_and_stream_validation_passed",
     "technical_prechecks_passed": [
       "request and pinned patch guard",
       "source ZIP SHA-256 and integrity",
@@ -156,11 +173,40 @@
       "JavaScript, Python and story JSON validation",
       "full-timeline browser smoke test",
       "source-v3 contact sheets",
-      "five music beds and 45 SFX cues validated"
+      "five music beds and 45 SFX cues validated",
+      "full 155-second 1080p/24 H2 render completed",
+      "H.264 video and AAC stereo 48 kHz stream metadata verified with ffprobe",
+      "EBU R128 loudness and true-peak measurement completed",
+      "candidate and review ZIP published as separate Release assets"
     ],
     "candidate_filename": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "candidate_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "candidate_size_bytes": 33409690,
+    "candidate_sha256": "761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f",
+    "size_bytes": 33409690,
+    "sha256": "761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f",
+    "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
     "review_bundle_filename": "h2-source-v3-shoelace-fix-review.zip",
-    "artistic_signoff": "pending",
-    "canonical_master_must_remain_unchanged": true
+    "review_bundle_release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip",
+    "review_bundle_size_bytes": 33709840,
+    "review_bundle_sha256": "56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745",
+    "duration_seconds": 155,
+    "width": 1920,
+    "height": 1080,
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "audio_sample_rate_hz": 48000,
+    "audio_channels": 2,
+    "audio_measurement": {
+      "method": "FFmpeg ebur128=peak=true on the exact released candidate MP4",
+      "integrated_loudness_lufs": -14,
+      "loudness_range_lu": 6.9,
+      "true_peak_dbfs": -2.4
+    },
+    "artistic_signoff": "pending full moving-picture review with audio, especially shoe-to-hand contact, action timing, close-up pacing, transitions, sync and emotional arc",
+    "is_canonical_master": false,
+    "canonical_master_must_remain_unchanged": true,
+    "note": "Technical CI success is not artistic approval; do not replace canonical H2 master without explicit approval."
   }
 }

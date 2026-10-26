@@ -99,10 +99,14 @@ The delivered master and later source-v2 are different versions. The prior maste
 
 
 
-## Source-v3 shoe-tying correction — corrected full-render rerun
-- Focused preview [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327) passed five-second 1080p/24 H.264 validation and generated a 20-frame contact sheet.
-- First full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) succeeded through full silent render, audio mix/ffprobe, and EBU R128: **-14.0 LUFS integrated**, **6.9 LU LRA**, **-2.4 dBFS true peak**. It failed only during review ZIP checksum creation because the pinned patch script was not copied to the payload. No source-v3 candidate or review ZIP was published by that attempt.
-- Corrected rerun [run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) has re-passed the request/patch guard, source ZIP SHA/ZIP integrity, patch application, and JavaScript/Python/JSON validation; it is currently running the browser smoke check across the source-v3 timeline.
-- The release packaging step now copies `tools/video/patch_h2_shoelace_scene.py` into `payload/` before checksumming, validates the expected MP4/report are present, and uploads a 30-day convenience artifact even if a later step fails.
-- Source patch: `tools/video/patch_h2_shoelace_scene.py` at pinned commit `05a2027cebdc83cedc1002992198d9404f253647`; base source-v2 archive SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
-- Keep the original H2 master and source-v2 candidate unchanged. Source-v3 is not artistically approved until its published full-length MP4 is reviewed with audio, including shoe-hand contact and action timing.
+## Source-v3 shoe-tying correction — technical render passed; artistic sign-off pending
+- [x] Focused five-second preview passed in [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327).
+- [x] Pinned patch `05a2027cebdc83cedc1002992198d9404f253647` applied to the immutable source-v2 ZIP with SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
+- [x] JavaScript, Python and story JSON validation; full-timeline browser smoke test; two 31-shot contact sheets; five music beds and 45 story SFX cues all passed.
+- [x] Full 155-second H2 render completed. ffprobe: 1920×1080 at 24 fps, H.264 video + AAC stereo 48 kHz.
+- [x] EBU R128 on the exact candidate: **−14.0 LUFS integrated**, **6.9 LU LRA**, **−2.4 dBFS true peak**.
+- [x] Candidate and review ZIP published as separate assets; every required step in [workflow run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) passed.
+- Candidate: [download source-v3 MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4) — SHA-256 `761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f`, 33,409,690 bytes.
+- Review bundle: [download review ZIP](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip) — SHA-256 `56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745`, 33,709,840 bytes. Includes contact sheets, logs, report, pinned patch and checksum list.
+- **Artistic approval is pending.** Watch the entire MP4 with audio. Confirm visible hand-to-shoe contact, readable action timing, close-up pacing around 35–45 and 70 seconds, transitions, sound sync and the emotional arc.
+- Canonical H2 master remains unchanged: `one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`. Do not promote source-v3 without full-motion review and explicit approval.
