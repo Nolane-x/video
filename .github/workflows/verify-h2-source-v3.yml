@@ -73,7 +73,7 @@ jobs:
               for name in names:
                   if name.startswith("/") or ".." in Path(name).parts:
                       raise SystemExit(f"Unsafe archive path: {name}")
-              z.extractall("/tmp/h2-source-v2")
+              z.extractall("/tmp/h2-source-v3")
           print("Source-v2 archive verified and extracted.")
           PY
 
@@ -87,7 +87,7 @@ jobs:
           cat /tmp/h2-review-v3/payload/source-v3-patch-report.json
 
       - name: Install project and Chromium dependencies
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
@@ -96,7 +96,7 @@ jobs:
           python -m pip install -r requirements-audio.txt
 
       - name: Validate JSON, JavaScript and Python sources
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
           node --check render.mjs
@@ -119,29 +119,29 @@ jobs:
           find engine packs tools -type f -name '*.py' -print0 | xargs -0 -n1 python -m py_compile
 
       - name: Run H2 browser smoke check across the source-v3 timeline
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
-          node render.mjs --project projects/one-more-scroll-h2 --check --scale 0.25 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-browser-check.log
-          if grep -E "LOI:|THIEU [1-9]|LOI NAP FILE CANH" /tmp/h2-review/h2-browser-check.log; then
+          node render.mjs --project projects/one-more-scroll-h2 --check --scale 0.25 --gl swiftshader 2>&1 | tee /tmp/h2-review-v3/h2-browser-check.log
+          if grep -E "LOI:|THIEU [1-9]|LOI NAP FILE CANH" /tmp/h2-review-v3/h2-browser-check.log; then
             echo "Browser smoke check logged missing scenes or render errors."
             exit 1
           fi
 
       - name: Generate source-v3 contact sheets
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
-          node render.mjs --project projects/one-more-scroll-h2 --sheet --scale 0.5 --at 0.5 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-contact-sheet.log
+          node render.mjs --project projects/one-more-scroll-h2 --sheet --scale 0.5 --at 0.5 --gl swiftshader 2>&1 | tee /tmp/h2-review-v3/h2-contact-sheet.log
           test -s projects/one-more-scroll-h2/build/sheets/sheet_01.jpg
           test -s projects/one-more-scroll-h2/build/sheets/sheet_02.jpg
-          cp projects/one-more-scroll-h2/build/sheets/sheet_*.jpg /tmp/h2-review/payload/
+          cp projects/one-more-scroll-h2/build/sheets/sheet_*.jpg /tmp/h2-review-v3/payload/
 
       - name: Validate packaged music and sound-effect assets
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
-          python - <<'PY' | tee /tmp/h2-review/h2-audio-generation.log
+          python - <<'PY' | tee /tmp/h2-review-v3/h2-audio-generation.log
           import json
           from pathlib import Path
           project=Path("projects/one-more-scroll-h2")
@@ -167,19 +167,19 @@ jobs:
           PY
 
       - name: Render source-v3 full-length silent master
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
-          node render.mjs --project projects/one-more-scroll-h2 --workers 4 --crf 18 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-full-render.log
+          node render.mjs --project projects/one-more-scroll-h2 --workers 4 --crf 18 --gl swiftshader 2>&1 | tee /tmp/h2-review-v3/h2-full-render.log
           test -s projects/one-more-scroll-h2/build/video_silent.mp4
 
       - name: Mix music and SFX and verify source-v3 candidate metadata
-        working-directory: /tmp/h2-source-v2
+        working-directory: /tmp/h2-source-v3
         run: |
           set -euo pipefail
-          python tools/mix.py --project projects/one-more-scroll-h2 2>&1 | tee /tmp/h2-review/h2-audio-mix.log
+          python tools/mix.py --project projects/one-more-scroll-h2 2>&1 | tee /tmp/h2-review-v3/h2-audio-mix.log
           python - <<'PY'
-          import hashlib, json, shutil, subprocess
+          import hashlib, json, os, shutil, subprocess
           from pathlib import Path
           out=Path("projects/one-more-scroll-h2/out")
           videos=sorted(p for p in out.glob("*.mp4") if p.is_file() and p.stat().st_size>1_000_000)
@@ -202,7 +202,7 @@ jobs:
               raise SystemExit(f"Unexpected candidate audio metadata: {a}")
           if abs(duration-155.0)>0.5:
               raise SystemExit(f"Unexpected candidate duration: {duration}")
-          target=Path("/tmp/h2-review/payload/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4")
+          target=Path("/tmp/h2-review-v3/payload/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4")
           shutil.copy2(video,target)
           h=hashlib.sha256()
           with target.open("rb") as f:
@@ -213,7 +213,7 @@ jobs:
               "source_revision":"source-v2 archive plus deterministic source-v3 shoelace pose patch",
               "source_archive":"one-more-scroll-h2-source-v2-scene-fixes.zip",
               "source_patch":"tools/video/patch_h2_shoelace_scene.py",
-              "source_patch_sha256":subprocess.check_output(["sha256sum","tools/video/patch_h2_shoelace_scene.py"],text=True).split()[0],
+              "source_patch_sha256":hashlib.sha256((Path(os.environ["GITHUB_WORKSPACE"])/"tools/video/patch_h2_shoelace_scene.py").read_bytes()).hexdigest(),
               "source_archive_sha256":"b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
               "source_story":"31 shots / 155 seconds",
               "candidate_file":target.name,
@@ -230,7 +230,7 @@ jobs:
               "is_canonical_master":False,
               "note":"Source-v3 is the immutable source-v2 archive plus tools/video/patch_h2_shoelace_scene.py. The shoe-tying gesture has a forward lean and alternating hand angles; keep the verified canonical master unchanged until visual/motion QA is explicitly approved."
           }
-          Path("/tmp/h2-review/payload/h2-source-v3-render-report.json").write_text(json.dumps(report,indent=2)+"\n")
+          Path("/tmp/h2-review-v3/payload/h2-source-v3-render-report.json").write_text(json.dumps(report,indent=2)+"\n")
           print(json.dumps(report,indent=2))
           PY
 
@@ -266,22 +266,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          cd /tmp/h2-review
+          cd /tmp/h2-review-v3-v3
           cp h2-browser-check.log h2-contact-sheet.log h2-audio-generation.log h2-full-render.log h2-audio-mix.log h2-audio-ebur128.log payload/
-          (cd payload && sha256sum *.jpg *.mp4 h2-source-v2-render-report.json > SHA256SUMS.txt)
+          (cd payload && sha256sum *.jpg *.mp4 *.json patch_h2_shoelace_scene.py > SHA256SUMS.txt)
           zip -qr h2-source-v3-shoelace-fix-review.zip payload
-          zip -T h2-source-v2-render-review.zip
+          zip -T h2-source-v3-shoelace-fix-review.zip
           gh release upload h2-production-assets-v1 \
-            /tmp/h2-review/payload/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4 \
-            /tmp/h2-review/h2-source-v2-render-review.zip \
+            /tmp/h2-review-v3/payload/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4 \
+            /tmp/h2-review-v3/h2-source-v3-shoelace-fix-review.zip \
             --repo Nolane-x/video --clobber
-          gh api "repos/Nolane-x/video/releases/tags/h2-production-assets-v1" > /tmp/h2-review/release-api.json
+          gh api "repos/Nolane-x/video/releases/tags/h2-production-assets-v1" > /tmp/h2-review-v3/release-api.json
           python - <<'PY'
           import json
           from pathlib import Path
-          data=json.loads(Path("/tmp/h2-review/release-api.json").read_text())
+          data=json.loads(Path("/tmp/h2-review-v3/release-api.json").read_text())
           assets={x["name"]:x for x in data["assets"]}
-          required=["one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4","h2-source-v2-render-review.zip"]
+          required=["one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4","h2-source-v3-shoelace-fix-review.zip"]
           missing=[n for n in required if n not in assets]
           if missing: raise SystemExit(f"Candidate release assets missing: {missing}")
           print("Candidate and review ZIP published to " + data["html_url"])
@@ -292,6 +292,6 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: h2-source-v3-shoelace-fix-review
-          path: /tmp/h2-review/
+          path: /tmp/h2-review-v3/
           if-no-files-found: error
           retention-days: 30
