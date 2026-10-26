@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: h2-source-v3-shoe-tie-preview
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   render-shoe-tie-preview:
@@ -113,6 +113,8 @@ jobs:
 
       - name: Create preview contact sheet and checksums
         run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pillow
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
