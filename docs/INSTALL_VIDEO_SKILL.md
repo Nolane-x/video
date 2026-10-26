@@ -31,7 +31,7 @@ Read `video-library/one-more-scroll/manifest.json`, `QA.md`, `latest-remotion-re
 
 The exact H2 master is already stored at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4` (31,547,778 bytes), SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`. GitHub Actions [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143) validated the checksum, duration, dimensions, frame rate, codecs and audio format, and generated metadata/contact sheets. The current portable skill ZIP includes this H2 master and a separate Remotion run-36 reference render. Do not repeat the import to restore current state, and never label the Remotion render as H2.
 
-If a fresh repository clone is missing the binary, fetch/update `main` first and verify the local copy against `video-library/one-more-scroll/one-more-scroll-h2-final.mp4.sha256`. `tools/video/archive_h2_master.py` remains available for importing the exact allow-listed attachment into a clone when truly needed; stop on any checksum mismatch. The H2 source ZIPs (`one-more-scroll-h2-source.zip` and source-v2) are separate large assets and remain unarchived until supplied and published through the source-release helper.
+The large H2 source archives are now published separately at the [h2-production-assets-v1 GitHub Release](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1). Their exact SHA-256 values and filenames are recorded in `video-library/one-more-scroll/h2-source-release.json`. The portable skill ZIP links to their manifest rather than duplicating the 230+ MB source packages. The source-v2 archive is not the canonical master; a new H2 render and visual QA must pass before any promotion.
 
 ## Archive previous videos and the H2 source code
 
