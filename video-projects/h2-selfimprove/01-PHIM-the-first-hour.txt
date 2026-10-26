@@ -47,17 +47,17 @@ ACCENT: amber
 > He finally saw the cost.
 > He had been absent from his own life.
 
-[B16] 6s | CẢNH: phòng ngủ bình minh, điện thoại nằm úp trên bàn, cậu nhìn ánh sáng ấm qua cửa sổ, không có bóng đen | NHẠC: hope | SFX: breath_in@1.0
+[B16] 6s | CẢNH: phòng ngủ bình minh, cậu ngồi dậy bên giường và nhìn ánh sáng ấm tràn qua cửa sổ, không có bóng đen | NHẠC: hope | SFX: breath_in@1.0
 > Then one message reached him.
 
 [B17] 6s | CẢNH: cận điện thoại chat với Jay, tin nhắn đến “miss you, man. coffee today?” | SFX: notif_msg@0.8
 @ jay: miss you, man. coffee today?
 > A real person still remembered him.
 
-[B18] 6s | CẢNH: phòng ngủ bình minh, cậu tắt điện thoại, đặt nó vào ngăn kéo, rồi mở rèm cửa | SFX: ui_click@0.5, door_open@2.0
+[B18] 6s | CẢNH: phòng ngủ bình minh, cậu đứng cạnh cửa sổ quay về phía ánh sáng, căn phòng dần ấm lên, không có bóng đen | SFX: ui_click@0.5, door_open@2.0
 > He did one small thing differently.
 
-[B19] 6s | CẢNH: phòng ngủ, cậu đứng dậy trước bàn học, mở laptop, đặt sổ tay cạnh bàn, nắng ấm trên vai | HUD: DAY 1 | NHẠC: rise | SFX: page_flip@1.0
+[B19] 6s | CẢNH: phòng ngủ bình minh, cậu bước từ cạnh giường tới bàn học, laptop mở sẵn, nắng ấm trên vai | HUD: DAY 1 | NHẠC: rise | SFX: page_flip@1.0
 > No grand promise. Just one hour.
 
 [B20] 6s | CẢNH: sổ tay, tay viết “ONE TASK. TEN MINUTES.”, bút chạm trang giấy, đèn bàn ấm | SFX: page_flip@0.4
@@ -75,7 +75,7 @@ ACCENT: amber
 [B24] 6s | CẢNH: thành phố bình minh, cậu chạy bộ ngang hàng cây, đeo băng đô amber, ánh mặt trời phía sau | HUD: DAY 7 | SFX: footsteps@0.4
 > Small wins began to stack.
 
-[B25] 6s | CẢNH: phòng tập, cậu đeo băng đô nâng tạ nhẹ, bao cát đỏ đung đưa ở hậu cảnh, đèn vàng trên cao | SFX: breath_in@0.4, impact_light@2.0
+[B25] 6s | CẢNH: phòng tập, cậu đeo băng đô đấm bao cát đỏ, tay vào thế đấm, bao cát đung đưa dưới đèn vàng | SFX: breath_in@0.4, impact_light@2.0
 > He stopped waiting to feel different.
 
 [B26] 6s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0
