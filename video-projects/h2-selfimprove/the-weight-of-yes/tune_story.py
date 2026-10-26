@@ -261,7 +261,7 @@ apply("b19", "scene", {
 apply("b20", "scene", {
     "set": "classroom", "setArgs": classroom("dusk"),
     "actors": [
-        actor("hero", 0.42, "stand", "nervous", facing=-1, scale=0.98),
+        actor("hero", 0.42, "stand", "worried", facing=-1, scale=0.98),
         actor("girl", 0.72, "shrug", "smile", facing=1, scale=0.88)
     ],
     "cam": cam(0.52, 0.57, 1.05),
