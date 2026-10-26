@@ -1,0 +1,234 @@
+name: Render and QA H2 source-v2 candidate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-library/one-more-scroll/h2-source-release.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: h2-source-v2-candidate-render
+  cancel-in-progress: false
+
+jobs:
+  render-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source and persistent production state
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg zip unzip
+
+      - name: Download and checksum-verify source-v2 release asset
+        run: |
+          set -euo pipefail
+          SOURCE="one-more-scroll-h2-source-v2-scene-fixes.zip"
+          URL="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path("video-library/one-more-scroll/h2-source-release.json").read_text())
+          assert manifest.get("status")=="uploaded_to_github_release_and_checksum_verified", "H2 source release is not verified/published."
+          item=next(x for x in manifest["assets"] if x["filename"]=="one-more-scroll-h2-source-v2-scene-fixes.zip")
+          assert item["sha256"]=="b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014"
+          print(item["release_asset_url"])
+          PY
+          )"
+          mkdir -p /tmp/h2-source-v2 /tmp/h2-review/payload
+          curl --fail --show-error --location --retry 3 --retry-all-errors \
+            --connect-timeout 20 --max-time 900 --output "/tmp/$SOURCE" "$URL"
+          test "$(stat -c %s "/tmp/$SOURCE")" = "115856962"
+          test "$(sha256sum "/tmp/$SOURCE" | cut -d ' ' -f1)" = "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014"
+          python - <<'PY'
+          import zipfile
+          from pathlib import Path
+          p=Path("/tmp/one-more-scroll-h2-source-v2-scene-fixes.zip")
+          with zipfile.ZipFile(p) as z:
+              bad=z.testzip()
+              if bad: raise SystemExit(f"Corrupt source-v2 ZIP member: {bad}")
+              names=set(z.namelist())
+              required={"render.mjs","engine/core.js","engine/rig.js","packs/dem/sets.js","projects/one-more-scroll-h2/story/shots.json","projects/one-more-scroll-h2/config.json"}
+              if not required.issubset(names): raise SystemExit(f"Missing source files: {sorted(required-names)}")
+              # Prevent unsafe archive entries from writing outside the working folder.
+              for name in names:
+                  if name.startswith("/") or ".." in Path(name).parts:
+                      raise SystemExit(f"Unsafe archive path: {name}")
+              z.extractall("/tmp/h2-source-v2")
+          print("Source-v2 archive verified and extracted.")
+          PY
+
+      - name: Install project and Chromium dependencies
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-audio.txt
+
+      - name: Validate JSON, JavaScript and Python sources
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          node --check render.mjs
+          node --check engine/core.js
+          node --check engine/player.js
+          node --check packs/dem/sets.js
+          node --check packs/dem/templates.js
+          node --check packs/dem/pack.js
+          find engine packs tools -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          story=json.loads(Path("projects/one-more-scroll-h2/story/shots.json").read_text())
+          config=json.loads(Path("projects/one-more-scroll-h2/config.json").read_text())
+          assert story.get("duration")==155, "Unexpected story duration"
+          assert len(story.get("shots",[]))==31, "Expected exactly 31 shots"
+          assert config.get("resolution")=="1080p" and config.get("fps")==24
+          print("JSON/story validation passed: 31 shots, 155s, 1080p/24.")
+          PY
+          find engine packs tools -type f -name '*.py' -print0 | xargs -0 -n1 python -m py_compile
+
+      - name: Run H2 browser smoke check across the full timeline
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/one-more-scroll-h2 --check --scale 0.25 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-browser-check.log
+          if grep -E "LOI:|THIEU [1-9]|LOI NAP FILE CANH" /tmp/h2-review/h2-browser-check.log; then
+            echo "Browser smoke check logged missing scenes or render errors."
+            exit 1
+          fi
+
+      - name: Generate source-v2 contact sheets
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/one-more-scroll-h2 --sheet --scale 0.5 --at 0.5 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-contact-sheet.log
+          test -s projects/one-more-scroll-h2/build/sheets/sheet_01.jpg
+          test -s projects/one-more-scroll-h2/build/sheets/sheet_02.jpg
+          cp projects/one-more-scroll-h2/build/sheets/sheet_*.jpg /tmp/h2-review/payload/
+
+      - name: Generate procedural music and sound effects
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          python packs/dem/audio.py 2>&1 | tee /tmp/h2-review/h2-audio-generation.log
+
+      - name: Render source-v2 full-length silent master
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/one-more-scroll-h2 --workers 4 --crf 18 --gl swiftshader 2>&1 | tee /tmp/h2-review/h2-full-render.log
+          test -s projects/one-more-scroll-h2/build/video_silent.mp4
+
+      - name: Mix music and SFX and verify candidate metadata
+        working-directory: /tmp/h2-source-v2
+        run: |
+          set -euo pipefail
+          python tools/mix.py --project projects/one-more-scroll-h2 2>&1 | tee /tmp/h2-review/h2-audio-mix.log
+          python - <<'PY'
+          import hashlib, json, shutil, subprocess
+          from pathlib import Path
+          out=Path("projects/one-more-scroll-h2/out")
+          videos=sorted(p for p in out.glob("*.mp4") if p.is_file() and p.stat().st_size>1_000_000)
+          if not videos:
+              raise SystemExit("H2 mix step produced no final MP4 in the project out directory.")
+          video=max(videos,key=lambda p:p.stat().st_mtime)
+          probe=json.loads(subprocess.check_output([
+              "ffprobe","-v","error","-show_entries",
+              "format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels",
+              "-of","json",str(video)
+          ],text=True))
+          streams=probe.get("streams",[])
+          v=next((x for x in streams if x.get("codec_type")=="video"),None)
+          a=next((x for x in streams if x.get("codec_type")=="audio"),None)
+          duration=float(probe.get("format",{}).get("duration",0))
+          if not v or not a: raise SystemExit("Candidate must have both video and audio.")
+          if (v.get("codec_name"),v.get("width"),v.get("height"),v.get("r_frame_rate"))!=("h264",1920,1080,"24/1"):
+              raise SystemExit(f"Unexpected candidate video metadata: {v}")
+          if (a.get("codec_name"),a.get("sample_rate"),a.get("channels"))!=("aac","48000",2):
+              raise SystemExit(f"Unexpected candidate audio metadata: {a}")
+          if abs(duration-155.0)>0.5:
+              raise SystemExit(f"Unexpected candidate duration: {duration}")
+          target=Path("/tmp/h2-review/payload/one-more-scroll-h2-source-v2-render-candidate.mp4")
+          shutil.copy2(video,target)
+          h=hashlib.sha256()
+          with target.open("rb") as f:
+              for block in iter(lambda:f.read(4*1024*1024),b""): h.update(block)
+          report={
+              "project_id":"one-more-scroll",
+              "status":"technical_render_and_stream_validation_passed",
+              "source_archive":"one-more-scroll-h2-source-v2-scene-fixes.zip",
+              "source_archive_sha256":"b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+              "source_story":"31 shots / 155 seconds",
+              "candidate_file":target.name,
+              "candidate_size_bytes":target.stat().st_size,
+              "candidate_sha256":h.hexdigest(),
+              "duration_seconds":duration,
+              "video":v,"audio":a,
+              "render_command":"node render.mjs --project projects/one-more-scroll-h2 --workers 4 --crf 18 --gl swiftshader",
+              "mix_command":"python tools/mix.py --project projects/one-more-scroll-h2",
+              "full_render":True,
+              "technical_validation":True,
+              "artistic_signoff":"pending human review of full motion, contact sheets, close-ups, shoe-tying and staircase crop",
+              "is_canonical_master":False,
+              "note":"This is a candidate derived from source-v2. Keep the previously verified canonical H2 master unchanged until visual/motion QA is explicitly approved."
+          }
+          Path("/tmp/h2-review/payload/h2-source-v2-render-report.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          PY
+
+      - name: Create review bundle and publish the candidate as a separate Release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd /tmp/h2-review
+          cp h2-browser-check.log h2-contact-sheet.log h2-audio-generation.log h2-full-render.log h2-audio-mix.log payload/
+          (cd payload && sha256sum *.jpg *.mp4 h2-source-v2-render-report.json > SHA256SUMS.txt)
+          zip -qr h2-source-v2-render-review.zip payload
+          zip -T h2-source-v2-render-review.zip
+          gh release upload h2-production-assets-v1 \
+            /tmp/h2-review/payload/one-more-scroll-h2-source-v2-render-candidate.mp4 \
+            /tmp/h2-review/h2-source-v2-render-review.zip \
+            --repo Nolane-x/video --clobber
+          gh api "repos/Nolane-x/video/releases/tags/h2-production-assets-v1" > /tmp/h2-review/release-api.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("/tmp/h2-review/release-api.json").read_text())
+          assets={x["name"]:x for x in data["assets"]}
+          required=["one-more-scroll-h2-source-v2-render-candidate.mp4","h2-source-v2-render-review.zip"]
+          missing=[n for n in required if n not in assets]
+          if missing: raise SystemExit(f"Candidate release assets missing: {missing}")
+          print("Candidate and review ZIP published to " + data["html_url"])
+          for n in required: print(assets[n]["browser_download_url"])
+          PY
+
+      - name: Upload short-retention convenience artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: h2-source-v2-render-review
+          path: /tmp/h2-review/
+          if-no-files-found: error
+          retention-days: 30
