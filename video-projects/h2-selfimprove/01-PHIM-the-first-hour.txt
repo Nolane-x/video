@@ -75,7 +75,7 @@ ACCENT: amber
 [B24] 6s | CẢNH: thành phố bình minh, cậu chạy bộ ngang hàng cây, đeo băng đô amber, ánh mặt trời phía sau | HUD: DAY 7 | SFX: footsteps@0.4
 > Small wins began to stack.
 
-[B25] 6s | CẢNH: phòng tập, cậu đeo băng đô đấm bao cát đỏ, tay vào thế đấm, bao cát đung đưa dưới đèn vàng | SFX: breath_in@0.4, impact_light@2.0
+[B25] 6s | CẢNH: phòng tập, cậu đeo băng đô đấm bao cát đỏ, tay vào thế đấm, bao cát đung đưa dưới đèn vàng | SFX: breath_in@0.4, impact_light@1.05, impact_light@2.70
 > He stopped waiting to feel different.
 
 [B26] 6s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0

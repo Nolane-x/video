@@ -7,6 +7,7 @@ on:
       - "video-projects/h2-selfimprove/the-first-hour/**"
       - "video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt"
       - ".github/workflows/render-selfimprove-film.yml"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
   workflow_dispatch:
 
 permissions:
@@ -165,7 +166,67 @@ jobs:
           cp projects/the-first-hour/build/sheets/*.jpg "$GITHUB_WORKSPACE/dist/the-first-hour/"
           ffprobe -v error -show_streams -show_format -of json "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4" > "$GITHUB_WORKSPACE/dist/the-first-hour/ffprobe.json"
           ffmpeg -hide_banner -nostats -i "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4" -af ebur128=peak=true -f null - 2> "$GITHUB_WORKSPACE/dist/the-first-hour/ebur128.log"
-          (cd "$GITHUB_WORKSPACE/dist/the-first-hour" && sha256sum *.mp4 *.json *.txt *.md *.jpg > SHA256SUMS.txt)
+          mkdir -p "$GITHUB_WORKSPACE/dist/the-first-hour/proofs"
+          VIDEO="$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4"
+          PROOFS="$GITHUB_WORKSPACE/dist/the-first-hour/proofs"
+          for spec in \
+            "b03-alarm-hesitation:10" \
+            "b06-desk-temptation:28" \
+            "b12-laptop-rejection:64" \
+            "b16-morning-turn:88" \
+            "b19-walk-to-desk:106" \
+            "b21-typing:118" \
+            "b22-vibrating-phone:124" \
+            "b23-phone-pushed-away:130" \
+            "b25-punch-bag-impact:142" \
+            "b26-cafe-reunion:148" \
+            "b27-shadow-recedes:154"; do
+            name="\${spec%%:*}"
+            start="\${spec##*:}"
+            ffmpeg -hide_banner -loglevel error -y -ss "$start" -i "$VIDEO" -t 6 \
+              -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p \
+              -c:a aac -b:a 128k -movflags +faststart "$PROOFS/$name.mp4"
+          done
+          cat > "$GITHUB_WORKSPACE/dist/the-first-hour/MOTION-PROOFS.md" <<'EOF'
+          # The First Hour — motion proof index
+
+          These six-second samples are cut from the actual mastered H2 render, including its sound:
+
+          | Proof | Timeline position | What to inspect |
+          |---|---:|---|
+          | b03-alarm-hesitation | 00:10 | Hand approaches and hesitates at the alarm |
+          | b06-desk-temptation | 00:28 | Character is staged at the laptop while temptation appears |
+          | b12-laptop-rejection | 01:04 | Rejection is legible on the laptop insert |
+          | b16-morning-turn | 01:28 | Morning reset and warm window light |
+          | b19-walk-to-desk | 01:46 | Actor walks from bed to the work area |
+          | b21-typing | 01:58 | Repeated hand movement reads as typing |
+          | b22-vibrating-phone | 02:04 | Desk phone vibrates while the character keeps working |
+          | b23-phone-pushed-away | 02:10 | Phone slides away and the actor returns to work |
+          | b25-punch-bag-impact | 02:22 | Punch timing, bag reaction and recovery pose |
+          | b26-cafe-reunion | 02:28 | Two characters face each other in a staged café |
+          | b27-shadow-recedes | 02:34 | The temptation becomes smaller and recedes |
+
+          Technical source: H2 SelfImprove Studio Canvas/Chromium render, then FFmpeg audio master.
+          These clips support motion review; their presence is not an artistic sign-off by itself.
+          EOF
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          root = Path("dist/the-first-hour/proofs")
+          proofs = sorted(root.glob("*.mp4"))
+          assert len(proofs) == 11, f"Expected 11 motion proofs, got {len(proofs)}"
+          for clip in proofs:
+              meta = json.loads(subprocess.check_output([
+                  "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)
+              ], text=True))
+              video = [s for s in meta["streams"] if s.get("codec_type") == "video"]
+              audio = [s for s in meta["streams"] if s.get("codec_type") == "audio"]
+              duration = float(meta["format"]["duration"])
+              assert video and audio, f"Motion proof has no audio/video stream: {clip.name}"
+              assert 5.75 <= duration <= 6.20, f"Unexpected proof duration {duration}: {clip.name}"
+          print(f"MOTION PROOFS PASS: {len(proofs)} audio/video clips, each approximately 6 seconds")
+          PY
+          (cd "$GITHUB_WORKSPACE/dist/the-first-hour" && sha256sum *.mp4 *.json *.txt *.md *.jpg *.log proofs/*.mp4 > SHA256SUMS.txt)
           cd "$GITHUB_WORKSPACE"
           zip -qr dist/the-first-hour-review.zip dist/the-first-hour
       - name: Validate exported MP4 and report
