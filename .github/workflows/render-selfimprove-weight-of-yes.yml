@@ -1,0 +1,272 @@
+name: Render H2 SelfImprove — The Weight of Yes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt"
+      - "video-projects/h2-selfimprove/the-weight-of-yes/**"
+      - ".github/workflows/render-selfimprove-weight-of-yes.yml"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h2-selfimprove-the-weight-of-yes-v1
+  cancel-in-progress: true
+
+jobs:
+  render-film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout H2 source and project
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install required system render tools
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          missing=0
+          for bin in ffmpeg zip unzip; do
+            if ! command -v "$bin" >/dev/null 2>&1; then
+              echo "Missing system dependency: $bin"
+              missing=1
+            else
+              echo "Found $bin at $(command -v "$bin")"
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            # Hosted Ubuntu mirrors were slow on the prior film. Allow bounded but realistic
+            # time for package downloads; never let apt wait without a wall-clock limit.
+            timeout 720s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=45 -o Acquire::https::Timeout=45 update
+            timeout 720s sudo apt-get -y -o Acquire::Retries=1 -o Acquire::http::Timeout=45 -o Acquire::https::Timeout=45 install --no-install-recommends ffmpeg zip unzip
+          fi
+          for bin in ffmpeg zip unzip; do command -v "$bin"; done
+          ffmpeg -version | head -n 1 || true
+
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install native H2 kit dependencies and audio assets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install chromium
+          python -m pip install numpy scipy soundfile
+          python audio/build_audio.py
+
+      - name: Generate storyboard and apply authored art direction
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/phim.py --project projects/the-weight-of-yes --phim ../../../../../video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt --force
+          cp ../../../../../video-projects/h2-selfimprove/the-weight-of-yes/config.json projects/the-weight-of-yes/config.json
+          cp ../../../../../video-projects/h2-selfimprove/the-weight-of-yes/story/bible.md projects/the-weight-of-yes/story/bible.md
+          python ../../../../../video-projects/h2-selfimprove/the-weight-of-yes/tune_story.py projects/the-weight-of-yes/story/shots.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          project = Path("projects/the-weight-of-yes")
+          story = json.loads((project / "story/shots.json").read_text(encoding="utf-8"))
+          source = Path("../../../../../video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt").read_text(encoding="utf-8")
+          shots = story["shots"]
+          expected = [f"b{i:02d}" for i in range(1, 30)]
+          assert [s["id"] for s in shots] == expected, "Shot IDs/order drifted"
+          assert abs(float(story["duration"]) - 143.0) < 0.01
+          assert abs(float(shots[-1]["end"]) - 143.0) < 0.02
+          for phrase in (
+              "He was everyone's first call.",
+              "His own task list sat untouched.",
+              "No. Not today.",
+              "The work found another pair of hands.",
+              "He kept the promise he had made himself.",
+              "You can care without disappearing."
+          ):
+              assert phrase in source, f"Missing story beat: {phrase}"
+          templates = {"scene", "phone", "clock", "calendar", "face", "note", "black", "card", "laptop"}
+          previous = 0.0
+          for shot in shots:
+              assert shot["tpl"] in templates, f"Unknown native H2 template {shot['tpl']} in {shot['id']}"
+              start, end = float(shot["start"]), float(shot["end"])
+              assert abs(start - previous) < 0.01, f"Gap/overlap before {shot['id']}"
+              assert end > start
+              for tx in shot.get("args", {}).get("texts", []):
+                  at, dur = float(tx.get("at", 0.3)), float(tx.get("dur", end - start - 0.1))
+                  assert at >= 0 and dur > 0 and at + dur <= end - start + 0.02, f"Caption overflow: {shot['id']} / {tx.get('t')}"
+              previous = end
+          assert abs(previous - 143.0) < 0.02
+          by_id = {s["id"]: s for s in shots}
+          assert by_id["b05"]["tpl"] == "laptop" and by_id["b11"]["tpl"] == "laptop"
+          assert by_id["b14"]["args"]["set"] == "void"
+          assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
+          assert len(by_id["b20"]["args"]["actors"]) == 2
+          assert by_id["b22"]["args"]["sentAt"] == 2.25
+          cfg = json.loads((project / "config.json").read_text(encoding="utf-8"))
+          assert cfg["aspect"] == "16:9" and cfg["resolution"] == "1080p" and cfg["fps"] == 24
+          print("STORY QA PASS: 29 shots, 143.000 seconds, request/overload/boundary/reaction/submission gates passed")
+          PY
+
+      - name: Validate full timeline and render contact sheets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/the-weight-of-yes --check --scale 0.25
+          node render.mjs --project projects/the-weight-of-yes --sheet --scale 0.5 --at 0.75
+
+      - name: Build music and SFX mix, then render 30-second audio preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/mix.py --project projects/the-weight-of-yes --no-video
+          node render.mjs --project projects/the-weight-of-yes --from 0 --to 30 --scale 0.5
+
+      - name: Full H2 silent render
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/the-weight-of-yes --workers 4 --crf 18
+
+      - name: Mix mastered audio into final MP4 and assemble review evidence
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/dist/the-weight-of-yes"
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("tools/mix.py")
+          source = p.read_text(encoding="utf-8")
+          revised = source.replace("loudnorm=I={lufs}:TP=-2.5:LRA=11", "loudnorm=I={lufs}:TP=-6:LRA=11")
+          revised = revised.replace("alimiter=limit=0.65:level=false", "alimiter=limit=0.75:level=false")
+          assert revised != source and "TP=-6" in revised and "alimiter=limit=0.75:level=false" in revised, "True-peak headroom patch failed"
+          p.write_text(revised, encoding="utf-8")
+          print("Mastering override active: loudnorm TP=-6 dBFS, final limiter=0.75")
+          PY
+          python tools/mix.py --project projects/the-weight-of-yes
+          cp projects/the-weight-of-yes/out/*.mp4 "$GITHUB_WORKSPACE/dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4"
+          cp projects/the-weight-of-yes/build/preview.mp4 "$GITHUB_WORKSPACE/dist/the-weight-of-yes/preview-30s.mp4"
+          cp projects/the-weight-of-yes/story/shots.json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/shots.json"
+          cp projects/the-weight-of-yes/story/bible.md "$GITHUB_WORKSPACE/dist/the-weight-of-yes/bible.md"
+          cp projects/the-weight-of-yes/config.json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/config.json"
+          cp ../../../../../video-projects/h2-selfimprove/the-weight-of-yes/tune_story.py "$GITHUB_WORKSPACE/dist/the-weight-of-yes/tune_story.py"
+          cp ../../../../../video-projects/h2-selfimprove/the-weight-of-yes/README.md "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          cp ../../../../../video-library/the-weight-of-yes/QA.md "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          cp ../../../../../video-library/the-weight-of-yes/manifest.json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          cp ../../../../../video-library/the-weight-of-yes/02-PACKAGE-the-weight-of-yes.md "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          cp ../../../../../video-library/the-weight-of-yes/03-THUMB-PROMPT-the-weight-of-yes.txt "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          cp ../../../../../video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt "$GITHUB_WORKSPACE/dist/the-weight-of-yes/01-PHIM-the-weight-of-yes.txt"
+          cp projects/the-weight-of-yes/build/sheets/*.jpg "$GITHUB_WORKSPACE/dist/the-weight-of-yes/"
+          ffprobe -v error -show_streams -show_format -of json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4" > "$GITHUB_WORKSPACE/dist/the-weight-of-yes/ffprobe.json"
+          ffmpeg -hide_banner -nostats -i "$GITHUB_WORKSPACE/dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4" -af ebur128=peak=true -f null - 2> "$GITHUB_WORKSPACE/dist/the-weight-of-yes/ebur128.log"
+          mkdir -p "$GITHUB_WORKSPACE/dist/the-weight-of-yes/proofs"
+          VIDEO="$GITHUB_WORKSPACE/dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4"
+          PROOFS="$GITHUB_WORKSPACE/dist/the-weight-of-yes/proofs"
+          for spec in \
+            "b03-request-arrives:9" \
+            "b05-favor-ledger:19" \
+            "b08-more-work:34" \
+            "b10-cost-of-yes:44" \
+            "b13-friend-notices:59" \
+            "b15-silence-before-no:69" \
+            "b18-choice:84" \
+            "b19-boundary:89" \
+            "b20-response:94" \
+            "b22-project-submitted:104" \
+            "b24-reciprocal-care:114" \
+            "b27-rebalanced-ledger:129"; do
+            name="${spec%%:*}"
+            start="${spec##*:}"
+            ffmpeg -hide_banner -loglevel error -y -ss "$start" -i "$VIDEO" -t 6 \
+              -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p \
+              -c:a aac -b:a 128k -movflags +faststart "$PROOFS/$name.mp4"
+          done
+          cat > "$GITHUB_WORKSPACE/dist/the-weight-of-yes/MOTION-PROOFS.md" <<'EOF'
+          # THE WEIGHT OF YES — motion proof index
+
+          Each proof is a six-second segment from the actual mastered H2 output with audio.
+
+          | Proof | Start | Inspect |
+          |---|---:|---|
+          | b03-request-arrives | 00:09 | Physical request and immediate acceptance |
+          | b05-favor-ledger | 00:19 | Rising favors versus unfinished personal work |
+          | b08-more-work | 00:34 | Favor handoff and hero remains behind |
+          | b10-cost-of-yes | 00:44 | The social cost of postponed rest |
+          | b13-friend-notices | 00:59 | Two-person acting and eye-line |
+          | b15-silence-before-no | 01:09 | Restrained overload and held pause |
+          | b18-choice | 01:24 | Hero considers request instead of reflexively agreeing |
+          | b19-boundary | 01:29 | "NO. Not today." legibility and physical gesture |
+          | b20-response | 01:34 | Non-punitive reaction stays in frame |
+          | b22-project-submitted | 01:44 | Visible submit action and confirmation |
+          | b24-reciprocal-care | 01:54 | Seated two-shot and care moving both ways |
+          | b27-rebalanced-ledger | 02:09 | Resolution and final task/rest balance |
+
+          Proof clips support targeted review; their existence is not artistic sign-off.
+          EOF
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist" / "the-weight-of-yes" / "proofs"
+          proofs = sorted(root.glob("*.mp4"))
+          assert len(proofs) == 12, f"Expected 12 motion proofs, got {len(proofs)}"
+          for clip in proofs:
+              meta = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)], text=True))
+              video = [s for s in meta["streams"] if s.get("codec_type") == "video"]
+              audio = [s for s in meta["streams"] if s.get("codec_type") == "audio"]
+              duration = float(meta["format"]["duration"])
+              assert video and audio, f"Motion proof has no audio/video stream: {clip.name}"
+              assert 5.75 <= duration <= 6.20, f"Unexpected proof duration {duration}: {clip.name}"
+          print(f"MOTION PROOFS PASS: {len(proofs)} audio/video clips, each approximately 6 seconds")
+          PY
+          (cd "$GITHUB_WORKSPACE/dist/the-weight-of-yes" && sha256sum *.mp4 *.json *.txt *.md *.jpg *.log proofs/*.mp4 > SHA256SUMS.txt)
+          cd "$GITHUB_WORKSPACE"
+          zip -qr dist/the-weight-of-yes-review.zip dist/the-weight-of-yes
+
+      - name: Validate exported MP4 and report
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path("dist/the-weight-of-yes/ffprobe.json")
+          d=json.loads(p.read_text())
+          v=[s for s in d["streams"] if s.get("codec_type")=="video"]
+          a=[s for s in d["streams"] if s.get("codec_type")=="audio"]
+          assert v and a, "Final MP4 must contain video and audio"
+          assert int(v[0]["width"])==1920 and int(v[0]["height"])==1080, f"Unexpected resolution: {v[0].get('width')}x{v[0].get('height')}"
+          assert abs(float(d["format"]["duration"])-143.0)<0.15, f"Unexpected runtime: {d['format']['duration']}"
+          assert v[0].get("r_frame_rate")=="24/1", f"Unexpected frame rate: {v[0].get('r_frame_rate')}"
+          assert a[0].get("sample_rate")=="48000" and int(a[0].get("channels",0))==2, "Audio must be 48 kHz stereo"
+          log=Path("dist/the-weight-of-yes/ebur128.log").read_text(errors="replace")
+          m_i=re.search(r"^\s*I:\s*(-?[0-9]+\.[0-9]+)\s*LUFS\s*$", log, re.M)
+          m_p=re.search(r"^\s*Peak:\s*(-?[0-9]+\.[0-9]+)\s*dBFS\s*$", log, re.M)
+          assert m_i and m_p, "EBU R128 summary missing loudness/peak"
+          integrated, peak=float(m_i.group(1)), float(m_p.group(1))
+          assert -15.0 <= integrated <= -13.0, f"Integrated loudness outside -14 LUFS ±1: {integrated}"
+          assert peak <= -1.0, f"True peak ceiling exceeded (-1.0 dBFS): {peak}"
+          mixer=Path("integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py").read_text(encoding="utf-8")
+          assert "TP=-6" in mixer and "alimiter=limit=0.75:level=false" in mixer, "Conservative peak-headroom mastering patch missing"
+          print(f"PASS: {float(d['format']['duration']):.3f}s; H.264 {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; AAC {a[0].get('sample_rate')}Hz stereo; I={integrated:.1f} LUFS; peak={peak:.1f} dBFS")
+          PY
+
+      - name: Upload master, preview and complete QA bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-weight-of-yes-h2-selfimprove-${{ github.run_number }}
+          path: |
+            dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4
+            dist/the-weight-of-yes/preview-30s.mp4
+            dist/the-weight-of-yes-review.zip
+            dist/the-weight-of-yes/
+          if-no-files-found: warn
+          retention-days: 30
