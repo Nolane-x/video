@@ -144,7 +144,7 @@ apply("b10", "scene", {
     "setArgs": {"sky": "dusk", "board": "SHOWCASE FRIDAY", "desks": [0.20, 0.45, 0.70]},
     "actors": [
         actor("hero", 0.31, "stand", "worried", facing=1, scale=0.96, z=1, look=0.05),
-        actor("girl", 0.72, "reach", "smile", facing=-1, scale=0.92, at=0.15, hold="book")
+        actor("girl", 0.72, "reach", "smile", facing=-1, scale=0.92, at=0.15, hold="portfolio")
     ],
     "cam": cam(0.49, 0.57, 1.04),
     "texts": [narr("Everyone else had something to show.", 0.35, 5.3)]
@@ -355,7 +355,7 @@ assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST 
 assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt"))
 assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
 assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1 and by_id["b22"]["args"]["sentAt"] == 2.25
-assert by_id["b10"]["args"]["actors"][1]["pose"] == "reach" and by_id["b10"]["args"]["actors"][1]["hold"] == "book"
+assert by_id["b10"]["args"]["actors"][1]["pose"] == "reach" and by_id["b10"]["args"]["actors"][1]["hold"] == "portfolio"
 assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
 assert by_id["b24"]["args"]["actors"][1]["poseAt"] == [[0.0, "sit"], [2.0, "sitpoint"]]
 assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
