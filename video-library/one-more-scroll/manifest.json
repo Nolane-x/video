@@ -190,6 +190,22 @@
     "verified_by_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40276064292",
     "artistic_signoff": "pending human review of full moving picture and sound",
     "is_canonical_master": false,
-    "do_not_replace_canonical_master_until": "full motion review and explicit artistic approval"
+    "do_not_replace_canonical_master_until": "full motion review and explicit artistic approval",
+    "audio_measurement": {
+      "method": "FFmpeg ebur128 filter on the exact released candidate MP4",
+      "integrated_loudness_lufs": -14,
+      "loudness_range_lu": 6.9,
+      "true_peak_dbfs": -2.4,
+      "sha256_verified_against_candidate": true
+    },
+    "sampled_visual_review": {
+      "method": "11 focus frames extracted from the exact rendered candidate at 35,40,45,70,79,80,81,82,84,85,86 seconds; plus the 31-shot contact sheets.",
+      "observations": [
+        "Staircase frame around 85 seconds appears to keep the protagonist's head in-frame, unlike the previously flagged crop.",
+        "The shoe-tying beat around 80–84 seconds shows a crouched pose but still does not prove hand-to-shoe contact in still images.",
+        "Close-up composition at approximately 35,45 and 70 seconds is tight but legible; full-motion pacing remains to be judged."
+      ],
+      "approval": "not granted; watch full candidate with audio before replacing canonical master"
+    }
   }
 }
