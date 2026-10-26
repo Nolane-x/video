@@ -82,11 +82,11 @@ if pk > 0.95: mix = np.tanh(mix / pk * 1.5) / np.tanh(1.5) * 0.95
 raw = os.path.join(P, "build", "mix_raw.wav"); save_wav(raw, mix)
 out = os.path.join(P, "build", "mix.wav"); lufs = cfg.get("loudness", -14)
 tmp = os.path.join(P, "build", "mix_ln.wav")
-run(["ffmpeg", "-y", "-v", "error", "-i", raw, "-af", f"loudnorm=I={lufs}:TP=-1.5:LRA=11", "-ar", str(SR), "-ac", "2", tmp]); os.remove(raw)
+run(["ffmpeg", "-y", "-v", "error", "-i", raw, "-af", f"loudnorm=I={lufs}:TP=-2.5:LRA=11", "-ar", str(SR), "-ac", "2", tmp]); os.remove(raw)
 # loudnorm 1 luot hay thieu ~1 dB: do lai va bu
 r = subprocess.run(["ffmpeg", "-v", "info", "-i", tmp, "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
 m = re.findall(r"I:\s+(-?[\d.]+) LUFS", r); gain = (lufs - float(m[-1])) if m else 0.0
-run(["ffmpeg", "-y", "-v", "error", "-i", tmp, "-af", f"volume={gain:.2f}dB,alimiter=limit=0.89:level=false", "-ar", str(SR), out]); os.remove(tmp)
+run(["ffmpeg", "-y", "-v", "error", "-i", tmp, "-af", f"volume={gain:.2f}dB,alimiter=limit=0.78:level=false", "-ar", str(SR), out]); os.remove(tmp)
 print("Am thanh:", out, "|", "; ".join(sorted(set(log))) if log else "ok")
 video = os.path.join(P, "build", "video_silent.mp4")
 if os.path.exists(video) and not a.no_video:
