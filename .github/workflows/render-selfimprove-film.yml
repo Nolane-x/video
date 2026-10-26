@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v7
+  group: h2-selfimprove-the-first-hour-v8
   cancel-in-progress: true
 
 jobs:
@@ -121,6 +121,8 @@ jobs:
           assert shots["b23"]["args"].get("setArgs", {}).get("phoneOnDesk", {}).get("slide"), "Phone-slide-away action is missing"
           assert any(p[1] == "punch" for p in shots["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Punch action is missing"
           assert shots["b25"]["args"].get("setArgs", {}).get("impacts") == [1.05, 2.7], "Punch impact timing is missing"
+          gym_source = Path("packs/dem/sets.js").read_text(encoding="utf-8")
+          assert "impacts: o.impacts, impactSwing: o.impactSwing, spark: o.spark" in gym_source, "Gym scene must pass impact timing/recoil into punchBag"
           assert shots["b25"]["args"].get("setArgs", {}).get("impactSwing", 0) >= 0.25, "Punch-bag recoil is too subtle"
           pulses = [f for f in shots["b25"]["args"].get("fx", []) if f.get("kind") == "speed" and f.get("dur", 99) < 0.5]
           assert len(pulses) == 2, "Punch speed accents must be short and impact-timed"

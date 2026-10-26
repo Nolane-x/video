@@ -302,7 +302,7 @@ export function set(g, kind = 'bedroom', o = {}) {
     case 'gym': {
       wall(g, '#141417', '#1a1a1e'); floor(g, gy, '#111114'); for (let i = 0; i < 8; i++) ln(g, [[X(i / 7), gy], [X(i / 7) + (i - 3.5) * 40, E.H]], { lw: 1, la: 0.12 });
       beam(g, X(o.spot ?? 0.5), -20, X(o.spot ?? 0.5) - 380, X(o.spot ?? 0.5) + 380, gy + 60, '#ffe2b0', 0.1);
-      if (o.bag !== false) punchBag(g, X(o.bagX ?? 0.62), Y(0.1), E.H * 0.42, { t, swing: o.swing });
+      if (o.bag !== false) punchBag(g, X(o.bagX ?? 0.62), Y(0.1), E.H * 0.42, { t, swing: o.swing, impacts: o.impacts, impactSwing: o.impactSwing, spark: o.spark });
       if (o.barbell) barbell(g, X(o.barbellX ?? 0.3), gy, 220);
       break; }
     case 'stairs': {
