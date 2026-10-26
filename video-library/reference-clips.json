@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Persistent reference map for future AI video-production sessions. Store provenance and craft-study prompts, not unauthorized duplicate video files.",
+  "updated_at": "2026-10-26",
+  "user_visual_priority": "Study the user's two named examples first. Combine what is learned from them with the repository's documented cinematic stick-figure direction; do not flatten the work into generic gradient/SVG slides.",
+  "references": [
+    {
+      "id": "words-you-never-forgot",
+      "title": "The Words You Never Forgot",
+      "original_filename": "The Words You Never Forgot. [qyFUAlGMxSE].mp4",
+      "source_url": "https://www.youtube.com/watch?v=qyFUAlGMxSE",
+      "storage_status": "link catalogued; standalone MP4 was not found in the current workspace or searchable ChatGPT Library at the time of this snapshot; not embedded in the public repository bundle",
+      "source_policy": "Use the linked public video for study when accessible. Do not copy/redistribute its video or audio into this repository without permission.",
+      "review_checklist": [
+        "Map the emotional hook and the moment that changes the viewer's interpretation.",
+        "Track shot length, transitions, pauses, and when the edit lets an emotional beat land.",
+        "Study how image, text, sound, and silence reinforce a feeling rather than repeat the same information.",
+        "Record timestamped observations only after viewing the current source; do not invent shot-level claims from the title."
+      ]
+    },
+    {
+      "id": "what-if-you-were-a-mentalist",
+      "title": "What If You Were a Mentalist?",
+      "original_filename": "What If You Were a Mentalist? [XexSnQTMMhw].mp4",
+      "source_url": "https://www.youtube.com/watch?v=XexSnQTMMhw",
+      "storage_status": "link catalogued; standalone MP4 was not found in the current workspace or searchable ChatGPT Library at the time of this snapshot; not embedded in the public repository bundle",
+      "source_policy": "Use the linked public video for study when accessible. Do not copy/redistribute its video or audio into this repository without permission.",
+      "review_checklist": [
+        "Identify how the premise becomes visually clear without relying on explanation alone.",
+        "Track the setup, reveal, cause-and-effect, and timing of key visual beats.",
+        "Study camera distance, framing changes, visual hierarchy, and the rhythm between action and reaction.",
+        "Record timestamped observations only after viewing the current source; do not invent shot-level claims from the title."
+      ]
+    }
+  ],
+  "related_style_sources": [
+    {
+      "title": "Ifverse Tales",
+      "url": "https://www.youtube.com/@IfverseTales",
+      "role": "Study readable stick-figure storytelling, staging, and clear visual cause/effect; do not copy specific assets."
+    },
+    {
+      "title": "Day One Films",
+      "url": "https://www.youtube.com/@dayonefilmsofficial",
+      "role": "Study restrained cinematic mood, emotional arc, contrast, and concise visual beats; do not copy specific compositions, scripts, or music."
+    }
+  ],
+  "mandatory_workflow": [
+    "Open the sources and verify they are accessible before claiming they have been reviewed.",
+    "Create a timestamped shot/technique log for each source once viewed; distinguish observations from hypotheses.",
+    "Translate techniques into original shots for the project's own characters, world, story, and sound design.",
+    "Review the resulting film as a moving sequence, not only a contact sheet or successful render."
+  ],
+  "non_claims": [
+    "This manifest does not assert that either source video has been watched in this session.",
+    "This manifest does not include an offline copy of either source MP4.",
+    "CI/build success does not establish artistic approval."
+  ]
+}
