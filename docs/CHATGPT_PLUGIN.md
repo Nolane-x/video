@@ -45,18 +45,18 @@ Start with [`AGENTS.md`](../AGENTS.md), the [cross-engine Video Production Maste
 - Krita asset-authoring guide: `tools/krita/README.md`
 - H2 source mirror: `integrations/h2-selfimprove-studio/`
 - H2 production overlay used in v1.1.0: `integrations/h2-selfimprove-studio-production-overlay/`
-- Video catalog, per-film manifest, QA notes and archived Remotion sample: `video-library/`
+- Video catalog, per-film manifest, QA notes, both master MP4s, archived Remotion sample and user reference map `video-library/reference-clips.json`: `video-library/`
 
 ## Important scope and artifact truth
 
 The private ChatGPT plugin packages the H2 production kit and its skill; it does **not** contain the complete upstream Remotion, Blender or Krita applications. This repository contains the Remotion project, Blender helper workflow, Krita guidance and production state, not full upstream application source trees.
 
-The original Full HD H2 master video and H2 source ZIP were previously delivered as ChatGPT attachments and are not yet canonical binary files in ordinary Git history. The archived Remotion render is a different renderer/output. Never conflate them, and never claim that a render passed artistic review unless the actual moving footage and relevant contact sheets were inspected.
+The exact Full HD H2 master video is archived in Git at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, technically verified by [Actions run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The H2 renderer source ZIPs remain a separate, still-open archive task and are not bundled. The archived Remotion render is a different renderer/output. Never conflate them, and never claim that a render passed artistic review unless the actual moving footage and relevant contact sheets were inspected.
 
 ## How a future ChatGPT session should use the plugin
 
 1. Open the plugin link above and ensure it is available in the current ChatGPT workspace.
-2. For a new production task, read `AGENTS.md`, the cross-engine skill, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md` and the per-film manifest before acting.
+2. For a new production task, read `AGENTS.md`, the cross-engine skill, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `video-library/reference-clips.json` and the per-film manifest/QA before acting.
 3. If H2 is the selected engine, invoke the H2 script/video workflow and read its bundled `production-pipeline.md`, `quality-gates.md`, `state-handoff.md`, `one-more-scroll-case-study.md` and existing install/style/audio/QA references.
 4. Verify current GitHub HEAD, workflow status and artifact paths. Do not assume an old ChatGPT attachment or expiring Actions artifact is permanent storage.
 5. Choose the engine per shot: H2 for its native rig/packs; Remotion for timeline/type/compositing/CI; Blender for shots that truly benefit from depth/3D; Krita for deliberately authored art; FFmpeg/ffprobe for mastering/technical validation.
