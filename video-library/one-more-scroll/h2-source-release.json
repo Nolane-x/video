@@ -133,5 +133,34 @@
       "status": "preliminary visual sampling only; artistic sign-off pending"
     }
   },
-  "portable_bundle_policy": "Include this verified candidate/review metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle."
+  "portable_bundle_policy": "Include this verified candidate/review metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle.",
+  "source_v3_render_candidate": {
+    "workflow_path": ".github/workflows/verify-h2-source-v3.yml",
+    "workflow_url": "https://github.com/Nolane-x/video/blob/main/.github/workflows/verify-h2-source-v3.yml",
+    "workflow_run_id": "40281627022",
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40281627022",
+    "request_path": "video-library/one-more-scroll/h2-source-v3-render-request.json",
+    "request_status": "preview_passed_ready_for_full_render",
+    "source_archive": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+    "source_archive_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+    "patch_path": "tools/video/patch_h2_shoelace_scene.py",
+    "patch_commit": "05a2027cebdc83cedc1002992198d9404f253647",
+    "preview_workflow_run_id": "40280228327",
+    "preview_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40280228327",
+    "status": "full_render_in_progress",
+    "current_step": "Render source-v3 full-length silent master",
+    "technical_prechecks_passed": [
+      "request and pinned patch guard",
+      "source ZIP SHA-256 and integrity",
+      "deterministic patch application",
+      "JavaScript, Python and story JSON validation",
+      "full-timeline browser smoke test",
+      "source-v3 contact sheets",
+      "five music beds and 45 SFX cues validated"
+    ],
+    "candidate_filename": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "review_bundle_filename": "h2-source-v3-shoelace-fix-review.zip",
+    "artistic_signoff": "pending",
+    "canonical_master_must_remain_unchanged": true
+  }
 }
