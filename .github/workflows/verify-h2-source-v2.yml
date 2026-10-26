@@ -129,11 +129,34 @@ jobs:
           test -s projects/one-more-scroll-h2/build/sheets/sheet_02.jpg
           cp projects/one-more-scroll-h2/build/sheets/sheet_*.jpg /tmp/h2-review/payload/
 
-      - name: Generate procedural music and sound effects
+      - name: Validate packaged music and sound-effect assets
         working-directory: /tmp/h2-source-v2
         run: |
           set -euo pipefail
-          python packs/dem/audio.py 2>&1 | tee /tmp/h2-review/h2-audio-generation.log
+          python - <<'PY' | tee /tmp/h2-review/h2-audio-generation.log
+          import json
+          from pathlib import Path
+          project=Path("projects/one-more-scroll-h2")
+          story=json.loads((project/"story/shots.json").read_text())
+          music_dir=Path("audio/music")
+          sfx_dir=Path("audio/sfx")
+          music={p.stem.split("_")[1]:p for p in music_dir.glob("bed_*.wav")}
+          sfx={p.stem for p in sfx_dir.glob("*.wav")}
+          required_beds={x.get("bed") for x in story.get("music",[]) if x.get("bed") not in (None,"none","drop")}
+          missing_beds=sorted(required_beds-set(music))
+          cues=[]
+          for shot in story.get("shots",[]):
+              cues.extend((shot.get("id"),x.get("name")) for x in shot.get("sfx",[]))
+          cues.extend(("story",x.get("name")) for x in story.get("sfx",[]))
+          def has_sfx(name):
+              return name in sfx or any(x.startswith(str(name)+"_") for x in sfx)
+          missing_sfx=sorted({name for _,name in cues if not has_sfx(name)})
+          if missing_beds: raise SystemExit("Missing pre-rendered music beds: "+", ".join(missing_beds))
+          if missing_sfx: raise SystemExit("Missing SFX for story cues: "+", ".join(missing_sfx))
+          if len(list(music_dir.glob("*.wav")))<5: raise SystemExit("Expected the five pre-rendered music beds.")
+          if len(list(sfx_dir.glob("*.wav")))<20: raise SystemExit("Expected the pre-rendered H2 sound-effect library.")
+          print(f"Pre-rendered audio validated: {len(required_beds)} referenced music beds, {len(cues)} story SFX cues, {len(sfx)} SFX WAVs. Source ZIP contains rendered WAV assets; packs/dem/audio.py depends on a synth module that is not included in the archive, so do not invoke it as a standalone generator.")
+          PY
 
       - name: Render source-v2 full-length silent master
         working-directory: /tmp/h2-source-v2
