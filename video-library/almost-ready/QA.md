@@ -39,16 +39,16 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 
 
 
-## Technical pass — render #9, before seated café pose refinement
-- Workflow: [run #9](https://github.com/Nolane-x/video/actions/runs/40353275695), source commit `a0ecaec8a85585a2bbf1127c1a5a517b138bce22`, artifact ID `12664692803` (available until 2026-11-25).
-- Master SHA-256: `d63ec757fe1f81b281df0706684316955b48e545aaa09c369a0219da8d3ddfcc`. Review-bundle SHA-256: `b9279347809a1b4765399b7706d9c34a20022971af4d5f798de1543996c28c04`.
-- Final MP4 technical gates passed: 172.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; integrated loudness `-14.0 LUFS`, true peak `-1.9 dBFS`. All 25 listed checksums validated and 12 motion proofs include A/V for approximately six seconds each.
-- Targeted visual review: B10 now shows the peer reaching with the held portfolio; B22 shows a timed green SENT confirmation; B19 walking action, B13 deadline change and B27 receding shadow were sampled frame by frame.
-- Remaining visual finding: B24's girl stood up abruptly when pointing. A new seated-pointing pose has been added to the character rig; run #11 is rerendering it. Full-length start-to-finish artistic approval remains pending.
-
-
-
 ## Final candidate — render #13
 - Workflow: [run #13](https://github.com/Nolane-x/video/actions/runs/40417564202), source commit `cf3050b81bab6163ea8793c641b21d98e4eead84`.
 - Added a larger, illustrated portfolio folder hand prop for the classroom-sharing beat (B10), while preserving the seated pointing pose in the café (B24) and timed SENT confirmation (B22). Final render and QA are pending.
 - The last confirmed technical baseline is run #11: [workflow](https://github.com/Nolane-x/video/actions/runs/40354490453), artifact `12664834346`. Full-length artistic sign-off still requires a start-to-finish watch with audio.
+
+
+## Technical pass — render #11, before the larger portfolio-folder prop
+- Workflow: [run #11](https://github.com/Nolane-x/video/actions/runs/40354490453), source commit `e9e92b631855fac2b72379e4442bb6c0873f9e44`, artifact ID `12664834346` (retained until 2026-11-25).
+- Master SHA-256: `a4cc565fca9a6aa39ace0b0e5a4f9c71a81264ce12b99515ba832638ba34522a`. Review bundle SHA-256: `2fc9d40c93266111b75108e9002cba975681a31df39e229f68cd53f742d2aaf9`. Preview SHA-256: `74cfecb8c7795f306410bdfad75133b0017aa91d00ad2be295dd0c561f4e9f92`.
+- Final MP4 gates passed: 172.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; integrated loudness `-14.0 LUFS`, true peak `-1.9 dBFS`.
+- All 25 entries in `SHA256SUMS.txt` validated. The 12 motion proof clips all have audio/video and are approximately six seconds.
+- Targeted motion review confirms: the SENT toast appears in B22; B10 shows a peer physically holding out a folder-like object; the two participants stay seated during B24 feedback; the old voice remains small in B27.
+- A further refinement adds a larger illustrated portfolio folder prop to B10 because the prior held object was too small to read clearly. Full-length artistic sign-off remains pending.
