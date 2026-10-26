@@ -32,6 +32,17 @@ Use as reference for:
 
 The Day One reference is about story and atmosphere; do not copy its character, compositions, scripts, or music.
 
+## User-specified reference videos — review these first
+
+The user explicitly called out these two examples as important creative references:
+
+- **The Words You Never Forgot** — https://www.youtube.com/watch?v=qyFUAlGMxSE
+- **What If You Were a Mentalist?** — https://www.youtube.com/watch?v=XexSnQTMMhw
+
+Their source identities and viewing checklist also live in [`video-library/reference-clips.json`](../video-library/reference-clips.json). When beginning a fresh session, open each link and confirm it is accessible. If watched, log timestamped, observable techniques: hook, beat timing, framing, transitions, visual cause/effect, music/SFX/silence and emotional payoff. Avoid claiming specific scenes or camera choices until the current video has been viewed. Treat them as references to analyze, not material to copy or rehost.
+
+The current repository/session snapshot did not contain separate local copies of these two MP4s, so the portable bundle contains the references map rather than duplicate media files.
+
 ## Combined direction for H2
 
 **Character:** simple, repeatable stick-figure/mascot design. Near-black round head with light outline, sparse readable face, colored shirt, dark thin limbs with a pale rim. Proportions are fixed in a character sheet. No realistic human body and no generated pseudo-photoreal person.
