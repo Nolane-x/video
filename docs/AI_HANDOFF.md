@@ -63,3 +63,14 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Source commit: `e766c5f407cf4bbd175c28d306acc99c6d8aa609`; render CI: [40200152650](https://github.com/Nolane-x/video/actions/runs/40200152650).
 - SHA-256: `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`; 155.100s, 1280x720, 24/1.
 - This is a Remotion render, not the H2 Canvas/Chromium master. Inspect contact sheets and motion proof before accepting artistic quality.
+
+
+
+## Current active film — ALMOST READY
+- Project: `ALMOST READY | An Animated Short Film`, an original 29-shot/172-second self-improvement film about perfectionism and fear of being seen.
+- Script: `video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt`.
+- Art direction: `video-projects/h2-selfimprove/almost-ready/tune_story.py`; character/world rules: `video-projects/h2-selfimprove/almost-ready/story/bible.md`.
+- Manifest/QA: `video-library/almost-ready/manifest.json`, `video-library/almost-ready/QA.md`.
+- Dedicated renderer workflow: `.github/workflows/render-selfimprove-almost-ready.yml`; status at source authoring is pending render. Verify the actual run, output artifact URL/ID, MP4 SHA, duration, 1920×1080/24fps H.264, AAC 48kHz stereo, EBU R128 and all motion proofs before updating the ledger.
+- Targeted checks: b03/b20 pen-to-page contact; b13 11:58→11:59; b15 deadline counter and split captions; b21/b22 typing then send; b23 response; b24 café table anchors/eye-lines; b27 shadow recedes while work continues.
+- Do not call the film artistically approved until the 172-second master is watched start-to-finish with audio. Keep it distinct from `THE FIRST HOUR` and the canonical `ONE MORE SCROLL` master.
