@@ -17,7 +17,7 @@ The GitHub Actions probe confirms duration, resolution, frame rate, codecs and a
 - Contact sheets and motion checks, not just “render success.”
 
 ## Defects/version distinction
-The delivered master and later source-v2 are different versions. The prior master was flagged for an intense close-up expression, shoe-tying hands not clearly reaching the shoes, and a staircase camera that clipped the head. Source-v2 fixed these in code, but its full render was not verified because local Chromium navigation was blocked. Do not claim these fixes are in the canonical MP4 until a complete render proves it.
+The delivered master and later source-v2 are different versions. The prior master was flagged for an intense close-up expression, shoe-tying hands not clearly reaching the shoes, and a staircase camera that clipped the head. Source-v2 has now rendered fully and passed technical stream checks as a separate candidate (run 40276064292); the original canonical master remains unchanged until full-motion review and explicit artistic approval pass.
 
 ## Open release gates
 - [x] Archive the exact H2 master to durable GitHub storage.
