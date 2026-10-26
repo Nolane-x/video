@@ -1,10 +1,10 @@
 # ALMOST READY — QA ledger
 
-## Status at source authoring
-- [ ] H2 schema/JS runtime check on the actual project
-- [ ] Exactly 29 shots, 172.000 seconds and no timeline gaps/overlaps
-- [ ] Full contact sheets viewed
-- [ ] 30-second preview with audio reviewed
+## Current status — render in progress
+- [x] H2 schema/runtime check and authored 29-shot timeline passed in Actions run [#1](https://github.com/Nolane-x/video/actions/runs/40346315405)
+- [x] Exactly 29 shots, 172.000 seconds and no timeline gaps/overlaps
+- [ ] Full contact sheets viewed manually
+- [ ] 30-second preview with audio reviewed manually
 - [ ] 12 moving proofs with audio rendered and reviewed
 - [ ] Exact final MP4 passes ffprobe: 1920×1080, 24 fps, H.264, AAC 48 kHz stereo
 - [ ] EBU R128 on the exact final MP4: integrated loudness −14 LUFS ±1; true peak ≤ −1 dBFS
