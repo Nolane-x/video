@@ -278,7 +278,7 @@ apply("b24", "scene", {
         actor("hero", "table.left", "sit", "worried", facing=1, scale=0.88,
               faceAt=[[0.0, "worried"], [1.8, "neutral"], [3.7, "smile"]], look=0.1),
         actor("girl", "table.right", "sit", "smile", facing=-1, scale=0.88, at=0.12,
-              poseAt=[[0.0, "sit"], [2.0, "point"]])
+              poseAt=[[0.0, "sit"], [2.0, "sitpoint"]])
     ],
     "cam": cam(0.5, 0.55, 1.06),
     "texts": [narr("Her first question was about the idea.", 0.35, 5.25)]
@@ -357,7 +357,7 @@ assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
 assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1 and by_id["b22"]["args"]["sentAt"] == 2.25
 assert by_id["b10"]["args"]["actors"][1]["pose"] == "reach" and by_id["b10"]["args"]["actors"][1]["hold"] == "book"
 assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
-assert by_id["b24"]["args"]["actors"][1]["poseAt"] == [[0.0, "sit"], [2.0, "point"]]
+assert by_id["b24"]["args"]["actors"][1]["poseAt"] == [[0.0, "sit"], [2.0, "sitpoint"]]
 assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
 story["duration"] = 172.0
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
