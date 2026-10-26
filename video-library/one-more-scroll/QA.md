@@ -97,3 +97,10 @@ The delivered master and later source-v2 are different versions. The prior maste
 - **Not yet artistically approved.** The contact sheets show the staircase head crop appears corrected in the sampled frame at about 85 seconds. The shoe-tying pose is low/crouched but still needs playback to verify real hand-to-shoe contact. Review close-up pacing near 35–45 and 70 seconds, transitions, sync, and the full emotional arc.
 - Do not replace `one-more-scroll-h2-final.mp4` until the entire candidate has been watched with audio and explicitly approved.
 
+
+
+## Source-v3 shoe-tying correction — full render in progress
+- Focused preview [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327) passed five-second 1080p/24 H.264 validation and generated a 20-frame contact sheet.
+- Full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed the request/patch pin guard, source archive SHA/ZIP validation, patch application, JS/Python/JSON checks, full-timeline browser smoke, source-v3 contact sheets and audio-WAV coverage. It is currently rendering the full-length silent master.
+- Source patch: `tools/video/patch_h2_shoelace_scene.py` at pinned commit `05a2027cebdc83cedc1002992198d9404f253647`; base source-v2 archive SHA-256 `b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014`.
+- Keep the original H2 master and the source-v2 candidate unchanged. A source-v3 output is a candidate only; final technical metadata, audio loudness, asset hashes, and a complete motion/audio review are still required.
