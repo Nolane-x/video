@@ -1,0 +1,124 @@
+name: Render H2 SelfImprove — The First Hour
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-projects/h2-selfimprove/the-first-hour/**"
+      - "video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt"
+      - ".github/workflows/render-selfimprove-film.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h2-selfimprove-the-first-hour
+  cancel-in-progress: false
+
+jobs:
+  render-film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout H2 source and project
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install system render dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg zip unzip
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native H2 kit dependencies
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python -m pip install numpy scipy soundfile
+          python audio/build_audio.py
+      - name: Generate H2 story from approved 01-PHIM script
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/phim.py --project projects/the-first-hour --phim ../../../../../video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt --force
+          cp ../../../../../video-projects/h2-selfimprove/the-first-hour/config.json projects/the-first-hour/config.json
+          cp ../../../../../video-projects/h2-selfimprove/the-first-hour/story/bible.md projects/the-first-hour/story/bible.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("projects/the-first-hour/story/shots.json")
+          d=json.loads(p.read_text())
+          d["duration"]=d["shots"][-1]["end"]
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n")
+          print(f"Built {len(d['shots'])} H2 shots; duration={d['duration']}s")
+          PY
+      - name: Validate full timeline and render contact sheets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/the-first-hour --check --scale 0.25
+          node render.mjs --project projects/the-first-hour --sheet --scale 0.5 --at 0.75
+      - name: Build music and SFX mix, then render 30-second audio preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python tools/mix.py --project projects/the-first-hour --no-video
+          node render.mjs --project projects/the-first-hour --from 0 --to 30 --scale 0.5
+      - name: Full H2 silent render
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/the-first-hour --workers 4 --crf 18
+      - name: Mix mastered audio into final MP4
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/dist/the-first-hour"
+          python tools/mix.py --project projects/the-first-hour
+          cp projects/the-first-hour/out/*.mp4 "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4"
+          cp projects/the-first-hour/build/preview.mp4 "$GITHUB_WORKSPACE/dist/the-first-hour/preview-30s.mp4"
+          cp projects/the-first-hour/story/shots.json "$GITHUB_WORKSPACE/dist/the-first-hour/shots.json"
+          cp projects/the-first-hour/story/bible.md "$GITHUB_WORKSPACE/dist/the-first-hour/bible.md"
+          cp projects/the-first-hour/config.json "$GITHUB_WORKSPACE/dist/the-first-hour/config.json"
+          cp ../../../../../video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt "$GITHUB_WORKSPACE/dist/the-first-hour/01-PHIM-the-first-hour.txt"
+          cp projects/the-first-hour/build/sheets/*.jpg "$GITHUB_WORKSPACE/dist/the-first-hour/"
+          ffprobe -v error -show_streams -show_format -of json "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4" > "$GITHUB_WORKSPACE/dist/the-first-hour/ffprobe.json"
+          ffmpeg -hide_banner -nostats -i "$GITHUB_WORKSPACE/dist/the-first-hour/the-first-hour-h2-selfimprove.mp4" -af ebur128=peak=true -f null - 2> "$GITHUB_WORKSPACE/dist/the-first-hour/ebur128.log"
+          (cd "$GITHUB_WORKSPACE/dist/the-first-hour" && sha256sum *.mp4 *.json *.txt *.md *.jpg > SHA256SUMS.txt)
+          cd "$GITHUB_WORKSPACE"
+          zip -qr dist/the-first-hour-review.zip dist/the-first-hour
+      - name: Validate exported MP4 and report
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("dist/the-first-hour/ffprobe.json")
+          d=json.loads(p.read_text())
+          v=[s for s in d["streams"] if s.get("codec_type")=="video"]
+          a=[s for s in d["streams"] if s.get("codec_type")=="audio"]
+          assert v and a, "Final MP4 must contain both video and audio streams"
+          assert int(v[0]["width"])==1920 and int(v[0]["height"])==1080, f"Unexpected resolution: {v[0].get('width')}x{v[0].get('height')}"
+          assert abs(float(d["format"]["duration"])-172.0)<3.0, f"Unexpected runtime: {d['format']['duration']}"
+          print(f"PASS: {d['format']['duration']}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz")
+          PY
+          grep -E "I: *-1[3456]\.[0-9]+ LUFS|Peak: *-?[0-9]+\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
+      - name: Upload video, preview and QA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-first-hour-h2-selfimprove-${{ github.run_number }}
+          path: |
+            dist/the-first-hour-h2-selfimprove.mp4
+            dist/the-first-hour-review.zip
+            dist/the-first-hour/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,92 @@
+TITLE: THE FIRST HOUR
+ACCENT: amber
+
+[B01] 4s | CẢNH: màn đen, bụi nhẹ, máy đẩy chậm vào dòng chữ | NHẠC: none
+> He kept promising himself one clean morning.
+
+[B02] 6s | CẢNH: phòng ngủ đêm trăng, đồng hồ 7:00, cậu nằm trong chăn, ánh sáng xanh lạnh ngoài cửa sổ | HUD: DAY 1 | NHẠC: sad | SFX: alarm_beep@0.4
+> Every morning began with a plan.
+
+[B03] 6s | CẢNH: cận đồng hồ báo thức 7:00, bàn tay với tới nhưng dừng lại | SFX: clock_tick@0.5
+~ five more minutes.
+
+[B04] 6s | CẢNH: phòng ngủ, cậu ngồi mép giường cầm điện thoại, màn hình xanh hắt lên mặt, bóng đen đứng sau vai | SFX: tempt_swell@0.4
+~ you deserve a little break.
+
+[B05] 6s | CẢNH: cận điện thoại, feed lướt nhanh: game, burger, selfie, xe ô tô | SFX: whoosh_mid@0.4, whoosh_mid@2.2
+> One clip became a hundred.
+
+[B06] 6s | CẢNH: phòng ngủ, cậu ngồi bàn trước laptop trống, bóng đen nghiêng người thì thầm | HUD: DAY 3 | SFX: tempt_whisper@0.4
+~ start when you feel ready.
+
+[B07] 6s | CẢNH: cận điện thoại, video đang xem kèm đồng hồ chạy 2:40:00 | SFX: whoosh_mid@1.0
+> The hours disappeared without a sound.
+
+[B08] 6s | CẢNH: phòng ngủ, lịch tháng NOV tô 12 ô, đèn bàn tắt, cậu ngồi gục cạnh laptop | HUD: DAY 12 | NHẠC: dark | SFX: page_flip@0.5
+> His plans gathered dust.
+
+[B09] 6s | CẢNH: cận mặt cậu, mắt đỏ gân máu, ánh điện thoại xanh, bóng đen mờ sau lưng | SFX: tempt_whisper@0.5
+~ everyone does this.
+
+[B10] 6s | CẢNH: thành phố đêm, cậu đi ngang những ô cửa sáng, người khác ở bên trong sinh hoạt, cậu nhìn xuống điện thoại | HUD: DAY 30
+> Life kept moving around him.
+
+[B11] 6s | CẢNH: cận điện thoại chat với Jay, tin nhắn đến “still coming tonight?”, cậu chưa trả lời | SFX: notif_msg@1.0
+> His friends stopped asking twice.
+
+[B12] 6s | CẢNH: phòng ngủ, cậu ngồi bàn nhìn email từ chối trên laptop, đèn bàn tạo một vùng sáng nhỏ | SFX: sting_low@2.0
+> The opportunity went to someone else.
+
+[B13] 6s | CẢNH: cận lịch tháng DEC, nhiều ô bị gạch, tay cậu đặt cạnh lịch nhưng không viết gì | HUD: DAY 412
+> Four hundred mornings.
+
+[B14] 6s | CẢNH: khoảng tối có đèn rọi, cậu ôm đầu ngồi gục, bóng đen đứng sát phía sau, ánh nhấn amber | SFX: boom_deep@2.2
+> And nothing had changed.
+
+[B15] 6s | CẢNH: màn đen, chỉ còn dòng chữ, bụi đứng yên, không có nhân vật | HUD: DAY 412 -> 0 | NHẠC: none | SFX: clock_tick@0.2
+> He finally saw the cost.
+> He had been absent from his own life.
+
+[B16] 6s | CẢNH: phòng ngủ bình minh, điện thoại nằm úp trên bàn, cậu nhìn ánh sáng ấm qua cửa sổ, không có bóng đen | NHẠC: hope | SFX: breath_in@1.0
+> Then one message reached him.
+
+[B17] 6s | CẢNH: cận điện thoại chat với Jay, tin nhắn đến “miss you, man. coffee today?” | SFX: notif_msg@0.8
+@ jay: miss you, man. coffee today?
+> A real person still remembered him.
+
+[B18] 6s | CẢNH: phòng ngủ bình minh, cậu tắt điện thoại, đặt nó vào ngăn kéo, rồi mở rèm cửa | SFX: ui_click@0.5, door_open@2.0
+> He did one small thing differently.
+
+[B19] 6s | CẢNH: phòng ngủ, cậu đứng dậy trước bàn học, mở laptop, đặt sổ tay cạnh bàn, nắng ấm trên vai | HUD: DAY 1 | NHẠC: rise | SFX: page_flip@1.0
+> No grand promise. Just one hour.
+
+[B20] 6s | CẢNH: sổ tay, tay viết “ONE TASK. TEN MINUTES.”, bút chạm trang giấy, đèn bàn ấm | SFX: page_flip@0.4
+> He made the next step smaller.
+
+[B21] 6s | CẢNH: phòng ngủ, cậu ngồi bàn làm việc, điện thoại úp xa tay, laptop sáng, máy quay đẩy chậm vào vai và bàn tay gõ phím | SFX: typing_2s@1.0
+> Ten minutes became thirty.
+
+[B22] 6s | CẢNH: cận điện thoại trên bàn rung lên, cậu nhìn thấy nhưng tiếp tục làm việc, bóng đen nhỏ xuất hiện ở rìa khung | SFX: phone_vibrate@1.0
+~ you can check it now.
+
+[B23] 6s | CẢNH: phòng ngủ, cậu đẩy điện thoại ra xa, quay lại laptop, bóng đen lùi vào bóng tối | SFX: whoosh_mid@0.5
+> This time, he let the feeling pass.
+
+[B24] 6s | CẢNH: thành phố bình minh, cậu chạy bộ ngang hàng cây, đeo băng đô amber, ánh mặt trời phía sau | HUD: DAY 7 | SFX: footsteps@0.4
+> Small wins began to stack.
+
+[B25] 6s | CẢNH: phòng tập, cậu đeo băng đô nâng tạ nhẹ, bao cát đỏ đung đưa ở hậu cảnh, đèn vàng trên cao | SFX: breath_in@0.4, impact_light@2.0
+> He stopped waiting to feel different.
+
+[B26] 6s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0
+> He came back into the room.
+
+[B27] 6s | CẢNH: phòng ngủ bình minh, cậu ngồi bàn làm việc, lịch có nhiều ô amber, điện thoại úp xuống, bóng đen vỡ thành mảnh sáng nhỏ phía sau | SFX: glass_shatter@2.5
+> The voice returned.
+~ just one more scroll.
+> But it sounded smaller now.
+
+[B28] 6s | THẺ KẾT: THE FIRST HOUR. / Your life starts in minutes. / Take the first one.
+
+[B29] 6s | KÊU GỌI | NHẠC: resolve
+> If this hit, like and subscribe.
