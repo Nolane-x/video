@@ -205,7 +205,7 @@ for b in beats:
             if quoted:
                 value = quoted.group(1).strip()
                 lines = [x.strip() for x in re.findall(r"[^.!?]+[.!?]?", value) if x.strip()]
-                args["text"] = "\\n".join(lines) if len(lines) > 1 else value
+                args["text"] = "\n".join(lines) if len(lines) > 1 else value
                 args["at"] = 0.45
                 args["cps"] = 7.5
         if tp == "clock":
