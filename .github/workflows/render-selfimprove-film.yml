@@ -184,8 +184,8 @@ jobs:
             "b25-punch-bag-impact:142" \
             "b26-cafe-reunion:148" \
             "b27-shadow-recedes:154"; do
-            name="\${spec%%:*}"
-            start="\${spec##*:}"
+            name="${spec%%:*}"
+            start="${spec##*:}"
             ffmpeg -hide_banner -loglevel error -y -ss "$start" -i "$VIDEO" -t 6 \
               -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p \
               -c:a aac -b:a 128k -movflags +faststart "$PROOFS/$name.mp4"
