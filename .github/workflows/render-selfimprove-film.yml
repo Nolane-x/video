@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v4
+  group: h2-selfimprove-the-first-hour-v5
   cancel-in-progress: true
 
 jobs:
@@ -225,11 +225,11 @@ jobs:
           These clips support motion review; their presence is not an artistic sign-off by itself.
           EOF
           python - <<'PY'
-          import json, subprocess
+          import json, os, subprocess
           from pathlib import Path
-          root = Path("dist/the-first-hour/proofs")
+          root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist" / "the-first-hour" / "proofs"
           proofs = sorted(root.glob("*.mp4"))
-          assert len(proofs) == 12, f"Expected 12 motion proofs, got {len(proofs)}"
+          assert len(proofs) == 12, f"Expected 12 motion proofs under {root}, got {len(proofs)}"
           for clip in proofs:
               meta = json.loads(subprocess.check_output([
                   "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)
