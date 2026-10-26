@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "project_id": "the-weight-of-yes",
+  "title": "THE WEIGHT OF YES | An Animated Short Film",
+  "status": "authored_render_pending",
+  "source": {
+    "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
+    "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
+    "art_bible": "video-projects/h2-selfimprove/the-weight-of-yes/story/bible.md",
+    "shot_tuner": "video-projects/h2-selfimprove/the-weight-of-yes/tune_story.py",
+    "workflow": ".github/workflows/render-selfimprove-weight-of-yes.yml"
+  },
+  "spec": {
+    "duration_seconds": 143,
+    "shot_count": 29,
+    "resolution": "1920x1080",
+    "fps": 24,
+    "aspect": "16:9",
+    "on_screen_language": "English",
+    "voice_over": false,
+    "renderer": "H2 SelfImprove Studio Canvas/Chromium",
+    "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
+  },
+  "latest_render": null,
+  "latest_technical_pass": null,
+  "artistic_signoff": {
+    "status": "pending",
+    "full_length_video_audio_review": false,
+    "review_notes": []
+  }
+}
