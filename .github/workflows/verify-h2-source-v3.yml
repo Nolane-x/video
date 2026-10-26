@@ -50,8 +50,8 @@ jobs:
           from pathlib import Path
           request=json.loads(Path("video-library/one-more-scroll/h2-source-v3-render-request.json").read_text())
           assert request.get("status") == "preview_passed_ready_for_full_render", "Focused shoe-tying preview has not been approved for full render."
-          assert request.get("preview_workflow_run_id") == "40280228327", "Unexpected preview run; review the latest approved preview before rendering."
-          assert request.get("patch_commit") == "05a2027cebdc83cedc1002992198d9404f253647", "Source-v3 patch revision mismatch."
+          assert request.get("preview", {}).get("workflow_run_id") == "40280228327", "Unexpected preview run; review the latest approved preview before rendering."
+          assert request.get("patch", {}).get("commit") == "05a2027cebdc83cedc1002992198d9404f253647", "Source-v3 patch revision mismatch."
           assert request.get("canonical_master_must_remain_unchanged") is True
           print("Source-v3 render request approved and pinned to the previewed patch.")
           PY
