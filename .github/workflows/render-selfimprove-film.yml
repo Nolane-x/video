@@ -175,8 +175,8 @@ jobs:
           assert a[0].get("sample_rate") == "48000" and int(a[0].get("channels", 0)) == 2, "Audio must be 48 kHz stereo"
           log=Path("dist/the-first-hour/ebur128.log").read_text(errors="replace")
           import re
-          m_i=re.search(r"^\s*I:\s*(-?[0-9]+\\.[0-9]+)\s*LUFS\s*$", log, re.M)
-          m_p=re.search(r"^\s*Peak:\s*(-?[0-9]+\\.[0-9]+)\s*dBFS\s*$", log, re.M)
+          m_i=re.search(r"^\s*I:\s*(-?[0-9]+\.[0-9]+)\s*LUFS\s*$", log, re.M)
+          m_p=re.search(r"^\s*Peak:\s*(-?[0-9]+\.[0-9]+)\s*dBFS\s*$", log, re.M)
           assert m_i and m_p, "EBU R128 summary is missing integrated loudness or peak"
           integrated=float(m_i.group(1)); peak=float(m_p.group(1))
           assert -15.0 <= integrated <= -13.0, f"Integrated loudness outside -14 LUFS ±1: {integrated}"
