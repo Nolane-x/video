@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v8
+  group: h2-selfimprove-the-first-hour-v9
   cancel-in-progress: true
 
 jobs:
@@ -271,7 +271,7 @@ jobs:
           assert peak <= -1.0, f"True peak ceiling exceeded (-1.0 dBFS): {peak}"
           mixer_source = Path("integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py").read_text(encoding="utf-8")
           assert 'TP=-2.5' in mixer_source, "Mastering must reserve AAC true-peak headroom"
-          assert 'alimiter=limit=0.78:level=false' in mixer_source, "Final limiter must protect the -1 dBFS release ceiling"
+          assert 'alimiter=limit=0.65:level=false' in mixer_source, "Final limiter must protect the -1 dBFS release ceiling"
           print(f"PASS: {float(d['format']['duration']):.3f}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz stereo; I={integrated:.1f} LUFS; peak={peak:.1f} dBFS")
           PY
       - name: Upload video, preview and QA bundle
