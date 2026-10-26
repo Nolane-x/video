@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v3
-  cancel-in-progress: false
+  group: h2-selfimprove-the-first-hour-v4
+  cancel-in-progress: true
 
 jobs:
   render-film:
@@ -27,6 +27,7 @@ jobs:
         with:
           ref: main
       - name: Verify system render dependencies
+        timeout-minutes: 4
         run: |
           set -euo pipefail
           missing=0
@@ -35,13 +36,19 @@ jobs:
               echo "Missing system dependency: $bin"
               missing=1
             else
-              "$bin" -version 2>/dev/null | head -n 1 || true
+              echo "Found $bin at $(command -v "$bin")"
             fi
           done
           if [ "$missing" -ne 0 ]; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg zip unzip
+            timeout 120s sudo apt-get update
+            timeout 120s sudo apt-get install -y ffmpeg zip unzip
           fi
+          for bin in ffmpeg zip unzip; do
+            command -v "$bin"
+          done
+          ffmpeg -version | head -n 1 || true
+          zip -v | head -n 1 || true
+          unzip -v | head -n 1 || true
       - name: Set up Node and Python
         uses: actions/setup-node@v4
         with:
