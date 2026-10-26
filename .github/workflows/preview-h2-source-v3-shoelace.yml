@@ -1,0 +1,156 @@
+name: H2 source-v3 shoe-tie preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/video/patch_h2_shoelace_scene.py"
+      - ".github/workflows/preview-h2-source-v3-shoelace.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h2-source-v3-shoe-tie-preview
+  cancel-in-progress: false
+
+jobs:
+  render-shoe-tie-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout project patch
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Chromium/FFmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg zip unzip
+
+      - name: Download and verify source-v2 archive
+        run: |
+          set -euo pipefail
+          URL="https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip"
+          curl --fail --show-error --location --retry 3 --retry-all-errors \
+            --connect-timeout 20 --max-time 900 \
+            --output /tmp/one-more-scroll-h2-source-v2-scene-fixes.zip "$URL"
+          test "$(stat -c %s /tmp/one-more-scroll-h2-source-v2-scene-fixes.zip)" = "115856962"
+          test "$(sha256sum /tmp/one-more-scroll-h2-source-v2-scene-fixes.zip | cut -d ' ' -f1)" = "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014"
+          python - <<'PY'
+          import zipfile
+          from pathlib import Path
+          src=Path("/tmp/one-more-scroll-h2-source-v2-scene-fixes.zip")
+          out=Path("/tmp/h2-source-v3")
+          with zipfile.ZipFile(src) as z:
+              bad=z.testzip()
+              if bad: raise SystemExit("Corrupt ZIP member: "+bad)
+              for name in z.namelist():
+                  p=Path(name)
+                  if p.is_absolute() or ".." in p.parts: raise SystemExit("Unsafe ZIP path: "+name)
+              z.extractall(out)
+          print("Verified and extracted source-v2; source ZIP remains immutable.")
+          PY
+
+      - name: Apply deterministic shoe-tying pose patch
+        run: |
+          set -euo pipefail
+          python tools/video/patch_h2_shoelace_scene.py /tmp/h2-source-v3 \
+            --report /tmp/h2-source-v3-patch-report.json
+          node --check /tmp/h2-source-v3/packs/dem/bean.js
+          python -m json.tool /tmp/h2-source-v3/projects/one-more-scroll-h2/story/shots.json >/dev/null
+
+      - name: Install project and Chromium dependencies
+        working-directory: /tmp/h2-source-v3
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Render only the shoe-tying scene for contact QA
+        working-directory: /tmp/h2-source-v3
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/h2-source-v3-preview
+          node render.mjs --project projects/one-more-scroll-h2 \
+            --from 80 --to 85 --workers 2 --crf 18 --gl swiftshader \
+            2>&1 | tee /tmp/h2-source-v3-preview/render.log
+          test -s projects/one-more-scroll-h2/build/preview.mp4
+          cp projects/one-more-scroll-h2/build/preview.mp4 \
+            /tmp/h2-source-v3-preview/one-more-scroll-shoelace-v3-preview.mp4
+          ffprobe -v error -show_entries format=duration,size:stream=codec_name,width,height,r_frame_rate \
+            -of json /tmp/h2-source-v3-preview/one-more-scroll-shoelace-v3-preview.mp4 \
+            > /tmp/h2-source-v3-preview/preview-ffprobe.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/h2-source-v3-preview/preview-ffprobe.json")
+          data=json.loads(p.read_text())
+          fmt=data["format"]; streams=data["streams"]
+          video=next((x for x in streams if x.get("codec_name")=="h264"),None)
+          duration=float(fmt.get("duration",0))
+          if not video or video.get("width")!=1920 or video.get("height")!=1080 or video.get("r_frame_rate")!="24/1":
+              raise SystemExit("Preview stream metadata is unexpected.")
+          if not 4.8 <= duration <= 5.2:
+              raise SystemExit(f"Expected a five-second preview; got {duration}s")
+          print("Shoe-tying preview stream check passed:",duration,"seconds, 1080p/24 H.264")
+          PY
+          ffmpeg -hide_banner -loglevel error -i /tmp/h2-source-v3-preview/one-more-scroll-shoelace-v3-preview.mp4 \
+            -vf "fps=4,scale=480:-1" -q:v 3 /tmp/h2-source-v3-preview/frame-%03d.jpg -y
+
+      - name: Create preview contact sheet and checksums
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          root=Path("/tmp/h2-source-v3-preview")
+          files=sorted(root.glob("frame-*.jpg"))
+          if len(files)<18: raise SystemExit(f"Too few preview frames to review: {len(files)}")
+          thumbs=[]
+          for i,p in enumerate(files):
+              im=Image.open(p).convert("RGB"); im.thumbnail((480,270))
+              canvas=Image.new("RGB",(500,310),"#111111")
+              canvas.paste(im,((500-im.width)//2,6))
+              ImageDraw.Draw(canvas).text((12,282),f"{80+i*0.25:.2f}s",fill="white")
+              thumbs.append(canvas)
+          cols=4; rows=(len(thumbs)+cols-1)//cols
+          out=Image.new("RGB",(cols*500,rows*310),"#222222")
+          for i,im in enumerate(thumbs): out.paste(im,((i%cols)*500,(i//cols)*310))
+          out.save(root/"shoelace-v3-preview-contact-sheet.jpg",quality=92)
+          print(f"Created contact sheet from {len(files)} frames.")
+          PY
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path("/tmp/h2-source-v3-preview")
+          report=json.loads(Path("/tmp/h2-source-v3-patch-report.json").read_text())
+          files=[root/"one-more-scroll-shoelace-v3-preview.mp4",root/"shoelace-v3-preview-contact-sheet.jpg",root/"preview-ffprobe.json"]
+          rows=[]
+          for p in files:
+              h=hashlib.sha256(p.read_bytes()).hexdigest()
+              rows.append({"file":p.name,"size_bytes":p.stat().st_size,"sha256":h})
+          Path(root/"SHA256SUMS.json").write_text(json.dumps({"patch":report,"files":rows},indent=2)+"\n")
+          print(json.dumps(rows,indent=2))
+          PY
+
+      - name: Upload shoe-tie preview for visual sign-off
+        uses: actions/upload-artifact@v5
+        with:
+          name: h2-source-v3-shoelace-preview
+          path: /tmp/h2-source-v3-preview/
+          if-no-files-found: error
+          retention-days: 30
