@@ -1,11 +1,6 @@
 name: Render and QA H2 source-v2 candidate
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "video-library/one-more-scroll/h2-source-release.json"
-      - ".github/workflows/verify-h2-source-v2.yml"
   workflow_dispatch:
 
 permissions:
