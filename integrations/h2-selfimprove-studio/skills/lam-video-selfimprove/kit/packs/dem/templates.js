@@ -2,7 +2,7 @@
 // Mau: scene (boi canh + nhan vat + giong noi) | phone | clock | calendar | face | note | card | black | cta
 // Lop phu chung cho moi mau: texts, hud, fx, lights, cam (xem README trong references/mau-canh.md)
 import { E, clamp, lerp, ease, kf, rng, noise, alpha, shade, registerTemplate, text, measure, radGrad } from '/engine/core.js';
-import { PAL, accent, fx, fy, fs, at, window01, safe, narr, tempt, say, big, stroke, light, beam, vignette, ln, box, oval, FONT_NARR, FONT_HAND, FONT_UI, fillAll, wrap } from './ink.js';
+import { PAL, accent, fx, fy, fs, at, window01, safe, narr, tempt, say, big, stroke, light, beam, vignette, obj, ln, box, oval, FONT_NARR, FONT_HAND, FONT_UI, fillAll, wrap } from './ink.js';
 import { bean, lyingHead, head, bigHand, CAST } from './bean.js';
 import { set, rain, dust, calendar, digitClock } from './sets.js';
 import { phone, bigClock, notebook, phoneHand } from './phone.js';

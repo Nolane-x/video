@@ -168,6 +168,18 @@ export function set(g, kind = 'bedroom', o = {}) {
         if (!o.phoneOnDesk) books(g, dx + dw * (o.stage ? 0.31 : 0.18), gy - dh, o.stage ? E.H * 0.065 : 60);
         deskLamp(g, dx - dw * 0.35, gy - dh, o.stage ? E.H * 0.085 : 90, o.lamp);
         if (o.laptop) laptop(g, dx + dw * (o.stage ? 0.02 : -0.02), gy - dh, o.stage ? E.H * 0.10 : 70, { on: o.laptop !== 'off', t, color: o.laptopColor });
+        if (o.typing) {
+          const kw = dw * (o.stage ? 0.30 : 0.26), kx = dx - dw * (o.stage ? 0.10 : 0.07), ky = gy - dh + 12;
+          box(g, kx - kw / 2, ky - 9, kw, 18, { fill: '#20232b', line: '#7b8290', r: 4, lw: 1.2 });
+          for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 11; col++) {
+              const xx = kx - kw * 0.43 + col * kw * 0.078;
+              const yy = ky - 6 + row * 4.6;
+              box(g, xx, yy, kw * 0.054, 2.8, { fill: '#9198a5', line: null, r: 1, la: 0.86 });
+            }
+          }
+          box(g, kx - kw * 0.19, ky + 5, kw * 0.38, 2.8, { fill: '#a6adb8', line: null, r: 1, la: 0.8 });
+        }
         if (o.stage && !o.phoneOnDesk) {
           box(g, dx - dw * 0.40, gy - dh - 8, dw * 0.19, 8, { fill: '#d5d0c3', line: '#7c7780', r: 2, la: 0.82 });
           ln(g, [[dx - dw * 0.38, gy - dh - 5], [dx - dw * 0.24, gy - dh - 5]], { color: '#77727b', lw: 1.3, la: 0.7 });

@@ -93,9 +93,17 @@ try {
   } else if (args.check) {
     // quet nhanh toan video tim loi (khong xuat file): moi 3 khung ve 1 lan o kich thuoc nho
     const { page, info } = await openPlayer(browser, args.style); report(info);
-    const errs = new Set(); page.on('console', (m) => { if (m.type() === 'error' && /SHOT|IMPORT/.test(m.text())) errs.add(m.text().slice(0, 200)); });
+    const errs = new Set();
+    const remember = (message) => errs.add(String(message).slice(0, 240));
+    page.on('console', (m) => {
+      if (m.type() === 'error' && /(SHOT|IMPORT|ReferenceError|TypeError|SyntaxError|not defined|LOI|LỖI)/i.test(m.text())) remember(m.text());
+    });
+    page.on('pageerror', (e) => remember(e));
     for (let f = 0; f < info.frames; f += 3) await page.evaluate((f) => window.renderFrame(f, { q: 0.3 }).then(() => 0), f);
-    console.log(errs.size ? 'LOI:\n' + [...errs].join('\n') : 'Khong co loi trong ' + info.frames + ' khung.');
+    if (errs.size) {
+      console.error('LOI:\\n' + [...errs].join('\\n'));
+      process.exitCode = 1;
+    } else console.log('Khong co loi trong ' + info.frames + ' khung.');
   } else if (args.sheet || args.stills) {
     const { page, info } = await openPlayer(browser, args.style); report(info);
     const items = [];

@@ -242,7 +242,9 @@
           "laptop": true,
           "laptopColor": "#9fb6ff",
           "lamp": true,
-          "stage": true
+          "stage": true,
+          "bedX": 0.13,
+          "bedW": 0.28
         },
         "actors": [
           {
@@ -1075,8 +1077,9 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 46,
-            "maxW": 0.84
+            "size": 48,
+            "maxW": 0.84,
+            "color": "#34313c"
           }
         ],
         "hud": {
@@ -1105,7 +1108,8 @@
           "lamp": true,
           "calendar": false,
           "clock": false,
-          "dim": 0.01
+          "dim": 0.01,
+          "typing": true
         },
         "actors": [
           {
@@ -1207,7 +1211,8 @@
             "vibrate": true,
             "vibrateAt": 0,
             "vibrateUntil": 5.6
-          }
+          },
+          "typing": true
         },
         "texts": [
           {
@@ -1322,7 +1327,8 @@
               "dur": 0.55,
               "dx": 0.035
             }
-          }
+          },
+          "typing": true
         },
         "actors": [
           {
@@ -1683,7 +1689,8 @@
           },
           "calX": 0.83,
           "clock": false,
-          "dim": 0.01
+          "dim": 0.01,
+          "typing": true
         },
         "actors": [
           {
