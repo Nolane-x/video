@@ -234,6 +234,25 @@ function holdItem(g, x, y, U, f, what, t, o) {
     const top = y - 36 * U; g.save(); g.strokeStyle = '#3a3a3a'; g.lineWidth = 1.2 * U; g.beginPath(); g.moveTo(x, y + 4 * U); g.lineTo(x, top); g.stroke();
     g.beginPath(); g.moveTo(x - 30 * U, top + 6 * U); g.quadraticCurveTo(x, top - 22 * U, x + 30 * U, top + 6 * U); for (let i = 3; i >= -3; i--) g.quadraticCurveTo(x + (i + 0.5) * 10 * U - 5 * U, top + 1 * U, x + i * 10 * U - 0 * U, top + 6 * U); g.closePath(); g.fillStyle = o.umbrellaColor || '#f2c230'; g.fill(); g.lineWidth = 1 * U; g.strokeStyle = '#a07c15'; g.stroke(); g.restore();
   } else if (what === 'book') { g.save(); g.translate(x, y - 2 * U); g.fillStyle = '#e8b33c'; g.fillRect(-6 * U, -8 * U, 9 * U, 11 * U); g.fillStyle = '#4e6b52'; g.fillRect(-6 * U, -8 * U, 2 * U, 11 * U); g.restore(); }
+  else if (what === 'portfolio') {
+    // A clearly legible hand-held portfolio folder sized for an actor's forearm.
+    g.save();
+    g.translate(x + 4 * U * f, y - 17 * U);
+    g.rotate(-0.16 * f);
+    const px = -10 * U, py = -16 * U, pw = 21 * U, ph = 31 * U;
+    g.beginPath();
+    g.roundRect(px - 1.6 * U, py - 1.6 * U, pw + 3.2 * U, ph + 3.2 * U, 2.2 * U);
+    g.fillStyle = '#ad7b38'; g.fill(); g.lineWidth = 1.4 * U; g.strokeStyle = '#4c3827'; g.stroke();
+    g.beginPath(); g.roundRect(px, py, pw, ph, 1.2 * U); g.fillStyle = '#f0e7d6'; g.fill();
+    g.fillStyle = '#8d5d2d'; g.fillRect(px, py, 2.3 * U, ph);
+    g.fillStyle = '#4f596f'; g.fillRect(px + 4 * U, py + 3.7 * U, 13.8 * U, 9.2 * U);
+    g.fillStyle = '#d6b36b'; g.fillRect(px + 5 * U, py + 4.7 * U, 11.8 * U, 1.3 * U);
+    g.fillStyle = '#6f776d';
+    g.fillRect(px + 4 * U, py + 15.2 * U, 13.8 * U, 0.9 * U);
+    g.fillRect(px + 4 * U, py + 18.4 * U, 11.5 * U, 0.9 * U);
+    g.fillRect(px + 4 * U, py + 21.6 * U, 12.5 * U, 0.9 * U);
+    g.restore();
+  }
   else if (what === 'ball') { dot(g, x + 3 * U * f, y + 2 * U, 5.5 * U, '#e07b2f', '#6a3510', 0.8 * U); }
   else if (what === 'bag') { g.save(); g.fillStyle = '#24262c'; g.beginPath(); g.roundRect(x - 4 * U, y, 12 * U, 14 * U, 2 * U); g.fill(); g.restore(); }
   else if (what === 'cup') { g.save(); g.fillStyle = '#f2efe9'; g.beginPath(); g.roundRect(x - 3 * U, y - 6 * U, 6 * U, 7 * U, 1.2 * U); g.fill(); g.restore(); }
