@@ -5,7 +5,7 @@
   "canonical_master": {
     "file_name": "one-more-scroll-h2-final.mp4",
     "renderer": "H2 Canvas/Chromium pipeline with FFmpeg audio mastering",
-    "duration_seconds": 155.0,
+    "duration_seconds": 155,
     "width": 1920,
     "height": 1080,
     "fps": "24/1",
@@ -19,7 +19,7 @@
     "size_bytes": 31547778,
     "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
     "fresh_probe": {
-      "duration_seconds": 155.0,
+      "duration_seconds": 155,
       "width": 1920,
       "height": 1080,
       "fps": "24/1",
@@ -73,17 +73,21 @@
       "file": "one-more-scroll-h2-source.zip",
       "kind": "source",
       "approx_size_bytes": 115875783,
-      "storage": "ChatGPT attachment",
+      "storage": "GitHub Release asset, verified by workflow run 40274927974",
       "sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
-      "zip_integrity_test": "passed via zipfile.testzip() in working environment"
+      "zip_integrity_test": "passed by GitHub Actions",
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source.zip",
+      "repository_path": null
     },
     {
       "file": "one-more-scroll-h2-source-v2-scene-fixes.zip",
       "kind": "source with later fixes",
       "approx_size_bytes": 115856962,
-      "storage": "ChatGPT attachment; fresh full render not verified",
+      "storage": "GitHub Release asset, verified by workflow run 40274927974; full render/artistic review pending",
       "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
-      "zip_integrity_test": "passed via zipfile.testzip() in working environment"
+      "zip_integrity_test": "passed by GitHub Actions",
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip",
+      "repository_path": null
     }
   ],
   "remotion_project": {
@@ -151,5 +155,15 @@
     "verified_by_workflow_run_id": "40271825143",
     "verification_run_url": "https://github.com/Nolane-x/video/actions/runs/40271825143",
     "note": "Original H2 Canvas/Chromium master; keep separate from the Remotion render."
+  },
+  "h2_source_release": {
+    "release_tag": "h2-production-assets-v1",
+    "release_url": "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1",
+    "published_at_utc": "2026-10-26T05:34:41Z",
+    "verification_workflow_run_id": "40274927974",
+    "source_asset_count": 2,
+    "original_source_sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
+    "source_v2_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+    "source_v2_full_render_status": "pending; do not mark as artistically approved"
   }
 }
