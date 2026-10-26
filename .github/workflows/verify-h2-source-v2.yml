@@ -5,13 +5,14 @@ on:
     branches: [main]
     paths:
       - "video-library/one-more-scroll/h2-source-release.json"
+      - ".github/workflows/verify-h2-source-v2.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: h2-source-v2-candidate-render
+  group: h2-source-v2-candidate-render-v2
   cancel-in-progress: false
 
 jobs:
