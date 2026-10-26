@@ -1,6 +1,6 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-25 after successful render/archive and confirmed ChatGPT Plugin Creator update to v1.1.0. Verify live GitHub state and Actions before relying on it.
+Snapshot updated 2026-10-26 after checksum-verified H2 master archival and portable bundle rebuild. Check linked GitHub Actions for the latest run status.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video
@@ -11,7 +11,7 @@ Snapshot updated 2026-10-25 after successful render/archive and confirmed ChatGP
 ## Canonical art direction
 User rejected flat generic SVG/gradient visuals and photo-like AI humans. Preferred: symbolic stick figure (dark round head, pale rim, expressive face, colored shirt, slim limbs) in rich, staged environments; warm windows/practical lamps against plum/charcoal shadows; architecture, props, foreground/background depth, varied camera sizes, visible acting/contact and purposeful edits.
 
-References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Films](https://www.youtube.com/@dayonefilmsofficial), and user-provided examples “The Words You Never Forgot” and “What If You Were a Mentalist?”. Read `docs/ART_DIRECTION_IFVERSE_DAYONE.md`.
+References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Films](https://www.youtube.com/@dayonefilmsofficial), and user-provided examples “The Words You Never Forgot” and “What If You Were a Mentalist?”. Read `docs/ART_DIRECTION_IFVERSE_DAYONE.md`. Their source links and a no-invented-observations study checklist are preserved in [`video-library/reference-clips.json`](../video-library/reference-clips.json).
 
 ## Current projects
 
@@ -38,7 +38,7 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - **Active private ChatGPT plugin: v1.1.0**, [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0), current release `pluginrel_6ade248942988191a57ff1059c818720`; Plugin Creator confirmed `status=updated` on 2026-10-25.
 - GitHub build/validation: [Actions run 40207680206](https://github.com/Nolane-x/video/actions/runs/40207680206) succeeded for source commit `a58ed0a0ca85079435b61ef670fa62531cd7f502`. Plugin ZIP SHA-256: `84993b9eab1d61662cb5859214664b1ac93c1491d9dea6493886df2ab6914917`. [Release result](../integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md).
 - The source mirror at `integrations/h2-selfimprove-studio/` intentionally preserves 51 UTF-8 files from the v1.0.2 base release (`pluginrel_6ade1c3ecb20819199def25125d2f89a`). The v1.1.0 production addendum/references are in `integrations/h2-selfimprove-studio-production-overlay/`; do not relabel the base manifest as v1.1.0.
-- The original `.plugin` archive itself and the original H2 master MP4 are not binary files in Git. The H2 renderer source mirror is in GitHub; native rendering still requires the appropriate runtime/dependencies.
+- The active private `.plugin` package is managed in Plugin Creator; the canonical H2 master MP4 is now a binary in Git at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`. The H2 renderer source mirror is in GitHub; native rendering still requires the appropriate runtime/dependencies.
 - This source is distinct from the Remotion project and from the complete upstream Remotion/Blender/Krita applications.
 ## Canonical H2 master (archived and verified in GitHub)
 - File: `one-more-scroll-h2-final.mp4`
@@ -47,7 +47,7 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - Related session attachments: 30-second preview, thumbnail, two contact sheets, QA report, source ZIP (~115.9 MB) and source-v2 ZIP (~115.9 MB).
 - **Storage truth:** the exact H2 master is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, and verified by [workflow run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The source ZIPs remain external until separately uploaded as Release assets. Source-v2 includes fixes that had not been verified by a new full render due to local Chromium navigation restrictions. Do not claim those fixes are in the master.
 - Exact H2 master: `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, 31,547,778 bytes. GitHub Actions verified its SHA, codec, dimensions, FPS, duration and audio format in [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143).
-- The repository's Remotion reference render **is now persisted** at `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`. Its SHA-256 is `cba900cebb306acc42fa3f741f7c7d008e9a04400a867a87402dcdf8090ac3e3`. This is a different video/renderer from the H2 master.
+- The current Remotion reference render is `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`, SHA-256 `cdccb836587093f2ab35c28d306acc99c6d8aa609`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
 
 ## Historical CI evidence
@@ -58,19 +58,19 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 
 ## Verified latest state
 - Remotion render CI: [run 40197641208](https://github.com/Nolane-x/video/actions/runs/40197641208) — passed schema validation, TypeScript, rendering, audio normalization, metadata and contact-sheet generation.
-- Archive CI: [run 40197855575](https://github.com/Nolane-x/video/actions/runs/40197855575) — passed and committed the video plus skill ZIP.
-- Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-31/one-more-scroll-remotion-master.mp4`.
-- Portable skill bundle: `video-library/video-production-master-skill.zip`. The latest validated package includes the Remotion run 36 reference MP4, cross-agent instructions/state, the H2 v1.0.2 base-source mirror, and the full H2 v1.1.0 production overlay plus release report. Bundle workflow [run 40209051977](https://github.com/Nolane-x/video/actions/runs/40209051977) passed ZIP integrity and required-file checks; the bundle checksum is recorded at `video-library/video-production-master-skill.zip.sha256`.
+- H2 archive verification: [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143) — passed SHA-256, file-size, codec, resolution, FPS, duration and audio-format checks; generated contact sheets and metadata.
+- Permanent Remotion sample: `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`.
+- Portable skill bundle: [`video-library/video-production-master-skill.zip`](../video-library/video-production-master-skill.zip). Packaging [run 40272019747](https://github.com/Nolane-x/video/actions/runs/40272019747) passed ZIP integrity and required-file checks: 167 entries, Remotion run-36 render, original H2 master included, H2 v1.1.0 overlay included, active Plugin Creator v1.1.0 release metadata included. SHA-256: `e503b5ddbc5e2488eb9ec4f15c419be9712cb5fc226ff8f512397c2ba2509bb4`.
 
 ## Prior work catalog and reusable archive tooling
 - The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.
 - The prior-works import tool is `tools/video/archive_previous_works.py`. It stages matched video attachments by hash; GitHub workflow then verifies remote bytes and generates contact sheets.
 - The H2 source publisher is `tools/video/publish_h2_source_release.ps1`; source ZIPs should be stored as verified GitHub Release assets, not huge regular Git blobs.
-- The current portable skill ZIP intentionally includes the Remotion reference video and, after checksum-verified import, the canonical H2 MP4. It does not bundle every historical video clip to avoid exceeding GitHub's single-file size limit. Clone the repo or inspect the catalog for the rest.
+- The current portable skill ZIP includes both the Remotion reference MP4 and the checksum-verified canonical H2 MP4. It also includes `video-library/reference-clips.json`, which preserves your two reference-video URLs and study prompts; standalone copies of those third-party MP4s were not found in the current workspace/Library and are not embedded. It does not bundle every historical clip; use the catalog for availability and provenance.
 
 ## Next priorities
-1. **Completed:** Portable skill package now contains the reference MP4, source map, state/handoff docs, H2 base-source mirror and the full v1.1.0 production overlay. The build validates required files and active plugin release metadata; see [successful packaging run 40209051977](https://github.com/Nolane-x/video/actions/runs/40209051977). Future overlay changes are included by the same workflow.
-2. **Open:** Import the exact H2 master binary with `tools/video/archive_h2_master.py` once `one-more-scroll-h2-final.mp4` is available locally. Expected SHA-256 is `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`; the file was not available in the current production workspace at this snapshot, so it is still not archived in GitHub.
+1. **Completed:** Portable package rebuilt and verified in [run 40272019747](https://github.com/Nolane-x/video/actions/runs/40272019747); includes both the H2 master and Remotion render, source/docs, tool inventory, H2 production overlay and plugin release metadata. The reference manifest is `video-library/reference-clips.json`.
+2. **Completed:** The canonical H2 master is archived and verified at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`; see verification [run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). H2 source ZIPs remain external and must be uploaded separately before claiming source-code archives are complete.
 3. **Open:** Visually review the persisted Remotion contact sheets and short moving proofs; technical CI passed, but artistic QA is not signed off. The latest run 36 measured -14.5 LUFS integrated and -2.3 dBFS true peak, within the configured conservative peak gate. Run 31's older -1.2 dBFS peak is historical, not the current master.
 4. **Open:** Re-render and inspect source-v2 with the actual H2 engine when its source/runtime is available; fix P0/P1 action/contact/crop issues.
 5. Update state and film manifest after every verified render.
