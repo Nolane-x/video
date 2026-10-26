@@ -285,6 +285,9 @@ jobs:
           set -euo pipefail
           cd /tmp/h2-review-v3
           cp h2-browser-check.log h2-contact-sheet.log h2-audio-generation.log h2-full-render.log h2-audio-mix.log h2-audio-ebur128.log payload/
+          cp "$GITHUB_WORKSPACE/tools/video/patch_h2_shoelace_scene.py" payload/
+          test -s payload/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4
+          test -s payload/h2-source-v3-render-report.json
           (cd payload && sha256sum *.jpg *.mp4 *.json patch_h2_shoelace_scene.py > SHA256SUMS.txt)
           zip -qr h2-source-v3-shoelace-fix-review.zip payload
           zip -T h2-source-v3-shoelace-fix-review.zip
@@ -306,9 +309,10 @@ jobs:
           PY
 
       - name: Upload short-retention convenience artifact
+        if: always()
         uses: actions/upload-artifact@v5
         with:
           name: h2-source-v3-shoelace-fix-review
           path: /tmp/h2-review-v3/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
