@@ -16,7 +16,7 @@ The active private ChatGPT plugin [h2-selfimprove-studio](https://chatgpt.com/pl
 The active private `h2-selfimprove-studio` ChatGPT plugin is available at https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0 (v1.1.0, release `pluginrel_6ade248942988191a57ff1059c818720`). Its 51-file source mirror under `integrations/h2-selfimprove-studio/` is the v1.0.2 base snapshot, while `integrations/h2-selfimprove-studio-production-overlay/` records the production workflow enhancement used for v1.1.0. Read `docs/CHATGPT_PLUGIN.md` and `integrations/h2-selfimprove-studio/MIRROR-NOTES.md`. Keep the native H2 kit distinct from the repo's Remotion renderer and from the full upstream Blender/Krita applications.
 
 ## Read before acting
-Read `AGENTS.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, `video-library/README.md`, `video-library/previous-works-catalog.json`, the per-film manifest, Remotion README, character bible and live shot plan. Inspect current HEAD, recent commits, Actions, logs and artifacts. Then read these references: [visual language](references/visual-language.md), [engine selection](references/engine-selection.md), [production workflow](references/production-workflow.md), [animation QA](references/animation-qa.md), [audio/delivery](references/audio-delivery.md), [state restoration](references/state-restoration.md), [reusable prompts](references/reusable-prompts.md).
+Read `AGENTS.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, `video-library/README.md`, `video-library/previous-works-catalog.json`, `video-library/reference-clips.json`, the per-film manifest/QA, Remotion README, character bible and live shot plan. Inspect current HEAD, recent commits, Actions, logs and artifacts. The canonical H2 master MP4 is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`; the large H2 source ZIPs are a separate, still-open archive task. Then read these references: [visual language](references/visual-language.md), [engine selection](references/engine-selection.md), [production workflow](references/production-workflow.md), [animation QA](references/animation-qa.md), [audio/delivery](references/audio-delivery.md), [state restoration](references/state-restoration.md), [reusable prompts](references/reusable-prompts.md).
 
 ## Product target
 Make a short film, not a motion-graphics slideshow. Use a simple symbolic stick figure (near-black round head, pale rim, readable face, colored shirt, slim dark limbs and shoes) inside a richly staged world. Distinct locations, architectural detail, warm practical light, plum/charcoal shadows, foreground/background depth, purposeful camera movement, visible acting and prop contact are central to the look.
@@ -24,8 +24,8 @@ Make a short film, not a motion-graphics slideshow. Use a simple symbolic stick 
 User references:
 - Ifverse Tales: https://www.youtube.com/@IfverseTales
 - Day One Films: https://www.youtube.com/@dayonefilmsofficial
-- Supplied examples: “The Words You Never Forgot” and “What If You Were a Mentalist?”
-Study the high-level visual grammar. Do not copy frames, characters, dialogue, scripts or music.
+- Supplied examples: “The Words You Never Forgot” (https://www.youtube.com/watch?v=qyFUAlGMxSE) and “What If You Were a Mentalist?” (https://www.youtube.com/watch?v=XexSnQTMMhw). See `video-library/reference-clips.json` for source provenance and review checklist.
+Open the source and actually watch it before recording timestamped observations; the standalone reference MP4s were not found in the current workspace/Library snapshot. Study the high-level visual grammar. Do not copy frames, characters, dialogue, scripts or music.
 
 ## Hard production gates
 1. **Repository truth:** inspect code, storyboard, assets, commits, CI and storage status.
