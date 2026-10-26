@@ -1,0 +1,66 @@
+name: Sync H2 source release manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "video-library/one-more-scroll/h2-source-release.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-h2-source-release-manifest
+  cancel-in-progress: false
+
+jobs:
+  sync-release-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Validate source-release manifest and upload updated Release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("video-library/one-more-scroll/h2-source-release.json").read_text())
+          assert data.get("release_tag")=="h2-production-assets-v1"
+          assert data.get("status")=="uploaded_to_github_release_and_checksum_verified"
+          names={x.get("filename") for x in data.get("assets",[])}
+          required={
+            "one-more-scroll-h2-final.mp4",
+            "one-more-scroll-h2-source.zip",
+            "one-more-scroll-h2-source-v2-scene-fixes.zip",
+            "one-more-scroll-h2-source-v2-render-candidate.mp4",
+            "h2-source-v2-render-review.zip"
+          }
+          missing=required-names
+          if missing: raise SystemExit("Source-release manifest is missing assets: "+", ".join(sorted(missing)))
+          candidate=data["source_v2_render_candidate"]
+          assert candidate.get("status")=="technical_render_and_stream_validation_passed"
+          assert candidate.get("is_canonical_master") is False
+          print("Source-release manifest is valid; candidate remains a separate non-canonical master.")
+          PY
+          gh release upload h2-production-assets-v1 \
+            video-library/one-more-scroll/h2-source-release.json \
+            --repo Nolane-x/video --clobber
+          gh api repos/Nolane-x/video/releases/tags/h2-production-assets-v1 > /tmp/h2-release.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          local=Path("video-library/one-more-scroll/h2-source-release.json")
+          remote=json.loads(Path("/tmp/h2-release.json").read_text())
+          assets={a["name"]:a for a in remote["assets"]}
+          if "h2-source-release.json" not in assets:
+              raise SystemExit("Updated source-release manifest is missing from GitHub Release.")
+          if assets["h2-source-release.json"]["size"] != local.stat().st_size:
+              raise SystemExit("Uploaded source-release manifest size does not match the local authoritative file.")
+          print("Updated Release manifest URL:",assets["h2-source-release.json"]["browser_download_url"])
+          PY
