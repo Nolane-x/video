@@ -25,7 +25,7 @@ The current skill ZIP is intended as a convenient bundle of agent instructions, 
 
 ## Restoring a particular video
 
-Read `video-library/one-more-scroll/manifest.json`, `QA.md`, and `latest-remotion-release.json` first. The latest Remotion video stored in the repo is not interchangeable with the original H2 Canvas/Chromium master. Verify every path and renderer label before use.
+Read `video-library/one-more-scroll/manifest.json`, `QA.md`, `latest-remotion-release.json`, and `video-library/reference-clips.json` first. The repo contains the exact H2 master and a separate Remotion sample; never interchange their paths or renderer labels. The reference map keeps your two named video links and study checklist; don't claim timestamped findings unless the linked source was actually viewed.
 
 ## Canonical H2 master — already archived
 
