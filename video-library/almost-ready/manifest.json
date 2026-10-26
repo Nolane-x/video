@@ -3,7 +3,7 @@
   "title": "ALMOST READY — An Animated Short Film",
   "project_id": "almost-ready",
   "created_at": "2026-10-26",
-  "status": "render_in_progress",
+  "status": "render_v5_in_progress_after_v3_technical_pass",
   "creative_target": "cinematic story-led stick-figure short about perfectionism and fear of being seen",
   "language": "English",
   "voiceover": false,
@@ -35,13 +35,29 @@
     "full_length_artistic_review": "pending"
   },
   "render": {
-    "workflow_run_id": 40346315405,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40346315405",
-    "source_commit": "b658acc369ec5ae13a47b3a579667d5af5705213",
+    "workflow_run_id": 40351517634,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40351517634",
+    "source_commit": "b4623afa5f65bb45091ba517912eff1c09595993",
     "master_sha256": null,
     "review_bundle_sha256": null,
     "artifact_id": null,
-    "artifact_storage": "GitHub Actions run in progress; no output or checksum verified yet"
+    "artifact_storage": "Latest passed baseline: Actions artifact #3 is temporary through 2026-11-25; improved visible-send and peer-sharing shots are rerendering",
+    "latest_technical_pass": {
+      "workflow_run_id": 40349359432,
+      "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40349359432",
+      "source_commit": "563a1d5c30fcffec5e0efc0be7c98bc092afee33",
+      "artifact_id": 12663396507,
+      "artifact_sha256": "966507eba49daa4e0da6b029417628d10a099ffdedbd773f2f7b413de9cbcedf",
+      "master_sha256": "dfb78ba804919e03771055e456fb216c058f5a02ef1f477ac0fd0c5a1cfc7d2f",
+      "review_bundle_sha256": "bbbf830a58492f12eab914dd2d84f97498d0615bef5ba5f39f876f7b3212ba54",
+      "duration_seconds": 172,
+      "video": "H.264, 1920x1080, 24 fps",
+      "audio": "AAC, 48000 Hz, stereo",
+      "integrated_lufs": -14,
+      "true_peak_dbfs": -1.9,
+      "motion_proofs": 12,
+      "checksum_files_valid": 25
+    }
   },
   "known_limits": [
     "The H2 character and prop rig must be verified in the rendered scene; source assertions do not establish visible contact.",
