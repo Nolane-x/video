@@ -2,6 +2,8 @@
 
 Read this folder before designing another video. It is the long-term catalog of films made by previous AI sessions.
 
+User-selected external visual references are indexed in [`reference-clips.json`](reference-clips.json). The two standalone MP4 files were not found in the current workspace/Library snapshot, so the bundle keeps their source links and review protocol rather than rehosting the videos.
+
 ## Rules
 - Each production needs a manifest, source commit/paths, story/shot data, master/preview links, contact sheets, QA notes, audio measurements and provenance.
 - Keep master, preview, contact sheet, source package and reproducible build distinct.
