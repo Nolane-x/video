@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
-      - "video-library/one-more-scroll/manifest.json"
-      - "video-library/one-more-scroll/QA.md"
       - ".github/workflows/verify-archive-h2-master.yml"
   workflow_dispatch:
 
