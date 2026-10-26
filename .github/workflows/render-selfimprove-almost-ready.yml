@@ -143,10 +143,10 @@ jobs:
           p = Path("tools/mix.py")
           source = p.read_text(encoding="utf-8")
           revised = source.replace("loudnorm=I={lufs}:TP=-2.5:LRA=11", "loudnorm=I={lufs}:TP=-6:LRA=11")
-          revised = revised.replace("alimiter=limit=0.65:level=false", "alimiter=limit=0.40:level=false")
-          assert revised != source and "TP=-6" in revised and "alimiter=limit=0.40:level=false" in revised, "True-peak limiter patch failed"
+          revised = revised.replace("alimiter=limit=0.65:level=false", "alimiter=limit=0.75:level=false")
+          assert revised != source and "TP=-6" in revised and "alimiter=limit=0.75:level=false" in revised, "True-peak limiter patch failed"
           p.write_text(revised, encoding="utf-8")
-          print("Mastering override active: loudnorm TP=-6 dBFS, final limiter=0.40")
+          print("Mastering override active: loudnorm TP=-6 dBFS, final limiter=0.75")
           PY
           python tools/mix.py --project projects/almost-ready
           cp projects/almost-ready/out/*.mp4 "$GITHUB_WORKSPACE/dist/almost-ready/the-almost-ready-h2-selfimprove.mp4"
@@ -250,7 +250,7 @@ jobs:
           assert peak <= -1.0, f"True peak ceiling exceeded (-1.0 dBFS): {peak}"
           mixer_source = Path("integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py").read_text(encoding="utf-8")
           assert 'TP=-6' in mixer_source, "Project mastering must target conservative true-peak headroom"
-          assert 'alimiter=limit=0.40:level=false' in mixer_source, "Project mastering must use conservative true-peak limiter"
+          assert 'alimiter=limit=0.75:level=false' in mixer_source, "Project mastering limiter ceiling must leave AAC true-peak headroom"
           print(f"PASS: {float(d['format']['duration']):.3f}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz stereo; I={integrated:.1f} LUFS; peak={peak:.1f} dBFS")
           PY
       - name: Upload video, preview and QA bundle
