@@ -103,6 +103,9 @@ jobs:
           assert by_id["b11"]["args"].get("messages", [{}])[0].get("text") == "still coming tonight?"
           assert by_id["b17"]["args"].get("messages", [{}])[0].get("text") == "miss you, man. coffee today?"
           assert by_id["b20"]["tpl"] == "note" and "ONE TASK." in by_id["b20"]["args"].get("text", "") and "TEN MINUTES." in by_id["b20"]["args"].get("text", "")
+          notebook_source = Path("packs/dem/phone.js").read_text(encoding="utf-8")
+          assert "Math.max(0, Math.min(n, line.length))" in notebook_source, "Notebook reveal must clamp visible character count"
+          assert "n = Math.max(0, n - line.length)" in notebook_source, "Notebook cursor must never become negative"
           assert shots["b03"]["tpl"] == "clock" and shots["b03"]["args"].get("reach") is True, "Alarm-hand hesitation insert is missing"
           assert shots["b06"]["args"].get("actors", [{}])[0].get("x") == "desk.seat", "Hero is not staged at the desk in B06"
           assert shots["b12"]["tpl"] == "laptop", "Rejection email must be shown on a laptop, not a phone"
@@ -178,6 +181,7 @@ jobs:
             "b12-laptop-rejection:64" \
             "b16-morning-turn:88" \
             "b19-walk-to-desk:106" \
+            "b20-notebook-writing:112" \
             "b21-typing:118" \
             "b22-vibrating-phone:124" \
             "b23-phone-pushed-away:130" \
@@ -202,6 +206,7 @@ jobs:
           | b12-laptop-rejection | 01:04 | Rejection is legible on the laptop insert |
           | b16-morning-turn | 01:28 | Morning reset and warm window light |
           | b19-walk-to-desk | 01:46 | Actor walks from bed to the work area |
+          | b20-notebook-writing | 01:52 | Writing cursor reveals only the current line and the pen follows the text |
           | b21-typing | 01:58 | Repeated hand movement reads as typing |
           | b22-vibrating-phone | 02:04 | Desk phone vibrates while the character keeps working |
           | b23-phone-pushed-away | 02:10 | Phone slides away and the actor returns to work |
@@ -217,7 +222,7 @@ jobs:
           from pathlib import Path
           root = Path("dist/the-first-hour/proofs")
           proofs = sorted(root.glob("*.mp4"))
-          assert len(proofs) == 11, f"Expected 11 motion proofs, got {len(proofs)}"
+          assert len(proofs) == 12, f"Expected 12 motion proofs, got {len(proofs)}"
           for clip in proofs:
               meta = json.loads(subprocess.check_output([
                   "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)

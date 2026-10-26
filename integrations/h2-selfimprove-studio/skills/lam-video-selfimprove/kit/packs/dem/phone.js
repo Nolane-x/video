@@ -107,9 +107,30 @@ export function notebook(g, cx, cy, s, o = {}) {
   light(g, cx, cy, s * 1.2, PAL.lamp, 0.25);
   box(g, cx - w / 2, cy - h / 2, w, h, { fill: '#efe8d6', line: '#7a705e', r: 8 }); ln(g, [[cx, cy - h / 2], [cx, cy + h / 2]], { color: '#7a705e', lw: 2 });
   for (let i = 1; i < 9; i++) ln(g, [[cx + 20, cy - h / 2 + i * h / 9], [cx + w / 2 - 20, cy - h / 2 + i * h / 9]], { color: '#9fb4cf', lw: 1.2, la: 0.6 });
-  const str = o.text || 'day 1.', lines = String(str).split('\n'), cps = o.cps || 9, at = o.at ?? 0.3; let n = Math.max(0, Math.floor((t - at) * cps)), lastX = cx - w * 0.38, lastY = cy - h * 0.2;
-  lines.forEach((l, i) => { const vis = l.slice(0, n); n -= l.length; if (!vis) return; const x0 = (o.page === 'right' ? cx + 40 : cx - w / 2 + 40), y0 = cy - h * 0.3 + i * s * 0.14; text(g, vis, x0, y0, { size: s * 0.1, font: FONT_HAND, weight: 700, color: '#2b2a33', align: 'left' }); lastX = x0 + measure(g, vis, s * 0.1, FONT_HAND, 700); lastY = y0; });
-  if (o.hand !== false) { bigHand(g, lastX + s * 0.08, lastY + s * 0.16 + Math.sin(t * 14) * 3, s * 0.13, { rot: -0.5, sleeve: o.sleeve || PAL.hood }); ln(g, [[lastX + s * 0.02, lastY + s * 0.04], [lastX + s * 0.1, lastY + s * 0.14]], { color: '#222', lw: s * 0.012, la: 1 }); }
+  const str = o.text || 'day 1.', lines = String(str).split('\n'), cps = o.cps || 9, at = o.at ?? 0.3;
+  // Keep the reveal cursor non-negative: String.slice(0, -n) exposes the end of the next line.
+  // Fit each full line to its own page before animation so the text never crosses the fold.
+  let n = Math.max(0, Math.floor((t - at) * cps)), lastX = cx - w * 0.38, lastY = cy - h * 0.2;
+  const x0 = o.page === 'right' ? cx + 40 : cx - w / 2 + 40;
+  const maxLineW = w * 0.5 - 72;
+  lines.forEach((line, i) => {
+    const count = Math.max(0, Math.min(n, line.length));
+    const vis = line.slice(0, count);
+    n = Math.max(0, n - line.length);
+    if (!vis) return;
+    const y0 = cy - h * 0.3 + i * s * 0.14;
+    const baseSize = s * 0.1;
+    const fullW = Math.max(1, measure(g, line, baseSize, FONT_HAND, 700));
+    const lineSize = baseSize * Math.min(1, maxLineW / fullW);
+    text(g, vis, x0, y0, { size: lineSize, font: FONT_HAND, weight: 700, color: '#2b2a33', align: 'left' });
+    lastX = x0 + measure(g, vis, lineSize, FONT_HAND, 700);
+    lastY = y0;
+  });
+  if (o.hand !== false) {
+    const handSize = s * 0.065;
+    bigHand(g, lastX + s * 0.045, lastY + s * 0.11 + Math.sin(t * 14) * 2, handSize, { rot: -0.5, sleeve: o.sleeve || PAL.hood });
+    ln(g, [[lastX + s * 0.015, lastY + s * 0.025], [lastX + s * 0.065, lastY + s * 0.09]], { color: '#222', lw: Math.max(2, s * 0.006), la: 1 });
+  }
 }
 
 // tay cam dien thoai: back = long ban tay + ngon tay o mep (ve truoc dien thoai), front = ngon cai de len man hinh (ve sau)
