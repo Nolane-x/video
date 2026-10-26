@@ -26,6 +26,7 @@ on:
       - ".github/workflows/verify-previous-works.yml"
       - ".github/workflows/verify-archive-h2-master.yml"
       - ".github/workflows/verify-h2-source-v2.yml"
+      - ".github/workflows/verify-h2-source-v3.yml"
       - ".github/workflows/preview-h2-source-v3-shoelace.yml"
       - ".github/workflows/sync-h2-source-release-manifest.yml"
       - "video-library/README.md"
@@ -43,6 +44,7 @@ on:
       - "video-projects/remotion/src/**"
       - "video-projects/remotion/public/story/**"
       - "video-library/one-more-scroll/h2-source-release.json"
+      - "video-library/one-more-scroll/h2-source-v3-render-request.json"
       - ".github/workflows/package-video-skill.yml"
   workflow_run:
     workflows:
@@ -75,7 +77,7 @@ jobs:
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library bundle/.github/workflows
           cp README.md AGENTS.md CLAUDE.md bundle/
-          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
+          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/verify-h2-source-v3.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
@@ -99,6 +101,7 @@ jobs:
              video-library/one-more-scroll/latest-remotion-release.json \
              video-library/one-more-scroll/h2-source-release.json \
              bundle/video-library/one-more-scroll/
+          cp video-library/one-more-scroll/h2-source-v3-render-request.json bundle/video-library/one-more-scroll/
           # The canonical H2 master is now required, not an optional extra.
           H2_PATH="video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
           test -s "$H2_PATH"
@@ -127,6 +130,7 @@ jobs:
           python -m json.tool video-library/reference-clips.json > /dev/null
           python -m json.tool video-library/one-more-scroll/manifest.json > /dev/null
           python -m json.tool video-library/one-more-scroll/h2-source-release.json > /dev/null
+          python -m json.tool video-library/one-more-scroll/h2-source-v3-render-request.json > /dev/null
           cat > bundle/VIDEO_PRODUCTION_BUNDLE_MANIFEST.json <<JSON
           {
             "bundle_name": "Nolane Video Production Master",
@@ -153,6 +157,8 @@ jobs:
             "h2_source_zip_binaries_embedded": false,
             "source_v2_candidate_workflow": ".github/workflows/verify-h2-source-v2.yml",
             "source_v3_shoelace_preview_workflow": ".github/workflows/preview-h2-source-v3-shoelace.yml",
+            "source_v3_full_render_workflow": ".github/workflows/verify-h2-source-v3.yml",
+            "source_v3_render_request": "video-library/one-more-scroll/h2-source-v3-render-request.json",
             "source_v3_shoelace_patch": "tools/video/patch_h2_shoelace_scene.py",
             "h2_source_release_manifest_sync_workflow": ".github/workflows/sync-h2-source-release-manifest.yml",
             "user_reference_clips_manifest": "video-library/reference-clips.json",
@@ -160,8 +166,8 @@ jobs:
             "canonical_h2_qa_report": "video-library/one-more-scroll/QA.md",
             "prior_work_video_masters_embedded": false,
             "prior_work_contact_sheets_embedded": $([ -d video-library/previous-works ] && echo true || echo false),
-            "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py", "tools/video/archive_previous_works.py"],
-            "important": "The included Remotion render is not the original H2 Canvas/Chromium master. The H2 source ZIPs are versioned Release assets, linked from h2_source_release_manifest, and are not duplicated in this ZIP. Source-v2 requires a full H2 render and human motion review before it can replace the canonical master. The full upstream Remotion, Blender and Krita application source trees are not vendored."
+            "included_tools_and_sources": ["video-projects/remotion", "tools/blender", "tools/krita", "tools/video/validate_story.py", "tools/video/archive_h2_master.py", "tools/video/archive_previous_works.py", "tools/video/patch_h2_shoelace_scene.py"],
+            "important": "The included Remotion render is not the original H2 Canvas/Chromium master. The H2 source ZIPs are versioned Release assets, linked from h2_source_release_manifest, and are not duplicated in this ZIP. Source-v3 has a pinned shoe-tying patch, a focused preview workflow and a full-render workflow; the candidate requires human motion review before it can replace the canonical master. The full upstream Remotion, Blender and Krita application source trees are not vendored."
           }
           JSON
           (cd bundle && zip -qr ../video-production-master-skill.zip .)
@@ -205,8 +211,10 @@ jobs:
               "video-library/one-more-scroll/original-h2-contact-sheet-shots.jpg",
               "video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg",
               "video-library/one-more-scroll/h2-source-release.json",
+              "video-library/one-more-scroll/h2-source-v3-render-request.json",
               ".github/workflows/verify-h2-source-v2.yml",
               ".github/workflows/preview-h2-source-v3-shoelace.yml",
+              ".github/workflows/verify-h2-source-v3.yml",
               ".github/workflows/sync-h2-source-release-manifest.yml",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
@@ -252,8 +260,12 @@ jobs:
                   raise SystemExit("Source ZIPs must remain separate release assets, not duplicated in the portable ZIP")
               if "tools/video/patch_h2_shoelace_scene.py" not in names:
                   raise SystemExit("The deterministic source-v3 shoe-tying patch is missing from the portable package")
+              if "video-library/one-more-scroll/h2-source-v3-render-request.json" not in names:
+                  raise SystemExit("The source-v3 render request/provenance file is missing from the portable package")
               if ".github/workflows/preview-h2-source-v3-shoelace.yml" not in names:
                   raise SystemExit("The source-v3 shoe-tying preview workflow is missing from the portable package")
+              if ".github/workflows/verify-h2-source-v3.yml" not in names:
+                  raise SystemExit("The full source-v3 render workflow is missing from the portable package")
               if ".github/workflows/verify-h2-source-v2.yml" not in names:
                   raise SystemExit("The source-v2 candidate render workflow is missing from the portable package")
               if ".github/workflows/sync-h2-source-release-manifest.yml" not in names:
