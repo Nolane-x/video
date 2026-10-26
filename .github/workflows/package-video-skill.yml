@@ -21,10 +21,12 @@ on:
       - "tools/video/validate_story.py"
       - "tools/video/archive_h2_master.py"
       - "tools/video/archive_previous_works.py"
+      - "tools/video/patch_h2_shoelace_scene.py"
       - "tools/video/publish_h2_source_release.ps1"
       - ".github/workflows/verify-previous-works.yml"
       - ".github/workflows/verify-archive-h2-master.yml"
       - ".github/workflows/verify-h2-source-v2.yml"
+      - ".github/workflows/preview-h2-source-v3-shoelace.yml"
       - ".github/workflows/sync-h2-source-release-manifest.yml"
       - "video-library/README.md"
       - "video-library/previous-works-catalog.json"
@@ -73,12 +75,12 @@ jobs:
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library bundle/.github/workflows
           cp README.md AGENTS.md CLAUDE.md bundle/
-          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
+          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
              docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md docs/CHATGPT_PLUGIN.md bundle/docs/
-          cp tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/publish_h2_source_release.ps1 bundle/tools/video/
+          cp tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/patch_h2_shoelace_scene.py tools/video/publish_h2_source_release.ps1 bundle/tools/video/
           mkdir -p bundle/integrations
           cp -R integrations/h2-selfimprove-studio bundle/integrations/
           cp -R integrations/h2-selfimprove-studio-production-overlay bundle/integrations/
@@ -120,7 +122,7 @@ jobs:
           cp -R video-projects/remotion bundle/video-projects/
           cp -R tools/blender bundle/tools/
           cp -R tools/krita bundle/tools/
-          python -m py_compile tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py
+          python -m py_compile tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/patch_h2_shoelace_scene.py
           python -m json.tool video-library/previous-works-catalog.json > /dev/null
           python -m json.tool video-library/reference-clips.json > /dev/null
           python -m json.tool video-library/one-more-scroll/manifest.json > /dev/null
@@ -150,6 +152,8 @@ jobs:
             "h2_source_release_url": "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1",
             "h2_source_zip_binaries_embedded": false,
             "source_v2_candidate_workflow": ".github/workflows/verify-h2-source-v2.yml",
+            "source_v3_shoelace_preview_workflow": ".github/workflows/preview-h2-source-v3-shoelace.yml",
+            "source_v3_shoelace_patch": "tools/video/patch_h2_shoelace_scene.py",
             "h2_source_release_manifest_sync_workflow": ".github/workflows/sync-h2-source-release-manifest.yml",
             "user_reference_clips_manifest": "video-library/reference-clips.json",
             "offline_user_reference_video_files_embedded": false,
@@ -177,6 +181,7 @@ jobs:
               "tools/krita/README.md",
               "tools/video/archive_h2_master.py",
               "tools/video/archive_previous_works.py",
+              "tools/video/patch_h2_shoelace_scene.py",
               "tools/video/publish_h2_source_release.ps1",
               "docs/TOOL_INVENTORY.md",
               "integrations/h2-selfimprove-studio/.codex-plugin/plugin.json",
@@ -201,6 +206,7 @@ jobs:
               "video-library/one-more-scroll/original-h2-contact-sheet-overview.jpg",
               "video-library/one-more-scroll/h2-source-release.json",
               ".github/workflows/verify-h2-source-v2.yml",
+              ".github/workflows/preview-h2-source-v3-shoelace.yml",
               ".github/workflows/sync-h2-source-release-manifest.yml",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
@@ -244,6 +250,10 @@ jobs:
                   raise SystemExit("The verified H2 source-release URL is missing or stale")
               if bundle_manifest.get("h2_source_zip_binaries_embedded") is not False:
                   raise SystemExit("Source ZIPs must remain separate release assets, not duplicated in the portable ZIP")
+              if "tools/video/patch_h2_shoelace_scene.py" not in names:
+                  raise SystemExit("The deterministic source-v3 shoe-tying patch is missing from the portable package")
+              if ".github/workflows/preview-h2-source-v3-shoelace.yml" not in names:
+                  raise SystemExit("The source-v3 shoe-tying preview workflow is missing from the portable package")
               if ".github/workflows/verify-h2-source-v2.yml" not in names:
                   raise SystemExit("The source-v2 candidate render workflow is missing from the portable package")
               if ".github/workflows/sync-h2-source-release-manifest.yml" not in names:
