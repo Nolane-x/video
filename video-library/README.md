@@ -25,3 +25,8 @@ The original H2 source and source-v2 scene-fixes ZIPs are published as checksum-
 ## ALMOST READY
 
 A new H2 SelfImprove film is being built from original source: [script](../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt), [project README](../video-projects/h2-selfimprove/almost-ready/README.md), [manifest](almost-ready/manifest.json), [QA ledger](almost-ready/QA.md), [publishing package](almost-ready/02-PACKAGE-almost-ready.md), and [thumbnail prompts](almost-ready/03-THUMB-PROMPT-almost-ready.txt). It targets 29 shots/172 seconds and currently requires a technical render plus full artistic review. See the dedicated workflow `.github/workflows/render-selfimprove-almost-ready.yml`.
+
+
+## THE WEIGHT OF YES
+
+A new 29-shot H2 short about people-pleasing and personal boundaries: [script](../video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt), [project README](../video-projects/h2-selfimprove/the-weight-of-yes/README.md), [art bible](../video-projects/h2-selfimprove/the-weight-of-yes/story/bible.md), [manifest](the-weight-of-yes/manifest.json), [QA ledger](the-weight-of-yes/QA.md), [publishing package](the-weight-of-yes/02-PACKAGE-the-weight-of-yes.md), and [thumbnail directions](the-weight-of-yes/03-THUMB-PROMPT-the-weight-of-yes.txt). The authored target is 143 seconds, 1920×1080 at 24 fps, English on-screen text and no voice-over. The current prop-continuity render is [Actions run #2](https://github.com/Nolane-x/video/actions/runs/40422690206). It is not marked final until stream/loudness checks, contact-sheet/proof review and a full moving-picture/audio review are complete.
