@@ -1,39 +1,46 @@
 {
   "project_id": "one-more-scroll",
-  "status": "not_yet_uploaded",
-  "intended_release_tag": "h2-production-assets-v1",
-  "release_url": null,
-  "upload_script": "tools/video/publish_h2_source_release.ps1",
-  "instruction": "Run the script from a clone of Nolane-x/video after downloading the exact listed files from ChatGPT attachments. The script verifies SHA-256 and creates the Release; it stages this manifest locally but does not commit or push.",
+  "status": "uploaded_to_github_release_and_checksum_verified",
+  "release_tag": "h2-production-assets-v1",
+  "release_url": "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1",
+  "verification_workflow_run_id": "40274927974",
+  "verification_workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40274927974",
+  "published_at_utc": "2026-10-26T05:34:41Z",
   "assets": [
     {
       "filename": "one-more-scroll-h2-final.mp4",
+      "role": "canonical H2 Canvas/Chromium master",
       "size_bytes": 31547778,
       "sha256": "be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f",
-      "role": "canonical H2 Canvas/Chromium master",
-      "status": "not yet a permanent release asset"
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-final.mp4",
+      "status": "sha256 verified before upload; identical to canonical MP4 in repository"
     },
     {
       "filename": "one-more-scroll-h2-source.zip",
+      "role": "original H2 renderer and project source",
       "size_bytes": 115875783,
       "sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
-      "role": "H2 renderer/source package",
-      "status": "not yet a permanent release asset"
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source.zip",
+      "status": "sha256 verified before upload; ZIP integrity test passed; 61 entries"
     },
     {
       "filename": "one-more-scroll-h2-source-v2-scene-fixes.zip",
+      "role": "H2 source package with later scene fixes",
       "size_bytes": 115856962,
       "sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
-      "role": "H2 source package with unverified fixes",
-      "status": "not yet a permanent release asset"
-    },
-    {
-      "filename": "h2-selfimprove-studio.plugin",
-      "size_bytes": 188342,
-      "sha256": "339b410a0535cd51525df9679e774e72515b483733e70c08be4f379a25b41bf3",
-      "role": "H2 plugin package",
-      "status": "not yet a permanent release asset"
+      "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip",
+      "status": "sha256 verified before upload; ZIP integrity test passed; 58 entries; full render/artistic QA was pending at publication"
     }
   ],
-  "warning": "The SHA-256 allow-list prevents similarly named but different videos/source packages from being uploaded as the canonical H2 assets."
+  "checksum_list_asset": {
+    "filename": "SHA256SUMS.txt",
+    "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/SHA256SUMS.txt",
+    "status": "uploaded and remotely verified"
+  },
+  "release_manifest_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-release.json",
+  "notes": [
+    "The canonical H2 master is distinct from the repository's Remotion render.",
+    "The source-v2 archive contains scene changes but is not an approved replacement master until a full H2 render and human moving-picture review pass.",
+    "Large source ZIPs are stored as separate GitHub Release assets and are not duplicated inside the portable skill ZIP."
+  ]
 }
