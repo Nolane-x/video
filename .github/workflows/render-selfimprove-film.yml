@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour
+  group: h2-selfimprove-the-first-hour-v2
   cancel-in-progress: true
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
           p=Path("projects/the-first-hour/story/shots.json")
           d=json.loads(p.read_text())
           d["duration"]=d["shots"][-1]["end"]
-          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\\n")
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n")
           print(f"Built {len(d['shots'])} H2 shots; duration={d['duration']}s")
           PY
       - name: Validate full timeline and render contact sheets
@@ -122,13 +122,13 @@ jobs:
           assert abs(float(d["format"]["duration"])-172.0)<3.0, f"Unexpected runtime: {d['format']['duration']}"
           print(f"PASS: {d['format']['duration']}s; {v[0]['codec_name']} {v[0]['width']}x{v[0]['height']} @ {v[0].get('r_frame_rate')}; audio={a[0]['codec_name']} {a[0].get('sample_rate')}Hz")
           PY
-          grep -E "I: *-1[3456]\\.[0-9]+ LUFS|Peak: *-?[0-9]+\\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
+          grep -E "I: *-1[3456]\.[0-9]+ LUFS|Peak: *-?[0-9]+\.[0-9]+ dBFS" dist/the-first-hour/ebur128.log || true
       - name: Upload video, preview and QA bundle
         uses: actions/upload-artifact@v4
         with:
           name: the-first-hour-h2-selfimprove-${{ github.run_number }}
           path: |
-            dist/the-first-hour-h2-selfimprove.mp4
+            dist/the-first-hour/the-first-hour-h2-selfimprove.mp4
             dist/the-first-hour-review.zip
             dist/the-first-hour/
           if-no-files-found: error
