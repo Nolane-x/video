@@ -143,8 +143,8 @@ apply("b10", "scene", {
     "set": "classroom",
     "setArgs": {"sky": "dusk", "board": "SHOWCASE FRIDAY", "desks": [0.20, 0.45, 0.70]},
     "actors": [
-        actor("hero", 0.31, "stand", "worried", facing=1, scale=0.96, z=1),
-        actor("girl", 0.72, "wave", "smile", facing=-1, scale=0.92, at=0.15)
+        actor("hero", 0.31, "stand", "worried", facing=1, scale=0.96, z=1, look=0.05),
+        actor("girl", 0.72, "reach", "smile", facing=-1, scale=0.92, at=0.15, hold="book")
     ],
     "cam": cam(0.49, 0.57, 1.04),
     "texts": [narr("Everyone else had something to show.", 0.35, 5.3)]
@@ -253,7 +253,8 @@ apply("b21", "scene", {
 apply("b22", "laptop", {
     "bg": "bedroom", "setArgs": bedroom("dawn"), "x": 0.5, "y": 0.5,
     "w": 0.82, "h": 0.70, "subject": "Portfolio — first look",
-    "sender": "To: Mina", "body": "Sent. It's not finished. I wanted you to see it.",
+    "sender": "To: Mina", "body": "It's not finished. I wanted you to see it.",
+    "sentAt": 2.25,
     "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 1}]},
     "cam": cam(0.5, 0.5, 1.08),
     "texts": [narr("He sent it before he could retreat.", 0.35, 5.25)]
@@ -352,7 +353,8 @@ assert abs(previous_end - 172.0) < 0.02, f"Expected 172.0 s, got {previous_end}"
 assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"
 assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt"))
 assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
-assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1
+assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1 and by_id["b22"]["args"]["sentAt"] == 2.25
+assert by_id["b10"]["args"]["actors"][1]["pose"] == "reach" and by_id["b10"]["args"]["actors"][1]["hold"] == "book"
 assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
 assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
 story["duration"] = 172.0
