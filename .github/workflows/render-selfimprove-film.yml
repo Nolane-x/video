@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: h2-selfimprove-the-first-hour-v2
+  group: h2-selfimprove-the-first-hour-v3
   cancel-in-progress: false
 
 jobs:
