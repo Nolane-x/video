@@ -59,11 +59,12 @@ a["texts"] = [
     {"kind": "big", "t": "He had been absent from his own life.", "at": 2.55, "dur": 3.0, "x": 0.5, "y": 0.56, "size": 78, "maxW": 0.90},
 ]
 
-# B16 — the protagonist wakes and notices the new light; no phantom "sleeping"
-# pose caused by the prop phone being described as lying face down.
+# B16 — this is the physical reset before the message, so its caption must
+# match the action on screen (the message itself is shown on the next insert).
 s = get("b16")
 s["tpl"] = "scene"
 a = args_for("b16")
+a["texts"] = [{"kind":"narr","t":"For once, he sat up and looked toward the light.","at":0.35,"dur":5.3,"size":55,"maxW":0.82}]
 a.pop("bed", None)
 a.update({
     "set": "bedroom",
@@ -87,8 +88,9 @@ a.update({
         "sky": "dawn", "bedX": 0.15, "bedW": 0.29, "windowX": 0.48,
         "deskX": 0.72, "laptop": True, "calendar": False, "clock": False, "lamp": True,
     },
-    "actors": [actor("hero", 0.43, "open", "determined", facing=-1, at=0.15)],
-    "cam": camera(0.49, 0.48, 1.0, 1.11),
+    "actors": [actor("hero", 0.64, "open", "determined", facing=-1, at=0.15,
+                     walk={"to":0.43,"at":0.25,"dur":2.8,"speed":0.72})],
+    "cam": camera(0.52, 0.50, 1.0, 1.20),
 })
 
 # B19 — show the movement toward the desk, not a second generic notebook insert.
@@ -109,8 +111,8 @@ a.update({
     "cam": camera(0.55, 0.61, 1.0, 1.08),
 })
 
-# B20 — put the actual promised task on the page, reveal it hand-written,
-# and keep the subtitle in a separate lower safe zone.
+# B20 — make the written action the visual narration; remove the tiny
+# redundant subtitle so the page, lettering, and moving hand own the frame.
 s = get("b20")
 s["tpl"] = "note"
 a = args_for("b20")
@@ -120,12 +122,10 @@ a.update({
     "cps": 7.5,
     "x": 0.5,
     "y": 0.50,
-    "s": 0.88,
-    "cam": camera(0.5, 0.51, 1.0, 1.06),
+    "s": 0.96,
+    "cam": camera(0.5, 0.51, 1.0, 1.08),
+    "texts": [],
 })
-for tx in a.get("texts", []):
-    if tx.get("kind") == "narr":
-        tx.update({"pos": "bottom", "size": 46, "maxW": 0.84, "at": 0.35, "dur": 5.3})
 
 # B21 — recompose the work shot around the visible desk and laptop, with a slow
 # deliberate push rather than a repeated static bedroom-wide.
@@ -137,7 +137,9 @@ a.update({
         "deskX": 0.70, "laptop": True, "lamp": True, "calendar": False, "clock": False,
     },
     "actors": [actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.15)],
-    "cam": camera(0.65, 0.63, 1.0, 1.18),
+    # A tighter desk-side shot removes empty bedroom space and makes the
+    # laptop/work posture carry the beat.
+    "cam": camera(0.66, 0.63, 1.0, 1.48),
 })
 
 # B22 — the temptation interrupts with a small visible camera tremor.
@@ -158,7 +160,7 @@ a.update({
         actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.15),
         actor("voice", 0.91, "reach", "grin", facing=-1, at=0.35, scale=0.58, out=3.0, fade=1.25),
     ],
-    "cam": camera(0.66, 0.63, 1.0, 1.15),
+    "cam": camera(0.66, 0.63, 1.0, 1.42),
 })
 
 # B25 — use the native punching-bag pose and oscillating bag, rather than a
@@ -198,9 +200,9 @@ a.update({
     },
     "actors": [
         actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.15),
-        actor("voice", 0.91, "reach", "grin", facing=-1, at=0.2, scale=0.52, out=3.2, fade=1.2),
+        actor("voice", 0.91, "reach", "grin", facing=-1, at=0.2, scale=0.42, out=5.2, fade=0.55),
     ],
-    "cam": camera(0.66, 0.62, 1.0, 1.12),
+    "cam": camera(0.66, 0.62, 1.0, 1.38),
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 1.45, "x": 0.5, "y": 0.105, "size": 56, "maxW": 0.82},
         {"kind": "tempt", "t": "just one more scroll.", "at": 2.0, "dur": 1.35, "x": 0.80, "y": 0.31, "size": 46},
