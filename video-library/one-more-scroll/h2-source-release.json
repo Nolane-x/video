@@ -56,7 +56,8 @@
   "notes": [
     "The canonical H2 master is distinct from the repository's Remotion render.",
     "The source-v2 archive contains scene changes but is not an approved replacement master until a full H2 render and human moving-picture review pass.",
-    "Large source ZIPs are stored as separate GitHub Release assets and are not duplicated inside the portable skill ZIP."
+    "Large source ZIPs are stored as separate GitHub Release assets and are not duplicated inside the portable skill ZIP.",
+    "Source-v2 candidate EBU R128 measurement: -14.0 LUFS integrated, 6.9 LU LRA, -2.4 dBFS true peak. This is technical evidence, not artistic sign-off."
   ],
   "source_v2_render_candidate": {
     "workflow_path": ".github/workflows/verify-h2-source-v2.yml",
@@ -113,7 +114,24 @@
     },
     "artistic_signoff": "pending human review of full motion; candidate is not the canonical master",
     "is_canonical_master": false,
-    "canonical_master_must_remain": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4"
+    "canonical_master_must_remain": "video-library/one-more-scroll/one-more-scroll-h2-final.mp4",
+    "audio_measurement": {
+      "method": "FFmpeg ebur128 filter run on the released candidate MP4 locally after SHA-256 verification",
+      "integrated_loudness_lufs": -14,
+      "loudness_range_lu": 6.9,
+      "true_peak_dbfs": -2.4,
+      "measured_file_sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7"
+    },
+    "sampled_visual_review": {
+      "method": "Two 31-shot contact sheets plus 11 full-resolution frames sampled at 35, 40, 45, 70, 79, 80, 81, 82, 84, 85, and 86 seconds from the released candidate.",
+      "observations": [
+        "The staircase head crop appears corrected at the sampled frames around 85–86 seconds.",
+        "The shoe-tying action around 80–84 seconds shows a crouched protagonist, but the still frames do not prove hand-to-shoe contact; confirm with video playback.",
+        "Close-ups at approximately 35, 45 and 70 seconds are tight but readable; the pacing across these cuts needs review in motion."
+      ],
+      "audio_review": "Technical loudness/peak measured, but not a complete perceptual review of the full mix.",
+      "status": "preliminary visual sampling only; artistic sign-off pending"
+    }
   },
   "portable_bundle_policy": "Include this verified candidate/review metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle."
 }
