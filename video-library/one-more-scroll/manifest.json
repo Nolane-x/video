@@ -160,10 +160,36 @@
     "release_tag": "h2-production-assets-v1",
     "release_url": "https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1",
     "published_at_utc": "2026-10-26T05:34:41Z",
-    "verification_workflow_run_id": "40274927974",
+    "verification_workflow_run_id": "40276064292",
     "source_asset_count": 2,
     "original_source_sha256": "f6f8bed7179c166800b9ba2c79dbd53e12e24050645cee83b44d3ce27c11c42b",
     "source_v2_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
-    "source_v2_full_render_status": "pending; do not mark as artistically approved"
+    "source_v2_full_render_status": "pending; do not mark as artistically approved",
+    "candidate_sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7",
+    "candidate_technical_status": "passed",
+    "candidate_artistic_status": "pending"
+  },
+  "source_v2_render_candidate": {
+    "file_name": "one-more-scroll-h2-source-v2-render-candidate.mp4",
+    "renderer": "H2 Canvas/Chromium + FFmpeg audio mix",
+    "release_tag": "h2-production-assets-v1",
+    "release_asset_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4",
+    "review_bundle_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip",
+    "source_archive_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+    "size_bytes": 33396438,
+    "sha256": "5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7",
+    "duration_seconds": 155,
+    "width": 1920,
+    "height": 1080,
+    "fps": "24/1",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "audio": "stereo 48 kHz",
+    "technical_status": "passed",
+    "verified_by_workflow_run_id": "40276064292",
+    "verified_by_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40276064292",
+    "artistic_signoff": "pending human review of full moving picture and sound",
+    "is_canonical_master": false,
+    "do_not_replace_canonical_master_until": "full motion review and explicit artistic approval"
   }
 }
