@@ -42,5 +42,12 @@
     "The canonical H2 master is distinct from the repository's Remotion render.",
     "The source-v2 archive contains scene changes but is not an approved replacement master until a full H2 render and human moving-picture review pass.",
     "Large source ZIPs are stored as separate GitHub Release assets and are not duplicated inside the portable skill ZIP."
-  ]
+  ],
+  "source_v2_render_candidate": {
+    "workflow_path": ".github/workflows/verify-h2-source-v2.yml",
+    "workflow_url": "https://github.com/Nolane-x/video/blob/main/.github/workflows/verify-h2-source-v2.yml",
+    "status": "pending",
+    "policy": "Render source-v2 to a separate candidate asset. Do not replace the canonical H2 master until full-motion QA and explicit artistic sign-off pass."
+  },
+  "portable_bundle_policy": "Include this metadata and the candidate workflow; keep the two 115 MB source ZIPs as separate GitHub Release assets rather than duplicating them inside the portable bundle."
 }
