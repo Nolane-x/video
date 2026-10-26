@@ -872,7 +872,7 @@
                 "determined"
               ]
             ],
-            "pose": "phone",
+            "pose": "open",
             "face": "tired",
             "facing": 1,
             "h": 0.47,
@@ -933,12 +933,17 @@
         "actors": [
           {
             "who": "hero",
-            "x": "desk.seat",
+            "x": 0.34,
             "pose": "relaxed",
             "face": "determined",
             "facing": 1,
             "h": 0.47,
-            "look": 0.5
+            "walk": {
+              "to": "desk.seat",
+              "at": 0.35,
+              "dur": 3.7,
+              "speed": 0.75
+            }
           }
         ],
         "cam": {
@@ -1120,6 +1125,32 @@
             "x": 0.77,
             "y": 0.25,
             "size": 43
+          }
+        ],
+        "cam": {
+          "from": [
+            0.5,
+            0.52,
+            1
+          ],
+          "to": [
+            0.5,
+            0.52,
+            1.08
+          ],
+          "at": 0.25,
+          "dur": 4.9
+        },
+        "shake": [
+          {
+            "at": 1,
+            "amt": 1.5,
+            "dur": 0.65
+          },
+          {
+            "at": 3.3,
+            "amt": 1,
+            "dur": 0.5
           }
         ]
       }
@@ -1342,7 +1373,7 @@
                 "determined"
               ]
             ],
-            "pose": "guard",
+            "pose": "punch",
             "face": "determined",
             "facing": 1,
             "h": 0.5,
