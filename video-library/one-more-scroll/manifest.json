@@ -120,7 +120,8 @@
   },
   "known_unverified": [
     "Source-v2 and source-v3 renders passed technical stream/audio checks, but full-motion artistic sign-off remains pending.",
-    "Source-v3 shoe-tying hand-to-shoe contact and timing require playback review; contact sheets cannot establish contact by themselves."
+    "Source-v3 shoe-tying hand-to-shoe contact and timing require playback review; contact sheets cannot establish contact by themselves.",
+    "Source-v3 motion spot-check around 80–84 seconds shows forward lean/arm movement, but hand-to-shoe/lace contact is still ambiguous in the wide shot; source-v4 focused preview should fix action legibility before artistic sign-off."
   ],
   "latest_remotion_render": {
     "project_id": "one-more-scroll",
@@ -258,6 +259,13 @@
     },
     "is_canonical_master": false,
     "canonical_master_must_remain_unchanged": true,
-    "artistic_signoff": "pending human review of full moving picture and audio"
+    "artistic_signoff": "not approved at this spot-check; hand-to-shoe/lace contact is not sufficiently legible at full-shot scale. Requires source-v4 focused preview plus full candidate playback/audio review.",
+    "visual_review_findings": {
+      "reviewed_sample": "Extracted frame samples at 4 fps from approximately 80–84 seconds, with additional contact-sheet samples around 35–48 and 67–76 seconds.",
+      "status": "not_artistically_approved",
+      "p1_finding": "Spot-check of frames at 0.25-second intervals around 80–84 seconds: the forward crouch and alternating arm motion are visible, but hand-to-shoe/lace contact remains ambiguous at the full-shot scale. The actor is small in frame; shot b17 needs a more legible medium/close composition and clearly visible contact with the lace prop. This is a visual QA finding, not a technical-render failure.",
+      "next_action": "Author source-v4 patch for shot b17 composition/prop readability and direct hand-to-lace contact; render a 3–6 second preview and inspect frames before/full motion before authorizing another 155-second render.",
+      "reviewed_by": "AI-assisted visual spot-check of sampled frames; not a human end-to-end audio review"
+    }
   }
 }

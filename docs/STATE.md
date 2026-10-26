@@ -50,12 +50,6 @@ References: [Ifverse Tales](https://www.youtube.com/@IfverseTales), [Day One Fil
 - The current Remotion reference render is `video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4`, SHA-256 `cdccb836587093f2ab35d39b2ff229438ed947e6e5ccfc26f9f7e5fa13539765`. This is a different video/renderer from the H2 master.
 - An old chat sandbox path is not a durable GitHub URL.
 
-## Source-v3 shoe-tying fix in progress
-- Focused preview [run 40280228327](https://github.com/Nolane-x/video/actions/runs/40280228327) passed; the review contact sheet showed a forward lean and alternating hand angles in the shoe area.
-- First full render [run 40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed all source/browser/contact/audio checks, rendered 155 seconds, passed mix + ffprobe and EBU R128 (-14.0 LUFS integrated, 6.9 LU LRA, -2.4 dBFS true peak), but release packaging failed because the patch script was not copied into the review payload before checksum generation. Corrected rerun [40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) is now underway; it includes the missing copy and uploads a convenience artifact even on failure.
-- Patch provenance: `tools/video/patch_h2_shoelace_scene.py`, commit `05a2027cebdc83cedc1002992198d9404f253647`; request JSON `video-library/one-more-scroll/h2-source-v3-render-request.json`; render status and source lineage in `video-library/one-more-scroll/h2-source-release.json` and `manifest.json`.
-- Portable bundle passed in [run 40282975459](https://github.com/Nolane-x/video/actions/runs/40282975459) with 176 entries and SHA-256 `81dd5ab26c3f4485e5131e5b88bf7b2804c939958eea7533bb62ca7c7cd04ca7`; newer edits are rebuilding it. Keep H2 master and source-v2 candidate immutable until source-v3 is published, verified and explicitly approved after full-motion/audio review.
-
 ## Historical CI evidence
 Earlier in the conversation:
 - Remotion render run 40186281738 succeeded for an earlier 31-shot Remotion version.
@@ -69,27 +63,19 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - First attempt [40281627022](https://github.com/Nolane-x/video/actions/runs/40281627022) passed rendering/audio but omitted the pinned patch script from the review payload. The corrected workflow copies the patch before checksum generation, verifies required files and uploads the candidate/review assets separately.
 - Portable skill package last passed in [run 40287442899](https://github.com/Nolane-x/video/actions/runs/40287442899): ZIP integrity, 176 entries, Remotion run-36 sample, canonical H2 master, H2 production overlay and plugin v1.1.0 all verified. That build's sidecar SHA-256 was `cf6257467655f73fedd715cf5ce2380c73aa30b855df1b6ae6605945d67f8635`; this manifest/docs change triggers a fresh package build, so recheck the newest run and sidecar.
 - Canonical H2 master remains unchanged: `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`. Source-v2 and source-v3 are separate non-canonical candidates.
-- Source-v3 is a **technical pass, not artistic sign-off**. Full playback with audio must verify shoe-to-hand contact, action timing, pacing, transitions, sync and emotional arc.
+- Source-v3 is a **technical pass, not artistic sign-off**. I sampled the shot-b17 motion at 4 fps around 80–84 seconds: the forward crouch and alternating arm motion are visible, but the hand-to-shoe/lace contact remains ambiguous because the actor is too small in the wide shot. Treat this as a P1 visual defect. Next: build a source-v4 3–6 second focused preview with clearer composition and actual hand/lace contact; review that preview before any new full render. Full candidate playback with audio, pacing, transitions, sync and emotional arc still require review.
 
 ## Next priorities
-1. Watch the complete source-v3 MP4 with audio and inspect the shoe-tying motion.
-2. Review close-up rhythm around 35–45 and ~70 seconds, transitions, sync and narrative arc; log defects with timestamps.
-3. Only explicit artistic approval may promote a candidate; preserve the current master/hash until then.
-4. Verify the fresh portable bundle after manifest sync and confirm its entry count and sidecar.
+1. **P1:** create and inspect a source-v4 focused shoe-tie preview; make the hand/lace contact legible at actual viewing size before full render.
+2. Watch the complete source-v3 candidate with audio and review close-up rhythm, transitions, synchronization and emotional arc.
+3. Verify the newest portable bundle run and SHA-256 sidecar after manifest sync.
+4. Preserve canonical master hash until an explicitly approved candidate exists.
 
 ## Prior work catalog and reusable archive tooling
 - The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.
 - The prior-works import tool is `tools/video/archive_previous_works.py`. It stages matched video attachments by hash; GitHub workflow then verifies remote bytes and generates contact sheets.
 - The H2 source publisher is `tools/video/publish_h2_source_release.ps1`; source ZIPs should be stored as verified GitHub Release assets, not huge regular Git blobs.
 - The current portable skill ZIP includes both the Remotion reference MP4 and the checksum-verified canonical H2 MP4. It also includes `video-library/reference-clips.json`, which preserves your two reference-video URLs and study prompts; standalone copies of those third-party MP4s were not found in the current workspace/Library and are not embedded. It does not bundle every historical clip; use the catalog for availability and provenance.
-
-## Next priorities
-1. **Completed:** Portable package was rebuilt and verified in [run 40282799904](https://github.com/Nolane-x/video/actions/runs/40282799904), with 176 entries and ZIP integrity passing. It includes the H2 + Remotion outputs, published source release manifest/candidate metadata, both user reference links, the H2 production overlay and source-v2 render workflow. The adjacent `.sha256` sidecar is authoritative.
-2. **Completed:** The canonical master and both H2 source ZIPs are archived. Source-v2 rendered successfully in [run 40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292): 155.000s, 1920×1080@24fps, H.264 + AAC 48 kHz stereo; candidate SHA-256 `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`. Next: watch the full candidate with audio, review the contact/action and pacing risks, then decide whether it is approved to replace the canonical master.
-3. **Open:** Review the persisted Remotion run-36 contact sheets and short moving proofs; technical CI passed but its artistic QA is not signed off. The H2 source-v2 candidate's audio measures -14.0 LUFS integrated, 6.9 LU loudness range and -2.4 dBFS true peak. This audio measurement does not replace a human review of story pacing and synchronization.
-4. **Open:** Watch the full H2 source-v2 candidate with audio. Confirm shoe-tying hand-to-shoe contact, the close-up rhythm around 35–45 and 70 seconds, transitions, sync and the emotional arc. The staircase head crop appears improved in sampled frames. Only after explicit artistic approval should the candidate be promoted to canonical master.
-5. Update state, handoff and film manifest after every verified render. Latest H2 source-v2 candidate is technical-pass / artistic-sign-off-pending; never promote it automatically.
-
 
 ## Latest H2 source-v2 render candidate
 - Workflow: [40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292) — full 155-second render, audio mix, stream validation and Release upload passed.
