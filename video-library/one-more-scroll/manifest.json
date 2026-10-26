@@ -207,5 +207,30 @@
       ],
       "approval": "not granted; watch full candidate with audio before replacing canonical master"
     }
+  },
+  "source_v3_render_candidate": {
+    "source_archive_sha256": "b8db965db214bf0e37b307d3fe1aa663c55f29ee753fd9103a5972b5fe633014",
+    "source_archive_release_url": "https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-scene-fixes.zip",
+    "patch_path": "tools/video/patch_h2_shoelace_scene.py",
+    "patch_commit": "05a2027cebdc83cedc1002992198d9404f253647",
+    "render_request_path": "video-library/one-more-scroll/h2-source-v3-render-request.json",
+    "preview_workflow_run_id": "40280228327",
+    "full_render_workflow_run_id": "40281627022",
+    "full_render_workflow_url": "https://github.com/Nolane-x/video/actions/runs/40281627022",
+    "status": "full_render_in_progress",
+    "technical_prechecks_passed": [
+      "request and pinned patch guard",
+      "source archive SHA-256 and ZIP integrity",
+      "deterministic shoe-tying patch applied",
+      "JS/Python/story JSON validation",
+      "full-timeline browser smoke test",
+      "source-v3 contact sheets",
+      "five music beds and 45 SFX cues validated"
+    ],
+    "expected_candidate": "one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4",
+    "expected_review_bundle": "h2-source-v3-shoelace-fix-review.zip",
+    "is_canonical_master": false,
+    "canonical_master_must_remain_unchanged": true,
+    "artistic_signoff": "pending"
   }
 }
