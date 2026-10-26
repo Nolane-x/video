@@ -1,7 +1,7 @@
 # Instructions for AI agents in this repository
 
 ## Mandatory start sequence
-Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-projects/remotion/README.md`, (7) `video-projects/remotion/public/story/bible.md`, (8) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
+Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
 
 ## Non-negotiable requirements
 - Preferred look: cinematic, story-led stick-figure animation. Character simple and reusable; environments, light, camera, props and action carry richness.
@@ -14,4 +14,4 @@ Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/
 - Preserve the last known-good master. Don't overwrite it before the next render passes QA.
 - Do not commit secrets, API keys, copyrighted reference footage, or assets without redistribution rights.
 
-See `docs/STATE.md` and `video-library/one-more-scroll/manifest.json` for current status. The previous Full HD H2 master was delivered as a prior ChatGPT attachment; it is not yet a permanent binary file in this repository.
+See `docs/STATE.md` and `video-library/one-more-scroll/manifest.json` for current status. The exact Full HD H2 master is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`, SHA-256 `be0608239a374cf10c89b2c9b16e642de962cdd8f1b177de1a173219413a940f`, verified by [Actions run 40271825143](https://github.com/Nolane-x/video/actions/runs/40271825143). The separate H2 source ZIPs are not yet archived. Consult `video-library/reference-clips.json` for the two user-selected reference-video links; do not claim to have watched them until reviewed.
