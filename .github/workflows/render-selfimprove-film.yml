@@ -63,14 +63,22 @@ jobs:
           python tools/phim.py --project projects/the-first-hour --phim ../../../../../video-projects/h2-selfimprove/01-PHIM-the-first-hour.txt --force
           cp ../../../../../video-projects/h2-selfimprove/the-first-hour/config.json projects/the-first-hour/config.json
           cp ../../../../../video-projects/h2-selfimprove/the-first-hour/story/bible.md projects/the-first-hour/story/bible.md
+          python ../../../../../video-projects/h2-selfimprove/the-first-hour/tune_story.py projects/the-first-hour/story/shots.json
           python - <<'PY'
           import json
           from pathlib import Path
           p=Path("projects/the-first-hour/story/shots.json")
-          d=json.loads(p.read_text())
+          d=json.loads(p.read_text(encoding="utf-8"))
+          shots={s["id"]:s for s in d["shots"]}
+          assert len(shots)==29, f"Expected 29 shots, got {len(shots)}"
+          assert shots["b20"]["tpl"]=="note" and "ONE TASK." in shots["b20"]["args"].get("text","") and "TEN MINUTES." in shots["b20"]["args"].get("text",""), "Notebook text is not mapped"
+          assert shots["b26"]["args"].get("set")=="cafe" and len(shots["b26"]["args"].get("actors",[]))>=2, "Café connection blocking is missing"
+          assert shots["b25"]["args"].get("actors",[{}])[0].get("pose")=="punch", "Workout action is missing"
+          assert shots["b21"]["args"].get("setArgs",{}).get("laptop") is True, "Work prop is missing"
+          t1,t2=shots["b15"]["args"]["texts"]
+          assert t1["at"]+t1["dur"] <= t2["at"], "B15 title text overlaps"
           d["duration"]=d["shots"][-1]["end"]
-          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n")
-          print(f"Built {len(d['shots'])} H2 shots; duration={d['duration']}s")
+          print(f"ART-DIRECTION QA PASS: {len(shots)} shots; {d['duration']}s; notebook/café/action/text-overlap guards passed")
           PY
       - name: Validate full timeline and render contact sheets
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
