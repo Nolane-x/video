@@ -133,9 +133,16 @@ jobs:
               assert story_texts, f"{sid} is missing its main story narration"
               for tx in story_texts:
                   assert int(tx.get("size", 53)) >= 48, f"{sid} story text is too small: {tx.get('t')!r}"
-              sample_t = (float(shot["end"]) - float(shot["start"])) * 0.75
-              visible = [tx for tx in texts if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", float(shot["end"]) - float(shot["start"]) - float(tx.get("at", 0.3)) - 0.1))]
-              assert visible, f"{sid} has no text visible at the 75% contact-sheet sample"
+              shot_duration = float(shot["end"]) - float(shot["start"])
+              sample_t = shot_duration * 0.75
+              active_story = [tx for tx in story_texts if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", shot_duration - float(tx.get("at", 0.3)) - 0.1))]
+              assert active_story, f"{sid} has no STORY narration active at the 75% contact-sheet sample"
+              # Don't accept a caption that is already fading at the review sample.
+              tx = active_story[-1]
+              at = float(tx.get("at", 0.3))
+              fo = float(tx.get("fo", 0.45))
+              tx["dur"] = max(float(tx.get("dur", shot_duration - at - 0.1)), sample_t - at + fo + 0.12)
+              assert at + float(tx["dur"]) <= shot_duration - 0.05, f"{sid} narration can't stay fully opaque at 75% without overrunning the shot"
           # Production regression checks: the errors found in the first render must not return.
           by_id = {s["id"]: s for s in story["shots"]}
           assert by_id["b11"]["args"].get("messages", [{}])[0].get("text") == "still coming tonight?"

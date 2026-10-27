@@ -102,11 +102,11 @@ apply("b05", "scene", {
 
 # B06 — actual laptop insert for the deadline, never a fake phone screen.
 apply("b06", "laptop", {
-    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.50,
-    "w": 0.78, "h": 0.66, "subject": "PORTFOLIO APPLICATION",
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.35, "y": 0.50,
+    "w": 0.62, "h": 0.66, "subject": "PORTFOLIO APPLICATION",
     "sender": "Studio Review", "body": "Final submissions close Friday at 11:59 PM.",
     "cam": cam(0.5, 0.5, 1.04),
-    "texts": [narr("The deadline was already real.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
+    "texts": [narr("The deadline was already real.", 0.35, 4.55, x=0.85, y=0.49, size=50, max_w=0.26)]
 })
 
 # B07 — a tighter over-shoulder staging; keep the shadow away from the text lane.
@@ -167,11 +167,11 @@ apply("b11", "phone", {
 
 # B12 — autosave is not submission.
 apply("b12", "laptop", {
-    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.5,
-    "w": 0.79, "h": 0.68, "subject": "MY PORTFOLIO — DRAFT 47",
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.35, "y": 0.5,
+    "w": 0.62, "h": 0.68, "subject": "MY PORTFOLIO — DRAFT 47",
     "sender": "Autosave", "body": "Last saved at 11:38 PM. Not submitted.",
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("He kept saving instead of sending.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
+    "texts": [narr("He kept saving instead of sending.", 0.35, 4.55, x=0.85, y=0.49, size=50, max_w=0.26)]
 })
 
 # B13 — preserve the clock insert and time transition as a separate action.
@@ -207,11 +207,11 @@ apply("b15", "black", {
 
 # B16 — a closed portal, visibly legible on the computer.
 apply("b16", "laptop", {
-    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.5, "y": 0.5,
-    "w": 0.82, "h": 0.70, "subject": "SUBMISSION WINDOW CLOSED",
+    "bg": "bedroom", "setArgs": bedroom("night"), "x": 0.35, "y": 0.5,
+    "w": 0.62, "h": 0.70, "subject": "SUBMISSION WINDOW CLOSED",
     "sender": "Portfolio Portal", "body": "This application is no longer accepting files.",
     "cam": cam(0.5, 0.5, 1.09),
-    "texts": [narr("He had polished it for no one.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
+    "texts": [narr("He had polished it for no one.", 0.35, 4.55, x=0.85, y=0.49, size=50, max_w=0.26)]
 })
 
 # B17 — intentional silence after the emotional reveal.
@@ -260,13 +260,13 @@ apply("b21", "scene", {
 
 # B22 — the outgoing email is visible on laptop; sent is now one.
 apply("b22", "laptop", {
-    "bg": "bedroom", "setArgs": bedroom("dawn"), "x": 0.5, "y": 0.5,
-    "w": 0.82, "h": 0.70, "subject": "Portfolio — first look",
+    "bg": "bedroom", "setArgs": bedroom("dawn"), "x": 0.35, "y": 0.5,
+    "w": 0.62, "h": 0.70, "subject": "Portfolio — first look",
     "sender": "To: Mina", "body": "It's not finished. I wanted you to see it.",
     "sentAt": 2.25,
     "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 1}]},
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("He sent it before he could retreat.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
+    "texts": [narr("He sent it before he could retreat.", 0.35, 4.55, x=0.85, y=0.49, size=50, max_w=0.26)]
 })
 
 # B23 — response arrives after send; the notification is not the ending by itself.
@@ -361,8 +361,14 @@ for shot in shots:
         tx["size"] = max(50, int(tx.get("size", 58)))
     duration = float(shot["end"]) - float(shot["start"])
     sample_t = duration * 0.75
-    visible = [tx for tx in texts if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", duration - float(tx.get("at", 0.3)) - 0.1))]
-    assert visible, f"{sid} has no text visible at the 75% contact-sheet sample"
+    active_story = [tx for tx in story_texts if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", duration - float(tx.get("at", 0.3)) - 0.1))]
+    assert active_story, f"{sid} has no STORY narration active at the 75% contact-sheet sample"
+    # Keep the selected narration fully opaque at the exact contact-sheet sample.
+    tx = active_story[-1]
+    at = float(tx.get("at", 0.3))
+    fo = float(tx.get("fo", 0.45))
+    tx["dur"] = max(float(tx.get("dur", duration - at - 0.1)), sample_t - at + fo + 0.12)
+    assert at + float(tx["dur"]) <= duration - 0.05, f"{sid} narration cannot remain fully opaque at 75% without overrunning the shot"
 
 previous_end = 0.0
 for s in shots:
@@ -398,7 +404,7 @@ assert by_id["b25"]["args"]["texts"][0]["dur"] <= 4.6
 assert by_id["b26"]["args"]["texts"][0]["dur"] <= 4.6
 for sid in ("b06", "b12", "b16", "b22"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert tx["x"] >= 0.72 and 0.40 <= tx["y"] <= 0.60 and tx["maxW"] <= 0.30 and tx.get("size", 53) >= 48, (
+    assert tx["x"] >= 0.84 and 0.40 <= tx["y"] <= 0.60 and tx["maxW"] <= 0.30 and tx.get("size", 53) >= 48, (
         f"{sid} laptop narration must remain in the right-side message-safe area"
     )
     shot_duration = float(by_id[sid]["end"]) - float(by_id[sid]["start"])

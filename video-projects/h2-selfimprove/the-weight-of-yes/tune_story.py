@@ -408,8 +408,14 @@ for shot in shots:
         assert int(tx.get("size", 53)) >= 48, f"Caption too small to read at 1080p: {sid} / {tx.get('t')!r}"
     duration = float(shot["end"]) - float(shot["start"])
     sample_t = duration * 0.75
-    visible = [tx for tx in captions if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", duration - float(tx.get("at", 0.3)) - 0.1))]
-    assert visible, f"No on-screen text visible at 75% contact-sheet sample: {sid}"
+    active_story = [tx for tx in story_captions if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", duration - float(tx.get("at", 0.3)) - 0.1))]
+    assert active_story, f"No STORY narration active at 75% contact-sheet sample: {sid}"
+    # A technically present caption is still a failure if its fade-out has begun at the review sample.
+    tx = active_story[-1]
+    at = float(tx.get("at", 0.3))
+    fo = float(tx.get("fo", 0.45))
+    tx["dur"] = max(float(tx.get("dur", duration - at - 0.1)), sample_t - at + fo + 0.12)
+    assert at + float(tx["dur"]) <= duration - 0.05, f"{sid} narration cannot remain fully opaque at 75% without overrunning the shot"
 assert by_id["b01"]["tpl"] == "black"
 assert by_id["b05"]["tpl"] == "laptop"
 assert by_id["b11"]["tpl"] == "laptop"
