@@ -158,7 +158,7 @@ jobs:
                   f"{sid} narration must stay in the left side lane, not across the actor"
               )
           tx = shots["b26"]["args"]["texts"][0]
-          assert tx.get("x", 0) >= 0.82 and 0.49 <= tx.get("y", 0) <= 0.57 and tx.get("maxW", 1) <= 0.25
+          assert tx.get("x", 0) >= 0.80 and 0.24 <= tx.get("y", 0) <= 0.32 and tx.get("maxW", 1) <= 0.23, "B26 reunion narration must sit in upper-right negative space above both faces"
           tx = shots["b29"]["args"]["texts"][0]
           assert tx.get("x", 1) <= 0.25 and tx.get("maxW", 1) <= 0.31 and 0.25 <= tx.get("y", 0) <= 0.33
           assert by_id["b29"]["tpl"] == "scene", "End card must not use a simulated platform UI"
