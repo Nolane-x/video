@@ -402,10 +402,14 @@ for shot in shots:
         assert args.get("word") and args.get("sub") and args.get("sub2"), "B28 end card must contain all three text lines"
         continue
     captions = args.get("texts", [])
-    assert captions, f"Missing on-screen story text: {sid}"
-    for tx in captions:
-        if tx.get("kind", "narr") in ("narr", "big"):
-            assert int(tx.get("size", 53)) >= 46, f"Caption too small to read at 1080p: {sid} / {tx.get('t')!r}"
+    story_captions = [tx for tx in captions if tx.get("kind", "narr") in ("narr", "big")]
+    assert story_captions, f"Missing main narrative line: {sid}"
+    for tx in story_captions:
+        assert int(tx.get("size", 53)) >= 48, f"Caption too small to read at 1080p: {sid} / {tx.get('t')!r}"
+    duration = float(shot["end"]) - float(shot["start"])
+    sample_t = duration * 0.75
+    visible = [tx for tx in captions if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", duration - float(tx.get("at", 0.3)) - 0.1))]
+    assert visible, f"No on-screen text visible at 75% contact-sheet sample: {sid}"
 assert by_id["b01"]["tpl"] == "black"
 assert by_id["b05"]["tpl"] == "laptop"
 assert by_id["b11"]["tpl"] == "laptop"

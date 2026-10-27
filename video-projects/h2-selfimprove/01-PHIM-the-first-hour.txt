@@ -8,15 +8,18 @@ ACCENT: amber
 > Every morning began with a plan.
 
 [B03] 6s | CẢNH: cận đồng hồ báo thức 7:00, bàn tay với tới nhưng dừng lại | SFX: clock_tick@0.5
+> He reached, then hesitated.
 ~ five more minutes.
 
 [B04] 6s | CẢNH: phòng ngủ, cậu ngồi mép giường cầm điện thoại, màn hình xanh hắt lên mặt, bóng đen đứng sau vai | SFX: tempt_swell@0.4
+> The first excuse sounded harmless.
 ~ you deserve a little break.
 
 [B05] 6s | CẢNH: cận điện thoại, feed lướt nhanh: game, burger, selfie, xe ô tô | SFX: whoosh_mid@0.4, whoosh_mid@2.2
 > One clip became a hundred.
 
 [B06] 6s | CẢNH: phòng ngủ, cậu ngồi bàn trước laptop trống, bóng đen nghiêng người thì thầm | HUD: DAY 3 | SFX: tempt_whisper@0.4
+> He kept postponing the start.
 ~ start when you feel ready.
 
 [B07] 6s | CẢNH: cận điện thoại, video đang xem kèm đồng hồ chạy 2:40:00 | SFX: whoosh_mid@1.0
@@ -26,6 +29,7 @@ ACCENT: amber
 > His plans gathered dust.
 
 [B09] 6s | CẢNH: cận mặt cậu, mắt đỏ gân máu, ánh điện thoại xanh, bóng đen mờ sau lưng | SFX: tempt_whisper@0.5
+> He began to believe the habit was normal.
 ~ everyone does this.
 
 [B10] 6s | CẢNH: thành phố đêm, cậu đi ngang những ô cửa sáng, người khác ở bên trong sinh hoạt, cậu nhìn xuống điện thoại | HUD: DAY 30
@@ -67,6 +71,7 @@ ACCENT: amber
 > Ten minutes became thirty.
 
 [B22] 6s | CẢNH: cận điện thoại trên bàn rung lên, cậu nhìn thấy nhưng tiếp tục làm việc, bóng đen nhỏ xuất hiện ở rìa khung | SFX: phone_vibrate@1.0
+> The old habit asked for one more look.
 ~ you can check it now.
 
 [B23] 6s | CẢNH: phòng ngủ, cậu đẩy điện thoại ra xa, quay lại laptop, bóng đen lùi vào bóng tối | SFX: whoosh_mid@0.5

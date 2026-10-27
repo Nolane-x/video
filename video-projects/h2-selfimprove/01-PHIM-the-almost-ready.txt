@@ -14,12 +14,14 @@ ACCENT: amber
 > Then he found one imperfect line.
 
 [B05] 6s | CẢNH: phòng ngủ đêm, cậu ngồi bàn xoá đi viết lại, bóng đen bắt đầu hiện sau vai | SFX: tempt_swell@0.4
+> He traded progress for another correction.
 ~ just one small correction.
 
 [B06] 6s | CẢNH: cận laptop, thư nhắc hạn portfolio, dòng hạn cuối Friday at 11:59 PM dễ đọc | SFX: typing_2s@0.3
 > The deadline was already real.
 
 [B07] 6s | CẢNH: phòng ngủ đêm, cậu trước laptop, bóng đen cúi gần màn hình như một người bạn, ánh màn hình lạnh đối lập đèn bàn | HUD: EDITS 12 | NHẠC: dark | SFX: tempt_whisper@0.4
+> He hid the work from everyone.
 ~ nobody needs to see it yet.
 
 [B08] 6s | CẢNH: cận lịch tháng NOV, các ngày được gạch dần bằng amber, máy quay đẩy chậm | HUD: EDITS 1..12; SHARED 0 | SFX: page_flip@0.5
@@ -41,6 +43,7 @@ ACCENT: amber
 > The minutes began to sprint.
 
 [B14] 6s | CẢNH: khoảng tối có đèn rọi, cậu thu mình trước bóng đen cao lớn, ánh amber của bóng đen siết lấy phần rìa khung | SFX: tempt_whisper@0.4
+> Fear made every mistake feel permanent.
 ~ they'll notice every mistake.
 
 [B15] 6s | CẢNH: màn đen, hai dòng chữ tách nhau trong khoảng lặng, bụi gần như đứng yên | HUD: MINUTES LEFT 1 -> 0 | NHẠC: none | SFX: clock_tick@0.2

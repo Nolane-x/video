@@ -120,6 +120,22 @@ jobs:
                       assert 0.16 <= text_y <= 0.84, (
                           f"{shot['id']} narration is inside letterbox bars: {tx.get('t')!r}, y={text_y}"
                       )
+          # Every authored scene needs a story line, and at the 75% contact-sheet sample some text must still be visible.
+          # This catches shots that only show a short-lived temptation line and then appear textless in the sheet.
+          for shot in story["shots"]:
+              sid = shot["id"]
+              args = shot.get("args", {})
+              if sid == "b28":
+                  assert args.get("word") and args.get("sub") and args.get("sub2"), "B28 end card must have all three lines"
+                  continue
+              texts = args.get("texts", [])
+              story_texts = [tx for tx in texts if tx.get("kind", "narr") in ("narr", "big")]
+              assert story_texts, f"{sid} is missing its main story narration"
+              for tx in story_texts:
+                  assert int(tx.get("size", 53)) >= 48, f"{sid} story text is too small: {tx.get('t')!r}"
+              sample_t = (float(shot["end"]) - float(shot["start"])) * 0.75
+              visible = [tx for tx in texts if float(tx.get("at", 0.3)) <= sample_t <= float(tx.get("at", 0.3)) + float(tx.get("dur", float(shot["end"]) - float(shot["start"]) - float(tx.get("at", 0.3)) - 0.1))]
+              assert visible, f"{sid} has no text visible at the 75% contact-sheet sample"
           # Production regression checks: the errors found in the first render must not return.
           by_id = {s["id"]: s for s in story["shots"]}
           assert by_id["b11"]["args"].get("messages", [{}])[0].get("text") == "still coming tonight?"

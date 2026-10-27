@@ -69,8 +69,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "top",
-            "size": 42,
-            "maxW": 0.25,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.23,
             "y": 0.28
           }
@@ -111,6 +111,16 @@
             "x": 0.72,
             "y": 0.18,
             "size": 46
+          },
+          {
+            "kind": "narr",
+            "t": "He reached, then hesitated.",
+            "at": 0.35,
+            "dur": 5.15,
+            "x": 0.18,
+            "y": 0.28,
+            "size": 50,
+            "maxW": 0.3
           }
         ],
         "hud": {
@@ -180,6 +190,16 @@
             "x": 0.68,
             "y": 0.22,
             "size": 46
+          },
+          {
+            "kind": "narr",
+            "t": "The first excuse sounded harmless.",
+            "at": 0.35,
+            "dur": 5.15,
+            "x": 0.18,
+            "y": 0.28,
+            "size": 50,
+            "maxW": 0.32
           }
         ],
         "hud": {
@@ -301,6 +321,16 @@
             "x": 0.8,
             "y": 0.23,
             "size": 45
+          },
+          {
+            "kind": "narr",
+            "t": "He kept postponing the start.",
+            "at": 0.35,
+            "dur": 5.15,
+            "x": 0.18,
+            "y": 0.28,
+            "size": 50,
+            "maxW": 0.32
           }
         ]
       }
@@ -403,8 +433,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.58
           }
@@ -453,6 +483,16 @@
             "x": 0.76,
             "y": 0.2,
             "size": 47
+          },
+          {
+            "kind": "narr",
+            "t": "He began to believe the habit was normal.",
+            "at": 0.35,
+            "dur": 5.15,
+            "x": 0.18,
+            "y": 0.28,
+            "size": 50,
+            "maxW": 0.32
           }
         ],
         "hud": {
@@ -553,7 +593,7 @@
             "t": "His friends stopped asking twice.",
             "at": 0.35,
             "dur": 5.1,
-            "size": 47
+            "size": 50
           }
         ],
         "hud": {
@@ -605,7 +645,7 @@
             "at": 0.35,
             "dur": 5.1,
             "pos": "bottom",
-            "size": 48,
+            "size": 50,
             "maxW": 0.78
           }
         ],
@@ -680,8 +720,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.58
           }
@@ -757,8 +797,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.58
           }
@@ -859,10 +899,10 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.19,
-            "y": 0.51
+            "y": 0.29
           }
         ],
         "hud": {
@@ -906,7 +946,7 @@
             "t": "A real person still remembered him.",
             "at": 0.35,
             "dur": 5.1,
-            "size": 49
+            "size": 50
           }
         ],
         "hud": {
@@ -974,8 +1014,8 @@
             "at": 0.35,
             "dur": 5.1,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.29
           }
@@ -1053,8 +1093,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.29
           }
@@ -1091,9 +1131,11 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 48,
-            "maxW": 0.84,
-            "color": "#34313c"
+            "size": 50,
+            "maxW": 0.27,
+            "color": "#302a24",
+            "x": 0.76,
+            "y": 0.67
           }
         ],
         "hud": {
@@ -1183,8 +1225,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.29
           }
@@ -1239,6 +1281,16 @@
             "x": 0.84,
             "y": 0.21,
             "size": 44
+          },
+          {
+            "kind": "narr",
+            "t": "The old habit asked for one more look.",
+            "at": 0.35,
+            "dur": 5.15,
+            "x": 0.18,
+            "y": 0.28,
+            "size": 50,
+            "maxW": 0.32
           }
         ],
         "cam": {
@@ -1445,8 +1497,8 @@
             "at": 0.35,
             "dur": 5.15,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.23,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.18,
             "y": 0.29
           }
@@ -1602,8 +1654,8 @@
             "at": 0.35,
             "dur": 4.5,
             "pos": "bottom",
-            "size": 42,
-            "maxW": 0.22,
+            "size": 50,
+            "maxW": 0.3,
             "x": 0.17,
             "y": 0.29
           }
@@ -1702,9 +1754,9 @@
             "at": 0.35,
             "dur": 4.55,
             "pos": "bottom",
-            "size": 40,
-            "maxW": 0.22,
-            "x": 0.83,
+            "size": 50,
+            "maxW": 0.3,
+            "x": 0.82,
             "y": 0.28
           }
         ]
@@ -1801,8 +1853,8 @@
             "dur": 2.05,
             "x": 0.12,
             "y": 0.3,
-            "size": 44,
-            "maxW": 0.22
+            "size": 50,
+            "maxW": 0.28
           },
           {
             "kind": "tempt",
@@ -1820,8 +1872,8 @@
             "dur": 3.4,
             "x": 0.12,
             "y": 0.3,
-            "size": 44,
-            "maxW": 0.22
+            "size": 50,
+            "maxW": 0.28
           }
         ]
       }
@@ -1895,7 +1947,7 @@
             "at": 0.35,
             "dur": 5.1,
             "pos": "bottom",
-            "size": 44,
+            "size": 50,
             "maxW": 0.3,
             "x": 0.22,
             "y": 0.29
