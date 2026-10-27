@@ -202,7 +202,7 @@ a.update({
         actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.15),
         actor("voice", 0.91, "reach", "grin", facing=-1, at=0.2, scale=0.42, out=5.2, fade=0.55),
     ],
-    "cam": camera(0.66, 0.62, 1.0, 1.38, 7.35),
+    "cam": camera(0.66, 0.62, 1.0, 1.38, 8.35),
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
         {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 1.95, "x": 0.80, "y": 0.31, "size": 46},
@@ -230,8 +230,9 @@ for shot in shots:
 b27_text = {tx.get("t"): tx for tx in get("b27").get("args", {}).get("texts", [])}
 assert b27_text["The voice returned."]["dur"] >= 2.0
 assert b27_text["just one more scroll."]["dur"] >= 1.8
-assert b27_text["But it sounded smaller now."]["dur"] >= 2.7
-assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 8.0) < 0.02
+assert b27_text["But it sounded smaller now."]["dur"] >= 3.3
+assert float(b27_text["But it sounded smaller now."]["at"]) + float(b27_text["But it sounded smaller now."]["dur"]) <= float(get("b27")["end"]) - float(get("b27")["start"]) + 0.02
+assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 9.0) < 0.02
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert by_id["b27"]["args"]["texts"][0]["maxW"] <= 0.23 and by_id["b27"]["args"]["texts"][2]["maxW"] <= 0.23
 story["duration"] = float(shots[-1]["end"])

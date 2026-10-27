@@ -81,7 +81,7 @@ ACCENT: amber
 [B26] 5s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0
 > He came back into the room.
 
-[B27] 8s | CẢNH: phòng ngủ bình minh, cậu ngồi bàn làm việc, lịch có nhiều ô amber, điện thoại úp xuống, bóng đen vỡ thành mảnh sáng nhỏ phía sau | SFX: tempt_whisper@2.6, glass_shatter@5.2
+[B27] 9s | CẢNH: phòng ngủ bình minh, cậu ngồi bàn làm việc, lịch có nhiều ô amber, điện thoại úp xuống, bóng đen vỡ thành mảnh sáng nhỏ phía sau | SFX: tempt_whisper@2.6, glass_shatter@5.2
 > The voice returned.
 ~ just one more scroll.
 > But it sounded smaller now.
