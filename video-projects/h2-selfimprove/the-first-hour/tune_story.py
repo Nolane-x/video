@@ -205,10 +205,33 @@ a.update({
     "cam": camera(0.66, 0.62, 1.0, 1.38, 8.35),
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
-        {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 1.95, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 3.40, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
+        {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 2.85, "x": 0.80, "y": 0.31, "size": 46},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 5.45, "dur": 3.25, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
     ],
 })
+
+# Critical whisper captions must be fully readable after the hand-written reveal.
+# The shared renderer caps reveal time at 30% of each caption's on-screen duration.
+TEMPT_HOLD_BY_SHOT = {"b03": 4.20, "b04": 4.60, "b06": 4.50, "b09": 4.00, "b22": 4.40, "b27": 2.85}
+for sid, hold in TEMPT_HOLD_BY_SHOT.items():
+    overlays = [tx for tx in get(sid).get("args", {}).get("texts", []) if tx.get("kind") == "tempt"]
+    assert len(overlays) == 1, f"{sid} must have exactly one temptation caption"
+    overlays[0]["dur"] = hold
+for shot in shots:
+    shot_dur = float(shot["end"]) - float(shot["start"])
+    for tx in shot.get("args", {}).get("texts", []):
+        if tx.get("kind") != "tempt":
+            continue
+        start = float(tx.get("at", 0.3))
+        dur = float(tx.get("dur", shot_dur - start - 0.1))
+        assert start >= 0 and dur >= 2.5 and start + dur <= shot_dur - 0.1, (
+            f"Temptation caption timing invalid/too short: {shot['id']} / {tx.get('t')!r}"
+        )
+        reveal = max(0.35, min(len(str(tx.get("t", ""))) / 16, dur * 0.30))
+        readable_hold = dur - reveal - float(tx.get("fo", 0.45))
+        assert readable_hold >= 1.2, (
+            f"Temptation caption has less than 1.2 s of full readable time: {shot['id']} / {tx.get('t')!r}"
+        )
 
 # Caption-safe-area and read-time regression guard for the encoded 2.39:1 picture.
 for shot in shots:
@@ -229,9 +252,10 @@ for shot in shots:
 # The returning-voice beat must have enough time to read all three captions.
 b27_text = {tx.get("t"): tx for tx in get("b27").get("args", {}).get("texts", [])}
 assert b27_text["The voice returned."]["dur"] >= 2.0
-assert b27_text["just one more scroll."]["dur"] >= 1.8
-assert b27_text["But it sounded smaller now."]["dur"] >= 3.3
-assert float(b27_text["But it sounded smaller now."]["at"]) + float(b27_text["But it sounded smaller now."]["dur"]) <= float(get("b27")["end"]) - float(get("b27")["start"]) + 0.02
+assert b27_text["just one more scroll."]["dur"] >= 2.85
+assert b27_text["But it sounded smaller now."]["dur"] >= 3.2
+assert float(b27_text["But it sounded smaller now."]["at"]) + float(b27_text["But it sounded smaller now."]["dur"]) <= float(get("b27")["end"]) - float(get("b27")["start"]) - 0.1
+assert float(b27_text["just one more scroll."]["at"]) + float(b27_text["just one more scroll."]["dur"]) <= float(b27_text["But it sounded smaller now."]["at"]) - 0.05
 assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 9.0) < 0.02
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert by_id["b27"]["args"]["texts"][0]["maxW"] <= 0.23 and by_id["b27"]["args"]["texts"][2]["maxW"] <= 0.23
