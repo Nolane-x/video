@@ -22,12 +22,12 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40425050181,
-    "run_number": 6,
+    "run_id": 40425789566,
+    "run_number": 7,
     "status": "in_progress",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40425050181",
-    "head_sha": "4ca6e78d680697150c08e455d53d169ca670a698",
-    "notes": "Native H2 silent render passed. Audio mastering/final MP4 assembly, preview audio mux, motion proofs, ffprobe and EBU R128 gates are currently running."
+    "url": "https://github.com/Nolane-x/video/actions/runs/40425789566",
+    "head_sha": "82f3cefb4fe22f910288530673bf9649cdd2c8f2",
+    "notes": "Render #6 passed all technical gates and was visually reviewed from contact sheets/motion proofs. Run #7 adds final art-direction corrections: B08 shows the favor-giver leaving with the portfolio; B19 moves the boundary caption off the character. Preview is muxed with the mastered mix and verified to contain audio/video."
   },
   "latest_technical_pass": null,
   "render_history": [
@@ -54,6 +54,12 @@
       "run_number": 5,
       "status": "in_progress",
       "reason": "H2 storyboard validation succeeded; full H2 silent render began before preview-audio gate was added. Its preview must not be used as a sound-enabled review preview."
+    },
+    {
+      "run_id": 40425050181,
+      "run_number": 6,
+      "status": "technical_pass_visual_revision_pending",
+      "reason": "Passed full MP4/audio checks and checksums; contact-sheet/motion review found B08 handoff ambiguity and B19 caption crowding, corrected in run #7."
     }
   ],
   "artistic_signoff": {
