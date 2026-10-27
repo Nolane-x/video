@@ -107,7 +107,7 @@ apply("b05", "laptop", {
     "sender": "TEAM", "body": "6 favors accepted. Personal project: NOT STARTED.",
     "hud": {"rows": [{"label": "FAVORS", "n": 6}, {"label": "HIS WORK", "n": 0}]},
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("His own task list sat untouched.", size=54)]
+    "texts": [narr("His own task list sat untouched.", 0.35, 4.0, x=0.76, y=0.49, size=42, max_w=0.30)]
 })
 
 # B06 — the pressure is social and face-to-face, not endless scrolling.
@@ -169,7 +169,7 @@ apply("b11", "laptop", {
     "sender": "Submission Portal", "body": "Due tonight at 11:59 PM. Progress: 0%.",
     "hud": {"rows": [{"label": "FAVORS", "n": 9}, {"label": "HIS WORK", "n": 0}]},
     "cam": cam(0.5, 0.5, 1.10),
-    "texts": [narr("His own deadline kept getting moved.", size=51)]
+    "texts": [narr("His own deadline kept getting moved.", 0.35, 4.0, x=0.76, y=0.49, size=42, max_w=0.30)]
 })
 
 # B12 — the polite smile fails to hide the exhaustion.
@@ -230,7 +230,7 @@ apply("b17", "laptop", {
     "w": 0.80, "h": 0.68, "subject": "ONE LAST FAVOR?",
     "sender": "A friend", "body": "Can you cover for me again tonight?",
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("One more request arrived.", size=56)]
+    "texts": [narr("One more request arrived.", 0.35, 4.0, x=0.76, y=0.49, size=42, max_w=0.30)]
 })
 
 # B18 — his eyes move from their request to his own unfinished page.
@@ -289,7 +289,7 @@ apply("b22", "laptop", {
     "sentAt": 2.25,
     "hud": {"rows": [{"label": "HIS WORK", "n": 1}, {"label": "FAVORS", "n": 9}]},
     "cam": cam(0.5, 0.5, 1.10),
-    "texts": [narr("He kept the promise he had made himself.", size=49)]
+    "texts": [narr("He kept the promise he had made himself.", 0.35, 4.0, x=0.76, y=0.49, size=42, max_w=0.30)]
 })
 
 # B23 — recovery is small and physical: he stands and clears his own space.
@@ -400,6 +400,13 @@ assert by_id["b11"]["tpl"] == "laptop"
 assert by_id["b14"]["args"]["set"] == "void"
 assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
+for sid in ("b05", "b11", "b17", "b22"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] >= 0.72 and 0.40 <= tx["y"] <= 0.60 and tx["maxW"] <= 0.32, (
+        f"{sid} laptop narration must stay in the right-side message-safe area"
+    )
+    shot_duration = float(by_id[sid]["end"]) - float(by_id[sid]["start"])
+    assert float(tx["at"]) + float(tx["dur"]) <= shot_duration + 0.02, f"{sid} narration overflows its shot"
 assert by_id["b22"]["args"]["sentAt"] == 2.25
 b27_caption = by_id["b27"]["args"]["texts"][0]
 assert by_id["b27"]["tpl"] == "calendar"

@@ -103,7 +103,7 @@ apply("b06", "laptop", {
     "w": 0.78, "h": 0.66, "subject": "PORTFOLIO APPLICATION",
     "sender": "Studio Review", "body": "Final submissions close Friday at 11:59 PM.",
     "cam": cam(0.5, 0.5, 1.04),
-    "texts": [narr("The deadline was already real.", 0.35, 5.2)]
+    "texts": [narr("The deadline was already real.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
 })
 
 # B07 — a tighter over-shoulder staging; keep the shadow away from the text lane.
@@ -165,7 +165,7 @@ apply("b12", "laptop", {
     "w": 0.79, "h": 0.68, "subject": "MY PORTFOLIO — DRAFT 47",
     "sender": "Autosave", "body": "Last saved at 11:38 PM. Not submitted.",
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("He kept saving instead of sending.", 0.35, 5.25)]
+    "texts": [narr("He kept saving instead of sending.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
 })
 
 # B13 — preserve the clock insert and time transition as a separate action.
@@ -202,7 +202,7 @@ apply("b16", "laptop", {
     "w": 0.82, "h": 0.70, "subject": "SUBMISSION WINDOW CLOSED",
     "sender": "Portfolio Portal", "body": "This application is no longer accepting files.",
     "cam": cam(0.5, 0.5, 1.09),
-    "texts": [narr("He had polished it for no one.", 0.35, 5.25)]
+    "texts": [narr("He had polished it for no one.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
 })
 
 # B17 — intentional silence after the emotional reveal.
@@ -257,7 +257,7 @@ apply("b22", "laptop", {
     "sentAt": 2.25,
     "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 1}]},
     "cam": cam(0.5, 0.5, 1.08),
-    "texts": [narr("He sent it before he could retreat.", 0.35, 5.25)]
+    "texts": [narr("He sent it before he could retreat.", 0.35, 4.55, x=0.77, y=0.49, size=42, max_w=0.26)]
 })
 
 # B23 — response arrives after send; the notification is not the ending by itself.
@@ -293,7 +293,7 @@ apply("b25", "scene", {
         actor("girl", 0.72, "stand", "smile", facing=-1, scale=0.92, at=0.12)
     ],
     "cam": cam(0.54, 0.56, 1.08),
-    "texts": [narr("The room didn't collapse around him.", 0.35, 4.5)]
+    "texts": [narr("The room didn't collapse around him.", 0.35, 4.5, x=0.38, y=0.28, size=44, max_w=0.30)]
 })
 
 # B26 — motivated lateral walk through the city at dawn, not zoom-only movement.
@@ -315,9 +315,9 @@ apply("b27", "scene", {
     ],
     "cam": cam(0.69, 0.60, 1.20, 7.2),
     "texts": [
-        narr("He still heard the old voice.", 0.25, 2.2, x=0.34, y=0.20, size=53, max_w=0.58),
+        narr("He still heard the old voice.", 0.25, 2.2, x=0.22, y=0.20, size=48, max_w=0.38),
         tempting("one more tiny fix.", 2.65, 1.8, x=0.80, y=0.30, size=42),
-        narr("He didn't have to obey it.", 4.65, 3.0, x=0.34, y=0.20, size=53, max_w=0.58)
+        narr("He didn't have to obey it.", 4.65, 3.0, x=0.22, y=0.20, size=48, max_w=0.38)
     ]
 })
 
@@ -370,6 +370,16 @@ assert b27_text["He still heard the old voice."]["dur"] >= 2.0
 assert b27_text["one more tiny fix."]["dur"] >= 1.7
 assert by_id["b25"]["args"]["texts"][0]["dur"] <= 4.6
 assert by_id["b26"]["args"]["texts"][0]["dur"] <= 4.6
+for sid in ("b06", "b12", "b16", "b22"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] >= 0.72 and 0.40 <= tx["y"] <= 0.60 and tx["max_w"] <= 0.27, (
+        f"{sid} laptop narration must remain in the right-side message-safe area"
+    )
+    shot_duration = float(by_id[sid]["end"]) - float(by_id[sid]["start"])
+    assert float(tx["at"]) + float(tx["dur"]) <= shot_duration + 0.02, f"{sid} narration overflows its shot"
+b25_caption = by_id["b25"]["args"]["texts"][0]
+assert 0.30 <= b25_caption["x"] <= 0.45 and 0.22 <= b25_caption["y"] <= 0.34 and b25_caption["max_w"] <= 0.31
+assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert b27_text["He didn't have to obey it."]["dur"] >= 2.8
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 8.0) < 0.02
 story["duration"] = 172.0
