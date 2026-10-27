@@ -99,7 +99,13 @@ export function narr(g, str, x, y, o = {}) {
     const vis = l.slice(0, Math.max(0, shown - used)); used += l.length + 1; if (!vis) return;
     const yy = y + (i - (lines.length - 1) / 2) * size * 1.25;
     g.save(); g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = size * 0.35; g.shadowOffsetY = 2;
-    text(g, vis, x - (o.align === 'left' ? 0 : 0), yy, { size, font: FONT_NARR, weight: 700, color: o.color || PAL.white, a, align: o.align || 'center' });
+    text(g, vis, x - (o.align === 'left' ? 0 : 0), yy, {
+      size, font: FONT_NARR, weight: 700, color: o.color || PAL.white, a,
+      // Fine dark edge keeps narration readable on bright paper, windows and device UI
+      // without adding a subtitle box or changing the restrained cinematic style.
+      stroke: size * 0.035, strokeColor: '#111116',
+      align: o.align || 'center'
+    });
     g.restore();
     if (o.emph) { // tu nhan doi mau
       for (const [word, col] of Object.entries(o.emph)) { const k = vis.indexOf(word); if (k < 0) continue; const lw = measure(g, l, size, FONT_NARR, 700), pre = measure(g, vis.slice(0, k), size, FONT_NARR, 700);
