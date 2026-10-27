@@ -315,9 +315,9 @@ apply("b27", "scene", {
     ],
     "cam": cam(0.69, 0.60, 1.20),
     "texts": [
-        narr("He still heard the old voice.", 0.25, 1.35, y=0.105, size=53),
+        narr("He still heard the old voice.", 0.25, 1.35, y=0.20, size=53),
         tempting("one more tiny fix.", 1.85, 1.30, x=0.80, y=0.30, size=42),
-        narr("He didn't have to obey it.", 3.55, 2.15, y=0.105, size=53)
+        narr("He didn't have to obey it.", 3.55, 2.15, y=0.20, size=53)
     ]
 })
 
