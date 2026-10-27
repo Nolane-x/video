@@ -213,10 +213,15 @@ a.update({
 # Critical whisper captions must be fully readable after the hand-written reveal.
 # The shared renderer caps reveal time at 30% of each caption's on-screen duration.
 TEMPT_HOLD_BY_SHOT = {"b03": 4.20, "b04": 4.60, "b06": 4.50, "b09": 4.00, "b22": 4.40, "b27": 2.85}
+TEMPT_START_BY_SHOT = {"b03": 0.65, "b04": 0.50, "b06": 0.50, "b09": 0.50, "b22": 0.55}
 for sid, hold in TEMPT_HOLD_BY_SHOT.items():
     shot = get(sid)
     overlays = [tx for tx in shot.get("args", {}).get("texts", []) if tx.get("kind") == "tempt"]
     assert len(overlays) == 1, f"{sid} must have exactly one temptation caption"
+    # The whisper sits in a separate right-side lane; start it early enough that it can be read
+    # while the main narrative stays in its left-side lane. Keep the chosen timing deterministic.
+    if sid in TEMPT_START_BY_SHOT:
+        overlays[0]["at"] = min(float(overlays[0].get("at", 0.3)), TEMPT_START_BY_SHOT[sid])
     at = float(overlays[0].get("at", 0.3))
     shot_dur = float(shot["end"]) - float(shot["start"])
     # Never extend a caption beyond its shot; use the longest safe hold available.
