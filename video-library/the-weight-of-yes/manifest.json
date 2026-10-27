@@ -22,13 +22,13 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40453130871,
-    "run_number": 23,
+    "run_id": 40453407914,
+    "run_number": 24,
     "status": "queued",
     "conclusion": null,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40453130871",
-    "head_sha": "9f7b94ef60bc0dc1733e262aa7992264a2e03e48",
-    "notes": "Same visual revision as run #22; corrected stale B21 coordinate assertion that stopped at storyboard gate."
+    "url": "https://github.com/Nolane-x/video/actions/runs/40453407914",
+    "head_sha": "4343b01d5265f89b1833a9e14d50fcf6b48976eb",
+    "notes": "B08 legacy sitdesk assertion removed after run #23 exposed the contradictory check. Visual changes remain B08 slump, B21 relaxed and upper-lane B19 caption."
   },
   "latest_technical_pass": {
     "workflow_run_id": 40442985212,
@@ -139,6 +139,22 @@
       "url": "https://github.com/Nolane-x/video/actions/runs/40453130871",
       "source_commit": "9f7b94ef60bc0dc1733e262aa7992264a2e03e48",
       "reason": "Rerender after fixing stale B21 coordinate assertions; retain B08/B21 grounded poses and upper-lane B19 caption."
+    },
+    {
+      "run_id": 40453130871,
+      "run_number": 23,
+      "status": "failed_storyboard_gate",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453130871",
+      "source_commit": "9f7b94ef60bc0dc1733e262aa7992264a2e03e48",
+      "reason": "Tuner had a second legacy assertion requiring B08 sitdesk after the scene was deliberately changed to slump. Removed in run #24."
+    },
+    {
+      "run_id": 40453407914,
+      "run_number": 24,
+      "status": "queued",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453407914",
+      "source_commit": "4343b01d5265f89b1833a9e14d50fcf6b48976eb",
+      "reason": "Stale B08 pose assertion removed; rerun the visual revision."
     }
   ],
   "artistic_signoff": {
