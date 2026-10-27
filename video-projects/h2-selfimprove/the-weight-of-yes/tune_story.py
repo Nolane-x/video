@@ -402,7 +402,7 @@ assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
 # Only B07 uses the notebook insert; its narration must sit below the handwritten "YES." title.
 tx = by_id["b07"]["args"]["texts"][0]
-assert by_id["b07"]["tpl"] == "note" and tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, "B07 narration must use the blank lower-right page
+assert by_id["b07"]["tpl"] == "note" and tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, "B07 narration must use the blank lower-right page"
 classroom_lane = ("b03", "b04", "b06", "b08", "b15", "b16", "b18", "b20", "b21", "b25")
 for sid in classroom_lane:
     tx = by_id[sid]["args"]["texts"][0]
