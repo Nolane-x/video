@@ -169,6 +169,10 @@ jobs:
           assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2
           assert any(p[1] == "punch" for p in by_id["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Workout action is missing"
           assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
+          # The second notebook page is the only safe lane for narration in B20.
+          b20_note_caption = shots["b20"]["args"]["texts"][0]
+          assert b20_note_caption.get("x") == 0.62 and b20_note_caption.get("maxW") <= 0.20 and b20_note_caption.get("color") == "#302a24", "B20 narration must fit inside the blank notebook page"
+          assert shots["b20"]["args"].get("hud", {}).get("y", 1) <= 0.05, "B20 DAY HUD must stay in the upper letterbox"
           classroom_or_room_left_lane = ("b02", "b16", "b18", "b19", "b21", "b23", "b25")
           for sid in classroom_or_room_left_lane:
               tx = shots[sid]["args"]["texts"][0]

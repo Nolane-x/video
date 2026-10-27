@@ -127,7 +127,7 @@ apply("b06", "scene", {
 apply("b07", "note", {
     "text": "YES.", "at": 0.35, "cps": 5.2, "x": 0.5, "y": 0.51, "s": 1.10,
     "cam": cam(0.5, 0.52, 1.12),
-    "hud": {"rows": [{"label": "FAVORS", "n": 7}, {"label": "HIS TIME", "n": 0}]},
+    "hud": {"rows": [{"label": "FAVORS", "n": 7}, {"label": "HIS TIME", "n": 0}], "y": 0.035},
     "texts": [narr("He answered before checking his own plans.", 0.32, 4.25, x=0.76, y=0.67, size=48, max_w=0.26, color="#302a24")]
 })
 
@@ -425,6 +425,7 @@ assert by_id["b21"]["args"]["actors"][0]["pose"] == "relaxed"
 assert all(a.get("pose") != "sitdesk" for a in by_id["b08"]["args"]["actors"] + by_id["b21"]["args"]["actors"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
 # Only B07 uses the notebook insert; its narration must sit below the handwritten "YES." title.
+assert by_id["b07"]["args"].get("hud", {}).get("y", 1) <= 0.05, "B07 FAVORS/HIS TIME HUD must stay in the upper letterbox clear of handwritten YES."
 tx = by_id["b07"]["args"]["texts"][0]
 assert by_id["b07"]["tpl"] == "note" and tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.27 and tx.get("size", 53) >= 46 and tx.get("color") == "#302a24", "B07 narration must be dark, large and on the blank lower-right page"
 classroom_lane = ("b03", "b04", "b06", "b08", "b15", "b16", "b18", "b20", "b21", "b25")
