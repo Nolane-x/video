@@ -385,9 +385,11 @@ for sid in ("b10", "b25"):
 for sid in ("b03", "b09", "b20"):
     tx = by_id[sid]["args"]["texts"][0]
     assert tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, f"{sid} notebook caption must use the blank lower-right page"
-for sid in ("b02", "b19", "b21", "b29"):
+for sid in ("b02", "b19", "b29"):
     tx = by_id[sid]["args"]["texts"][0]
     assert tx["x"] <= 0.26 and tx["maxW"] <= 0.31 and 0.25 <= tx["y"] <= 0.33, f"{sid} caption must stay left of the window/character"
+tx = by_id["b21"]["args"]["texts"][0]
+assert tx["x"] >= 0.76 and tx["maxW"] <= 0.27 and 0.25 <= tx["y"] <= 0.33, "B21 caption must stay in the right-side bedroom wall lane"
 tx = by_id["b13"]["args"]["texts"][0]
 assert tx["x"] <= 0.20 and tx["y"] <= 0.31 and tx["maxW"] <= 0.25, "B13 clock caption must stay outside the clock face"
 tx = by_id["b08"]["args"]["texts"][0]
