@@ -1,37 +1,40 @@
 # THE WEIGHT OF YES — QA ledger
 
-## Current state — run #25 in progress
-- Current workflow: [run #25](https://github.com/Nolane-x/video/actions/runs/40453637108), source commit `1bfb4abe2934cc36b239bb796013178f03cae5d5`.
-- Progress verified: setup, storyboard/art-direction assertions, timeline/contact-sheet checks, audio preview, and full H2 silent render have passed. FFmpeg mastered-audio assembly and evidence packaging are running; final ffprobe/EBU R128/checksum gates are still pending.
-- Run #24 failed at the storyboard gate because a legacy assertion still expected separate `NO.` and `Not today.` captions after they were consolidated into `NO. NOT TODAY.`. Those stale assertions were replaced with the unified-caption check in run #25.
-- No output from run #25 is claimed until its full render and audio/metadata/checksum gates finish.
+## Latest render — run #25 passed
+- Workflow: [run #25 — all 19 steps successful](https://github.com/Nolane-x/video/actions/runs/40453637108).
+- Source commit: 1bfb4abe2934cc36b239bb796013178f03cae5d5.
+- Renderer: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering; not Remotion.
+- Spec: 143.000 seconds, 29 shots, H.264 1920×1080 @24 fps, AAC stereo 48 kHz, English on-screen text, no voice-over.
+- Master: 21,776,467 bytes; SHA-256 73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6.
+- Preview: 30.000 seconds; SHA-256 539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093.
+- Inner review bundle: 30,922,811 bytes; SHA-256 e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f.
+- Actions artifact: the-weight-of-yes-h2-selfimprove-25, ID 12711996632, 61,873,149 bytes; archive SHA-256 318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d; expires 2026-11-26.
+- Audio: −14.0 LUFS integrated; LRA 9.2 LU; true peak −5.0 dBFS.
+- Artifact downloaded successfully; every entry in SHA256SUMS.txt passed sha256sum -c. ffprobe confirmed streams, resolution, frame rate, sample rate, channels and duration. All 12 motion proofs had audio/video and were approximately six seconds.
 
-## Latest available technical candidate — run #21
-- Workflow: [run #21 — success](https://github.com/Nolane-x/video/actions/runs/40442985212), source commit `4a23abe4195133f319290f18fcccb4499dd48b5b`.
-- Actions artifact: `the-weight-of-yes-h2-selfimprove-21`, ID `12706519055`, 61,842,849 bytes; SHA-256 `119d0c6a1428628a1757bf0fb15b75583c7719adfe3a48d04a569e026f79d377`; expires 2026-11-26.
-- Master: 21,773,496 bytes; SHA-256 `c722d1e4363b42fff33d096f22b5b0da915e86d9b38e0c8a0b4d55863c7edb60`.
-- Preview: 1,866,462 bytes; SHA-256 `c0d55b58e3b044660fdd1b994b4973036efedce12c4b5a1b399a8dbc29d4b893`.
-- Original review ZIP: 30,907,384 bytes; SHA-256 `149dfa921fc58dfd7b0e9f52d22d184dfc232bb85fa420385c1fd5f0057b526a`.
-- Master: 143.000 seconds, H.264 1920×1080 @24 fps + AAC stereo 48 kHz.
-- Audio metrics on exact master: −14.0 LUFS integrated, LRA 9.2 LU, true peak −5.0 dBFS.
-- Full run #21 artifact was downloaded; every entry in its checksum ledger passed `sha256sum -c`.
+## Targeted visual review — run #25
+- [x] Both contact sheets inspected across all 29 shots.
+- [x] Three frames (start, midpoint and end) from all 12 proof clips sampled. This is targeted motion sampling, not a real-time start-to-finish watch.
+- [x] B08: hero remains upright/slumped while the helper carries the portfolio away; sampled frames show coherent limbs and held folder.
+- [x] B19: unified “NO. NOT TODAY.” caption is in the upper negative-space lane and no longer collides with the hero in sampled frames.
+- [x] B21: hero stays upright as another helper takes the folder; sampled handoff is understandable.
+- [x] B22: green SENT confirmation is visible.
+- [x] B20: response remains non-punitive.
+- [x] B24: reciprocal-care café two-shot is present in contact sheet.
+- [x] B27: rebalanced ledger/end arc is present.
+- [ ] Full 143-second film must still be watched start-to-finish with audio, checking transitions, pacing, acting, prop contacts and emotional arc.
+- [ ] Full perceptual listening remains pending. Objective loudness/true-peak measurements are not a substitute for listening.
 
-## Visual review
-- [x] Both contact sheets covering all 29 shots inspected.
-- [x] Three frames (start/mid/end) sampled from all 12 motion-proof clips; this is targeted frame sampling, not real-time playback of every clip.
-- [x] B08 folder remains attached to the helper through the walk-away after the shared H2 gait fix.
-- [x] B22 displays green SENT confirmation; B20's response is non-punitive; B24 reciprocal-care two-shot and B27 ledger are visible.
-- [ ] Run #25 must confirm B08/B21 do not read as unsupported seated figures in the classroom.
-- [ ] Run #25 must confirm unified “NO. NOT TODAY.” caption stays above faces/hands and remains readable.
-- [ ] Full 143-second film start-to-finish review with sound remains pending.
-- [ ] Perceptual listening to the full audio arc remains pending; loudness/true peak metrics are objective checks only.
+## Sound arc spot-check
+- [x] Master has audio; integrated loudness −14.0 LUFS and true peak −5.0 dBFS.
+- [x] FFmpeg silencedetect at −45 dB found a 4.917-second quiet interval between approximately 69.12 and 74.04 seconds, matching the intended silence around the overload/turning point.
+- [ ] Full start-to-finish listening remains pending.
 
-## Required technical gates
-- [x] Run #21 timeline QA: 29 shots, 143.000 seconds, no gaps or overlaps.
-- [x] H.264 1920×1080 @24 fps + AAC 48 kHz stereo.
-- [x] EBU R128 integrated −14.0 LUFS; true peak −5.0 dBFS below −1.0 dBFS ceiling.
-- [x] Twelve audio/video motion proofs and all run #21 checksum entries validated.
-- [ ] Run #25 full render, ffprobe, EBU R128, motion-proof and checksum gates must pass.
-- [ ] Inspect corrected B08/B19/B21 proofs from run #25 before artistic sign-off.
+## Historical validation failures and fixes
+- Run #22 failed before rendering because a stale assertion expected B21 X=0.49 instead of authored X=0.43.
+- Run #23 failed before rendering because a legacy assertion still required B08 sitdesk after its pose was changed to slump.
+- Run #24 failed before rendering because stale checks expected two B19 captions after they were unified.
+- Run #25 removed the contradictory checks; all 19 steps passed and the resulting artifact was downloaded and verified.
 
-**Status:** run #21 is a verified technical fallback candidate, not approved final. Full-length audiovisual sign-off remains pending.
+## Status and sign-off
+**Technical pass + targeted motion review passed. Full-length artistic approval remains pending.** Do not call this the approved final until the complete 143-second master has been watched with sound and any remaining P0/P1 issues are resolved.

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "visual_revision_render_in_progress",
+  "status": "technical_pass_targeted_visual_review_pass_full_length_review_pending",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -24,30 +24,60 @@
   "latest_render": {
     "run_id": 40453637108,
     "run_number": 25,
-    "status": "in_progress",
-    "conclusion": null,
+    "status": "success",
+    "conclusion": "success",
     "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
     "head_sha": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
-    "notes": "Storyboard/art-direction assertions, timeline/contact-sheet checks, audio preview and full H2 silent render have passed. FFmpeg mastered-audio assembly and evidence packaging are running; ffprobe/EBU R128/checksum gates still pending."
+    "artifact": {
+      "id": 12711996632,
+      "name": "the-weight-of-yes-h2-selfimprove-25",
+      "size_bytes": 61873149,
+      "sha256": "318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d",
+      "expires_at": "2026-11-26T05:13:23Z"
+    },
+    "master": {
+      "file_name": "the-weight-of-yes-h2-selfimprove.mp4",
+      "size_bytes": 21776467,
+      "sha256": "73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6",
+      "duration_seconds": 143,
+      "width": 1920,
+      "height": 1080,
+      "fps": "24/1",
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "audio_sample_rate_hz": 48000,
+      "audio_channels": 2,
+      "audio_integrated_loudness_lufs": -14,
+      "audio_loudness_range_lu": 9.2,
+      "audio_true_peak_dbfs": -5
+    },
+    "preview": {
+      "file_name": "preview-30s.mp4",
+      "size_bytes": 1866218,
+      "sha256": "539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093",
+      "duration_seconds": 30,
+      "video": "H.264 960x540 at 24 fps",
+      "audio": "AAC 48 kHz stereo"
+    },
+    "review_bundle": {
+      "file_name": "the-weight-of-yes-review.zip",
+      "size_bytes": 30922811,
+      "sha256": "e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f"
+    },
+    "notes": "All 19 workflow steps passed. Downloaded artifact SHA-256, every entry in SHA256SUMS.txt, streams, runtime, loudness and proof durations were independently checked. Both contact sheets and 3-frame samples from all 12 motion proofs were reviewed. Full-length audiovisual approval remains pending."
   },
   "latest_technical_pass": {
-    "workflow_run_id": 40442985212,
-    "workflow_run_number": 21,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40442985212",
-    "source_commit": "4a23abe4195133f319290f18fcccb4499dd48b5b",
+    "workflow_run_id": 40453637108,
+    "workflow_run_number": 25,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
+    "source_commit": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
     "conclusion": "success",
     "all_workflow_steps_passed": true,
-    "master_sha256": "c722d1e4363b42fff33d096f22b5b0da915e86d9b38e0c8a0b4d55863c7edb60",
-    "master_bytes": 21773496,
-    "preview_sha256": "c0d55b58e3b044660fdd1b994b4973036efedce12c4b5a1b399a8dbc29d4b893",
-    "preview_bytes": 1866462,
-    "review_bundle_sha256": "149dfa921fc58dfd7b0e9f52d22d184dfc232bb85fa420385c1fd5f0057b526a",
-    "review_bundle_bytes": 30907384,
-    "artifact_id": 12706519055,
-    "artifact_name": "the-weight-of-yes-h2-selfimprove-21",
-    "artifact_bytes": 61842849,
-    "artifact_zip_sha256": "119d0c6a1428628a1757bf0fb15b75583c7719adfe3a48d04a569e026f79d377",
-    "artifact_expires_at": "2026-11-26T03:18:56Z",
+    "artifact_id": 12711996632,
+    "artifact_sha256": "318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d",
+    "master_sha256": "73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6",
+    "preview_sha256": "539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093",
+    "review_bundle_sha256": "e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f",
     "duration_seconds": 143,
     "resolution": "1920x1080",
     "fps": "24/1",
@@ -56,11 +86,10 @@
     "integrated_lufs": -14,
     "lra_lu": 9.2,
     "true_peak_dbfs": -5,
-    "checksum_files_valid": true,
     "proof_count": 12,
     "contact_sheet_count": 2,
-    "full_length_artistic_review": "pending",
-    "notes": "Run #21 technically passed and file checksums verified after download. Visual sampling found B19 caption overlap and potentially unsupported classroom sitting poses; fixes are in render #22."
+    "checksum_files_valid": true,
+    "full_length_artistic_review": "pending"
   },
   "render_history": [
     {
@@ -171,6 +200,14 @@
       "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
       "source_commit": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
       "reason": "Storyboard, art-direction assertions and timeline checks passed; audio preview/mix step is running."
+    },
+    {
+      "run_id": 40453637108,
+      "run_number": 25,
+      "status": "technical_pass_targeted_visual_review_pass",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
+      "source_commit": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
+      "reason": "Passed all 19 workflow steps, including storyboard assertions, full render, FFmpeg mastering, ffprobe, EBU R128, 12 proof clips and checksums. Contact sheets and three-point proof sampling confirm B08/B19/B21 revisions in the reviewed frames."
     }
   ],
   "artistic_signoff": {
@@ -178,9 +215,12 @@
     "full_length_video_audio_review": false,
     "review_notes": [
       "Both contact sheets covering all 29 shots were inspected.",
-      "All 12 motion proofs were sampled at start, midpoint and end; this is frame sampling, not a real-time start-to-finish watch.",
-      "Master audio streams and EBU R128 metrics were verified; perceptual start-to-finish listening is still pending.",
-      "Run #21 candidate remains available as fallback; do not call artistically approved until run #22 and a complete audiovisual review are checked."
+      "Three frames (start, midpoint and end) from each of 12 motion-proof clips were sampled.",
+      "B08 shows a standing/slumped hero while the helper walks away with the portfolio; the sampled frames show coherent limbs and a held folder.",
+      "B19 unified 'NO. NOT TODAY.' caption sits in the upper lane above the characters in sampled frames.",
+      "B21 hero remains upright as another helper takes the portfolio; sampled handoff reads coherently.",
+      "Master audio stream, loudness and true peak were verified; a 4.917-second silence was detected from approximately 69.12 to 74.04 seconds, matching the intended quiet beat.",
+      "Full 143-second start-to-finish review and perceptual listening remain pending."
     ]
   },
   "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6"
