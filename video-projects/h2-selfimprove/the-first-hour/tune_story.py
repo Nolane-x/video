@@ -206,7 +206,7 @@ a.update({
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
         {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 1.95, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 2.80, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 3.40, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
     ],
 })
 

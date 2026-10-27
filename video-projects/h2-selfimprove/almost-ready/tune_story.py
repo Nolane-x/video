@@ -378,7 +378,7 @@ for sid in ("b06", "b12", "b16", "b22"):
     shot_duration = float(by_id[sid]["end"]) - float(by_id[sid]["start"])
     assert float(tx["at"]) + float(tx["dur"]) <= shot_duration + 0.02, f"{sid} narration overflows its shot"
 b25_caption = by_id["b25"]["args"]["texts"][0]
-assert 0.30 <= b25_caption["x"] <= 0.45 and 0.22 <= b25_caption["y"] <= 0.34 and b25_caption["max_w"] <= 0.31
+assert 0.30 <= b25_caption["x"] <= 0.45 and 0.22 <= b25_caption["y"] <= 0.34 and b25_caption["maxW"] <= 0.31
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert b27_text["He didn't have to obey it."]["dur"] >= 3.0
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 9.0) < 0.02
