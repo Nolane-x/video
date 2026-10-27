@@ -1,10 +1,10 @@
 # THE WEIGHT OF YES — QA ledger
 
-## Current state — run #24 queued
-- Current workflow: [run #24](https://github.com/Nolane-x/video/actions/runs/40453407914), source commit `4343b01d5265f89b1833a9e14d50fcf6b48976eb`.
-- Run #22 failed because B21's authored X=0.43 disagreed with a stale assertion expecting 0.49. That gate was fixed in run #23.
-- Run #23 then exposed a second, contradictory legacy assertion requiring B08's pose to be `sitdesk` after the new art direction deliberately changed B08 to `slump`. That redundant assertion was removed in run #24.
-- These two runs failed before video rendering; no new MP4 was produced by them.
+## Current state — run #25 in progress
+- Current workflow: [run #25](https://github.com/Nolane-x/video/actions/runs/40453637108), source commit `1bfb4abe2934cc36b239bb796013178f03cae5d5`.
+- Progress verified: checkout, tool bootstrap, H2/audio dependencies, storyboard/art-direction assertions and timeline/contact-sheet checks have passed. The audio mix + 30-second preview step is running.
+- Run #24 failed at the storyboard gate because a legacy assertion still expected separate `NO.` and `Not today.` captions after they were consolidated into `NO. NOT TODAY.`. Those stale assertions were replaced with the unified-caption check in run #25.
+- No output from run #25 is claimed until its full render and audio/metadata/checksum gates finish.
 
 ## Latest available technical candidate — run #21
 - Workflow: [run #21 — success](https://github.com/Nolane-x/video/actions/runs/40442985212), source commit `4a23abe4195133f319290f18fcccb4499dd48b5b`.
@@ -14,24 +14,24 @@
 - Original review ZIP: 30,907,384 bytes; SHA-256 `149dfa921fc58dfd7b0e9f52d22d184dfc232bb85fa420385c1fd5f0057b526a`.
 - Master: 143.000 seconds, H.264 1920×1080 @24 fps + AAC stereo 48 kHz.
 - Audio metrics on exact master: −14.0 LUFS integrated, LRA 9.2 LU, true peak −5.0 dBFS.
-- Full run #21 artifact was downloaded. Every entry in its checksum ledger passed `sha256sum -c`.
+- Full run #21 artifact was downloaded; every entry in its checksum ledger passed `sha256sum -c`.
 
 ## Visual review
 - [x] Both contact sheets covering all 29 shots inspected.
-- [x] Three frames (start/mid/end) sampled from all 12 motion-proof clips. This is targeted frame sampling, not real-time playback of every clip.
-- [x] B08's folder remains attached to the favor-giver through the walk-away after the shared H2 gait fix.
-- [x] B22 shows the green SENT confirmation; B20's response is non-punitive; B24's reciprocal-care two-shot and B27's ledger are visible.
-- [ ] Run #24 must confirm B08/B21 no longer read as unsupported seated figures in the classroom.
-- [ ] Run #24 must confirm the unified “NO. NOT TODAY.” caption stays above faces/hands and is readable against the background.
+- [x] Three frames (start/mid/end) sampled from all 12 motion-proof clips; this is targeted frame sampling, not real-time playback of every clip.
+- [x] B08 folder remains attached to the helper through the walk-away after the shared H2 gait fix.
+- [x] B22 displays green SENT confirmation; B20's response is non-punitive; B24 reciprocal-care two-shot and B27 ledger are visible.
+- [ ] Run #25 must confirm B08/B21 do not read as unsupported seated figures in the classroom.
+- [ ] Run #25 must confirm unified “NO. NOT TODAY.” caption stays above faces/hands and remains readable.
 - [ ] Full 143-second film start-to-finish review with sound remains pending.
-- [ ] Perceptual listening to the full audio arc remains pending; LUFS/true-peak are objective checks only.
+- [ ] Perceptual listening to the full audio arc remains pending; loudness/true peak metrics are objective checks only.
 
 ## Required technical gates
-- [x] Run #21 timeline QA: 29 shots, 143.000 seconds, no gaps/overlaps.
+- [x] Run #21 timeline QA: 29 shots, 143.000 seconds, no gaps or overlaps.
 - [x] H.264 1920×1080 @24 fps + AAC 48 kHz stereo.
-- [x] EBU R128 integrated −14.0 LUFS; true peak −5.0 dBFS, below −1.0 dBFS ceiling.
-- [x] Twelve audio/video motion proofs validated; all run #21 artifact checksum entries verified.
-- [ ] Run #24: storyboard/caption/preset gates, contact sheets, audio preview, full render, ffprobe, EBU R128, motion-proof and checksum gates must pass.
-- [ ] Review corrected B08/B19/B21 proofs from run #24 before artistic sign-off.
+- [x] EBU R128 integrated −14.0 LUFS; true peak −5.0 dBFS below −1.0 dBFS ceiling.
+- [x] Twelve audio/video motion proofs and all run #21 checksum entries validated.
+- [ ] Run #25 full render, ffprobe, EBU R128, motion-proof and checksum gates must pass.
+- [ ] Inspect corrected B08/B19/B21 proofs from run #25 before artistic sign-off.
 
-**Status:** run #21 is a verified technical fallback candidate, not an approved final. Full-length audiovisual approval remains pending.
+**Status:** run #21 is a verified technical fallback candidate, not approved final. Full-length audiovisual sign-off remains pending.

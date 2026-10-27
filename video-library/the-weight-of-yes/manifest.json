@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "visual_revision_render_queued",
+  "status": "visual_revision_render_in_progress",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -22,13 +22,13 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40453407914,
-    "run_number": 24,
-    "status": "queued",
+    "run_id": 40453637108,
+    "run_number": 25,
+    "status": "in_progress",
     "conclusion": null,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40453407914",
-    "head_sha": "4343b01d5265f89b1833a9e14d50fcf6b48976eb",
-    "notes": "B08 legacy sitdesk assertion removed after run #23 exposed the contradictory check. Visual changes remain B08 slump, B21 relaxed and upper-lane B19 caption."
+    "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
+    "head_sha": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
+    "notes": "B08/B21 grounded poses and unified upper-lane B19 caption; removed contradictory legacy pose and caption assertions. Storyboard/timeline gates passed; audio preview build currently running."
   },
   "latest_technical_pass": {
     "workflow_run_id": 40442985212,
@@ -155,6 +155,22 @@
       "url": "https://github.com/Nolane-x/video/actions/runs/40453407914",
       "source_commit": "4343b01d5265f89b1833a9e14d50fcf6b48976eb",
       "reason": "Stale B08 pose assertion removed; rerun the visual revision."
+    },
+    {
+      "run_id": 40453407914,
+      "run_number": 24,
+      "status": "failed_storyboard_gate",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453407914",
+      "source_commit": "4343b01d5265f89b1833a9e14d50fcf6b48976eb",
+      "reason": "Legacy assertions still expected separate NO./Not today. captions after the caption was unified. Removed the stale checks in run #25."
+    },
+    {
+      "run_id": 40453637108,
+      "run_number": 25,
+      "status": "in_progress",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
+      "source_commit": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
+      "reason": "Storyboard, art-direction assertions and timeline checks passed; audio preview/mix step is running."
     }
   ],
   "artistic_signoff": {
