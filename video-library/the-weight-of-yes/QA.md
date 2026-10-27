@@ -1,7 +1,7 @@
 # THE WEIGHT OF YES — QA ledger
 
 ## Current state
-- Status: render #6 is running. Static FFmpeg/H.264 checks, H2 dependency/audio generation, storyboard geometry/template/caption/rig assertions, full timeline validation and contact-sheet render all passed. The music/SFX and preview render passed; the full 143-second H2 silent render has also passed. Final audio mux, preview audio mux, MP4 measurements and 12 motion-proof checks are in progress.
+- Status: render #7 is running with two art-direction refinements after visually reviewing run #6: B08 now has a clear physical departure with the folder, and B19 moves the “NO. / Not today.” captions into left-side negative space. Run #6 passed MP4/audio gates, but is not the final visual candidate. Run #7 must pass the full technical gates again.
 - Project: 143 seconds, 29 shots, 1920×1080, 24 fps, English on-screen text, no voice-over.
 - Engine: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering.
 - Render workflow: [Render THE WEIGHT OF YES](https://github.com/Nolane-x/video/actions/workflows/render-selfimprove-weight-of-yes.yml).
