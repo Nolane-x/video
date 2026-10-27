@@ -22,7 +22,7 @@ shots[-1]["end"] = 172.0
 story["duration"] = 172.0
 
 def cap(kind: str, text: str, at: float = 0.3, dur: float = 5.25,
-        x: float = 0.5, y: float = 0.105, size: int = 55,
+        x: float = 0.5, y: float = 0.20, size: int = 55,
         max_w: float = 0.82, **extra: Any) -> dict[str, Any]:
     return {"kind": kind, "t": text, "at": at, "dur": dur,
             "x": x, "y": y, "size": size, "maxW": max_w, **extra}
@@ -349,6 +349,12 @@ for s in shots:
         assert at >= 0 and dur > 0 and at + dur <= d + 0.02, (
             f"{s['id']} text outside shot: {tx.get('t')!r}; at={at}, dur={dur}, shot={d}"
         )
+        if tx.get("kind") in ("narr", "big") and tx.get("y") is not None:
+            text_y = float(tx["y"])
+            assert 0.16 <= text_y <= 0.84, (
+                f"Caption falls in/too close to cinematic bars: {s['id']} / "
+                f"{tx.get('t')!r} at y={text_y}"
+            )
     previous_end = float(s["end"])
 assert abs(previous_end - 172.0) < 0.02, f"Expected 172.0 s, got {previous_end}"
 assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"

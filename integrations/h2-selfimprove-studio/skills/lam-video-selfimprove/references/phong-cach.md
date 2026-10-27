@@ -23,6 +23,8 @@ Học từ các kênh "An Animated Short Film" dẫn đầu ngách. Chỉ học 
 ## Bố cục
 - Nhân vật chính ở 1/3 trái hoặc phải, không đứng chính giữa trừ cảnh cô đơn (`void`, `hill`).
 - Chữ kể chuyện ở trên, không đè lên mặt. Nếu đè, đặt `pos: "bottom"`.
+- **Vùng chữ an toàn khi dùng dải đen 2.39:1:** với tọa độ `y` dạng tỉ lệ, chữ kể chuyện/chữ nhấn phải nằm trong `0.16–0.84`. Không dùng `y: 0.105`: nó nằm trong hoặc sát dải đen phía trên và có thể biến mất khỏi video xuất dù vẫn tồn tại trong `shots.json`.
+- Mỗi cảnh có câu kể phải có chữ nhìn thấy ở khung xuất thật; kiểm tra ít nhất một khung sau lúc chữ bắt đầu hiện. Contact sheet một mình chưa đủ nếu caption nằm ngoài vùng hình.
 - Chữ cám dỗ cạnh bóng đen, không đè lên mặt nhân vật chính.
 - Bộ đếm luôn ở góc trên trái, cùng cỡ, cùng chỗ suốt phim.
 

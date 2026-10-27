@@ -15,6 +15,8 @@
 - [ ] Không có khung "THIEU MAU", "THIEU SHOT" hay chữ đỏ "LOI".
 - [ ] Hình khớp mô tả cảnh trong file 01. Chữ đúng nguyên văn file 01.
 - [ ] Chữ kể chuyện không đè lên mặt nhân vật, đọc rõ trên nền (không nằm trên vùng sáng chói).
+- [ ] Với dải đen 2.39:1, kiểm tra tọa độ thật của mọi caption: không để chữ kể chuyện/chữ nhấn ở `y < 0.16` hoặc `y > 0.84`. Đối chiếu một khung từ MP4 đã xuất, không chỉ JSON.
+- [ ] Quét 100% shot: mỗi câu trong kịch bản có bản chữ tương ứng nhìn thấy trong hình; xác nhận tại thời điểm chữ đã hiện, không kiểm tra ở frame quá sớm.
 - [ ] Chữ cám dỗ nằm cạnh bóng đen, không đè lên nhân vật chính.
 - [ ] Bộ đếm đúng số theo từng cảnh, cú sụp đúng cảnh, sau cú sụp các cảnh sau giữ số mới.
 - [ ] Nhân vật chính cùng preset (hoặc đổi đúng chỗ đã ghi trong `bible.md`). Bóng đen dùng đúng màu nhấn.

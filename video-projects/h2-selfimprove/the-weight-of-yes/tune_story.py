@@ -31,7 +31,7 @@ story["duration"] = cursor
 assert abs(cursor - 143.0) < 0.01
 
 def cap(kind: str, text: str, at: float = 0.32, dur: float = 4.25,
-        x: float = 0.5, y: float = 0.105, size: int = 53,
+        x: float = 0.5, y: float = 0.20, size: int = 53,
         max_w: float = 0.84, **extra: Any) -> dict[str, Any]:
     return {"kind": kind, "t": text, "at": at, "dur": dur,
             "x": x, "y": y, "size": size, "maxW": max_w, **extra}
@@ -382,6 +382,12 @@ for shot in shots:
         assert at >= 0 and dur > 0 and at + dur <= duration + 0.02, (
             f"Caption outside shot: {shot['id']} / {tx.get('t')!r}"
         )
+        if tx.get("kind") in ("narr", "big") and tx.get("y") is not None:
+            text_y = float(tx["y"])
+            assert 0.16 <= text_y <= 0.84, (
+                f"Caption falls in/too close to cinematic bars: {shot['id']} / "
+                f"{tx.get('t')!r} at y={text_y}"
+            )
     previous_end = end
 
 assert abs(previous_end - 143.0) < 0.02
