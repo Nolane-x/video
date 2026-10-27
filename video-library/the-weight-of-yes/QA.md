@@ -1,7 +1,7 @@
 # THE WEIGHT OF YES — QA ledger
 
 ## Current state
-- Status: render attempt #3 is running. Static FFmpeg/ffprobe setup and the H.264 encoder check passed; H2 dependency/audio setup is running. No final MP4 is claimed yet.
+- Status: clean render attempt #5 is pending after removing duplicate classroom setArgs keys. The previous attempt #4 passed static FFmpeg/ffprobe and H.264 encoder setup, then continued H2 dependency/audio setup. No final MP4 is claimed yet.
 - Project: 143 seconds, 29 shots, 1920×1080, 24 fps, English on-screen text, no voice-over.
 - Engine: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering.
 - Render workflow: [Render THE WEIGHT OF YES](https://github.com/Nolane-x/video/actions/workflows/render-selfimprove-weight-of-yes.yml).
