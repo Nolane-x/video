@@ -134,9 +134,10 @@ apply("b07", "note", {
 # B08 — everyone else leaves with the task done; he stays at the desk.
 apply("b08", "scene", {
     "set": "classroom", "setArgs": classroom("dusk"),
+    "setArgs": classroom("dusk", desks=[0.46]),
     "actors": [
-        actor("hero", "desk.seat", "sitdesk", "tired", facing=1, scale=1.00),
-        actor("friend2", 0.81, "reach", "smile", facing=-1, scale=0.82)
+        actor("hero", 0.49, "sitdesk", "tired", facing=1, scale=1.00),
+        actor("friend2", 0.60, "reach", "smile", facing=-1, scale=0.82, hold="portfolio")
     ],
     "cam": cam(0.58, 0.60, 1.11),
     "texts": [narr("They went home lighter.", size=56)]
@@ -271,10 +272,11 @@ apply("b20", "scene", {
 # B21 — another pair of hands takes over, making the boundary practical.
 apply("b21", "scene", {
     "set": "classroom", "setArgs": classroom("day"),
+    "setArgs": classroom("day", desks=[0.46]),
     "actors": [
-        actor("hero", "desk.seat", "sitdesk", "relaxed", facing=1, scale=0.96),
-        actor("girl", 0.70, "carry", "neutral", facing=1, scale=0.91, hold="portfolio"),
-        actor("friend2", 0.86, "reach", "smile", facing=-1, scale=0.75)
+        actor("hero", 0.49, "sitdesk", "smile", facing=1, scale=0.96),
+        actor("girl", 0.60, "reach", "neutral", facing=-1, scale=0.87),
+        actor("friend2", 0.75, "carry", "smile", facing=-1, scale=0.83, hold="portfolio")
     ],
     "cam": cam(0.56, 0.58, 1.10),
     "texts": [narr("The work found another pair of hands.", size=50)]
@@ -394,6 +396,10 @@ assert by_id["b22"]["args"]["sentAt"] == 2.25
 assert by_id["b28"]["tpl"] == "card"
 assert by_id["b29"]["tpl"] == "scene"
 assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
+assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49
+assert by_id["b21"]["args"]["actors"][0]["x"] == 0.49
+assert by_id["b08"]["args"]["actors"][0]["pose"] == "sitdesk"
+assert by_id["b21"]["args"]["actors"][2]["hold"] == "portfolio"
 assert [a["x"] for a in by_id["b13"]["args"]["actors"]] == ["table.left", "table.right"]
 assert [a["x"] for a in by_id["b24"]["args"]["actors"]] == ["table.left", "table.right"]
 
