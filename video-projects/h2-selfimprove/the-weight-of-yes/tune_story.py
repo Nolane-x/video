@@ -462,7 +462,7 @@ assert by_id["b29"]["tpl"] == "scene"
 assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
 assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49
 assert by_id["b21"]["args"]["actors"][0]["x"] == 0.43
-assert by_id["b08"]["args"]["actors"][0]["pose"] == "sitdesk"
+# B08 pose is already asserted above as 'slump'; keep no contradictory legacy check.
 assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84
 assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio"
 b19labels = {t.get("t"): t for t in by_id["b19"]["args"]["texts"]}
