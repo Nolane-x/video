@@ -1777,10 +1777,10 @@
             "t": "The voice returned.",
             "at": 0.35,
             "dur": 2.05,
-            "x": 0.32,
-            "y": 0.2,
-            "size": 56,
-            "maxW": 0.56
+            "x": 0.12,
+            "y": 0.3,
+            "size": 44,
+            "maxW": 0.22
           },
           {
             "kind": "tempt",
@@ -1796,10 +1796,10 @@
             "t": "But it sounded smaller now.",
             "at": 4.8,
             "dur": 2.8,
-            "x": 0.32,
-            "y": 0.2,
-            "size": 56,
-            "maxW": 0.56
+            "x": 0.12,
+            "y": 0.3,
+            "size": 44,
+            "maxW": 0.22
           }
         ]
       }

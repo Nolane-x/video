@@ -204,9 +204,9 @@ a.update({
     ],
     "cam": camera(0.66, 0.62, 1.0, 1.38, 7.35),
     "texts": [
-        {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.32, "y": 0.20, "size": 56, "maxW": 0.56},
+        {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
         {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 1.95, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 2.80, "x": 0.32, "y": 0.20, "size": 56, "maxW": 0.56},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 2.80, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
     ],
 })
 
@@ -232,6 +232,8 @@ assert b27_text["The voice returned."]["dur"] >= 2.0
 assert b27_text["just one more scroll."]["dur"] >= 1.8
 assert b27_text["But it sounded smaller now."]["dur"] >= 2.7
 assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 8.0) < 0.02
+assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
+assert by_id["b27"]["args"]["texts"][0]["maxW"] <= 0.23 and by_id["b27"]["args"]["texts"][2]["maxW"] <= 0.23
 story["duration"] = float(shots[-1]["end"])
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Art direction applied: {len(shots)} shots; duration={story['duration']}s")
