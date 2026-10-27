@@ -159,7 +159,7 @@ apply("b10", "scene", {
     "set": "cafe", "setArgs": {"lampX": 0.50, "tableW": 0.28},
     "actors": [actor("hero", "table.left", "sit", "sad", facing=1, scale=0.88)],
     "cam": cam(0.50, 0.56, 1.10),
-    "texts": [narr("He ate after everyone else left.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
+    "texts": [narr("He ate after everyone else left.", 0.32, 4.25, x=0.90, y=0.48, size=38, max_w=0.18)]
 })
 
 # B11 — his own deadline finally enters frame as a concrete consequence.
@@ -190,7 +190,7 @@ apply("b13", "scene", {
         actor("girl", "table.right", "sitpoint", "worried", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.56, 1.08),
-    "texts": [narr("When someone asked how he was, he smiled.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
+    "texts": [narr("When someone asked how he was, he smiled.", 0.32, 4.25, x=0.90, y=0.48, size=38, max_w=0.18)]
 })
 
 # B14 — a short, restrained overload beat. No monster and no exaggerated collapse.
@@ -301,7 +301,7 @@ apply("b23", "scene", {
               walk={"to": 0.48, "at": 0.28, "dur": 2.60, "speed": 0.74})
     ],
     "cam": cam(0.55, 0.55, 1.12),
-    "texts": [narr("The first space he protected was his own.", 0.32, 4.25, x=0.28, y=0.28, size=42, max_w=0.22)]
+    "texts": [narr("The first space he protected was his own.", 0.32, 4.25, x=0.20, y=0.30, size=38, max_w=0.18)]
 })
 
 # B24 — reciprocal care: the friend offers something and listens.
@@ -312,7 +312,7 @@ apply("b24", "scene", {
         actor("friend", "table.right", "sitpoint", "smile", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.57, 1.08),
-    "texts": [narr("Care began to move both ways.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
+    "texts": [narr("Care began to move both ways.", 0.32, 4.25, x=0.90, y=0.48, size=38, max_w=0.18)]
 })
 
 # B25 — preserve generosity; the lesson is choice, not withdrawal.
@@ -408,7 +408,7 @@ for sid in classroom_lane:
     )
 for sid in ("b10", "b13", "b24"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert tx["x"] >= 0.82 and 0.49 <= tx["y"] <= 0.57 and tx["maxW"] <= 0.25, (
+    assert tx["x"] >= 0.88 and 0.44 <= tx["y"] <= 0.52 and tx["maxW"] <= 0.20, (
         f"{sid} café narration must stay in the clear right-side lane below the window/lamp"
     )
 for sid in ("b02", "b23"):
