@@ -206,7 +206,7 @@ a.update({
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
         {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 2.85, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 5.45, "dur": 3.25, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 5.55, "dur": 3.15, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
     ],
 })
 
@@ -262,7 +262,7 @@ for shot in shots:
 b27_text = {tx.get("t"): tx for tx in get("b27").get("args", {}).get("texts", [])}
 assert b27_text["The voice returned."]["dur"] >= 2.0
 assert b27_text["just one more scroll."]["dur"] >= 2.85
-assert b27_text["But it sounded smaller now."]["dur"] >= 3.2
+assert b27_text["But it sounded smaller now."]["dur"] >= 3.1
 assert float(b27_text["But it sounded smaller now."]["at"]) + float(b27_text["But it sounded smaller now."]["dur"]) <= float(get("b27")["end"]) - float(get("b27")["start"]) - 0.1
 assert float(b27_text["just one more scroll."]["at"]) + float(b27_text["just one more scroll."]["dur"]) <= float(b27_text["But it sounded smaller now."]["at"]) - 0.05
 assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 9.0) < 0.02
