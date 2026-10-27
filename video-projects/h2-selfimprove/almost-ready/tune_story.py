@@ -293,7 +293,7 @@ apply("b25", "scene", {
         actor("girl", 0.72, "stand", "smile", facing=-1, scale=0.92, at=0.12)
     ],
     "cam": cam(0.54, 0.56, 1.08),
-    "texts": [narr("The room didn't collapse around him.", 0.35, 5.25)]
+    "texts": [narr("The room didn't collapse around him.", 0.35, 4.5)]
 })
 
 # B26 — motivated lateral walk through the city at dawn, not zoom-only movement.
@@ -302,7 +302,7 @@ apply("b26", "scene", {
     "actors": [actor("hero", 0.18, "stand", "neutral", facing=1,
                      walk={"to": 0.78, "at": 0.25, "dur": 4.3, "speed": 0.78})],
     "cam": cam(0.5, 0.56, 1.05),
-    "texts": [narr("A few flaws survived the journey.", 0.35, 5.25)]
+    "texts": [narr("A few flaws survived the journey.", 0.35, 4.5)]
 })
 
 # B27 — the old voice returns small; the hero keeps working.
@@ -368,6 +368,8 @@ assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
 b27_text = {tx.get("t"): tx for tx in by_id["b27"]["args"].get("texts", [])}
 assert b27_text["He still heard the old voice."]["dur"] >= 2.0
 assert b27_text["one more tiny fix."]["dur"] >= 1.7
+assert by_id["b25"]["args"]["texts"][0]["dur"] <= 4.6
+assert by_id["b26"]["args"]["texts"][0]["dur"] <= 4.6
 assert b27_text["He didn't have to obey it."]["dur"] >= 2.8
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 8.0) < 0.02
 story["duration"] = 172.0
