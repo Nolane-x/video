@@ -1487,7 +1487,7 @@
             "kind": "narr",
             "t": "Small wins began to stack.",
             "at": 0.35,
-            "dur": 5.15,
+            "dur": 4.55,
             "pos": "top",
             "size": 55,
             "maxW": 0.74
@@ -1680,7 +1680,7 @@
             "kind": "narr",
             "t": "He came back into the room.",
             "at": 0.35,
-            "dur": 5.15,
+            "dur": 4.55,
             "pos": "bottom",
             "size": 56,
             "maxW": 0.72
@@ -1750,13 +1750,13 @@
             1.28
           ],
           "at": 0.25,
-          "dur": 5.4
+          "dur": 7.35
         },
         "fx": [
           {
             "kind": "shards",
-            "at": 2.65,
-            "dur": 1.45,
+            "at": 5.2,
+            "dur": 1.2,
             "x": 0.91,
             "y": 0.45,
             "color": "#d5a34c",
@@ -1776,30 +1776,30 @@
             "kind": "narr",
             "t": "The voice returned.",
             "at": 0.35,
-            "dur": 1.45,
-            "x": 0.5,
-            "y": 0.105,
-            "size": 55,
-            "maxW": 0.82
+            "dur": 2.05,
+            "x": 0.32,
+            "y": 0.2,
+            "size": 56,
+            "maxW": 0.56
           },
           {
             "kind": "tempt",
             "t": "just one more scroll.",
-            "at": 2,
-            "dur": 1.35,
+            "at": 2.6,
+            "dur": 1.95,
             "x": 0.8,
             "y": 0.31,
-            "size": 44
+            "size": 46
           },
           {
             "kind": "narr",
             "t": "But it sounded smaller now.",
-            "at": 3.75,
-            "dur": 1.95,
-            "x": 0.5,
-            "y": 0.105,
-            "size": 55,
-            "maxW": 0.82
+            "at": 4.8,
+            "dur": 2.8,
+            "x": 0.32,
+            "y": 0.2,
+            "size": 56,
+            "maxW": 0.56
           }
         ]
       }
