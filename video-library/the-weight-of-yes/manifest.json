@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "render_in_progress",
+  "status": "render_queued",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -21,9 +21,29 @@
     "renderer": "H2 SelfImprove Studio Canvas/Chromium",
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
-  "latest_render": {"run_id": 40422690206, "run_number": 2, "status": "in_progress", "url": "https://github.com/Nolane-x/video/actions/runs/40422690206", "head_sha": "a8742c877abfb0de58096da5b196431f296e6c2e"},
+  "latest_render": {
+    "run_id": 40424081349,
+    "run_number": 3,
+    "status": "pending",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40424081349",
+    "head_sha": "d0b4c37186adcabf9a0bf0bc466716e5ab8f81f9",
+    "notes": "Cafe seating-anchor P1 correction plus static FFmpeg bootstrap; no artifact until workflow completes."
+  },
   "latest_technical_pass": null,
-  "render_history": [{"run_id": 40422473197, "run_number": 1, "status": "cancelled", "reason": "Restarted to keep the hand-held portfolio prop visible during favor handoff."}],
+  "render_history": [
+    {
+      "run_id": 40422473197,
+      "run_number": 1,
+      "status": "cancelled",
+      "reason": "Restarted to keep the hand-held portfolio prop visible during favor handoff."
+    },
+    {
+      "run_id": 40422690206,
+      "run_number": 2,
+      "status": "superseded",
+      "reason": "Rerender triggered because cafe seated characters needed table.left/table.right anchor geometry; apt-based FFmpeg installation remained stalled."
+    }
+  ],
   "artistic_signoff": {
     "status": "pending",
     "full_length_video_audio_review": false,
