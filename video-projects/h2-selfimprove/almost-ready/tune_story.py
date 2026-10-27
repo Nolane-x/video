@@ -325,8 +325,8 @@ apply("b27", "scene", {
     "cam": cam(0.69, 0.60, 1.20, 8.35),
     "texts": [
         narr("He still heard the old voice.", 0.25, 2.2, x=0.18, y=0.20, size=46, max_w=0.30),
-        tempting("one more tiny fix.", 2.65, 1.8, x=0.80, y=0.30, size=42),
-        narr("He didn't have to obey it.", 4.65, 3.0, x=0.18, y=0.20, size=46, max_w=0.30)
+        tempting("one more tiny fix.", 2.50, 2.85, x=0.80, y=0.30, size=42),
+        narr("He didn't have to obey it.", 5.45, 3.0, x=0.18, y=0.20, size=46, max_w=0.30)
     ]
 })
 
@@ -345,6 +345,24 @@ apply("b29", "scene", {
     "cam": cam(0.52, 0.55, 1.04),
     "texts": [narr("If this hit, like and subscribe.", 0.35, 5.1, x=0.22, y=0.29, size=50, max_w=0.30)]
 })
+
+# Make every temptation line readable for a real viewer, not merely present in a contact-sheet frame.
+# The native handwritten reveal is capped at 30% of the caption duration; require a full-text dwell window.
+for shot in shots:
+    shot_dur = float(shot["end"]) - float(shot["start"])
+    for tx in shot.get("args", {}).get("texts", []):
+        if tx.get("kind") != "tempt":
+            continue
+        start = float(tx.get("at", 0.3))
+        dur = float(tx.get("dur", shot_dur - start - 0.1))
+        assert start >= 0 and dur >= 2.5 and start + dur <= shot_dur - 0.1, (
+            f"Temptation caption timing invalid/too short: {shot['id']} / {tx.get('t')!r}"
+        )
+        reveal = max(0.35, min(len(str(tx.get("t", ""))) / 16, dur * 0.30))
+        readable_hold = dur - reveal - float(tx.get("fo", 0.45))
+        assert readable_hold >= 1.2, (
+            f"Temptation caption has less than 1.2 s of full readable time: {shot['id']} / {tx.get('t')!r}"
+        )
 
 # Validate captions and global timing after the authored pass.
 # Readability/coverage gate: raise story captions to a usable Full-HD floor, then require both narrative coverage and visible text at 75% of each shot.
@@ -399,7 +417,7 @@ assert by_id["b24"]["args"]["actors"][1]["poseAt"] == [[0.0, "sit"], [2.0, "sitp
 assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
 b27_text = {tx.get("t"): tx for tx in by_id["b27"]["args"].get("texts", [])}
 assert b27_text["He still heard the old voice."]["dur"] >= 2.0
-assert b27_text["one more tiny fix."]["dur"] >= 1.7
+assert b27_text["one more tiny fix."]["dur"] >= 2.85
 assert by_id["b25"]["args"]["texts"][0]["dur"] <= 4.6
 assert by_id["b26"]["args"]["texts"][0]["dur"] <= 4.6
 for sid in ("b06", "b12", "b16", "b22"):
@@ -431,6 +449,7 @@ tx = by_id["b24"]["args"]["texts"][0]
 assert tx["x"] >= 0.80 and 0.24 <= tx["y"] <= 0.32 and tx["maxW"] <= 0.31 and tx.get("size", 53) >= 48, "B24 cafe narration must stay above the seated characters and remain readable"
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert b27_text["He didn't have to obey it."]["dur"] >= 3.0
+assert float(b27_text["one more tiny fix."]["at"]) + float(b27_text["one more tiny fix."]["dur"]) <= float(b27_text["He didn't have to obey it."]["at"]) - 0.05
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 9.0) < 0.02
 story["duration"] = 172.0
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
