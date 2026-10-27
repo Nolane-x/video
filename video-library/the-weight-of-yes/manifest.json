@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "technical_pass_full_length_artistic_review_pending",
+  "status": "visual_revision_render_in_progress",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -22,74 +22,45 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40429993390,
-    "run_number": 8,
-    "status": "success",
-    "conclusion": "success",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40429993390",
-    "head_sha": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
-    "artifact": {
-      "name": "the-weight-of-yes-h2-selfimprove-8",
-      "id": 12701373173,
-      "size_bytes": 58464627,
-      "sha256": "c0978eb3455e07656ecaa92082587ee5440f9a15fb87277a05132d282dd47938",
-      "expires_at": "2026-11-26T01:05:42Z",
-      "url": "https://github.com/Nolane-x/video/actions/runs/40429993390"
-    },
-    "master": {
-      "file_name": "the-weight-of-yes-h2-selfimprove.mp4",
-      "size_bytes": 20652791,
-      "sha256": "87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9",
-      "duration_seconds": 143,
-      "width": 1920,
-      "height": 1080,
-      "fps": "24/1",
-      "video_codec": "h264",
-      "audio_codec": "aac",
-      "audio_sample_rate_hz": 48000,
-      "audio_channels": 2,
-      "audio_integrated_loudness_lufs": -14,
-      "audio_loudness_range_lu": 9.2,
-      "audio_true_peak_dbfs": -5
-    },
-    "preview": {
-      "file_name": "preview-30s.mp4",
-      "size_bytes": 1761726,
-      "sha256": "ad1351737a2e10a926f6ae96713412bbf07a761a3b8e4ef016bf505019180f97",
-      "duration_seconds": 30,
-      "video": "H.264 960x540 at 24 fps",
-      "audio": "AAC 48 kHz stereo"
-    },
-    "review_bundle": {
-      "file_name": "the-weight-of-yes-review.zip",
-      "size_bytes": 29218876,
-      "sha256": "3d786efda871f5185043aad20eb27c0d8432a7db5973ddfefcbd4061509a9378",
-      "checksum_verification": "All entries in SHA256SUMS.txt verified after download."
-    },
-    "notes": "All 19 workflow steps passed. Shared H2 scheduled-motion fix is included. Contact sheets were reviewed; B08 proof sampled at opening/middle/end and the portfolio remains attached while the helper walks away. Full-length start-to-finish review with audio remains pending."
+    "run_id": 40452825177,
+    "run_number": 22,
+    "status": "in_progress",
+    "conclusion": null,
+    "url": "https://github.com/Nolane-x/video/actions/runs/40452825177",
+    "head_sha": "ad526e58f1deb7038bea24d6f612ef4269ab7de1",
+    "notes": "Visual revision: B08/B21 now use grounded upright poses; B19 boundary text is one line in the upper negative-space lane. CI gates assert these constraints."
   },
   "latest_technical_pass": {
-    "workflow_run_id": 40429993390,
-    "workflow_run_number": 8,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40429993390",
-    "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
+    "workflow_run_id": 40442985212,
+    "workflow_run_number": 21,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40442985212",
+    "source_commit": "4a23abe4195133f319290f18fcccb4499dd48b5b",
     "conclusion": "success",
-    "master_sha256": "87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9",
-    "preview_sha256": "ad1351737a2e10a926f6ae96713412bbf07a761a3b8e4ef016bf505019180f97",
-    "review_bundle_sha256": "3d786efda871f5185043aad20eb27c0d8432a7db5973ddfefcbd4061509a9378",
-    "artifact_id": 12701373173,
-    "artifact_zip_sha256": "c0978eb3455e07656ecaa92082587ee5440f9a15fb87277a05132d282dd47938",
-    "artifact_expires_at": "2026-11-26T01:05:42Z",
+    "all_workflow_steps_passed": true,
+    "master_sha256": "c722d1e4363b42fff33d096f22b5b0da915e86d9b38e0c8a0b4d55863c7edb60",
+    "master_bytes": 21773496,
+    "preview_sha256": "c0d55b58e3b044660fdd1b994b4973036efedce12c4b5a1b399a8dbc29d4b893",
+    "preview_bytes": 1866462,
+    "review_bundle_sha256": "149dfa921fc58dfd7b0e9f52d22d184dfc232bb85fa420385c1fd5f0057b526a",
+    "review_bundle_bytes": 30907384,
+    "artifact_id": 12706519055,
+    "artifact_name": "the-weight-of-yes-h2-selfimprove-21",
+    "artifact_bytes": 61842849,
+    "artifact_zip_sha256": "119d0c6a1428628a1757bf0fb15b75583c7719adfe3a48d04a569e026f79d377",
+    "artifact_expires_at": "2026-11-26T03:18:56Z",
     "duration_seconds": 143,
     "resolution": "1920x1080",
-    "fps": 24,
+    "fps": "24/1",
     "video": "H.264",
     "audio": "AAC 48000 Hz stereo",
     "integrated_lufs": -14,
     "lra_lu": 9.2,
     "true_peak_dbfs": -5,
     "checksum_files_valid": true,
-    "full_length_artistic_review": "pending"
+    "proof_count": 12,
+    "contact_sheet_count": 2,
+    "full_length_artistic_review": "pending",
+    "notes": "Run #21 technically passed and file checksums verified after download. Visual sampling found B19 caption overlap and potentially unsupported classroom sitting poses; fixes are in render #22."
   },
   "render_history": [
     {
@@ -136,15 +107,32 @@
       "url": "https://github.com/Nolane-x/video/actions/runs/40429993390",
       "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
       "reason": "Fixed scheduled walk/run descriptors being treated as scalar gait speeds when movement was idle; full MP4 and all checksum checks passed."
+    },
+    {
+      "run_id": 40442985212,
+      "run_number": 21,
+      "status": "technical_pass_visual_revision_required",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40442985212",
+      "source_commit": "4a23abe4195133f319290f18fcccb4499dd48b5b",
+      "reason": "Full render and checksums passed; contact sheets and three-point motion proof sampling identified a B19 caption collision and classroom seated poses that read as unsupported."
+    },
+    {
+      "run_id": 40452825177,
+      "run_number": 22,
+      "status": "in_progress",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40452825177",
+      "source_commit": "ad526e58f1deb7038bea24d6f612ef4269ab7de1",
+      "reason": "B08/B21 grounded pose revision; B19 unified caption moved to upper safe lane; additional static storyboard assertions added."
     }
   ],
   "artistic_signoff": {
     "status": "pending",
     "full_length_video_audio_review": false,
     "review_notes": [
-      "Both contact sheets reviewed; B08 proof sampled at opening, middle and ending frames after the engine fix.",
-      "The remaining eleven proofs passed automated stream/duration/checksum checks but were not all watched individually.",
-      "Do not mark artistically approved until the full 143-second master is watched with audio start-to-finish."
+      "Both contact sheets covering all 29 shots were inspected.",
+      "All 12 motion proofs were sampled at start, midpoint and end; this is frame sampling, not a real-time start-to-finish watch.",
+      "Master audio streams and EBU R128 metrics were verified; perceptual start-to-finish listening is still pending.",
+      "Run #21 candidate remains available as fallback; do not call artistically approved until run #22 and a complete audiovisual review are checked."
     ]
   },
   "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6"

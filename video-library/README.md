@@ -29,4 +29,8 @@ ALMOST READY is a technical-pass H2 candidate: [manifest](almost-ready/manifest.
 
 ## THE WEIGHT OF YES
 
+Current render: [Actions run #22](https://github.com/Nolane-x/video/actions/runs/40452825177). Run #21 passed technical QA; full-length audiovisual sign-off is pending.
+
+
+
 A new 29-shot H2 short about people-pleasing and personal boundaries: [script](../video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt), [project README](../video-projects/h2-selfimprove/the-weight-of-yes/README.md), [art bible](../video-projects/h2-selfimprove/the-weight-of-yes/story/bible.md), [manifest](the-weight-of-yes/manifest.json), [QA ledger](the-weight-of-yes/QA.md), [publishing package](the-weight-of-yes/02-PACKAGE-the-weight-of-yes.md), and [thumbnail directions](the-weight-of-yes/03-THUMB-PROMPT-the-weight-of-yes.txt). The authored target is 143 seconds, 1920×1080 at 24 fps, English on-screen text and no voice-over. The newest candidate is [Actions run #8](https://github.com/Nolane-x/video/actions/runs/40429993390), which passed all technical gates after a shared H2 scheduled-motion fix. Both contact sheets and the B08 motion proof were reviewed; full-length audio/video sign-off remains pending. The Actions artifact is temporary, not durable release storage.

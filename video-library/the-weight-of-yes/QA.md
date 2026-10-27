@@ -1,31 +1,48 @@
 # THE WEIGHT OF YES — QA ledger
 
-## Current status — render #8 technical pass
-- Workflow: [run #8 — success](https://github.com/Nolane-x/video/actions/runs/40429993390); all 19 workflow steps passed.
-- Source/render commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6) — shared H2 scheduled-motion fix.
-- Temporary Actions artifact: `the-weight-of-yes-h2-selfimprove-8`, ID `12701373173`, 58,464,627 bytes; expires 2026-11-26T01:05:42Z. This is not a durable release.
-- Project: 143.000 s, 29 shots, H.264 1920×1080 @24 fps, AAC 48 kHz stereo, English on-screen text, no voice-over.
-- Master: 20,652,791 bytes; SHA-256 `87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9`.
-- Audio on the exact MP4: −14.0 LUFS integrated, LRA 9.2 LU, true peak −5.0 dBFS.
-- Preview: 30.000 s with video + AAC sound; SHA-256 `ad1351737a2e10a926f6ae96713412bbf07a761a3b8e4ef016bf505019180f97`.
-- Review ZIP: 29,218,876 bytes; SHA-256 `3d786efda871f5185043aad20eb27c0d8432a7db5973ddfefcbd4061509a9378`; every entry in its checksum file passed after download.
+## Current state — run #22 visual revision in progress
+- Current workflow: [run #22](https://github.com/Nolane-x/video/actions/runs/40452825177), source commit `ad526e58f1deb7038bea24d6f612ef4269ab7de1`.
+- Status: the new render is in progress; no output from run #22 is claimed yet.
+- Previous candidate: [run #21 — all technical gates passed](https://github.com/Nolane-x/video/actions/runs/40442985212), source commit `4a23abe4195133f319290f18fcccb4499dd48b5b`.
+- Render: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering; not Remotion.
+- Target: 143.000 seconds, 29 shots, 1920×1080 at 24 fps, English on-screen text, no voice-over.
 
-## Targeted visual review
-- [x] Both contact sheets reviewed across all 29 shots.
-- [x] B08 proof sampled at opening, middle and end: limbs remain coherent and the portfolio stays attached to the favor-giver during departure.
-- [x] B19 boundary caption sits in negative space; B20's response is visible and non-punitive.
-- [x] B21 shows another helper taking the folder; B22 shows SENT; B24 reciprocal-care two-shot and B27 rebalanced ledger are present in the contact sheets.
-- [ ] Watch the entire 143-second film start-to-finish with audio, checking transitions, pacing, acting, prop contacts and emotional arc.
-- [ ] Individually watch the 30-second preview and all 12 motion proofs with audio; the eleven proofs other than B08 were not all individually watched.
+## Run #21 — independently downloaded technical candidate
+- Actions artifact: `the-weight-of-yes-h2-selfimprove-21`, ID `12706519055`, 61,842,849 bytes; artifact SHA-256 `119d0c6a1428628a1757bf0fb15b75583c7719adfe3a48d04a569e026f79d377`; expires 2026-11-26.
+- Master: `the-weight-of-yes-h2-selfimprove.mp4`, 21,773,496 bytes; SHA-256 `c722d1e4363b42fff33d096f22b5b0da915e86d9b38e0c8a0b4d55863c7edb60`.
+- Preview: `preview-30s.mp4`, 1,866,462 bytes; SHA-256 `c0d55b58e3b044660fdd1b994b4973036efedce12c4b5a1b399a8dbc29d4b893`.
+- Review bundle: `the-weight-of-yes-review.zip`, 30,907,384 bytes; SHA-256 `149dfa921fc58dfd7b0e9f52d22d184dfc232bb85fa420385c1fd5f0057b526a`.
+- Audio on the exact MP4: integrated loudness −14.0 LUFS, LRA 9.2 LU, true peak −5.0 dBFS.
+- Video/audio metadata: H.264 1920×1080 @24 fps; AAC stereo at 48 kHz; 143.000 seconds.
+- Validation: all 29 storyboard shots present with continuous timing; two contact sheets reviewed; 12 motion proof clips contain video and audio and pass duration/stream checks. Every checksum in the downloaded run #21 SHA256SUMS ledger passed.
+
+## Visual review and run #22 revisions
+- [x] Both contact sheets were inspected across all 29 shots.
+- [x] Three frames (start, midpoint, end) sampled from each of the 12 proof clips. This is targeted frame sampling, not full playback of every clip.
+- [x] B08 portfolio handoff remains visible while the helper moves away; the run #21 gait fix prevents the held folder/limbs from detaching.
+- [x] B22 displays the green SENT confirmation; B20's friend response remains non-punitive; café two-shots and ending ledger are visible in the sheets.
+- [ ] Run #22 must confirm B08 and B21 no longer read as unsupported seated figures in a classroom without a visible chair.
+- [ ] Run #22 must confirm the combined “NO. NOT TODAY.” caption remains fully legible in the upper safe lane.
+- [ ] Watch the full 143-second film start-to-finish with audio, checking transitions, pacing, acting, contacts and emotional arc.
+- [ ] Listen through the sound arc perceptually; loudness/true peak measurements are objective checks, not listening approval.
+
+## Story/visual regression gates
+- [x] A rising favor count contrasts with the hero's unfinished personal project.
+- [x] Overload beat is restrained; no villain or supernatural shadow is introduced.
+- [x] Boundary response stays visible and non-punitive.
+- [x] Another person visibly carries the portfolio after the boundary.
+- [x] A clear submitted/SENT confirmation appears after the hero's action.
+- [ ] Revised render must show grounded posture in classroom handoff scenes.
+- [ ] Revised render must keep the B19 boundary caption out of faces, hands and props.
+- [x] Resolution shows both chosen help and a calm refusal.
 
 ## Technical gates
-- [x] Native H2 timeline / authored story QA passed: 29 shot IDs, 143.000 s, no gaps/overlaps.
+- [x] Run #21 timeline/story QA passed: 29 shots, 143.000 seconds, no gaps/overlaps.
 - [x] Master H.264 1920×1080 @24 fps + AAC 48 kHz stereo.
 - [x] Runtime 143.000 s; EBU R128 −14.0 LUFS; true peak −5.0 dBFS (below −1.0 dBFS ceiling).
-- [x] Twelve ~6-second motion proofs contain audio/video; packaged checksum ledger validates.
-- [x] All entries in `SHA256SUMS.txt` passed `sha256sum -c`.
+- [x] Twelve ~6-second proof clips contain both audio and video.
+- [x] SHA-256 entries verified after downloading run #21 artifact.
+- [ ] Re-run all technical gates on run #22, then verify its new artifact/checksums.
 
-## Root cause and fix
-The earlier B08 proof exposed an engine bug: a scheduled `walk: {to, at, dur, speed}` object remained on the actor while movement was idle, and the character rig treated the object as a numeric gait speed. That could corrupt limb coordinates and detach held props at the first/last frames. The shared native H2 renderer now strips scheduled `walk`/`run` descriptor objects outside the active gait window in `integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/templates.js`. The new B08 proof was checked at the beginning, middle and end; the portfolio remains held and limbs are coherent.
-
-**Technical pass; artistic sign-off pending.** CI and targeted motion checks do not replace a full-length review with audio. Do not mark this an approved final or replace the canonical ONE MORE SCROLL master until the complete viewing is finished.
+## Sign-off
+**Run #21 is a verified technical candidate, not the approved final.** Run #22 is intended to address the remaining visual risks. Full-length audiovisual sign-off remains pending; do not replace the canonical ONE MORE SCROLL master.
