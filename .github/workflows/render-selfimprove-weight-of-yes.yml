@@ -127,7 +127,7 @@ jobs:
           assert by_id["b21"]["args"]["actors"][0]["pose"] == "relaxed", "B21 hero must stay upright and grounded"
           assert all(a.get("pose") != "sitdesk" for a in by_id["b08"]["args"]["actors"] + by_id["b21"]["args"]["actors"]), "Unsupported desk-sitting pose in classroom"
           assert len(by_id["b20"]["args"]["actors"]) == 2
-           assert by_id["b07"]["args"].get("y", 0) >= 0.57 and by_id["b07"]["args"].get("s", 1.2) <= 1.02, "B07 handwritten YES. must not clip into the letterbox"
+          assert by_id["b07"]["args"].get("y", 0) >= 0.57 and by_id["b07"]["args"].get("s", 1.2) <= 1.02, "B07 handwritten YES. must not clip into the letterbox"
           assert by_id["b22"]["args"]["sentAt"] == 2.25
           assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49, "B08 hero must use a numeric classroom position"
           assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84, "B08 favor-giver must visibly leave the hero behind"
