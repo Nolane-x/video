@@ -1,23 +1,18 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-27 after a shared H2 actor-motion fix and three successful native renders. The active candidate is **THE WEIGHT OF YES** (run #8). **THE FIRST HOUR** (run #30) and **ALMOST READY** (run #14) also passed technical QA after the same engine fix. All three still require complete start-to-finish artistic review with audio; none is marked artistically approved or archived to a durable release. The canonical ONE MORE SCROLL master remains unchanged.
+Snapshot updated 2026-10-27 after caption-safe-area and notebook layout revisions. Latest H2 candidates: **THE WEIGHT OF YES #30**, **THE FIRST HOUR #48**, and **ALMOST READY #33**. Each latest workflow completed all 19 steps; downloaded artifacts passed every entry in their checksum ledgers. Both contact sheets were manually inspected for each film and targeted 1080p frames were reviewed at previously failing text locations. None is approved for final release yet: complete start-to-finish video and audio review remains pending. The canonical ONE MORE SCROLL master remains unchanged.
 
-## Latest active film — THE WEIGHT OF YES
-- Manifest: [video-library/the-weight-of-yes/manifest.json](../video-library/the-weight-of-yes/manifest.json); QA: [video-library/the-weight-of-yes/QA.md](../video-library/the-weight-of-yes/QA.md).
-- Story: people-pleasing and personal boundaries; 29 shots, 143.000 s, English on-screen text, no voice-over.
-- Engine: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg audio mastering; not Remotion.
-- Source/render commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6).
-- CI: [run #8 — success](https://github.com/Nolane-x/video/actions/runs/40429993390); all 19 steps passed.
-- MP4: H.264 1920×1080 @24 fps, AAC 48 kHz stereo; 20,652,791 bytes. SHA-256: `87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9`.
-- EBU R128: −14.0 LUFS integrated, LRA 9.2 LU, true peak −5.0 dBFS. The 30-second preview contains video and mastered audio.
-- Review ZIP SHA-256: `3d786efda871f5185043aad20eb27c0d8432a7db5973ddfefcbd4061509a9378`; every checksum entry passed.
-- Temporary Actions artifact: [`the-weight-of-yes-h2-selfimprove-8`](https://github.com/Nolane-x/video/actions/runs/40429993390), ID `12701373173`; expires 2026-11-26T01:05:42Z.
-- Visual check: both contact sheets reviewed; B08 sampled at opening/middle/end after the fix. The folder stays attached to the moving helper and limbs remain coherent. Full-length audio/video review remains pending.
+## Current active candidate — THE WEIGHT OF YES
+- QA: [manifest](../video-library/the-weight-of-yes/manifest.json), [QA ledger](../video-library/the-weight-of-yes/QA.md).
+- Latest render: [run #30 — all 19 steps passed](https://github.com/Nolane-x/video/actions/runs/40461365610), source [commit](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442).
+- Master: 143.000 s, H.264 1920×1080 @24 fps + AAC stereo 48 kHz; SHA-256 `cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d`.
+- Audio: −14.0 LUFS, LRA 9.2 LU, true peak −5.0 dBFS.
+- Targeted visual QA: contact sheets reviewed; B07 handwritten YES. is inside the page and B19’s boundary caption clears the actors/board. Full-length approval pending.
 
-## Parallel H2 candidates re-rendered after the shared engine fix
-- **THE FIRST HOUR**: [run #30 — success](https://github.com/Nolane-x/video/actions/runs/40429993407); [manifest](../video-library/the-first-hour/manifest.json). 172.000 s, 1920×1080/24 fps H.264 + AAC 48 kHz stereo; −14.1 LUFS, −2.5 dBFS true peak. Master SHA-256 `f08c9afad88034b1ce7a0e57438f48391aa0a43ffcb3f59c8bbbc4339d25126b`. Artifact expires 2026-11-26T01:07:01Z. Both sheets reviewed; B19 motion sampled.
-- **ALMOST READY**: [run #14 — success](https://github.com/Nolane-x/video/actions/runs/40429993482); [manifest](../video-library/almost-ready/manifest.json). 172.000 s, 1920×1080/24 fps H.264 + AAC 48 kHz stereo; −14.0 LUFS, −1.9 dBFS true peak. Master SHA-256 `67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2`. Artifact expires 2026-11-26T01:05:34Z. B19 movement proof sampled; complete sheet/full-length review pending.
-- Technical pass does not equal artistic approval.
+## Parallel H2 candidates
+- **THE FIRST HOUR**: [run #48 — success](https://github.com/Nolane-x/video/actions/runs/40462283974). 172.000 s; master SHA-256 `47ded9fb4c2fb4512853e3f8de1d02095c608e775545bc8b9466746485e40730`; −14.0 LUFS, LRA 6.6 LU, −1.9 dBFS true peak. Targeted B20 notebook frame shows the caption inside the lower-right paper region.
+- **ALMOST READY**: [run #33 — success](https://github.com/Nolane-x/video/actions/runs/40462284021). 172.000 s; master SHA-256 `1b55dc7dda017d7f9869c2b3b5e5492a2c97d471e51ac958e019a031c7af5fc9`; −14.1 LUFS, LRA 9.1 LU, −1.8 dBFS true peak. Targeted B13 frame shows narration above the reduced clock/SNOOZE UI.
+- All three are temporary Actions artifacts, not durable release archives.
 
 ## Shared H2 fix pushed to main
 - Commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6).
@@ -101,7 +96,7 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - The H2 source publisher is `tools/video/publish_h2_source_release.ps1`; source ZIPs should be stored as verified GitHub Release assets, not huge regular Git blobs.
 - The current portable skill ZIP includes both the Remotion reference MP4 and the checksum-verified canonical H2 MP4. It also includes `video-library/reference-clips.json`, which preserves your two reference-video URLs and study prompts; standalone copies of those third-party MP4s were not found in the current workspace/Library and are not embedded. It does not bundle every historical clip; use the catalog for availability and provenance.
 
-## Latest H2 source-v2 render candidate
+## Historical H2 source-v2 render candidate
 - Workflow: [40276064292](https://github.com/Nolane-x/video/actions/runs/40276064292) — full 155-second render, audio mix, stream validation and Release upload passed.
 - Candidate: [download MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v2-render-candidate.mp4); review bundle: [ZIP](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v2-render-review.zip).
 - SHA-256: `5f72e611c1257a4b31fa834c4b8d5481a8404b6becb50f41df7663cd2f7c96b7`; size 33,396,438 bytes; 155.000s; 1920×1080 @24fps; H.264 + AAC stereo 48 kHz.
@@ -116,7 +111,7 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 
 
 
-## Parallel H2 candidate — ALMOST READY (run #14 technical pass)
+## Historical ALMOST READY candidate — run #14 technical pass
 - Manifest: [video-library/almost-ready/manifest.json](../video-library/almost-ready/manifest.json); QA: [video-library/almost-ready/QA.md](../video-library/almost-ready/QA.md).
 - Script: [01-PHIM-the-almost-ready.txt](../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt); art-direction: [tune_story.py](../video-projects/h2-selfimprove/almost-ready/tune_story.py).
 - Latest native H2 render: [run #14](https://github.com/Nolane-x/video/actions/runs/40429993482), all steps successful. 172.000 s, H.264 1920×1080 @24 fps + AAC 48 kHz stereo; −14.0 LUFS, −1.9 dBFS true peak.

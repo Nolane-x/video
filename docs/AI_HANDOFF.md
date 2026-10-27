@@ -1,13 +1,13 @@
 # AI session handoff
 
-## Current active film — verify this before resuming old projects
-- Resume with **THE WEIGHT OF YES — An Animated Short Film**, native H2 Canvas/Chromium + FFmpeg; not Remotion.
-- Latest render: [run #8 — success](https://github.com/Nolane-x/video/actions/runs/40429993390), source commit `1ab974acc2f8e0b268940fbf16f6b566884dace6`; manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
-- Candidate: SHA-256 `87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9`, 143.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; −14.0 LUFS, LRA 9.2 LU, true peak −5.0 dBFS.
-- Both contact sheets reviewed; B08 sampled at opening/middle/end after the engine fix. The portfolio and limbs remain coherent. Full 143-second start-to-finish audio/video review is pending.
-- Temporary artifact `the-weight-of-yes-h2-selfimprove-8` (ID 12701373173) expires 2026-11-26T01:05:42Z; not a durable release.
-- Parallel technical-pass rerenders: [THE FIRST HOUR #30](https://github.com/Nolane-x/video/actions/runs/40429993407) and [ALMOST READY #14](https://github.com/Nolane-x/video/actions/runs/40429993482); full-length reviews also pending.
-- Shared bugfix commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6). It prevents scheduled `walk`/`run` objects being treated as scalar gait speeds outside active movement windows. Do not change canonical ONE MORE SCROLL master.
+## Current verified state — continue from these, not historical render numbers
+- Primary candidate: **THE WEIGHT OF YES — render #30**, [workflow](https://github.com/Nolane-x/video/actions/runs/40461365610), source [commit](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442), manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
+- Parallel latest candidates: **THE FIRST HOUR #48** ([run](https://github.com/Nolane-x/video/actions/runs/40462283974)) and **ALMOST READY #33** ([run](https://github.com/Nolane-x/video/actions/runs/40462284021)); both use source commit `263e855a675b451f799ee684d66515b23a0dded7`.
+- All current workflows passed 19 steps; downloaded checksum ledgers passed. Both current contact sheets per film were visually inspected and selected 1080p problem frames extracted.
+- Caption fixes: First Hour B20 stays within the notebook page; Almost Ready B03/B09/B20 captions stay inside the page and B13 narration clears the reduced SNOOZE/timer UI; Weight of Yes B07 handwritten “YES.” stays inside the page and B19’s “NO. NOT TODAY.” sits clear of actors/board.
+- Audio checks: Weight of Yes −14.0 LUFS / 9.2 LU LRA / −5.0 dBFS true peak; First Hour −14.0 / 6.6 / −1.9; Almost Ready −14.1 / 9.1 / −1.8. Masters are H.264 1920×1080 @24 fps + AAC 48 kHz stereo; durations 143 s / 172 s / 172 s.
+- Full-length start-to-finish viewing and perceptual listening remain pending. Do not state any film is artistically approved; do not archive to a durable release until sign-off. Preserve the canonical ONE MORE SCROLL master.
+- Inspect the current `main` branch before further edits; do not resume using stale run #8/#30/#14 references below.
 
 ## First reads
 Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, and `video-library/one-more-scroll/manifest.json`.
