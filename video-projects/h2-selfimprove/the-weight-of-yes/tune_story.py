@@ -131,11 +131,11 @@ apply("b07", "note", {
     "texts": [narr("He answered before checking his own plans.", 0.32, 4.25, x=0.76, y=0.67, size=48, max_w=0.26, color="#302a24")]
 })
 
-# B08 — everyone else leaves with the task done; he stays at the desk.
+# B08 — the hero remains grounded and visibly exhausted as the other helper carries the portfolio away.
 apply("b08", "scene", {
     "set": "classroom", "setArgs": classroom("dusk", desks=[0.46]),
     "actors": [
-        actor("hero", 0.49, "sitdesk", "tired", facing=1, scale=1.00),
+        actor("hero", 0.49, "slump", "tired", facing=1, scale=1.00),
         actor("friend2", 0.70, "carry", "smile", facing=1, scale=0.82, hold="portfolio",
               walk={"to": 0.86, "at": 0.55, "dur": 2.85, "speed": 0.70})
     ],
@@ -244,7 +244,7 @@ apply("b18", "scene", {
     "texts": [narr("This time, he let the silence answer first.", 0.32, 4.25, x=0.41, y=0.28, size=48, max_w=0.34)]
 })
 
-# B19 — one calm, unmistakable boundary. Leave a clean text lane.
+# B19 — one calm, unmistakable boundary, composed in the upper negative-space lane.
 apply("b19", "scene", {
     "set": "classroom", "setArgs": classroom("dusk"),
     "actors": [
@@ -253,8 +253,7 @@ apply("b19", "scene", {
     ],
     "cam": cam(0.52, 0.56, 1.07),
     "texts": [
-        cap("big", "NO.", 0.70, 2.15, x=0.29, y=0.39, size=124, max_w=0.36),
-        narr("Not today.", 3.02, 1.45, x=0.29, y=0.54, size=49, max_w=0.42)
+        cap("big", "NO. NOT TODAY.", 0.70, 3.85, x=0.50, y=0.245, size=82, max_w=0.82)
     ]
 })
 
@@ -269,11 +268,11 @@ apply("b20", "scene", {
     "texts": [narr("She paused. Then she nodded.", 0.32, 4.25, x=0.41, y=0.28, size=48, max_w=0.34)]
 })
 
-# B21 — another pair of hands takes over, making the boundary practical.
+# B21 — another pair of hands takes over; the hero stays upright and physically grounded.
 apply("b21", "scene", {
     "set": "classroom", "setArgs": classroom("day", desks=[0.46]),
     "actors": [
-        actor("hero", 0.49, "sitdesk", "smile", facing=1, scale=0.96),
+        actor("hero", 0.43, "relaxed", "smile", facing=1, scale=0.96),
         actor("girl", 0.60, "reach", "neutral", facing=-1, scale=0.87),
         actor("friend2", 0.75, "carry", "smile", facing=-1, scale=0.83, hold="portfolio")
     ],
@@ -420,7 +419,10 @@ assert by_id["b01"]["tpl"] == "black"
 assert by_id["b05"]["tpl"] == "laptop"
 assert by_id["b11"]["tpl"] == "laptop"
 assert by_id["b14"]["args"]["set"] == "void"
-assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
+assert any(t.get("t") == "NO. NOT TODAY." and abs(float(t.get("y", 0)) - 0.245) < 0.01 for t in by_id["b19"]["args"]["texts"])
+assert by_id["b08"]["args"]["actors"][0]["pose"] == "slump"
+assert by_id["b21"]["args"]["actors"][0]["pose"] == "relaxed"
+assert all(a.get("pose") != "sitdesk" for a in by_id["b08"]["args"]["actors"] + by_id["b21"]["args"]["actors"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
 # Only B07 uses the notebook insert; its narration must sit below the handwritten "YES." title.
 tx = by_id["b07"]["args"]["texts"][0]

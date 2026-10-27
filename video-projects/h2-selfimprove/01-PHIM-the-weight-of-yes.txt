@@ -22,7 +22,7 @@ ACCENT: amber
 [B07] 5s | CẢNH: cận trang sổ, một chữ YES hiện ra, bàn tay viết nhanh rồi dừng lại | SFX: page_flip@0.4
 > He answered before checking his own plans.
 
-[B08] 5s | CẢNH: cậu ngồi bàn học, một người khác đặt thêm giấy trước mặt, cậu cúi đầu tiếp tục giúp | NHẠC: dark
+[B08] 5s | CẢNH: lớp học lúc chiều muộn, cậu đứng cạnh bàn với vai rũ xuống, bạn cùng lớp mang hồ sơ đi về phía cửa; cậu ở lại một mình | NHẠC: dark
 > They went home lighter.
 
 [B09] 5s | CẢNH: thành phố lúc chiều muộn, cậu bước giữa dòng người, tay ôm chồng tài liệu, người khác đi trước nhẹ nhàng | SFX: footsteps@0.5
@@ -55,8 +55,8 @@ ACCENT: amber
 [B18] 5s | CẢNH: cậu nhìn yêu cầu, rồi nhìn trang kế hoạch riêng còn bỏ dở trên bàn | NHẠC: tension
 > This time, he let the silence answer first.
 
-[B19] 5s | CẢNH: cậu đứng thẳng hơn, nhìn người đối diện và lắc đầu nhẹ nhưng rõ ràng | NHẠC: none
-> "No. Not today."
+[B19] 5s | CẢNH: lớp học gần như trống, cậu đứng vững và từ chối bình tĩnh; câu trả lời hiện ở khoảng trống phía trên, không che mặt hay tay | NHẠC: none
+! NO. NOT TODAY.
 
 [B20] 5s | CẢNH: người bạn ngạc nhiên một nhịp, sau đó gật đầu; không ai nổi giận, không thế giới nào sụp đổ | NHẠC: hope
 > She paused. Then she nodded.
