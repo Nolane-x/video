@@ -74,7 +74,7 @@ apply("b02", "scene", {
 apply("b03", "note", {
     "text": "FIRST DRAFT", "at": 0.45, "cps": 5.0, "x": 0.5, "y": 0.52, "s": 0.88,
     "cam": cam(0.5, 0.52, 1.07),
-    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
+    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.70, y=0.67, size=40, max_w=0.22)]
 })
 
 # B04 — face reaction after the first flaw; the screen/page light cools the mood.
@@ -135,7 +135,7 @@ apply("b09", "note", {
     "text": "VERSION 19", "at": 0.4, "cps": 5.1, "s": 0.90,
     "cam": cam(0.5, 0.52, 1.13),
     "hud": {"rows": [{"label": "EDITS", "n": 19}, {"label": "SHARED", "n": 0}]},
-    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
+    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.70, y=0.67, size=40, max_w=0.22)]
 })
 
 # B10 — peers visibly share; the protagonist stays in the less-lit foreground.
@@ -172,7 +172,7 @@ apply("b12", "laptop", {
 apply("b13", "clock", {
     "time": "11:58", "timeAt": [[3.0, "11:59"]], "ring": False,
     "s": 0.77, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.12),
-    "texts": [narr("The minutes began to sprint.", 0.35, 4.25, x=0.18, y=0.28, size=42, max_w=0.24)]
+    "texts": [narr("The minutes began to sprint.", 0.35, 4.25, x=0.07, y=0.48, size=38, max_w=0.13)]
 })
 
 # B14 — the voice is close and dominant at the low point.
@@ -237,7 +237,7 @@ apply("b19", "scene", {
 apply("b20", "note", {
     "text": "GOOD ENOUGH\nTO SHARE.", "at": 0.45, "cps": 6.2,
     "x": 0.5, "y": 0.52, "s": 0.92, "cam": cam(0.5, 0.52, 1.10),
-    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
+    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.70, y=0.67, size=40, max_w=0.22)]
 })
 
 # B21 — deliberate desk composition, real typing posture; sent count is still zero.
@@ -281,7 +281,7 @@ apply("b24", "scene", {
               poseAt=[[0.0, "sit"], [2.0, "sitpoint"]])
     ],
     "cam": cam(0.5, 0.55, 1.06),
-    "texts": [narr("Her first question was about the idea.", 0.35, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
+    "texts": [narr("Her first question was about the idea.", 0.35, 4.25, x=0.83, y=0.28, size=40, max_w=0.22)]
 })
 
 # B25 — studio critique; hero is no longer hidden at the back of the room.
@@ -384,18 +384,18 @@ for sid in ("b10", "b25"):
     assert 0.38 <= tx["x"] <= 0.44 and 0.25 <= tx["y"] <= 0.31 and tx["maxW"] <= 0.35, f"{sid} narration must avoid the TEAM WORK/SHOWCASE board"
 for sid in ("b03", "b09", "b20"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, f"{sid} notebook caption must use the blank lower-right page"
+    assert tx["x"] == 0.70 and tx["y"] >= 0.63 and tx["maxW"] <= 0.22, f"{sid} notebook caption must fit wholly inside the blank right page"
 for sid in ("b02", "b19", "b29"):
     tx = by_id[sid]["args"]["texts"][0]
     assert tx["x"] <= 0.26 and tx["maxW"] <= 0.31 and 0.25 <= tx["y"] <= 0.33, f"{sid} caption must stay left of the window/character"
 tx = by_id["b21"]["args"]["texts"][0]
 assert tx["x"] >= 0.76 and tx["maxW"] <= 0.27 and 0.25 <= tx["y"] <= 0.33, "B21 caption must stay in the right-side bedroom wall lane"
 tx = by_id["b13"]["args"]["texts"][0]
-assert tx["x"] <= 0.20 and tx["y"] <= 0.31 and tx["maxW"] <= 0.25, "B13 clock caption must stay outside the clock face"
+assert tx["x"] <= 0.08 and 0.42 <= tx["y"] <= 0.53 and tx["maxW"] <= 0.14, "B13 clock narration must remain in the left margin outside the timer face"
 tx = by_id["b08"]["args"]["texts"][0]
 assert tx["x"] <= 0.22 and tx["y"] >= 0.55 and tx["maxW"] <= 0.25, "B08 calendar caption must stay left of the calendar"
 tx = by_id["b24"]["args"]["texts"][0]
-assert tx["x"] >= 0.82 and 0.49 <= tx["y"] <= 0.57 and tx["maxW"] <= 0.25, "B24 cafe caption must stay in the right-side safe lane"
+assert tx["x"] >= 0.81 and 0.24 <= tx["y"] <= 0.32 and tx["maxW"] <= 0.23, "B24 cafe narration must stay above the seated characters"
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert b27_text["He didn't have to obey it."]["dur"] >= 3.0
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 9.0) < 0.02
