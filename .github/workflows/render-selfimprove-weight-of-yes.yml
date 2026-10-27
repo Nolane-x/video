@@ -175,8 +175,11 @@ jobs:
           print("Mastering override active: loudnorm TP=-6 dBFS, final limiter=0.75")
           PY
           python tools/mix.py --project projects/the-weight-of-yes
+          # render.mjs is silent when this film has no voice track; mux the same mastered mix used by the final master.
+          ffmpeg -hide_banner -loglevel error -y -i projects/the-weight-of-yes/build/preview.mp4 -i projects/the-weight-of-yes/build/mix.wav -t 30 -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -movflags +faststart projects/the-weight-of-yes/build/preview_with_audio.mp4
+          ffprobe -v error -show_streams -show_format -of json projects/the-weight-of-yes/build/preview_with_audio.mp4 > "$GITHUB_WORKSPACE/dist/the-weight-of-yes/preview-ffprobe.json"
           cp projects/the-weight-of-yes/out/*.mp4 "$GITHUB_WORKSPACE/dist/the-weight-of-yes/the-weight-of-yes-h2-selfimprove.mp4"
-          cp projects/the-weight-of-yes/build/preview.mp4 "$GITHUB_WORKSPACE/dist/the-weight-of-yes/preview-30s.mp4"
+          cp projects/the-weight-of-yes/build/preview_with_audio.mp4 "$GITHUB_WORKSPACE/dist/the-weight-of-yes/preview-30s.mp4"
           cp projects/the-weight-of-yes/story/shots.json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/shots.json"
           cp projects/the-weight-of-yes/story/bible.md "$GITHUB_WORKSPACE/dist/the-weight-of-yes/bible.md"
           cp projects/the-weight-of-yes/config.json "$GITHUB_WORKSPACE/dist/the-weight-of-yes/config.json"
@@ -268,6 +271,14 @@ jobs:
           assert abs(float(d["format"]["duration"])-143.0)<0.15, f"Unexpected runtime: {d['format']['duration']}"
           assert v[0].get("r_frame_rate")=="24/1", f"Unexpected frame rate: {v[0].get('r_frame_rate')}"
           assert a[0].get("sample_rate")=="48000" and int(a[0].get("channels",0))==2, "Audio must be 48 kHz stereo"
+          preview=json.loads(Path("dist/the-weight-of-yes/preview-ffprobe.json").read_text())
+          pv=[s for s in preview["streams"] if s.get("codec_type")=="video"]
+          pa=[s for s in preview["streams"] if s.get("codec_type")=="audio"]
+          pd=float(preview["format"]["duration"])
+          assert pv and pa, "30-second preview must contain both video and audio"
+          assert 29.7 <= pd <= 30.3, f"Preview duration is not 30 seconds: {pd}"
+          assert int(pv[0]["width"]) >= 640 and int(pv[0]["height"]) >= 360, "Preview resolution is too small"
+          assert pa[0].get("sample_rate") == "48000", "Preview audio must be 48 kHz"
           log=Path("dist/the-weight-of-yes/ebur128.log").read_text(errors="replace")
           m_i=re.search(r"^\s*I:\s*(-?[0-9]+\.[0-9]+)\s*LUFS\s*$", log, re.M)
           m_p=re.search(r"^\s*Peak:\s*(-?[0-9]+\.[0-9]+)\s*dBFS\s*$", log, re.M)
