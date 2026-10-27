@@ -22,12 +22,12 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40424661440,
-    "run_number": 5,
+    "run_id": 40425050181,
+    "run_number": 6,
     "status": "pending",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40424661440",
-    "head_sha": "43b47f8efed73b2ca0c7d1b02a7f1e636e98708a",
-    "notes": "Clean duplicate set arguments after classroom-anchor correction. FFmpeg/ffprobe now uses static setup action. Run #4 is still completing its dependency step and may be superseded by #5; no final MP4 claimed."
+    "url": "https://github.com/Nolane-x/video/actions/runs/40425050181",
+    "head_sha": "4ca6e78d680697150c08e455d53d169ca670a698",
+    "notes": "Clean classroom-anchor source and preview audio mux/stream validation. Run #5 is currently in silent-render stage on the prior cleanly equivalent source; #6 is the newest workflow."
   },
   "latest_technical_pass": null,
   "render_history": [
@@ -48,6 +48,12 @@
       "run_number": 4,
       "status": "in_progress",
       "reason": "Contains the same functional classroom anchors and validation guards; only duplicate classroom setArgs keys remain, valid in Python but removed cleanly in the queued successor."
+    },
+    {
+      "run_id": 40424661440,
+      "run_number": 5,
+      "status": "in_progress",
+      "reason": "H2 storyboard validation succeeded; full H2 silent render began before preview-audio gate was added. Its preview must not be used as a sound-enabled review preview."
     }
   ],
   "artistic_signoff": {
