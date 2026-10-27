@@ -101,7 +101,7 @@ jobs:
           for phrase in (
               "He was everyone's first call.",
               "His own task list sat untouched.",
-              "No. Not today.",
+              "NO. NOT TODAY.",
               "The work found another pair of hands.",
               "He kept the promise he had made himself.",
               "You can care without disappearing."
