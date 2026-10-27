@@ -74,7 +74,7 @@ apply("b02", "scene", {
     "setArgs": {"sky": "dawn", "stage": True, "tableX": 0.61, "lamp": False},
     "actors": [actor("hero", 0.50, "stand", "tired", facing=1, scale=0.98)],
     "cam": cam(0.50, 0.55, 1.08),
-    "texts": [narr("Before his own day began, someone else needed him.", size=49)]
+    "texts": [narr("Before his own day began, someone else needed him.", 0.32, 4.25, x=0.28, y=0.28, size=42, max_w=0.20)]
 })
 
 # B03 — a request lands in physical space; he accepts before thinking.
@@ -85,7 +85,7 @@ apply("b03", "scene", {
         actor("friend", 0.69, "reach", "neutral", facing=-1, scale=0.91, hold="portfolio")
     ],
     "cam": cam(0.53, 0.56, 1.10),
-    "texts": [narr("“Could you cover this?”", size=56)]
+    "texts": [narr("“Could you cover this?”", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B04 — second favor; keep both eye-lines and the handoff readable.
@@ -97,7 +97,7 @@ apply("b04", "scene", {
         actor("friend2", 0.87, "point", "neutral", facing=-1, scale=0.70)
     ],
     "cam": cam(0.54, 0.56, 1.06),
-    "texts": [narr("“Can you fix our part, too?”", size=53)]
+    "texts": [narr("“Can you fix our part, too?”", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B05 — favors accumulate, but the hero's own board remains empty.
@@ -120,7 +120,7 @@ apply("b06", "scene", {
     ],
     "hud": {"rows": [{"label": "REQUESTS", "n": 3}]},
     "cam": cam(0.50, 0.57, 1.12),
-    "texts": [narr("One more message. One more favor.", size=55)]
+    "texts": [narr("One more message. One more favor.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B07 — "YES" becomes a repeated, deliberate visual motif.
@@ -140,7 +140,7 @@ apply("b08", "scene", {
               walk={"to": 0.86, "at": 0.55, "dur": 2.85, "speed": 0.70})
     ],
     "cam": cam(0.56, 0.59, 1.05),
-    "texts": [narr("They went home lighter.", size=56)]
+    "texts": [narr("They went home lighter.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B09 — the burden follows him into ordinary public space.
@@ -159,7 +159,7 @@ apply("b10", "scene", {
     "set": "cafe", "setArgs": {"lampX": 0.50, "tableW": 0.28},
     "actors": [actor("hero", "table.left", "sit", "sad", facing=1, scale=0.88)],
     "cam": cam(0.50, 0.56, 1.10),
-    "texts": [narr("He ate after everyone else left.", size=56)]
+    "texts": [narr("He ate after everyone else left.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
 })
 
 # B11 — his own deadline finally enters frame as a concrete consequence.
@@ -190,7 +190,7 @@ apply("b13", "scene", {
         actor("girl", "table.right", "sitpoint", "worried", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.56, 1.08),
-    "texts": [narr("When someone asked how he was, he smiled.", size=49)]
+    "texts": [narr("When someone asked how he was, he smiled.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
 })
 
 # B14 — a short, restrained overload beat. No monster and no exaggerated collapse.
@@ -210,7 +210,7 @@ apply("b15", "scene", {
         actor("friend", 0.77, "stand", "worried", facing=-1, scale=0.86)
     ],
     "cam": cam(0.53, 0.57, 1.06, 4.45),
-    "texts": [narr("For once, he stopped in the middle of yes.", size=49)]
+    "texts": [narr("For once, he stopped in the middle of yes.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B16 — the friend changes posture to meet him at eye level.
@@ -221,7 +221,7 @@ apply("b16", "scene", {
         actor("friend", 0.65, "kneel", "worried", facing=-1, scale=0.88)
     ],
     "cam": cam(0.51, 0.61, 1.10),
-    "texts": [narr("A friend noticed the silence.", size=56)]
+    "texts": [narr("A friend noticed the silence.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B17 — one last request arrives; show it as readable UI, not a scrolling feed.
@@ -241,7 +241,7 @@ apply("b18", "scene", {
         actor("girl", 0.75, "reach", "neutral", facing=-1, scale=0.86)
     ],
     "cam": cam(0.52, 0.56, 1.14),
-    "texts": [narr("This time, he let the silence answer first.", size=49)]
+    "texts": [narr("This time, he let the silence answer first.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B19 — one calm, unmistakable boundary. Leave a clean text lane.
@@ -266,7 +266,7 @@ apply("b20", "scene", {
         actor("girl", 0.72, "shrug", "smile", facing=1, scale=0.88)
     ],
     "cam": cam(0.52, 0.57, 1.05),
-    "texts": [narr("She paused. Then she nodded.", size=58)]
+    "texts": [narr("She paused. Then she nodded.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B21 — another pair of hands takes over, making the boundary practical.
@@ -278,7 +278,7 @@ apply("b21", "scene", {
         actor("friend2", 0.75, "carry", "smile", facing=-1, scale=0.83, hold="portfolio")
     ],
     "cam": cam(0.56, 0.58, 1.10),
-    "texts": [narr("The work found another pair of hands.", size=50)]
+    "texts": [narr("The work found another pair of hands.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B22 — visible completion, with a timed SENT confirmation after the click.
@@ -301,7 +301,7 @@ apply("b23", "scene", {
               walk={"to": 0.48, "at": 0.28, "dur": 2.60, "speed": 0.74})
     ],
     "cam": cam(0.55, 0.55, 1.12),
-    "texts": [narr("The first space he protected was his own.", size=49)]
+    "texts": [narr("The first space he protected was his own.", 0.32, 4.25, x=0.28, y=0.28, size=42, max_w=0.22)]
 })
 
 # B24 — reciprocal care: the friend offers something and listens.
@@ -312,7 +312,7 @@ apply("b24", "scene", {
         actor("friend", "table.right", "sitpoint", "smile", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.57, 1.08),
-    "texts": [narr("Care began to move both ways.", size=58)]
+    "texts": [narr("Care began to move both ways.", 0.32, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
 })
 
 # B25 — preserve generosity; the lesson is choice, not withdrawal.
@@ -323,7 +323,7 @@ apply("b25", "scene", {
         actor("girl", 0.70, "reach", "smile", facing=1, scale=0.88)
     ],
     "cam": cam(0.53, 0.57, 1.06),
-    "texts": [narr("He still said yes when he meant it.", size=55)]
+    "texts": [narr("He still said yes when he meant it.", 0.32, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B26 — a calm decline, followed by continued movement; no apology spiral.
@@ -369,7 +369,7 @@ apply("b29", "scene", {
     "setArgs": room("dawn", door=True, doorOpen=0.7, lamp=False),
     "actors": [actor("hero", 0.53, "wave", "smile", facing=1, scale=0.94)],
     "cam": cam(0.52, 0.55, 1.04, 3.50),
-    "texts": [narr("If this hit, like and subscribe.", 0.28, 3.45, size=48)]
+    "texts": [narr("If this hit, like and subscribe.", 0.28, 3.45, x=0.22, y=0.29, size=44, max_w=0.30)]
 })
 
 # Strict storyboard gates: IDs, time, captions, visual turning point and payoff.
@@ -400,6 +400,24 @@ assert by_id["b11"]["tpl"] == "laptop"
 assert by_id["b14"]["args"]["set"] == "void"
 assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
+classroom_lane = ("b03", "b04", "b06", "b08", "b15", "b16", "b18", "b20", "b21", "b25")
+for sid in classroom_lane:
+    tx = by_id[sid]["args"]["texts"][0]
+    assert 0.38 <= tx["x"] <= 0.44 and 0.25 <= tx["y"] <= 0.31 and tx["maxW"] <= 0.35, (
+        f"{sid} narration must stay between the classroom window/clock and the TEAM WORK board"
+    )
+for sid in ("b10", "b13", "b24"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] >= 0.82 and 0.49 <= tx["y"] <= 0.57 and tx["maxW"] <= 0.25, (
+        f"{sid} café narration must stay in the clear right-side lane below the window/lamp"
+    )
+for sid in ("b02", "b23"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] <= 0.30 and tx["maxW"] <= 0.23 and 0.25 <= tx["y"] <= 0.31, (
+        f"{sid} bedroom narration must remain left of the window and clear of the character"
+    )
+tx = by_id["b29"]["args"]["texts"][0]
+assert tx["x"] <= 0.25 and tx["maxW"] <= 0.31 and 0.25 <= tx["y"] <= 0.33, "B29 CTA must stay left of the window"
 for sid in ("b05", "b11", "b17", "b22"):
     tx = by_id[sid]["args"]["texts"][0]
     assert tx["x"] >= 0.68 and 0.40 <= tx["y"] <= 0.60 and tx["maxW"] <= 0.30, (
