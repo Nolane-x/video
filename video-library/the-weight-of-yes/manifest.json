@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "render_queued",
+  "status": "render_in_progress",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -24,10 +24,10 @@
   "latest_render": {
     "run_id": 40425050181,
     "run_number": 6,
-    "status": "pending",
+    "status": "in_progress",
     "url": "https://github.com/Nolane-x/video/actions/runs/40425050181",
     "head_sha": "4ca6e78d680697150c08e455d53d169ca670a698",
-    "notes": "Clean classroom-anchor source and preview audio mux/stream validation. Run #5 is currently in silent-render stage on the prior cleanly equivalent source; #6 is the newest workflow."
+    "notes": "Static FFmpeg/H.264 checks passed; H2 dependencies/audio built; authored storyboard geometry, template, caption-range, face/pose checks passed; full timeline and contact-sheet render passed. Music/SFX preview and full video render remain pending."
   },
   "latest_technical_pass": null,
   "render_history": [
