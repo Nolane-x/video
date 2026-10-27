@@ -1,40 +1,33 @@
 # THE WEIGHT OF YES — QA ledger
 
-## Latest render — run #25 passed
-- Workflow: [run #25 — all 19 steps successful](https://github.com/Nolane-x/video/actions/runs/40453637108).
-- Source commit: 1bfb4abe2934cc36b239bb796013178f03cae5d5.
+## Latest render — #30 technical pass with targeted visual review
+- Workflow: [run #30 — success](https://github.com/Nolane-x/video/actions/runs/40461365610); all 19 steps passed.
+- Source commit: [`9214fb3ce0765c38d4169be917099a75a8e53442`](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442).
 - Renderer: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering; not Remotion.
 - Spec: 143.000 seconds, 29 shots, H.264 1920×1080 @24 fps, AAC stereo 48 kHz, English on-screen text, no voice-over.
-- Master: 21,776,467 bytes; SHA-256 73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6.
-- Preview: 30.000 seconds; SHA-256 539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093.
-- Inner review bundle: 30,922,811 bytes; SHA-256 e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f.
-- Actions artifact: the-weight-of-yes-h2-selfimprove-25, ID 12711996632, 61,873,149 bytes; archive SHA-256 318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d; expires 2026-11-26.
+- Master: 21,783,919 bytes; SHA-256 `cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d`.
+- Preview: 30.000 seconds; SHA-256 `d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965`.
+- Review bundle SHA-256: `c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455`.
+- Actions artifact: `the-weight-of-yes-h2-selfimprove-30`, ID `12714602184`, 61,869,228 bytes; expires 2026-11-26. Archive SHA-256: `21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e`.
 - Audio: −14.0 LUFS integrated; LRA 9.2 LU; true peak −5.0 dBFS.
-- Artifact downloaded successfully; every entry in SHA256SUMS.txt passed sha256sum -c. ffprobe confirmed streams, resolution, frame rate, sample rate, channels and duration. All 12 motion proofs had audio/video and were approximately six seconds.
+- All 29 entries in `SHA256SUMS.txt` passed; ffprobe confirms duration, codecs, resolution, frame rate and audio format.
 
-## Targeted visual review — run #25
+## Targeted visual review — run #30
 - [x] Both contact sheets inspected across all 29 shots.
-- [x] Three frames (start, midpoint and end) from all 12 proof clips sampled. This is targeted motion sampling, not a real-time start-to-finish watch.
-- [x] B08: hero remains upright/slumped while the helper carries the portfolio away; sampled frames show coherent limbs and held folder.
-- [x] B19: unified “NO. NOT TODAY.” caption is in the upper negative-space lane and no longer collides with the hero in sampled frames.
-- [x] B21: hero stays upright as another helper takes the folder; sampled handoff is understandable.
-- [x] B22: green SENT confirmation is visible.
-- [x] B20: response remains non-punitive.
-- [x] B24: reciprocal-care café two-shot is present in contact sheet.
-- [x] B27: rebalanced ledger/end arc is present.
-- [ ] Full 143-second film must still be watched start-to-finish with audio, checking transitions, pacing, acting, prop contacts and emotional arc.
-- [ ] Full perceptual listening remains pending. Objective loudness/true-peak measurements are not a substitute for listening.
+- [x] 1080p B07 frame at 32.75 s: handwritten “YES.” stays inside the left page; narration stays on the right page and clear of the outer edge.
+- [x] B19 “NO. NOT TODAY.” sits in upper-left negative space, clear of actors and the classroom board on the current contact sheet.
+- [x] Latest storyboard and caption-safe-area gates passed.
+- [ ] Individually review all 12 motion-proof clips with audio.
+- [ ] Watch the complete 143-second master start-to-finish with audio, checking pacing, transitions, hand/prop contacts, emotional arc and sound design.
 
 ## Sound arc spot-check
-- [x] Master has audio; integrated loudness −14.0 LUFS and true peak −5.0 dBFS.
-- [x] FFmpeg silencedetect at −45 dB found a 4.917-second quiet interval between approximately 69.12 and 74.04 seconds, matching the intended silence around the overload/turning point.
-- [ ] Full start-to-finish listening remains pending.
+- [x] AAC audio present; −14.0 LUFS integrated and −5.0 dBFS true peak measured on the exact master.
+- [ ] Full perceptual listening remains pending; objective loudness is not a substitute for listening.
 
-## Historical validation failures and fixes
+## Historical validation failures
 - Run #22 failed before rendering because a stale assertion expected B21 X=0.49 instead of authored X=0.43.
-- Run #23 failed before rendering because a legacy assertion still required B08 sitdesk after its pose was changed to slump.
-- Run #24 failed before rendering because stale checks expected two B19 captions after they were unified.
-- Run #25 removed the contradictory checks; all 19 steps passed and the resulting artifact was downloaded and verified.
+- Run #23 failed because a legacy assertion expected B08 sitdesk after its pose changed to slump.
+- Run #24 failed because stale checks expected two B19 captions after they were unified.
+- Run #25 passed after contradictory assertions were removed. Subsequent renders focused on caption placement and notebook framing; run #30 is the current targeted-reviewed candidate.
 
-## Status and sign-off
-**Technical pass + targeted motion review passed. Full-length artistic approval remains pending.** Do not call this the approved final until the complete 143-second master has been watched with sound and any remaining P0/P1 issues are resolved.
+**Status: technical pass + targeted visual review. Full-length artistic approval remains pending.**

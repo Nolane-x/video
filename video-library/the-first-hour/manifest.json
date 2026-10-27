@@ -3,25 +3,25 @@
   "title": "THE FIRST HOUR — An Animated Short Film",
   "project_id": "the-first-hour",
   "created_at": "2026-10-26",
-  "status": "technical_pass_targeted_motion_review_pending_full_length_artistic_review",
+  "status": "technical_pass_targeted_visual_review_pending_full_length_artistic_review",
   "language": "English",
   "voiceover": false,
   "aspect_ratio": "16:9",
   "renderer": "H2 SelfImprove Studio native Canvas/Chromium + FFmpeg audio mastering",
-  "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
+  "source_commit": "263e855a675b451f799ee684d66515b23a0dded7",
   "workflow": {
     "name": "Render H2 SelfImprove — The First Hour",
-    "run_number": 30,
-    "run_id": 40429993407,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40429993407",
+    "run_number": 48,
+    "run_id": 40462283974,
+    "url": "https://github.com/Nolane-x/video/actions/runs/40462283974",
     "conclusion": "success",
     "all_steps_passed": true,
-    "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6"
+    "source_commit": "263e855a675b451f799ee684d66515b23a0dded7"
   },
   "master": {
     "file_name": "the-first-hour-h2-selfimprove.mp4",
-    "size_bytes": 26743126,
-    "sha256": "f08c9afad88034b1ce7a0e57438f48391aa0a43ffcb3f59c8bbbc4339d25126b",
+    "size_bytes": 26837060,
+    "sha256": "47ded9fb4c2fb4512853e3f8de1d02095c608e775545bc8b9466746485e40730",
     "duration_seconds": 172,
     "width": 1920,
     "height": 1080,
@@ -30,22 +30,22 @@
     "audio_codec": "aac",
     "audio_sample_rate_hz": 48000,
     "audio_channels": 2,
-    "audio_integrated_loudness_lufs": -14.1,
-    "audio_loudness_range_lu": 6.8,
-    "audio_true_peak_dbfs": -2.5,
-    "qa_measurement": "ffprobe + EBU R128 on the exact output of run #30; all workflow thresholds passed"
+    "audio_integrated_loudness_lufs": -14,
+    "audio_loudness_range_lu": 6.6,
+    "audio_true_peak_dbfs": -1.9,
+    "qa_measurement": "ffprobe + EBU R128 on exact run #48 MP4; all workflow thresholds passed"
   },
   "preview": {
     "file_name": "preview-30s.mp4",
-    "size_bytes": 1879734,
-    "sha256": "cb0d5abe68a91bc3e1bf0fe34aea19594055d66f8ebd2780baea56feb9d56d8b",
+    "size_bytes": 1913181,
+    "sha256": "df2d057f60dfc4327f8ce3021733c726ede5ab141a1c7728828f1730495ad29e",
     "duration_seconds": 30,
     "contains": "H.264 video and AAC 48 kHz stereo"
   },
   "review_bundle": {
     "file_name": "the-first-hour-review.zip",
-    "size_bytes": 36749758,
-    "sha256": "e3b3c700d8f2cd585db8a889981370aa7412f9daf38acc9376398aa92eb37672",
+    "size_bytes": 37129816,
+    "sha256": "318fa26cc9f09561d16f58579b483db8991abe7f773784540022143db0f8d568",
     "contains": [
       "master MP4",
       "30-second preview",
@@ -57,15 +57,15 @@
       "12 six-second motion proofs with audio",
       "SHA256SUMS.txt"
     ],
-    "checksum_verification": "Every entry in SHA256SUMS.txt passed after download."
+    "checksum_verification": "All 24 listed entries passed after download."
   },
   "actions_artifact": {
-    "name": "the-first-hour-h2-selfimprove-30",
-    "artifact_id": 12702200246,
-    "size_bytes": 73535367,
-    "sha256": "30173a58ce0e6ccad61c22d7c310e65d003ce81c881b6e956057b5b17febdc6f",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40429993407",
-    "expires_at": "2026-11-26T01:07:01Z",
+    "name": "the-first-hour-h2-selfimprove-48",
+    "artifact_id": 12714294179,
+    "size_bytes": 74296056,
+    "sha256": "f37c0634128e4583787166e711d58a3ffe18520dcf2bb3ad6d3cd47e258532f3",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40462283974",
+    "expires_at": "2026-11-26T06:43:47Z",
     "storage_status": "temporary GitHub Actions artifact; not archived to a durable release"
   },
   "visual_qa": {
@@ -73,17 +73,18 @@
     "storyboard_shots": 29,
     "motion_proof_count": 12,
     "all_proofs_passed_stream_duration_checks": true,
-    "proof_spot_checks": {
-      "b20_notebook_writing": "Inspected. First-line/second-line reveal regression is corrected; no next-line text bleed seen in the sampled motion frames.",
-      "b25_punch_bag_impact": "Inspected. After wiring the gym set's impact args through to the bag renderer, visible bag tilt/recoil and sparks are present around timed impacts.",
-      "b19_walk_to_desk": "Sampled at 0.15, 1, 2.8 and 5.5 seconds after the shared engine fix; limbs remain coherent and the character settles upright at the desk."
+    "targeted_checks": {
+      "b20_notebook": "1080p frame at 116.5 s: caption is inside lower-right paper region and clear of the pen and bottom frame edge.",
+      "overall_caption_coverage": "Both sheets reviewed; B03, B04, B06, B09 and B22 now have separate explanatory narration."
     },
+    "checksums_verified": true,
     "full_length_watch_with_audio": "pending",
     "artistic_signoff": "pending"
   },
   "next_steps": [
-    "Watch the full 172-second MP4 with audio start-to-finish; check pacing, transitions, captions, hand/prop contacts and emotional arc.",
-    "Archive the approved master and review ZIP to a durable release only after full artistic sign-off.",
-    "Keep the canonical ONE MORE SCROLL master unchanged."
+    "Watch the complete 172-second MP4 with audio start-to-finish, checking pacing, transitions, captions, hand/prop contacts and emotional arc.",
+    "Individually review all 12 motion proofs with audio; stream/duration validation is not full motion approval.",
+    "Archive the approved master and review ZIP only after full artistic sign-off.",
+    "Keep canonical ONE MORE SCROLL master unchanged."
   ]
 }

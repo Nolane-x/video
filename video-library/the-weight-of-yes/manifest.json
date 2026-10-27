@@ -22,23 +22,23 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40453637108,
-    "run_number": 25,
+    "run_id": 40461365610,
+    "run_number": 30,
     "status": "success",
     "conclusion": "success",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
-    "head_sha": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40461365610",
+    "head_sha": "9214fb3ce0765c38d4169be917099a75a8e53442",
     "artifact": {
-      "id": 12711996632,
-      "name": "the-weight-of-yes-h2-selfimprove-25",
-      "size_bytes": 61873149,
-      "sha256": "318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d",
-      "expires_at": "2026-11-26T05:13:23Z"
+      "id": 12714602184,
+      "name": "the-weight-of-yes-h2-selfimprove-30",
+      "size_bytes": 61869228,
+      "sha256": "21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e",
+      "expires_at": "2026-11-26T06:32:15Z"
     },
     "master": {
       "file_name": "the-weight-of-yes-h2-selfimprove.mp4",
-      "size_bytes": 21776467,
-      "sha256": "73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6",
+      "size_bytes": 21783919,
+      "sha256": "cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d",
       "duration_seconds": 143,
       "width": 1920,
       "height": 1080,
@@ -53,31 +53,31 @@
     },
     "preview": {
       "file_name": "preview-30s.mp4",
-      "size_bytes": 1866218,
-      "sha256": "539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093",
+      "size_bytes": 1867722,
+      "sha256": "d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965",
       "duration_seconds": 30,
       "video": "H.264 960x540 at 24 fps",
       "audio": "AAC 48 kHz stereo"
     },
     "review_bundle": {
       "file_name": "the-weight-of-yes-review.zip",
-      "size_bytes": 30922811,
-      "sha256": "e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f"
+      "size_bytes": 30920502,
+      "sha256": "c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455"
     },
-    "notes": "All 19 workflow steps passed. Downloaded artifact SHA-256, every entry in SHA256SUMS.txt, streams, runtime, loudness and proof durations were independently checked. Both contact sheets and 3-frame samples from all 12 motion proofs were reviewed. Full-length audiovisual approval remains pending."
+    "notes": "All 19 workflow steps passed. Downloaded archive hash and all 29 entries in SHA256SUMS.txt were verified. Both sheets and targeted 1080p frames for B07/B19 were inspected. Full-length approval remains pending."
   },
   "latest_technical_pass": {
-    "workflow_run_id": 40453637108,
-    "workflow_run_number": 25,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
-    "source_commit": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
+    "workflow_run_id": 40461365610,
+    "workflow_run_number": 30,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40461365610",
+    "source_commit": "9214fb3ce0765c38d4169be917099a75a8e53442",
     "conclusion": "success",
     "all_workflow_steps_passed": true,
-    "artifact_id": 12711996632,
-    "artifact_sha256": "318561c6296339feff95aa2afbf31553dd3d85d15f57875ecfc2ba0568d2410d",
-    "master_sha256": "73737805d180b218fd7e6fe4b0d008fb9f6672152579b80971c5ce98aab187e6",
-    "preview_sha256": "539866c06ebed0580384d00ad29ca93f4425b7e2b32677c7b3da33d4679b0093",
-    "review_bundle_sha256": "e64a6adbb81f41f43a7ff2f70e8d161872fd8134eefd1a6bf7e3b4f66b90f70f",
+    "artifact_id": 12714602184,
+    "artifact_sha256": "21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e",
+    "master_sha256": "cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d",
+    "preview_sha256": "d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965",
+    "review_bundle_sha256": "c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455",
     "duration_seconds": 143,
     "resolution": "1920x1080",
     "fps": "24/1",
@@ -215,13 +215,11 @@
     "full_length_video_audio_review": false,
     "review_notes": [
       "Both contact sheets covering all 29 shots were inspected.",
-      "Three frames (start, midpoint and end) from each of 12 motion-proof clips were sampled.",
-      "B08 shows a standing/slumped hero while the helper walks away with the portfolio; the sampled frames show coherent limbs and a held folder.",
-      "B19 unified 'NO. NOT TODAY.' caption sits in the upper lane above the characters in sampled frames.",
-      "B21 hero remains upright as another helper takes the portfolio; sampled handoff reads coherently.",
-      "Master audio stream, loudness and true peak were verified; a 4.917-second silence was detected from approximately 69.12 to 74.04 seconds, matching the intended quiet beat.",
-      "Full 143-second start-to-finish review and perceptual listening remain pending."
+      "1080p B07 frame at 32.75 s: handwritten YES. stays inside left page; narration stays on right page clear of outer edge.",
+      "B19 “NO. NOT TODAY.” sits in upper negative space, clear of actors and board.",
+      "Run #30 artifact downloaded and all 29 checksum entries passed.",
+      "Full 143-second review and perceptual listening remain pending."
     ]
   },
-  "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6"
+  "source_commit": "9214fb3ce0765c38d4169be917099a75a8e53442"
 }
