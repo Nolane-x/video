@@ -461,7 +461,7 @@ assert by_id["b28"]["tpl"] == "card"
 assert by_id["b29"]["tpl"] == "scene"
 assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
 assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49
-assert by_id["b21"]["args"]["actors"][0]["x"] == 0.49
+assert by_id["b21"]["args"]["actors"][0]["x"] == 0.43
 assert by_id["b08"]["args"]["actors"][0]["pose"] == "sitdesk"
 assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84
 assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio"
