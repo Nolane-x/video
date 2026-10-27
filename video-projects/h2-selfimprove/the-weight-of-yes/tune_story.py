@@ -155,8 +155,8 @@ apply("b09", "scene", {
 
 # B10 — a visible cost: he sits alone after the others have gone.
 apply("b10", "scene", {
-    "set": "cafe", "setArgs": {"sky": "night", "stage": True},
-    "actors": [actor("hero", 0.50, "sit", "sad", facing=1, scale=0.98)],
+    "set": "cafe", "setArgs": {"lampX": 0.50, "tableW": 0.28},
+    "actors": [actor("hero", "table.left", "sit", "sad", facing=1, scale=0.88)],
     "cam": cam(0.50, 0.56, 1.10),
     "texts": [narr("He ate after everyone else left.", size=56)]
 })
@@ -185,8 +185,8 @@ apply("b12", "face", {
 apply("b13", "scene", {
     "set": "cafe", "setArgs": {"sky": "night", "stage": True},
     "actors": [
-        actor("hero", 0.35, "sit", "smile", facing=1, scale=0.95),
-        actor("girl", 0.70, "sitpoint", "worried", facing=-1, scale=0.93)
+        actor("hero", "table.left", "sit", "smile", facing=1, scale=0.88),
+        actor("girl", "table.right", "sitpoint", "worried", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.56, 1.08),
     "texts": [narr("When someone asked how he was, he smiled.", size=49)]
@@ -305,10 +305,10 @@ apply("b23", "scene", {
 
 # B24 — reciprocal care: the friend offers something and listens.
 apply("b24", "scene", {
-    "set": "cafe", "setArgs": {"sky": "dawn", "stage": True},
+    "set": "cafe", "setArgs": {"lampX": 0.50, "tableW": 0.28},
     "actors": [
-        actor("hero", 0.36, "sit", "smile", facing=1, scale=0.96),
-        actor("friend", 0.69, "sitpoint", "smile", facing=-1, scale=0.92)
+        actor("hero", "table.left", "sit", "smile", facing=1, scale=0.88),
+        actor("friend", "table.right", "sitpoint", "smile", facing=-1, scale=0.88)
     ],
     "cam": cam(0.52, 0.57, 1.08),
     "texts": [narr("Care began to move both ways.", size=58)]
@@ -393,6 +393,9 @@ assert len(by_id["b20"]["args"]["actors"]) == 2
 assert by_id["b22"]["args"]["sentAt"] == 2.25
 assert by_id["b28"]["tpl"] == "card"
 assert by_id["b29"]["tpl"] == "scene"
+assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
+assert [a["x"] for a in by_id["b13"]["args"]["actors"]] == ["table.left", "table.right"]
+assert [a["x"] for a in by_id["b24"]["args"]["actors"]] == ["table.left", "table.right"]
 
 story["duration"] = 143.0
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
