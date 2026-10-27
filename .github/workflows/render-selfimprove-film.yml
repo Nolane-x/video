@@ -146,7 +146,22 @@ jobs:
           assert by_id["b26"]["args"].get("set") == "cafe" and len(by_id["b26"]["args"].get("actors", [])) >= 2
           assert any(p[1] == "punch" for p in by_id["b25"]["args"].get("actors", [{}])[0].get("poseAt", [])), "Workout action is missing"
           assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
-          assert by_id["b29"]["tpl"] == "scene", "End card must not use a simulated platform UI"
+          classroom_or_room_left_lane = ("b02", "b16", "b18", "b19", "b21", "b23", "b25")
+for sid in classroom_or_room_left_lane:
+    tx = shots[sid]["args"]["texts"][0]
+    assert tx.get("x", 1) <= 0.25 and 0.25 <= tx.get("y", 0) <= 0.56 and tx.get("maxW", 1) <= 0.25, (
+        f"{sid} narration must stay left of the window/character"
+    )
+for sid in ("b08", "b13", "b14"):
+    tx = shots[sid]["args"]["texts"][0]
+    assert tx.get("x", 1) <= 0.22 and 0.54 <= tx.get("y", 0) <= 0.62 and tx.get("maxW", 1) <= 0.24, (
+        f"{sid} narration must stay in the left side lane, not across the actor"
+    )
+tx = shots["b26"]["args"]["texts"][0]
+assert tx.get("x", 0) >= 0.82 and 0.49 <= tx.get("y", 0) <= 0.57 and tx.get("maxW", 1) <= 0.25
+tx = shots["b29"]["args"]["texts"][0]
+assert tx.get("x", 1) <= 0.25 and tx.get("maxW", 1) <= 0.31 and 0.25 <= tx.get("y", 0) <= 0.33
+assert by_id["b29"]["tpl"] == "scene", "End card must not use a simulated platform UI"
           assert "voice" not in [a.get("who") for a in by_id["b16"]["args"].get("actors", [])], "Shadow must be absent at the turning point"
           t1, t2 = by_id["b15"]["args"]["texts"]
           assert t1["at"] + t1["dur"] <= t2["at"], "B15 title text overlaps"

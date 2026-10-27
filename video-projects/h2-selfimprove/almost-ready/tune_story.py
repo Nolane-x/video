@@ -67,14 +67,14 @@ apply("b02", "scene", {
     "actors": [actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.12)],
     "hud": {"rows": [{"label": "DAYS LEFT", "n": 5}]},
     "cam": cam(0.60, 0.57, 1.08),
-    "texts": [narr("The deadline was five days away.", 0.35, 5.25)]
+    "texts": [narr("The deadline was five days away.", 0.35, 4.25, x=0.25, y=0.28, size=42, max_w=0.24)]
 })
 
 # B03 — native notebook drawing with a visible, timed pen contact.
 apply("b03", "note", {
     "text": "FIRST DRAFT", "at": 0.45, "cps": 5.0, "x": 0.5, "y": 0.52, "s": 0.88,
     "cam": cam(0.5, 0.52, 1.07),
-    "texts": [narr("The first draft felt alive.", 0.35, 5.3)]
+    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
 })
 
 # B04 — face reaction after the first flaw; the screen/page light cools the mood.
@@ -127,7 +127,7 @@ apply("b08", "calendar", {
         {"label": "SHARED", "n": 0}
     ]},
     "cam": cam(0.5, 0.53, 1.08),
-    "texts": [narr("One correction became twelve.", 0.35, 5.3)]
+    "texts": [narr("One correction became twelve.", 0.35, 4.25, x=0.20, y=0.60, size=42, max_w=0.24)]
 })
 
 # B09 — an insert of version 19, with correct page/pen staging.
@@ -135,7 +135,7 @@ apply("b09", "note", {
     "text": "VERSION 19", "at": 0.4, "cps": 5.1, "s": 0.90,
     "cam": cam(0.5, 0.52, 1.13),
     "hud": {"rows": [{"label": "EDITS", "n": 19}, {"label": "SHARED", "n": 0}]},
-    "texts": [narr("Every fix uncovered another flaw.", 0.35, 5.3)]
+    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
 })
 
 # B10 — peers visibly share; the protagonist stays in the less-lit foreground.
@@ -147,7 +147,7 @@ apply("b10", "scene", {
         actor("girl", 0.72, "reach", "smile", facing=-1, scale=0.92, at=0.15, hold="portfolio")
     ],
     "cam": cam(0.49, 0.57, 1.04),
-    "texts": [narr("Everyone else had something to show.", 0.35, 5.3)]
+    "texts": [narr("Everyone else had something to show.", 0.35, 4.25, x=0.41, y=0.28, size=44, max_w=0.34)]
 })
 
 # B11 — a readable phone feed establishes comparison without overloading the screen.
@@ -172,7 +172,7 @@ apply("b12", "laptop", {
 apply("b13", "clock", {
     "time": "11:58", "timeAt": [[3.0, "11:59"]], "ring": False,
     "s": 0.77, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.12),
-    "texts": [narr("The minutes began to sprint.", 0.35, 5.3)]
+    "texts": [narr("The minutes began to sprint.", 0.35, 4.25, x=0.18, y=0.28, size=42, max_w=0.24)]
 })
 
 # B14 — the voice is close and dominant at the low point.
@@ -230,14 +230,14 @@ apply("b19", "scene", {
     "actors": [actor("hero", 0.30, "stand", "determined", facing=1,
                      walk={"to": "desk.seat", "at": 0.35, "dur": 2.8, "speed": 0.78})],
     "cam": cam(0.53, 0.57, 1.12),
-    "texts": [narr("He opened the file one last time.", 0.35, 5.25)]
+    "texts": [narr("He opened the file one last time.", 0.35, 4.25, x=0.22, y=0.28, size=42, max_w=0.24)]
 })
 
 # B20 — the written rule is the action; the hand must track the current line.
 apply("b20", "note", {
     "text": "GOOD ENOUGH\nTO SHARE.", "at": 0.45, "cps": 6.2,
     "x": 0.5, "y": 0.52, "s": 0.92, "cam": cam(0.5, 0.52, 1.10),
-    "texts": [narr("He made one rule for himself.", 0.35, 5.2)]
+    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
 })
 
 # B21 — deliberate desk composition, real typing posture; sent count is still zero.
@@ -246,7 +246,7 @@ apply("b21", "scene", {
     "actors": [actor("hero", "desk.seat", "type", "determined", facing=1, look=0.10)],
     "hud": {"rows": [{"label": "EDITS", "n": 47}, {"label": "SHARED", "n": 0}]},
     "cam": cam(0.69, 0.60, 1.24),
-    "texts": [narr("He chose the version he had.", 0.35, 5.2)]
+    "texts": [narr("He chose the version he had.", 0.35, 4.25, x=0.80, y=0.28, size=42, max_w=0.25)]
 })
 
 # B22 — the outgoing email is visible on laptop; sent is now one.
@@ -281,7 +281,7 @@ apply("b24", "scene", {
               poseAt=[[0.0, "sit"], [2.0, "sitpoint"]])
     ],
     "cam": cam(0.5, 0.55, 1.06),
-    "texts": [narr("Her first question was about the idea.", 0.35, 4.5)]
+    "texts": [narr("Her first question was about the idea.", 0.35, 4.25, x=0.85, y=0.53, size=42, max_w=0.24)]
 })
 
 # B25 — studio critique; hero is no longer hidden at the back of the room.
@@ -315,9 +315,9 @@ apply("b27", "scene", {
     ],
     "cam": cam(0.69, 0.60, 1.20, 8.35),
     "texts": [
-        narr("He still heard the old voice.", 0.25, 2.2, x=0.22, y=0.20, size=48, max_w=0.38),
+        narr("He still heard the old voice.", 0.25, 2.2, x=0.18, y=0.20, size=46, max_w=0.30),
         tempting("one more tiny fix.", 2.65, 1.8, x=0.80, y=0.30, size=42),
-        narr("He didn't have to obey it.", 4.65, 3.0, x=0.22, y=0.20, size=48, max_w=0.38)
+        narr("He didn't have to obey it.", 4.65, 3.0, x=0.18, y=0.20, size=46, max_w=0.30)
     ]
 })
 
@@ -334,7 +334,7 @@ apply("b29", "scene", {
     "set": "bedroom", "setArgs": bedroom("dawn", door=True, doorOpen=0.7),
     "actors": [actor("hero", 0.53, "wave", "smile", facing=1, scale=0.94)],
     "cam": cam(0.52, 0.55, 1.04),
-    "texts": [narr("If this hit, like and subscribe.", 0.35, 5.2)]
+    "texts": [narr("If this hit, like and subscribe.", 0.35, 3.8, x=0.22, y=0.29, size=44, max_w=0.30)]
 })
 
 # Validate captions and global timing after the authored pass.
@@ -379,6 +379,21 @@ for sid in ("b06", "b12", "b16", "b22"):
     assert float(tx["at"]) + float(tx["dur"]) <= shot_duration + 0.02, f"{sid} narration overflows its shot"
 b25_caption = by_id["b25"]["args"]["texts"][0]
 assert 0.30 <= b25_caption["x"] <= 0.45 and 0.22 <= b25_caption["y"] <= 0.34 and b25_caption["maxW"] <= 0.31
+for sid in ("b10", "b25"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert 0.38 <= tx["x"] <= 0.44 and 0.25 <= tx["y"] <= 0.31 and tx["maxW"] <= 0.35, f"{sid} narration must avoid the TEAM WORK/SHOWCASE board"
+for sid in ("b03", "b09", "b20"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, f"{sid} notebook caption must use the blank lower-right page"
+for sid in ("b02", "b19", "b21", "b29"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] <= 0.26 and tx["maxW"] <= 0.31 and 0.25 <= tx["y"] <= 0.33, f"{sid} caption must stay left of the window/character"
+tx = by_id["b13"]["args"]["texts"][0]
+assert tx["x"] <= 0.20 and tx["y"] <= 0.31 and tx["maxW"] <= 0.25, "B13 clock caption must stay outside the clock face"
+tx = by_id["b08"]["args"]["texts"][0]
+assert tx["x"] <= 0.22 and tx["y"] >= 0.55 and tx["maxW"] <= 0.25, "B08 calendar caption must stay left of the calendar"
+tx = by_id["b24"]["args"]["texts"][0]
+assert tx["x"] >= 0.82 and 0.49 <= tx["y"] <= 0.57 and tx["maxW"] <= 0.25, "B24 cafe caption must stay in the right-side safe lane"
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
 assert b27_text["He didn't have to obey it."]["dur"] >= 3.0
 assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 9.0) < 0.02
