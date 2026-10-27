@@ -133,7 +133,7 @@ jobs:
           assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio", "B08 favor-giver must carry the folder away"
           b19labels = {t.get("t"): t for t in by_id["b19"]["args"]["texts"]}
           assert set(b19labels) == {"NO. NOT TODAY."}, "B19 should use a single unified boundary caption"
-          assert b19labels["NO. NOT TODAY."]["x"] == 0.50 and b19labels["NO. NOT TODAY."]["y"] <= 0.26 and b19labels["NO. NOT TODAY."]["maxW"] <= 0.82, "B19 caption must stay above the actors"
+          assert b19labels["NO. NOT TODAY."]["x"] <= 0.40 and b19labels["NO. NOT TODAY."]["y"] <= 0.26 and b19labels["NO. NOT TODAY."]["maxW"] <= 0.52 and b19labels["NO. NOT TODAY."]["size"] >= 68, "B19 caption must stay in upper-left negative space, clear of the board and actors"
           assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49, "B08 must use a numeric position on the classroom set"
           assert by_id["b21"]["args"]["actors"][0]["x"] == 0.43, "B21 hero must use the authored grounded position"
           assert by_id["b21"]["args"]["actors"][2]["hold"] == "portfolio", "Recipient must visibly carry the portfolio in B21"

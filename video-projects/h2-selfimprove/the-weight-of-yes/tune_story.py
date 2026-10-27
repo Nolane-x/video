@@ -253,7 +253,7 @@ apply("b19", "scene", {
     ],
     "cam": cam(0.52, 0.56, 1.07),
     "texts": [
-        cap("big", "NO. NOT TODAY.", 0.70, 3.85, x=0.50, y=0.245, size=82, max_w=0.82)
+        cap("big", "NO. NOT TODAY.", 0.70, 3.85, x=0.37, y=0.245, size=72, max_w=0.50)
     ]
 })
 
@@ -468,7 +468,7 @@ assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84
 assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio"
 b19labels = {t.get("t"): t for t in by_id["b19"]["args"]["texts"]}
 assert set(b19labels) == {"NO. NOT TODAY."}
-assert b19labels["NO. NOT TODAY."]["x"] == 0.50 and b19labels["NO. NOT TODAY."]["y"] <= 0.26 and b19labels["NO. NOT TODAY."]["maxW"] <= 0.82
+assert b19labels["NO. NOT TODAY."]["x"] <= 0.40 and b19labels["NO. NOT TODAY."]["y"] <= 0.26 and b19labels["NO. NOT TODAY."]["maxW"] <= 0.52 and b19labels["NO. NOT TODAY."]["size"] >= 68
 assert by_id["b21"]["args"]["actors"][2]["hold"] == "portfolio"
 assert [a["x"] for a in by_id["b13"]["args"]["actors"]] == ["table.left", "table.right"]
 assert [a["x"] for a in by_id["b24"]["args"]["actors"]] == ["table.left", "table.right"]
