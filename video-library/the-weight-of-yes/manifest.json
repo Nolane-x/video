@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project_id": "the-weight-of-yes",
   "title": "THE WEIGHT OF YES | An Animated Short Film",
-  "status": "visual_revision_render_in_progress",
+  "status": "visual_revision_render_queued",
   "source": {
     "script": "video-projects/h2-selfimprove/01-PHIM-the-weight-of-yes.txt",
     "config": "video-projects/h2-selfimprove/the-weight-of-yes/config.json",
@@ -22,13 +22,13 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40452825177,
-    "run_number": 22,
-    "status": "in_progress",
+    "run_id": 40453130871,
+    "run_number": 23,
+    "status": "queued",
     "conclusion": null,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40452825177",
-    "head_sha": "ad526e58f1deb7038bea24d6f612ef4269ab7de1",
-    "notes": "Visual revision: B08/B21 now use grounded upright poses; B19 boundary text is one line in the upper negative-space lane. CI gates assert these constraints."
+    "url": "https://github.com/Nolane-x/video/actions/runs/40453130871",
+    "head_sha": "9f7b94ef60bc0dc1733e262aa7992264a2e03e48",
+    "notes": "Same visual revision as run #22; corrected stale B21 coordinate assertion that stopped at storyboard gate."
   },
   "latest_technical_pass": {
     "workflow_run_id": 40442985212,
@@ -123,6 +123,22 @@
       "url": "https://github.com/Nolane-x/video/actions/runs/40452825177",
       "source_commit": "ad526e58f1deb7038bea24d6f612ef4269ab7de1",
       "reason": "B08/B21 grounded pose revision; B19 unified caption moved to upper safe lane; additional static storyboard assertions added."
+    },
+    {
+      "run_id": 40452825177,
+      "run_number": 22,
+      "status": "failed_storyboard_gate",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40452825177",
+      "source_commit": "ad526e58f1deb7038bea24d6f612ef4269ab7de1",
+      "reason": "Correctly changed B21 hero's X from 0.49 to 0.43, but a stale assertion in tune_story.py still expected 0.49. No video render was produced. Assertion fixed in run #23."
+    },
+    {
+      "run_id": 40453130871,
+      "run_number": 23,
+      "status": "queued",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40453130871",
+      "source_commit": "9f7b94ef60bc0dc1733e262aa7992264a2e03e48",
+      "reason": "Rerender after fixing stale B21 coordinate assertions; retain B08/B21 grounded poses and upper-lane B19 caption."
     }
   ],
   "artistic_signoff": {
