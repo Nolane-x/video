@@ -28,7 +28,7 @@
     "conclusion": null,
     "url": "https://github.com/Nolane-x/video/actions/runs/40453637108",
     "head_sha": "1bfb4abe2934cc36b239bb796013178f03cae5d5",
-    "notes": "B08/B21 grounded poses and unified upper-lane B19 caption; removed contradictory legacy pose and caption assertions. Storyboard/timeline gates passed; audio preview build currently running."
+    "notes": "Storyboard/art-direction assertions, timeline/contact-sheet checks, audio preview and full H2 silent render have passed. FFmpeg mastered-audio assembly and evidence packaging are running; ffprobe/EBU R128/checksum gates still pending."
   },
   "latest_technical_pass": {
     "workflow_run_id": 40442985212,

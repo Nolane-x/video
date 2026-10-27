@@ -2,7 +2,7 @@
 
 ## Current state — run #25 in progress
 - Current workflow: [run #25](https://github.com/Nolane-x/video/actions/runs/40453637108), source commit `1bfb4abe2934cc36b239bb796013178f03cae5d5`.
-- Progress verified: checkout, tool bootstrap, H2/audio dependencies, storyboard/art-direction assertions and timeline/contact-sheet checks have passed. The audio mix + 30-second preview step is running.
+- Progress verified: setup, storyboard/art-direction assertions, timeline/contact-sheet checks, audio preview, and full H2 silent render have passed. FFmpeg mastered-audio assembly and evidence packaging are running; final ffprobe/EBU R128/checksum gates are still pending.
 - Run #24 failed at the storyboard gate because a legacy assertion still expected separate `NO.` and `Not today.` captions after they were consolidated into `NO. NOT TODAY.`. Those stale assertions were replaced with the unified-caption check in run #25.
 - No output from run #25 is claimed until its full render and audio/metadata/checksum gates finish.
 
