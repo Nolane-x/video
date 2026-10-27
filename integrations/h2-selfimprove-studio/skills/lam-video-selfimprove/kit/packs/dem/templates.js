@@ -46,6 +46,12 @@ function drawActor(g, a, lt, M, info) {
   let alphaK = 1; if (a.fadeIn !== false && a.at) alphaK = clamp((lt - a0) / (a.fadeIn ?? (a.who === 'voice' ? 0.8 : 0.001))); if (a.out !== undefined) alphaK *= clamp(1 - (lt - a.out) / (a.fade ?? 0.6));
   const mv = a.walk || a.run;
   const o = { ...a, t: lt + (a.seed || 0), facing: st.facing, pose: at(lt, a.poseAt, a.pose || 'stand'), face: at(lt, a.faceAt, a.face || (a.who === 'voice' ? 'grin' : 'neutral')), look: at(lt, a.lookAt, a.look ?? 0.25) };
+  // A scheduled movement object describes when/where to move; it is not a gait speed.
+  // Strip it outside the active movement window so bean() never uses an object as a
+  // number. That previously produced NaN limb coordinates and detached props at the
+  // first/last frame of shots with walk/run keyframes.
+  if (a.walk && typeof a.walk === 'object' && a.walk.to !== undefined) delete o.walk;
+  if (a.run && typeof a.run === 'object' && a.run.to !== undefined) delete o.run;
   if (st.moving) { if (a.run) o.run = a.run.speed || 1.6; else o.walk = (a.walk && a.walk.speed) || 0.9; }
   const k = alphaK; if (k <= 0) return null;
   g.save(); g.globalAlpha *= k;
