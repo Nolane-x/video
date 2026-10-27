@@ -74,7 +74,7 @@ apply("b02", "scene", {
 apply("b03", "note", {
     "text": "FIRST DRAFT", "at": 0.45, "cps": 5.0, "x": 0.5, "y": 0.52, "s": 0.88,
     "cam": cam(0.5, 0.52, 1.07),
-    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.78, y=0.80, size=50, max_w=0.24, color="#302a24")]
+    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B04 — face reaction after the first flaw; the screen/page light cools the mood.
@@ -141,7 +141,7 @@ apply("b09", "note", {
     "text": "VERSION 19", "at": 0.4, "cps": 5.1, "s": 0.90,
     "cam": cam(0.5, 0.52, 1.13),
     "hud": {"rows": [{"label": "EDITS", "n": 19}, {"label": "SHARED", "n": 0}], "y": 0.035},
-    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.78, y=0.80, size=50, max_w=0.24, color="#302a24")]
+    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B10 — peers visibly share; the protagonist stays in the less-lit foreground.
@@ -178,7 +178,7 @@ apply("b12", "laptop", {
 apply("b13", "clock", {
     "time": "11:58", "timeAt": [[3.0, "11:59"]], "ring": False,
     "s": 0.64, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.08),
-    "texts": [narr("The minutes began to sprint.", 0.35, 5.15, x=0.16, y=0.28, size=50, max_w=0.28)]
+    "texts": [narr("The minutes began to sprint.", 0.35, 5.15, x=0.50, y=0.20, size=50, max_w=0.42)]
 })
 
 # B14 — the voice is close and dominant at the low point.
@@ -246,7 +246,7 @@ apply("b19", "scene", {
 apply("b20", "note", {
     "text": "GOOD ENOUGH\nTO SHARE.", "at": 0.45, "cps": 6.2,
     "x": 0.5, "y": 0.52, "s": 0.92, "cam": cam(0.5, 0.52, 1.10),
-    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.78, y=0.80, size=50, max_w=0.24, color="#302a24")]
+    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B21 — deliberate desk composition, real typing posture; sent count is still zero.
@@ -416,7 +416,7 @@ for sid in ("b10", "b25"):
     assert 0.30 <= tx["x"] <= 0.44 and 0.22 <= tx["y"] <= 0.34 and tx["maxW"] <= 0.35 and tx.get("size", 53) >= 48, f"{sid} narration must avoid the TEAM WORK/SHOWCASE board"
 for sid in ("b03", "b09", "b20"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert tx["x"] >= 0.76 and tx["y"] >= 0.76 and tx["maxW"] <= 0.25 and tx.get("size", 53) >= 48 and tx.get("color") == "#302a24", f"{sid} notebook narration must sit at bottom-right of the page, clear of the pen"
+    assert 0.64 <= tx["x"] <= 0.70 and tx["y"] >= 0.76 and tx["maxW"] <= 0.23 and tx.get("size", 53) >= 48 and tx.get("color") == "#302a24", f"{sid} notebook narration must sit low on the right page without clipping the outer edge"
 assert by_id["b09"]["args"].get("hud", {}).get("y", 1) <= 0.05, "B09 EDITS/SHARED HUD must stay in the upper letterbox clear of VERSION 19"
 for sid in ("b02", "b19", "b29"):
     tx = by_id[sid]["args"]["texts"][0]
@@ -424,7 +424,7 @@ for sid in ("b02", "b19", "b29"):
 tx = by_id["b21"]["args"]["texts"][0]
 assert tx["x"] >= 0.76 and tx["maxW"] <= 0.30 and 0.25 <= tx["y"] <= 0.33 and tx.get("size", 53) >= 48, "B21 caption must stay in the right-side bedroom wall lane"
 tx = by_id["b13"]["args"]["texts"][0]
-assert tx["x"] <= 0.18 and 0.25 <= tx["y"] <= 0.32 and tx["maxW"] <= 0.30 and tx.get("size", 53) >= 48 and by_id["b13"]["args"]["s"] <= 0.66, "B13 clock must leave a readable left narration lane"
+assert abs(tx["x"] - 0.50) <= 0.02 and 0.17 <= tx["y"] <= 0.23 and tx["maxW"] <= 0.44 and tx.get("size", 53) >= 48 and by_id["b13"]["args"]["s"] <= 0.66, "B13 narration must sit above the clock face, clear of SNOOZE and the timer digits"
 tx = by_id["b08"]["args"]["texts"][0]
 assert tx["x"] <= 0.22 and tx["y"] >= 0.55 and tx["maxW"] <= 0.25, "B08 calendar caption must stay left of the calendar"
 tx = by_id["b24"]["args"]["texts"][0]
