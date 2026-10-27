@@ -348,7 +348,10 @@ apply("b27", "calendar", {
         {"label": "REST", "n": 1}
     ]},
     "cam": cam(0.5, 0.53, 1.08),
-    "texts": [narr("His kindness stopped costing him everything.", size=50)]
+    "texts": [
+        narr("His kindness stopped costing him everything.", 0.35, 4.2,
+             x=0.14, y=0.43, size=42, max_w=0.24)
+    ]
 })
 
 # B28 — a designed end card, separate from the thumbnail treatment.
@@ -398,6 +401,9 @@ assert by_id["b14"]["args"]["set"] == "void"
 assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
 assert by_id["b22"]["args"]["sentAt"] == 2.25
+b27_caption = by_id["b27"]["args"]["texts"][0]
+assert by_id["b27"]["tpl"] == "calendar"
+assert b27_caption["x"] < 0.2 and b27_caption["maxW"] <= 0.25 and 0.16 <= b27_caption["y"] <= 0.84, "B27 calendar narration must remain in the left negative space"
 assert by_id["b28"]["tpl"] == "card"
 assert by_id["b29"]["tpl"] == "scene"
 assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
