@@ -214,9 +214,13 @@ a.update({
 # The shared renderer caps reveal time at 30% of each caption's on-screen duration.
 TEMPT_HOLD_BY_SHOT = {"b03": 4.20, "b04": 4.60, "b06": 4.50, "b09": 4.00, "b22": 4.40, "b27": 2.85}
 for sid, hold in TEMPT_HOLD_BY_SHOT.items():
-    overlays = [tx for tx in get(sid).get("args", {}).get("texts", []) if tx.get("kind") == "tempt"]
+    shot = get(sid)
+    overlays = [tx for tx in shot.get("args", {}).get("texts", []) if tx.get("kind") == "tempt"]
     assert len(overlays) == 1, f"{sid} must have exactly one temptation caption"
-    overlays[0]["dur"] = hold
+    at = float(overlays[0].get("at", 0.3))
+    shot_dur = float(shot["end"]) - float(shot["start"])
+    # Never extend a caption beyond its shot; use the longest safe hold available.
+    overlays[0]["dur"] = min(hold, shot_dur - at - 0.1)
 for shot in shots:
     shot_dur = float(shot["end"]) - float(shot["start"])
     for tx in shot.get("args", {}).get("texts", []):
