@@ -136,9 +136,10 @@ apply("b08", "scene", {
     "set": "classroom", "setArgs": classroom("dusk", desks=[0.46]),
     "actors": [
         actor("hero", 0.49, "sitdesk", "tired", facing=1, scale=1.00),
-        actor("friend2", 0.60, "reach", "smile", facing=-1, scale=0.82, hold="portfolio")
+        actor("friend2", 0.70, "carry", "smile", facing=1, scale=0.82, hold="portfolio",
+              walk={"to": 0.86, "at": 0.55, "dur": 2.85, "speed": 0.70})
     ],
-    "cam": cam(0.58, 0.60, 1.11),
+    "cam": cam(0.56, 0.59, 1.05),
     "texts": [narr("They went home lighter.", size=56)]
 })
 
@@ -252,8 +253,8 @@ apply("b19", "scene", {
     ],
     "cam": cam(0.52, 0.56, 1.07),
     "texts": [
-        cap("big", "NO.", 0.70, 2.15, x=0.50, y=0.44, size=112, max_w=0.55),
-        narr("Not today.", 3.02, 1.45, x=0.50, y=0.67, size=51, max_w=0.70)
+        cap("big", "NO.", 0.70, 2.15, x=0.29, y=0.39, size=124, max_w=0.36),
+        narr("Not today.", 3.02, 1.45, x=0.29, y=0.54, size=49, max_w=0.42)
     ]
 })
 
@@ -397,6 +398,11 @@ assert by_id["b10"]["args"]["actors"][0]["x"] == "table.left"
 assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49
 assert by_id["b21"]["args"]["actors"][0]["x"] == 0.49
 assert by_id["b08"]["args"]["actors"][0]["pose"] == "sitdesk"
+assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84
+assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio"
+b19labels = {t.get("t"): t for t in by_id["b19"]["args"]["texts"]}
+assert b19labels["NO."]["x"] == 0.29 and b19labels["NO."]["maxW"] <= 0.36
+assert b19labels["Not today."]["x"] == 0.29 and b19labels["Not today."]["maxW"] <= 0.42
 assert by_id["b21"]["args"]["actors"][2]["hold"] == "portfolio"
 assert [a["x"] for a in by_id["b13"]["args"]["actors"]] == ["table.left", "table.right"]
 assert [a["x"] for a in by_id["b24"]["args"]["actors"]] == ["table.left", "table.right"]

@@ -125,6 +125,12 @@ jobs:
           assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
           assert len(by_id["b20"]["args"]["actors"]) == 2
           assert by_id["b22"]["args"]["sentAt"] == 2.25
+          assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49, "B08 hero must use a numeric classroom position"
+          assert by_id["b08"]["args"]["actors"][1]["walk"]["to"] >= 0.84, "B08 favor-giver must visibly leave the hero behind"
+          assert by_id["b08"]["args"]["actors"][1]["hold"] == "portfolio", "B08 favor-giver must carry the folder away"
+          b19labels = {t.get("t"): t for t in by_id["b19"]["args"]["texts"]}
+          assert b19labels["NO."]["x"] == 0.29 and b19labels["NO."]["maxW"] <= 0.36, "B19 NO caption must stay in the left-safe lane"
+          assert b19labels["Not today."]["x"] == 0.29 and b19labels["Not today."]["maxW"] <= 0.42, "B19 sub-caption must stay off the character"
           assert by_id["b08"]["args"]["actors"][0]["x"] == 0.49, "B08 must use a numeric position on the classroom set"
           assert by_id["b21"]["args"]["actors"][0]["x"] == 0.49, "B21 must use a numeric position on the classroom set"
           assert by_id["b21"]["args"]["actors"][2]["hold"] == "portfolio", "Recipient must visibly carry the portfolio in B21"
