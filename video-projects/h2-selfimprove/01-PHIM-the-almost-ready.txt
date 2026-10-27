@@ -73,7 +73,7 @@ ACCENT: amber
 [B23] 6s | CẢNH: cận điện thoại, phản hồi của Mina đến, ánh sáng màn hình dịu hơn lần trước | SFX: notif_msg@0.5
 > A real person answered the work.
 
-[B24] 6s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Mina dưới đèn treo amber, ban đầu căng thẳng rồi nhìn lên khi cô chỉ vào ý tưởng trong bản vẽ | SFX: ding_soft@0.4
+[B24] 5s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Mina dưới đèn treo amber, ban đầu căng thẳng rồi nhìn lên khi cô chỉ vào ý tưởng trong bản vẽ | SFX: ding_soft@0.4
 > Her first question was about the idea.
 
 [B25] 5s | CẢNH: phòng studio lớp học, bảng dự án phía sau, cậu đứng cạnh tác phẩm trong khi một người bạn chăm chú lắng nghe
@@ -82,7 +82,7 @@ ACCENT: amber
 [B26] 5s | CẢNH: thành phố lúc bình minh, cậu bước đi qua những ô cửa sáng, cầm sổ tay bên hông, máy quay tracking ngang | SFX: footsteps@0.4
 > A few flaws survived the journey.
 
-[B27] 8s | CẢNH: phòng ngủ bình minh, cậu tiếp tục làm việc, bóng đen nhỏ lùi ở rìa khung và nhạt dần | SFX: typing_2s@0.4, tempt_whisper@2.65
+[B27] 9s | CẢNH: phòng ngủ bình minh, cậu tiếp tục làm việc, bóng đen nhỏ lùi ở rìa khung và nhạt dần | SFX: typing_2s@0.4, tempt_whisper@2.65
 > He still heard the old voice.
 ~ one more tiny fix.
 > He didn't have to obey it.

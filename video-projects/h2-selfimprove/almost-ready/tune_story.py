@@ -281,7 +281,7 @@ apply("b24", "scene", {
               poseAt=[[0.0, "sit"], [2.0, "sitpoint"]])
     ],
     "cam": cam(0.5, 0.55, 1.06),
-    "texts": [narr("Her first question was about the idea.", 0.35, 5.25)]
+    "texts": [narr("Her first question was about the idea.", 0.35, 4.5)]
 })
 
 # B25 — studio critique; hero is no longer hidden at the back of the room.
@@ -313,7 +313,7 @@ apply("b27", "scene", {
         actor("voice", 0.93, "reach", "grin", facing=-1, at=0.25,
               scale=0.40, out=4.8, fade=0.85, glow="#8f724d")
     ],
-    "cam": cam(0.69, 0.60, 1.20, 7.2),
+    "cam": cam(0.69, 0.60, 1.20, 8.35),
     "texts": [
         narr("He still heard the old voice.", 0.25, 2.2, x=0.22, y=0.20, size=48, max_w=0.38),
         tempting("one more tiny fix.", 2.65, 1.8, x=0.80, y=0.30, size=42),
@@ -372,7 +372,7 @@ assert by_id["b25"]["args"]["texts"][0]["dur"] <= 4.6
 assert by_id["b26"]["args"]["texts"][0]["dur"] <= 4.6
 for sid in ("b06", "b12", "b16", "b22"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert tx["x"] >= 0.72 and 0.40 <= tx["y"] <= 0.60 and tx["max_w"] <= 0.27, (
+    assert tx["x"] >= 0.72 and 0.40 <= tx["y"] <= 0.60 and tx["maxW"] <= 0.27, (
         f"{sid} laptop narration must remain in the right-side message-safe area"
     )
     shot_duration = float(by_id[sid]["end"]) - float(by_id[sid]["start"])
@@ -380,8 +380,8 @@ for sid in ("b06", "b12", "b16", "b22"):
 b25_caption = by_id["b25"]["args"]["texts"][0]
 assert 0.30 <= b25_caption["x"] <= 0.45 and 0.22 <= b25_caption["y"] <= 0.34 and b25_caption["max_w"] <= 0.31
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
-assert b27_text["He didn't have to obey it."]["dur"] >= 2.8
-assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 8.0) < 0.02
+assert b27_text["He didn't have to obey it."]["dur"] >= 3.0
+assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 9.0) < 0.02
 story["duration"] = 172.0
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print("ART-DIRECTION QA PASS: 29 shots, 172.0s, desk/pen/clock/deadline/send/reply/cafe/voice gates passed")
