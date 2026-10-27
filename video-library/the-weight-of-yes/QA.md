@@ -16,7 +16,7 @@
 - [ ] Another person takes the task; the boundary has a believable practical outcome.
 - [ ] A clear submitted/sent confirmation appears after the hero's action.
 - [ ] The resolution shows both chosen help and a calm refusal.
-- [ ] The 30-second preview, both contact sheets and all 12 motion proofs are inspected.
+- [ ] The 30-second preview is confirmed to contain both video and the mastered mix, then watched alongside both contact sheets and all 12 motion proofs.
 
 ## Technical delivery gates
 - [ ] Native H2 timeline check passes; all 29 shot IDs are present with no gaps/overlaps.
