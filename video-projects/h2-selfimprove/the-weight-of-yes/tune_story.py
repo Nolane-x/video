@@ -133,8 +133,7 @@ apply("b07", "note", {
 
 # B08 — everyone else leaves with the task done; he stays at the desk.
 apply("b08", "scene", {
-    "set": "classroom", "setArgs": classroom("dusk"),
-    "setArgs": classroom("dusk", desks=[0.46]),
+    "set": "classroom", "setArgs": classroom("dusk", desks=[0.46]),
     "actors": [
         actor("hero", 0.49, "sitdesk", "tired", facing=1, scale=1.00),
         actor("friend2", 0.60, "reach", "smile", facing=-1, scale=0.82, hold="portfolio")
@@ -271,8 +270,7 @@ apply("b20", "scene", {
 
 # B21 — another pair of hands takes over, making the boundary practical.
 apply("b21", "scene", {
-    "set": "classroom", "setArgs": classroom("day"),
-    "setArgs": classroom("day", desks=[0.46]),
+    "set": "classroom", "setArgs": classroom("day", desks=[0.46]),
     "actors": [
         actor("hero", 0.49, "sitdesk", "smile", facing=1, scale=0.96),
         actor("girl", 0.60, "reach", "neutral", facing=-1, scale=0.87),
