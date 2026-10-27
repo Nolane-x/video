@@ -116,7 +116,7 @@ jobs:
           assert abs(previous - 172.0) < 0.02
           by_id = {s["id"]: s for s in shots}
           assert by_id["b03"]["tpl"] == "note" and by_id["b03"]["args"]["text"] == "FIRST DRAFT"
-          assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt"))
+          assert by_id["b13"]["tpl"] == "clock" and "11:59" in str(by_id["b13"]["args"].get("timeAt")) and by_id["b13"]["args"].get("s", 1) <= 0.56, "B13 timer must leave readable caption space above SNOOZE"
           assert by_id["b15"]["args"]["hud"]["rows"][0]["to"] == 0
           assert by_id["b22"]["tpl"] == "laptop" and by_id["b22"]["args"]["hud"]["rows"][1]["n"] == 1
           assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2

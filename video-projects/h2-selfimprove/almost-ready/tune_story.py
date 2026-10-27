@@ -177,7 +177,7 @@ apply("b12", "laptop", {
 # B13 — preserve the clock insert and time transition as a separate action.
 apply("b13", "clock", {
     "time": "11:58", "timeAt": [[3.0, "11:59"]], "ring": False,
-    "s": 0.64, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.08),
+    "s": 0.55, "x": 0.5, "y": 0.53, "cam": cam(0.5, 0.52, 1.08),
     "texts": [narr("The minutes began to sprint.", 0.35, 5.15, x=0.50, y=0.20, size=50, max_w=0.42)]
 })
 
@@ -424,7 +424,7 @@ for sid in ("b02", "b19", "b29"):
 tx = by_id["b21"]["args"]["texts"][0]
 assert tx["x"] >= 0.76 and tx["maxW"] <= 0.30 and 0.25 <= tx["y"] <= 0.33 and tx.get("size", 53) >= 48, "B21 caption must stay in the right-side bedroom wall lane"
 tx = by_id["b13"]["args"]["texts"][0]
-assert abs(tx["x"] - 0.50) <= 0.02 and 0.17 <= tx["y"] <= 0.23 and tx["maxW"] <= 0.44 and tx.get("size", 53) >= 48 and by_id["b13"]["args"]["s"] <= 0.66, "B13 narration must sit above the clock face, clear of SNOOZE and the timer digits"
+assert abs(tx["x"] - 0.50) <= 0.02 and 0.17 <= tx["y"] <= 0.23 and tx["maxW"] <= 0.44 and tx.get("size", 53) >= 48 and by_id["b13"]["args"]["s"] <= 0.56, "B13 timer must be small enough to leave a clear narration lane above SNOOZE"
 tx = by_id["b08"]["args"]["texts"][0]
 assert tx["x"] <= 0.22 and tx["y"] >= 0.55 and tx["maxW"] <= 0.25, "B08 calendar caption must stay left of the calendar"
 tx = by_id["b24"]["args"]["texts"][0]
