@@ -1,7 +1,7 @@
 # THE WEIGHT OF YES — QA ledger
 
 ## Current state
-- Status: render attempt #2 is queued on GitHub Actions after a prop-continuity refinement; no final MP4 is claimed yet.
+- Status: render attempt #2 is running on GitHub Actions after a prop-continuity refinement; the runner is still installing FFmpeg and no final MP4 is claimed yet.
 - Project: 143 seconds, 29 shots, 1920×1080, 24 fps, English on-screen text, no voice-over.
 - Engine: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering.
 - Render workflow: [Render THE WEIGHT OF YES](https://github.com/Nolane-x/video/actions/workflows/render-selfimprove-weight-of-yes.yml).
