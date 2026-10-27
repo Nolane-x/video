@@ -1,12 +1,13 @@
 # AI session handoff
 
 ## Current active film — verify this before resuming old projects
-- The current candidate is **THE FIRST HOUR — An Animated Short Film**, built with native H2 Canvas/Chromium + FFmpeg, not the separate Remotion pipeline.
-- Latest passed CI: [run #26](https://github.com/Nolane-x/video/actions/runs/40329265743), source commit `6eba384b4babde94f030371d5c9904c483fcbef3`.
-- Manifest: `video-library/the-first-hour/manifest.json`; review notes: `video-library/the-first-hour/QA.md`.
-- Master SHA-256: `75b4172e47735368bb0070b50273ce12fb0248a460a5930c78cd19abb26e82a8`; 172.000 s, 1920×1080 @24/1, H.264 + AAC stereo 48 kHz; EBU R128 on the exact MP4: −14.1 LUFS, LRA 6.8 LU, true peak −2.5 dBFS.
-- All 12 motion-proof files exist and passed audio/video stream + duration checks. Still-sheet review and focused motion spot-checks were made for b20 writing and b25 punch-bag reaction. Full-length artistic playback is still pending.
-- Artifact run #26 (ID `12653272820`) is temporary GitHub Actions storage, not durable release archival. Before calling the project finished, complete full playback with audio and archive the approved candidate plus review ZIP to a durable release. Do not confuse this project with or overwrite the archived ONE MORE SCROLL master.
+- Resume with **THE WEIGHT OF YES — An Animated Short Film**, native H2 Canvas/Chromium + FFmpeg; not Remotion.
+- Latest render: [run #8 — success](https://github.com/Nolane-x/video/actions/runs/40429993390), source commit `1ab974acc2f8e0b268940fbf16f6b566884dace6`; manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
+- Candidate: SHA-256 `87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9`, 143.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; −14.0 LUFS, LRA 9.2 LU, true peak −5.0 dBFS.
+- Both contact sheets reviewed; B08 sampled at opening/middle/end after the engine fix. The portfolio and limbs remain coherent. Full 143-second start-to-finish audio/video review is pending.
+- Temporary artifact `the-weight-of-yes-h2-selfimprove-8` (ID 12701373173) expires 2026-11-26T01:05:42Z; not a durable release.
+- Parallel technical-pass rerenders: [THE FIRST HOUR #30](https://github.com/Nolane-x/video/actions/runs/40429993407) and [ALMOST READY #14](https://github.com/Nolane-x/video/actions/runs/40429993482); full-length reviews also pending.
+- Shared bugfix commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6). It prevents scheduled `walk`/`run` objects being treated as scalar gait speeds outside active movement windows. Do not change canonical ONE MORE SCROLL master.
 
 ## First reads
 Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, and `video-library/one-more-scroll/manifest.json`.
@@ -28,7 +29,7 @@ Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/
 - Krita: `tools/krita/README.md`
 - H2 source mirror: `integrations/h2-selfimprove-studio/` (51-file v1.0.2 base); v1.1.0 production overlay: `integrations/h2-selfimprove-studio-production-overlay/`.
 - Active private ChatGPT plugin: [h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) — v1.1.0, current release `pluginrel_6ade248942988191a57ff1059c818720` (Plugin Creator update confirmed 2026-10-25); see `docs/CHATGPT_PLUGIN.md` and `integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md`.
-- Film manifest: `video-library/one-more-scroll/manifest.json`
+- Current film manifest: `video-library/the-weight-of-yes/manifest.json`; canonical ONE MORE SCROLL history remains in `video-library/one-more-scroll/manifest.json`.
 
 ## Tool and video inventory
 - Read `docs/TOOL_INVENTORY.md`, `video-library/previous-works-catalog.json`, and `video-library/reference-clips.json` before assuming a tool, source archive, old clip, or reference MP4 is present.
@@ -66,11 +67,9 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 
 
 
-## Current active film — ALMOST READY
-- Project: `ALMOST READY | An Animated Short Film`, an original 29-shot/172-second self-improvement film about perfectionism and fear of being seen.
-- Script: `video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt`.
-- Art direction: `video-projects/h2-selfimprove/almost-ready/tune_story.py`; character/world rules: `video-projects/h2-selfimprove/almost-ready/story/bible.md`.
-- Manifest/QA: `video-library/almost-ready/manifest.json`, `video-library/almost-ready/QA.md`.
-- Dedicated renderer workflow: `.github/workflows/render-selfimprove-almost-ready.yml`; status at source authoring is pending render. Verify the actual run, output artifact URL/ID, MP4 SHA, duration, 1920×1080/24fps H.264, AAC 48kHz stereo, EBU R128 and all motion proofs before updating the ledger.
-- Targeted checks: b03/b20 pen-to-page contact; b13 11:58→11:59; b15 deadline counter and split captions; b21/b22 typing then send; b23 response; b24 café table anchors/eye-lines; b27 shadow recedes while work continues.
-- Do not call the film artistically approved until the 172-second master is watched start-to-finish with audio. Keep it distinct from `THE FIRST HOUR` and the canonical `ONE MORE SCROLL` master.
+## Parallel H2 candidate — ALMOST READY (run #14 technical pass)
+- Project: 29 shots / 172 seconds about perfectionism and fear of being seen.
+- Latest render: [run #14 — success](https://github.com/Nolane-x/video/actions/runs/40429993482), source commit `1ab974acc2f8e0b268940fbf16f6b566884dace6`; manifest and QA in `video-library/almost-ready/`.
+- Master SHA-256: `67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2`; 1920×1080/24 fps H.264, AAC 48 kHz stereo, −14.0 LUFS, −1.9 dBFS true peak.
+- B19 motion sample passed the targeted limb-coherence check. Contact sheets and complete 172-second audio/video review remain pending; artifact expires 2026-11-26T01:05:34Z.
+- Do not mark artistically approved until full review. Keep it separate from THE FIRST HOUR, THE WEIGHT OF YES and canonical ONE MORE SCROLL.

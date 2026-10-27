@@ -1,19 +1,30 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-26 after **THE FIRST HOUR** H2 render candidate passed the complete CI pipeline (run #26). Technical QA and targeted visual/motion spot-checks passed. The complete 172-second film has **not** yet had a real-time, start-to-finish artistic review with audio; keep artistic sign-off pending. The previously archived ONE MORE SCROLL canonical master remains unchanged.
+Snapshot updated 2026-10-27 after a shared H2 actor-motion fix and three successful native renders. The active candidate is **THE WEIGHT OF YES** (run #8). **THE FIRST HOUR** (run #30) and **ALMOST READY** (run #14) also passed technical QA after the same engine fix. All three still require complete start-to-finish artistic review with audio; none is marked artistically approved or archived to a durable release. The canonical ONE MORE SCROLL master remains unchanged.
 
-## Latest active film — THE FIRST HOUR
+## Latest active film — THE WEIGHT OF YES
+- Manifest: [video-library/the-weight-of-yes/manifest.json](../video-library/the-weight-of-yes/manifest.json); QA: [video-library/the-weight-of-yes/QA.md](../video-library/the-weight-of-yes/QA.md).
+- Story: people-pleasing and personal boundaries; 29 shots, 143.000 s, English on-screen text, no voice-over.
+- Engine: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg audio mastering; not Remotion.
+- Source/render commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6).
+- CI: [run #8 — success](https://github.com/Nolane-x/video/actions/runs/40429993390); all 19 steps passed.
+- MP4: H.264 1920×1080 @24 fps, AAC 48 kHz stereo; 20,652,791 bytes. SHA-256: `87f3fb490289d3bb34527dc49821c3d9cdbb0cb12ff8c2af6a36e7803e2691a9`.
+- EBU R128: −14.0 LUFS integrated, LRA 9.2 LU, true peak −5.0 dBFS. The 30-second preview contains video and mastered audio.
+- Review ZIP SHA-256: `3d786efda871f5185043aad20eb27c0d8432a7db5973ddfefcbd4061509a9378`; every checksum entry passed.
+- Temporary Actions artifact: [`the-weight-of-yes-h2-selfimprove-8`](https://github.com/Nolane-x/video/actions/runs/40429993390), ID `12701373173`; expires 2026-11-26T01:05:42Z.
+- Visual check: both contact sheets reviewed; B08 sampled at opening/middle/end after the fix. The folder stays attached to the moving helper and limbs remain coherent. Full-length audio/video review remains pending.
 
-- Manifest: [video-library/the-first-hour/manifest.json](../video-library/the-first-hour/manifest.json); QA notes: [video-library/the-first-hour/QA.md](../video-library/the-first-hour/QA.md).
-- Engine: native H2 SelfImprove Studio Canvas/Chromium render + FFmpeg mix/master; not Remotion.
-- Source commit: `6eba384b4babde94f030371d5c9904c483fcbef3`.
-- CI: [run #26 — passed](https://github.com/Nolane-x/video/actions/runs/40329265743), every workflow step green.
-- Master: 172.000 s, H.264 1920×1080 @24/1, AAC 48 kHz stereo; integrated loudness −14.1 LUFS, LRA 6.8 LU, true peak −2.5 dBFS.
-- MP4 SHA-256: `75b4172e47735368bb0070b50273ce12fb0248a460a5930c78cd19abb26e82a8`; 26,696,094 bytes.
-- Review ZIP SHA-256: `e0e514ee6cd048ad2d389a536c6c899297f77755e7d551cfd303193435dbfa3f`; includes the master, preview, two full shot sheets, reports and 12 six-second audio/video motion proofs. All 24 checksums listed inside the review bundle were verified locally.
-- Actions artifact: [the-first-hour-h2-selfimprove-26](https://github.com/Nolane-x/video/actions/runs/40329265743), artifact ID `12653272820`, ZIP SHA-256 `f7b6c6b6cac7ac0f76d10856d8a6e0c62d9351f9ba249ed3162feab9c2acef2a`. This is temporary Actions storage, **not** a durable release archive yet.
-- Visual sampling: both 29-shot contact sheets reviewed; notebook writing (b20) and punch-bag (b25) motion proofs inspected. The notebook no longer leaks characters from the next line; the bag visibly tilts/recoils at timed impacts after the gym-set wiring fix. The other 10 proof files are stream/duration validated, not all individually watched.
-- Next gate: full 172-second playback with audio, checking transitions, text readability, acting, all prop contacts and sound/story pacing; then archive the candidate to a durable release and update its status. Do not mark fully artistically approved based on CI or contact sheets alone.
+## Parallel H2 candidates re-rendered after the shared engine fix
+- **THE FIRST HOUR**: [run #30 — success](https://github.com/Nolane-x/video/actions/runs/40429993407); [manifest](../video-library/the-first-hour/manifest.json). 172.000 s, 1920×1080/24 fps H.264 + AAC 48 kHz stereo; −14.1 LUFS, −2.5 dBFS true peak. Master SHA-256 `f08c9afad88034b1ce7a0e57438f48391aa0a43ffcb3f59c8bbbc4339d25126b`. Artifact expires 2026-11-26T01:07:01Z. Both sheets reviewed; B19 motion sampled.
+- **ALMOST READY**: [run #14 — success](https://github.com/Nolane-x/video/actions/runs/40429993482); [manifest](../video-library/almost-ready/manifest.json). 172.000 s, 1920×1080/24 fps H.264 + AAC 48 kHz stereo; −14.0 LUFS, −1.9 dBFS true peak. Master SHA-256 `67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2`. Artifact expires 2026-11-26T01:05:34Z. B19 movement proof sampled; complete sheet/full-length review pending.
+- Technical pass does not equal artistic approval.
+
+## Shared H2 fix pushed to main
+- Commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6).
+- File: `integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/templates.js`.
+- Root cause: scheduled `walk`/`run` keyframe objects were passed to the character rig as numeric gait speeds when the actor was outside an active movement interval, corrupting limbs and occasionally detaching held props at first/last frames.
+- Fix: strip scheduled movement descriptors outside active gait windows; three H2 projects rerendered successfully.
+- Regression evidence: THE WEIGHT OF YES B08 proof sampled at opening/middle/end; THE FIRST HOUR B19 and ALMOST READY B19 sampled for coherent limbs.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video
@@ -69,7 +80,7 @@ Earlier in the conversation:
 - H2 runtime packaging runs 40189690048 and 40189801017 succeeded.
 These are historical identifiers, not proof about current HEAD. Check the live Actions page.
 
-## Verified latest state
+## Historical verified state — ONE MORE SCROLL source-v3
 - **H2 source-v3 full render and Release packaging passed:** [workflow run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324), all required steps successful, including the previously failing review-bundle checksum/publish step.
 - Candidate: [source-v3 H2 MP4](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/one-more-scroll-h2-source-v3-shoelace-fix-candidate.mp4), SHA-256 `761d238ae019e6c39eca3a9c46bff88b02f6f96e332f35d6e5d6b0d41e29310f`, 33,409,690 bytes. Review ZIP: [source-v3 review package](https://github.com/Nolane-x/video/releases/download/h2-production-assets-v1/h2-source-v3-shoelace-fix-review.zip), SHA-256 `56bf506a0ec63fbb9d99256ac1cc989186f6ddab12056c9cfb9f012b922d0745`, 33,709,840 bytes.
 - Verified streams: 155.000s, 1920×1080 @24fps, H.264 + AAC stereo 48 kHz. EBU R128: −14.0 LUFS integrated, 6.9 LU LRA, −2.4 dBFS true peak.
@@ -79,10 +90,10 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - Source-v3 is a **technical pass, not artistic sign-off**. I sampled the shot-b17 motion at 4 fps around 80–84 seconds: the forward crouch and alternating arm motion are visible, but the hand-to-shoe/lace contact remains ambiguous because the actor is too small in the wide shot. Treat this as a P1 visual defect. Next: build a source-v4 3–6 second focused preview with clearer composition and actual hand/lace contact; review that preview before any new full render. Full candidate playback with audio, pacing, transitions, sync and emotional arc still require review.
 
 ## Next priorities
-1. **P1:** create and inspect a source-v4 focused shoe-tie preview; make the hand/lace contact legible at actual viewing size before full render.
-2. Watch the complete source-v3 candidate with audio and review close-up rhythm, transitions, synchronization and emotional arc.
-3. Verify the newest portable bundle run and SHA-256 sidecar after manifest sync.
-4. Preserve canonical master hash until an explicitly approved candidate exists.
+1. Watch THE WEIGHT OF YES in full with audio, verifying pacing, transitions, captions, character acting, prop contacts and emotional arc.
+2. Perform equivalent full-length audio/video reviews for THE FIRST HOUR and ALMOST READY; do not infer artistic approval from green CI.
+3. After explicit sign-off, publish approved master and review ZIP to durable GitHub Release storage, verify remote URLs/checksums and update manifests. Actions artifacts expire.
+4. Keep the ONE MORE SCROLL source-v4 shoe-tie/contact fix as a separate backlog item; do not replace the canonical master without full-motion review.
 
 ## Prior work catalog and reusable archive tooling
 - The [previous-work catalog](../video-library/previous-works-catalog.json) records older H2/remotion/cinematic iterations, their exact checksums and whether they are available only in the production workspace or archived in GitHub.
@@ -105,11 +116,9 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 
 
 
-## Next active film — ALMOST READY (source committed, render pending)
-
-- Manifest: [video-library/almost-ready/manifest.json](../video-library/almost-ready/manifest.json); QA ledger: [video-library/almost-ready/QA.md](../video-library/almost-ready/QA.md).
-- Original screenplay: [01-PHIM-the-almost-ready.txt](../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt); authored art-direction pass: [tune_story.py](../video-projects/h2-selfimprove/almost-ready/tune_story.py).
-- Creative focus: perfectionism and fear of being seen; the hero's edit counter rises while the shared count stays at zero, misses the submission window, then takes the smaller but real step of sharing an imperfect version with Mina.
-- Target: 29 shots, 172 seconds, English on-screen text, no voice-over, 16:9 1080p at 24 fps; native H2 Canvas/Chromium plus FFmpeg audio mastering.
-- Dedicated workflow: `.github/workflows/render-selfimprove-almost-ready.yml`. Initial status is source-only until the actual render, contact sheets, 12 motion proofs, ffprobe and EBU R128 gates are verified.
-- Keep `THE FIRST HOUR` separate; its full-length artistic review and durable release archival remain pending. Do not overwrite the canonical `ONE MORE SCROLL` H2 master.
+## Parallel H2 candidate — ALMOST READY (run #14 technical pass)
+- Manifest: [video-library/almost-ready/manifest.json](../video-library/almost-ready/manifest.json); QA: [video-library/almost-ready/QA.md](../video-library/almost-ready/QA.md).
+- Script: [01-PHIM-the-almost-ready.txt](../video-projects/h2-selfimprove/01-PHIM-the-almost-ready.txt); art-direction: [tune_story.py](../video-projects/h2-selfimprove/almost-ready/tune_story.py).
+- Latest native H2 render: [run #14](https://github.com/Nolane-x/video/actions/runs/40429993482), all steps successful. 172.000 s, H.264 1920×1080 @24 fps + AAC 48 kHz stereo; −14.0 LUFS, −1.9 dBFS true peak.
+- B19 turning-action sample shows coherent limbs during motion. Full contact-sheet review and full-length video/audio watch remain pending; the artifact expires 2026-11-26T01:05:34Z.
+- Keep it separate from THE FIRST HOUR, THE WEIGHT OF YES and canonical ONE MORE SCROLL.

@@ -1,14 +1,14 @@
 # ALMOST READY — QA ledger
 
-## Current status — render in progress
-- [x] H2 schema/runtime check and authored 29-shot timeline passed in Actions run [#1](https://github.com/Nolane-x/video/actions/runs/40346315405)
+## Current status — render #14 technical pass
+- [x] Latest render [#14](https://github.com/Nolane-x/video/actions/runs/40429993482) passed all 17 workflow steps.
 - [x] Exactly 29 shots, 172.000 seconds and no timeline gaps/overlaps
 - [ ] Full contact sheets viewed manually
 - [ ] 30-second preview with audio reviewed manually
-- [ ] 12 moving proofs with audio rendered and reviewed
-- [ ] Exact final MP4 passes ffprobe: 1920×1080, 24 fps, H.264, AAC 48 kHz stereo
-- [ ] EBU R128 on the exact final MP4: integrated loudness −14 LUFS ±1; true peak ≤ −1 dBFS
-- [ ] All files in the review ZIP have checksums and validate after packaging
+- [x] 12 moving proofs with audio rendered and checksum/stream-duration validated; [ ] individually watch all 12.
+- [x] Master passed ffprobe: 172.000 s, 1920×1080, 24 fps H.264, AAC 48 kHz stereo.
+- [x] EBU R128 on exact master: −14.0 LUFS integrated, 9.1 LU LRA, −1.9 dBFS true peak.
+- [x] Review ZIP checksum ledger passed after download.
 - [ ] Full 172-second playback with audio and artistic sign-off
 
 ## Critical motion checks
@@ -39,9 +39,9 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 
 
 
-## Final candidate — render #13
+## Superseded candidate — render #13
 - Workflow: [run #13](https://github.com/Nolane-x/video/actions/runs/40417564202), source commit `cf3050b81bab6163ea8793c641b21d98e4eead84`.
-- Added a larger, illustrated portfolio folder hand prop for the classroom-sharing beat (B10), while preserving the seated pointing pose in the café (B24) and timed SENT confirmation (B22). Final render and QA are pending.
+- Added a larger, illustrated portfolio folder hand prop for the classroom-sharing beat (B10), while preserving the seated pointing pose in the café (B24) and timed SENT confirmation (B22). Superseded by the successful technical rerender #14; use the latest technical-pass record below.
 - The last confirmed technical baseline is run #11: [workflow](https://github.com/Nolane-x/video/actions/runs/40354490453), artifact `12664834346`. Full-length artistic sign-off still requires a start-to-finish watch with audio.
 
 
@@ -52,3 +52,13 @@ A green CI build does not establish artistic approval. Contact sheets do not est
 - All 25 entries in `SHA256SUMS.txt` validated. The 12 motion proof clips all have audio/video and are approximately six seconds.
 - Targeted motion review confirms: the SENT toast appears in B22; B10 shows a peer physically holding out a folder-like object; the two participants stay seated during B24 feedback; the old voice remains small in B27.
 - A further refinement adds a larger illustrated portfolio folder prop to B10 because the prior held object was too small to read clearly. Full-length artistic sign-off remains pending.
+
+## Latest technical pass — render #14
+- Workflow: [run #14 — success](https://github.com/Nolane-x/video/actions/runs/40429993482); source commit `1ab974acc2f8e0b268940fbf16f6b566884dace6`.
+- Master: 172.000 s, H.264 1920×1080 @24 fps, AAC 48 kHz stereo; 23,193,623 bytes.
+- Master SHA-256: `67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2`.
+- Audio: −14.0 LUFS integrated, LRA 9.1 LU, true peak −1.9 dBFS.
+- Preview SHA-256: `74cfecb8c7795f306410bdfad75133b0017aa91d00ad2be295dd0c561f4e9f92`; 30 seconds, video and audio present.
+- Review ZIP SHA-256: `b9c7be54b8967a5b318991c29846b1332f5eda3aebe95bc61a74c31ee7213956`; every listed checksum passed.
+- Temporary Actions artifact: `almost-ready-h2-selfimprove-14`, ID `12702020242`, 62,128,819 bytes; expires 2026-11-26T01:05:34Z. No durable release yet.
+- B19 turning-action proof sampled at opening/middle/end; sampled limbs remain coherent. Manual contact-sheet review and full-length audio/video review remain pending.

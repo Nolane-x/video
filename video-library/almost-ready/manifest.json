@@ -3,7 +3,7 @@
   "title": "ALMOST READY — An Animated Short Film",
   "project_id": "almost-ready",
   "created_at": "2026-10-26",
-  "status": "final_candidate_rerendering_portfolio_prop",
+  "status": "technical_pass_targeted_motion_review_pending_full_length_artistic_review",
   "creative_target": "cinematic story-led stick-figure short about perfectionism and fear of being seen",
   "language": "English",
   "voiceover": false,
@@ -35,35 +35,55 @@
     "full_length_artistic_review": "pending"
   },
   "render": {
-    "workflow_run_id": 40417564202,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40417564202",
-    "source_commit": "cf3050b81bab6163ea8793c641b21d98e4eead84",
-    "master_sha256": null,
-    "review_bundle_sha256": null,
-    "artifact_id": null,
-    "artifact_storage": "Run #11 is retained as a technical baseline; run #13 adds a readable portfolio folder prop and keeps the seated café pose",
+    "workflow_run_id": 40429993482,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40429993482",
+    "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
+    "master_sha256": "67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2",
+    "review_bundle_sha256": "b9c7be54b8967a5b318991c29846b1332f5eda3aebe95bc61a74c31ee7213956",
+    "artifact_id": 12702020242,
+    "artifact_storage": "temporary GitHub Actions artifact; not archived to a durable release",
     "latest_technical_pass": {
-      "workflow_run_id": 40354490453,
-      "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40354490453",
-      "source_commit": "e9e92b631855fac2b72379e4442bb6c0873f9e44",
-      "artifact_id": 12664834346,
-      "artifact_sha256": "e519f6a9954a37cc89d8db002a46947631ee30bab8b54ebdec049cb9df479cc1",
-      "master_sha256": "a4cc565fca9a6aa39ace0b0e5a4f9c71a81264ce12b99515ba832638ba34522a",
-      "review_bundle_sha256": "2fc9d40c93266111b75108e9002cba975681a31df39e229f68cd53f742d2aaf9",
+      "workflow_run_id": 40429993482,
+      "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40429993482",
+      "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
+      "artifact_id": 12702020242,
+      "artifact_name": "almost-ready-h2-selfimprove-14",
+      "artifact_sha256": "de136135895dc24ddf1d026ae15ad00466f8e0fd6b50729a5cf3d953e69cda2d",
+      "master_sha256": "67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2",
+      "review_bundle_sha256": "b9c7be54b8967a5b318991c29846b1332f5eda3aebe95bc61a74c31ee7213956",
       "preview_sha256": "74cfecb8c7795f306410bdfad75133b0017aa91d00ad2be295dd0c561f4e9f92",
       "duration_seconds": 172,
-      "video": "H.264, 1920x1080, 24 fps",
-      "audio": "AAC, 48000 Hz, stereo",
+      "video": "H.264 1920x1080 @24fps",
+      "audio": "AAC 48000 Hz stereo",
       "integrated_lufs": -14,
+      "lra_lu": 9.1,
       "true_peak_dbfs": -1.9,
       "motion_proofs": 12,
-      "checksum_files_valid": 25,
-      "targeted_visual_review": "Reviewed contact sheets and 1 fps motion proof montages for portfolio sharing, send confirmation, seated café feedback and receding shadow; café characters remain seated during the point gesture."
-    }
+      "checksum_files_valid": true,
+      "targeted_visual_review": "B19 turning-action proof sampled at opening/middle/end; character limbs remain coherent. Twelve proofs and checksum ledger passed technical validation; full-length review is pending."
+    },
+    "preview_sha256": "74cfecb8c7795f306410bdfad75133b0017aa91d00ad2be295dd0c561f4e9f92",
+    "artifact_sha256": "de136135895dc24ddf1d026ae15ad00466f8e0fd6b50729a5cf3d953e69cda2d",
+    "artifact_size_bytes": 62128819,
+    "artifact_name": "almost-ready-h2-selfimprove-14",
+    "artifact_expires_at": "2026-11-26T01:05:34Z",
+    "duration_seconds": 172,
+    "master_size_bytes": 23193623,
+    "review_bundle_size_bytes": 31049304,
+    "preview_size_bytes": 1545331
   },
   "known_limits": [
     "The H2 character and prop rig must be verified in the rendered scene; source assertions do not establish visible contact.",
     "The laptop/phone UI templates are stylized inserts; review text readability at 1920x1080.",
     "The complete film must be watched with audio before artistic approval."
-  ]
+  ],
+  "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
+  "artistic_signoff": {
+    "status": "pending",
+    "full_length_video_audio_review": false,
+    "review_notes": [
+      "Run #14 passed automated gates and checksum verification; B19 turning-action proof sampled at opening/middle/end after the shared H2 motion fix.",
+      "The full contact sheets and the complete film with audio still require review."
+    ]
+  }
 }

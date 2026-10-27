@@ -3,24 +3,25 @@
   "title": "THE FIRST HOUR — An Animated Short Film",
   "project_id": "the-first-hour",
   "created_at": "2026-10-26",
-  "status": "technical_pass_targeted_visual_qa_pending_full_length_artistic_review",
+  "status": "technical_pass_targeted_motion_review_pending_full_length_artistic_review",
   "language": "English",
   "voiceover": false,
   "aspect_ratio": "16:9",
   "renderer": "H2 SelfImprove Studio native Canvas/Chromium + FFmpeg audio mastering",
-  "source_commit": "6eba384b4babde94f030371d5c9904c483fcbef3",
+  "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6",
   "workflow": {
     "name": "Render H2 SelfImprove — The First Hour",
-    "run_number": 26,
-    "run_id": 40329265743,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40329265743",
+    "run_number": 30,
+    "run_id": 40429993407,
+    "url": "https://github.com/Nolane-x/video/actions/runs/40429993407",
     "conclusion": "success",
-    "all_steps_passed": true
+    "all_steps_passed": true,
+    "source_commit": "1ab974acc2f8e0b268940fbf16f6b566884dace6"
   },
   "master": {
     "file_name": "the-first-hour-h2-selfimprove.mp4",
-    "size_bytes": 26696094,
-    "sha256": "75b4172e47735368bb0070b50273ce12fb0248a460a5930c78cd19abb26e82a8",
+    "size_bytes": 26743126,
+    "sha256": "f08c9afad88034b1ce7a0e57438f48391aa0a43ffcb3f59c8bbbc4339d25126b",
     "duration_seconds": 172,
     "width": 1920,
     "height": 1080,
@@ -32,18 +33,19 @@
     "audio_integrated_loudness_lufs": -14.1,
     "audio_loudness_range_lu": 6.8,
     "audio_true_peak_dbfs": -2.5,
-    "qa_measurement": "FFmpeg ffprobe + EBU R128 on the exact exported MP4; all workflow thresholds passed"
+    "qa_measurement": "ffprobe + EBU R128 on the exact output of run #30; all workflow thresholds passed"
   },
   "preview": {
     "file_name": "preview-30s.mp4",
     "size_bytes": 1879734,
     "sha256": "cb0d5abe68a91bc3e1bf0fe34aea19594055d66f8ebd2780baea56feb9d56d8b",
-    "duration_seconds": 30
+    "duration_seconds": 30,
+    "contains": "H.264 video and AAC 48 kHz stereo"
   },
   "review_bundle": {
     "file_name": "the-first-hour-review.zip",
-    "size_bytes": 36695188,
-    "sha256": "e0e514ee6cd048ad2d389a536c6c899297f77755e7d551cfd303193435dbfa3f",
+    "size_bytes": 36749758,
+    "sha256": "e3b3c700d8f2cd585db8a889981370aa7412f9daf38acc9376398aa92eb37672",
     "contains": [
       "master MP4",
       "30-second preview",
@@ -55,15 +57,16 @@
       "12 six-second motion proofs with audio",
       "SHA256SUMS.txt"
     ],
-    "checksum_verification": "All 24 entries in SHA256SUMS.txt were independently verified after download."
+    "checksum_verification": "Every entry in SHA256SUMS.txt passed after download."
   },
   "actions_artifact": {
-    "name": "the-first-hour-h2-selfimprove-26",
-    "artifact_id": 12653272820,
-    "size_bytes": 73426295,
-    "sha256": "f7b6c6b6cac7ac0f76d10856d8a6e0c62d9351f9ba249ed3162feab9c2acef2a",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40329265743",
-    "storage_status": "temporary GitHub Actions artifact; not yet archived to a durable release"
+    "name": "the-first-hour-h2-selfimprove-30",
+    "artifact_id": 12702200246,
+    "size_bytes": 73535367,
+    "sha256": "30173a58ce0e6ccad61c22d7c310e65d003ce81c881b6e956057b5b17febdc6f",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40429993407",
+    "expires_at": "2026-11-26T01:07:01Z",
+    "storage_status": "temporary GitHub Actions artifact; not archived to a durable release"
   },
   "visual_qa": {
     "contact_sheets_reviewed": 2,
@@ -72,14 +75,15 @@
     "all_proofs_passed_stream_duration_checks": true,
     "proof_spot_checks": {
       "b20_notebook_writing": "Inspected. First-line/second-line reveal regression is corrected; no next-line text bleed seen in the sampled motion frames.",
-      "b25_punch_bag_impact": "Inspected. After wiring the gym set's impact args through to the bag renderer, visible bag tilt/recoil and sparks are present around timed impacts."
+      "b25_punch_bag_impact": "Inspected. After wiring the gym set's impact args through to the bag renderer, visible bag tilt/recoil and sparks are present around timed impacts.",
+      "b19_walk_to_desk": "Sampled at 0.15, 1, 2.8 and 5.5 seconds after the shared engine fix; limbs remain coherent and the character settles upright at the desk."
     },
     "full_length_watch_with_audio": "pending",
     "artistic_signoff": "pending"
   },
   "next_steps": [
-    "Watch the full 172-second MP4 with audio from start to finish; check pacing, transitions, captions, all hand/prop contacts and the emotional arc.",
-    "Archive the approved master and review ZIP to a durable GitHub Release, then record the permanent asset URLs and checksums here.",
-    "Only change artistic_signoff after the complete viewing/review is actually complete."
+    "Watch the full 172-second MP4 with audio start-to-finish; check pacing, transitions, captions, hand/prop contacts and emotional arc.",
+    "Archive the approved master and review ZIP to a durable release only after full artistic sign-off.",
+    "Keep the canonical ONE MORE SCROLL master unchanged."
   ]
 }
