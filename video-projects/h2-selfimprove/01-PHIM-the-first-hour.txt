@@ -72,16 +72,16 @@ ACCENT: amber
 [B23] 6s | CẢNH: phòng ngủ, cậu đẩy điện thoại ra xa, quay lại laptop, bóng đen lùi vào bóng tối | SFX: whoosh_mid@0.5
 > This time, he let the feeling pass.
 
-[B24] 6s | CẢNH: thành phố bình minh, cậu chạy bộ ngang hàng cây, đeo băng đô amber, ánh mặt trời phía sau | HUD: DAY 7 | SFX: footsteps@0.4
+[B24] 5s | CẢNH: thành phố bình minh, cậu chạy bộ ngang hàng cây, đeo băng đô amber, ánh mặt trời phía sau | HUD: DAY 7 | SFX: footsteps@0.4
 > Small wins began to stack.
 
 [B25] 6s | CẢNH: phòng tập, cậu đeo băng đô đấm bao cát đỏ, tay vào thế đấm, bao cát đung đưa dưới đèn vàng | SFX: breath_in@0.4, impact_light@1.05, impact_light@2.70
 > He stopped waiting to feel different.
 
-[B26] 6s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0
+[B26] 5s | CẢNH: quán cà phê đêm mưa, cậu ngồi đối diện Jay, hai người nhìn nhau và cười nhẹ dưới đèn treo ấm | HUD: DAY 14 | NHẠC: hope | SFX: ding_soft@1.0
 > He came back into the room.
 
-[B27] 6s | CẢNH: phòng ngủ bình minh, cậu ngồi bàn làm việc, lịch có nhiều ô amber, điện thoại úp xuống, bóng đen vỡ thành mảnh sáng nhỏ phía sau | SFX: glass_shatter@2.5
+[B27] 8s | CẢNH: phòng ngủ bình minh, cậu ngồi bàn làm việc, lịch có nhiều ô amber, điện thoại úp xuống, bóng đen vỡ thành mảnh sáng nhỏ phía sau | SFX: tempt_whisper@2.6, glass_shatter@5.2
 > The voice returned.
 ~ just one more scroll.
 > But it sounded smaller now.

@@ -202,14 +202,36 @@ a.update({
         actor("hero", "desk.seat", "sitdesk", "determined", facing=1, look=0.15),
         actor("voice", 0.91, "reach", "grin", facing=-1, at=0.2, scale=0.42, out=5.2, fade=0.55),
     ],
-    "cam": camera(0.66, 0.62, 1.0, 1.38),
+    "cam": camera(0.66, 0.62, 1.0, 1.38, 7.35),
     "texts": [
-        {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 1.45, "x": 0.5, "y": 0.105, "size": 56, "maxW": 0.82},
-        {"kind": "tempt", "t": "just one more scroll.", "at": 2.0, "dur": 1.35, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 3.75, "dur": 1.95, "x": 0.5, "y": 0.105, "size": 56, "maxW": 0.82},
+        {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.32, "y": 0.20, "size": 56, "maxW": 0.56},
+        {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 1.95, "x": 0.80, "y": 0.31, "size": 46},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 4.80, "dur": 2.80, "x": 0.32, "y": 0.20, "size": 56, "maxW": 0.56},
     ],
 })
 
+# Caption-safe-area and read-time regression guard for the encoded 2.39:1 picture.
+for shot in shots:
+    duration = float(shot["end"]) - float(shot["start"])
+    for tx in shot.get("args", {}).get("texts", []):
+        kind = tx.get("kind")
+        if kind in ("narr", "big") and tx.get("y") is not None:
+            text_y = float(tx["y"])
+            assert 0.16 <= text_y <= 0.84, (
+                f"Caption falls in/too close to cinematic bars: {shot['id']} / {tx.get('t')!r} at y={text_y}"
+            )
+        if kind in ("narr", "big", "tempt") and tx.get("t"):
+            at = float(tx.get("at", 0.3))
+            dur = float(tx.get("dur", duration - at - 0.1))
+            assert dur > 0 and at + dur <= duration + 0.02, (
+                f"Caption timing exceeds shot: {shot['id']} / {tx.get('t')!r}"
+            )
+# The returning-voice beat must have enough time to read all three captions.
+b27_text = {tx.get("t"): tx for tx in get("b27").get("args", {}).get("texts", [])}
+assert b27_text["The voice returned."]["dur"] >= 2.0
+assert b27_text["just one more scroll."]["dur"] >= 1.8
+assert b27_text["But it sounded smaller now."]["dur"] >= 2.7
+assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 8.0) < 0.02
 story["duration"] = float(shots[-1]["end"])
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Art direction applied: {len(shots)} shots; duration={story['duration']}s")

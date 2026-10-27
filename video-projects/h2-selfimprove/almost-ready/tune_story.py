@@ -313,11 +313,11 @@ apply("b27", "scene", {
         actor("voice", 0.93, "reach", "grin", facing=-1, at=0.25,
               scale=0.40, out=4.8, fade=0.85, glow="#8f724d")
     ],
-    "cam": cam(0.69, 0.60, 1.20),
+    "cam": cam(0.69, 0.60, 1.20, 7.2),
     "texts": [
-        narr("He still heard the old voice.", 0.25, 1.35, y=0.20, size=53),
-        tempting("one more tiny fix.", 1.85, 1.30, x=0.80, y=0.30, size=42),
-        narr("He didn't have to obey it.", 3.55, 2.15, y=0.20, size=53)
+        narr("He still heard the old voice.", 0.25, 2.2, x=0.34, y=0.20, size=53, max_w=0.58),
+        tempting("one more tiny fix.", 2.65, 1.8, x=0.80, y=0.30, size=42),
+        narr("He didn't have to obey it.", 4.65, 3.0, x=0.34, y=0.20, size=53, max_w=0.58)
     ]
 })
 
@@ -365,6 +365,11 @@ assert by_id["b10"]["args"]["actors"][1]["pose"] == "reach" and by_id["b10"]["ar
 assert by_id["b24"]["args"]["set"] == "cafe" and len(by_id["b24"]["args"]["actors"]) == 2
 assert by_id["b24"]["args"]["actors"][1]["poseAt"] == [[0.0, "sit"], [2.0, "sitpoint"]]
 assert by_id["b27"]["args"]["actors"][1]["scale"] < 0.5
+b27_text = {tx.get("t"): tx for tx in by_id["b27"]["args"].get("texts", [])}
+assert b27_text["He still heard the old voice."]["dur"] >= 2.0
+assert b27_text["one more tiny fix."]["dur"] >= 1.7
+assert b27_text["He didn't have to obey it."]["dur"] >= 2.8
+assert abs(float(by_id["b27"]["end"]) - float(by_id["b27"]["start"]) - 8.0) < 0.02
 story["duration"] = 172.0
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print("ART-DIRECTION QA PASS: 29 shots, 172.0s, desk/pen/clock/deadline/send/reply/cafe/voice gates passed")
