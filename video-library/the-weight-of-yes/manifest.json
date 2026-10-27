@@ -27,7 +27,7 @@
     "status": "in_progress",
     "url": "https://github.com/Nolane-x/video/actions/runs/40425050181",
     "head_sha": "4ca6e78d680697150c08e455d53d169ca670a698",
-    "notes": "Static FFmpeg/H.264 checks passed; H2 dependencies/audio built; authored storyboard geometry, template, caption-range, face/pose checks passed; full timeline and contact-sheet render passed. Music/SFX preview and full video render remain pending."
+    "notes": "Native H2 silent render passed. Audio mastering/final MP4 assembly, preview audio mux, motion proofs, ffprobe and EBU R128 gates are currently running."
   },
   "latest_technical_pass": null,
   "render_history": [
