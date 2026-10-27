@@ -171,7 +171,7 @@ jobs:
           assert by_id["b21"]["args"].get("setArgs", {}).get("laptop") is True, "Work prop is missing"
           # The second notebook page is the only safe lane for narration in B20.
           b20_note_caption = shots["b20"]["args"]["texts"][0]
-          assert 0.64 <= b20_note_caption.get("x") <= 0.70 and b20_note_caption.get("y") >= 0.76 and b20_note_caption.get("maxW") <= 0.23 and b20_note_caption.get("color") == "#302a24", "B20 narration must sit in the lower-right page without clipping at the page edge or crossing the pen"
+          assert 0.64 <= b20_note_caption.get("x") <= 0.70 and 0.69 <= b20_note_caption.get("y") <= 0.75 and b20_note_caption.get("maxW") <= 0.23 and b20_note_caption.get("color") == "#302a24", "B20 narration must sit above the lower frame edge, clear of the moving pen"
           assert shots["b20"]["args"].get("hud", {}).get("y", 1) <= 0.05, "B20 DAY HUD must stay in the upper letterbox"
           classroom_or_room_left_lane = ("b02", "b16", "b18", "b19", "b21", "b23", "b25")
           for sid in classroom_or_room_left_lane:

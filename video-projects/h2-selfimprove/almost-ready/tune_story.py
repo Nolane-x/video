@@ -74,7 +74,7 @@ apply("b02", "scene", {
 apply("b03", "note", {
     "text": "FIRST DRAFT", "at": 0.45, "cps": 5.0, "x": 0.5, "y": 0.52, "s": 0.88,
     "cam": cam(0.5, 0.52, 1.07),
-    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
+    "texts": [narr("The first draft felt alive.", 0.35, 4.25, x=0.67, y=0.72, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B04 — face reaction after the first flaw; the screen/page light cools the mood.
@@ -141,7 +141,7 @@ apply("b09", "note", {
     "text": "VERSION 19", "at": 0.4, "cps": 5.1, "s": 0.90,
     "cam": cam(0.5, 0.52, 1.13),
     "hud": {"rows": [{"label": "EDITS", "n": 19}, {"label": "SHARED", "n": 0}], "y": 0.035},
-    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
+    "texts": [narr("Every fix uncovered another flaw.", 0.35, 4.25, x=0.67, y=0.72, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B10 — peers visibly share; the protagonist stays in the less-lit foreground.
@@ -246,7 +246,7 @@ apply("b19", "scene", {
 apply("b20", "note", {
     "text": "GOOD ENOUGH\nTO SHARE.", "at": 0.45, "cps": 6.2,
     "x": 0.5, "y": 0.52, "s": 0.92, "cam": cam(0.5, 0.52, 1.10),
-    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.67, y=0.80, size=50, max_w=0.22, color="#302a24")]
+    "texts": [narr("He made one rule for himself.", 0.35, 4.25, x=0.67, y=0.72, size=50, max_w=0.22, color="#302a24")]
 })
 
 # B21 — deliberate desk composition, real typing posture; sent count is still zero.
@@ -416,7 +416,7 @@ for sid in ("b10", "b25"):
     assert 0.30 <= tx["x"] <= 0.44 and 0.22 <= tx["y"] <= 0.34 and tx["maxW"] <= 0.35 and tx.get("size", 53) >= 48, f"{sid} narration must avoid the TEAM WORK/SHOWCASE board"
 for sid in ("b03", "b09", "b20"):
     tx = by_id[sid]["args"]["texts"][0]
-    assert 0.64 <= tx["x"] <= 0.70 and tx["y"] >= 0.76 and tx["maxW"] <= 0.23 and tx.get("size", 53) >= 48 and tx.get("color") == "#302a24", f"{sid} notebook narration must sit low on the right page without clipping the outer edge"
+    assert 0.64 <= tx["x"] <= 0.70 and 0.69 <= tx["y"] <= 0.75 and tx["maxW"] <= 0.23 and tx.get("size", 53) >= 48 and tx.get("color") == "#302a24", f"{sid} notebook narration must stay clear of the pen and lower frame edge"
 assert by_id["b09"]["args"].get("hud", {}).get("y", 1) <= 0.05, "B09 EDITS/SHARED HUD must stay in the upper letterbox clear of VERSION 19"
 for sid in ("b02", "b19", "b29"):
     tx = by_id[sid]["args"]["texts"][0]
