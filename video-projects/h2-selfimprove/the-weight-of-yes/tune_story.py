@@ -128,7 +128,7 @@ apply("b07", "note", {
     "text": "YES.", "at": 0.35, "cps": 5.2, "x": 0.5, "y": 0.51, "s": 1.10,
     "cam": cam(0.5, 0.52, 1.12),
     "hud": {"rows": [{"label": "FAVORS", "n": 7}, {"label": "HIS TIME", "n": 0}]},
-    "texts": [narr("He answered before checking his own plans.", size=48)]
+    "texts": [narr("He answered before checking his own plans.", 0.32, 4.25, x=0.76, y=0.67, size=42, max_w=0.25)]
 })
 
 # B08 — everyone else leaves with the task done; he stays at the desk.
@@ -400,6 +400,9 @@ assert by_id["b11"]["tpl"] == "laptop"
 assert by_id["b14"]["args"]["set"] == "void"
 assert any(t.get("t") == "NO." for t in by_id["b19"]["args"]["texts"])
 assert len(by_id["b20"]["args"]["actors"]) == 2
+for sid in ("b03", "b07", "b09", "b20"):
+    tx = by_id[sid]["args"]["texts"][0]
+    assert tx["x"] >= 0.72 and tx["y"] >= 0.63 and tx["maxW"] <= 0.26, f"{sid} notebook caption must use the blank lower-right page"
 classroom_lane = ("b03", "b04", "b06", "b08", "b15", "b16", "b18", "b20", "b21", "b25")
 for sid in classroom_lane:
     tx = by_id[sid]["args"]["texts"][0]
