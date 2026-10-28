@@ -22,18 +22,18 @@
     "audio_mastering": "FFmpeg; EBU R128 target -14 LUFS ±1; true peak <= -1.0 dBFS"
   },
   "latest_render": {
-    "run_id": 40461365610,
-    "run_number": 30,
+    "run_id": 40532086413,
+    "run_number": 31,
     "status": "success",
     "conclusion": "success",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40461365610",
-    "head_sha": "9214fb3ce0765c38d4169be917099a75a8e53442",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40532086413",
+    "head_sha": "58c95de849405b0ae5d1636851bb883ffa3870ec",
     "artifact": {
-      "id": 12714602184,
-      "name": "the-weight-of-yes-h2-selfimprove-30",
-      "size_bytes": 61869228,
-      "sha256": "21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e",
-      "expires_at": "2026-11-26T06:32:15Z"
+      "id": 12746292555,
+      "name": "the-weight-of-yes-h2-selfimprove-31",
+      "size_bytes": 61868285,
+      "sha256": "ddfbc5100354b0cd881632767649faf075605bd3ee560938f22cbd4d0a367b3f",
+      "expires_at": "2026-11-26T15:36:18Z"
     },
     "master": {
       "file_name": "the-weight-of-yes-h2-selfimprove.mp4",
@@ -61,23 +61,23 @@
     },
     "review_bundle": {
       "file_name": "the-weight-of-yes-review.zip",
-      "size_bytes": 30920502,
-      "sha256": "c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455"
+      "size_bytes": 30920015,
+      "sha256": "dcd222468bd915cf202b6fb46f55eb945d382b062c16986a41692db90ed311d5"
     },
-    "notes": "All 19 workflow steps passed. Downloaded archive hash and all 29 entries in SHA256SUMS.txt were verified. Both sheets and targeted 1080p frames for B07/B19 were inspected. Full-length approval remains pending."
+    "notes": "All 19 workflow steps passed. Downloaded artifact SHA-256 and all 29 entries in SHA256SUMS.txt were verified. Both contact sheets were visually inspected; B07 handwritten YES. stays inside the notebook page and B19 NO. NOT TODAY. clears the actors and classroom board. Full-length approval remains pending."
   },
   "latest_technical_pass": {
-    "workflow_run_id": 40461365610,
-    "workflow_run_number": 30,
-    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40461365610",
-    "source_commit": "9214fb3ce0765c38d4169be917099a75a8e53442",
+    "workflow_run_id": 40532086413,
+    "workflow_run_number": 31,
+    "workflow_run_url": "https://github.com/Nolane-x/video/actions/runs/40532086413",
+    "source_commit": "58c95de849405b0ae5d1636851bb883ffa3870ec",
     "conclusion": "success",
     "all_workflow_steps_passed": true,
-    "artifact_id": 12714602184,
-    "artifact_sha256": "21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e",
+    "artifact_id": 12746292555,
+    "artifact_sha256": "ddfbc5100354b0cd881632767649faf075605bd3ee560938f22cbd4d0a367b3f",
     "master_sha256": "cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d",
     "preview_sha256": "d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965",
-    "review_bundle_sha256": "c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455",
+    "review_bundle_sha256": "dcd222468bd915cf202b6fb46f55eb945d382b062c16986a41692db90ed311d5",
     "duration_seconds": 143,
     "resolution": "1920x1080",
     "fps": "24/1",
