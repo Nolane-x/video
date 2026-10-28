@@ -932,14 +932,33 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
     )
+    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),
+              "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
+              "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
+              "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
+              "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
+              "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
+              "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
+              "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
+    index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
+               "repository":"https://github.com/Nolane-x/video",
+               "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0 or Public Domain metadata; source-only libraries are not raw-bundled.",
+               "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
+               "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
+               "met_open_access_downloads":met_report,"wikimedia_public_domain_downloads":wikimedia_report,
+               "openverse_downloads":openverse_report,"assets":index}
+    write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
+    make_asset_catalog(STAGE,index,summary)
+
+    # Index and checksum ledger intentionally do not hash themselves; all actual resources,
+    # source/license notes, and the offline catalog are included in the ledger.
     digest_lines=[]
     for path in sorted(STAGE.rglob("*")):
         if path.is_file() and path.name not in {"ASSET_INDEX.json","SHA256SUMS.txt"}:
             digest_lines.append(f"{sha256_path(path)}  {path.relative_to(STAGE).as_posix()}")
-    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),"met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),"wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
-    index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"Original assets are CC0; third-party bundles require explicit item-level CC0 or Public Domain metadata; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"met_open_access_downloads":met_report,"wikimedia_public_domain_downloads":wikimedia_report,"openverse_downloads":openverse_report,"assets":index}
+    summary["checksummed_files"]=len(digest_lines)
+    index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
-    make_asset_catalog(STAGE,index,summary)
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=30 and len(OVERLAYS)>=30 and len(ICONS)>=50 and len(INFO)>=20
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)
