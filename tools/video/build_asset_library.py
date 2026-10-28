@@ -815,7 +815,7 @@ def choose_poly_texture_selection(tree):
 
 def download_polyhaven(root,index):
     report=[]
-    counts={"hdris":6,"models":8,"textures":10}
+    counts={"hdris":10,"models":12,"textures":18}
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -908,7 +908,7 @@ def download_polyhaven(root,index):
     return report
 
 def download_met_open_access(root,index):
-    report=[]; total=0; cap=24
+    report=[]; total=0; cap=60
     queries=[
         ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
         ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
@@ -923,7 +923,7 @@ def download_met_open_access(root,index):
         try:
             response=request_json(search_url,timeout=20)
             for object_id in response.get("objectIDs") or []:
-                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=2: break
+                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=5: break
                 if object_id in seen: continue
                 seen.add(object_id)
                 try:
@@ -1194,7 +1194,7 @@ def openverse_extension(url,ctype,kind,item):
 
 
 def download_wikimedia_public_domain(root,index):
-    report=[]; total=0; cap=30; seen=set()
+    report=[]; total=0; cap=100; seen=set()
     queries=[
         ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
         ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
@@ -1202,11 +1202,14 @@ def download_wikimedia_public_domain(root,index):
         ("anatomy","human anatomy public domain illustration filetype:bitmap"),("science","physics diagram public domain filetype:bitmap"),
         ("newspapers","historical newspaper public domain filetype:bitmap"),("food","fruit still life public domain filetype:bitmap"),
         ("wildlife","wildlife public domain photo filetype:bitmap"),("satellite","satellite image public domain filetype:bitmap"),
-        ("landscape","landscape public domain photo filetype:bitmap"),("industry","industrial machinery public domain filetype:bitmap")
+        ("landscape","landscape public domain photo filetype:bitmap"),("industry","industrial machinery public domain filetype:bitmap"),
+        ("urban","historic city street public domain filetype:bitmap"),("bridges","bridge public domain photo filetype:bitmap"),
+        ("spaceflight","lunar surface public domain filetype:bitmap"),("geology","geology rock formation public domain filetype:bitmap"),
+        ("insects","insect scientific illustration public domain filetype:bitmap"),("portraits-archive","historic building public domain photo filetype:bitmap")
     ]
     for category,q in queries:
         if total>=cap: break
-        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":12,
+        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":20,
                 "prop":"imageinfo","iiprop":"url|extmetadata","iiurlwidth":1600}
         url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
         successes=0
@@ -1214,7 +1217,7 @@ def download_wikimedia_public_domain(root,index):
             response=request_json(url,timeout=16)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=3: break
+                if total>=cap or successes>=6: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
@@ -1316,7 +1319,9 @@ def make_asset_catalog(root,index,summary):
         license_url=item.get("license_url") or ""
         if ext in {".svg",".png",".jpg",".jpeg",".webp"}:
             preview=f'<img loading="lazy" alt="{html.escape(title,quote=True)}" src="{html.escape(rel,quote=True)}">'
-        elif ext==".wav":
+        elif ext in {".mp4",".mov",".m4v",".webm"}:
+            preview=f'<video controls preload="metadata" playsinline src="{html.escape(rel,quote=True)}" style="width:100%;height:100%;object-fit:contain"></video>'
+        elif ext in {".wav",".mp3",".ogg",".flac",".m4a"}:
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
@@ -1375,6 +1380,8 @@ def main():
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
+    nasa_report=download_nasa_media(STAGE,index)
+    loc_report=download_loc_public_domain(STAGE,index)
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
@@ -1386,6 +1393,8 @@ def main():
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
+      "\n\n## Library of Congress photographs\nThe builder downloads only image records with an explicit item-level rights statement containing ‘No known restrictions on publication’, ‘Public Domain’, or ‘No known copyright restrictions’, and rejects explicit conflicting limitations. Records without a rights statement are skipped. Each selected file records the exact statement, item URL, direct image URL, and SHA-256. LOC notes users remain responsible for evaluating copyright and other rights, so inspect the item/context before publication. Sources: https://www.loc.gov/apis/json-and-yaml/ and https://ask.loc.gov/faq/305466.\n\n"+
       "\n\n## Wikimedia Commons imagery\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Creator, file page, license URL and SHA-256 are stored for each downloaded image. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
@@ -1398,14 +1407,19 @@ def main():
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
+              "nasa_images_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="image" for x in nasa_report),
+              "nasa_videos_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="video" for x in nasa_report),
+              "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
+              "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0 or Public Domain metadata; source-only libraries are not raw-bundled.",
+               "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
-               "met_open_access_downloads":met_report,"wikimedia_public_domain_downloads":wikimedia_report,
+               "met_open_access_downloads":met_report,"nasa_media_downloads":nasa_report,
+               "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
