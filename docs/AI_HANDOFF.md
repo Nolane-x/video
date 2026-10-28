@@ -1,13 +1,13 @@
 # AI session handoff
 
 ## Current verified state — continue from these, not historical render numbers
-- Primary candidate: **THE WEIGHT OF YES — render #30**, [workflow](https://github.com/Nolane-x/video/actions/runs/40461365610), source [commit](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442), manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
-- Parallel latest candidates: **THE FIRST HOUR #48** ([run](https://github.com/Nolane-x/video/actions/runs/40462283974)) and **ALMOST READY #33** ([run](https://github.com/Nolane-x/video/actions/runs/40462284021)); both use source commit `263e855a675b451f799ee684d66515b23a0dded7`.
-- All current workflows passed 19 steps; downloaded checksum ledgers passed. Both current contact sheets per film were visually inspected and selected 1080p problem frames extracted.
-- Caption fixes: First Hour B20 stays within the notebook page; Almost Ready B03/B09/B20 captions stay inside the page and B13 narration clears the reduced SNOOZE/timer UI; Weight of Yes B07 handwritten “YES.” stays inside the page and B19’s “NO. NOT TODAY.” sits clear of actors/board.
-- Audio checks: Weight of Yes −14.0 LUFS / 9.2 LU LRA / −5.0 dBFS true peak; First Hour −14.0 / 6.6 / −1.9; Almost Ready −14.1 / 9.1 / −1.8. Masters are H.264 1920×1080 @24 fps + AAC 48 kHz stereo; durations 143 s / 172 s / 172 s.
-- Full-length start-to-finish viewing and perceptual listening remain pending. Do not state any film is artistically approved; do not archive to a durable release until sign-off. Preserve the canonical ONE MORE SCROLL master.
-- Inspect the current `main` branch before further edits; do not resume using stale run #8/#30/#14 references below.
+- Primary candidate: **THE WEIGHT OF YES — render #31**, [workflow](https://github.com/Nolane-x/video/actions/runs/40532086413), source [commit](https://github.com/Nolane-x/video/commit/58c95de849405b0ae5d1636851bb883ffa3870ec), manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
+- **THE FIRST HOUR #52** is technically successful ([run](https://github.com/Nolane-x/video/actions/runs/40534178338)), but targeted full-resolution review found a P1 caption safe-area issue in B27: “But it sounded smaller now.” clipped at the left edge and “just one more scroll.” crossed the hanging calendar. The corrected source is commit `4e9e5374ceaa55bd4926cbfc1b99ffb112580dbd`; its render is [run #53](https://github.com/Nolane-x/video/actions/runs/40626151070). Do not accept #52 as the final First Hour master; inspect #53’s exact B27 1080p frames.
+- **ALMOST READY #34** passed all render/validation steps ([run](https://github.com/Nolane-x/video/actions/runs/40532086120)); manifest/QA: `video-library/almost-ready/manifest.json` and `video-library/almost-ready/QA.md`.
+- Downloaded artifacts for Weight of Yes #31, Almost Ready #34 and First Hour #52 were inspected. Their metadata confirms H.264 1920×1080 @24 fps plus AAC 48 kHz stereo; durations are 143 s / 172 s / 172 s. The downloaded SHA256SUMS ledgers passed (29 / 25 / 24 entries).
+- Audio measurement: Weight of Yes −14.0 LUFS / 9.2 LU LRA / −5.0 dBFS peak; First Hour #52 −14.0 / 6.6 / −1.9; Almost Ready #34 −14.1 / 9.1 / −1.8.
+- Shared handwritten-whisper reveal now completes within 30% of the caption hold. Both First Hour and Almost Ready story tuners assert a minimum of 1.2 seconds of fully readable time for temptation overlays. Full-length playback and perceptual listening remain pending for every film; don't infer artistic approval from green CI or contact sheets.
+- Preserve the canonical ONE MORE SCROLL master. Do not archive any new candidate as final until start-to-finish picture and audio review is completed.
 
 ## First reads
 Read root `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, and `video-library/one-more-scroll/manifest.json`.
