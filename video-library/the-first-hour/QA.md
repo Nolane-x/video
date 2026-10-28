@@ -20,6 +20,7 @@
 - [x] Final merged storyboard confirms the B27 whisper holds for 2.85 s; closing narration begins after it and has 3.15 s inside the 9 s shot.
 - [x] Post-override regression gates passed; the workflow now checks the final merged storyboard so `shot-overrides.json` cannot silently replace the corrected coordinates/timing.
 - [x] Timeline, contact-sheet, motion-proof stream/duration, ffprobe, audio-loudness and checksum gates passed.
+- [x] Six-point visual frame sweep of all 12 motion proofs; no sampled caption/crop regression found. This is a visual-only pass; perceptual listening of the proof clips remains pending.
 - [ ] Individually watch all 12 motion-proof clips with audio.
 - [ ] Watch the complete 172-second master start-to-finish with audio, checking pacing, transitions, acting, prop contact, sound arc and emotional payoff.
 
