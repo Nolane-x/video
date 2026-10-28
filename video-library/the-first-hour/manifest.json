@@ -3,25 +3,25 @@
   "title": "THE FIRST HOUR — An Animated Short Film",
   "project_id": "the-first-hour",
   "created_at": "2026-10-26",
-  "status": "technical_pass_targeted_visual_review_pending_full_length_artistic_review",
+  "status": "technical_pass_targeted_visual_review_pass_full_length_artistic_review_pending",
   "language": "English",
   "voiceover": false,
   "aspect_ratio": "16:9",
   "renderer": "H2 SelfImprove Studio native Canvas/Chromium + FFmpeg audio mastering",
-  "source_commit": "263e855a675b451f799ee684d66515b23a0dded7",
+  "source_commit": "9d86d9a4195982924868468887ff68a2fbcf1790",
   "workflow": {
     "name": "Render H2 SelfImprove — The First Hour",
-    "run_number": 48,
-    "run_id": 40462283974,
-    "url": "https://github.com/Nolane-x/video/actions/runs/40462283974",
+    "run_number": 55,
+    "run_id": 40626868973,
+    "url": "https://github.com/Nolane-x/video/actions/runs/40626868973",
     "conclusion": "success",
     "all_steps_passed": true,
-    "source_commit": "263e855a675b451f799ee684d66515b23a0dded7"
+    "source_commit": "9d86d9a4195982924868468887ff68a2fbcf1790"
   },
   "master": {
     "file_name": "the-first-hour-h2-selfimprove.mp4",
-    "size_bytes": 26837060,
-    "sha256": "47ded9fb4c2fb4512853e3f8de1d02095c608e775545bc8b9466746485e40730",
+    "size_bytes": 26866550,
+    "sha256": "67171131ab8ab539b82f992651ef6c5b3ce4e70efd91af92292e0da763a5bc6a",
     "duration_seconds": 172,
     "width": 1920,
     "height": 1080,
@@ -33,19 +33,19 @@
     "audio_integrated_loudness_lufs": -14,
     "audio_loudness_range_lu": 6.6,
     "audio_true_peak_dbfs": -1.9,
-    "qa_measurement": "ffprobe + EBU R128 on exact run #48 MP4; all workflow thresholds passed"
+    "qa_measurement": "ffprobe + EBU R128 on exact run #55 MP4; all workflow thresholds passed"
   },
   "preview": {
     "file_name": "preview-30s.mp4",
-    "size_bytes": 1913181,
-    "sha256": "df2d057f60dfc4327f8ce3021733c726ede5ab141a1c7728828f1730495ad29e",
+    "size_bytes": 1920141,
+    "sha256": "cedabafa48eedf397d09a02dcf11245baef461f3fc2b88bdcd868c042512c879",
     "duration_seconds": 30,
     "contains": "H.264 video and AAC 48 kHz stereo"
   },
   "review_bundle": {
     "file_name": "the-first-hour-review.zip",
-    "size_bytes": 37129816,
-    "sha256": "318fa26cc9f09561d16f58579b483db8991abe7f773784540022143db0f8d568",
+    "size_bytes": 37181240,
+    "sha256": "8685bf5217a458e954401f3c461214ace167444257e36b55248175e124b89ae8",
     "contains": [
       "master MP4",
       "30-second preview",
@@ -60,12 +60,12 @@
     "checksum_verification": "All 24 listed entries passed after download."
   },
   "actions_artifact": {
-    "name": "the-first-hour-h2-selfimprove-48",
-    "artifact_id": 12714294179,
-    "size_bytes": 74296056,
-    "sha256": "f37c0634128e4583787166e711d58a3ffe18520dcf2bb3ad6d3cd47e258532f3",
-    "url": "https://github.com/Nolane-x/video/actions/runs/40462283974",
-    "expires_at": "2026-11-26T06:43:47Z",
+    "name": "the-first-hour-h2-selfimprove-55",
+    "artifact_id": 12789354772,
+    "size_bytes": 74398229,
+    "sha256": "02fd88d1ecf76010453d2ea3e37c0f2f00f600219d888b7bf8b18ff791cb6d5c",
+    "url": "https://github.com/Nolane-x/video/actions/runs/40626868973",
+    "expires_at": "2026-11-27T03:35:04Z",
     "storage_status": "temporary GitHub Actions artifact; not archived to a durable release"
   },
   "visual_qa": {
@@ -74,17 +74,47 @@
     "motion_proof_count": 12,
     "all_proofs_passed_stream_duration_checks": true,
     "targeted_checks": {
-      "b20_notebook": "1080p frame at 116.5 s: caption is inside lower-right paper region and clear of the pen and bottom frame edge.",
-      "overall_caption_coverage": "Both sheets reviewed; B03, B04, B06, B09 and B22 now have separate explanatory narration."
+      "b20_notebook": "Run #55 1080p sheet confirms the narration is inside the lower-right page region and clear of the pen and page edge.",
+      "b27_whisper": "The 1080p frame at 154.5 s shows 'just one more scroll.' fully revealed and positioned below the calendar, clear of it.",
+      "b27_closing": "Frames at 157.2, 158.2 and 159.5 s show 'But it sounded smaller now.' inside the left safe lane, not clipped by the frame; it does not overlap the whisper caption.",
+      "b27_timing": "Final merged shots.json has whisper at 2.60 s for 2.85 s and closing narration at 5.55 s for 3.15 s within the 9 s shot.",
+      "overall_caption_coverage": "Both full 29-shot contact sheets inspected; the key handwritten whisper now remains readable for a dedicated hold."
     },
     "checksums_verified": true,
+    "sha256_ledger_entries": 24,
     "full_length_watch_with_audio": "pending",
     "artistic_signoff": "pending"
   },
   "next_steps": [
-    "Watch the complete 172-second MP4 with audio start-to-finish, checking pacing, transitions, captions, hand/prop contacts and emotional arc.",
-    "Individually review all 12 motion proofs with audio; stream/duration validation is not full motion approval.",
+    "Watch the complete 172-second MP4 start-to-finish with audio, checking pacing, transitions, captions, hand/prop contacts and emotional arc.",
+    "Individually review all 12 motion-proof clips with audio; stream/duration validation is not full motion approval.",
     "Archive the approved master and review ZIP only after full artistic sign-off.",
     "Keep canonical ONE MORE SCROLL master unchanged."
+  ],
+  "render_history": [
+    {
+      "run_id": 40534178338,
+      "run_number": 52,
+      "status": "technical_pass_visual_issue_found",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40534178338",
+      "source_commit": "b18f4a21d1a6b6482b8a2cbffaf43a5567d115cd",
+      "reason": "Full-resolution review found B27 closing narration clipped at the left edge and whisper overlapping the calendar; not accepted."
+    },
+    {
+      "run_id": 40626151070,
+      "run_number": 53,
+      "status": "technical_pass_visual_issue_not_fixed",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40626151070",
+      "source_commit": "4e9e5374ceaa55bd4926cbfc1b99ffb112580dbd",
+      "reason": "Tuner-only position changes were overwritten by shot-overrides.json after the tuner ran; exact rendered frames retained old coordinates."
+    },
+    {
+      "run_id": 40626868973,
+      "run_number": 55,
+      "status": "technical_pass_targeted_visual_review_pass_full_length_review_pending",
+      "url": "https://github.com/Nolane-x/video/actions/runs/40626868973",
+      "source_commit": "9d86d9a4195982924868468887ff68a2fbcf1790",
+      "reason": "Actual override corrected, post-merge regression gates passed, artifact and all 24 checksums verified; B27 text positions inspected at full resolution. Full-length artistic and perceptual audio approval remains pending."
+    }
   ]
 }
