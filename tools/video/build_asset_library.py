@@ -1,0 +1,702 @@
+#!/usr/bin/env python3
+"""Create the cross-genre resource library, preserve provenance, and gate redistribution by license."""
+from __future__ import annotations
+import hashlib, html, json, mimetypes, re, shutil, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+
+REPO = Path(__file__).resolve().parents[2]
+OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
+STAGE = OUT / "video-asset-library"
+SOURCES_PATH = REPO / "video-library/assets/sources.json"
+CC0 = "CC0-1.0"
+CC0_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
+UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
+MAX_KENNEY_ZIP = 110 * 1024 * 1024
+MAX_MEDIA_FILE = 3 * 1024 * 1024
+MAX_POLY_FILE = 35 * 1024 * 1024
+ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
+DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
+
+KENNEY = [
+("nature-kit","Nature Kit","trees, foliage, nature props"),("space-kit","Space Kit","space vehicles and props"),
+("modular-space-kit","Modular Space Kit","modular sci-fi environments"),("furniture-kit","Furniture Kit","interior props"),
+("food-kit","Food Kit","food and kitchen props"),("building-kit","Building Kit","architecture"),("racing-kit","Racing Kit","cars and tracks"),
+("castle-kit","Castle Kit","medieval / fantasy"),("ui-pack","UI Pack","general interface"),("pixel-ui-pack","Pixel UI Pack","pixel interface"),
+("particle-pack","Particle Pack","VFX particles"),("light-masks","Light Masks","light and shadow masks"),
+("smoke-particles","Smoke Particles","smoke effects"),("foliage-sprites","Foliage Sprites","2D nature"),
+("impact-sounds","Impact Sounds","foley / impact SFX"),("interface-sounds","Interface Sounds","UI SFX"),
+("digital-audio","Digital Audio","digital / sci-fi SFX"),("ui-audio","UI Audio","button / switch SFX"),
+("road-textures","Road Textures","road textures"),("ui-pack-adventure","UI Pack Adventure","adventure interface"),
+("ui-pack-sci-fi","UI Pack Sci-Fi","sci-fi interface"),("ui-pack-pixel-adventure","UI Pack Pixel Adventure","pixel adventure UI"),
+("ui-pack-rpg-expansion","UI Pack RPG Expansion","RPG interface"),("casino-audio","Casino Audio","game SFX")
+]
+PALETTES = [
+("studio-warm",("#171923","#312b39","#ffc77f"),"studio"),("newsroom",("#0d1724","#19354a","#f4ad69"),"news"),
+("science-laboratory",("#10222c","#203c4a","#5ce1cc"),"lab"),("server-room",("#081723","#123346","#65d8f1"),"server"),
+("city-night",("#101522","#352942","#ffb574"),"city"),("city-day",("#759db8","#bfd8df","#f4d4a0"),"city"),
+("rooftop-dawn",("#25233d","#855f7b","#f8b17e"),"rooftop"),("metro-station",("#131a25","#2a3947","#d8e8ed"),"metro"),
+("underpass-rain",("#121a23","#263a49","#8ed5e1"),"underpass"),("hospital-corridor",("#13282c","#29434a","#c4e9dc"),"hospital"),
+("library-aisle",("#251e25","#43303a","#f0bd78"),"library"),("museum-gallery",("#25232b","#403a45","#dec7a2"),"museum"),
+("factory-floor",("#1e2228","#394049","#f4bd72"),"factory"),("finance-desk",("#101c24","#22323a","#7be0c3"),"finance"),
+("product-stage",("#11131e","#2b3045","#f6d3a0"),"product"),("food-studio",("#38261f","#5c4131","#ffd18a"),"food"),
+("classroom-board",("#1c2630","#35414c","#ead6a5"),"classroom"),("castle-hall",("#201b2a","#46374b","#f3c58d"),"castle"),
+("mountain-dawn",("#1a2940","#a56e83","#ffd39a"),"mountain"),("forest-mist",("#10272a","#2e5148","#e6c58c"),"forest"),
+("beach-sunset",("#27274a","#b36c7b","#ffc58e"),"beach"),("underwater-blue",("#052b45","#117b91","#9cecf0"),"underwater"),
+("space-observatory",("#060b20","#252b60","#9e8bfa"),"space"),("cyber-security",("#08141c","#123642","#41e8d4"),"cyber"),
+("ancient-map",("#3b2b22","#806348","#ebc88e"),"map"),("sports-arena",("#172034","#33415f","#f6c36f"),"sports"),
+("gaming-arcade",("#191326","#34234a","#ff65b8"),"gaming"),("desert-dusk",("#2c1b2b","#a25753","#ffd08e"),"desert"),
+("snow-mountain",("#162538","#7c9faf","#e3f4f2"),"snow"),("horror-manor",("#0e1019","#252331","#c77865"),"horror"),
+("greenhouse",("#102820","#2a5945","#edcc8c"),"greenhouse"),("abstract-data",("#081323","#183254","#66c3ff"),"network")
+]
+OVERLAYS = [
+("film-grain","Fine film grain"),("scanlines","CRT scanlines"),("halftone","Halftone dots"),("light-leak","Warm/cool light leak"),
+("vignette","Cinematic vignette"),("letterbox","Cinematic letterbox"),("film-gate","Film gate frame"),("dust","Floating dust motes"),
+("bokeh","Bokeh rings"),("rain","Rain streaks"),("snow","Snow flecks"),("speed-lines","Motion speed lines"),
+("sparkles","Highlight sparkles"),("topographic","Topographic contours"),("blueprint","Technical blueprint grid"),
+("chart-grid","Data chart grid"),("starfield","Space starfield"),("data-network","Network links"),("glitch","Digital glitch bands"),
+("subtitle-safe","Subtitle safe-area guide"),("corner-hud","Corner framing brackets"),("waveform","Audio waveform"),
+("paper-texture","Archival paper texture"),("vhs","Analog scan texture"),("embers","Floating embers"),
+("map-graticule","Map graticule"),("confetti","Confetti"),("radar","Radar sweep"),("focus-frame","Camera focus frame"),
+("flash-frame","Flash frame"),("film-burn","Film-burn wash"),("soft-fog","Atmospheric fog"),("rainbow-prism","Prism light"),
+("screen-reflection","Screen reflection bands"),("corner-vignette","Corner vignette"),("measurement-rulers","Measurement rulers")
+]
+INFO = [
+("title-card","Title / chapter card"),("lower-third","Lower third"),("stat-number","Big statistic"),("timeline","Horizontal timeline"),
+("vertical-timeline","Vertical timeline"),("process-steps","Four-step process"),("comparison","Side-by-side comparison"),
+("pros-cons","Pros and cons"),("bar-chart","Bar chart placeholder"),("line-chart","Line chart placeholder"),
+("quote-card","Quote / key evidence"),("definition-card","Definition card"),("equation-card","Equation board"),
+("map-callout","Map callout frame"),("funnel","Funnel stages"),("pyramid","Layered pyramid"),("decision-tree","Decision tree"),
+("ranked-list","Ranked list"),("recipe-steps","Recipe / procedure"),("chapter-divider","Chapter divider"),("source-card","Source / evidence card")
+]
+# Original, standalone vector icons. The visual style is intentionally neutral and adaptable.
+ICONS = {
+"brain":'<path d="M32 11C24 2 12 9 15 19C5 22 8 36 16 38C9 49 21 58 29 51L32 48L35 51C44 58 55 49 48 38C57 36 59 22 49 19C52 9 40 2 32 11Z"/><path d="M32 12V49M17 23Q27 21 26 30M47 23Q37 21 38 30M17 40Q26 36 27 44M47 40Q38 36 37 44"/>',
+"book":'<path d="M8 13Q21 8 32 17Q43 8 56 13V52Q42 46 32 55Q22 46 8 52Z"/><path d="M32 17V55M14 20Q22 18 27 22M14 29Q22 27 27 31M37 22Q44 18 50 20M37 31Q44 27 50 29"/>',
+"atom":'<ellipse cx="32" cy="32" rx="26" ry="10"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(120 32 32)"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/>',
+"dna":'<path d="M18 7C51 20 13 44 46 57M46 7C13 20 51 44 18 57"/><path d="M23 13H41M19 24H45M19 39H45M23 50H41"/>',
+"chip":'<rect x="16" y="16" width="32" height="32" rx="5"/><rect x="23" y="23" width="18" height="18" rx="2"/><path d="M24 5V16M40 5V16M24 48V59M40 48V59M5 24H16M5 40H16M48 24H59M48 40H59"/>',
+"robot":'<rect x="13" y="20" width="38" height="32" rx="8"/><path d="M32 8V20M25 8H39M8 31H13M51 31H56M21 52V58M43 52V58"/><circle cx="24" cy="34" r="3" fill="currentColor" stroke="none"/><circle cx="40" cy="34" r="3" fill="currentColor" stroke="none"/><path d="M23 43H41"/>',
+"server":'<rect x="11" y="8" width="42" height="16" rx="3"/><rect x="11" y="27" width="42" height="16" rx="3"/><rect x="11" y="46" width="42" height="10" rx="3"/><circle cx="19" cy="16" r="2" fill="currentColor"/><circle cx="19" cy="35" r="2" fill="currentColor"/><path d="M27 16H46M27 35H46M27 51H46"/>',
+"cloud":'<path d="M18 49H48A11 11 0 0 0 48 27A16 16 0 0 0 18 25A12 12 0 0 0 18 49Z"/>',
+"network":'<circle cx="32" cy="11" r="6"/><circle cx="12" cy="47" r="6"/><circle cx="52" cy="47" r="6"/><circle cx="32" cy="34" r="6"/><path d="M29 17L15 41M35 17L49 41M18 47H46M32 17V28"/>',
+"globe":'<circle cx="32" cy="32" r="25"/><ellipse cx="32" cy="32" rx="11" ry="25"/><path d="M8 32H56M14 19H50M14 45H50"/>',
+"plane":'<path d="M5 34L27 28L28 8Q32 3 36 8L38 27L57 19L60 24L40 39L41 53L35 57L30 43L17 50L14 46L24 35L5 38Z"/>',
+"mountain":'<path d="M5 53L24 18L35 36L43 25L60 53Z"/><path d="M19 27L24 18L30 29M39 31L43 25L49 35"/>',
+"leaf":'<path d="M56 8C29 8 9 19 10 42C11 59 34 60 44 45C53 33 55 20 56 8Z"/><path d="M14 53Q29 33 51 14M28 39L27 24M36 31L49 31"/>',
+"tree":'<path d="M32 57V34"/><path d="M13 37Q2 22 20 19Q20 3 32 10Q46 1 47 18Q62 20 51 37Z"/><path d="M24 57H40"/>',
+"water":'<path d="M32 6C25 20 14 30 14 41A18 18 0 0 0 50 41C50 30 39 20 32 6Z"/><path d="M23 42Q25 49 32 49"/>',
+"sun":'<circle cx="32" cy="32" r="12"/><path d="M32 4V13M32 51V60M4 32H13M51 32H60M12 12L19 19M45 45L52 52M12 52L19 45M45 19L52 12"/>',
+"moon":'<path d="M48 42A22 22 0 0 1 22 14A24 24 0 1 0 48 42Z"/>',
+"hospital":'<path d="M10 57V13H54V57Z"/><path d="M26 13V5H38V13M32 23V45M21 34H43"/>',
+"flask":'<path d="M23 7H41M27 7V27L13 49Q10 57 19 57H45Q54 57 51 49L37 27V7"/><path d="M19 45H45M24 38H40"/>',
+"microscope":'<path d="M24 8L42 26L35 33L17 15Z"/><path d="M35 30L44 39M23 37Q13 44 22 51H49M28 51V57M16 57H54M42 15L49 8M39 18L45 24"/>',
+"newspaper":'<rect x="9" y="9" width="46" height="46" rx="3"/><path d="M16 18H48M16 25H48M16 33H29M16 40H29M16 47H29M34 33H48V48H34Z"/>',
+"microphone":'<rect x="24" y="7" width="16" height="31" rx="8"/><path d="M15 30A17 17 0 0 0 49 30M32 47V58M22 58H42"/>',
+"headphones":'<path d="M9 34V29A23 23 0 0 1 55 29V34"/><rect x="8" y="31" width="12" height="20" rx="5"/><rect x="44" y="31" width="12" height="20" rx="5"/>',
+"gamepad":'<path d="M20 20H44Q52 20 55 30L59 44Q61 54 51 54L40 43H24L13 54Q3 54 5 44L9 30Q12 20 20 20Z"/><path d="M19 29V41M13 35H25"/><circle cx="44" cy="31" r="3"/><circle cx="50" cy="38" r="3"/>',
+"shield":'<path d="M32 6L53 14V31Q51 47 32 58Q13 47 11 31V14Z"/><path d="M21 32L28 39L44 22"/>',
+"lock":'<rect x="12" y="27" width="40" height="30" rx="5"/><path d="M20 27V19A12 12 0 0 1 44 19V27"/><circle cx="32" cy="41" r="3"/><path d="M32 44V49"/>',
+"key":'<circle cx="20" cy="25" r="12"/><path d="M30 33L54 57M43 45L49 39M49 51L55 45"/>',
+"idea":'<path d="M20 29A12 12 0 1 1 44 29Q44 38 38 42V49H26V42Q20 37 20 29Z"/><path d="M26 54H38M28 59H36M32 4V9M7 18L13 21M51 21L57 18M9 43L15 41M49 41L55 43"/>',
+"target":'<circle cx="32" cy="32" r="25"/><circle cx="32" cy="32" r="15"/><circle cx="32" cy="32" r="5"/><path d="M35 29L58 6M47 6H58V17"/>',
+"trophy":'<path d="M19 7H45V23A13 13 0 0 1 19 23Z"/><path d="M19 13H9V21Q9 33 24 32M45 13H55V21Q55 33 40 32M32 36V50M22 56H42M25 50H39"/>',
+"heart":'<path d="M32 54L9 32Q1 17 15 10Q25 5 32 18Q39 5 49 10Q63 17 55 32Z"/>',
+"people":'<circle cx="24" cy="20" r="9"/><circle cx="45" cy="23" r="7"/><path d="M7 54V47A17 17 0 0 1 41 47V54ZM39 39A13 13 0 0 1 57 51V54H45"/>',
+"backpack":'<rect x="15" y="19" width="34" height="39" rx="8"/><path d="M23 19V13A9 9 0 0 1 41 13V19M15 31H49M23 39H41V50H23Z"/>',
+"play":'<circle cx="32" cy="32" r="26"/><path d="M26 19L45 32L26 45Z" fill="currentColor" stroke="none"/>',
+"camera":'<path d="M8 20H20L25 13H39L44 20H56V54H8Z"/><circle cx="32" cy="36" r="11"/><circle cx="49" cy="27" r="2"/>',
+"clock":'<circle cx="32" cy="32" r="26"/><path d="M32 15V33L45 40"/>',
+"calendar":'<rect x="8" y="13" width="48" height="43" rx="4"/><path d="M8 25H56M20 6V18M44 6V18M19 34H25M31 34H37M43 34H49M19 44H25M31 44H37"/>',
+"bell":'<path d="M14 44H50L45 37V25A13 13 0 0 0 19 25V37Z"/><path d="M26 51Q32 60 38 51"/>',
+"phone":'<rect x="17" y="5" width="30" height="54" rx="5"/><path d="M26 12H38M28 51H36"/>',
+"dollar":'<path d="M44 16Q39 8 29 10Q15 12 18 24Q20 32 34 34Q49 36 46 47Q43 58 28 55Q19 53 16 47"/><path d="M32 4V60"/>',
+"wallet":'<rect x="7" y="15" width="50" height="39" rx="6"/><path d="M7 23H48Q57 23 57 32V42H43A6 6 0 0 1 43 30H57"/>',
+"chart":'<path d="M9 55V9M9 55H59"/><rect x="16" y="35" width="8" height="20" rx="2"/><rect x="30" y="24" width="8" height="31" rx="2"/><rect x="44" y="12" width="8" height="43" rx="2"/>',
+"linechart":'<path d="M8 55V9M8 55H59M13 45L25 32L34 39L48 18L58 25"/>',
+"car":'<path d="M9 42L14 27Q16 22 22 22H42Q48 22 50 28L55 42V52H9Z"/><path d="M16 29H48M9 42H55"/><circle cx="19" cy="49" r="5"/><circle cx="45" cy="49" r="5"/>',
+"house":'<path d="M5 30L32 7L59 30M12 27V57H52V27M26 57V39H39V57"/>',
+"factory":'<path d="M7 57V30L22 38V28L37 36V16H50V57Z"/><path d="M42 16V7H51V16M15 46H21M27 46H33M40 46H46"/>',
+"rocket":'<path d="M32 5Q48 15 45 39L32 52L19 39Q16 15 32 5Z"/><circle cx="32" cy="27" r="6"/><path d="M19 34L8 48L21 45M45 34L56 48L43 45M27 51L32 60L37 51"/>',
+"warning":'<path d="M32 6L59 55H5Z"/><path d="M32 22V38M32 46V48"/>',
+"search":'<circle cx="27" cy="27" r="17"/><path d="M40 40L57 57"/>',
+"compass":'<circle cx="32" cy="32" r="26"/><path d="M41 21L35 36L20 43L27 28Z"/>',
+"lightning":'<path d="M36 4L13 35H29L25 60L51 25H35Z"/>',
+"check":'<path d="M10 34L25 49L55 14"/>',
+"close":'<path d="M14 14L50 50M50 14L14 50"/>',
+"arrow":'<path d="M7 32H55M38 14L56 32L38 50"/>',
+"location-pin":'<path d="M32 59S11 36 11 25A21 21 0 1 1 53 25Q53 36 32 59Z"/><circle cx="32" cy="25" r="7"/>',
+"food":'<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="14"/><path d="M8 7V24M4 7V17M12 7V17M55 7V59M51 7V17"/>',
+"eye":'<path d="M5 32Q32 3 59 32Q32 61 5 32Z"/><circle cx="32" cy="32" r="9"/>',
+"presentation":'<rect x="8" y="8" width="48" height="34" rx="2"/><path d="M32 42V57M18 57H46M15 33L25 25L32 30L45 17"/>',
+"music":'<path d="M26 48V14L55 7V41"/><ellipse cx="18" cy="49" rx="8" ry="6"/><ellipse cx="47" cy="42" rx="8" ry="6"/>',
+"book-open":'<path d="M7 14Q21 9 32 18Q43 9 57 14V52Q42 46 32 55Q22 46 7 52Z"/><path d="M32 18V55"/>',
+"map":'<path d="M7 13L23 6L41 13L57 6V50L41 57L23 50L7 57Z"/><path d="M23 6V50M41 13V57M33 18C33 18 23 30 23 36A10 10 0 0 0 43 36C43 30 33 18 33 18Z"/>',
+"audio-wave":'<path d="M6 34H12L18 19L25 49L32 10L39 52L46 20L52 35H58"/>',
+"database":'<ellipse cx="32" cy="13" rx="23" ry="7"/><path d="M9 13V49C9 59 55 59 55 49V13M9 31C9 40 55 40 55 31"/>',
+"shield-lock":'<path d="M32 6L53 14V31Q51 47 32 58Q13 47 11 31V14Z"/><rect x="23" y="28" width="18" height="15" rx="3"/><path d="M27 28V23A5 5 0 0 1 37 23V28"/>',
+"paw":'<ellipse cx="32" cy="42" rx="15" ry="11"/><circle cx="15" cy="24" r="6"/><circle cx="28" cy="17" r="6"/><circle cx="42" cy="18" r="6"/><circle cx="53" cy="27" r="6"/>',
+"camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>'
+}
+
+def request_bytes(url, timeout=45, limit=None):
+    req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"*/*"})
+    with urllib.request.urlopen(req,timeout=timeout) as resp:
+        data=resp.read(limit+1 if limit else -1)
+        if limit and len(data)>limit: raise RuntimeError(f"file larger than allowed limit: {url}")
+        return data, resp.headers.get("Content-Type","application/octet-stream")
+
+def request_json(url, timeout=45):
+    raw,_=request_bytes(url,timeout,25*1024*1024)
+    return json.loads(raw.decode("utf-8"))
+
+def write_text(path, content):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(content,encoding="utf-8")
+
+def sha256_path(path):
+    h=hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda:f.read(1024*1024),b""): h.update(block)
+    return h.hexdigest()
+
+def slugify(text):
+    return re.sub(r"-+","-",re.sub(r"[^a-zA-Z0-9._-]+","-",str(text).lower())).strip("-")[:72] or "asset"
+
+def svg_doc(body, defs="", width=1920, height=1080, bg=None):
+    bgsvg=f'<rect width="{width}" height="{height}" fill="{bg}"/>' if bg else ""
+    return f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}"><defs>{defs}</defs>{bgsvg}{body}</svg>'
+
+def make_background(asset_id,palette,kind):
+    top,bottom,accent=palette
+    defs=f'''<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="{top}"/><stop offset="1" stop-color="{bottom}"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="{accent}" stop-opacity=".72"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="{accent}" stroke-opacity=".13" stroke-width="2"/></pattern>'''
+    p=[f'<rect width="1920" height="1080" fill="url(#sky)"/>','<ellipse cx="1460" cy="250" rx="420" ry="340" fill="url(#glow)"/>','<rect width="1920" height="1080" fill="url(#grid)" opacity=".28"/>']
+    if kind in {"city","news","metro","underpass","rooftop","hospital"}:
+        if kind=="rooftop":
+            p.append(f'<circle cx="1450" cy="315" r="118" fill="{accent}" opacity=".85"/><path d="M0 610L190 510L330 575L480 430L640 560L830 470L1020 590L1190 455L1390 560L1590 440L1920 585V850H0Z" fill="{top}" opacity=".45"/>')
+        else:
+            n=17
+            for layer,(base,color,op) in enumerate([(610,top,.55),(770,bottom,.92)]):
+                width=1920/n
+                for i in range(n):
+                    x=i*width-layer*38; h=130+((i*71+layer*47+len(asset_id)*19)%350); y=base-h; w=width*(.74+(i%3)*.05)
+                    p.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h}" rx="5" fill="{color}" opacity="{op}"/>')
+                    for row in range(max(1,int(h/55))):
+                        for col in range(2+(i%2)):
+                            wx=x+18+col*(w-36)/(2+(i%2)); wy=y+28+row*48
+                            p.append(f'<rect x="{wx:.1f}" y="{wy:.1f}" width="12" height="22" rx="2" fill="{accent}" opacity="{.14+((i+row+col)%4)*.12:.2f}"/>')
+        if kind in {"metro","underpass","hospital"}:
+            for i in range(8):
+                x=i*275-50
+                p.append(f'<path d="M{x} 100Q960 20 {1920-x} 100M{x} 100V800M{1920-x} 100V800" fill="none" stroke="{accent}" stroke-opacity=".28" stroke-width="9"/>')
+        if kind=="news":
+            for i in range(5):
+                x=140+i*340
+                p.append(f'<rect x="{x}" y="140" width="290" height="235" rx="16" fill="#08101a" stroke="{accent}" stroke-width="4" stroke-opacity=".7"/><path d="M{x+30} 325L{x+90} 265L{x+150} 295L{x+220} 200" fill="none" stroke="{accent}" stroke-width="7"/>')
+            p.append(f'<rect y="910" width="1920" height="110" fill="{top}" stroke="{accent}" stroke-opacity=".65" stroke-width="3"/>')
+        if kind=="hospital":
+            p.append(f'<path d="M930 260H990V330H1060V390H990V460H930V390H860V330H930Z" fill="{accent}" opacity=".82"/>')
+    elif kind in {"forest","greenhouse"}:
+        for layer in range(3):
+            count=17-layer*4; span=1920/count
+            for i in range(count):
+                x=i*span-span*.3; h=230+((i*43+layer*59)%420); w=18+layer*11; col=top if layer%2==0 else bottom
+                p.append(f'<path d="M{x} 930L{x+w} 930L{x+w/2} {930-h}Z" fill="{col}" opacity="{.42+layer*.18:.2f}"/>')
+                p.append(f'<rect x="{x+w*.35}" y="{930-h*.48}" width="{w*.3}" height="{h*.48}" fill="{col}"/>')
+                if layer<2:
+                    for branch in range(4):
+                        cy=930-h+40+branch*45
+                        p.append(f'<ellipse cx="{x+w/2}" cy="{cy}" rx="{w*2.7}" ry="{w*1.65}" fill="{bottom}" opacity=".52"/>')
+        for i in range(6): p.append(f'<ellipse cx="{150+i*330}" cy="{775+(i%2)*45}" rx="270" ry="46" fill="#e3f0d8" opacity=".055"/>')
+        if kind=="greenhouse":
+            p.append(f'<path d="M80 900V190H1840V900M80 190L960 70L1840 190M330 190V900M640 150V900M960 110V900M1280 150V900M1590 190V900" fill="none" stroke="{accent}" stroke-width="8" stroke-opacity=".48"/>')
+    elif kind in {"mountain","beach","snow","desert"}:
+        p.append(f'<circle cx="1440" cy="370" r="120" fill="{accent}" opacity=".85"/>')
+        if kind=="beach":
+            p.append(f'<path d="M0 590Q360 550 690 600T1350 590T1920 620V1080H0Z" fill="#477d91" opacity=".7"/>')
+            for i in range(13):
+                y=640+i*30; p.append(f'<path d="M0 {y}Q460 {y-25} 900 {y+8}T1920 {y}" fill="none" stroke="#d8ebe9" stroke-width="{2+i%3}" stroke-opacity=".28"/>')
+            p.append(f'<path d="M0 850Q480 750 920 900T1920 830V1080H0Z" fill="{bottom}"/>')
+        else:
+            for layer in range(4):
+                pts=[]
+                for i in range(13): pts.append(f'{i*160},{440+layer*110+((i*83+layer*37+len(asset_id)*23)%180)}')
+                p.append(f'<polygon points="0,1080 {" ".join(pts)} 1920,1080" fill="{bottom if layer%2 else top}" opacity="{.32+layer*.17:.2f}"/>')
+            if kind=="desert":
+                for i in range(5): p.append(f'<path d="M0 {700+i*75}Q460 {590+i*75} 900 {710+i*75}T1920 {680+i*75}" fill="none" stroke="{accent}" stroke-opacity=".23" stroke-width="4"/>')
+            if kind=="snow":
+                for i in range(140): p.append(f'<circle cx="{(i*137+19)%1920}" cy="{(i*83+11)%900}" r="{1+i%4}" fill="#f2fbff" opacity=".65"/>')
+    elif kind=="space":
+        for i in range(260): p.append(f'<circle cx="{(i*157+37)%1920}" cy="{(i*97+13)%940}" r="{.8+(i%5)*.65}" fill="#f2f4ff" opacity="{.25+(i%6)*.1:.2f}"/>')
+        p.append(f'<circle cx="1330" cy="430" r="165" fill="{accent}" opacity=".88"/><ellipse cx="1330" cy="430" rx="260" ry="62" fill="none" stroke="{bottom}" stroke-width="33" transform="rotate(-18 1330 430)"/><ellipse cx="1330" cy="430" rx="260" ry="62" fill="none" stroke="#e4dafe" stroke-opacity=".58" stroke-width="5" transform="rotate(-18 1330 430)"/>')
+    elif kind in {"lab","finance","server","classroom","museum","factory","product","food","castle","gaming","cyber","map","sports","horror","network","studio"}:
+        p.append(f'<path d="M0 110H1920M0 675H1920M320 110V675M640 110V675M960 110V675M1280 110V675M1600 110V675" fill="none" stroke="{accent}" stroke-opacity=".12" stroke-width="4"/>')
+        if kind=="lab":
+            for i in range(7):
+                x=145+i*235
+                p.append(f'<rect x="{x}" y="490" width="155" height="260" rx="8" fill="{bottom}" stroke="{accent}" stroke-opacity=".55" stroke-width="4"/><path d="M{x+40} 550H{x+115}L{x+102} 690Q{x+78} 726 {x+53} 690Z" fill="{accent}" fill-opacity=".16" stroke="{accent}" stroke-width="3"/><path d="M{x+53} 652H{x+103}" stroke="{accent}" stroke-width="10" stroke-opacity=".7"/>')
+            p.append(f'<rect x="1200" y="150" width="520" height="260" rx="10" fill="#071319" stroke="{accent}" stroke-width="5"/><path d="M1235 320L1300 260L1360 300L1430 220L1500 272L1570 205L1670 290" fill="none" stroke="{accent}" stroke-width="7"/>')
+        elif kind=="finance":
+            p.append(f'<rect x="110" y="150" width="790" height="310" rx="16" fill="#06131b" stroke="{accent}" stroke-opacity=".55" stroke-width="4"/>')
+            for i in range(12):
+                x=160+i*58; h=55+(i*47)%180
+                p.append(f'<rect x="{x}" y="{430-h}" width="31" height="{h}" rx="5" fill="{accent}" opacity="{.25+(i%4)*.14:.2f}"/>')
+            p.append(f'<path d="M1100 455L1180 405L1260 430L1340 310L1420 345L1500 250L1580 295L1700 180" fill="none" stroke="{accent}" stroke-width="8"/><path d="M1100 455H1730M1100 180V455" fill="none" stroke="{accent}" stroke-opacity=".4" stroke-width="3"/>')
+        elif kind=="server":
+            for row in range(4):
+                for col in range(7):
+                    x=100+col*245; y=150+row*175
+                    p.append(f'<rect x="{x}" y="{y}" width="205" height="140" rx="8" fill="#08151e" stroke="{accent}" stroke-opacity=".5" stroke-width="4"/>')
+                    for j in range(5): p.append(f'<rect x="{x+22+j*31}" y="{y+35}" width="16" height="8" rx="3" fill="{accent}" opacity="{.35+(j%3)*.2:.2f}"/>')
+                    p.append(f'<path d="M{x+22} {y+72}H{x+180}M{x+22} {y+101}H{x+146}" stroke="{bottom}" stroke-width="7"/>')
+        elif kind=="classroom":
+            p.append(f'<rect x="740" y="170" width="960" height="365" rx="8" fill="#193b35" stroke="{accent}" stroke-opacity=".45" stroke-width="7"/><path d="M830 265H1260M830 335H1110M1285 265H1590M1285 335H1480" stroke="#d9eee0" stroke-width="9" stroke-opacity=".68"/>')
+            for x in [180,430,680,930,1180,1430,1680]: p.append(f'<path d="M{x} 805V945H{x+180}V805" fill="{bottom}" stroke="{accent}" stroke-opacity=".3" stroke-width="4"/>')
+        elif kind=="museum":
+            for i in range(5):
+                x=100+i*365; y=190+(i%2)*32
+                p.append(f'<rect x="{x}" y="{y}" width="260" height="340" fill="#171821" stroke="{accent}" stroke-width="15" stroke-opacity=".65"/><rect x="{x+24}" y="{y+24}" width="212" height="292" fill="{bottom}"/><circle cx="{x+130}" cy="{y+126}" r="58" fill="{accent}" fill-opacity=".5"/><path d="M{x+45} {y+260}L{x+130} {y+180}L{x+216} {y+270}" fill="none" stroke="#e5d2b1" stroke-width="7"/>')
+        elif kind=="factory":
+            for i in range(7):
+                x=i*300
+                p.append(f'<path d="M{x} 150L{x+150} 80L{x+300} 150V680H{x}Z" fill="{bottom}" fill-opacity=".3" stroke="{accent}" stroke-opacity=".28" stroke-width="5"/>')
+            for i in range(4):
+                x=130+i*430; y=680-i%2*40
+                p.append(f'<rect x="{x}" y="{y}" width="230" height="180" fill="{bottom}" stroke="{accent}" stroke-width="4" stroke-opacity=".45"/><path d="M{x+15} {y+20}L{x+215} {y+160}M{x+215} {y+20}L{x+15} {y+160}" stroke="{accent}" stroke-opacity=".2" stroke-width="4"/>')
+        elif kind=="product":
+            p.append(f'<path d="M960 130L460 790H1460Z" fill="url(#glow)" opacity=".35"/><ellipse cx="960" cy="845" rx="360" ry="76" fill="{bottom}" stroke="{accent}" stroke-width="6" stroke-opacity=".65"/><path d="M740 840V670Q740 620 800 620H1120Q1180 620 1180 670V840Z" fill="{top}" stroke="{accent}" stroke-width="5" stroke-opacity=".8"/>')
+        elif kind=="food":
+            p.append(f'<rect y="730" width="1920" height="350" fill="{bottom}" stroke="{accent}" stroke-opacity=".25" stroke-width="4"/>')
+            for i,(x,y,r,col) in enumerate([(350,660,92,"#d95f45"),(670,630,68,"#e8b64b"),(1020,670,102,"#5c9a61"),(1380,640,80,"#d88a4b"),(1610,700,54,"#c95850")]):
+                p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{col}" fill-opacity=".8" stroke="#f8dfac" stroke-width="5"/><circle cx="{x}" cy="{y}" r="{r*.58}" fill="#f9d7a0" fill-opacity=".42"/>')
+        elif kind=="castle":
+            for x,w,h in [(120,240,470),(420,290,600),(820,270,690),(1240,280,560),(1580,210,430)]:
+                p.append(f'<rect x="{x}" y="{900-h}" width="{w}" height="{h}" fill="{bottom}" stroke="{accent}" stroke-opacity=".38" stroke-width="5"/><path d="M{x-20} {900-h}L{x+w/2} {820-h}L{x+w+20} {900-h}Z" fill="{top}"/>')
+        elif kind=="gaming":
+            for i in range(5):
+                x=170+i*345; y=285+(i%2)*45
+                p.append(f'<rect x="{x}" y="{y}" width="220" height="510" rx="24" fill="#0b0b18" stroke="{accent}" stroke-width="7"/><rect x="{x+20}" y="{y+35}" width="180" height="220" rx="12" fill="{bottom}" stroke="{accent}" stroke-opacity=".55" stroke-width="4"/><path d="M{x+45} {y+150}L{x+85} {y+100}L{x+120} {y+175}L{x+172} {y+90}" fill="none" stroke="{accent}" stroke-width="8"/>')
+        elif kind in {"cyber","network"}:
+            nodes=[]
+            for i in range(30):
+                x=(i*163+79)%1850+35; y=(i*137+53)%1010+35; nodes.append((x,y))
+            for i,(x,y) in enumerate(nodes):
+                for x2,y2 in nodes[i+1:i+4]: p.append(f'<line x1="{x}" y1="{y}" x2="{x2}" y2="{y2}" stroke="{accent}" stroke-opacity=".12" stroke-width="3"/>')
+                p.append(f'<circle cx="{x}" cy="{y}" r="{5+i%4*2}" fill="{accent}" opacity=".52"/>')
+        elif kind=="map":
+            for i in range(18):
+                x=80+i*91; y=430+(i%5)*47
+                p.append(f'<path d="M{x-260} {y}C{x-160} {y-230} {x+90} {y-240} {x+200} {y-35}S{x+320} {y+220} {x+150} {y+300}S{x-170} {y+250} {x-260} {y}" fill="none" stroke="{accent}" stroke-opacity=".2" stroke-width="4"/>')
+            p.append('<path d="M220 840C430 730 500 630 720 660S1100 440 1330 480S1600 240 1710 250" fill="none" stroke="#fa8f64" stroke-width="10" stroke-dasharray="22 18"/>')
+        elif kind=="sports":
+            p.append(f'<path d="M0 260Q960 100 1920 260V600Q960 440 0 600Z" fill="{bottom}" opacity=".72"/>')
+            for i in range(8): p.append(f'<path d="M0 {310+i*38}Q960 {160+i*38} 1920 {310+i*38}" fill="none" stroke="{accent}" stroke-opacity=".22" stroke-width="8"/>')
+            p.append(f'<path d="M140 1070V820Q140 690 280 690H1640Q1780 690 1780 820V1070M960 690V1080M420 690V900H1500V690" fill="none" stroke="{accent}" stroke-opacity=".58" stroke-width="6"/>')
+        elif kind=="horror":
+            for i in range(7):
+                x=100+i*285; h=200+(i*89)%310
+                p.append(f'<path d="M{x} 790V{790-h}L{x+90} {730-h}L{x+180} {790-h}V790Z" fill="#11131b" stroke="{accent}" stroke-opacity=".18" stroke-width="4"/>')
+                p.append(f'<rect x="{x+60}" y="{820-h}" width="25" height="70" fill="{accent}" opacity=".25"/><rect x="{x+110}" y="{820-h}" width="25" height="70" fill="{accent}" opacity=".18"/>')
+        else:
+            p.append(f'<rect x="130" y="160" width="1660" height="625" rx="24" fill="{bottom}" fill-opacity=".3" stroke="{accent}" stroke-opacity=".3" stroke-width="5"/><path d="M130 785H1790" stroke="{accent}" stroke-opacity=".4" stroke-width="6"/>')
+    elif kind=="underwater":
+        p.append(f'<path d="M0 0H1920V700Q960 810 0 700Z" fill="{top}" opacity=".28"/>')
+        for i in range(24):
+            x=(i*131+25)%1920; y=(i*113+65)%890; r=4+(i%7)*4
+            p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="none" stroke="#b6f6f4" stroke-opacity=".25" stroke-width="3"/>')
+        for i in range(9):
+            x=i*240; p.append(f'<path d="M{x} 1080Q{x-30} 850 {x+35} 740Q{x+90} 920 {x+120} 1080" fill="none" stroke="#56cbb8" stroke-opacity=".45" stroke-width="10"/>')
+        for i in range(8):
+            x=i*245+80; y=350+(i%3)*80
+            p.append(f'<path d="M{x-55} {y}Q{x} {y-42} {x+55} {y}Q{x} {y+42} {x-55} {y}Z" fill="{accent}" opacity=".35"/><circle cx="{x+27}" cy="{y-4}" r="4" fill="#ecffff"/>')
+    # Subtle original particles add texture without replacing detailed scene art with a flat gradient.
+    for i in range(100):
+        x=(i*167+29)%1920; y=(i*113+17)%1080
+        p.append(f'<circle cx="{x}" cy="{y}" r="{1+i%3}" fill="#fff" opacity="{.025+(i%5)*.009:.3f}"/>')
+    p.append(f'<rect x="18" y="18" width="1884" height="1044" fill="none" stroke="{accent}" stroke-opacity=".12" stroke-width="2"/>')
+    return svg_doc("".join(p),defs)
+
+def overlay_svg(name):
+    defs='<linearGradient id="leak" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff5b56" stop-opacity=".28"/><stop offset=".32" stop-color="#ffbd66" stop-opacity=".13"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient><radialGradient id="vign"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient><pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.5" fill="#fff" fill-opacity=".22"/></pattern><pattern id="lines" width="1" height="7" patternUnits="userSpaceOnUse"><rect width="1" height="2" fill="#fff" fill-opacity=".14"/></pattern><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="13"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .15"/></feComponentTransfer></filter>'
+    p=[]
+    if name=="film-grain": p.append('<rect width="1920" height="1080" filter="url(#noise)" opacity=".2"/>')
+    elif name=="scanlines": p.append('<rect width="1920" height="1080" fill="url(#lines)" opacity=".62"/>')
+    elif name=="halftone": p.append('<rect width="1920" height="1080" fill="url(#dots)" opacity=".65"/>')
+    elif name in {"light-leak","film-burn","rainbow-prism"}:
+        p.append('<rect width="1920" height="1080" fill="url(#leak)"/>')
+        if name=="film-burn": p.append('<ellipse cx="130" cy="530" rx="620" ry="760" fill="#ff784c" opacity=".21"/><ellipse cx="1810" cy="540" rx="330" ry="720" fill="#ffcf7a" opacity=".15"/>')
+        if name=="rainbow-prism": p.append('<path d="M-100 0L400 0L1300 1080H820Z" fill="#71b8ff" opacity=".055"/><path d="M250 0H570L1510 1080H1220Z" fill="#fd8eda" opacity=".06"/><path d="M1000 0H1250L1920 600V800Z" fill="#83f1ce" opacity=".07"/>')
+    elif name in {"vignette","corner-vignette"}: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
+    elif name=="letterbox": p.append('<rect width="1920" height="110" fill="#000"/><rect y="970" width="1920" height="110" fill="#000"/>')
+    elif name=="film-gate":
+        p.append('<rect x="30" y="30" width="1860" height="1020" fill="none" stroke="#f5f0e4" stroke-opacity=".42" stroke-width="4"/>')
+        for x in range(65,1880,95): p.append(f'<rect x="{x}" y="48" width="16" height="32" rx="4" fill="#f5f0e4" opacity=".65"/><rect x="{x}" y="1000" width="16" height="32" rx="4" fill="#f5f0e4" opacity=".65"/>')
+    elif name in {"dust","embers","bokeh","sparkles","snow","confetti"}:
+        count=210 if name in {"dust","bokeh"} else 160
+        for i in range(count):
+            x=(i*137+53)%1920; y=(i*191+31)%1080
+            if name=="bokeh":
+                r=13+(i%7)*8; p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="none" stroke="#f6dcb0" stroke-opacity=".12" stroke-width="4"/>')
+            elif name=="sparkles":
+                r=5+(i%5)*2; p.append(f'<path d="M{x} {y-r*2}V{y+r*2}M{x-r*2} {y}H{x+r*2}" stroke="#ffe9b7" stroke-opacity=".35" stroke-width="2"/>')
+            elif name=="snow":
+                p.append(f'<circle cx="{x}" cy="{y}" r="{1+i%5}" fill="#edf8ff" opacity=".62"/>')
+            elif name=="confetti":
+                rot=(i*19)%360; col=["#ffcc70","#70e7d3","#ff7f98","#b4a1ff"][i%4]
+                p.append(f'<rect x="{x}" y="{y}" width="{5+i%8}" height="{12+i%15}" rx="2" fill="{col}" opacity=".25" transform="rotate({rot} {x} {y})"/>')
+            else:
+                col="#ffb86c" if name=="embers" else "#f8e9c8"; r=1+(i%5)*.65
+                p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{col}" opacity="{.1+(i%7)*.035:.2f}"/>')
+    elif name=="rain":
+        for i in range(250):
+            x=(i*97+31)%1920; y=(i*83+17)%1080; length=22+(i%5)*10
+            p.append(f'<path d="M{x} {y}l-9 {length}" stroke="#bfe3f4" stroke-opacity="{.11+(i%4)*.04:.2f}" stroke-width="{1+i%2}"/>')
+    elif name=="speed-lines":
+        for i in range(46):
+            y=(i*37+13)%1080; x=(i*139)%1150
+            p.append(f'<path d="M{x} {y}L{x+350+(i%5)*105} {y-25+(i%4)*18}" stroke="#fff" stroke-opacity="{.035+(i%4)*.025:.2f}" stroke-width="{2+i%3}"/>')
+    elif name=="topographic":
+        for i in range(20):
+            x=80+i*91; y=430+(i%5)*47
+            p.append(f'<path d="M{x-260} {y}C{x-160} {y-230} {x+90} {y-240} {x+200} {y-35}S{x+320} {y+220} {x+150} {y+300}S{x-170} {y+250} {x-260} {y}" fill="none" stroke="#d2e5c4" stroke-opacity=".14" stroke-width="3"/>')
+    elif name in {"blueprint","chart-grid","map-graticule"}:
+        step=80 if name=="blueprint" else 120 if name=="chart-grid" else 160
+        color="#89dff3" if name!="map-graticule" else "#e8dcc1"
+        for x in range(0,1921,step): p.append(f'<path d="M{x} 0V1080" stroke="{color}" stroke-opacity=".12" stroke-width="2"/>')
+        for y in range(0,1081,step): p.append(f'<path d="M0 {y}H1920" stroke="{color}" stroke-opacity=".12" stroke-width="2"/>')
+    elif name=="starfield":
+        for i in range(320): p.append(f'<circle cx="{(i*157+17)%1920}" cy="{(i*89+41)%1080}" r="{.8+(i%4)*.65}" fill="#eaf0ff" opacity="{.18+(i%5)*.12:.2f}"/>')
+    elif name in {"data-network","radar"}:
+        if name=="radar":
+            p.append('<circle cx="960" cy="540" r="130" fill="none" stroke="#79f0d1" stroke-opacity=".24" stroke-width="3"/><circle cx="960" cy="540" r="260" fill="none" stroke="#79f0d1" stroke-opacity=".22" stroke-width="3"/><circle cx="960" cy="540" r="390" fill="none" stroke="#79f0d1" stroke-opacity=".18" stroke-width="3"/><path d="M570 540H1350M960 150V930M685 265L1235 815M685 815L1235 265" stroke="#79f0d1" stroke-opacity=".14" stroke-width="3"/><path d="M960 540L1215 280A365 365 0 0 1 1320 560Z" fill="#79f0d1" fill-opacity=".09"/>')
+        else:
+            nodes=[((i*163+79)%1850+35,(i*137+53)%1010+35) for i in range(40)]
+            for i,(x,y) in enumerate(nodes):
+                for x2,y2 in nodes[i+1:i+4]: p.append(f'<line x1="{x}" y1="{y}" x2="{x2}" y2="{y2}" stroke="#70e6db" stroke-opacity=".14" stroke-width="2"/>')
+                p.append(f'<circle cx="{x}" cy="{y}" r="4" fill="#70e6db" opacity=".7"/>')
+    elif name in {"glitch","vhs","screen-reflection-bands"}:
+        for i in range(45):
+            y=(i*73+13)%1080; x=(i*131)%1500; w=80+(i%6)*73
+            col="#ff4fb5" if i%2 else "#5de9ff"
+            p.append(f'<rect x="{x}" y="{y}" width="{w}" height="{2+i%8}" fill="{col}" opacity=".14"/>')
+        if name=="vhs": p.append('<path d="M0 180H1920M0 526H1920M0 802H1920" stroke="#8fd8ff" stroke-opacity=".15" stroke-width="5"/>')
+        if name=="screen-reflection-bands": p.append('<path d="M0 100L1920 350M0 260L1920 510M0 420L1920 670" stroke="#fff" stroke-opacity=".065" stroke-width="90"/>')
+    elif name in {"subtitle-safe","focus-frame","corner-hud","measurement-rulers"}:
+        if name=="subtitle-safe": p.append('<rect x="100" y="80" width="1720" height="920" fill="none" stroke="#75ff9b" stroke-opacity=".38" stroke-width="4" stroke-dasharray="18 14"/><rect x="180" y="780" width="1560" height="210" fill="#000" fill-opacity=".035" stroke="#75ff9b" stroke-opacity=".35" stroke-width="3" stroke-dasharray="12 10"/>')
+        elif name=="focus-frame": p.append('<rect x="110" y="90" width="1700" height="900" fill="none" stroke="#f5f1e9" stroke-opacity=".72" stroke-width="4"/><path d="M110 210V90H230M1690 90H1810V210M110 870V990H230M1690 990H1810V870" stroke="#f5f1e9" stroke-width="12" fill="none"/>')
+        elif name=="corner-hud": p.append('<path d="M160 50H50V160M1760 50H1870V160M50 920V1030H160M1760 1030H1870V920" fill="none" stroke="#b6d6ff" stroke-opacity=".55" stroke-width="4"/>')
+        else:
+            for x in range(0,1920,100): p.append(f'<path d="M{x} 15V45M{x} 1035V1065" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>')
+            for y in range(0,1080,100): p.append(f'<path d="M15 {y}H45M1875 {y}H1905" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>')
+    elif name=="waveform":
+        coords=[f'{i*19.2:.1f},{540+(((i*71)%131)-65)*(.6+(i%7)*.08):.1f}' for i in range(101)]
+        p.append(f'<polyline points="{" ".join(coords)}" fill="none" stroke="#83f0df" stroke-opacity=".6" stroke-width="5"/>')
+    elif name=="paper-texture":
+        p.append('<rect width="1920" height="1080" fill="#e6d6b7" fill-opacity=".09"/>')
+        for i in range(150): p.append(f'<path d="M{(i*173+23)%1920} {(i*97+19)%1080}h{18+(i%21)*5}" stroke="#f7e8cd" stroke-opacity=".1" stroke-width="2"/>')
+    elif name=="soft-fog":
+        for i in range(12):
+            y=280+i*68
+            p.append(f'<ellipse cx="{180+(i*223)%1560}" cy="{y}" rx="{400+(i%4)*130}" ry="{45+(i%3)*20}" fill="#d8e5e0" opacity=".028"/>')
+    elif name=="audio-waveform":
+        p.append('<path d="M0 540H120L160 500L200 580L245 430L300 650L360 455L420 600L480 540H620L670 485L710 565L770 410L825 675L890 470L940 540H1100L1150 495L1200 590L1260 440L1320 640L1380 510L1430 540H1920" fill="none" stroke="#83f0df" stroke-opacity=".5" stroke-width="6"/>')
+    else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
+    return svg_doc("".join(p),defs)
+
+def icon_svg(drawing):
+    css='<style>.line{stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;fill:none}</style>'
+    return svg_doc(f'<g class="line">{drawing}</g>',css,width=64,height=64)
+
+def infographic_svg(asset_id,title,index):
+    accent=["#e6ad6c","#5dd7ca","#9faeff","#e985a2"][index%4]
+    bg=["#1a1b25","#10232b","#292035","#20292a"][index%4]
+    defs='<style>text{font-family:Arial,sans-serif;fill:#f4f0e6}.muted{fill:#b8c0cb}.line{stroke:#cbd1db;stroke-opacity:.35;stroke-width:4;fill:none}</style>'
+    p=[f'<rect x="56" y="56" width="1808" height="968" rx="28" fill="{bg}" stroke="{accent}" stroke-opacity=".5" stroke-width="4"/><rect x="105" y="110" width="14" height="120" rx="7" fill="{accent}"/>',
+       f'<text x="155" y="178" font-size="44" font-weight="700">{html.escape(title.upper())}</text>',
+       '<text x="155" y="220" class="muted" font-size="22">EDIT PLACEHOLDERS · INCLUDE SOURCES WHEN NEEDED</text>']
+    if asset_id in {"bar-chart","line-chart","stat-number"}:
+        for y in [350,480,610,740]: p.append(f'<path d="M180 {y}H1740" class="line" stroke-dasharray="6 16"/>')
+        if asset_id=="line-chart":
+            p.append(f'<path d="M220 740L460 670L700 710L940 510L1180 555L1420 375L1680 410" fill="none" stroke="{accent}" stroke-width="12"/>')
+        elif asset_id=="stat-number": p.append(f'<text x="960" y="590" text-anchor="middle" font-size="225" font-weight="700" fill="{accent}">00.0%</text><text x="960" y="680" text-anchor="middle" font-size="38">SOURCE / PERIOD / UNITS</text>')
+        else:
+            for i in range(7):
+                h=120+((i*73+index*29)%360); x=260+i*215
+                p.append(f'<rect x="{x}" y="{800-h}" width="115" height="{h}" rx="10" fill="{accent}" opacity="{.35+(i%4)*.15:.2f}"/><text x="{x+57}" y="850" font-size="21" text-anchor="middle">ITEM {i+1}</text>')
+    elif asset_id in {"timeline","vertical-timeline","process-steps","recipe-steps","chapter-divider"}:
+        if asset_id=="vertical-timeline":
+            p.append(f'<path d="M410 330V850" stroke="{accent}" stroke-width="9"/>')
+            for i in range(5):
+                y=350+i*120
+                p.append(f'<circle cx="410" cy="{y}" r="20" fill="{accent}"/><rect x="470" y="{y-30}" width="880" height="62" rx="12" fill="{accent}" fill-opacity=".16" stroke="{accent}" stroke-opacity=".35" stroke-width="2"/><text x="510" y="{y+10}" font-size="25">DATE / MILESTONE {i+1}</text>')
+        else:
+            count=4 if asset_id in {"process-steps","recipe-steps"} else 5; span=1500/(count-1)
+            p.append(f'<path d="M250 570H1670" stroke="{accent}" stroke-width="8"/>')
+            for i in range(count):
+                x=250+i*span
+                p.append(f'<circle cx="{x}" cy="570" r="38" fill="{bg}" stroke="{accent}" stroke-width="8"/><text x="{x}" y="585" text-anchor="middle" font-size="34" font-weight="700">{i+1}</text><text x="{x}" y="660" text-anchor="middle" font-size="24">STEP / DATE</text><rect x="{x-115}" y="715" width="230" height="78" rx="12" fill="{accent}" fill-opacity=".14" stroke="{accent}" stroke-opacity=".35" stroke-width="2"/>')
+    elif asset_id in {"comparison","pros-cons"}:
+        for i in range(2):
+            x=145+i*830; col="#68d9bc" if i==0 else "#ed9e88"
+            p.append(f'<rect x="{x}" y="310" width="735" height="540" rx="18" fill="{col}" fill-opacity=".10" stroke="{col}" stroke-opacity=".55" stroke-width="3"/><text x="{x+42}" y="375" font-size="34" fill="{col}">{"OPTION A" if i==0 else "OPTION B"}</text>')
+            for j in range(5):
+                y=440+j*74; p.append(f'<circle cx="{x+58}" cy="{y}" r="10" fill="{col}"/><path d="M{x+90} {y}H{x+620-j*18}" stroke="#e8e6df" stroke-opacity=".4" stroke-width="8" stroke-linecap="round"/>')
+    elif asset_id in {"funnel","pyramid"}:
+        for i in range(4):
+            y=330+i*135; w=1420-i*250; x=(1920-w)/2
+            if asset_id=="pyramid": p.append(f'<path d="M{960-w/2} {y+108}L960 {y-30}L{960+w/2} {y+108}Z" fill="{accent}" fill-opacity="{.12+i*.09:.2f}" stroke="{accent}" stroke-opacity=".65" stroke-width="4"/>')
+            else: p.append(f'<path d="M{x} {y}H{x+w}L{x+w-85} {y+105}H{x+85}Z" fill="{accent}" fill-opacity="{.14+i*.1:.2f}" stroke="{accent}" stroke-opacity=".65" stroke-width="4"/>')
+            p.append(f'<text x="960" y="{y+64}" text-anchor="middle" font-size="27">LEVEL {i+1} / LABEL</text>')
+    elif asset_id=="decision-tree":
+        p.append(f'<rect x="760" y="310" width="400" height="95" rx="16" fill="{accent}" fill-opacity=".18" stroke="{accent}" stroke-width="4"/><text x="960" y="368" text-anchor="middle" font-size="27">QUESTION</text><path d="M960 405V495H480V555M960 495H1440V555" class="line"/>')
+        for x,label in [(480,"YES / PATH A"),(1440,"NO / PATH B")]:
+            p.append(f'<rect x="{x-180}" y="555" width="360" height="100" rx="14" fill="{accent}" fill-opacity=".12" stroke="{accent}" stroke-width="3"/><text x="{x}" y="615" text-anchor="middle" font-size="24">{label}</text><path d="M{x} 655V715" class="line"/><rect x="{x-220}" y="715" width="440" height="100" rx="14" fill="#fff" fill-opacity=".04" stroke="#fff" stroke-opacity=".2" stroke-width="3"/><text x="{x}" y="775" text-anchor="middle" font-size="24">OUTCOME</text>')
+    elif asset_id=="map-callout":
+        p.append('<path d="M160 370Q330 220 520 380T890 380T1230 340T1700 400M100 610Q320 470 550 620T1000 610T1600 670" fill="none" stroke="#7ca78a" stroke-opacity=".45" stroke-width="12"/>')
+        for x,y,label in [(300,350,"A"),(800,390,"B"),(1300,350,"C")]: p.append(f'<circle cx="{x}" cy="{y}" r="22" fill="{accent}"/><rect x="{x-88}" y="{y-100}" width="176" height="56" rx="10" fill="{bg}" stroke="{accent}" stroke-width="3"/><text x="{x}" y="{y-63}" text-anchor="middle" font-size="24">{label} · PLACE</text>')
+        p.append('<path d="M300 350Q500 550 800 390T1300 350" fill="none" stroke="#ed9874" stroke-width="6" stroke-dasharray="14 15"/>')
+    elif asset_id in {"quote-card","source-card"}:
+        p.append(f'<text x="210" y="410" font-size="110" fill="{accent}">“</text><text x="290" y="495" font-size="38">REPLACE WITH SHORT VERIFIED { "QUOTE" if asset_id=="quote-card" else "SOURCE / EVIDENCE" }</text><path d="M300 575H1580" stroke="{accent}" stroke-opacity=".65" stroke-width="4"/><text x="310" y="650" class="muted" font-size="28">AUTHOR / PUBLISHER</text><text x="310" y="700" class="muted" font-size="25">DATE · LINK · CONTEXT</text>')
+    elif asset_id in {"definition-card","equation-card"}:
+        p.append(f'<rect x="165" y="315" width="1590" height="435" rx="24" fill="{accent}" fill-opacity=".08" stroke="{accent}" stroke-opacity=".38" stroke-width="3"/><text x="235" y="420" font-size="48" font-weight="700">{"TERM / CONCEPT" if asset_id=="definition-card" else "FORMULA / EQUATION"}</text><path d="M235 465H1660" stroke="{accent}" stroke-opacity=".35" stroke-width="3"/><text x="235" y="545" font-size="30" class="muted">PLAIN-LANGUAGE EXPLANATION / VARIABLE KEY</text><text x="235" y="620" font-size="24" class="muted">SOURCE / ASSUMPTIONS / UNITS</text>')
+    else:
+        for i in range(5):
+            y=330+i*112
+            p.append(f'<circle cx="230" cy="{y}" r="28" fill="{accent}" fill-opacity=".22" stroke="{accent}" stroke-width="3"/><text x="230" y="{y+10}" text-anchor="middle" font-size="28">{i+1}</text><text x="300" y="{y+10}" font-size="28">ITEM / SHORT EXPLANATION</text><path d="M300 {y+35}H1640" stroke="#e8e6df" stroke-opacity=".2" stroke-width="3"/>')
+    p.append('<text x="960" y="970" text-anchor="middle" font-size="20" fill="#aeb8c6">TEMPLATE ONLY · REPLACE PLACEHOLDERS AND VERIFY SOURCES</text>')
+    return svg_doc("".join(p),defs)
+
+def generate_originals(root,index):
+    for folder in ["backgrounds","overlays","icons","infographics"]: (root/"originals"/folder).mkdir(parents=True,exist_ok=True)
+    for asset_id,palette,kind in PALETTES:
+        path=root/"originals/backgrounds"/(asset_id+".svg")
+        write_text(path,make_background(asset_id,palette,kind))
+        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-background","category":kind,"license":CC0,"license_url":CC0_URL,"redistributable":True})
+    for asset_id,title in OVERLAYS:
+        path=root/"originals/overlays"/(asset_id+".svg")
+        write_text(path,overlay_svg(asset_id))
+        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-overlay","description":title,"license":CC0,"license_url":CC0_URL,"transparent":True,"redistributable":True})
+    for name,drawing in ICONS.items():
+        path=root/"originals/icons"/(name+".svg")
+        write_text(path,icon_svg(drawing))
+        index.append({"id":name,"path":path.relative_to(root).as_posix(),"type":"original-svg-icon","license":CC0,"license_url":CC0_URL,"redistributable":True})
+    for i,(asset_id,title) in enumerate(INFO):
+        path=root/"originals/infographics"/(asset_id+".svg")
+        write_text(path,infographic_svg(asset_id,title,i))
+        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-infographic-template","title":title,"license":CC0,"license_url":CC0_URL,"redistributable":True,"warning":"Replace placeholders and verify all data and sources before publishing."})
+
+def safe_extract(blob,target,max_bytes=350*1024*1024):
+    import io
+    total=0; count=0; target=target.resolve()
+    with zipfile.ZipFile(io.BytesIO(blob)) as z:
+        bad=z.testzip()
+        if bad: raise RuntimeError("corrupt ZIP member: "+bad)
+        for info in z.infolist():
+            name=info.filename.replace("\\\\","/")
+            pp=PurePosixPath(name); ext=Path(name).suffix.lower()
+            if pp.is_absolute() or ".." in pp.parts: raise RuntimeError("unsafe ZIP path: "+name)
+            if info.is_dir() or ext in DENIED or ext not in ALLOWED: continue
+            total+=info.file_size
+            if total>max_bytes: raise RuntimeError("pack extraction size limit exceeded")
+            out=(target/Path(*pp.parts)).resolve()
+            if target not in out.parents: raise RuntimeError("unsafe extraction destination")
+            out.parent.mkdir(parents=True,exist_ok=True)
+            with z.open(info) as src,out.open("wb") as dst: shutil.copyfileobj(src,dst)
+            count+=1
+    return count,total
+
+def verify_kenney_license(page):
+    try:
+        data,_=request_bytes(page,timeout=35,limit=4*1024*1024)
+        text=data.decode("utf-8","ignore")
+        return "Creative Commons CC0" in text or "CC0 1.0 Universal" in text or "CC0-1.0" in text
+    except Exception as e:
+        print("[Kenney] page verification error:",page,str(e))
+        return False
+
+def download_kenney(root,index):
+    report=[]
+    for slug,title,category in KENNEY:
+        page=f"https://kenney.nl/assets/{slug}"
+        url=f"https://kenney.nl/media/pages/assets/{slug}/download"
+        row={"id":"kenney-"+slug,"title":title,"provider":"Kenney","category":category,"source_page":page,"download_url":url,"license":CC0}
+        try:
+            if not verify_kenney_license(page):
+                row.update(status="skipped",reason="official page CC0 marker could not be verified")
+            else:
+                blob,_=request_bytes(url,timeout=90,limit=MAX_KENNEY_ZIP)
+                if not blob.startswith(b"PK"): raise RuntimeError("official download endpoint did not return ZIP bytes")
+                dest=root/"third-party/kenney"/slug
+                n,total=safe_extract(blob,dest)
+                if n<1: raise RuntimeError("no allowed media files found in ZIP")
+                write_text(dest/"SOURCE_AND_LICENSE.md",f"# {title} — Kenney\n\nSource: {page}\nLicense: CC0 1.0 Universal — {CC0_URL}\nOfficial page license marker was checked at build time. The source ZIP passed an integrity test before extraction. Keep source credits or license files distributed within this pack.\n")
+                row.update(status="downloaded",file_count=n,unpacked_bytes=total,archive_sha256=hashlib.sha256(blob).hexdigest())
+                for f in dest.rglob("*"):
+                    if f.is_file():
+                        index.append({"id":f"kenney-{slug}-{f.relative_to(dest).as_posix()}","path":f.relative_to(root).as_posix(),"type":"kenney-cc0-pack-file","provider":"Kenney","source_page":page,"license":CC0,"license_url":CC0_URL,"size_bytes":f.stat().st_size,"sha256":sha256_path(f),"redistributable":True})
+            print(f"[Kenney] {row.get('status')}: {slug}"+(f" ({row.get('file_count')} files)" if row.get('file_count') else f" — {row.get('reason','')}"))
+        except Exception as e:
+            row.update(status="failed",reason=str(e)); print("[Kenney] failed:",slug,str(e))
+        report.append(row); time.sleep(.25)
+    return report
+
+def choose_poly_file(tree,kind):
+    if not isinstance(tree,dict): return None
+    if kind=="hdris":
+        block=tree.get("hdri",{})
+        for res in ("1k","2k","4k","8k","16k","32k"):
+            fmts=block.get(res,{}) if isinstance(block,dict) else {}
+            for fmt in ("hdr","exr","jpg"):
+                f=fmts.get(fmt) if isinstance(fmts,dict) else None
+                if isinstance(f,dict) and f.get("url"): return f
+        for fmts in block.values() if isinstance(block,dict) else []:
+            if isinstance(fmts,dict):
+                for f in fmts.values():
+                    if isinstance(f,dict) and f.get("url"): return f
+        return None
+    for fmt in ("gltf","blend","fbx","usd"):
+        block=tree.get(fmt,{})
+        if not isinstance(block,dict): continue
+        for res in ("1k","2k","4k","8k","16k","32k"):
+            fmts=block.get(res,{})
+            f=fmts.get(fmt) if isinstance(fmts,dict) else None
+            if isinstance(f,dict) and f.get("url"): return f
+        for fmts in block.values():
+            if isinstance(fmts,dict):
+                f=fmts.get(fmt)
+                if isinstance(f,dict) and f.get("url"): return f
+    return None
+
+def download_polyhaven(root,index):
+    report=[]
+    for kind,limit in [("hdris",3),("models",3)]:
+        try:
+            data=request_json(f"https://api.polyhaven.com/assets?type={kind}")
+            entries=[(k,v) for k,v in data.items() if isinstance(v,dict)]
+            entries.sort(key=lambda kv:int(kv[1].get("download_count",0) or 0),reverse=True)
+            chosen=[]; seen=set()
+            for asset_id,meta in entries:
+                cat=str(meta.get("category","")).split("/")[0] or "other"
+                if cat in seen and len(chosen)<limit-1: continue
+                chosen.append((asset_id,meta)); seen.add(cat)
+                if len(chosen)>=limit: break
+            for asset_id,meta in chosen:
+                row={"id":"polyhaven-"+asset_id,"title":meta.get("name",asset_id),"provider":"Poly Haven","source_page":f"https://polyhaven.com/a/{asset_id}","license":CC0,"license_url":"https://polyhaven.com/license","category":meta.get("category",kind)}
+                try:
+                    tree=request_json(f"https://api.polyhaven.com/files/{urllib.parse.quote(asset_id)}")
+                    fileobj=choose_poly_file(tree,kind)
+                    if not fileobj: raise RuntimeError("no suitable direct file in API response")
+                    url=fileobj["url"]; blob,ctype=request_bytes(url,timeout=90,limit=MAX_POLY_FILE)
+                    name=Path(urllib.parse.urlparse(url).path).name or (asset_id+(".hdr" if kind=="hdris" else ".zip"))
+                    if Path(name).suffix.lower() not in ALLOWED: name += ".zip"
+                    target=root/"third-party/polyhaven"/kind/(slugify(asset_id)+"-"+slugify(name))
+                    target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    row.update(status="downloaded",path=target.relative_to(root).as_posix(),size_bytes=len(blob),sha256=digest,file_url=url)
+                    index.append({"id":row["id"],"path":row["path"],"type":"polyhaven-"+kind,"title":row["title"],"category":row["category"],"source_page":row["source_page"],"license":CC0,"license_url":"https://polyhaven.com/license","size_bytes":len(blob),"sha256":digest,"redistributable":True})
+                    print("[Poly Haven] OK:",asset_id,len(blob))
+                except Exception as e:
+                    row.update(status="failed",reason=str(e)); print("[Poly Haven] failed:",asset_id,str(e))
+                report.append(row); time.sleep(.5)
+        except Exception as e:
+            row={"id":"polyhaven-"+kind,"provider":"Poly Haven","status":"failed","reason":str(e),"source_page":"https://polyhaven.com/license"}
+            report.append(row); print("[Poly Haven] API unavailable:",str(e))
+    write_text(root/"third-party/polyhaven/POWERED-BY-POLY-HAVEN.md","# Poly Haven credit\n\nAssets in this folder are CC0. When the live public API is used to build an application or product, Poly Haven asks API users to include a small “Powered by Poly Haven” credit. Sources: https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md\n")
+    return report
+
+def openverse_extension(url,ctype,kind,item):
+    ext=Path(urllib.parse.urlparse(url).path).suffix.lower()
+    allowed={".jpg",".jpeg",".png",".webp"} if kind=="image" else {".mp3",".wav",".ogg",".flac",".m4a"}
+    if ext in allowed: return ext
+    mime=ctype.split(";")[0].lower()
+    m={"image/jpeg":".jpg","image/png":".png","image/webp":".webp","audio/mpeg":".mp3","audio/mp3":".mp3","audio/wav":".wav","audio/x-wav":".wav","audio/ogg":".ogg","audio/flac":".flac","audio/mp4":".m4a"}
+    if m.get(mime) in allowed: return m[mime]
+    ft=str(item.get("filetype") or "").lower()
+    return "."+ft if "."+ft in allowed else ""
+
+def download_openverse(root,index):
+    report=[]; total=0; cap=42
+    queries=[("image","architecture","architecture interior",4),("image","mountains","mountain landscape",4),("image","science","science laboratory",4),("image","space","galaxy nebula",4),("image","history","historical map",4),("image","nature","forest wildlife",4),("image","food","food ingredients",4),("audio","rain","rain ambience",3),("audio","forest","forest birds ambience",3),("audio","ocean","ocean waves",3),("audio","foley","footsteps foley",3),("audio","technology","sci fi sound effect",3)]
+    for kind,category,q,limit in queries:
+        if total>=cap: break
+        endpoint=f"https://api.openverse.org/v1/{'images' if kind=='image' else 'audio'}/"
+        url=endpoint+"?"+urllib.parse.urlencode({"q":q,"license":"cc0","page_size":limit,"page":1})
+        try:
+            data=request_json(url)
+            for item in data.get("results",[]):
+                if total>=cap: break
+                if str(item.get("license","")).lower()!="cc0":
+                    report.append({"id":item.get("id"),"status":"skipped","reason":"not exact CC0"}); continue
+                media_url=str(item.get("url") or "")
+                if not media_url.startswith("https://"): continue
+                try:
+                    blob,ctype=request_bytes(media_url,timeout=50,limit=MAX_MEDIA_FILE)
+                    ext=openverse_extension(media_url,ctype,kind,item)
+                    if not ext: raise RuntimeError("unsupported file type: "+ctype)
+                    title=str(item.get("title") or item.get("id") or category)
+                    ident=slugify(str(item.get("id") or hashlib.sha256(media_url.encode()).hexdigest()[:12]))
+                    path=root/"third-party/openverse"/("images" if kind=="image" else "audio")/f"{category}-{slugify(title)[:36]}-{ident}{ext}"
+                    path.parent.mkdir(parents=True,exist_ok=True); path.write_bytes(blob)
+                    digest=sha256_path(path)
+                    entry={"id":"openverse-"+kind+"-"+ident,"path":path.relative_to(root).as_posix(),"type":"openverse-"+kind,"title":title,"creator":item.get("creator"),"provider":item.get("provider"),"source":item.get("source"),"source_url":media_url,"source_landing_url":item.get("foreign_landing_url") or item.get("detail_url") or media_url,"license":"CC0","license_version":item.get("license_version"),"license_url":item.get("license_url") or CC0_URL,"attribution_text":item.get("attribution"),"query":q,"size_bytes":len(blob),"sha256":digest,"redistributable":True}
+                    index.append(entry); total+=1; report.append({"id":entry["id"],"status":"downloaded","path":entry["path"],"license":"CC0","size_bytes":len(blob)})
+                    print("[Openverse] OK:",kind,category,title[:48],len(blob))
+                except Exception as e:
+                    report.append({"id":item.get("id"),"status":"failed","reason":str(e),"source_url":media_url})
+                    print("[Openverse] failed:",q,str(e))
+            time.sleep(1.1)
+        except Exception as e:
+            report.append({"id":"openverse-"+category,"status":"failed","reason":str(e),"query":q})
+            print("[Openverse] query failed:",q,str(e)); time.sleep(1.1)
+    return report
+
+def main():
+    if STAGE.exists(): shutil.rmtree(STAGE)
+    STAGE.mkdir(parents=True)
+    index=[]
+    generate_originals(STAGE,index)
+    print("[Originals] generated",len(index),"SVG assets")
+    kenney_report=download_kenney(STAGE,index)
+    polyhaven_report=download_polyhaven(STAGE,index)
+    openverse_report=download_openverse(STAGE,index)
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",
+      "# Sources and licenses\n\n"
+      "## Original vector assets\nThe original SVG backgrounds, overlays, icons and infographic templates in originals/ were generated for this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"
+      "## Kenney packs\nThe builder checks each official item page for an explicit CC0 marker before downloading from Kenney's official endpoint. Pack-level source and license notes are stored beside files. Outcomes:\n\n"+
+      "\n".join(f"- {r['title']}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in kenney_report)+
+      "\n\n## Poly Haven\nPoly Haven's library of HDRIs, textures and models is CC0; files successfully fetched through its public API are indexed item-by-item. The API has separate terms and asks API-based tools to display a small Powered by Poly Haven credit. See https://polyhaven.com/license.\n\n"+
+      "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
+      "\n\n## Openverse downloads\nOnly results with exact CC0 metadata were accepted. Each asset records the source landing page, creator where available, item-level license URL, file size and SHA-256. Download failures and unsupported file types are recorded below.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
+      "\n\n## Source-only libraries\n- Pexels: https://www.pexels.com/license/ — may be used in composed videos under its terms but must not be repackaged as standalone source assets.\n- Mixkit: https://mixkit.co/license/ — licenses vary by item type, including restricted items; use only eligible items in finished projects and do not mirror raw media into this bundle.\n- ambientCG: https://ambientcg.com/ — its asset library declares CC0; the whole site is not mirrored by this build.\n- Google Fonts: https://fonts.google.com/ — inspect the license of the selected font and include its license file when redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved final video. Check actual visual/audio quality, suitability, metadata, model integrity, and the license record before publication."
+    )
+    digest_lines=[]
+    for path in sorted(STAGE.rglob("*")):
+        if path.is_file() and path.name not in {"ASSET_INDEX.json","SHA256SUMS.txt"}:
+            digest_lines.append(f"{sha256_path(path)}  {path.relative_to(STAGE).as_posix()}")
+    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_files_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
+    index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"CC0-only for automatic third-party bundling; original assets are CC0; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"openverse_downloads":openverse_report,"assets":index}
+    write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
+    write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
+    assert len(PALETTES)>=30 and len(OVERLAYS)>=30 and len(ICONS)>=50 and len(INFO)>=20
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)
+    assert len(list((STAGE/"originals").rglob("*.svg")))==expected
+    indexed={line.split("  ",1)[1] for line in digest_lines}
+    for path in STAGE.rglob("*"):
+        if path.is_file() and path.name not in {"SHA256SUMS.txt"}:
+            if path.relative_to(STAGE).as_posix() not in indexed and path.name!="ASSET_INDEX.json":
+                raise RuntimeError("checksum missing for "+str(path))
+    OUT.mkdir(parents=True,exist_ok=True)
+    archive=OUT/"video-asset-library.zip"
+    if archive.exists(): archive.unlink()
+    with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as z:
+        for path in sorted(STAGE.rglob("*")):
+            if path.is_file(): z.write(path,Path("video-asset-library")/path.relative_to(STAGE))
+    archive_sha=sha256_path(archive)
+    write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",f"built_at={index_doc['built_at']}\nzip={archive.name}\nzip_sha256={archive_sha}\nzip_size_bytes={archive.stat().st_size}\nsummary={json.dumps(summary)}\n")
+    print(json.dumps(summary,indent=2))
+    print(f"[Package] {archive} size={archive.stat().st_size} SHA256={archive_sha}")
+if __name__=="__main__":
+    main()
