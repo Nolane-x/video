@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0.0",
-  "purpose": "Curated source inventory for a reusable, cross-genre video-production resource library. Bundle only original repository assets and sources explicitly marked CC0; maintain source links and restrictions for everything else.",
+  "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
   "checked_on": "2026-10-28",
   "bundling_policy": {
-    "allow_automatic": "Original assets created by this repository; individual third-party assets whose source metadata says CC0 and whose source/creator/license URLs are preserved.",
-    "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself.",
+    "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
+    "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
     "review": "A public-domain mark from a third-party aggregator is not automatically proof of status in every jurisdiction; CC0 is preferred for automatic bundling."
   },
   "sources": [
@@ -437,6 +437,48 @@
       "bundling": "automated-after-readme-cc0-verification-and-media-extension-filter",
       "verified_page_license": true,
       "note": "The build reads the official README/LICENSE content from each downloaded GitHub archive and requires asset-related CC0 language before extracting approved media formats. Game scripts, executable/binary code and unrelated files are excluded. Each extracted file records the repository source, the evidence line and SHA-256. The main Kenney website packs not mirrored by these starter-kit repositories remain source-only because its downloader is browser-driven."
+    },
+    {
+      "id": "nasa-image-video-library",
+      "title": "NASA Image and Video Library — screened images, video and audio",
+      "provider": "NASA",
+      "kind": "media library",
+      "category": "space, astronomy, Earth science, climate, aeronautics",
+      "source_page": "https://images.nasa.gov/",
+      "api": "https://images-api.nasa.gov",
+      "license": "NASA Media Usage Guidelines; generally not copyrighted in the United States, but not CC0",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "verified_page_license": true,
+      "bundling": "auto-screened-nasa-origin-with-copyright-marker-filter",
+      "note": "Only records attributed to NASA centers are considered. Explicit copyright/third-party-rights markers, NASA logos/seals, and obvious identifiable-person keyword categories are skipped. Every bundled record preserves source/media URL and rights basis. Credit NASA, do not imply endorsement, avoid protected insignia, and review privacy/publicity rights before commercial or promotional use."
+    },
+    {
+      "id": "library-of-congress-rights-verified-photos",
+      "title": "Library of Congress — photographs with explicit item-level rights statements",
+      "provider": "Library of Congress",
+      "kind": "photography and historical media archive",
+      "category": "history, maps, architecture, science, aviation, nature, industry",
+      "source_page": "https://www.loc.gov/apis/json-and-yaml/",
+      "api": "https://www.loc.gov/photos/?fo=json",
+      "license": "Public Domain / No Known Restrictions on Publication only when explicitly stated in item record",
+      "license_url": "https://www.loc.gov/rr/print/195_copr.html",
+      "verified_page_license": true,
+      "bundling": "auto-only-when-item-rights-positive-and-no-conflicts",
+      "note": "Only records whose own rights field explicitly states No Known Restrictions on Publication, Public Domain or No Known Copyright Restrictions are candidates. Records with missing, ambiguous or conflicting rights are skipped. Preserve the exact rights statement, item page and file URL; review context and other rights before publication."
+    },
+    {
+      "id": "smithsonian-open-access",
+      "title": "Smithsonian Open Access — item-level CC0 collection",
+      "provider": "Smithsonian Institution",
+      "kind": "museum and cultural heritage collection",
+      "category": "art, natural history, culture, science, objects and archival imagery",
+      "source_page": "https://www.si.edu/openaccess",
+      "api": "https://api.si.edu/openaccess/api/v1.0/search",
+      "license": "CC0 only for items explicitly released under Smithsonian Open Access; other collection records may have different rights",
+      "license_url": "https://www.si.edu/openaccess/faq",
+      "verified_page_license": true,
+      "bundling": "source-only-until-item-license-and-api-key-are-available",
+      "note": "Potential high-value source for later expansion. Requires an API key and item-level CC0 status check; this build does not bundle from Smithsonian until the credentials and license verification can be safely configured."
     }
   ]
 }
