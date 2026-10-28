@@ -40,3 +40,22 @@ The resource library is a toolbox, not a fixed art style. The story's intended g
 - When using third-party factual media, store the exact source page, creator, license, relevant download date and file checksum. Keep the attribution text adjacent to the asset.
 - "Free to use" does **not** always mean "free to redistribute as a raw file." Only the dedicated release builder's CC0-allowed lane is auto-bundled.
 - If an external asset's license changes, that is not retroactively a reason to strip its provenance. Pin the exact download metadata with the delivered version.
+
+
+## Expanded source routing and media discipline
+
+- **Space / astronomy / planetary science:** use screened NASA imagery/video for factual establishing shots; pair it with original observatory, orbital-lab and deep-space vectors, and Poly Haven 3D lighting/props where an explanatory reconstruction helps. NASA media is not CC0; retain required attribution and review its official media-use guidance.
+- **Earth science / climate / weather / ocean:** prioritize item-grounded NASA Earth-observation imagery for factual claims; use the ocean-depths, monsoon-city, tundra-aurora and underwater-reef original environments only as clearly illustrative shots. Never portray a stylized background as actual satellite evidence.
+- **History / archival culture / industrial evolution:** discover Library of Congress material only when its exact item rights statement is positive; combine with The Met Open Access and verified Wikimedia CC0/Public Domain assets. Add visible dates and an “illustration/reconstruction” label when needed.
+- **Science / medicine / engineering:** use clinical-lab, orbital-lab and observatory environments as visual supports, not source evidence. The anatomy-label, experiment-card, fact-check, blueprint-dimensions and source-ledger layouts should surface units, sample sizes, references and uncertainty where relevant.
+- **Business / product / software:** use financial-night, product-showcase-ivory, data-visualization and cyber-operations styles; supplement with laptop, code, terminal, scales and package icons. Do not fabricate real product interfaces, market data, performance or customers.
+- **Documentary / investigation / news:** archive timecode, CCTV framing, paper tears, source ledger, fact-check cards and news ticker are distinct graphic families. Do not use these overlays to make unverified media look like authentic evidence.
+- **Fantasy / gaming / music / sport:** start with castle-ruins, neon-alley, concert-hall, sports-court and particle/spectrum overlays; build a separate palette and audio motif for each environment rather than applying the same look to every topic.
+
+### Source mix before a shot is approved
+
+1. Mark every shot as **factual source media**, **original illustration**, **3D reconstruction**, or **graphic explanation** in the shot notes.
+2. For factual source media, use a provenance-backed item and preserve creator, rights, source URL, date/period and checksum where present.
+3. For reconstructions, tell the viewer when that distinction materially affects interpretation; never pass a stylized 3D render off as archival footage.
+4. Use at least four meaningful shot families per minute, and vary shot scale, movement, subject and composition—not merely color.
+5. The catalog’s “source/license” links are an audit trail, not a blanket permission slip. When uncertain, keep the file out of the release bundle and link to the official source instead.
