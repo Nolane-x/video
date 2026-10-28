@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
+      - "tools/video/generate_sfx_library.py"
       - "video-library/assets/sources.json"
+      - "video-library/assets/**"
   workflow_dispatch:
 
 permissions:
