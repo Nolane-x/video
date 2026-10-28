@@ -873,7 +873,7 @@ def make_asset_catalog(root,index,summary):
             f'<div class="links">{" ".join(links)}</div></div></article>'
         )
     counts = " · ".join(f"{html.escape(str(k))}: {html.escape(str(v))}" for k,v in summary.items() if isinstance(v,(str,int,float)))
-    document=f"""<!doctype html>
+    document="""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nolane Video Asset Library</title>
 <style>
@@ -892,9 +892,9 @@ main{{padding:24px clamp(16px,4vw,60px) 65px}}.grid{{display:grid;grid-template-
 </style></head><body>
 <header><h1>Nolane · Video Asset Library</h1>
 <p>Offline catalog of original vector environments, transparent motion overlays, reusable infographic frames, synthesized sound effects, and third-party media whose item-level license was verified for redistribution. Pick resources by the visual need of the shot, not by genre alone.</p>
-<p class="summary">{counts}</p></header>
+<p class="summary">__CATALOG_COUNTS__</p></header>
 <div class="controls"><input id="search" type="search" placeholder="Search assets, topics, creators, types…"><select id="category"><option value="">All categories</option></select></div>
-<main><p id="count"></p><div class="grid" id="grid">{"".join(cards)}</div></main>
+<main><p id="count"></p><div class="grid" id="grid">__CATALOG_CARDS__</div></main>
 <footer>License and provenance data lives in ASSET_INDEX.json and SOURCES_AND_LICENSES.md. A source link does not itself grant raw-file redistribution rights. Verify the asset is suitable for the actual video and honor any rights or context limitations.</footer>
 <script>
 const cards=[...document.querySelectorAll('.card')], search=document.querySelector('#search'), select=document.querySelector('#category'), count=document.querySelector('#count');
@@ -903,6 +903,7 @@ for(const c of categories){const o=document.createElement('option');o.value=c;o.
 function filter(){const q=search.value.trim().toLowerCase(),cat=select.value;let n=0;for(const c of cards){const ok=(!q||c.dataset.search.includes(q))&&(!cat||c.dataset.category===cat);c.hidden=!ok;if(ok)n++}count.textContent=n+' assets shown';}
 search.addEventListener('input',filter);select.addEventListener('change',filter);filter();
 </script></body></html>"""
+    document=document.replace("__CATALOG_COUNTS__",counts).replace("__CATALOG_CARDS__","".join(cards))
     write_text(root/"ASSET_CATALOG.html",document)
 
 def main():
