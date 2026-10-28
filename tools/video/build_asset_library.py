@@ -517,30 +517,14 @@ def verify_kenney_license(page):
         return False
 
 def download_kenney(root,index):
-    report=[]
-    for slug,title,category in KENNEY:
-        page=f"https://kenney.nl/assets/{slug}"
-        url=f"https://kenney.nl/media/pages/assets/{slug}/download"
-        row={"id":"kenney-"+slug,"title":title,"provider":"Kenney","category":category,"source_page":page,"download_url":url,"license":CC0}
-        try:
-            if not verify_kenney_license(page):
-                row.update(status="skipped",reason="official page CC0 marker could not be verified")
-            else:
-                blob,_=request_bytes(url,timeout=90,limit=MAX_KENNEY_ZIP)
-                if not blob.startswith(b"PK"): raise RuntimeError("official download endpoint did not return ZIP bytes")
-                dest=root/"third-party/kenney"/slug
-                n,total=safe_extract(blob,dest)
-                if n<1: raise RuntimeError("no allowed media files found in ZIP")
-                write_text(dest/"SOURCE_AND_LICENSE.md",f"# {title} — Kenney\n\nSource: {page}\nLicense: CC0 1.0 Universal — {CC0_URL}\nOfficial page license marker was checked at build time. The source ZIP passed an integrity test before extraction. Keep source credits or license files distributed within this pack.\n")
-                row.update(status="downloaded",file_count=n,unpacked_bytes=total,archive_sha256=hashlib.sha256(blob).hexdigest())
-                for f in dest.rglob("*"):
-                    if f.is_file():
-                        index.append({"id":f"kenney-{slug}-{f.relative_to(dest).as_posix()}","path":f.relative_to(root).as_posix(),"type":"kenney-cc0-pack-file","provider":"Kenney","source_page":page,"license":CC0,"license_url":CC0_URL,"size_bytes":f.stat().st_size,"sha256":sha256_path(f),"redistributable":True})
-            print(f"[Kenney] {row.get('status')}: {slug}"+(f" ({row.get('file_count')} files)" if row.get('file_count') else f" — {row.get('reason','')}"))
-        except Exception as e:
-            row.update(status="failed",reason=str(e)); print("[Kenney] failed:",slug,str(e))
-        report.append(row); time.sleep(.25)
-    return report
+    return [{
+        "id":"kenney-official-packs",
+        "provider":"Kenney",
+        "status":"source_only",
+        "reason":"Official CC0 packs are linked in sources.json, but the current website uses a browser-driven download step. CI will not guess an undocumented ZIP URL.",
+        "source_page":"https://kenney.nl/assets"
+    }]
+
 
 def choose_poly_file(tree,kind):
     if not isinstance(tree,dict): return None
@@ -551,60 +535,189 @@ def choose_poly_file(tree,kind):
             for fmt in ("hdr","exr","jpg"):
                 f=fmts.get(fmt) if isinstance(fmts,dict) else None
                 if isinstance(f,dict) and f.get("url"): return f
-        for fmts in block.values() if isinstance(block,dict) else []:
-            if isinstance(fmts,dict):
-                for f in fmts.values():
-                    if isinstance(f,dict) and f.get("url"): return f
         return None
-    for fmt in ("gltf","blend","fbx","usd"):
-        block=tree.get(fmt,{})
-        if not isinstance(block,dict): continue
-        for res in ("1k","2k","4k","8k","16k","32k"):
-            fmts=block.get(res,{})
-            f=fmts.get(fmt) if isinstance(fmts,dict) else None
-            if isinstance(f,dict) and f.get("url"): return f
-        for fmts in block.values():
-            if isinstance(fmts,dict):
-                f=fmts.get(fmt)
+    if kind=="models":
+        # Prefer a Blender scene package and download its listed dependencies too.
+        for fmt in ("blend","gltf","fbx","usd"):
+            block=tree.get(fmt,{})
+            if not isinstance(block,dict): continue
+            for res in ("1k","2k","4k","8k","16k","32k"):
+                fmts=block.get(res,{})
+                f=fmts.get(fmt) if isinstance(fmts,dict) else None
                 if isinstance(f,dict) and f.get("url"): return f
+        return None
     return None
+
+def choose_poly_texture_selection(tree):
+    selected=[]
+    for channel in ("Diffuse","nor_gl","nor_dx","rough","ao","disp","bump","metal"):
+        block=tree.get(channel) if isinstance(tree,dict) else None
+        if not isinstance(block,dict): continue
+        item=None
+        for res in ("1k","2k","4k","8k"):
+            fmts=block.get(res,{})
+            if not isinstance(fmts,dict): continue
+            for fmt in ("jpg","png","exr"):
+                candidate=fmts.get(fmt)
+                if isinstance(candidate,dict) and candidate.get("url"):
+                    item=candidate
+                    break
+            if item: break
+        if item and item.get("url") not in {x.get("url") for x in selected}:
+            selected.append(item)
+    return selected[:6]
 
 def download_polyhaven(root,index):
     report=[]
-    for kind,limit in [("hdris",3),("models",3)]:
+    counts={"hdris":6,"models":8,"textures":10}
+    dependency_cap=8*1024*1024
+    for kind,limit in counts.items():
         try:
-            data=request_json(f"https://api.polyhaven.com/assets?type={kind}")
+            data=request_json(f"https://api.polyhaven.com/assets?type={kind}",timeout=35)
             entries=[(k,v) for k,v in data.items() if isinstance(v,dict)]
             entries.sort(key=lambda kv:int(kv[1].get("download_count",0) or 0),reverse=True)
             chosen=[]; seen=set()
             for asset_id,meta in entries:
-                cat=str(meta.get("category","")).split("/")[0] or "other"
-                if cat in seen and len(chosen)<limit-1: continue
+                categories=meta.get("categories") if kind=="textures" else [meta.get("category","")]
+                if isinstance(categories,str): categories=[categories]
+                cat=str((categories or [meta.get("category","")])[0]).split("/")[0] or "other"
+                if cat in seen and len(chosen)<limit-2: continue
                 chosen.append((asset_id,meta)); seen.add(cat)
                 if len(chosen)>=limit: break
             for asset_id,meta in chosen:
-                row={"id":"polyhaven-"+asset_id,"title":meta.get("name",asset_id),"provider":"Poly Haven","source_page":f"https://polyhaven.com/a/{asset_id}","license":CC0,"license_url":"https://polyhaven.com/license","category":meta.get("category",kind)}
+                row={"id":"polyhaven-"+asset_id,"title":meta.get("name",asset_id),"provider":"Poly Haven",
+                     "source_page":f"https://polyhaven.com/a/{asset_id}","license":CC0,
+                     "license_url":"https://polyhaven.com/license","category":meta.get("category",kind)}
                 try:
-                    tree=request_json(f"https://api.polyhaven.com/files/{urllib.parse.quote(asset_id)}")
-                    fileobj=choose_poly_file(tree,kind)
-                    if not fileobj: raise RuntimeError("no suitable direct file in API response")
-                    url=fileobj["url"]; blob,ctype=request_bytes(url,timeout=90,limit=MAX_POLY_FILE)
-                    name=Path(urllib.parse.urlparse(url).path).name or (asset_id+(".hdr" if kind=="hdris" else ".zip"))
-                    if Path(name).suffix.lower() not in ALLOWED: name += ".zip"
-                    target=root/"third-party/polyhaven"/kind/(slugify(asset_id)+"-"+slugify(name))
+                    tree=request_json(f"https://api.polyhaven.com/files/{urllib.parse.quote(asset_id)}",timeout=35)
+                    downloaded=[]
+                    if kind=="textures":
+                        file_objects=choose_poly_texture_selection(tree)
+                        if not file_objects: raise RuntimeError("no supported PBR maps returned by official API")
+                        pack_dir=root/"third-party/polyhaven"/"textures"/slugify(asset_id)
+                        for fo in file_objects:
+                            url=fo["url"]
+                            try:
+                                blob,ctype=request_bytes(url,timeout=35,limit=dependency_cap)
+                                name=Path(urllib.parse.urlparse(url).path).name
+                                if Path(name).suffix.lower() not in ALLOWED: continue
+                                target=pack_dir/name
+                                target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                                digest=sha256_path(target)
+                                entry={"id":f"polyhaven-{asset_id}-{slugify(name)}","path":target.relative_to(root).as_posix(),
+                                       "type":"polyhaven-pbr-map","title":name,"parent_asset_id":"polyhaven-"+asset_id,
+                                       "category":row["category"],"source_page":row["source_page"],"license":CC0,
+                                       "license_url":"https://polyhaven.com/license","size_bytes":len(blob),
+                                       "sha256":digest,"redistributable":True}
+                                index.append(entry); downloaded.append(entry)
+                            except Exception as dep_exc:
+                                row.setdefault("dependency_failures",[]).append({"url":url,"reason":str(dep_exc)})
+                        if not downloaded: raise RuntimeError("no PBR map could be downloaded")
+                    else:
+                        fileobj=choose_poly_file(tree,kind)
+                        if not fileobj: raise RuntimeError("no suitable direct file in API response")
+                        url=fileobj["url"]; blob,ctype=request_bytes(url,timeout=70,limit=MAX_POLY_FILE)
+                        name=Path(urllib.parse.urlparse(url).path).name or (asset_id+(".hdr" if kind=="hdris" else ".blend"))
+                        if Path(name).suffix.lower() not in ALLOWED: name += ".bin"
+                        pack_dir=root/"third-party/polyhaven"/kind/slugify(asset_id)
+                        pack_dir.mkdir(parents=True,exist_ok=True)
+                        target=pack_dir/name; target.write_bytes(blob); digest=sha256_path(target)
+                        entry={"id":"polyhaven-"+asset_id,"path":target.relative_to(root).as_posix(),
+                               "type":"polyhaven-"+kind,"title":row["title"],"category":row["category"],
+                               "source_page":row["source_page"],"license":CC0,"license_url":"https://polyhaven.com/license",
+                               "size_bytes":len(blob),"sha256":digest,"redistributable":True,"file_url":url}
+                        index.append(entry); downloaded.append(entry)
+                        for relpath,dep in (fileobj.get("include") or {}).items():
+                            try:
+                                rel=PurePosixPath(str(relpath).replace("\\\\","/"))
+                                ext=Path(rel.name).suffix.lower()
+                                if rel.is_absolute() or ".." in rel.parts or ext not in ALLOWED or ext in DENIED: continue
+                                dep_url=dep.get("url") if isinstance(dep,dict) else None
+                                if not dep_url: continue
+                                if int(dep.get("size",0) or 0)>dependency_cap: continue
+                                dep_blob,dep_ctype=request_bytes(dep_url,timeout=35,limit=dependency_cap)
+                                dep_path=(pack_dir/Path(*rel.parts)).resolve()
+                                if pack_dir.resolve() not in dep_path.parents: raise RuntimeError("unsafe dependency path")
+                                dep_path.parent.mkdir(parents=True,exist_ok=True); dep_path.write_bytes(dep_blob)
+                                dep_sha=sha256_path(dep_path)
+                                index.append({"id":"polyhaven-"+asset_id+"-dependency-"+slugify(rel.as_posix()),
+                                              "path":dep_path.relative_to(root).as_posix(),"type":"polyhaven-model-dependency",
+                                              "parent_asset_id":"polyhaven-"+asset_id,"source_page":row["source_page"],
+                                              "license":CC0,"license_url":"https://polyhaven.com/license",
+                                              "size_bytes":len(dep_blob),"sha256":dep_sha,"redistributable":True})
+                                row["dependencies_downloaded"]=row.get("dependencies_downloaded",0)+1
+                            except Exception as dep_exc:
+                                row.setdefault("dependency_failures",[]).append({"path":str(relpath),"reason":str(dep_exc)})
+                    row.update(status="downloaded",path=downloaded[0]["path"],downloaded_files=len(downloaded),
+                               size_bytes=sum(x.get("size_bytes",0) for x in downloaded))
+                    print("[Poly Haven] OK:",asset_id,kind,len(downloaded),"file(s)")
+                except Exception as exc:
+                    row.update(status="failed",reason=str(exc)); print("[Poly Haven] failed:",asset_id,str(exc))
+                report.append(row); time.sleep(.35)
+        except Exception as exc:
+            report.append({"id":"polyhaven-"+kind,"provider":"Poly Haven","status":"failed","reason":str(exc),"source_page":"https://polyhaven.com/license"})
+            print("[Poly Haven] API unavailable:",kind,str(exc))
+    write_text(root/"third-party/polyhaven/POWERED-BY-POLY-HAVEN.md",
+        "# Poly Haven credit\n\nAssets in this folder are CC0. When this library uses the live public API, its tools should make clear the assets came from Poly Haven. Sources: https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md\n")
+    return report
+
+def download_met_open_access(root,index):
+    report=[]; total=0; cap=24
+    queries=[
+        ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
+        ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
+        ("food","still life fruit"),("textiles","textile pattern"),("instruments","musical instrument"),
+        ("mythology","mythological painting"),("fashion","historical costume"),("science","scientific instrument")
+    ]
+    seen=set()
+    for category,q in queries:
+        if total>=cap: break
+        search_url="https://collectionapi.metmuseum.org/public/collection/v1.1/search?"+urllib.parse.urlencode({
+            "isPublicDomain":"true","hasImages":"true","q":q,"limit":14,"offset":0})
+        try:
+            response=request_json(search_url,timeout=20)
+            for object_id in response.get("objectIDs") or []:
+                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=2: break
+                if object_id in seen: continue
+                seen.add(object_id)
+                try:
+                    obj=request_json(f"https://collectionapi.metmuseum.org/public/collection/v1/objects/{int(object_id)}",timeout=18)
+                    if obj.get("isPublicDomain") is not True: continue
+                    image_url=obj.get("primaryImageSmall") or obj.get("primaryImage")
+                    if not isinstance(image_url,str) or not image_url.startswith("https://images.metmuseum.org/"): continue
+                    blob,ctype=request_bytes(image_url,timeout=22,limit=MAX_MEDIA_FILE)
+                    if not ctype.lower().startswith("image/") or len(blob)<2048:
+                        raise RuntimeError("URL did not return a usable image")
+                    ext=Path(urllib.parse.urlparse(image_url).path).suffix.lower()
+                    if ext not in {".jpg",".jpeg",".png",".webp"}:
+                        ext={ "image/jpeg":".jpg","image/png":".png","image/webp":".webp"}.get(ctype.split(";")[0].lower(),".jpg")
+                    title=str(obj.get("title") or f"Met object {object_id}")
+                    filename=f"{category}-{slugify(title)[:44]}-{int(object_id)}{ext}"
+                    target=root/"third-party/met-open-access"/filename
                     target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
                     digest=sha256_path(target)
-                    row.update(status="downloaded",path=target.relative_to(root).as_posix(),size_bytes=len(blob),sha256=digest,file_url=url)
-                    index.append({"id":row["id"],"path":row["path"],"type":"polyhaven-"+kind,"title":row["title"],"category":row["category"],"source_page":row["source_page"],"license":CC0,"license_url":"https://polyhaven.com/license","size_bytes":len(blob),"sha256":digest,"redistributable":True})
-                    print("[Poly Haven] OK:",asset_id,len(blob))
-                except Exception as e:
-                    row.update(status="failed",reason=str(e)); print("[Poly Haven] failed:",asset_id,str(e))
-                report.append(row); time.sleep(.5)
-        except Exception as e:
-            row={"id":"polyhaven-"+kind,"provider":"Poly Haven","status":"failed","reason":str(e),"source_page":"https://polyhaven.com/license"}
-            report.append(row); print("[Poly Haven] API unavailable:",str(e))
-    write_text(root/"third-party/polyhaven/POWERED-BY-POLY-HAVEN.md","# Poly Haven credit\n\nAssets in this folder are CC0. When the live public API is used to build an application or product, Poly Haven asks API users to include a small “Powered by Poly Haven” credit. Sources: https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md\n")
+                    object_page=obj.get("objectURL") or f"https://www.metmuseum.org/art/collection/search/{int(object_id)}"
+                    entry={"id":f"met-oa-{int(object_id)}","path":target.relative_to(root).as_posix(),"type":"met-open-access-image",
+                           "category":category,"title":title,"artist":obj.get("artistDisplayName"),"date":obj.get("objectDate"),
+                           "department":obj.get("department"),"medium":obj.get("medium"),"credit_line":obj.get("creditLine"),
+                           "source_page":object_page,"image_url":image_url,"license":CC0,
+                           "license_url":"https://www.metmuseum.org/about-the-met/policies-and-documents/open-access",
+                           "license_code_url":CC0_URL,"size_bytes":len(blob),"sha256":digest,"redistributable":True}
+                    index.append(entry); total+=1
+                    report.append({"id":entry["id"],"status":"downloaded","category":category,"path":entry["path"],
+                                   "title":title,"source_page":object_page,"size_bytes":len(blob),"sha256":digest,"license":CC0})
+                    print("[The Met Open Access] OK:",category,title[:52],len(blob))
+                except Exception as item_exc:
+                    report.append({"id":"met-"+str(object_id),"status":"failed","category":category,"reason":str(item_exc)})
+                    print("[The Met Open Access] item failed:",object_id,str(item_exc))
+                time.sleep(.15)
+        except Exception as exc:
+            report.append({"id":"met-"+category,"status":"failed","category":category,"reason":str(exc),
+                           "source_page":"https://www.metmuseum.org/hubs/open-access"})
+            print("[The Met Open Access] query failed:",q,str(exc))
+        time.sleep(.2)
     return report
+
 
 def openverse_extension(url,ctype,kind,item):
     ext=Path(urllib.parse.urlparse(url).path).suffix.lower()
@@ -660,6 +773,7 @@ def main():
     print("[Originals] generated",len(index),"SVG assets")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
+    met_report=download_met_open_access(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -676,8 +790,8 @@ def main():
     for path in sorted(STAGE.rglob("*")):
         if path.is_file() and path.name not in {"ASSET_INDEX.json","SHA256SUMS.txt"}:
             digest_lines.append(f"{sha256_path(path)}  {path.relative_to(STAGE).as_posix()}")
-    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_files_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
-    index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"CC0-only for automatic third-party bundling; original assets are CC0; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"openverse_downloads":openverse_report,"assets":index}
+    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),"met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
+    index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"CC0-only for automatic third-party bundling; original assets are CC0; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"met_open_access_downloads":met_report,"openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=30 and len(OVERLAYS)>=30 and len(ICONS)>=50 and len(INFO)>=20
