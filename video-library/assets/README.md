@@ -20,12 +20,16 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - Original vector background library across documentary, science, news, history, travel, nature, gaming, product, food, finance and narrative genres.
 - Transparent motion-graphics overlays / VFX.
 - Reusable icon SVGs and infographic / title / lower-third templates.
-- Curated Kenney CC0 packs (2D sprites, 3D props/environments, VFX and audio).
-- Eligible Openverse **CC0-only** image/audio downloads, with each item's creator, source page, license URL, file hash and size recorded.
-- Poly Haven CC0 environment/model downloads when the live API returns a valid supported file; failures are recorded rather than silently misrepresented.
+- Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
+- Up to 24 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
+- Up to 30 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
+- Poly Haven HDRIs, Blender models with available dependencies, and complete sets of PBR texture maps (base color/diffuse, normal, roughness, AO, displacement where available); item/source metadata and SHA-256 are retained.
+- 64 original procedural sound-effect WAVs for UI, foley-like beats, ambience, transitions, impacts, sci-fi and emotional punctuation. These are synthesized by code, not downloaded recordings.
+- `ASSET_CATALOG.html` — searchable offline catalog with previews/audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
 
-Large binary assets are shipped as a GitHub Release asset, not ordinary Git blobs. The source code, catalog, generated-original SVG source templates and selection rules remain versioned here.
+Large binary assets are shipped as a GitHub Release asset, not ordinary Git blobs. Open the [builds and downloadable releases](https://github.com/Nolane-x/video/releases) and download `video-asset-library.zip`; open `ASSET_CATALOG.html` after extraction to browse offline. Run metadata/checksum reports are also attached to each Actions run for 30 days.
 
 ## Usage
 
