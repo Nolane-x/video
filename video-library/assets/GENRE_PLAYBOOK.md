@@ -1,0 +1,30 @@
+# Genre-to-asset playbook
+
+The resource library is a toolbox, not a fixed art style. The story's intended genre decides the visual language; only then should shots choose assets.
+
+| Genre / use case | Starting resources | Visual grammar to prefer |
+|---|---|---|
+| Cinematic narrative / self-improvement | Rooftop, city-rain, bedroom/studio, forest-mist, night overlays, warm practical lights, props | Character acting, meaningful foreground/background, motivated camera, deliberate negative space |
+| Documentary / biography | Museum, newsroom, paper/map textures, photo/film overlays, timeline cards, archival source links | Evidence-led chronology, chapter cards, maps, period-specific imagery only after fact-checking |
+| Science / education | Laboratory, blueprint grid, atom/DNA/microscope icons, equation card, diagrams and chart grids | Clear concept progression, labeled diagrams, visual metaphors that do not misstate science |
+| AI / technology | Server room, cyber-security/network background, chip/robot/server/cloud icons, data nodes, terminal overlays | Real system diagrams, code/data inserts, layered depth; avoid generic glowing HUD on every shot |
+| News / current affairs | Newsroom, map callouts, ticker/lower-thirds, source cards, chart/quote templates | Date-stamped facts, visible source citations, restrained graphics, no fabricated maps or data |
+| History / archaeology | Museum, worn-paper texture, map routes, ruins / columns, timeline and comparison templates | Clearly mark reconstructions; do not pass invented illustrations off as documentary evidence |
+| Travel / places | Mountain dawn, beach sunset, underpass/city, compass/globe/plane icons, route template | Establishing shots and transitions between distinct locations; prefer genuine licensed footage for factual places |
+| Nature / wildlife | Forest-mist, mountain, beach, underwater, leaf/tree/sun/water icons, fog/rain/snow overlays | Natural color/light and scale; use source footage or verified photography for species facts |
+| Business / finance | Finance dashboard, newsroom, office, charts, money/wallet/graph icons, statistic templates | Accurate scales and units, visible data sources, minimal decoration |
+| Product / marketing | Product stage, studio backgrounds, UI pack, typography frames, light masks | Product truth first; clean product lighting, legible proof points and non-deceptive claims |
+| Food / cooking | Food studio, kitchen, ingredients/icons, timer/recipe cards | Ingredient/step close-ups and pacing matched to actions; never invent health claims |
+| Gaming / fantasy / sci-fi | Gaming arena, space, modular space, castle/food/nature kits, particles, audio packs | Distinct worlds/palettes by location, practical compositing and sound motifs |
+| Health / medicine | Medical corridor, lab and microscope/flask icons, simple anatomy/science diagrams | Use authoritative medical sources; label illustrative diagrams and avoid misleading patient imagery |
+| Sports / fitness | Arena/gym staging, line/charts/timer/trophy icons, speed/impact overlays | Real action beats and readable motion; prefer actual permitted footage when events are factual |
+| Infographics / explainers | Icon SVGs, charts, process, flow, funnel, timeline, quote, map and comparison templates | One idea per visual, consistent scales, accessible contrast and read time |
+
+## Practical selection rules
+
+- Do not reuse the same establishing background two shots in a row unless the location intentionally persists.
+- Try to use at least four distinct shot families in a one-minute segment: environment wide, action/prop insert, face/reaction, diagram/data insert, or real licensed footage.
+- Choose an asset because it explains the current beat, not because it looks impressive.
+- When using third-party factual media, store the exact source page, creator, license, relevant download date and file checksum. Keep the attribution text adjacent to the asset.
+- "Free to use" does **not** always mean "free to redistribute as a raw file." Only the dedicated release builder's CC0-allowed lane is auto-bundled.
+- If an external asset's license changes, that is not retroactively a reason to strip its provenance. Pin the exact download metadata with the delivered version.
