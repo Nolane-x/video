@@ -486,6 +486,9 @@ def generate_originals(root,index):
         path=root/"originals/infographics"/(asset_id+".svg")
         write_text(path,infographic_svg(asset_id,title,i))
         index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-infographic-template","title":title,"license":CC0,"license_url":CC0_URL,"redistributable":True,"warning":"Replace placeholders and verify all data and sources before publishing."})
+    from generate_sfx_library import generate_original_audio
+    audio_count=generate_original_audio(root,index,CC0_URL)
+    print("[Original SFX] generated",audio_count,"WAV files")
 
 def safe_extract(blob,target,max_bytes=350*1024*1024):
     import io
@@ -730,22 +733,21 @@ def openverse_extension(url,ctype,kind,item):
     return "."+ft if "."+ft in allowed else ""
 
 def download_openverse(root,index):
-    report=[]; total=0; cap=42
-    queries=[("image","architecture","architecture interior",4),("image","mountains","mountain landscape",4),("image","science","science laboratory",4),("image","space","galaxy nebula",4),("image","history","historical map",4),("image","nature","forest wildlife",4),("image","food","food ingredients",4),("audio","rain","rain ambience",3),("audio","forest","forest birds ambience",3),("audio","ocean","ocean waves",3),("audio","foley","footsteps foley",3),("audio","technology","sci fi sound effect",3)]
+    # A small CC0-only fallback. The upstream host has intermittent tunnel timeouts in CI,
+    # so requests are intentionally short and failures are recorded rather than retried for minutes.
+    report=[]; total=0
+    queries=[("image","nature","forest landscape",2),("image","science","science laboratory",2),("audio","rain","rain ambience",2)]
     for kind,category,q,limit in queries:
-        if total>=cap: break
         endpoint=f"https://api.openverse.org/v1/{'images' if kind=='image' else 'audio'}/"
         url=endpoint+"?"+urllib.parse.urlencode({"q":q,"license":"cc0","page_size":limit,"page":1})
         try:
-            data=request_json(url)
+            data=request_json(url,timeout=10)
             for item in data.get("results",[]):
-                if total>=cap: break
-                if str(item.get("license","")).lower()!="cc0":
-                    report.append({"id":item.get("id"),"status":"skipped","reason":"not exact CC0"}); continue
+                if str(item.get("license","")).lower()!="cc0": continue
                 media_url=str(item.get("url") or "")
                 if not media_url.startswith("https://"): continue
                 try:
-                    blob,ctype=request_bytes(media_url,timeout=50,limit=MAX_MEDIA_FILE)
+                    blob,ctype=request_bytes(media_url,timeout=15,limit=MAX_MEDIA_FILE)
                     ext=openverse_extension(media_url,ctype,kind,item)
                     if not ext: raise RuntimeError("unsupported file type: "+ctype)
                     title=str(item.get("title") or item.get("id") or category)
@@ -753,17 +755,22 @@ def download_openverse(root,index):
                     path=root/"third-party/openverse"/("images" if kind=="image" else "audio")/f"{category}-{slugify(title)[:36]}-{ident}{ext}"
                     path.parent.mkdir(parents=True,exist_ok=True); path.write_bytes(blob)
                     digest=sha256_path(path)
-                    entry={"id":"openverse-"+kind+"-"+ident,"path":path.relative_to(root).as_posix(),"type":"openverse-"+kind,"title":title,"creator":item.get("creator"),"provider":item.get("provider"),"source":item.get("source"),"source_url":media_url,"source_landing_url":item.get("foreign_landing_url") or item.get("detail_url") or media_url,"license":"CC0","license_version":item.get("license_version"),"license_url":item.get("license_url") or CC0_URL,"attribution_text":item.get("attribution"),"query":q,"size_bytes":len(blob),"sha256":digest,"redistributable":True}
-                    index.append(entry); total+=1; report.append({"id":entry["id"],"status":"downloaded","path":entry["path"],"license":"CC0","size_bytes":len(blob)})
+                    entry={"id":"openverse-"+kind+"-"+ident,"path":path.relative_to(root).as_posix(),"type":"openverse-"+kind,
+                           "title":title,"creator":item.get("creator"),"provider":item.get("provider"),"source":item.get("source"),
+                           "source_url":media_url,"source_landing_url":item.get("foreign_landing_url") or item.get("detail_url") or media_url,
+                           "license":"CC0","license_version":item.get("license_version"),"license_url":item.get("license_url") or CC0_URL,
+                           "attribution_text":item.get("attribution"),"query":q,"size_bytes":len(blob),"sha256":digest,"redistributable":True}
+                    index.append(entry); total+=1
+                    report.append({"id":entry["id"],"status":"downloaded","path":entry["path"],"license":"CC0","size_bytes":len(blob)})
                     print("[Openverse] OK:",kind,category,title[:48],len(blob))
-                except Exception as e:
-                    report.append({"id":item.get("id"),"status":"failed","reason":str(e),"source_url":media_url})
-                    print("[Openverse] failed:",q,str(e))
-            time.sleep(1.1)
-        except Exception as e:
-            report.append({"id":"openverse-"+category,"status":"failed","reason":str(e),"query":q})
-            print("[Openverse] query failed:",q,str(e)); time.sleep(1.1)
+                except Exception as item_exc:
+                    report.append({"id":item.get("id"),"status":"failed","reason":str(item_exc),"source_url":media_url})
+            time.sleep(.2)
+        except Exception as exc:
+            report.append({"id":"openverse-"+category,"status":"failed","reason":str(exc),"query":q})
+            print("[Openverse] quick attempt failed:",q,str(exc))
     return report
+
 
 def main():
     if STAGE.exists(): shutil.rmtree(STAGE)
@@ -790,7 +797,7 @@ def main():
     for path in sorted(STAGE.rglob("*")):
         if path.is_file() and path.name not in {"ASSET_INDEX.json","SHA256SUMS.txt"}:
             digest_lines.append(f"{sha256_path(path)}  {path.relative_to(STAGE).as_posix()}")
-    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),"met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
+    summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),"met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"CC0-only for automatic third-party bundling; original assets are CC0; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"met_open_access_downloads":met_report,"openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
