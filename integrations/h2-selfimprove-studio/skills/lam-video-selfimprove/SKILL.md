@@ -17,6 +17,14 @@ Toàn bộ hình **vẽ bằng code** (canvas, Chromium chạy ngầm chụp t�
 - `references/am-thanh.md`: nhạc, SFX.
 - `references/kiem-tra.md`: xem trước, xuất bản cuối, danh sách kiểm tra.
 
+## Thư viện tài nguyên mở rộng — không ép mọi video cùng một phong cách
+
+- Danh mục nguồn: `video-library/assets/README.md`, `sources.json`, `GENRE_PLAYBOOK.md`.
+- Tải gói nhị phân mới nhất tại [GitHub Releases](https://github.com/Nolane-x/video/releases), giải nén `video-asset-library.zip`, rồi mở `ASSET_CATALOG.html` để tìm, xem trước, nghe SFX và truy ngược giấy phép ngay cả khi offline.
+- Trong gói có nền SVG, lớp phủ trong suốt, icon, template infographic, ảnh Open Access/Public Domain, HDRI, mô hình Blender, texture PBR và SFX WAV tổng hợp. Dùng `ASSET_INDEX.json` và `SOURCES_AND_LICENSES.md` để kiểm chứng nguồn; không giả định một liên kết nguồn đồng nghĩa với quyền phân phối tệp gốc.
+- Với video self-improvement, vẫn giữ hệ nhân vật của `dem` làm ngôn ngữ chính; chỉ lấy ảnh/3D/texture làm chi tiết có chủ đích nếu thật sự giúp câu chuyện. Với chủ đề mới ngoài thể loại này, **đọc GENRE_PLAYBOOK trước rồi chọn ngôn ngữ hình ảnh, tỷ lệ khung, pack, typography, nhịp cắt, âm thanh và loại cảnh riêng** — không tái sử dụng silhouette nhân vật, nền tối, bóng cám dỗ và chữ viết tay chỉ vì có sẵn.
+- Trong một phút video, kết hợp nhiều họ cảnh (toàn cảnh môi trường, cận cảnh đạo cụ, hành động/biểu cảm, ảnh tư liệu, biểu đồ/diagram, typography và shot chuyển cảnh). Tránh lặp một nền quá hai cảnh liên tục nếu câu chuyện không chủ ý giữ cùng địa điểm.
+
 ## Luật vàng
 1. **Giữ nguyên chữ và thời lượng trong file 01.** Muốn đổi chữ thì hỏi người dùng.
 2. **Dùng mẫu cảnh, không viết code từng cảnh.** Mỗi cảnh là `tpl` + `args` trong `story/shots.json`. Chỉ cảnh đặc biệt mới viết code (`scenes/shots/<id>.js`).
