@@ -106,6 +106,25 @@ jobs:
           assert abs(float(story["shots"][-1]["start"]) - (duration - 6.0)) < 0.01
           story["shots"][-1]["end"] = duration
           story["duration"] = duration
+          # Regression gate on the FINAL merged storyboard (shot-overrides.json replaces tuner args).
+          by_id = {s["id"]: s for s in story["shots"]}
+          b27_texts = {tx.get("t"): tx for tx in by_id["b27"]["args"].get("texts", [])}
+          assert "just one more scroll." in b27_texts and "But it sounded smaller now." in b27_texts
+          whisper = b27_texts["just one more scroll."]
+          closing = b27_texts["But it sounded smaller now."]
+          assert whisper["dur"] >= 2.85 and 0.40 <= whisper["y"] <= 0.47 and 0.76 <= whisper["x"] <= 0.84, "B27 whisper must be fully readable below the calendar in the right safe lane"
+          assert 0.18 <= closing["x"] <= 0.25 and 0.44 <= closing["y"] <= 0.50 and closing["maxW"] <= 0.24 and closing["size"] >= 48, "B27 closing narration must stay inside the left safe lane"
+          assert float(whisper["at"]) + float(whisper["dur"]) <= float(closing["at"]) - 0.05, "B27 whisper and closing narration must not overlap"
+          for shot in story["shots"]:
+              shot_duration = float(shot["end"]) - float(shot["start"])
+              for tx in shot.get("args", {}).get("texts", []):
+                  if tx.get("kind") != "tempt":
+                      continue
+                  at = float(tx.get("at", 0.3))
+                  dur = float(tx.get("dur", shot_duration - at - 0.1))
+                  assert dur >= 2.5 and at >= 0 and at + dur <= shot_duration - 0.1, f"{shot['id']} temptation caption timing invalid: {tx.get('t')!r}"
+                  reveal = max(0.35, min(len(str(tx.get("t", ""))) / 16, dur * 0.30))
+                  assert dur - reveal - float(tx.get("fo", 0.45)) >= 1.2, f"{shot['id']} temptation caption lacks 1.2 s fully readable time: {tx.get('t')!r}"
           # Preserve the approved script text while ensuring every overlay fits its shot.
           for shot in story["shots"]:
               shot_duration = float(shot["end"]) - float(shot["start"])
