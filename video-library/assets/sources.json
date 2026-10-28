@@ -17,10 +17,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/nature-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/nature-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "space-kit",
@@ -31,10 +30,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/space-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/space-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "modular-space-kit",
@@ -45,10 +43,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/modular-space-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/modular-space-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "furniture-kit",
@@ -59,10 +56,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/furniture-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/furniture-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "food-kit",
@@ -73,10 +69,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/food-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/food-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "building-kit",
@@ -87,10 +82,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/building-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/building-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "racing-kit",
@@ -101,10 +95,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/racing-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/racing-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "castle-kit",
@@ -115,10 +108,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/castle-kit",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/castle-kit/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-pack",
@@ -129,10 +121,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-pack",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-pack/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "pixel-ui-pack",
@@ -143,10 +134,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/pixel-ui-pack",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/pixel-ui-pack/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "particle-pack",
@@ -157,10 +147,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/particle-pack",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/particle-pack/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "light-masks",
@@ -171,10 +160,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/light-masks",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/light-masks/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "smoke-particles",
@@ -185,10 +173,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/smoke-particles",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/smoke-particles/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "foliage-sprites",
@@ -199,10 +186,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/foliage-sprites",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/foliage-sprites/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "impact-sounds",
@@ -213,10 +199,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/impact-sounds",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/impact-sounds/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "interface-sounds",
@@ -227,10 +212,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/interface-sounds",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/interface-sounds/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "digital-audio",
@@ -241,10 +225,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/digital-audio",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/digital-audio/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-audio",
@@ -255,10 +238,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-audio",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-audio/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "road-textures",
@@ -269,10 +251,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/road-textures",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/road-textures/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-pack-adventure",
@@ -283,10 +264,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-pack-adventure",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-pack-adventure/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-pack-sci-fi",
@@ -297,10 +277,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-pack-sci-fi",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-pack-sci-fi/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-pack-pixel-adventure",
@@ -311,10 +290,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-pack-pixel-adventure",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-pack-pixel-adventure/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "ui-pack-rpg-expansion",
@@ -325,10 +303,9 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/ui-pack-rpg-expansion",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/ui-pack-rpg-expansion/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "casino-audio",
@@ -339,14 +316,13 @@
       "license": "CC0-1.0",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "source_page": "https://kenney.nl/assets/casino-audio",
-      "download_endpoint": "https://kenney.nl/media/pages/assets/casino-audio/download",
       "verified_page_license": true,
-      "bundling": "auto",
-      "note": "Official Kenney asset page identifies this pack as CC0. The downloader keeps the page URL in the asset index; a failed download is recorded and never replaced with a guessed mirror."
+      "bundling": "source-only-until-documented-download-flow",
+      "note": "Official pages identify individual packs as CC0, but the current site uses a browser-driven Continue without donating download step. This repository does not guess a direct ZIP URL; use the official page link and keep the pack's included license/source note when acquired."
     },
     {
       "id": "polyhaven",
-      "title": "Poly Haven — HDRIs, textures and 3D models",
+      "title": "Poly Haven — HDRIs, PBR textures and 3D models",
       "provider": "Poly Haven",
       "kind": "3D asset library",
       "source_page": "https://polyhaven.com/",
@@ -355,7 +331,7 @@
       "license_url": "https://polyhaven.com/license",
       "verified_page_license": true,
       "bundling": "auto-when-live-api-download-is-valid",
-      "note": "Assets are CC0 and redistributable. The public API has separate terms and requires a small Powered by Poly Haven credit when an application builds on the API; preserve that credit in the generated bundle."
+      "note": "The official public API exposes separate asset kinds for hdris, models and textures. The build chooses compact HDRIs, complete Blender model files plus listed dependencies, and PBR channel maps. CC0 applies to the assets; live API use also requires clear source credit."
     },
     {
       "id": "ambientcg",
@@ -413,6 +389,21 @@
       "license": "Per font — commonly SIL Open Font License; verify the selected family",
       "bundling": "per-font-license-review",
       "note": "Keep the exact font license file with the font. Do not assume every family uses the same license."
+    },
+    {
+      "id": "met-open-access",
+      "title": "The Metropolitan Museum of Art Open Access",
+      "provider": "The Met",
+      "kind": "CC0 artwork images and object data",
+      "source_page": "https://www.metmuseum.org/hubs/open-access",
+      "api": "https://collectionapi.metmuseum.org/public/collection/v1.1/search",
+      "object_api": "https://collectionapi.metmuseum.org/public/collection/v1/objects/",
+      "license": "CC0-1.0",
+      "license_url": "https://www.metmuseum.org/about-the-met/policies-and-documents/open-access",
+      "license_code_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "auto-only-when-isPublicDomain-is-true",
+      "note": "The builder uses the current paginated v1.1 search endpoint and independently checks each object's isPublicDomain flag before downloading an image from images.metmuseum.org. Preserve the exact object page, title, artist and date. The Met notes third-party rights can still apply to some depicted subjects."
     }
   ]
 }
