@@ -15,7 +15,7 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
-ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
+ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
 KENNEY = [
@@ -57,7 +57,38 @@ PALETTES = [
 ("ancient-map",("#3b2b22","#806348","#ebc88e"),"map"),("sports-arena",("#172034","#33415f","#f6c36f"),"sports"),
 ("gaming-arcade",("#191326","#34234a","#ff65b8"),"gaming"),("desert-dusk",("#2c1b2b","#a25753","#ffd08e"),"desert"),
 ("snow-mountain",("#162538","#7c9faf","#e3f4f2"),"snow"),("horror-manor",("#0e1019","#252331","#c77865"),"horror"),
-("greenhouse",("#102820","#2a5945","#edcc8c"),"greenhouse"),("abstract-data",("#081323","#183254","#66c3ff"),"network")
+("greenhouse",("#102820","#2a5945","#edcc8c"),"greenhouse"),("abstract-data",("#081323","#183254","#66c3ff"),"network"),
+("city-rooftop-bluehour",("#101a2b","#354b6b","#ffb984"),"city"),
+("monsoon-city",("#111d2b","#344957","#8bd2dd"),"city"),
+("neon-alley",("#171025","#3b1c46","#ff62b8"),"city"),
+("coastal-cliffs",("#203b54","#7b9eae","#ffd29c"),"mountain"),
+("ocean-depths",("#031f3a","#075c79","#66d7db"),"underwater"),
+("volcanic-caldera",("#211522","#6a3438","#ff8f52"),"desert"),
+("tundra-aurora",("#10243b","#34536b","#9cf4e8"),"snow"),
+("botanical-conservatory",("#102c24","#2b694f","#e3d99a"),"greenhouse"),
+("orbital-lab",("#071a2a","#1b354c","#59e5d4"),"lab"),
+("science-observatory",("#070c25","#202b65","#b6a4ff"),"space"),
+("antique-library",("#2a2026","#51403d","#e5bd82"),"museum"),
+("silk-road-map",("#332719","#76583d","#f4d09a"),"map"),
+("rainforest-canopy",("#092c27","#1b5b48","#a6d89d"),"forest"),
+("modern-gallery",("#1c2028","#343c49","#d3dff2"),"museum"),
+("factory-at-dusk",("#1b2229","#3b464c","#ffb56e"),"factory"),
+("sports-court",("#101b32","#2f456b","#f7d47e"),"sports"),
+("concert-hall",("#171525","#342747","#e2a0ff"),"studio"),
+("subway-platform",("#141d29","#2e4352","#93dce4"),"metro"),
+("clinical-lab",("#102529","#294d50","#a4f5dc"),"lab"),
+("financial-night",("#0b1722","#203846","#6de0bd"),"finance"),
+("product-showcase-ivory",("#28292d","#4b4c50","#f6e9ce"),"product"),
+("culinary-night-market",("#2a1b1a","#684039","#ffbf6d"),"food"),
+("deep-space-nebula",("#07091d","#29265b","#ed8cff"),"space"),
+("frozen-lake",("#10253b","#557f98","#d7f9fb"),"snow"),
+("castle-ruins",("#201a28","#443746","#ddbc8b"),"castle"),
+("cyber-operations",("#071b24","#12404b","#54f0d9"),"cyber"),
+("airport-at-dawn",("#19283d","#5c7089","#ffca9b"),"metro"),
+("data-visualization",("#08172a","#193c5a","#73d8ff"),"network"),
+("village-evening",("#1d2831","#4e5660","#ffc589"),"city"),
+("mountain-storm",("#131e34","#465a72","#bfd5e4"),"mountain"),
+("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater")
 ]
 OVERLAYS = [
 ("film-grain","Fine film grain"),("scanlines","CRT scanlines"),("halftone","Halftone dots"),("light-leak","Warm/cool light leak"),
@@ -69,7 +100,17 @@ OVERLAYS = [
 ("paper-texture","Archival paper texture"),("vhs","Analog scan texture"),("embers","Floating embers"),
 ("map-graticule","Map graticule"),("confetti","Confetti"),("radar","Radar sweep"),("focus-frame","Camera focus frame"),
 ("flash-frame","Flash frame"),("film-burn","Film-burn wash"),("soft-fog","Atmospheric fog"),("rainbow-prism","Prism light"),
-("screen-reflection","Screen reflection bands"),("corner-vignette","Corner vignette"),("measurement-rulers","Measurement rulers")
+("screen-reflection","Screen reflection bands"),("corner-vignette","Corner vignette"),("measurement-rulers","Measurement rulers"),
+("cctv-timestamp","Documentary timestamp and camera ID"),("news-ticker","Broadcast ticker frame"),
+("comic-panels","Comic / storyboard panel grid"),("torn-paper","Ripped archival paper edge"),
+("lens-flare","Optical lens flare"),("blueprint-dimensions","Engineering dimension arrows"),
+("tracking-markers","Motion-tracking marker set"),("dust-scratches","Archival dust and scratch pass"),
+("glow-bloom","Soft highlight bloom"),("thermal-map","Thermal / false-color wash"),
+("tape-label","Archival tape label"),("split-screen-divider","Split-screen comparison divider"),
+("map-route","Route line and location markers"),("spectrum-bars","Audio spectrum bars"),
+("rain-on-glass","Rain-on-glass droplets"),("underwater-caustics","Underwater caustic light"),
+("film-frame-counter","Film frame counter"),("focus-pull","Focus-distance marks"),
+("caution-stripes","Caution / industrial stripe edge"),("vertical-safe-area","Vertical 9:16 safe-area guide")
 ]
 INFO = [
 ("title-card","Title / chapter card"),("lower-third","Lower third"),("stat-number","Big statistic"),("timeline","Horizontal timeline"),
@@ -77,7 +118,17 @@ INFO = [
 ("pros-cons","Pros and cons"),("bar-chart","Bar chart placeholder"),("line-chart","Line chart placeholder"),
 ("quote-card","Quote / key evidence"),("definition-card","Definition card"),("equation-card","Equation board"),
 ("map-callout","Map callout frame"),("funnel","Funnel stages"),("pyramid","Layered pyramid"),("decision-tree","Decision tree"),
-("ranked-list","Ranked list"),("recipe-steps","Recipe / procedure"),("chapter-divider","Chapter divider"),("source-card","Source / evidence card")
+("ranked-list","Ranked list"),("recipe-steps","Recipe / procedure"),("chapter-divider","Chapter divider"),("source-card","Source / evidence card"),
+("scatter-plot","Scatter plot / relationship"),("stacked-bar","Stacked bar / proportion"),
+("venn-diagram","Set overlap / Venn diagram"),("cycle-diagram","Circular cycle / feedback loop"),
+("gantt-chart","Schedule / Gantt timeline"),("roadmap","Product / project roadmap"),
+("budget-breakdown","Budget allocation"),("experiment-card","Experiment design and result"),
+("anatomy-label","Labeled anatomy / structure illustration"),("fact-check","Claim / evidence / verdict card"),
+("map-legend","Map legend and symbols"),("before-after","Before / after comparison"),
+("scorecard","KPI / evaluation scorecard"),("milestone-grid","Milestone grid"),
+("funnel-conversion","Conversion funnel"),("story-beat-board","Story beat board"),
+("shot-list","Shot list / coverage checklist"),("accessibility-checklist","Accessibility review"),
+("source-ledger","Source and citation ledger")
 ]
 # Original, standalone vector icons. The visual style is intentionally neutral and adaptable.
 ICONS = {
@@ -148,6 +199,43 @@ ICONS = {
 "paw":'<ellipse cx="32" cy="42" rx="15" ry="11"/><circle cx="15" cy="24" r="6"/><circle cx="28" cy="17" r="6"/><circle cx="42" cy="18" r="6"/><circle cx="53" cy="27" r="6"/>',
 "camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>'
 }
+
+
+// Additional purpose-built pictograms broaden the visual vocabulary without importing icon packs.
+ICONS.update({
+"satellite":'<rect x="24" y="24" width="16" height="16" rx="3"/><path d="M23 23L12 12M41 41L52 52M7 7L20 20M44 44L57 57M9 27L27 9M37 55L55 37"/>',
+"telescope":'<path d="M12 12L39 5L45 22L18 29Z"/><path d="M18 29L28 42M39 24L50 48M29 42L19 59M49 48L56 59M10 59H60"/>',
+"volcano":'<path d="M5 56L20 27L29 40L36 20L59 56Z"/><path d="M26 25Q20 17 27 8M36 18Q43 11 39 5M31 25L34 31M20 32L24 36"/>',
+"wave":'<path d="M4 25Q13 10 22 25T40 25T58 25M4 40Q13 25 22 40T40 40T58 40M4 54Q13 39 22 54T40 54T58 54"/>',
+"ship":'<path d="M7 38H57L48 53H17Z"/><path d="M16 38V20H31V38M34 38V11H45V38M8 58Q18 53 28 58T48 58T60 58"/>',
+"train":'<rect x="10" y="6" width="44" height="43" rx="8"/><path d="M18 16H46V30H18ZM20 49L13 58M44 49L51 58M15 38H49"/><circle cx="21" cy="39" r="2"/><circle cx="43" cy="39" r="2"/>',
+"bicycle":'<circle cx="15" cy="45" r="11"/><circle cx="49" cy="45" r="11"/><path d="M15 45L27 25L39 45H15L33 31H44M24 21H32M38 25H46"/>',
+"helmet":'<path d="M7 43A25 25 0 0 1 57 43H7Z"/><path d="M17 43V29M30 43V19M43 43V29M7 43H60"/>',
+"medal":'<circle cx="32" cy="37" r="17"/><path d="M21 6H43L40 22L32 29L24 22Z"/><path d="M32 28L36 35L44 36L38 42L39 50L32 46L25 50L26 42L20 36L28 35Z"/>',
+"flag":'<path d="M12 59V5M14 9H52L43 22L52 35H14"/>',
+"megaphone":'<path d="M8 26H22L51 12V50L22 36H8Z"/><path d="M20 36L26 54H37L31 41M55 24L61 21M55 38L61 41"/>',
+"package":'<path d="M7 20L32 7L57 20V47L32 60L7 47Z"/><path d="M7 20L32 34L57 20M32 34V60M20 13L45 27"/>',
+"shopping-bag":'<path d="M9 22H55L51 58H13Z"/><path d="M21 24V17A11 11 0 0 1 43 17V24"/>',
+"laptop":'<rect x="12" y="8" width="40" height="34" rx="3"/><path d="M5 49H59L53 57H11Z"/>',
+"code":'<path d="M23 18L9 32L23 46M41 18L55 32L41 46M36 12L28 52"/>',
+"terminal":'<rect x="6" y="9" width="52" height="46" rx="5"/><path d="M15 22L23 29L15 36M29 38H45M7 17H57"/>',
+"wrench":'<path d="M39 8A16 16 0 0 0 22 29L7 44A7 7 0 0 0 17 54L32 39A16 16 0 0 0 53 19L42 30L32 20Z"/>',
+"scales":'<path d="M32 8V55M18 55H46M13 19H51M32 13L13 19M32 13L51 19M13 19L5 36H21ZM51 19L43 36H59Z"/>',
+"gavel":'<path d="M16 11L29 24M23 5L35 17L25 27L13 15ZM33 28L47 42M40 22L52 34L42 44L30 32ZM7 56H47M23 46L31 54"/>',
+"recycle":'<path d="M26 9L35 9L42 21M42 21L33 21M42 21L47 13M48 31L54 40L48 49H36M36 49L41 42M36 49L44 55M24 49H13L7 39L13 29M13 29L22 29M13 29L13 38M17 21L23 11H34M34 11L30 18M34 11L38 18"/>',
+"thermometer":'<path d="M26 37V14A7 7 0 0 1 40 14V37A13 13 0 1 1 26 37Z"/><path d="M33 22V44"/>',
+"pulse":'<path d="M4 34H17L24 17L35 49L43 27L48 34H60"/>',
+"virus":'<circle cx="32" cy="32" r="15"/><path d="M32 6V17M32 47V58M6 32H17M47 32H58M14 14L22 22M42 42L50 50M14 50L22 42M42 22L50 14"/><circle cx="27" cy="28" r="2"/><circle cx="38" cy="36" r="2"/>',
+"map-route":'<path d="M7 13L23 7L41 14L57 8V51L41 57L23 50L7 57Z"/><path d="M23 7V50M41 14V57M14 39Q28 12 37 31T50 24"/><circle cx="14" cy="39" r="3"/><circle cx="50" cy="24" r="3"/>',
+"moon-stars":'<path d="M43 42A22 22 0 0 1 21 13A24 24 0 1 0 43 42Z"/><path d="M46 8L49 15L56 18L49 21L46 28L43 21L36 18L43 15ZM16 27L18 31L22 33L18 35L16 39L14 35L10 33L14 31Z"/>',
+"film-strip":'<rect x="6" y="7" width="52" height="50" rx="3"/><path d="M17 7V57M47 7V57M17 18H47M17 46H47"/>',
+"clapperboard":'<path d="M7 24H57V57H7Z"/><path d="M7 24L11 7H57L53 24Z"/><path d="M14 7L23 24M31 7L40 24M48 7L55 20"/>',
+"star":'<path d="M32 5L40 23L60 25L45 39L49 59L32 49L15 59L19 39L4 25L24 23Z"/>',
+"flame":'<path d="M33 5Q40 20 30 26Q35 13 21 12Q24 29 13 37Q5 48 17 56Q31 63 44 54Q58 43 47 29Q44 21 33 5Z"/><path d="M31 38Q38 45 31 53Q22 51 25 44Z"/>',
+"droplet":'<path d="M32 5C25 20 12 34 12 44A20 20 0 0 0 52 44C52 34 39 20 32 5Z"/><path d="M23 45Q25 52 32 52"/>',
+"puzzle":'<path d="M8 8H25A7 7 0 1 1 39 8H56V25A7 7 0 1 0 56 39V56H39A7 7 0 1 1 25 56H8V39A7 7 0 1 0 8 25Z"/>',
+"speech-bubble":'<path d="M7 11H57V43H33L19 56V43H7Z"/><path d="M16 22H48M16 31H40"/>'
+})
 
 def request_bytes(url, timeout=45, limit=None):
     req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"*/*"})
