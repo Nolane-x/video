@@ -417,6 +417,26 @@
       "verified_page_license": true,
       "bundling": "auto-only-on-file-level-cc0-or-public-domain",
       "note": "The builder queries file namespace 6, reads each file's extmetadata, filters out CC BY, CC BY-SA, NC, missing or ambiguous licenses, uses the item thumbnail only, and stores the source page, creator, license URL, date/title metadata and SHA-256. Public-domain content may still depict people, trademarks or other third-party rights."
+    },
+    {
+      "id": "kenney-github-cc0-starter-kits",
+      "title": "Kenney GitHub Starter Kits — CC0 Media Subset",
+      "provider": "Kenney / GitHub",
+      "kind": "2D sprites, 3D models, textures, VFX and sound-effect media",
+      "source_page": "https://github.com/KenneyNL",
+      "repositories": [
+        "https://github.com/KenneyNL/Starter-Kit-Racing",
+        "https://github.com/KenneyNL/Starter-Kit-3D-Platformer",
+        "https://github.com/KenneyNL/Starter-Kit-City-Builder",
+        "https://github.com/KenneyNL/Starter-Kit-Basic-Scene",
+        "https://github.com/KenneyNL/Starter-Kit-Match-3",
+        "https://github.com/KenneyNL/Starter-Kit-FPS"
+      ],
+      "license": "CC0-1.0 for media subset only; repo source code may have a separate software license",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bundling": "automated-after-readme-cc0-verification-and-media-extension-filter",
+      "verified_page_license": true,
+      "note": "The build reads the official README/LICENSE content from each downloaded GitHub archive and requires asset-related CC0 language before extracting approved media formats. Game scripts, executable/binary code and unrelated files are excluded. Each extracted file records the repository source, the evidence line and SHA-256. The main Kenney website packs not mirrored by these starter-kit repositories remain source-only because its downloader is browser-driven."
     }
   ]
 }
