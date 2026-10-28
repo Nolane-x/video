@@ -732,6 +732,75 @@ def openverse_extension(url,ctype,kind,item):
     ft=str(item.get("filetype") or "").lower()
     return "."+ft if "."+ft in allowed else ""
 
+
+def download_wikimedia_public_domain(root,index):
+    report=[]; total=0; cap=30; seen=set()
+    queries=[
+        ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
+        ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
+        ("ocean","ocean public domain filetype:bitmap"),("plants","plants botanical public domain filetype:bitmap"),
+        ("anatomy","human anatomy public domain illustration filetype:bitmap"),("science","physics diagram public domain filetype:bitmap"),
+        ("newspapers","historical newspaper public domain filetype:bitmap"),("food","fruit still life public domain filetype:bitmap"),
+        ("wildlife","wildlife public domain photo filetype:bitmap"),("satellite","satellite image public domain filetype:bitmap"),
+        ("landscape","landscape public domain photo filetype:bitmap"),("industry","industrial machinery public domain filetype:bitmap")
+    ]
+    for category,q in queries:
+        if total>=cap: break
+        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":12,
+                "prop":"imageinfo","iiprop":"url|extmetadata","iiurlwidth":1600}
+        url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
+        successes=0
+        try:
+            response=request_json(url,timeout=16)
+            pages=(response.get("query") or {}).get("pages") or {}
+            for page in pages.values():
+                if total>=cap or successes>=3: break
+                imageinfo=(page.get("imageinfo") or [{}])[0]
+                meta=imageinfo.get("extmetadata") or {}
+                short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
+                license_url=str((meta.get("LicenseUrl") or {}).get("value") or imageinfo.get("descriptionurl") or "")
+                normalized=short.lower().replace(" ","").replace("-","").replace("®","")
+                if normalized not in {"cc0","cc01.0","creativecommonszero","publicdomain","publicdomainmark"}:
+                    continue
+                asset_url=imageinfo.get("thumburl") or imageinfo.get("url")
+                page_url=imageinfo.get("descriptionurl") or "https://commons.wikimedia.org/wiki/"+urllib.parse.quote(page.get("title","").replace(" ","_"))
+                if not asset_url or not asset_url.startswith("https://"): continue
+                identity=str(page.get("pageid") or page.get("title"))
+                if identity in seen: continue
+                seen.add(identity)
+                try:
+                    blob,ctype=request_bytes(asset_url,timeout=22,limit=MAX_MEDIA_FILE)
+                    if not ctype.lower().startswith("image/") or len(blob)<2048:
+                        raise RuntimeError("thumbnail endpoint did not return a usable image")
+                    name=Path(urllib.parse.urlparse(asset_url).path).name
+                    ext=Path(name).suffix.lower()
+                    if ext not in {".jpg",".jpeg",".png",".webp"}:
+                        ext={ "image/jpeg":".jpg","image/png":".png","image/webp":".webp"}.get(ctype.split(";")[0].lower(),".jpg")
+                    title=str((meta.get("ObjectName") or {}).get("value") or page.get("title") or identity)
+                    filename=f"{category}-{slugify(title)[:48]}-{slugify(identity)}{ext}"
+                    target=root/"third-party/wikimedia"/"images"/filename
+                    target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    artist=str((meta.get("Artist") or {}).get("value") or (meta.get("Credit") or {}).get("value") or "")
+                    description=str((meta.get("ImageDescription") or {}).get("value") or "")
+                    entry={"id":"wikimedia-"+slugify(identity),"path":target.relative_to(root).as_posix(),"type":"wikimedia-public-domain-image",
+                           "category":category,"title":title,"creator":artist,"description":description,
+                           "source_page":page_url,"source_file_url":imageinfo.get("url"),"license":short,
+                           "license_url":license_url or "https://commons.wikimedia.org/wiki/Commons:Licensing",
+                           "license_verified_from_item_metadata":True,"size_bytes":len(blob),"sha256":digest,"redistributable":True,
+                           "note":"Only exact CC0/Public Domain metadata is auto-bundled; other licenses are skipped."}
+                    index.append(entry); total+=1; successes+=1
+                    report.append({"id":entry["id"],"status":"downloaded","category":category,"path":entry["path"],
+                                   "title":title,"source_page":page_url,"license":short,"size_bytes":len(blob),"sha256":digest})
+                    print("[Wikimedia Commons] OK:",category,short,title[:48],len(blob))
+                except Exception as item_exc:
+                    report.append({"id":"wikimedia-"+slugify(identity),"status":"failed","category":category,"reason":str(item_exc),"source_page":page_url})
+            time.sleep(.25)
+        except Exception as exc:
+            report.append({"id":"wikimedia-"+category,"status":"failed","category":category,"reason":str(exc),"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing"})
+            print("[Wikimedia Commons] search failed:",q,str(exc))
+    return report
+
 def download_openverse(root,index):
     # A small CC0-only fallback. The upstream host has intermittent tunnel timeouts in CI,
     # so requests are intentionally short and failures are recorded rather than retried for minutes.
