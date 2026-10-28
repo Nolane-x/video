@@ -500,6 +500,58 @@ def overlay_svg(name):
             p.append(f'<ellipse cx="{180+(i*223)%1560}" cy="{y}" rx="{400+(i%4)*130}" ry="{45+(i%3)*20}" fill="#d8e5e0" opacity=".028"/>')
     elif name=="audio-waveform":
         p.append('<path d="M0 540H120L160 500L200 580L245 430L300 650L360 455L420 600L480 540H620L670 485L710 565L770 410L825 675L890 470L940 540H1100L1150 495L1200 590L1260 440L1320 640L1380 510L1430 540H1920" fill="none" stroke="#83f0df" stroke-opacity=".5" stroke-width="6"/>')
+    elif name in {"cctv-timestamp","news-ticker","comic-panels","torn-paper","lens-flare","blueprint-dimensions","tracking-markers","dust-scratches","glow-bloom","thermal-map","tape-label","split-screen-divider","map-route","spectrum-bars","rain-on-glass","underwater-caustics","film-frame-counter","focus-pull","caution-stripes","vertical-safe-area"}:
+        if name=="cctv-timestamp":
+            p.append('<rect x="54" y="48" width="470" height="74" rx="5" fill="#000" fill-opacity=".38"/><text x="78" y="94" font-size="31" font-family="monospace" fill="#e9f3e9">CAM 03 · REC 00:14:28</text><circle cx="483" cy="82" r="9" fill="#ff594f"/><path d="M55 145H145V172M55 145V235M1865 145H1775V172M1865 145V235" fill="none" stroke="#c9e1d5" stroke-opacity=".55" stroke-width="4"/>')
+        elif name=="news-ticker":
+            p.append('<rect y="900" width="1920" height="180" fill="#07121d" fill-opacity=".82"/><rect y="900" width="220" height="52" fill="#e84e54"/><text x="38" y="936" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#fff">UPDATE</text><path d="M0 900H1920M0 1075H1920" stroke="#f5f5f5" stroke-opacity=".25" stroke-width="3"/>')
+        elif name=="comic-panels":
+            p.append('<rect x="55" y="55" width="570" height="450" fill="none" stroke="#fff" stroke-width="12"/><rect x="650" y="55" width="1215" height="450" fill="none" stroke="#fff" stroke-width="12"/><rect x="55" y="530" width="880" height="490" fill="none" stroke="#fff" stroke-width="12"/><rect x="960" y="530" width="905" height="490" fill="none" stroke="#fff" stroke-width="12"/>')
+        elif name=="torn-paper":
+            p.append('<path d="M0 72L88 52L164 78L260 55L375 82L498 48L620 71L760 50L875 79L1000 51L1125 81L1260 52L1380 78L1510 48L1630 76L1750 52L1920 70V180L1810 195L1690 173L1570 198L1440 175L1300 196L1160 170L1020 198L880 175L740 196L600 171L470 197L330 174L190 200L60 176L0 190Z" fill="#eee1c8" fill-opacity=".18"/>')
+        elif name=="lens-flare":
+            p.append('<path d="M0 390L1920 690" stroke="#ffe7b0" stroke-opacity=".16" stroke-width="130"/><circle cx="1340" cy="600" r="74" fill="#fff2c1" fill-opacity=".035"/><circle cx="580" cy="480" r="38" fill="#87e7ff" fill-opacity=".06"/>')
+        elif name=="blueprint-dimensions":
+            p.append('<path d="M210 230H1640M210 210V250M1640 210V250M210 230L235 220M210 230L235 240M1640 230L1615 220M1640 230L1615 240M360 330V820M340 330H380M340 820H380" fill="none" stroke="#9deaff" stroke-width="3" stroke-opacity=".65"/><text x="925" y="210" fill="#9deaff" font-family="monospace" font-size="28" text-anchor="middle">DIMENSION / SCALE</text>')
+        elif name=="tracking-markers":
+            for x,y in [(160,160),(960,160),(1760,160),(160,920),(960,920),(1760,920)]:
+                p.append(f'<circle cx="{x}" cy="{y}" r="22" fill="none" stroke="#65f5cb" stroke-opacity=".75" stroke-width="3"/><path d="M{x-40} {y}H{x+40}M{x} {y-40}V{y+40}" stroke="#65f5cb" stroke-opacity=".6" stroke-width="3"/>')
+        elif name=="dust-scratches":
+            for i in range(240):
+                x=(i*127+19)%1920; y=(i*83+47)%1080; h=6+(i%49)*2
+                p.append(f'<path d="M{x} {y}l{(i%3)-1} {h}" stroke="#e4dbc8" stroke-opacity="{.04+(i%5)*.018:.3f}" stroke-width="{1+i%2}"/>')
+        elif name=="glow-bloom":
+            p.append('<ellipse cx="960" cy="400" rx="700" ry="430" fill="#fff6cc" fill-opacity=".055"/>')
+        elif name=="thermal-map":
+            p.append('<rect width="1920" height="1080" fill="#e3435f" fill-opacity=".035"/><path d="M0 220Q450 50 800 300T1500 220T1920 330V850Q1330 750 900 900T0 810Z" fill="#ffc35a" fill-opacity=".07"/><ellipse cx="1180" cy="520" rx="360" ry="230" fill="#4ce2cd" fill-opacity=".06"/>')
+        elif name=="tape-label":
+            p.append('<path d="M170 120H850L890 175L850 230H170L130 175Z" fill="#e8d4a9" fill-opacity=".72" stroke="#9e865d" stroke-opacity=".4" stroke-width="3"/><text x="510" y="190" fill="#302b23" font-family="monospace" text-anchor="middle" font-size="36">ARCHIVE / DATE / REEL</text>')
+        elif name=="split-screen-divider":
+            p.append('<rect x="952" y="0" width="16" height="1080" fill="#fff" fill-opacity=".72"/><circle cx="960" cy="540" r="46" fill="#111" fill-opacity=".55" stroke="#fff" stroke-opacity=".8" stroke-width="3"/><path d="M950 522L970 540L950 558" fill="none" stroke="#fff" stroke-width="5"/>')
+        elif name=="map-route":
+            p.append('<path d="M220 850C460 700 430 450 730 500S1060 710 1260 430S1510 260 1710 180" fill="none" stroke="#ffb467" stroke-width="10" stroke-dasharray="18 18" stroke-linecap="round"/><circle cx="220" cy="850" r="24" fill="#70e5cf"/><circle cx="1710" cy="180" r="24" fill="#ffb467"/>')
+        elif name=="spectrum-bars":
+            for i in range(86):
+                x=i*22+14; h=35+((i*47+13)%230)
+                p.append(f'<rect x="{x}" y="{540-h/2}" width="10" height="{h}" rx="5" fill="#8be7dc" fill-opacity="{.18+(i%5)*.1:.2f}"/>')
+        elif name=="rain-on-glass":
+            for i in range(90):
+                x=(i*173+33)%1920; y=(i*97+21)%1080; r=5+(i%9)*2
+                p.append(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*1.8}" fill="#a8e7ff" fill-opacity=".06" stroke="#d7f5ff" stroke-opacity=".19" stroke-width="2"/>')
+        elif name=="underwater-caustics":
+            for i in range(22):
+                x=(i*139+10)%1920; y=(i*71+20)%1080
+                p.append(f'<path d="M{x-150} {y}Q{x-75} {y-80} {x} {y}T{x+150} {y}" fill="none" stroke="#b9fff3" stroke-opacity=".13" stroke-width="18"/>')
+        elif name=="film-frame-counter":
+            p.append('<rect x="70" y="45" width="260" height="78" fill="#000" fill-opacity=".55" stroke="#f5eee0" stroke-opacity=".5" stroke-width="2"/><text x="200" y="98" text-anchor="middle" font-family="monospace" font-size="35" fill="#fff">FRAME 0042</text>')
+        elif name=="focus-pull":
+            p.append('<path d="M120 960A900 900 0 0 1 1800 960" fill="none" stroke="#e4eef3" stroke-opacity=".35" stroke-width="4"/><path d="M250 900V930M390 875V905M530 850V880M670 832V862M810 822V852M950 820V850M1090 822V852M1230 832V862M1370 850V880M1510 875V905M1650 900V930" stroke="#e4eef3" stroke-opacity=".35" stroke-width="4"/><text x="960" y="1000" fill="#e4eef3" fill-opacity=".6" font-size="24" text-anchor="middle">FOCUS DISTANCE / MARKS</text>')
+        elif name=="caution-stripes":
+            for i in range(-1200,2400,120):
+                p.append(f'<path d="M{i} 1080L{i+500} 0H{i+560}L{i+60} 1080Z" fill="#f4c84a" fill-opacity=".065"/>')
+            p.append('<path d="M0 0H1920V30H0ZM0 1050H1920V1080H0Z" fill="#f4c84a" fill-opacity=".45"/>')
+        else:
+            p.append('<rect x="540" y="40" width="840" height="1000" fill="none" stroke="#76f1cf" stroke-opacity=".42" stroke-width="4" stroke-dasharray="18 14"/><rect x="615" y="120" width="690" height="840" fill="none" stroke="#76f1cf" stroke-opacity=".2" stroke-width="2" stroke-dasharray="8 12"/><text x="960" y="1020" text-anchor="middle" font-size="22" fill="#76f1cf">9:16 SAFE AREA</text>')
     else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
     return svg_doc("".join(p),defs)
 
@@ -559,6 +611,51 @@ def infographic_svg(asset_id,title,index):
         p.append(f'<text x="210" y="410" font-size="110" fill="{accent}">“</text><text x="290" y="495" font-size="38">REPLACE WITH SHORT VERIFIED { "QUOTE" if asset_id=="quote-card" else "SOURCE / EVIDENCE" }</text><path d="M300 575H1580" stroke="{accent}" stroke-opacity=".65" stroke-width="4"/><text x="310" y="650" class="muted" font-size="28">AUTHOR / PUBLISHER</text><text x="310" y="700" class="muted" font-size="25">DATE · LINK · CONTEXT</text>')
     elif asset_id in {"definition-card","equation-card"}:
         p.append(f'<rect x="165" y="315" width="1590" height="435" rx="24" fill="{accent}" fill-opacity=".08" stroke="{accent}" stroke-opacity=".38" stroke-width="3"/><text x="235" y="420" font-size="48" font-weight="700">{"TERM / CONCEPT" if asset_id=="definition-card" else "FORMULA / EQUATION"}</text><path d="M235 465H1660" stroke="{accent}" stroke-opacity=".35" stroke-width="3"/><text x="235" y="545" font-size="30" class="muted">PLAIN-LANGUAGE EXPLANATION / VARIABLE KEY</text><text x="235" y="620" font-size="24" class="muted">SOURCE / ASSUMPTIONS / UNITS</text>')
+    elif asset_id in {"venn-diagram","cycle-diagram","scatter-plot","budget-breakdown","gantt-chart","before-after","scorecard","source-ledger","fact-check","roadmap"}:
+        if asset_id=="venn-diagram":
+            p.append(f'<circle cx="760" cy="555" r="235" fill="{accent}" fill-opacity=".18" stroke="{accent}" stroke-width="5"/><circle cx="1000" cy="555" r="235" fill="#80d7c8" fill-opacity=".18" stroke="#80d7c8" stroke-width="5"/><circle cx="880" cy="700" r="235" fill="#d99ab6" fill-opacity=".14" stroke="#d99ab6" stroke-width="5"/><text x="640" y="510" font-size="30">SET A</text><text x="1080" y="510" font-size="30">SET B</text><text x="855" y="850" font-size="30">SET C</text>')
+        elif asset_id=="cycle-diagram":
+            coords=[(960,350),(1330,555),(960,770),(590,555)]
+            for i,(x,y) in enumerate(coords):
+                nx,ny=coords[(i+1)%4]
+                p.append(f'<path d="M{x} {y}Q{(x+nx)/2+35} {(y+ny)/2-35} {nx} {ny}" fill="none" stroke="{accent}" stroke-width="7" stroke-dasharray="12 10"/>')
+                p.append(f'<circle cx="{x}" cy="{y}" r="92" fill="{accent}" fill-opacity=".16" stroke="{accent}" stroke-width="4"/><text x="{x}" y="{y+10}" text-anchor="middle" font-size="25">STEP {i+1}</text>')
+        elif asset_id=="scatter-plot":
+            p.append(f'<path d="M260 310V840H1650M260 580H1650M260 420H1650" fill="none" stroke="#d6deea" stroke-opacity=".3" stroke-width="4"/>')
+            for i in range(70):
+                x=310+(i*173)%1280; y=760-((i*83+int((i*31)%9)*49)%410)
+                p.append(f'<circle cx="{x}" cy="{y}" r="{5+i%5}" fill="{accent}" fill-opacity="{.4+(i%5)*.1:.2f}"/>')
+        elif asset_id=="budget-breakdown":
+            p.append(f'<circle cx="620" cy="580" r="230" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="72"/><circle cx="620" cy="580" r="230" fill="none" stroke="{accent}" stroke-width="72" stroke-dasharray="420 1025" transform="rotate(-90 620 580)"/><circle cx="620" cy="580" r="230" fill="none" stroke="#5dd7ca" stroke-width="72" stroke-dasharray="310 1135" stroke-dashoffset="-420" transform="rotate(-90 620 580)"/>')
+            for i in range(4):
+                y=395+i*115
+                p.append(f'<rect x="1020" y="{y}" width="{480-i*55}" height="42" rx="10" fill="{accent}" fill-opacity="{.28+i*.14:.2f}"/><text x="1020" y="{y-14}" font-size="24">CATEGORY {i+1} · %</text>')
+        elif asset_id=="gantt-chart":
+            for i in range(6):
+                y=340+i*85
+                p.append(f'<text x="200" y="{y+32}" font-size="23">TASK {i+1}</text><path d="M470 {y+20}H1690" stroke="#fff" stroke-opacity=".13" stroke-width="2"/>')
+                x=500+((i*173)%580); w=280+((i*97)%440)
+                p.append(f'<rect x="{x}" y="{y}" width="{w}" height="42" rx="8" fill="{accent}" fill-opacity="{.35+(i%4)*.14:.2f}"/>')
+        elif asset_id=="before-after":
+            for i in range(2):
+                x=150+i*830; col=accent if i==0 else "#5dd7ca"
+                p.append(f'<rect x="{x}" y="330" width="730" height="430" rx="20" fill="{col}" fill-opacity=".1" stroke="{col}" stroke-width="3"/><text x="{x+365}" y="395" text-anchor="middle" font-size="35">{"BEFORE" if i==0 else "AFTER"}</text><path d="M{x+55} 455H{x+675}M{x+55} 535H{x+595}M{x+55} 615H{x+630}" stroke="{col}" stroke-opacity=".55" stroke-width="10" stroke-linecap="round"/>')
+        elif asset_id=="scorecard":
+            for i,(label,value) in enumerate([("ACCURACY","00.0%"),("GROWTH","+00%"),("QUALITY","0.0 / 10")]):
+                x=180+i*550
+                p.append(f'<rect x="{x}" y="360" width="470" height="340" rx="24" fill="{accent}" fill-opacity=".1" stroke="{accent}" stroke-opacity=".5" stroke-width="3"/><text x="{x+235}" y="440" font-size="28" text-anchor="middle">{label}</text><text x="{x+235}" y="570" font-size="68" font-weight="700" text-anchor="middle" fill="{accent}">{value}</text><path d="M{x+55} 625H{x+415}" stroke="#fff" stroke-opacity=".18" stroke-width="4"/>')
+        elif asset_id=="source-ledger":
+            for i,label in enumerate(["CLAIM / STATEMENT","AUTHOR / ORGANIZATION","DATE / VERSION","SOURCE URL","LICENSE / ACCESS DATE"]):
+                y=340+i*96
+                p.append(f'<rect x="190" y="{y-38}" width="1540" height="72" rx="9" fill="{accent}" fill-opacity="{.12 if i%2==0 else .05}"/><text x="230" y="{y+7}" font-size="25">{label}</text><path d="M700 {y}H1670" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>')
+        elif asset_id=="fact-check":
+            for i,(label,col) in enumerate([("CLAIM",accent),("EVIDENCE","#5dd7ca"),("VERDICT","#e985a2")]):
+                x=170+i*560
+                p.append(f'<rect x="{x}" y="400" width="460" height="330" rx="20" fill="{col}" fill-opacity=".1" stroke="{col}" stroke-width="3"/><text x="{x+230}" y="465" text-anchor="middle" font-size="30">{label}</text><path d="M{x+50} 530H{x+410}M{x+50} 590H{x+375}M{x+50} 650H{x+330}" stroke="{col}" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/>')
+        else:
+            for i in range(5):
+                x=260+i*330; y=500+(i%2)*120
+                p.append(f'<circle cx="{x}" cy="{y}" r="32" fill="{accent}" fill-opacity=".22" stroke="{accent}" stroke-width="4"/><path d="M{x+35} {y}H{x+155}" stroke="{accent}" stroke-width="5"/><text x="{x}" y="{y+85}" text-anchor="middle" font-size="23">PHASE {i+1}</text>')
     else:
         for i in range(5):
             y=330+i*112
@@ -1106,7 +1203,7 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=30 and len(OVERLAYS)>=30 and len(ICONS)>=50 and len(INFO)>=20
+    assert len(PALETTES)>=50 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}
