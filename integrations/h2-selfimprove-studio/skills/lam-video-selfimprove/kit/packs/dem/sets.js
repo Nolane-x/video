@@ -333,9 +333,353 @@ export function set(g, kind = 'bedroom', o = {}) {
     case 'doorway': {
       wall(g, '#121216', '#18181d'); floor(g, gy); door(g, X(o.doorX ?? 0.62), gy, X(0.1), E.H * 0.45, { open: o.doorOpen ?? 1 }); M.door = [X(o.doorX ?? 0.62), gy];
       break; }
+    // ---------- New cinematic environments (authored in-code; no third-party image dependency)
+    case 'metro': {
+      wall(g, '#121821', '#242d38');
+      // Tunnel ribs converge toward a distant vanishing point.
+      const vx = X(0.52), vy = Y(0.28);
+      for (let i = 0; i < 8; i++) {
+        const k = i / 7, x = X(-0.06 + k * 1.12), yTop = Y(0.08 + Math.abs(k - 0.5) * 0.15);
+        ln(g, [[x, yTop], [vx + (x - vx) * 0.28, vy], [x, gy - E.H * 0.02]], { color: '#69717e', lw: 4, la: 0.32 });
+      }
+      box(g, 0, Y(0.5), E.W, Y(0.13), { fill: '#1b222c', line: '#454d5a', r: 0, la: 0.9, lw: 2 });
+      for (let i = 0; i < 14; i++) {
+        const x = i * E.W / 13;
+        ln(g, [[x, Y(0.51)], [x, Y(0.63)]], { color: '#88919d', lw: 2, la: 0.2 });
+      }
+      // Platform edge and tracks add strong horizontal/perspective cues.
+      floor(g, gy, '#282b32');
+      ln(g, [[0, gy - 18], [E.W, gy - 18]], { color: '#e6b65e', lw: 8, la: 0.9 });
+      ln(g, [[0, gy + E.H * 0.07], [vx, gy + E.H * 0.02], [E.W, gy + E.H * 0.07]], { color: '#818995', lw: 5, la: 0.55 });
+      ln(g, [[0, gy + E.H * 0.13], [vx, gy + E.H * 0.03], [E.W, gy + E.H * 0.13]], { color: '#818995', lw: 4, la: 0.42 });
+      for (const k of [0.12, 0.36, 0.62, 0.87]) {
+        box(g, X(k) - 40, Y(0.06), 80, 16, { fill: '#e6e0d3', line: null, r: 4, la: 0.9 });
+        light(g, X(k), Y(0.1), E.H * 0.22, '#d4e6ff', 0.12);
+      }
+      box(g, X(0.06), Y(0.17), X(0.17), Y(0.08), { fill: '#243d47', line: '#8cabb0', r: 4, lw: 2 });
+      text(g, o.sign || 'PLATFORM 02', X(0.145), Y(0.222), { size: 22, font: FONT_UI, weight: 700, color: '#dce9e6' });
+      M.platform = [X(0.5), gy - 10]; M.vanish = [vx, vy];
+      break;
+    }
+    case 'rooftop': {
+      const tm = o.time || 'dusk';
+      const sky = tm === 'dawn' ? [[0, '#292a4a'], [0.58, '#9a647c'], [1, '#f2ad7e']] :
+        tm === 'night' ? [[0, '#090f20'], [0.65, '#202b45'], [1, '#3f4050']] :
+        [[0, '#171b32'], [0.55, '#5a4568'], [1, '#c77d70']];
+      vgrad(g, sky, 0, gy);
+      skyline(g, gy - E.H * 0.04, { color: '#252335', seed: 19, n: 15, hmin: 0.18, hvar: 0.34, lit: tm === 'night' ? 0.36 : 0.14 });
+      skyline(g, gy - E.H * 0.02, { color: '#171b27', seed: 27, n: 11, hmin: 0.10, hvar: 0.2, lit: 0.22 });
+      if (tm === 'night') moon(g, X(0.78), Y(0.19), E.H * 0.025);
+      else light(g, X(0.7), Y(0.42), E.H * 0.34, '#ffb878', 0.23);
+      floor(g, gy, '#25232e');
+      // Roof tiles and leading lines guide the eye into the frame.
+      for (let i = -4; i <= 4; i++) ln(g, [[E.W * 0.5 + i * 18, gy], [E.W * 0.5 + i * 140, E.H + 24]], { color: '#77707d', lw: 2, la: 0.2 });
+      box(g, 0, gy - E.H * 0.16, E.W, E.H * 0.16, { fill: '#36313f', line: '#8a7281', r: 0, la: 1, lw: 3 });
+      ln(g, [[0, gy - E.H * 0.16], [E.W, gy - E.H * 0.16]], { color: '#d1b0a0', lw: 4, la: 0.48 });
+      // Ventilation blocks, water tank, aerial and warm maintenance lamp.
+      box(g, X(0.12), gy - E.H * 0.31, X(0.16), E.H * 0.15, { fill: '#4a4652', line: '#77717c', r: 5 });
+      for (let j = 0; j < 5; j++) ln(g, [[X(0.13), gy - E.H * (0.29 - j * 0.022)], [X(0.27), gy - E.H * (0.29 - j * 0.022)]], { color: '#9b929c', lw: 2, la: 0.36 });
+      box(g, X(0.73), gy - E.H * 0.28, X(0.12), E.H * 0.12, { fill: '#343642', line: '#86818a', r: 10 });
+      oval(g, X(0.79), gy - E.H * 0.28, X(0.06), E.H * 0.025, { fill: '#585561', line: '#96909a', lw: 2 });
+      ln(g, [[X(0.86), gy - E.H * 0.28], [X(0.86), gy - E.H * 0.43], [X(0.91), gy - E.H * 0.43]], { color: '#a29ba7', lw: 3, la: 0.8 });
+      light(g, X(0.31), gy - E.H * 0.27, E.H * 0.25, '#ffc878', 0.18);
+      M.parapet = [X(0.5), gy - E.H * 0.16]; M.vent = [X(0.2), gy - E.H * 0.2];
+      break;
+    }
+    case 'underpass': {
+      wall(g, '#171b24', '#272d37');
+      const vanX = X(o.vanishX ?? 0.52), vanY = Y(0.24);
+      // Receding concrete ribs and wet floor make the depth legible.
+      for (let i = 0; i < 7; i++) {
+        const x = X(-0.1 + i * 0.2), top = Y(0.02 + Math.abs(i - 3) * 0.035);
+        obj(g, (c) => {
+          c.moveTo(x - E.W * 0.075, top); c.lineTo(x + E.W * 0.075, top);
+          c.lineTo(vanX + (x + E.W * 0.075 - vanX) * 0.55, gy - 10);
+          c.lineTo(vanX + (x - E.W * 0.075 - vanX) * 0.55, gy - 10); c.closePath();
+        }, { fill: '#303541', line: '#737b87', lw: 3, la: 0.65, a: 0.72 });
+      }
+      floor(g, gy, '#1a1f28');
+      for (let i = 0; i < 7; i++) {
+        const x = X(i / 6);
+        ln(g, [[x, gy], [vanX + (x - vanX) * 0.08, vanY]], { color: '#656d79', lw: 2, la: 0.23 });
+      }
+      for (const [x, c] of [[0.18, '#dbe9ff'], [0.48, '#f1d2a0'], [0.79, '#c5dcff']]) {
+        box(g, X(x) - 48, Y(0.12 + Math.abs(x - 0.5) * 0.08), 96, 14, { fill: c, line: null, r: 5, la: 0.78 });
+        light(g, X(x), Y(0.17), E.H * 0.31, c, 0.16);
+      }
+      // Puddles reflect the lamps without overwhelming the character silhouette.
+      for (let i = 0; i < 5; i++) oval(g, X(0.13 + i * 0.18), gy + E.H * (0.055 + (i % 2) * 0.03), E.W * (0.032 + (i % 3) * 0.008), E.H * 0.008, { fill: '#8b9aaf', line: null, a: 0.13 });
+      if (o.rain) rain(g, t, { n: 90, a: 0.16, speed: 880 });
+      M.vanish = [vanX, vanY]; M.walkway = [X(0.5), gy];
+      break;
+    }
+    case 'hospital': {
+      wall(g, '#172329', '#26363c');
+      const vx = X(0.5), vy = Y(0.2);
+      // Long corridor with paired doors, ceiling panels and perspective floor.
+      box(g, X(0.22), Y(0.1), X(0.56), Y(0.49), { fill: '#202e34', line: '#61777b', r: 0, lw: 3, la: 0.72 });
+      obj(g, (c) => { c.moveTo(0, 0); c.lineTo(X(0.22), Y(0.1)); c.lineTo(X(0.22), Y(0.59)); c.lineTo(0, gy); c.closePath(); }, { fill: '#1d3036', line: '#71888b', lw: 2, la: 0.48 });
+      obj(g, (c) => { c.moveTo(E.W, 0); c.lineTo(X(0.78), Y(0.1)); c.lineTo(X(0.78), Y(0.59)); c.lineTo(E.W, gy); c.closePath(); }, { fill: '#1d3036', line: '#71888b', lw: 2, la: 0.48 });
+      for (const side of [0.08, 0.92]) {
+        for (let i = 0; i < 3; i++) {
+          const y = Y(0.17 + i * 0.13), w = E.W * (0.12 - i * 0.018);
+          box(g, side < 0.5 ? X(side) : X(side) - w, y, w, E.H * (0.12 - i * 0.015), { fill: '#34454b', line: '#6c8186', r: 2, lw: 2, la: 0.8 });
+          box(g, side < 0.5 ? X(side) + w * 0.7 : X(side) - w * 0.25, y + E.H * 0.055, 6, 6, { fill: '#b7a98c', line: null, r: 2 });
+        }
+      }
+      floor(g, gy, '#28333a');
+      for (let i = 0; i < 9; i++) {
+        const x = X(i / 8);
+        ln(g, [[vx, Y(0.55)], [x, gy + E.H * 0.2]], { color: '#6e8286', lw: 2, la: 0.24 });
+      }
+      for (let i = 0; i < 5; i++) box(g, X(0.32 + i * 0.09), Y(0.07), X(0.055), 18, { fill: '#d5e7df', line: null, r: 4, la: 0.85 });
+      box(g, X(0.38), Y(0.25), X(0.24), Y(0.055), { fill: '#31564d', line: '#8db2a0', r: 4 });
+      text(g, o.sign || 'QUIET ZONE', X(0.5), Y(0.287), { size: 22, font: FONT_UI, weight: 700, color: '#e2f0e8' });
+      light(g, X(0.5), Y(0.15), E.H * 0.4, '#d7f0ec', 0.10);
+      M.corridor = [vx, gy]; M.doorLeft = [X(0.16), Y(0.53)]; M.doorRight = [X(0.84), Y(0.53)];
+      break;
+    }
+    case 'library': {
+      wall(g, '#211c22', '#30252b');
+      // High windows, tall shelves and a central aisle.
+      windowBox(g, X(0.05), Y(0.1), X(0.17), Y(0.28), { sky: o.sky || 'dawn', t });
+      for (const side of [0, 1]) {
+        const sx = side === 0 ? X(0.025) : X(0.76), sw = E.W * 0.215;
+        box(g, sx, Y(0.08), sw, gy - Y(0.08), { fill: '#46332d', line: '#96745c', r: 3, lw: 3, la: 0.82 });
+        for (let shelf = 0; shelf < 5; shelf++) {
+          const y = Y(0.16 + shelf * 0.115);
+          ln(g, [[sx + 5, y], [sx + sw - 5, y]], { color: '#a28a73', lw: 5, la: 0.75 });
+          for (let b = 0; b < 15; b++) {
+            const x = sx + 10 + b * (sw - 22) / 15, bh = E.H * (0.045 + ((b * 7 + shelf * 3) % 5) * 0.009);
+            const colors = ['#607080', '#9a6754', '#b69a65', '#526657', '#78677d', '#d0bda0'];
+            box(g, x, y - bh, Math.max(5, sw / 24), bh, { fill: colors[(b + shelf * 2) % colors.length], line: '#30252a', r: 1, lw: 1, la: 0.92 });
+          }
+        }
+      }
+      // Perspective aisle floor and reading tables.
+      floor(g, gy, '#1e1b20');
+      for (let i = -3; i <= 3; i++) ln(g, [[X(0.5), Y(0.39)], [X(0.5) + i * E.W * 0.18, E.H + 20]], { color: '#7d6570', lw: 2, la: 0.25 });
+      table(g, X(0.5), gy, X(0.38), E.H * 0.22, { fill: '#644637' });
+      for (const x of [0.39, 0.61]) {
+        books(g, X(x), gy - E.H * 0.22, E.H * 0.11);
+        deskLamp(g, X(x), gy - E.H * 0.22, E.H * 0.08, true);
+        light(g, X(x), gy - E.H * 0.22, E.H * 0.23, '#ffc77d', 0.18);
+      }
+      // Ladder silhouette on the right shelf.
+      ln(g, [[X(0.81), Y(0.22)], [X(0.85), gy]], { color: '#bba07c', lw: 5, la: 0.7 });
+      ln(g, [[X(0.87), Y(0.22)], [X(0.91), gy]], { color: '#bba07c', lw: 5, la: 0.7 });
+      for (let i = 0; i < 7; i++) ln(g, [[X(0.82 + i * 0.013), Y(0.27 + i * 0.08)], [X(0.87 + i * 0.013), Y(0.27 + i * 0.08)]], { color: '#bba07c', lw: 3, la: 0.7 });
+      M.table = { left: [X(0.32), gy], right: [X(0.68), gy], top: [X(0.5), gy - E.H * 0.22] };
+      M.aisle = [X(0.5), gy];
+      break;
+    }
+    case 'warehouse': {
+      wall(g, '#1a1c21', '#272b31');
+      const vx = X(0.52), vy = Y(0.18);
+      // Roof trusses and steel columns form large industrial scale.
+      for (let i = 0; i < 7; i++) {
+        const x = X(i / 6);
+        ln(g, [[x, 0], [vx + (x - vx) * 0.22, vy], [x, gy]], { color: '#747b82', lw: 5, la: 0.36 });
+        ln(g, [[x, Y(0.08)], [vx + (x - vx) * 0.22, vy + 18], [E.W - x, Y(0.08)]], { color: '#535a63', lw: 3, la: 0.34 });
+      }
+      for (const x of [0.12, 0.34, 0.7, 0.89]) {
+        box(g, X(x) - E.W * 0.035, Y(0.27), E.W * 0.07, gy - Y(0.27), { fill: '#353b43', line: '#69717a', r: 2, lw: 2, la: 0.92 });
+      }
+      // Stacked crates have different footprints/heights, rather than repeated flat cards.
+      const crates = [[0.08, 0.61, 0.12, 0.16], [0.2, 0.69, 0.14, 0.11], [0.76, 0.58, 0.13, 0.19], [0.86, 0.7, 0.09, 0.09]];
+      for (let i = 0; i < crates.length; i++) {
+        const [x, y, w, h] = crates[i];
+        box(g, X(x), Y(y), X(w), Y(h), { fill: i % 2 ? '#5a5044' : '#665744', line: '#9b8870', r: 2, lw: 2 });
+        ln(g, [[X(x + 0.025), Y(y + 0.025)], [X(x + w - 0.025), Y(y + h - 0.025)]], { color: '#b7a084', lw: 3, la: 0.48 });
+        ln(g, [[X(x + w - 0.025), Y(y + 0.025)], [X(x + 0.025), Y(y + h - 0.025)]], { color: '#b7a084', lw: 3, la: 0.32 });
+      }
+      floor(g, gy, '#202329');
+      for (let i = 0; i < 5; i++) {
+        const x = X(0.16 + i * 0.17);
+        box(g, x - 35, Y(0.1), 70, 12, { fill: '#d3dce2', line: null, r: 5, la: 0.76 });
+        light(g, x, Y(0.15), E.H * 0.28, '#e8d8ad', 0.12);
+      }
+      beam(g, X(0.72), Y(0.16), X(0.6), X(0.9), gy, '#ffd08b', 0.08);
+      M.vanish = [vx, vy]; M.crates = [X(0.16), Y(0.68)]; M.gy = gy;
+      break;
+    }
+    case 'laboratory': {
+      wall(g, '#12212a', '#24333b');
+      // Long windows suggest a working lab, not a generic sci-fi HUD.
+      for (let i = 0; i < 4; i++) {
+        const x = X(0.05 + i * 0.15);
+        box(g, x, Y(0.12), X(0.125), Y(0.26), { fill: '#263a46', line: '#7296a0', r: 3, lw: 3, la: 0.9 });
+        ln(g, [[x + X(0.0625), Y(0.12)], [x + X(0.0625), Y(0.38)]], { color: '#6d929d', lw: 2, la: 0.5 });
+        light(g, x + X(0.0625), Y(0.24), E.H * 0.18, '#7bd5db', 0.1);
+      }
+      box(g, X(0.67), Y(0.11), X(0.27), Y(0.18), { fill: '#0e171e', line: '#52727b', r: 5, lw: 3 });
+      // Oscilloscope and simple signal traces.
+      ln(g, [[X(0.69), Y(0.21)], [X(0.73), Y(0.21)], [X(0.75), Y(0.15)], [X(0.79), Y(0.25)], [X(0.83), Y(0.19)], [X(0.88), Y(0.19),], [X(0.92), Y(0.23)]], { color: '#67d8cb', lw: 3, la: 0.95 });
+      floor(g, gy, '#182329');
+      table(g, X(0.5), gy, X(0.72), E.H * 0.24, { fill: '#38454c' });
+      // Flask/vial silhouettes with colored liquid and a warm task lamp.
+      for (let i = 0; i < 5; i++) {
+        const x = X(0.25 + i * 0.105), h = E.H * (0.075 + (i % 3) * 0.02), y = gy - E.H * 0.24;
+        box(g, x - 10, y - h, 20, h, { fill: '#17353d', line: '#82b9bd', r: 5, lw: 2, la: 0.95 });
+        box(g, x - 7, y - h * 0.42, 14, h * 0.32, { fill: ['#3ca9a0', '#90bd86', '#cf9d5c', '#6484b4', '#9a7ab0'][i], line: null, r: 3, la: 0.88 });
+        ln(g, [[x - 2, y - h + 7], [x - 2, y - h * 0.45]], { color: '#e1f8f2', lw: 2, la: 0.45 });
+      }
+      deskLamp(g, X(0.77), gy - E.H * 0.24, E.H * 0.12, true);
+      light(g, X(0.77), gy - E.H * 0.24, E.H * 0.3, '#ffcf82', 0.2);
+      M.table = { left: [X(0.14), gy], right: [X(0.86), gy], top: [X(0.5), gy - E.H * 0.24] };
+      M.scope = [X(0.8), Y(0.2)];
+      break;
+    }
+    case 'forest': {
+      const tm = o.time || 'dusk';
+      const sky = tm === 'dawn' ? [[0, '#283047'], [0.55, '#8d6572'], [1, '#e6a16d']] :
+        tm === 'night' ? [[0, '#080f1a'], [0.65, '#162736'], [1, '#27353a']] :
+        [[0, '#14272c'], [0.62, '#38534d'], [1, '#bd8668']];
+      vgrad(g, sky, 0, gy);
+      if (tm === 'night') moon(g, X(0.78), Y(0.18), E.H * 0.025);
+      else light(g, X(0.68), Y(0.39), E.H * 0.38, '#e5b27b', 0.18);
+      // Distant trunks, then layered foreground trees; the open center is a motivated stage.
+      for (let layer = 0; layer < 3; layer++) {
+        const count = 13 - layer * 2, spread = E.W / count;
+        for (let i = 0; i < count; i++) {
+          const x = i * spread - spread * 0.12 + ((i * 37 + layer * 19) % 17);
+          const baseY = gy + layer * 10, trunkW = 8 + layer * 5, treeH = E.H * (0.28 + ((i * 5 + layer * 3) % 6) * 0.045);
+          if (layer === 2 && x > E.W * 0.28 && x < E.W * 0.72) continue;
+          box(g, x, baseY - treeH, trunkW, treeH, { fill: layer === 0 ? '#243b38' : layer === 1 ? '#172d2b' : '#101e20', line: '#71806d', r: 3, lw: 1.5, la: layer === 2 ? 0.45 : 0.3 });
+          for (let b = 0; b < 4; b++) {
+            const cy = baseY - treeH + b * treeH * 0.18;
+            oval(g, x + trunkW / 2 + Math.sin(i * 4 + b) * E.W * 0.012, cy, treeH * (0.12 + layer * 0.025), treeH * 0.14, { fill: layer === 0 ? '#39564b' : layer === 1 ? '#223f3a' : '#162b2b', line: null, a: 0.68 });
+          }
+        }
+      }
+      // Mist ribbons and sparse fireflies.
+      for (let i = 0; i < 4; i++) oval(g, X(0.15 + i * 0.23), Y(0.56 + i * 0.035), E.W * 0.13, E.H * 0.022, { fill: '#c6d3be', line: null, a: 0.055 });
+      for (let i = 0; i < 12; i++) {
+        const x = X(0.08 + ((i * 37) % 83) / 100), y = Y(0.32 + ((i * 19) % 45) / 100) + Math.sin(t * 1.7 + i) * 5;
+        oval(g, x, y, 2.5, 2.5, { fill: '#f4d68a', line: null, a: 0.7 });
+        light(g, x, y, 16, '#f4d68a', 0.18);
+      }
+      floor(g, gy, '#18231f');
+      for (let i = 0; i < 24; i++) {
+        const x = X(i / 23);
+        ln(g, [[x, gy], [x + (i % 2 ? 26 : -18), gy - E.H * (0.03 + (i % 4) * 0.006)]], { color: '#57705a', lw: 2, la: 0.4 });
+      }
+      M.clearing = [X(0.5), gy]; M.gy = gy;
+      break;
+    }
+    case 'beach': {
+      const tm = o.time || 'dawn';
+      const sky = tm === 'day' ? [[0, '#5f9bc1'], [0.62, '#a5d3d7'], [1, '#f2d8b1']] :
+        tm === 'sunset' ? [[0, '#292a52'], [0.48, '#b35f76'], [1, '#f4a16e']] :
+        [[0, '#172a45'], [0.52, '#6d718b'], [1, '#f4b48a']];
+      vgrad(g, sky, 0, Y(0.64));
+      const sunX = X(o.sunX ?? 0.73), sunY = Y(tm === 'day' ? 0.24 : 0.42);
+      light(g, sunX, sunY, E.H * 0.3, '#ffd39a', 0.28);
+      oval(g, sunX, sunY, E.H * 0.052, E.H * 0.052, { fill: '#ffe0a9', line: null, a: 0.92 });
+      // Bands of water change hue and scale toward the horizon.
+      vgrad(g, [[0, '#526e86'], [0.38, '#36566d'], [1, '#182f40']], Y(0.64), gy);
+      for (let i = 0; i < 22; i++) {
+        const y = Y(0.66 + i * 0.013);
+        const x = X(((i * 29) % 91) / 100);
+        ln(g, [[x, y], [Math.min(E.W, x + X(0.05 + (i % 5) * 0.018)), y + Math.sin(t * 1.6 + i) * 2]], { color: i % 4 ? '#c2ccd0' : '#f8dfb7', lw: i < 7 ? 2 : 3, la: 0.16 + (i % 4) * 0.035 });
+      }
+      floor(g, gy, '#342e31');
+      // Broken foam edge, scattered stones and a few grasses.
+      for (let i = 0; i < 14; i++) {
+        const x = X(i / 13), y = gy - E.H * (0.02 + (i % 3) * 0.012);
+        ln(g, [[x - 15, y], [x + 22, y + Math.sin(i * 3) * 6], [x + 58, y - 4]], { color: '#e3d5c3', lw: 3, la: 0.24 });
+      }
+      for (let i = 0; i < 7; i++) oval(g, X(0.07 + i * 0.14), gy + E.H * 0.03 + (i % 3) * 8, 8 + i * 1.4, 4 + i * 0.7, { fill: '#6c5b53', line: '#aa9783', lw: 1, a: 0.75 });
+      for (let i = 0; i < 8; i++) {
+        const x = X(0.05 + i * 0.12);
+        ln(g, [[x, gy + 20], [x - 8, gy - 18 - (i % 3) * 6]], { color: '#657552', lw: 3, la: 0.72 });
+      }
+      M.shore = [X(0.5), gy]; M.horizon = [X(0.5), Y(0.64)];
+      break;
+    }
+    case 'parking': {
+      wall(g, '#1a1c21', '#282b30');
+      const vx = X(0.5), vy = Y(0.22);
+      // Concrete garage, fluorescent ceiling bars and lane markings.
+      obj(g, (c) => { c.moveTo(0, 0); c.lineTo(E.W, 0); c.lineTo(X(0.78), Y(0.32)); c.lineTo(X(0.22), Y(0.32)); c.closePath(); }, { fill: '#343941', line: '#757b84', lw: 3, la: 0.6 });
+      obj(g, (c) => { c.moveTo(0, gy); c.lineTo(X(0.22), Y(0.32)); c.lineTo(X(0.78), Y(0.32)); c.lineTo(E.W, gy); c.closePath(); }, { fill: '#353940', line: '#7c8189', lw: 3, la: 0.5 });
+      for (let i = 0; i < 5; i++) {
+        const x = X(i / 4);
+        ln(g, [[x, Y(0.02)], [vx + (x - vx) * 0.28, Y(0.3)]], { color: '#8a9097', lw: 4, la: 0.25 });
+        box(g, vx + (x - vx) * 0.48 - 30, Y(0.12 + Math.abs(i - 2) * 0.018), 60, 12, { fill: '#e1dfd7', line: null, r: 4, la: 0.7 });
+      }
+      for (const x of [0.06, 0.2, 0.8, 0.94]) {
+        box(g, X(x) - E.W * 0.025, Y(0.32), E.W * 0.05, gy - Y(0.32), { fill: '#4b4f55', line: '#8b9096', r: 4, lw: 2, la: 0.9 });
+        ln(g, [[X(x) - E.W * 0.025, Y(0.42)], [X(x) + E.W * 0.025, Y(0.42)]], { color: '#b3a06c', lw: 3, la: 0.7 });
+      }
+      floor(g, gy, '#22252a');
+      for (let i = 0; i < 6; i++) {
+        const x = X(0.18 + i * 0.13);
+        ln(g, [[x, gy - 4], [vx + (x - vx) * 0.15, Y(0.32)]], { color: '#d3c48c', lw: 3, la: 0.4 });
+      }
+      // Far-car silhouettes are background dressing; keep the protagonist lane open.
+      for (const [x, scale] of [[0.13, 0.62], [0.79, 0.72]]) {
+        const y = gy - E.H * 0.11 * scale, w = E.W * 0.14 * scale, h = E.H * 0.07 * scale;
+        box(g, X(x), y, w, h, { fill: '#313944', line: '#8a929c', r: 10, lw: 2, la: 0.9 });
+        oval(g, X(x) + w * 0.2, y + h, w * 0.12, h * 0.22, { fill: '#101216', line: '#858b94', lw: 2 });
+        oval(g, X(x) + w * 0.78, y + h, w * 0.12, h * 0.22, { fill: '#101216', line: '#858b94', lw: 2 });
+      }
+      light(g, X(0.51), Y(0.37), E.H * 0.42, '#ecd5a2', 0.08);
+      M.vanish = [vx, vy]; M.lane = [X(0.5), gy];
+      break;
+    }
+    case 'workshop': {
+      wall(g, '#25211f', '#322a26');
+      windowBox(g, X(0.07), Y(0.1), X(0.19), Y(0.24), { sky: o.sky || 'dawn', t });
+      // Pegboard with individually silhouetted tools.
+      box(g, X(0.56), Y(0.1), X(0.36), Y(0.29), { fill: '#55443a', line: '#967b65', r: 5, lw: 3 });
+      for (let i = 0; i < 5; i++) {
+        const x = X(0.61 + i * 0.063), y = Y(0.17 + (i % 2) * 0.1);
+        ln(g, [[x, y], [x, y + E.H * 0.07], [x - 13, y + E.H * 0.09]], { color: '#c5b8a4', lw: 5, la: 0.82 });
+        oval(g, x, y - 5, 7, 10, { fill: null, line: '#c5b8a4', lw: 3, la: 0.82 });
+      }
+      // Wall shelves, bolts, jars and a heavy timber bench.
+      for (let i = 0; i < 3; i++) {
+        box(g, X(0.06), Y(0.42 + i * 0.07), X(0.25), 12, { fill: '#765744', line: '#b28c6d', r: 2, lw: 2 });
+        for (let j = 0; j < 5; j++) box(g, X(0.08 + j * 0.043), Y(0.38 + i * 0.07), X(0.027), Y(0.04), { fill: ['#8f8e82', '#b68b57', '#657887', '#9b735d'][j % 4], line: '#463c38', r: 3, lw: 1 });
+      }
+      floor(g, gy, '#211d1b');
+      table(g, X(0.5), gy, X(0.72), E.H * 0.24, { fill: '#73513b' });
+      box(g, X(0.32), gy - E.H * 0.255, X(0.16), E.H * 0.035, { fill: '#9c8066', line: '#4d3a2e', r: 4 });
+      for (let i = 0; i < 4; i++) oval(g, X(0.65 + i * 0.025), gy - E.H * 0.255, 4, 4, { fill: '#d4bc8b', line: null, a: 0.9 });
+      deskLamp(g, X(0.78), gy - E.H * 0.24, E.H * 0.12, true);
+      light(g, X(0.78), gy - E.H * 0.24, E.H * 0.3, '#ffc77f', 0.23);
+      M.table = { left: [X(0.14), gy], right: [X(0.86), gy], top: [X(0.5), gy - E.H * 0.24] };
+      break;
+    }
+    case 'museum': {
+      wall(g, '#242127', '#353039');
+      // Quiet gallery wall, track lights, and framed works with generous negative space.
+      box(g, 0, Y(0.13), E.W, Y(0.5), { fill: '#2d2931', line: '#645965', r: 0, lw: 3, la: 0.72 });
+      ln(g, [[0, Y(0.13)], [E.W, Y(0.13)]], { color: '#aca0ad', lw: 5, la: 0.52 });
+      for (let i = 0; i < 5; i++) {
+        const x = X(0.1 + i * 0.2), y = Y(0.21 + (i % 2) * 0.03), w = X(0.12 + (i % 3) * 0.025), h = Y(0.23 + (i % 2) * 0.04);
+        box(g, x, y, w, h, { fill: '#4f454e', line: '#bba889', r: 2, lw: 5, la: 0.95 });
+        box(g, x + 10, y + 10, w - 20, h - 20, { fill: ['#596778', '#8c6c56', '#6e7160', '#9b826f', '#464e60'][i], line: null, r: 0, la: 0.9 });
+        // Abstract shapes in the picture so each frame differs from a blank card.
+        oval(g, x + w * 0.45, y + h * 0.44, w * 0.2, h * 0.19, { fill: '#d4b68a', line: null, a: 0.7 });
+        ln(g, [[x + w * 0.12, y + h * 0.76], [x + w * 0.48, y + h * 0.5], [x + w * 0.88, y + h * 0.82]], { color: '#d7c7ad', lw: 4, la: 0.63 });
+        ln(g, [[x + w * 0.05, Y(0.11)], [x + w * 0.5, y + 1]], { color: '#c9d8ec', lw: 3, la: 0.28 });
+        light(g, x + w / 2, y, E.H * 0.2, '#ffe1ad', 0.15);
+      }
+      floor(g, gy, '#29252d');
+      // Pedestals break the flat-wall composition and create foreground depth.
+      for (const [x, w, h] of [[0.25, 0.11, 0.13], [0.63, 0.14, 0.17]]) {
+        box(g, X(x), gy - E.H * h, X(w), E.H * h, { fill: '#78717b', line: '#bab0ba', r: 3, lw: 2, la: 0.88 });
+        oval(g, X(x + w / 2), gy - E.H * h - 13, X(w * 0.22), E.H * 0.035, { fill: '#bda58a', line: '#d6c8b4', lw: 2 });
+      }
+      for (let i = 0; i < 9; i++) ln(g, [[X(i / 8), gy], [X(0.5 + (i / 8 - 0.5) * 0.18), Y(0.62)]], { color: '#827984', lw: 2, la: 0.17 });
+      M.gallery = [X(0.5), gy]; M.pedestal = [X(0.68), gy - E.H * 0.16];
+      break;
+    }
     default: wall(g); floor(g, gy);
   }
   if (o.dim) { g.save(); g.fillStyle = `rgba(0,0,0,${o.dim})`; g.fillRect(-60, -60, E.W + 120, E.H + 120); g.restore(); }
   return M;
 }
-export const SETS = ['bedroom', 'city', 'street', 'lockers', 'classroom', 'court', 'cafe', 'gym', 'stairs', 'hill', 'mirror', 'kitchen', 'void', 'black', 'doorway'];
+export const SETS = ['bedroom', 'city', 'street', 'lockers', 'classroom', 'court', 'cafe', 'gym', 'stairs', 'hill', 'mirror', 'kitchen', 'void', 'black', 'doorway', 'metro', 'rooftop', 'underpass', 'hospital', 'library', 'warehouse', 'laboratory', 'forest', 'beach', 'parking', 'workshop', 'museum'];
