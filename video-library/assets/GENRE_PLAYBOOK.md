@@ -20,6 +20,18 @@ The resource library is a toolbox, not a fixed art style. The story's intended g
 | Sports / fitness | Arena/gym staging, line/charts/timer/trophy icons, speed/impact overlays | Real action beats and readable motion; prefer actual permitted footage when events are factual |
 | Infographics / explainers | Icon SVGs, charts, process, flow, funnel, timeline, quote, map and comparison templates | One idea per visual, consistent scales, accessible contrast and read time |
 
+
+| Experimental / abstract | Original overlays, procedural grids, topographic lines, starfield, waveform, node network | Give each motion a reason; establish one clear focal point and build/resolve the image over time |
+| Horror / mystery / suspense | Horror-manor palette, rain/fog/vignette, archival objects, sparse light and long shadows | Preserve darkness detail; limit glitch to motivated beats; let negative space and sound create tension |
+| Human stories / relationships | City-day/night, interiors, archival photography, faces/hands/letters, calendar and message inserts | Prioritize body language and specific objects over generic motivational text |
+| Kids / family learning | Bright city/nature palettes, clear icons, animals, large labels, simple step cards | Use simple silhouettes and calm motion; keep captions readable and facts age-appropriate |
+| Historical reconstruction / archaeology | Public-domain maps and illustrations, museum images, paper textures, date cards, reconstructed 3D environments | Label reconstructions and approximate dates; do not present an illustrative model as a real photograph |
+| Vertical social / teaser | 9:16 safe-area overlay, giant title card, waveform, high-contrast image crop, concise stat/quote cards | Compose for phone-size readability, keep vital text clear of platform UI, and make the first 1–2 seconds distinctive |
+| Music / performance visuals | Waveform overlay, spectrum-style line art, bokeh, film grain, stage palettes and light sweeps | Let rhythm inform timing; use only music/SFX with clear usage rights |
+| Tutorial / software walkthrough | Accurate UI captures, step numbers, source cards, diagram/process templates, restrained cursor highlights | Show real product state; don't fabricate interface screenshots or claim a feature exists based on a decorative mockup |
+| Real-estate / architecture | Architecture and city images, floor-plan/blueprint overlays, model renders, daylight/night palettes | Keep spatial scale and property details accurate; label conceptual images and illustrative renders |
+| Sports highlight / training | Motion speed lines, impact overlays, timer/trophy/charts, arena environment and real permitted footage | Prioritize actual motion/action; overlays must not obscure the key action or fake score/time data |
+
 ## Practical selection rules
 
 - Do not reuse the same establishing background two shots in a row unless the location intentionally persists.
