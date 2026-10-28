@@ -966,10 +966,15 @@ def download_met_open_access(root,index):
 
 
 def nasa_item_is_eligible(data):
-    """Apply conservative NASA origin, copyright-marker, and identifiable-person filters."""
-    center=str(data.get("center") or "")
-    if "NASA" not in center.upper():
-        return False, "item is not attributed to a NASA center"
+    """Screen NASA-center attribution and explicit rights/person markers without rejecting center codes."""
+    center=str(data.get("center") or "").strip().upper()
+    known_centers={"NASA","JPL","JSC","KSC","GSFC","HQ","MSFC","LRC","ARC","AFRC","SSC","GRC",
+                   "LARC","DFRC","NSSC","NESC","GISS","Ames Research Center".upper(),
+                   "GODDARD SPACE FLIGHT CENTER","JOHNSON SPACE CENTER","KENNEDY SPACE CENTER",
+                   "MARSHALL SPACE FLIGHT CENTER","AMES RESEARCH CENTER","GLENN RESEARCH CENTER",
+                   "LANGLEY RESEARCH CENTER","STENNIS SPACE CENTER"}
+    if not (center in known_centers or "NASA" in center):
+        return False, "record has no recognized NASA-center attribution"
     title=str(data.get("title") or "")
     description=str(data.get("description") or "")
     secondary=str(data.get("secondary_creator") or "")
@@ -980,10 +985,14 @@ def nasa_item_is_eligible(data):
         return False, "explicit copyright/rights or protected NASA identifier marker found"
     keywords=data.get("keywords") or []
     if isinstance(keywords,str): keywords=[keywords]
-    people_terms=("astronaut","portrait","crew","person","people","employee","human subject")
-    if any(any(term in str(word).lower() for term in people_terms) for word in keywords):
+    people_terms={"astronaut","astronauts","portrait","portraits","crew portrait","crew portraits",
+                  "people","person","personnel","human subject","human subjects","self portrait"}
+    normalized={str(word).strip().lower() for word in keywords}
+    if any(word in people_terms for word in normalized):
         return False, "identifiable-person category excluded from the general stock pool"
-    return True, "NASA-center attribution, no explicit third-party copyright marker, NASA media guidance retained"
+    if any("third-party copyright" in str(word).lower() or "copyrighted" in str(word).lower() for word in keywords):
+        return False, "item keywords include an explicit third-party rights marker"
+    return True, "recognized NASA center, no explicit third-party copyright marker, NASA media guidance retained"
 
 
 def download_nasa_media(root,index):
@@ -1104,15 +1113,39 @@ def loc_rights_are_eligible(rights):
     if isinstance(rights,list): text_value=" ".join(str(x) for x in rights)
     elif isinstance(rights,dict): text_value=" ".join(str(v) for v in rights.values())
     else: text_value=str(rights or "")
-    low=text_value.lower()
+    low=text_value.lower().replace("&nbsp;"," ")
     positive=("no known restrictions on publication","public domain","no known copyright restrictions")
     negative=("copyrighted","permission required","possible restrictions","restricted material","all rights reserved")
     return any(p in low for p in positive) and not any(n in low for n in negative),text_value
 
 
+def loc_rights_from_item(detail):
+    """Prefer the Library's item-level rights_information / rights_advisory fields."""
+    item_record=detail.get("item") if isinstance(detail,dict) else {}
+    if not isinstance(item_record,dict): item_record={}
+    candidates=[
+        item_record.get("rights_information"),
+        item_record.get("rights_advisory"),
+        item_record.get("rights_status"),
+        item_record.get("rights"),
+        detail.get("rights_information") if isinstance(detail,dict) else None,
+        detail.get("rights_advisory") if isinstance(detail,dict) else None,
+    ]
+    for candidate in candidates:
+        eligible,text_value=loc_rights_are_eligible(candidate)
+        if eligible:
+            return True,text_value,item_record
+    # Return the first non-empty statement for a useful skipped-item report.
+    for candidate in candidates:
+        if candidate:
+            _,text_value=loc_rights_are_eligible(candidate)
+            return False,text_value,item_record
+    return False,"No explicit positive item-level rights statement present",item_record
+
+
 def download_loc_public_domain(root,index):
-    """Download LOC images only when each record has an explicit positive rights statement."""
-    report=[]; total=0; cap=80
+    """Only bundle LOC photos after verifying a positive rights statement on the exact item record."""
+    report=[]; total=0; cap=48
     queries=[
         ("aviation","aircraft aviation"),("maps","historical map"),("industry","industrial machinery"),
         ("agriculture","farm harvest"),("city","historic city street"),("nature","national park landscape"),
@@ -1124,57 +1157,87 @@ def download_loc_public_domain(root,index):
     seen=set()
     for category,q in queries:
         if total>=cap: break
-        url="https://www.loc.gov/photos/?"+urllib.parse.urlencode({"fo":"json","c":60,"q":q})
-        successes=0
+        url="https://www.loc.gov/photos/?"+urllib.parse.urlencode({"fo":"json","c":30,"q":q})
+        successes=0; checked=0; rejections=[]
         try:
-            response=request_json(url,timeout=20)
+            response=request_json(url,timeout=12)
             for item in response.get("results") or []:
-                if total>=cap or successes>=5: break
-                eligible,rights_text=loc_rights_are_eligible(item.get("rights") or item.get("rights_note") or item.get("rights_status"))
-                if not eligible:
-                    continue
+                if total>=cap or successes>=3 or checked>=8: break
                 item_url=str(item.get("url") or item.get("id") or "")
-                identity=item_url.rstrip("/").split("/")[-1] if item_url else slugify(item.get("title",""))
+                if not item_url: continue
+                identity=item_url.rstrip("/").split("/")[-1]
                 if not identity or identity in seen: continue
-                image_urls=item.get("image_url") or []
+                seen.add(identity); checked+=1
+                detail_url=item_url.replace("http://","https://")
+                detail_url += ("&" if "?" in detail_url else "?")+"fo=json"
+                try:
+                    detail=request_json(detail_url,timeout=10)
+                except Exception as detail_exc:
+                    rejections.append("item metadata timeout/error: "+str(detail_exc))
+                    continue
+                eligible,rights_text,item_record=loc_rights_from_item(detail)
+                if not eligible:
+                    rejections.append("rights not positively stated: "+rights_text[:120])
+                    continue
+                if item_record.get("access_restricted") is True:
+                    rejections.append("item-level access_restricted=true")
+                    continue
+                source_summary=item_record if item_record else item
+                image_urls=source_summary.get("image_url") or item.get("image_url") or []
                 if isinstance(image_urls,str): image_urls=[image_urls]
                 if isinstance(image_urls,dict): image_urls=list(image_urls.values())
                 candidates=[str(x) for x in image_urls if isinstance(x,str) and urllib.parse.urlparse(x).hostname in {"loc.gov","www.loc.gov","tile.loc.gov"}]
-                if not candidates: continue
-                candidates=list(reversed(candidates))
+                if not candidates:
+                    resources=detail.get("resources") or []
+                    for resource in resources:
+                        for file_group in (resource.get("files") or []):
+                            group_items=file_group if isinstance(file_group,list) else [file_group]
+                            for fileobj in group_items:
+                                if not isinstance(fileobj,dict): continue
+                                candidate=str(fileobj.get("url") or fileobj.get("filename") or fileobj.get("download") or "")
+                                if candidate and urllib.parse.urlparse(candidate).hostname in {"loc.gov","www.loc.gov","tile.loc.gov"}:
+                                    candidates.append(candidate)
+                if not candidates:
+                    rejections.append("rights passed but no direct image URL found")
+                    continue
                 downloaded=None
-                for image_url in candidates:
+                for image_url in list(dict.fromkeys(reversed(candidates))):
                     try:
-                        blob,ctype=request_bytes(image_url,timeout=25,limit=MAX_MEDIA_FILE)
+                        blob,ctype=request_bytes(image_url,timeout=12,limit=MAX_MEDIA_FILE)
                         if not ctype.lower().startswith("image/") or len(blob)<2048:
                             continue
                         ext=Path(urllib.parse.urlparse(image_url).path).suffix.lower()
                         if ext not in {".jpg",".jpeg",".png",".webp"}:
                             ext={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"}.get(ctype.split(";")[0].lower(),".jpg")
                         downloaded=(image_url,ext,blob); break
-                    except Exception:
-                        continue
+                    except Exception as image_exc:
+                        rejections.append("image fetch failed: "+str(image_exc))
                 if not downloaded: continue
                 image_url,ext,blob=downloaded
-                seen.add(identity)
-                title=str(item.get("title") or identity)
+                title=str(source_summary.get("title") or item.get("title") or identity)
                 target=root/"third-party/library-of-congress"/(f"{category}-{slugify(title)[:46]}-{slugify(identity)}{ext}")
                 target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
                 digest=sha256_path(target)
-                source_page=item_url if item_url.startswith("https://") else "https://www.loc.gov"+item_url
+                source_page=source_summary.get("id") or item_url
+                source_page=str(source_page).replace("http://","https://")
                 entry={"id":"loc-"+slugify(identity),"path":target.relative_to(root).as_posix(),"type":"loc-rights-verified-image",
-                       "title":title,"category":category,"date":item.get("date"),"description":str(item.get("description") or "")[:1500],
+                       "title":title,"category":category,"date":source_summary.get("date") or item.get("date"),
+                       "description":str(source_summary.get("description") or item.get("description") or "")[:1500],
                        "rights_statement":rights_text,"source_page":source_page,"source_file_url":image_url,
                        "license":"Public Domain / No Known Restrictions on Publication (record-level rights statement)",
                        "license_url":"https://www.loc.gov/rr/print/195_copr.html","rights_verified_from_item_metadata":True,
-                       "usage_notes":"LOC states users are responsible for evaluating rights and other restrictions; preserve this item's rights statement and assess context before publication.",
+                       "usage_notes":"LOC states users are responsible for evaluating rights and other restrictions; preserve this item's exact rights statement and assess context before publication.",
                        "size_bytes":len(blob),"sha256":digest,"redistributable":True}
                 index.append(entry); total+=1; successes+=1
                 report.append({"id":entry["id"],"status":"downloaded","category":category,"path":entry["path"],
                                "title":title,"source_page":source_page,"rights_statement":rights_text,
                                "size_bytes":len(blob),"sha256":digest})
                 print("[Library of Congress] OK:",category,title[:48],len(blob))
-            time.sleep(.2)
+                time.sleep(.12)
+            if not successes:
+                report.append({"id":"loc-"+category,"status":"no_eligible_item","category":category,"query":q,
+                               "source_page":"https://www.loc.gov/apis/json-and-yaml/","items_checked":checked,
+                               "reason":"No downloadable image passed exact-item rights verification. "+ " | ".join(rejections[:3])})
         except Exception as exc:
             report.append({"id":"loc-"+category,"status":"failed","category":category,"query":q,
                            "source_page":"https://www.loc.gov/apis/json-and-yaml/","reason":str(exc)})
