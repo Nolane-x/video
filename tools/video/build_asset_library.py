@@ -841,6 +841,70 @@ def download_openverse(root,index):
     return report
 
 
+
+def make_asset_catalog(root,index,summary):
+    cards=[]
+    for item in index:
+        rel=item.get("path")
+        if not isinstance(rel,str) or not (root/rel).is_file(): continue
+        path=Path(rel); ext=path.suffix.lower()
+        title=str(item.get("title") or item.get("description") or item.get("id") or path.name)
+        category=str(item.get("category") or item.get("type") or "asset")
+        asset_type=str(item.get("type") or "asset")
+        license_name=str(item.get("license") or "check source record")
+        source=item.get("source_page") or item.get("source_landing_url") or ""
+        license_url=item.get("license_url") or ""
+        if ext in {".svg",".png",".jpg",".jpeg",".webp"}:
+            preview=f'<img loading="lazy" alt="{html.escape(title,quote=True)}" src="{html.escape(rel,quote=True)}">'
+        elif ext==".wav":
+            preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
+        else:
+            preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
+        size=(root/rel).stat().st_size
+        size_text=f"{size/1024:.0f} KB" if size<1024*1024 else f"{size/(1024*1024):.1f} MB"
+        links=[f'<a class="file-link" href="{html.escape(rel,quote=True)}" download>Open / download</a>']
+        if source: links.append(f'<a href="{html.escape(str(source),quote=True)}" target="_blank" rel="noreferrer">Source</a>')
+        if license_url: links.append(f'<a href="{html.escape(str(license_url),quote=True)}" target="_blank" rel="noreferrer">License</a>')
+        search=' '.join(str(item.get(k,"")) for k in ("id","title","description","category","type","creator","artist","date","department"))
+        cards.append(
+            f'<article class="card" data-category="{html.escape(category,quote=True)}" data-search="{html.escape(search.lower(),quote=True)}">'
+            f'<div class="preview">{preview}</div><div class="body"><div class="kicker">{html.escape(category)} · {html.escape(asset_type)}</div>'
+            f'<h3>{html.escape(title)}</h3><p class="meta">{html.escape(license_name)} · {size_text}</p>'
+            f'<div class="links">{" ".join(links)}</div></div></article>'
+        )
+    counts = " · ".join(f"{html.escape(str(k))}: {html.escape(str(v))}" for k,v in summary.items() if isinstance(v,(str,int,float)))
+    document=f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nolane Video Asset Library</title>
+<style>
+:root{{--bg:#10141b;--panel:#1a212b;--line:#354151;--text:#f2f4f8;--muted:#aab5c2;--accent:#79d5c8}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}}
+header{{padding:32px clamp(20px,5vw,70px);border-bottom:1px solid var(--line);background:linear-gradient(130deg,#192431,#121821 65%)}}
+h1{{margin:0;font-size:clamp(28px,4vw,46px);letter-spacing:-.04em}}header p{{max-width:900px;color:var(--muted)}}.summary{{font-size:12px;color:var(--muted)}}
+.controls{{position:sticky;top:0;z-index:2;display:flex;gap:12px;padding:15px clamp(16px,4vw,60px);background:#10141bf2;border-bottom:1px solid var(--line)}}
+input,select{{min-width:0;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}}input{{flex:1}}
+main{{padding:24px clamp(16px,4vw,60px) 65px}}.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}}
+.card{{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--panel);display:flex;flex-direction:column}}
+.preview{{height:190px;background:#111923;display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid var(--line)}}
+.preview img{{width:100%;height:100%;object-fit:contain;background:#111923}}.preview audio{{width:90%}}.file-preview{{width:100%;height:100%;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:var(--accent);background:radial-gradient(circle at 50% 40%,#283748,#111923)}}.file-preview span{{font-size:28px;font-weight:750;letter-spacing:.07em}}.file-preview small{{color:var(--muted)}}
+.body{{padding:15px;display:flex;flex-direction:column;flex:1}}.kicker{{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);overflow-wrap:anywhere}}h3{{font-size:16px;line-height:1.3;margin:8px 0 6px;overflow-wrap:anywhere}}.meta{{font-size:12px;color:var(--muted);margin:0 0 15px}}.links{{display:flex;gap:12px;flex-wrap:wrap;margin-top:auto}}a{{color:var(--accent);font-size:12px;text-decoration:none}}a:hover{{text-decoration:underline}}.file-link{{font-weight:700}}#count{{color:var(--muted);font-size:13px;margin:0 0 12px}}footer{{padding:24px clamp(16px,4vw,60px);border-top:1px solid var(--line);color:var(--muted);font-size:12px}}
+@media(max-width:600px){{.controls{{flex-direction:column}}.preview{{height:160px}}}}
+</style></head><body>
+<header><h1>Nolane · Video Asset Library</h1>
+<p>Offline catalog of original vector environments, transparent motion overlays, reusable infographic frames, synthesized sound effects, and third-party media whose item-level license was verified for redistribution. Pick resources by the visual need of the shot, not by genre alone.</p>
+<p class="summary">{counts}</p></header>
+<div class="controls"><input id="search" type="search" placeholder="Search assets, topics, creators, types…"><select id="category"><option value="">All categories</option></select></div>
+<main><p id="count"></p><div class="grid" id="grid">{"".join(cards)}</div></main>
+<footer>License and provenance data lives in ASSET_INDEX.json and SOURCES_AND_LICENSES.md. A source link does not itself grant raw-file redistribution rights. Verify the asset is suitable for the actual video and honor any rights or context limitations.</footer>
+<script>
+const cards=[...document.querySelectorAll('.card')], search=document.querySelector('#search'), select=document.querySelector('#category'), count=document.querySelector('#count');
+const categories=[...new Set(cards.map(c=>c.dataset.category).filter(Boolean))].sort();
+for(const c of categories){const o=document.createElement('option');o.value=c;o.textContent=c;select.append(o)}
+function filter(){const q=search.value.trim().toLowerCase(),cat=select.value;let n=0;for(const c of cards){const ok=(!q||c.dataset.search.includes(q))&&(!cat||c.dataset.category===cat);c.hidden=!ok;if(ok)n++}count.textContent=n+' assets shown';}
+search.addEventListener('input',filter);select.addEventListener('change',filter);filter();
+</script></body></html>"""
+    write_text(root/"ASSET_CATALOG.html",document)
+
 def main():
     if STAGE.exists(): shutil.rmtree(STAGE)
     STAGE.mkdir(parents=True)
@@ -874,6 +938,7 @@ def main():
     summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),"original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),"kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),"polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),"polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),"met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),"wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),"openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),"checksummed_files":len(digest_lines)}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),"repository":"https://github.com/Nolane-x/video","policy":"Original assets are CC0; third-party bundles require explicit item-level CC0 or Public Domain metadata; source-only libraries are not raw-bundled.","summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},"kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,"met_open_access_downloads":met_report,"wikimedia_public_domain_downloads":wikimedia_report,"openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
+    make_asset_catalog(STAGE,index,summary)
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=30 and len(OVERLAYS)>=30 and len(ICONS)>=50 and len(INFO)>=20
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)
