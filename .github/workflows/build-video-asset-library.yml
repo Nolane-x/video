@@ -1,0 +1,119 @@
+name: Build cross-genre video asset library
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-video-asset-library.yml"
+      - "tools/video/build_asset_library.py"
+      - "video-library/assets/sources.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: video-asset-library
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build, validate and publish CC0-safe assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Compile asset builder before any network downloads
+        run: python -m py_compile tools/video/build_asset_library.py
+
+      - name: Build vector originals and download licensed resources
+        run: python tools/video/build_asset_library.py dist/video-assets
+
+      - name: Validate index, checksums, archive and original asset counts
+        run: |
+          python - <<'PY'
+          import json
+          import hashlib
+          import zipfile
+          from pathlib import Path
+
+          root = Path("dist/video-assets/video-asset-library")
+          index_path = root / "ASSET_INDEX.json"
+          sums_path = root / "SHA256SUMS.txt"
+          archive = Path("dist/video-assets/video-asset-library.zip")
+          summary_path = Path("dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt"
+
+          )
+          assert root.is_dir(), "Library folder missing"
+          assert index_path.is_file() and sums_path.is_file(), "Index or checksum ledger missing"
+          assert archive.is_file() and archive.stat().st_size > 1024, "ZIP is missing/too small"
+          assert summary_path.is_file(), "Build summary missing"
+
+          index = json.loads(index_path.read_text(encoding="utf-8"))
+          expected = index["summary"]
+          assert expected["original_backgrounds"] >= 30
+          assert expected["original_overlays"] >= 30
+          assert expected["original_icons"] >= 50
+          assert expected["original_infographics"] >= 20
+
+          for line in sums_path.read_text(encoding="utf-8").splitlines():
+              if not line.strip():
+                  continue
+              digest, rel = line.split("  ", 1)
+              target = root / rel
+              assert target.is_file(), f"Checksum target missing: {rel}"
+              h = hashlib.sha256(target.read_bytes()).hexdigest()
+              assert h == digest, f"Checksum mismatch: {rel}"
+
+          with zipfile.ZipFile(archive) as zf:
+              assert zf.testzip() is None, "Asset ZIP integrity test failed"
+              names = zf.namelist()
+              assert any(p.endswith("ASSET_INDEX.json") for p in names)
+              assert any(p.endswith("SOURCES_AND_LICENSES.md") for p in names)
+              assert any(p.endswith("SHA256SUMS.txt") for p in names)
+
+          print(json.dumps({
+              "summary": expected,
+              "archive_bytes": archive.stat().st_size,
+              "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+              "checksummed_entries": len(sums_path.read_text(encoding="utf-8").splitlines()),
+          }, indent=2))
+          PY
+
+      - name: Publish versioned downloadable library
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: video-asset-library-build-${{ github.run_number }}
+          name: Video Asset Library Build ${{ github.run_number }}
+          fail_on_unmatched_files: true
+          files: |
+            dist/video-assets/video-asset-library.zip
+            dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
+          body: |
+            Automated cross-genre video resources for Nolane Video Studio.
+
+            The package includes original CC0 vector backgrounds, overlays, icon SVGs and infographic templates, plus third-party assets only where the item/pack license is explicitly verified as CC0 by the builder. Item-level source, license and SHA-256 data is included.
+
+            Some external providers can be unreachable or change their API; the build index records successful, failed and skipped downloads. "Free to use" sources with limits on raw-file redistribution are documented as source-only and are not mirrored into this archive.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload index and license report for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-asset-library-reports-${{ github.run_number }}
+          path: |
+            dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
+            dist/video-assets/video-asset-library/ASSET_INDEX.json
+            dist/video-assets/video-asset-library/SOURCES_AND_LICENSES.md
+            dist/video-assets/video-asset-library/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
