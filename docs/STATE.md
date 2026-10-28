@@ -1,6 +1,6 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-28 after the latest caption-readability review. Current verified green candidates: **THE WEIGHT OF YES #31** and **ALMOST READY #34**. **THE FIRST HOUR #53** is rebuilding after full-resolution review found two B27 caption-placement defects in #52. Technical/export checks and checksums passed for the green candidates, but none is approved for final release yet: full-length video and perceptual audio review remain pending. The canonical ONE MORE SCROLL master remains unchanged.
+Snapshot updated 2026-10-28 after tracing the First Hour B27 caption regression to the final override merge. Current green candidates: **THE WEIGHT OF YES #31**, **ALMOST READY #34**, and **THE FIRST HOUR #53** technically passed, but #53 still rendered stale B27 text because `shot-overrides.json` replaced the patched tuner arguments. The actual override was corrected in commit `1fc7a4c0e9fae34b2f1847204a63ad3a96e771f2`, and a post-merge regression gate was added in `9d86d9a4195982924868468887ff68a2fbcf1790`. First Hour run #54 is in progress and run #55 is queued. None is approved for final release: full-length video and perceptual audio review remain pending. The canonical ONE MORE SCROLL master remains unchanged.
 
 ## Current active candidate — THE WEIGHT OF YES
 - QA: [manifest](../video-library/the-weight-of-yes/manifest.json), [QA ledger](../video-library/the-weight-of-yes/QA.md).
@@ -10,7 +10,7 @@ Snapshot updated 2026-10-28 after the latest caption-readability review. Current
 - Targeted visual QA: both sheets reviewed; B07 handwritten YES. is inside the page and B19’s boundary caption clears the actors/board. Full-length approval pending.
 
 ## Parallel H2 candidates
-- **THE FIRST HOUR**: [run #52 — success](https://github.com/Nolane-x/video/actions/runs/40534178338); [run #53 — caption-position correction rendering](https://github.com/Nolane-x/video/actions/runs/40626151070). Run #52 master is 172.000 s, H.264 1920×1080 @24 fps + AAC stereo 48 kHz; SHA-256 `0b9c519c778bb5f75b27bf07e2126ef7b99944e0737728b1998cc1f3e96a59c7`; −14.0 LUFS, LRA 6.6 LU, true peak −1.9 dBFS. Full-resolution spot-check found B27’s final narration clipped at the left edge and the whisper caption crossing the calendar; source positions were corrected in commit `4e9e5374ceaa55bd4926cbfc1b99ffb112580dbd`. Run #53 must be rechecked before acceptance.
+- **THE FIRST HOUR**: [run #52 — success](https://github.com/Nolane-x/video/actions/runs/40534178338); [run #53 — technical success, visual issue still present](https://github.com/Nolane-x/video/actions/runs/40626151070); [run #54 — corrected override render in progress](https://github.com/Nolane-x/video/actions/runs/40626837716); [run #55 — post-merge regression gate queued](https://github.com/Nolane-x/video/actions/runs/40626868973). The #52 master is 172.000 s, H.264 1920×1080 @24 fps + AAC stereo 48 kHz; SHA-256 `0b9c519c778bb5f75b27bf07e2126ef7b99944e0737728b1998cc1f3e96a59c7`; −14.0 LUFS, LRA 6.6 LU, true peak −1.9 dBFS. Full-resolution review proved the tuner-only fix did not propagate because the workflow replaces shot args from `shot-overrides.json`; that actual input is now corrected and the workflow checks the merged timing/lanes.
 - **ALMOST READY**: [run #34 — success](https://github.com/Nolane-x/video/actions/runs/40532086120). 172.000 s; master SHA-256 `aed4367abf31d0373d767856e4412bc96ce6be99a3210cc8e1abb3c0e1fac12a`; −14.1 LUFS, LRA 9.1 LU, true peak −1.8 dBFS. Both contact sheets and selected 1080p B27 frames were inspected; caption beats now have a readable dwell window.
 - Green-run outputs are temporary Actions artifacts, not durable release archives. Full-length playback and perceptual listening are still pending for all three films.
 
@@ -24,7 +24,7 @@ Snapshot updated 2026-10-28 after the latest caption-readability review. Current
 ## Caption readability revision — 2026-10-28
 - Shared H2 handwritten-temptation renderer now caps the typewriter reveal at 30% of the caption’s hold, so the audience gets time to read the complete line.
 - First Hour and Almost Ready source tuners add a regression gate requiring at least 1.2 seconds of full-text readability for temptation overlays, with timing kept inside the shot.
-- Full-resolution review caught two additional First Hour B27 layout defects in run #52 (caption edge clipping and overlap with a calendar). The authored coordinates and safe-lane assertions were corrected; run #53 is the new candidate to inspect.
+- Full-resolution review of #52/#53 caught two First Hour B27 defects (closing-caption edge clipping and whisper/calendar collision). Root cause: the workflow overwrote the tuner’s `args` with `shot-overrides.json`. The override is corrected in `1fc7a4c0e9fae34b2f1847204a63ad3a96e771f2`; post-merge checks were added in `9d86d9a4195982924868468887ff68a2fbcf1790`. Inspect run #54/#55, not #53, for acceptance.
 - Preserve the canonical ONE MORE SCROLL master. Green CI is technical evidence, not artistic approval.
 
 ## Repository
