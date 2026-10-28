@@ -404,6 +404,19 @@
       "verified_page_license": true,
       "bundling": "auto-only-when-isPublicDomain-is-true",
       "note": "The builder uses the current paginated v1.1 search endpoint and independently checks each object's isPublicDomain flag before downloading an image from images.metmuseum.org. Preserve the exact object page, title, artist and date. The Met notes third-party rights can still apply to some depicted subjects."
+    },
+    {
+      "id": "wikimedia-commons-public-domain",
+      "title": "Wikimedia Commons — item-verified CC0/Public Domain media",
+      "provider": "Wikimedia Commons",
+      "kind": "images / reference media",
+      "source_page": "https://commons.wikimedia.org/wiki/Commons:Licensing",
+      "api": "https://commons.wikimedia.org/w/api.php",
+      "license": "Per item. Automatic bundling accepts only exact CC0 or Public Domain metadata.",
+      "license_url": "https://commons.wikimedia.org/wiki/Commons:Licensing",
+      "verified_page_license": true,
+      "bundling": "auto-only-on-file-level-cc0-or-public-domain",
+      "note": "The builder queries file namespace 6, reads each file's extmetadata, filters out CC BY, CC BY-SA, NC, missing or ambiguous licenses, uses the item thumbnail only, and stores the source page, creator, license URL, date/title metadata and SHA-256. Public-domain content may still depict people, trademarks or other third-party rights."
     }
   ]
 }
