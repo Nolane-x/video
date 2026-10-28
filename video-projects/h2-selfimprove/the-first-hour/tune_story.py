@@ -205,8 +205,8 @@ a.update({
     "cam": camera(0.66, 0.62, 1.0, 1.38, 8.35),
     "texts": [
         {"kind": "narr", "t": "The voice returned.", "at": 0.35, "dur": 2.05, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
-        {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 2.85, "x": 0.80, "y": 0.31, "size": 46},
-        {"kind": "narr", "t": "But it sounded smaller now.", "at": 5.55, "dur": 3.15, "x": 0.12, "y": 0.30, "size": 44, "maxW": 0.22},
+        {"kind": "tempt", "t": "just one more scroll.", "at": 2.60, "dur": 2.85, "x": 0.80, "y": 0.43, "size": 46},
+        {"kind": "narr", "t": "But it sounded smaller now.", "at": 5.55, "dur": 3.15, "x": 0.22, "y": 0.47, "size": 44, "maxW": 0.23},
     ],
 })
 
@@ -267,7 +267,9 @@ assert float(b27_text["But it sounded smaller now."]["at"]) + float(b27_text["Bu
 assert float(b27_text["just one more scroll."]["at"]) + float(b27_text["just one more scroll."]["dur"]) <= float(b27_text["But it sounded smaller now."]["at"]) - 0.05
 assert abs(float(get("b27")["end"]) - float(get("b27")["start"]) - 9.0) < 0.02
 assert by_id["b27"]["args"]["texts"][0]["x"] <= 0.25 and by_id["b27"]["args"]["texts"][2]["x"] <= 0.25
-assert by_id["b27"]["args"]["texts"][0]["maxW"] <= 0.23 and by_id["b27"]["args"]["texts"][2]["maxW"] <= 0.23
+assert by_id["b27"]["args"]["texts"][0]["maxW"] <= 0.23 and by_id["b27"]["args"]["texts"][2]["maxW"] <= 0.24
+assert 0.44 <= b27_text["But it sounded smaller now."]["y"] <= 0.50, "B27 final narration must stay below the window and clear of the left frame edge"
+assert 0.40 <= b27_text["just one more scroll."]["y"] <= 0.47 and 0.76 <= b27_text["just one more scroll."]["x"] <= 0.84, "B27 whisper must stay below the calendar in the clear right-side lane"
 story["duration"] = float(shots[-1]["end"])
 path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Art direction applied: {len(shots)} shots; duration={story['duration']}s")
