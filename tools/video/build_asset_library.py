@@ -201,7 +201,7 @@ ICONS = {
 }
 
 
-// Additional purpose-built pictograms broaden the visual vocabulary without importing icon packs.
+# Additional purpose-built pictograms broaden the visual vocabulary without importing icon packs.
 ICONS.update({
 "satellite":'<rect x="24" y="24" width="16" height="16" rx="3"/><path d="M23 23L12 12M41 41L52 52M7 7L20 20M44 44L57 57M9 27L27 9M37 55L55 37"/>',
 "telescope":'<path d="M12 12L39 5L45 22L18 29Z"/><path d="M18 29L28 42M39 24L50 48M29 42L19 59M49 48L56 59M10 59H60"/>',
