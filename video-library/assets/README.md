@@ -17,7 +17,7 @@ This is the shared asset pool for future videos, not a collection dedicated to t
 ## Release deliverables
 
 The Actions builder generates a versioned downloadable ZIP containing:
-- 64+ original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
+- 63+ original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
 - 56+ transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
 - 98+ original icon SVGs and 40+ infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
