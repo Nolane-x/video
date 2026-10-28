@@ -1,18 +1,18 @@
 # Video Studio — current state snapshot
 
-Snapshot updated 2026-10-27 after caption-safe-area and notebook layout revisions. Latest H2 candidates: **THE WEIGHT OF YES #30**, **THE FIRST HOUR #48**, and **ALMOST READY #33**. Each latest workflow completed all 19 steps; downloaded artifacts passed every entry in their checksum ledgers. Both contact sheets were manually inspected for each film and targeted 1080p frames were reviewed at previously failing text locations. None is approved for final release yet: complete start-to-finish video and audio review remains pending. The canonical ONE MORE SCROLL master remains unchanged.
+Snapshot updated 2026-10-28 after the latest caption-readability review. Current verified green candidates: **THE WEIGHT OF YES #31** and **ALMOST READY #34**. **THE FIRST HOUR #53** is rebuilding after full-resolution review found two B27 caption-placement defects in #52. Technical/export checks and checksums passed for the green candidates, but none is approved for final release yet: full-length video and perceptual audio review remain pending. The canonical ONE MORE SCROLL master remains unchanged.
 
 ## Current active candidate — THE WEIGHT OF YES
 - QA: [manifest](../video-library/the-weight-of-yes/manifest.json), [QA ledger](../video-library/the-weight-of-yes/QA.md).
-- Latest render: [run #30 — all 19 steps passed](https://github.com/Nolane-x/video/actions/runs/40461365610), source [commit](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442).
+- Latest render: [run #31 — success](https://github.com/Nolane-x/video/actions/runs/40532086413), source [commit](https://github.com/Nolane-x/video/commit/58c95de849405b0ae5d1636851bb883ffa3870ec).
 - Master: 143.000 s, H.264 1920×1080 @24 fps + AAC stereo 48 kHz; SHA-256 `cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d`.
 - Audio: −14.0 LUFS, LRA 9.2 LU, true peak −5.0 dBFS.
-- Targeted visual QA: contact sheets reviewed; B07 handwritten YES. is inside the page and B19’s boundary caption clears the actors/board. Full-length approval pending.
+- Targeted visual QA: both sheets reviewed; B07 handwritten YES. is inside the page and B19’s boundary caption clears the actors/board. Full-length approval pending.
 
 ## Parallel H2 candidates
-- **THE FIRST HOUR**: [run #48 — success](https://github.com/Nolane-x/video/actions/runs/40462283974). 172.000 s; master SHA-256 `47ded9fb4c2fb4512853e3f8de1d02095c608e775545bc8b9466746485e40730`; −14.0 LUFS, LRA 6.6 LU, −1.9 dBFS true peak. Targeted B20 notebook frame shows the caption inside the lower-right paper region.
-- **ALMOST READY**: [run #33 — success](https://github.com/Nolane-x/video/actions/runs/40462284021). 172.000 s; master SHA-256 `1b55dc7dda017d7f9869c2b3b5e5492a2c97d471e51ac958e019a031c7af5fc9`; −14.1 LUFS, LRA 9.1 LU, −1.8 dBFS true peak. Targeted B13 frame shows narration above the reduced clock/SNOOZE UI.
-- All three are temporary Actions artifacts, not durable release archives.
+- **THE FIRST HOUR**: [run #52 — success](https://github.com/Nolane-x/video/actions/runs/40534178338); [run #53 — caption-position correction rendering](https://github.com/Nolane-x/video/actions/runs/40626151070). Run #52 master is 172.000 s, H.264 1920×1080 @24 fps + AAC stereo 48 kHz; SHA-256 `0b9c519c778bb5f75b27bf07e2126ef7b99944e0737728b1998cc1f3e96a59c7`; −14.0 LUFS, LRA 6.6 LU, true peak −1.9 dBFS. Full-resolution spot-check found B27’s final narration clipped at the left edge and the whisper caption crossing the calendar; source positions were corrected in commit `4e9e5374ceaa55bd4926cbfc1b99ffb112580dbd`. Run #53 must be rechecked before acceptance.
+- **ALMOST READY**: [run #34 — success](https://github.com/Nolane-x/video/actions/runs/40532086120). 172.000 s; master SHA-256 `aed4367abf31d0373d767856e4412bc96ce6be99a3210cc8e1abb3c0e1fac12a`; −14.1 LUFS, LRA 9.1 LU, true peak −1.8 dBFS. Both contact sheets and selected 1080p B27 frames were inspected; caption beats now have a readable dwell window.
+- Green-run outputs are temporary Actions artifacts, not durable release archives. Full-length playback and perceptual listening are still pending for all three films.
 
 ## Shared H2 fix pushed to main
 - Commit: [`1ab974acc2f8e0b268940fbf16f6b566884dace6`](https://github.com/Nolane-x/video/commit/1ab974acc2f8e0b268940fbf16f6b566884dace6).
@@ -20,6 +20,12 @@ Snapshot updated 2026-10-27 after caption-safe-area and notebook layout revision
 - Root cause: scheduled `walk`/`run` keyframe objects were passed to the character rig as numeric gait speeds when the actor was outside an active movement interval, corrupting limbs and occasionally detaching held props at first/last frames.
 - Fix: strip scheduled movement descriptors outside active gait windows; three H2 projects rerendered successfully.
 - Regression evidence: THE WEIGHT OF YES B08 proof sampled at opening/middle/end; THE FIRST HOUR B19 and ALMOST READY B19 sampled for coherent limbs.
+
+## Caption readability revision — 2026-10-28
+- Shared H2 handwritten-temptation renderer now caps the typewriter reveal at 30% of the caption’s hold, so the audience gets time to read the complete line.
+- First Hour and Almost Ready source tuners add a regression gate requiring at least 1.2 seconds of full-text readability for temptation overlays, with timing kept inside the shot.
+- Full-resolution review caught two additional First Hour B27 layout defects in run #52 (caption edge clipping and overlap with a calendar). The authored coordinates and safe-lane assertions were corrected; run #53 is the new candidate to inspect.
+- Preserve the canonical ONE MORE SCROLL master. Green CI is technical evidence, not artistic approval.
 
 ## Repository
 - Repository: https://github.com/Nolane-x/video
