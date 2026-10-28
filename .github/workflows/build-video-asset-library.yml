@@ -62,11 +62,11 @@ jobs:
 
           index = json.loads(index_path.read_text(encoding="utf-8"))
           expected = index["summary"]
-          assert expected["original_backgrounds"] >= 30
-          assert expected["original_overlays"] >= 30
-          assert expected["original_icons"] >= 50
-          assert expected["original_infographics"] >= 20
-          assert expected["original_sfx"] >= 60, "Procedural sound-effect bank is incomplete"
+          assert expected["original_backgrounds"] >= 50
+          assert expected["original_overlays"] >= 50
+          assert expected["original_icons"] >= 90
+          assert expected["original_infographics"] >= 35
+          assert expected["original_sfx"] >= 100, "Procedural sound-effect bank is incomplete"
 
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
@@ -105,7 +105,7 @@ jobs:
           body: |
             Automated cross-genre video resources for Nolane Video Studio.
 
-            The package includes original CC0 vector backgrounds, overlays, icon SVGs and infographic templates, plus third-party assets only where the item/pack license is explicitly verified as CC0 by the builder. Item-level source, license and SHA-256 data is included.
+            The package includes a greatly expanded original CC0 vector/overlay/icon/infographic library and 100+ procedural sound effects; Poly Haven HDRIs/models/PBR textures; Met Open Access and verified Wikimedia CC0/Public Domain images; NASA-center media screened under NASA Media Usage Guidelines (not CC0); and Library of Congress images only when item-level rights statements explicitly support use. Item-level source, usage notes and SHA-256 data are included.
 
             Some external providers can be unreachable or change their API; the build index records successful, failed and skipped downloads. "Free to use" sources with limits on raw-file redistribution are documented as source-only and are not mirrored into this archive.
         env:
