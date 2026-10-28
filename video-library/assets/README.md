@@ -17,19 +17,28 @@ This is the shared asset pool for future videos, not a collection dedicated to t
 ## Release deliverables
 
 The Actions builder generates a versioned downloadable ZIP containing:
-- Original vector background library across documentary, science, news, history, travel, nature, gaming, product, food, finance and narrative genres.
-- Transparent motion-graphics overlays / VFX.
-- Reusable icon SVGs and infographic / title / lower-third templates.
+- 64+ original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
+- 56+ transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
+- 98+ original icon SVGs and 40+ infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
-- Up to 24 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
-- Up to 30 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
+- Up to 100 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- NASA Image and Video Library items: screened small images, short video clips and audio files from NASA-center records. The NASA lane is **not CC0**; it retains NASA’s media usage guidance, attribution requirements, logo/endorsement warnings and item-level source.
+- Library of Congress images only when the specific record carries an explicit positive rights statement (e.g. “No Known Restrictions on Publication”); ambiguous or conflicting rights records are skipped.
 - Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
-- Poly Haven HDRIs, Blender models with available dependencies, and complete sets of PBR texture maps (base color/diffuse, normal, roughness, AO, displacement where available); item/source metadata and SHA-256 are retained.
-- 64 original procedural sound-effect WAVs for UI, foley-like beats, ambience, transitions, impacts, sci-fi and emotional punctuation. These are synthesized by code, not downloaded recordings.
-- `ASSET_CATALOG.html` — searchable offline catalog with previews/audio players, category filtering, direct file links, and source/license links.
+- Larger Poly Haven selection: up to 10 HDRIs, 12 models and 18 texture packages; bundle available models/dependencies and PBR maps (base color, normal, roughness, AO/displacement where available). Item/source metadata and SHA-256 are retained.
+- 125 original procedural sound-effect WAV presets for UI, foley-like accents, multiple weather/forest/ocean/city ambiences, camera, heartbeat, tension, science-fiction, magic, transitions and impacts. These are synthesized by code, not copied recordings.
+- `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
 
 Large binary assets are shipped as a GitHub Release asset, not ordinary Git blobs. Open the [builds and downloadable releases](https://github.com/Nolane-x/video/releases) and download `video-asset-library.zip`; open `ASSET_CATALOG.html` after extraction to browse offline. Run metadata/checksum reports are also attached to each Actions run for 30 days.
+
+## New source and rights rules
+
+- NASA media is tracked under NASA’s own media-use guidance and **must not** be labelled CC0. Keep NASA attribution, never imply NASA endorsement, avoid logos/seals, and check identifiable-person/privacy/publicity constraints.
+- Library of Congress photos are auto-bundled only if the item-level rights statement is explicitly positive and non-conflicting. The user remains responsible for context and other rights.
+- The Met and Wikimedia continue to use per-item Public Domain/CC0 checks. Smithsonian Open Access is recorded as a future high-value source but is not fetched until an API key and item-level CC0 verification can be configured safely.
+- Exact successful download counts are generated into each `ASSET_INDEX.json`; API timeouts and skipped records are not represented as successful downloads.
 
 ## Usage
 
