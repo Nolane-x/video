@@ -8,7 +8,6 @@ on:
       - "tools/video/build_asset_library.py"
       - "tools/video/generate_sfx_library.py"
       - "video-library/assets/sources.json"
-      - "video-library/assets/**"
   workflow_dispatch:
 
 permissions:
@@ -57,6 +56,8 @@ jobs:
           assert root.is_dir(), "Library folder missing"
           assert index_path.is_file() and sums_path.is_file(), "Index or checksum ledger missing"
           assert archive.is_file() and archive.stat().st_size > 1024, "ZIP is missing/too small"
+          catalog_path = root / "ASSET_CATALOG.html"
+          assert catalog_path.is_file(), "Offline searchable catalog missing"
           assert summary_path.is_file(), "Build summary missing"
 
           index = json.loads(index_path.read_text(encoding="utf-8"))
@@ -65,6 +66,7 @@ jobs:
           assert expected["original_overlays"] >= 30
           assert expected["original_icons"] >= 50
           assert expected["original_infographics"] >= 20
+          assert expected["original_sfx"] >= 60, "Procedural sound-effect bank is incomplete"
 
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
@@ -79,6 +81,7 @@ jobs:
               assert zf.testzip() is None, "Asset ZIP integrity test failed"
               names = zf.namelist()
               assert any(p.endswith("ASSET_INDEX.json") for p in names)
+              assert any(p.endswith("ASSET_CATALOG.html") for p in names), "Offline catalog missing from archive"
               assert any(p.endswith("SOURCES_AND_LICENSES.md") for p in names)
               assert any(p.endswith("SHA256SUMS.txt") for p in names)
 
