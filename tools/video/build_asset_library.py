@@ -965,6 +965,223 @@ def download_met_open_access(root,index):
     return report
 
 
+def nasa_item_is_eligible(data):
+    """Apply conservative NASA origin, copyright-marker, and identifiable-person filters."""
+    center=str(data.get("center") or "")
+    if "NASA" not in center.upper():
+        return False, "item is not attributed to a NASA center"
+    title=str(data.get("title") or "")
+    description=str(data.get("description") or "")
+    secondary=str(data.get("secondary_creator") or "")
+    combined=" ".join([title,description,secondary,center]).lower()
+    blocked=("all rights reserved","copyrighted","copyright holder","copyright restrictions","©",
+             "nasa logo","nasa insignia","nasa seal","third-party copyright","permission required")
+    if any(marker in combined for marker in blocked):
+        return False, "explicit copyright/rights or protected NASA identifier marker found"
+    keywords=data.get("keywords") or []
+    if isinstance(keywords,str): keywords=[keywords]
+    people_terms=("astronaut","portrait","crew","person","people","employee","human subject")
+    if any(any(term in str(word).lower() for term in people_terms) for word in keywords):
+        return False, "identifiable-person category excluded from the general stock pool"
+    return True, "NASA-center attribution, no explicit third-party copyright marker, NASA media guidance retained"
+
+
+def download_nasa_media(root,index):
+    """Bundle small NASA-origin media when the item passes the conservative policy filters."""
+    report=[]; seen=set()
+    searches=[
+        ("space","nebula galaxy stars"),("planet","Mars surface rover"),
+        ("earth","Earth from space clouds"),("solar","solar flare sun"),
+        ("ocean","Earth ocean satellite"),("atmosphere","aurora atmosphere"),
+        ("launch","rocket launch pad"),("aviation","NASA research aircraft"),
+        ("telescope","James Webb space telescope"),("moon","Moon lunar surface"),
+        ("climate","hurricane satellite view"),("observatory","deep space galaxy"),
+        ("planetary","Saturn rings spacecraft"),("earth-science","Earth observation"),
+        ("asteroid","asteroid Bennu surface"),("space-station","International Space Station exterior")
+    ]
+    media_types=("image","video","audio")
+    for category,q in searches:
+        for media_type in media_types:
+            if media_type=="audio" and category not in {"space","earth","launch","atmosphere"}:
+                continue
+            params={"q":q,"media_type":media_type,"page_size":25}
+            search_url="https://images-api.nasa.gov/search?"+urllib.parse.urlencode(params)
+            try:
+                response=request_json(search_url,timeout=18)
+                items=((response.get("collection") or {}).get("items") or [])
+                chosen=None; chosen_data=None; chosen_id=None
+                for item in items:
+                    data=(item.get("data") or [{}])[0]
+                    nasa_id=str(data.get("nasa_id") or "")
+                    if not nasa_id or nasa_id in seen or data.get("media_type")!=media_type:
+                        continue
+                    eligible,reason=nasa_item_is_eligible(data)
+                    if not eligible:
+                        continue
+                    chosen=item; chosen_data=data; chosen_id=nasa_id
+                    break
+                if not chosen:
+                    report.append({"id":f"nasa-{category}-{media_type}","provider":"NASA Image and Video Library",
+                                   "category":category,"status":"no_eligible_item","query":q,
+                                   "source_page":"https://images.nasa.gov/","reason":"No distinct record passed the NASA-center and rights/person filters."})
+                    continue
+                seen.add(chosen_id)
+                try:
+                    manifest=request_json("https://images-api.nasa.gov/asset/"+urllib.parse.quote(chosen_id,safe=""),timeout=18)
+                    urls=[str(x.get("href") or "") for x in ((manifest.get("collection") or {}).get("items") or [])]
+                    if media_type=="image":
+                        allowed_ext={".jpg",".jpeg",".png",".webp"}; cap=MAX_MEDIA_FILE
+                    elif media_type=="video":
+                        allowed_ext={".mp4",".mov",".m4v"}; cap=12*1024*1024
+                    else:
+                        allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=10*1024*1024
+                    candidates=[]
+                    for media_url in urls:
+                        if not media_url.startswith("https://images-assets.nasa.gov/"):
+                            continue
+                        ext=Path(urllib.parse.urlparse(media_url).path).suffix.lower()
+                        if ext not in allowed_ext:
+                            continue
+                        name=Path(urllib.parse.urlparse(media_url).path).name.lower()
+                        preference=0 if "~small" in name else 1 if "~medium" in name else 2 if "~large" in name else 3 if "~orig" in name else 4
+                        candidates.append((preference,len(media_url),media_url,ext))
+                    candidates.sort()
+                    downloaded=None; failures=[]
+                    for _,__,media_url,ext in candidates:
+                        try:
+                            blob,ctype=request_bytes(media_url,timeout=35,limit=cap)
+                            if len(blob)<2048:
+                                raise RuntimeError("media file too small / not a usable asset")
+                            if media_type=="image" and not ctype.lower().startswith("image/"):
+                                raise RuntimeError("URL did not return image MIME type")
+                            if media_type=="video" and (len(blob)<20000 or b"ftyp" not in blob[:64]):
+                                raise RuntimeError("URL did not return a usable MP4/MOV container")
+                            if media_type=="audio" and not (ctype.lower().startswith("audio/") or blob.startswith(b"RIFF") or blob.startswith(b"ID3")):
+                                raise RuntimeError("URL did not return a recognizable audio file")
+                            downloaded=(media_url,ext,blob,ctype); break
+                        except Exception as file_exc:
+                            failures.append(str(file_exc))
+                    if not downloaded:
+                        raise RuntimeError("no suitable small media file could be retrieved: "+"; ".join(failures[-3:]))
+                    media_url,ext,blob,ctype=downloaded
+                    title=str(chosen_data.get("title") or chosen_id)
+                    filename=f"{category}-{slugify(title)[:48]}-{slugify(chosen_id)}{ext}"
+                    folder={"image":"images","video":"video","audio":"audio"}[media_type]
+                    target=root/"third-party/nasa"/folder/filename
+                    target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    page_url="https://images.nasa.gov/details/"+urllib.parse.quote(chosen_id,safe="")
+                    license_name="NASA Media Usage Guidelines — generally not copyrighted; not CC0"
+                    entry={"id":"nasa-"+media_type+"-"+slugify(chosen_id),"path":target.relative_to(root).as_posix(),
+                           "type":"nasa-government-"+media_type,"title":title,"category":category,
+                           "description":str(chosen_data.get("description") or "")[:2500],
+                           "center":chosen_data.get("center"),"date_created":chosen_data.get("date_created"),
+                           "keywords":chosen_data.get("keywords") or [],"source_page":page_url,"source_file_url":media_url,
+                           "license":license_name,"license_url":"https://www.nasa.gov/nasa-brand-center/images-and-media/",
+                           "rights_basis":"Official NASA-center item passed a conservative copyright-marker filter; NASA guidance says NASA content is generally not copyrighted in the United States, while third-party marked material must be excluded.",
+                           "usage_notes":"Credit NASA; do not imply NASA endorsement. Avoid NASA insignia/logos and assess privacy/publicity rights before commercial use. This is not a CC0 license.",
+                           "license_filter_passed":True,"size_bytes":len(blob),"sha256":digest,"redistributable":True}
+                    index.append(entry)
+                    report.append({"id":entry["id"],"status":"downloaded","category":category,"media_type":media_type,
+                                   "path":entry["path"],"title":title,"source_page":page_url,"source_file_url":media_url,
+                                   "license":license_name,"size_bytes":len(blob),"sha256":digest,"rights_filter":"passed"})
+                    print("[NASA media] OK:",media_type,category,title[:48],len(blob))
+                except Exception as item_exc:
+                    report.append({"id":"nasa-"+media_type+"-"+slugify(chosen_id),"status":"failed",
+                                   "category":category,"media_type":media_type,"source_page":"https://images.nasa.gov/details/"+chosen_id,
+                                   "reason":str(item_exc)})
+                    print("[NASA media] item failed:",chosen_id,str(item_exc))
+                time.sleep(.12)
+            except Exception as exc:
+                report.append({"id":f"nasa-{category}-{media_type}","provider":"NASA Image and Video Library",
+                               "category":category,"status":"failed","query":q,"reason":str(exc),
+                               "source_page":"https://images.nasa.gov/"})
+                print("[NASA media] search failed:",q,media_type,str(exc))
+    return report
+
+
+def loc_rights_are_eligible(rights):
+    if isinstance(rights,list): text_value=" ".join(str(x) for x in rights)
+    elif isinstance(rights,dict): text_value=" ".join(str(v) for v in rights.values())
+    else: text_value=str(rights or "")
+    low=text_value.lower()
+    positive=("no known restrictions on publication","public domain","no known copyright restrictions")
+    negative=("copyrighted","permission required","possible restrictions","restricted material","all rights reserved")
+    return any(p in low for p in positive) and not any(n in low for n in negative),text_value
+
+
+def download_loc_public_domain(root,index):
+    """Download LOC images only when each record has an explicit positive rights statement."""
+    report=[]; total=0; cap=80
+    queries=[
+        ("aviation","aircraft aviation"),("maps","historical map"),("industry","industrial machinery"),
+        ("agriculture","farm harvest"),("city","historic city street"),("nature","national park landscape"),
+        ("science","scientific instrument laboratory"),("astronomy","astronomy observatory"),
+        ("architecture","historic architecture building"),("transport","railroad locomotive"),
+        ("ocean","ship harbor ocean"),("history","historic poster"),("botanical","botanical illustration"),
+        ("engineering","bridge engineering"),("weather","storm weather"),("culture","textile pattern pottery")
+    ]
+    seen=set()
+    for category,q in queries:
+        if total>=cap: break
+        url="https://www.loc.gov/photos/?"+urllib.parse.urlencode({"fo":"json","c":60,"q":q})
+        successes=0
+        try:
+            response=request_json(url,timeout=20)
+            for item in response.get("results") or []:
+                if total>=cap or successes>=5: break
+                eligible,rights_text=loc_rights_are_eligible(item.get("rights") or item.get("rights_note") or item.get("rights_status"))
+                if not eligible:
+                    continue
+                item_url=str(item.get("url") or item.get("id") or "")
+                identity=item_url.rstrip("/").split("/")[-1] if item_url else slugify(item.get("title",""))
+                if not identity or identity in seen: continue
+                image_urls=item.get("image_url") or []
+                if isinstance(image_urls,str): image_urls=[image_urls]
+                if isinstance(image_urls,dict): image_urls=list(image_urls.values())
+                candidates=[str(x) for x in image_urls if isinstance(x,str) and urllib.parse.urlparse(x).hostname in {"loc.gov","www.loc.gov","tile.loc.gov"}]
+                if not candidates: continue
+                candidates=list(reversed(candidates))
+                downloaded=None
+                for image_url in candidates:
+                    try:
+                        blob,ctype=request_bytes(image_url,timeout=25,limit=MAX_MEDIA_FILE)
+                        if not ctype.lower().startswith("image/") or len(blob)<2048:
+                            continue
+                        ext=Path(urllib.parse.urlparse(image_url).path).suffix.lower()
+                        if ext not in {".jpg",".jpeg",".png",".webp"}:
+                            ext={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"}.get(ctype.split(";")[0].lower(),".jpg")
+                        downloaded=(image_url,ext,blob); break
+                    except Exception:
+                        continue
+                if not downloaded: continue
+                image_url,ext,blob=downloaded
+                seen.add(identity)
+                title=str(item.get("title") or identity)
+                target=root/"third-party/library-of-congress"/(f"{category}-{slugify(title)[:46]}-{slugify(identity)}{ext}")
+                target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                digest=sha256_path(target)
+                source_page=item_url if item_url.startswith("https://") else "https://www.loc.gov"+item_url
+                entry={"id":"loc-"+slugify(identity),"path":target.relative_to(root).as_posix(),"type":"loc-rights-verified-image",
+                       "title":title,"category":category,"date":item.get("date"),"description":str(item.get("description") or "")[:1500],
+                       "rights_statement":rights_text,"source_page":source_page,"source_file_url":image_url,
+                       "license":"Public Domain / No Known Restrictions on Publication (record-level rights statement)",
+                       "license_url":"https://www.loc.gov/rr/print/195_copr.html","rights_verified_from_item_metadata":True,
+                       "usage_notes":"LOC states users are responsible for evaluating rights and other restrictions; preserve this item's rights statement and assess context before publication.",
+                       "size_bytes":len(blob),"sha256":digest,"redistributable":True}
+                index.append(entry); total+=1; successes+=1
+                report.append({"id":entry["id"],"status":"downloaded","category":category,"path":entry["path"],
+                               "title":title,"source_page":source_page,"rights_statement":rights_text,
+                               "size_bytes":len(blob),"sha256":digest})
+                print("[Library of Congress] OK:",category,title[:48],len(blob))
+            time.sleep(.2)
+        except Exception as exc:
+            report.append({"id":"loc-"+category,"status":"failed","category":category,"query":q,
+                           "source_page":"https://www.loc.gov/apis/json-and-yaml/","reason":str(exc)})
+            print("[Library of Congress] query failed:",q,str(exc))
+    return report
+
+
 def openverse_extension(url,ctype,kind,item):
     ext=Path(urllib.parse.urlparse(url).path).suffix.lower()
     allowed={".jpg",".jpeg",".png",".webp"} if kind=="image" else {".mp3",".wav",".ogg",".flac",".m4a"}
