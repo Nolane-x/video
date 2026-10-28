@@ -1,22 +1,23 @@
 # THE WEIGHT OF YES — QA ledger
 
-## Latest render — #30 technical pass with targeted visual review
-- Workflow: [run #30 — success](https://github.com/Nolane-x/video/actions/runs/40461365610); all 19 steps passed.
-- Source commit: [`9214fb3ce0765c38d4169be917099a75a8e53442`](https://github.com/Nolane-x/video/commit/9214fb3ce0765c38d4169be917099a75a8e53442).
+## Latest render — #31 technical pass with targeted visual review
+- Workflow: [run #31 — success](https://github.com/Nolane-x/video/actions/runs/40532086413); all 19 workflow steps passed.
+- Source commit: [`58c95de849405b0ae5d1636851bb883ffa3870ec`](https://github.com/Nolane-x/video/commit/58c95de849405b0ae5d1636851bb883ffa3870ec).
 - Renderer: native H2 SelfImprove Studio Canvas/Chromium + FFmpeg mastering; not Remotion.
-- Spec: 143.000 seconds, 29 shots, H.264 1920×1080 @24 fps, AAC stereo 48 kHz, English on-screen text, no voice-over.
-- Master: 21,783,919 bytes; SHA-256 `cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d`.
-- Preview: 30.000 seconds; SHA-256 `d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965`.
-- Review bundle SHA-256: `c4325fe0044f89ff3a031baa7386c4a9e0bb693e23d28966dffdd73f8b5a0455`.
-- Actions artifact: `the-weight-of-yes-h2-selfimprove-30`, ID `12714602184`, 61,869,228 bytes; expires 2026-11-26. Archive SHA-256: `21810fde7a704eea5c70454c8032935631f44f2b957edd9da3e5b6ace89d515e`.
+- Temporary Actions artifact: `the-weight-of-yes-h2-selfimprove-31`, ID `12746292555`, 61,868,285 bytes; expires 2026-11-26 15:36:18 UTC. Not a durable release.
+- Downloaded artifact SHA-256: `ddfbc5100354b0cd881632767649faf075605bd3ee560938f22cbd4d0a367b3f`.
+- Master: 143.000 s, H.264 1920×1080 @24 fps, AAC stereo 48 kHz; 21,783,919 bytes.
+- Master SHA-256: `cfc5882636f70e98ace6fc5263c2a60ee2100cf35a2b59351940453242951e9d`.
+- Preview SHA-256: `d963785ac2e8b9c486e866373622a59a7a6c6486b9bcab4defd21cdc0ae92965`; 30.000 s.
+- Review bundle SHA-256: `dcd222468bd915cf202b6fb46f55eb945d382b062c16986a41692db90ed311d5`; all 29 entries in `SHA256SUMS.txt` passed.
 - Audio: −14.0 LUFS integrated; LRA 9.2 LU; true peak −5.0 dBFS.
-- All 29 entries in `SHA256SUMS.txt` passed; ffprobe confirms duration, codecs, resolution, frame rate and audio format.
 
-## Targeted visual review — run #30
+## Targeted visual review — run #31
 - [x] Both contact sheets inspected across all 29 shots.
-- [x] 1080p B07 frame at 32.75 s: handwritten “YES.” stays inside the left page; narration stays on the right page and clear of the outer edge.
-- [x] B19 “NO. NOT TODAY.” sits in upper-left negative space, clear of actors and the classroom board on the current contact sheet.
-- [x] Latest storyboard and caption-safe-area gates passed.
+- [x] B07 at 29 s: handwritten “YES.” remains within the left notebook page and its narration stays in the right page lane.
+- [x] B19 at 89 s: “NO. NOT TODAY.” remains readable in upper negative space, clear of the actors and classroom board.
+- [x] Downloaded master matches the manifest SHA-256; ffprobe confirms duration, codecs, resolution, frame rate and audio format.
+- [x] All 29 entries in the downloaded checksum ledger passed.
 - [ ] Individually review all 12 motion-proof clips with audio.
 - [ ] Watch the complete 143-second master start-to-finish with audio, checking pacing, transitions, hand/prop contacts, emotional arc and sound design.
 
