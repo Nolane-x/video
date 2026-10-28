@@ -83,7 +83,13 @@
     "checksums_verified": true,
     "sha256_ledger_entries": 24,
     "full_length_watch_with_audio": "pending",
-    "artistic_signoff": "pending"
+    "artistic_signoff": "pending",
+    "motion_frame_sweep": {
+      "status": "visual_only_pass",
+      "samples_per_proof": 6,
+      "proof_count": 12,
+      "notes": "Six frames sampled across each of the 12 six-second motion proofs. This is a visual frame sweep, not a substitute for watching the complete proof clips with audio."
+    }
   },
   "next_steps": [
     "Watch the complete 172-second MP4 start-to-finish with audio, checking pacing, transitions, captions, hand/prop contacts and emotional arc.",
