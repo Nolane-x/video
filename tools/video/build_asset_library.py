@@ -31,6 +31,16 @@ KENNEY = [
 ("ui-pack-sci-fi","UI Pack Sci-Fi","sci-fi interface"),("ui-pack-pixel-adventure","UI Pack Pixel Adventure","pixel adventure UI"),
 ("ui-pack-rpg-expansion","UI Pack RPG Expansion","RPG interface"),("casino-audio","Casino Audio","game SFX")
 ]
+
+KENNEY_GITHUB_REPOS = [
+    {"slug":"Starter-Kit-Racing","title":"Starter Kit Racing","category":"vehicles, racing, 3D props","evidence":"README: package assets (2D sprites, 3D models and sound effects) are CC0 licensed."},
+    {"slug":"Starter-Kit-3D-Platformer","title":"Starter Kit 3D Platformer","category":"3D props, platforms, VFX, audio","evidence":"README: sprites, 3D models and sound effects are CC0 licensed."},
+    {"slug":"Starter-Kit-City-Builder","title":"Starter Kit City Builder","category":"architecture, city props, structures","evidence":"README: sprites and 3D models are CC0 licensed."},
+    {"slug":"Starter-Kit-Basic-Scene","title":"Starter Kit Basic Scene","category":"3D environment, scene props","evidence":"README: bundled assets are CC0 licensed; the Mini Arena pack is CC0."},
+    {"slug":"Starter-Kit-Match-3","title":"Starter Kit Match-3","category":"2D sprites, UI, particles","evidence":"README labels the included 2D sprites CC0 licensed; only media files are extracted."},
+    {"slug":"Starter-Kit-FPS","title":"Starter Kit FPS","category":"weapons, props, 3D models","evidence":"README labels included sprites and 3D models CC0 licensed; only media files are extracted."}
+]
+
 PALETTES = [
 ("studio-warm",("#171923","#312b39","#ffc77f"),"studio"),("newsroom",("#0d1724","#19354a","#f4ad69"),"news"),
 ("science-laboratory",("#10222c","#203c4a","#5ce1cc"),"lab"),("server-room",("#081723","#123346","#65d8f1"),"server"),
@@ -520,13 +530,61 @@ def verify_kenney_license(page):
         return False
 
 def download_kenney(root,index):
-    return [{
-        "id":"kenney-official-packs",
-        "provider":"Kenney",
-        "status":"source_only",
-        "reason":"Official CC0 packs are linked in sources.json, but the current website uses a browser-driven download step. CI will not guess an undocumented ZIP URL.",
-        "source_page":"https://kenney.nl/assets"
-    }]
+    import io
+    report=[]
+    max_archive=MAX_KENNEY_ZIP
+    for source in KENNEY_GITHUB_REPOS:
+        slug=source["slug"]
+        page=f"https://github.com/KenneyNL/{slug}"
+        archive_url=f"https://api.github.com/repos/KenneyNL/{slug}/zipball/main"
+        row={"id":"kenney-github-"+slugify(slug),"title":source["title"],"provider":"Kenney / GitHub",
+             "category":source["category"],"source_page":page,"archive_url":archive_url,
+             "license":"CC0-1.0","license_url":CC0_URL,"license_evidence":source["evidence"]}
+        try:
+            blob,_=request_bytes(archive_url,timeout=70,limit=max_archive)
+            if not blob.startswith(b"PK"):
+                raise RuntimeError("GitHub did not return a ZIP archive")
+            # Inspect official repository documentation before extracting any file.
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                corrupt=zf.testzip()
+                if corrupt: raise RuntimeError("corrupt source ZIP member: "+corrupt)
+                readmes=[]
+                for info in zf.infolist():
+                    basename=PurePosixPath(info.filename).name.lower()
+                    if basename in {"readme.md","readme.txt","license.md","license.txt"} and not info.is_dir():
+                        if info.file_size<=2*1024*1024:
+                            try: readmes.append(zf.read(info).decode("utf-8","ignore").lower())
+                            except Exception: pass
+                documentation="\n".join(readmes)
+                if "cc0" not in documentation or "licensed" not in documentation or "asset" not in documentation:
+                    raise RuntimeError("repository README/license did not confirm CC0 for assets")
+            dest=root/"third-party/kenney"/slugify(slug)
+            extracted,unpacked=safe_extract(blob,dest,max_bytes=450*1024*1024)
+            media_files=[p for p in dest.rglob("*") if p.is_file() and p.name!="SOURCE_AND_LICENSE.md"]
+            if not media_files: raise RuntimeError("no allowed asset media files after safe extraction")
+            write_text(dest/"SOURCE_AND_LICENSE.md",
+                       f"# {source['title']} — Kenney\n\nOfficial repository: {page}\nArchive SHA-256: {hashlib.sha256(blob).hexdigest()}\nVerified documentation evidence: {source['evidence']}\nLicense: CC0 1.0 Universal — {CC0_URL}\nOnly approved media/document file types were extracted; executable and game logic files are intentionally omitted.\n")
+            for path in sorted(p for p in dest.rglob("*") if p.is_file()):
+                index.append({"id":f"kenney-{slugify(slug)}-{slugify(path.relative_to(dest).as_posix())}",
+                              "path":path.relative_to(root).as_posix(),"type":"kenney-cc0-asset-file",
+                              "provider":"Kenney / GitHub","parent_asset_id":"kenney-github-"+slugify(slug),
+                              "category":source["category"],"source_page":page,"license":"CC0-1.0",
+                              "license_url":CC0_URL,"license_evidence":source["evidence"],
+                              "size_bytes":path.stat().st_size,"sha256":sha256_path(path),"redistributable":True})
+            row.update(status="downloaded",file_count=len(media_files),unpacked_bytes=unpacked,
+                       archive_sha256=hashlib.sha256(blob).hexdigest())
+            print("[Kenney GitHub] OK:",slug,len(media_files),"files",unpacked,"bytes")
+        except Exception as exc:
+            row.update(status="failed",reason=str(exc))
+            print("[Kenney GitHub] failed:",slug,str(exc))
+        report.append(row); time.sleep(.3)
+    # The separate official asset browser remains a useful discovery index. Do not guess
+    # its current dynamic download endpoint for packs that are not present in GitHub.
+    report.append({"id":"kenney-official-catalog","provider":"Kenney","status":"source_only",
+                   "reason":"The main asset catalog uses a browser-driven download step. Additional packs are listed for future manual acquisition; no guessed direct download URL is used.",
+                   "source_page":"https://kenney.nl/assets",
+                   "packs_not_yet_mirrored":[x[0] for x in KENNEY]})
+    return report
 
 
 def choose_poly_file(tree,kind):
