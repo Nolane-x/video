@@ -407,16 +407,16 @@
     },
     {
       "id": "wikimedia-commons-public-domain",
-      "title": "Wikimedia Commons — item-verified CC0/Public Domain images, video and audio",
+      "title": "Wikimedia Commons — item-verified CC0/Public Domain images, SVG vectors, video and audio",
       "provider": "Wikimedia Commons",
-      "kind": "images / video / audio reference media",
+      "kind": "images / SVG vectors / video / audio reference media",
       "source_page": "https://commons.wikimedia.org/wiki/Commons:Licensing",
       "api": "https://commons.wikimedia.org/w/api.php",
       "license": "Per item. Automatic bundling accepts only exact CC0 or Public Domain metadata.",
       "license_url": "https://commons.wikimedia.org/wiki/Commons:Licensing",
       "verified_page_license": true,
       "bundling": "auto-only-on-file-level-cc0-or-public-domain",
-      "note": "The build uses Wikimedia Commons file-namespace metadata. Images, video and audio are considered only when exact LicenseShortName metadata explicitly says CC0 or Public Domain; audio/video also require supported file extension, a small file size, official upload.wikimedia.org host, compatible MIME type and recognizable container signature. It stores the file page, creator, rights URL and SHA-256. Public-domain material may still depict people, trademarks or other third-party rights."
+      "note": "The build uses Wikimedia Commons file-namespace metadata. Images, SVG, video and audio are considered only when exact LicenseShortName metadata explicitly says CC0 or Public Domain; SVG vectors must be small, use an official upload.wikimedia.org URL and pass sanitization that removes scripts, event handlers and external references. Audio/video also require supported extensions, small file sizes, compatible MIME types and recognizable container signatures. The item page, creator, rights URL and SHA-256 are retained."
     },
     {
       "id": "kenney-github-cc0-starter-kits",
