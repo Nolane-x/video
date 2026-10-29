@@ -1733,7 +1733,10 @@ def download_smithsonian_open_access(root,index):
                 target=root/"third-party/smithsonian"/category/(f"{slugify(title)[:48]}-{slugify(record_id)}{ext}")
                 target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
                 digest=sha256_path(target); seen.add(record_id)
-                note=str(((content.get("freetext") or {}).get("notes") or [{}])[0].get("content") or "") if isinstance((content.get("freetext") or {}).get("notes") or [{}],list) else ""
+                notes=(content.get("freetext") or {}).get("notes") or []
+                if isinstance(notes,dict): notes=[notes]
+                if not isinstance(notes,list): notes=[]
+                note=next((str(n.get("content") or "") for n in notes if isinstance(n,dict) and n.get("content")), "")
                 entry={"id":"smithsonian-"+slugify(record_id),"path":target.relative_to(root).as_posix(),
                        "type":"smithsonian-open-access-image","title":title,"creator":creator,"category":category,
                        "unit_code":unit_code,"description":note[:1800],"record_id":record_id,"source_page":record_url,
