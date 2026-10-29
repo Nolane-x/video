@@ -52,7 +52,7 @@ Large binary assets are shipped as a GitHub Release asset, not ordinary Git blob
 
 - NASA media is tracked under NASA’s own media-use guidance and **must not** be labelled CC0. Keep NASA attribution, never imply NASA endorsement, avoid logos/seals, and check identifiable-person/privacy/publicity constraints.
 - Library of Congress photos are auto-bundled only if the item-level rights statement is explicitly positive and non-conflicting. The user remains responsible for context and other rights.
-- The Met and Wikimedia continue to use per-item Public Domain/CC0 checks. Smithsonian Open Access is recorded as a future high-value source but is not fetched until an API key and item-level CC0 verification can be configured safely.
+- The Met and Wikimedia continue to use per-item Public Domain/CC0 checks. Smithsonian Open Access is attempted with the configured `SMITHSONIAN_API_KEY` or the low-volume `DEMO_KEY` fallback; no Smithsonian asset is counted as successful unless both the record and exact media file pass the CC0 gate.
 - Exact successful download counts are generated into each `ASSET_INDEX.json`; API timeouts and skipped records are not represented as successful downloads.
 
 ## Usage
