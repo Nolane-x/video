@@ -110,6 +110,43 @@ TEXTURES = [
  ("neon-circuit","Neon circuit traces"),("soft-clouds","Cloud contour texture"),
  ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands")
 ]
+ILLUSTRATIONS = [
+ ("satellite-hero","Satellite / orbital hardware","space","satellite"),("telescope-hero","Space telescope","space","telescope"),
+ ("rocket-hero","Launch vehicle","space","rocket"),("planet-hero","Ringed planet","space","moon-stars"),
+ ("rover-hero","Planetary rover","space","car"),("earth-globe-hero","Earth globe","earth science","globe"),
+ ("microscope-hero","Laboratory microscope","science","microscope"),("chemistry-flask-hero","Chemistry flask","science","flask"),
+ ("dna-hero","DNA helix","science","dna"),("atom-hero","Atomic model","science","atom"),
+ ("brain-hero","Brain model","medicine","brain"),("heart-hero","Heart / pulse","medicine","heart"),
+ ("medical-pulse-hero","Clinical pulse monitor","medicine","pulse"),("medical-virus-hero","Virus diagram","medicine","virus"),
+ ("tree-hero","Forest tree","nature","tree"),("leaf-hero","Leaf / botany","nature","leaf"),
+ ("mountain-hero","Mountain range","nature","mountain"),("volcano-hero","Volcano / geology","nature","volcano"),
+ ("ocean-wave-hero","Ocean swell","nature","wave"),("rain-cloud-hero","Rain cloud","weather","cloud"),
+ ("storm-lightning-hero","Lightning storm","weather","lightning"),("sunflower-hero","Sun / solar energy","nature","sun"),
+ ("research-aircraft-hero","Research aircraft","transport","plane"),("train-engine-hero","Railway train","transport","train"),
+ ("cargo-ship-hero","Cargo ship","transport","ship"),("bicycle-hero","Bicycle","transport","bicycle"),
+ ("bridge-hero","Bridge engineering","architecture","map-route"),("house-hero","House / architecture","architecture","house"),
+ ("city-factory-hero","Industrial city","architecture","factory"),("industrial-plant-hero","Factory machinery","industry","factory"),
+ ("storefront-hero","Retail storefront","business","shopping-bag"),("robot-hero","Robotics","technology","robot"),
+ ("chip-hero","Computer chip","technology","chip"),("server-rack-hero","Server rack","technology","server"),
+ ("laptop-hero","Laptop computer","technology","laptop"),("smartphone-hero","Smartphone","technology","phone"),
+ ("cyber-shield-hero","Cybersecurity shield","technology","shield-lock"),("open-book-hero","Open book","education","book-open"),
+ ("archival-news-hero","Archive / newspaper","history","newspaper"),("museum-building-hero","Museum / heritage building","history","house"),
+ ("museum-artifact-hero","Museum artefact","history","eye"),("film-camera-hero","Film camera","film","camera-film"),
+ ("clapperboard-hero","Clapperboard","film","clapperboard"),("microphone-hero","Studio microphone","music","microphone"),
+ ("music-note-hero","Music / audio","music","music"),("food-bowl-hero","Food / cooking","food","food"),
+ ("recipe-timer-hero","Cooking timer","food","clock"),("coin-stack-hero","Finance / money","business","dollar"),
+ ("wallet-hero","Budget / wallet","business","wallet"),("trophy-hero","Sports trophy","sport","trophy"),
+ ("fitness-hero","Fitness / training","sport","lightning"),("compass-hero","Travel compass","travel","compass"),
+ ("suitcase-hero","Travel luggage","travel","backpack"),("delivery-parcel-hero","Delivery / logistics","business","package"),
+ ("map-route-hero","Map / itinerary","travel","map-route"),("solar-installation-hero","Solar / clean energy","energy","presentation"),
+ ("wind-energy-hero","Wind / power","energy","lightning"),("globe-network-hero","Global network","technology","network"),
+ ("calendar-planner-hero","Calendar / planning","education","calendar"),("clock-time-hero","Time / deadline","education","clock"),
+ ("film-strip-hero","Film / cinema","film","film-strip"),("speech-bubble-hero","Conversation / interview","people","speech-bubble"),
+ ("paw-nature-hero","Wildlife / animal","nature","paw"),("recycle-hero","Circular economy / recycling","environment","recycle"),
+ ("shopping-cart-hero","Commerce / shopping","business","shopping-bag"),("security-lock-hero","Privacy / security","technology","lock"),
+ ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave")
+]
+
 OVERLAYS = [
 ("film-grain","Fine film grain"),("scanlines","CRT scanlines"),("halftone","Halftone dots"),("light-leak","Warm/cool light leak"),
 ("vignette","Cinematic vignette"),("letterbox","Cinematic letterbox"),("film-gate","Film gate frame"),("dust","Floating dust motes"),
@@ -256,6 +293,53 @@ ICONS.update({
 "puzzle":'<path d="M8 8H25A7 7 0 1 1 39 8H56V25A7 7 0 1 0 56 39V56H39A7 7 0 1 1 25 56H8V39A7 7 0 1 0 8 25Z"/>',
 "speech-bubble":'<path d="M7 11H57V43H33L19 56V43H7Z"/><path d="M16 22H48M16 31H40"/>'
 })
+
+def make_illustration_svg(asset_id,title,category,icon_id,index):
+    """Create a self-contained editorial illustration from an original vector pictogram."""
+    drawing=ICONS.get(icon_id)
+    if not drawing:
+        raise RuntimeError(f"missing illustration icon: {icon_id}")
+    palettes=[
+        ("#102438","#60ddcc","#d9fff8"),("#232338","#f5bd7a","#fff0d4"),
+        ("#142c23","#a3d995","#e9f2d2"),("#252330","#eaa3bd","#ffe9f0"),
+        ("#252a32","#a7caff","#eef5ff"),("#2a2522","#e9cf9b","#fff5d8"),
+        ("#171d30","#b6a3ff","#eee9ff"),("#1b2d39","#f2a36f","#fff0dc")
+    ]
+    bg,accent,light=palettes[index%len(palettes)]
+    dots=[]
+    for j in range(19):
+        x=(j*137+31+index*23)%640; y=(j*91+57+index*17)%640
+        radius=2+(j%4)
+        dots.append(f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{light}" fill-opacity="{.08+(j%4)*.025:.3f}"/>')
+    css=f'<style>.line{{stroke:{light};stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;fill:none}}</style>'
+    defs=f'''<radialGradient id="halo"><stop stop-color="{accent}" stop-opacity=".28"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient>
+<linearGradient id="pedestal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="{accent}" stop-opacity=".25"/><stop offset="1" stop-color="{bg}" stop-opacity=".08"/></linearGradient>
+<pattern id="microgrid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="{light}" stroke-opacity=".045" stroke-width="1"/></pattern>{css}'''
+    base=(f'<rect width="640" height="640" fill="url(#microgrid)"/>'
+          f'<ellipse cx="320" cy="282" rx="238" ry="238" fill="url(#halo)"/>'
+          f'<circle cx="320" cy="282" r="205" fill="none" stroke="{accent}" stroke-opacity=".14" stroke-width="2" stroke-dasharray="5 13"/>'
+          f'<path d="M86 518Q320 466 554 518L526 568Q320 534 114 568Z" fill="url(#pedestal)" stroke="{accent}" stroke-opacity=".24" stroke-width="2"/>'
+          + "".join(dots))
+    icon=f'<g transform="translate(108 70) scale(6.62)" class="line" style="color:{accent}">{drawing}</g>'
+    title_text=html.escape(title.upper())
+    label=(f'<rect x="110" y="584" width="420" height="34" rx="17" fill="{bg}" fill-opacity=".82" stroke="{accent}" stroke-opacity=".26"/>'
+           f'<text x="320" y="607" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="1.2" fill="{light}">{title_text[:46]}</text>')
+    return svg_doc(base+icon+label,defs,width=640,height=640)
+
+
+def generate_original_illustrations(root,index):
+    target_dir=root/"originals/illustrations"
+    target_dir.mkdir(parents=True,exist_ok=True)
+    for i,(asset_id,title,category,icon_id) in enumerate(ILLUSTRATIONS):
+        path=target_dir/(asset_id+".svg")
+        write_text(path,make_illustration_svg(asset_id,title,category,icon_id,i))
+        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),
+                      "type":"original-svg-editorial-illustration","title":title,
+                      "category":category,"icon_source_id":icon_id,"license":CC0,"license_url":CC0_URL,
+                      "redistributable":True,
+                      "note":"Original repository-generated vector illustration; may be scaled for a shot. The included title strip is part of the artwork."})
+    return len(ILLUSTRATIONS)
+
 
 def make_texture_svg(texture_id,title,index):
     """Create tileable, original, vector texture plates with no external dependencies."""
@@ -1617,7 +1701,8 @@ def main():
     index=[]
     generate_originals(STAGE,index)
     texture_count=generate_original_textures(STAGE,index)
-    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable surface textures")
+    illustration_count=generate_original_illustrations(STAGE,index)
+    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures and",illustration_count,"editorial illustrations")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
@@ -1644,6 +1729,7 @@ def main():
     )
     summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),
               "original_textures":len(TEXTURES),
+              "original_illustrations":len(ILLUSTRATIONS),
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
@@ -1676,8 +1762,8 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30
-    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)
+    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30 and len(ILLUSTRATIONS)>=50
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}
     for path in STAGE.rglob("*"):
