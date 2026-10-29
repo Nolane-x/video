@@ -23,16 +23,16 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - 80 original transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
 - 141 original icon SVGs and 55 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
-- Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
-- Up to 160 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
-- Up to 45 Wikimedia Commons SVG vectors (maps, science diagrams, transit layouts, botanical illustrations, patterns and engineering schematics) when the exact file metadata says CC0 or Public Domain. Each SVG is sanitized to remove scripts, event handlers, and remote references before indexing.
-- Up to 20 short video/audio files from Wikimedia Commons, subject to strict file-level CC0/Public Domain metadata, host, byte-size, MIME and container checks. Video and audio counts appear in the build manifest; if no suitable small files are found, the report says so rather than pretending the source yielded media.
-- Up to 60 Rijksmuseum Open Access artwork images, downloaded through the no-key OAI-PMH feed and official IIIF image service only when the individual EDM record explicitly carries CC0 or Public Domain Mark rights.
+- Up to 110 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
+- Up to 240 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- Up to 60 Wikimedia Commons SVG vectors (maps, science diagrams, transit layouts, botanical illustrations, patterns and engineering schematics) when the exact file metadata says CC0 or Public Domain. Each SVG is sanitized to remove scripts, event handlers, and remote references before indexing.
+- Up to 36 short video/audio files from Wikimedia Commons, subject to strict file-level CC0/Public Domain metadata, host, byte-size, MIME and container checks. Video and audio counts appear in the build manifest; if no suitable small files are found, the report says so rather than pretending the source yielded media.
+- Up to 90 Rijksmuseum Open Access artwork images, downloaded through the no-key OAI-PMH feed and official IIIF image service only when the individual EDM record explicitly carries CC0 or Public Domain Mark rights.
 - Up to 60 Smithsonian Open Access images from the official API, with a strict two-level gate: both the item metadata and the exact media file must say CC0. A `SMITHSONIAN_API_KEY` GitHub Actions secret is optional but recommended; without it, the build makes a low-volume attempt using `DEMO_KEY` and records any authentication/rate-limit failure.
 - NASA Image and Video Library items: screened small images, short video clips and audio files from NASA-center records. The NASA lane is **not CC0**; it retains NASA’s media usage guidance, attribution requirements, logo/endorsement warnings and item-level source.
 - Library of Congress images only when the specific record carries an explicit positive rights statement (e.g. “No Known Restrictions on Publication”); ambiguous or conflicting rights records are skipped.
 - Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
-- Larger Poly Haven selection: up to 16 HDRIs, 22 models and 36 texture packages; bundle available models/dependencies and PBR maps (base color, normal, roughness, AO/displacement where available). Item/source metadata and SHA-256 are retained.
+- Larger Poly Haven selection: up to 20 HDRIs, 28 models and 48 texture packages; bundle available models/dependencies and PBR maps (base color, normal, roughness, AO/displacement where available). Item/source metadata and SHA-256 are retained.
 - 196 original procedural sound-effect WAV presets for UI, foley-like accents, multiple weather/forest/ocean/city ambiences, camera, heartbeat, tension, science-fiction, magic, transitions and impacts. These are synthesized by code, not copied recordings.
 - 58 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
 - `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
@@ -73,4 +73,16 @@ The next release raises the reusable, repository-generated core rather than only
 - 175+ original procedural WAV cues, indexed by category, tags, intended use and loopability so later scene selection can search beyond filename guesses.
 
 The counts above describe generated families and are enforced by the build workflow. Third-party downloads remain conditional on the specific asset's rights metadata, valid file signature, size limits and SHA-256 ledger; a source listed in the catalog is not treated as successfully downloaded unless the build report says so.
+
+## Build 42 external-source expansion (in preparation)
+
+The next source pass broadens discovery without relaxing the file-level gates:
+
+- Poly Haven official CC0 selection: up to 20 HDRIs, 28 models and 48 PBR texture packages, with the actual downloaded files/dependencies recorded.
+- The Met: up to 110 images, only when the record's `isPublicDomain` flag and image endpoint pass.
+- Rijksmuseum: up to 90 images from the OAI-PMH/IIIF feed, only when each record carries CC0 or Public Domain Mark rights.
+- Wikimedia Commons: up to 240 images, 60 SVGs, and 36 short audio/video files, subject to exact file-level CC0/Public Domain metadata. SVGs are sanitized; media file signatures, MIME, size and SHA-256 are validated.
+- Broader Library of Congress and NASA search themes aim to improve the chance of finding more archival, science, engineering, nature, transport, heritage and field-recording resources. LOC's positive, non-conflicting item-rights statement gate remains; NASA is still treated under its own usage guidance, not CC0.
+
+These are search ceilings, not promised download counts. The generated build report and `ASSET_INDEX.json` remain authoritative for how many eligible files actually arrived and passed validation.
 
