@@ -23,7 +23,8 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - 98 original icon SVGs and 40 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
 - Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
-- Up to 100 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- Up to 160 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
+- Up to 20 short video/audio files from Wikimedia Commons, subject to strict file-level CC0/Public Domain metadata, host, byte-size, MIME and container checks. Video and audio counts appear in the build manifest; if no suitable small files are found, the report says so rather than pretending the source yielded media.
 - Up to 60 Rijksmuseum Open Access artwork images, downloaded through the no-key OAI-PMH feed and official IIIF image service only when the individual EDM record explicitly carries CC0 or Public Domain Mark rights.
 - Up to 60 Smithsonian Open Access images from the official API, with a strict two-level gate: both the item metadata and the exact media file must say CC0. A `SMITHSONIAN_API_KEY` GitHub Actions secret is optional but recommended; without it, the build makes a low-volume attempt using `DEMO_KEY` and records any authentication/rate-limit failure.
 - NASA Image and Video Library items: screened small images, short video clips and audio files from NASA-center records. The NASA lane is **not CC0**; it retains NASA’s media usage guidance, attribution requirements, logo/endorsement warnings and item-level source.
@@ -34,6 +35,8 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - 34 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
 - `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
+
+The GitHub Actions workflow runs offline license-gate regression tests before making external requests, then validates the new media counts against actual indexed entries.
 
 Large binary assets are shipped as a GitHub Release asset, not ordinary Git blobs. Open the [builds and downloadable releases](https://github.com/Nolane-x/video/releases) and download `video-asset-library.zip`; open `ASSET_CATALOG.html` after extraction to browse offline. Run metadata/checksum reports are also attached to each Actions run for 30 days.
 
