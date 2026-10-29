@@ -115,7 +115,7 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
     def test_asset_families_have_enough_unique_ids(self):
         self.assertGreaterEqual(len(library.PALETTES), 90)
         self.assertGreaterEqual(len(library.OVERLAYS), 75)
-        self.assertGreaterEqual(len(library.ICONS), 110)
+        self.assertGreaterEqual(len(library.ICONS), 125)
         self.assertGreaterEqual(len(library.TEXTURES), 55)
         self.assertGreaterEqual(len(library.ILLUSTRATIONS), 105)
         self.assertGreaterEqual(len(library.INFO), 50)
