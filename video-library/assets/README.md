@@ -18,10 +18,10 @@ This is the shared asset pool for future videos, not a collection dedicated to t
 
 The Actions builder generates a versioned downloadable ZIP containing:
 - 93 original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
-- 111 large-format editorial SVG illustrations for satellites, telescopes, rockets, laboratory tools, biology, nature, transport, architecture, robotics, finance, food, travel, film and music. Each is generated in-repository and licensed CC0.
+- 112 large-format editorial SVG illustrations for satellites, telescopes, rockets, laboratory tools, biology, nature, transport, architecture, robotics, finance, food, travel, film and music. Each is generated in-repository and licensed CC0.
 - 24 original, six-second 1280×720 H.264 motion loops for orbital grids, data signals, neon circuits, water, aurora, retro scanlines, film grain, industrial hazard, audio spectrum, particles, map routes and bokeh. They are generated with FFmpeg filters, contain no external footage/audio, and are verified by `ffprobe` before packaging.
 - 80 original transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
-- 113 original icon SVGs and 55 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
+- 129 original icon SVGs and 55 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
 - Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
 - Up to 160 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
@@ -67,7 +67,7 @@ The next release raises the reusable, repository-generated core rather than only
 
 - 93+ art-directed background plates for more locations and genres.
 - 80+ overlays, including light rays, wet lens, scan/radar, film edges, subtitle contrast and evidence/broadcast frames.
-- 110+ icons and 105+ large editorial illustrations across science, ecology, energy, transport, education, cooking, sports, film and sound.
+- 125+ icons and 105+ large editorial illustrations across science, ecology, energy, transport, education, cooking, sports, film and sound.
 - 55+ infographic templates, including risk/quadrant matrices, hierarchy/network layouts, chronology, learning progression and equation derivation.
 - 24 six-second original motion loops, each rendered with FFmpeg and checked with ffprobe.
 - 175+ original procedural WAV cues, indexed by category, tags, intended use and loopability so later scene selection can search beyond filename guesses.
