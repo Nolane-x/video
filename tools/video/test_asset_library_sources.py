@@ -19,6 +19,10 @@ class RightsGateTests(unittest.TestCase):
         self.assertFalse(library.smithsonian_rights_are_cc0(None, "CC0"))
         self.assertFalse(library.smithsonian_rights_are_cc0("CC0", None))
 
+    def test_rijksmuseum_resolver_rejects_nonofficial_hosts_without_network_access(self):
+        self.assertEqual(library.resolve_rijksmuseum_iiif("https://example.com/123"), "")
+        self.assertEqual(library.resolve_rijksmuseum_iiif("https://data.rijksmuseum.nl/123"), "")
+
     def test_rijksmuseum_only_accepts_explicit_cc0_or_public_domain_mark(self):
         self.assertEqual(
             library.rijksmuseum_license_from_rights(
