@@ -1203,6 +1203,12 @@ def overlay_svg(name):
     elif name=="sports-scorebug":
         p.append('<rect x="120" y="70" width="530" height="110" rx="12" fill="#0a111c" fill-opacity=".72" stroke="#b9c9d7" stroke-opacity=".55" stroke-width="3"/><path d="M385 70V180" stroke="#b9c9d7" stroke-opacity=".4" stroke-width="2"/><text x="250" y="135" fill="#fff" font-size="30">HOME 00</text><text x="500" y="135" fill="#fff" font-size="30">AWAY 00</text>')
 
+
+    elif name=="flash-frame":
+        p.append('<rect width="1920" height="1080" fill="#fff8dd" fill-opacity=".16"/>')
+        p.append('<path d="M0 0H1920V1080H0Z" fill="none" stroke="#fff8dd" stroke-opacity=".5" stroke-width="18"/>')
+    elif name=="screen-reflection":
+        p.append('<path d="M-250 0H80L920 1080H590ZM250 0H470L1310 1080H1090ZM1030 0H1180L1920 880V1080Z" fill="#dff6ff" fill-opacity=".055"/>')
     else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')    else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
     return svg_doc("".join(p),defs)
 
@@ -2854,7 +2860,7 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30 and len(ILLUSTRATIONS)>=50 and len(MOTION_LOOPS)>=10
+    assert len(PALETTES)>=90 and len(OVERLAYS)>=75 and len(ICONS)>=125 and len(INFO)>=50 and len(TEXTURES)>=55 and len(ILLUSTRATIONS)>=105 and len(MOTION_LOOPS)==24
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}
