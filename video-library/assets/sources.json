@@ -407,16 +407,16 @@
     },
     {
       "id": "wikimedia-commons-public-domain",
-      "title": "Wikimedia Commons — item-verified CC0/Public Domain media",
+      "title": "Wikimedia Commons — item-verified CC0/Public Domain images, video and audio",
       "provider": "Wikimedia Commons",
-      "kind": "images / reference media",
+      "kind": "images / video / audio reference media",
       "source_page": "https://commons.wikimedia.org/wiki/Commons:Licensing",
       "api": "https://commons.wikimedia.org/w/api.php",
       "license": "Per item. Automatic bundling accepts only exact CC0 or Public Domain metadata.",
       "license_url": "https://commons.wikimedia.org/wiki/Commons:Licensing",
       "verified_page_license": true,
       "bundling": "auto-only-on-file-level-cc0-or-public-domain",
-      "note": "The builder queries file namespace 6, reads each file's extmetadata, filters out CC BY, CC BY-SA, NC, missing or ambiguous licenses, uses the item thumbnail only, and stores the source page, creator, license URL, date/title metadata and SHA-256. Public-domain content may still depict people, trademarks or other third-party rights."
+      "note": "The build uses Wikimedia Commons file-namespace metadata. Images, video and audio are considered only when exact LicenseShortName metadata explicitly says CC0 or Public Domain; audio/video also require supported file extension, a small file size, official upload.wikimedia.org host, compatible MIME type and recognizable container signature. It stores the file page, creator, rights URL and SHA-256. Public-domain material may still depict people, trademarks or other third-party rights."
     },
     {
       "id": "kenney-github-cc0-starter-kits",

@@ -15,7 +15,7 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
-ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
+ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
 KENNEY = [
@@ -1523,6 +1523,15 @@ def openverse_extension(url,ctype,kind,item):
     return "."+ft if "."+ft in allowed else ""
 
 
+def wikimedia_license_is_eligible(short_name):
+    """Only accept file-level CC0 or Public Domain labels from the Commons metadata record."""
+    normalized=re.sub(r"[\s\-®().]+","",str(short_name or "").lower())
+    return normalized in {
+        "cc0","cc01.0","creativecommonszero",
+        "publicdomain","publicdomainmark","publicdomainus","publicdomainunitedstates"
+    }
+
+
 def download_wikimedia_public_domain(root,index):
     report=[]; total=0; cap=160; seen=set()
     queries=[
@@ -1561,8 +1570,7 @@ def download_wikimedia_public_domain(root,index):
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
                 license_url=str((meta.get("LicenseUrl") or {}).get("value") or imageinfo.get("descriptionurl") or "")
-                normalized=short.lower().replace(" ","").replace("-","").replace("®","")
-                if normalized not in {"cc0","cc01.0","creativecommonszero","publicdomain","publicdomainmark"}:
+                if not wikimedia_license_is_eligible(short):
                     continue
                 asset_url=imageinfo.get("thumburl") or imageinfo.get("url")
                 page_url=imageinfo.get("descriptionurl") or "https://commons.wikimedia.org/wiki/"+urllib.parse.quote(page.get("title","").replace(" ","_"))
@@ -1940,6 +1948,120 @@ def download_rijksmuseum_open_access(root,index):
     return report
 
 
+def download_wikimedia_video_audio(root,index):
+    """Bundle a small set of video/audio files only when the Commons file page explicitly marks CC0 or Public Domain."""
+    report=[]; total=0; total_videos=0; total_audio=0; cap=20; seen=set()
+    queries=[
+        ("spaceflight","video spaceflight rocket launch filetype:video"),
+        ("earth-observation","video satellite Earth clouds filetype:video"),
+        ("nature","wildlife nature landscape filetype:video"),
+        ("ocean","ocean underwater marine filetype:video"),
+        ("weather","storm lightning aurora filetype:video"),
+        ("architecture","historic architecture city filetype:video"),
+        ("astronomy","star trails night sky time lapse filetype:video"),
+        ("science","microscopy laboratory scientific demonstration filetype:video"),
+        ("birds","bird song nature field recording filetype:audio"),
+        ("ocean-audio","ocean waves rain wind ambience filetype:audio"),
+        ("industrial-audio","machine workshop field recording filetype:audio"),
+        ("ambience-audio","forest city ambience field recording filetype:audio")
+    ]
+    for category,q in queries:
+        if total>=cap: break
+        is_audio=category.endswith("-audio") or category=="birds"
+        kind="audio" if is_audio else "video"
+        extensions={".mp3",".wav",".ogg",".flac",".m4a",".oga"} if is_audio else {".mp4",".m4v",".mov",".webm",".ogv"}
+        cap_size=8*1024*1024 if is_audio else 18*1024*1024
+        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":25,
+                "prop":"imageinfo","iiprop":"url|extmetadata|size|mime"}
+        url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
+        successes=0; checked=0
+        try:
+            response=request_json(url,timeout=18)
+            pages=(response.get("query") or {}).get("pages") or {}
+            for page in pages.values():
+                if total>=cap or successes>=3 or checked>=18: break
+                imageinfo=(page.get("imageinfo") or [{}])[0]
+                if not isinstance(imageinfo,dict): continue
+                meta=imageinfo.get("extmetadata") or {}
+                short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
+                if not wikimedia_license_is_eligible(short):
+                    continue
+                file_url=str(imageinfo.get("url") or "")
+                parsed=urllib.parse.urlparse(file_url)
+                ext=Path(parsed.path).suffix.lower()
+                mime=str(imageinfo.get("mime") or "").lower()
+                byte_size=int(imageinfo.get("size") or 0)
+                if parsed.scheme!="https" or parsed.hostname!="upload.wikimedia.org":
+                    continue
+                if ext not in extensions or byte_size<2048 or byte_size>cap_size:
+                    continue
+                if mime and mime!="application/octet-stream" and not mime.startswith("audio/" if is_audio else "video/"):
+                    continue
+                identity=str(page.get("pageid") or page.get("title") or "")
+                if not identity or identity in seen: continue
+                seen.add(identity); checked+=1
+                try:
+                    blob,ctype=request_bytes(file_url,timeout=25,limit=cap_size)
+                    if len(blob)<2048: raise RuntimeError("file too small to be a useful media source")
+                    mime2=ctype.split(";")[0].strip().lower()
+                    if is_audio:
+                        if not (mime2.startswith("audio/") or blob.startswith(b"RIFF") or blob.startswith(b"OggS") or blob.startswith(b"ID3")):
+                            raise RuntimeError("download did not return recognizable audio data")
+                        if ext==".mp3" and not (blob.startswith(b"ID3") or (len(blob)>2 and blob[0]==0xff and blob[1]&0xe0==0xe0)):
+                            raise RuntimeError("MP3 signature is missing")
+                        if ext in {".ogg",".oga"} and not blob.startswith(b"OggS"):
+                            raise RuntimeError("Ogg signature is missing")
+                        if ext==".wav" and not blob.startswith(b"RIFF"):
+                            raise RuntimeError("WAV RIFF signature is missing")
+                    else:
+                        if not (mime2.startswith("video/") or (len(blob)>12 and blob[4:8]==b"ftyp") or blob.startswith(b"\x1a\x45\xdf\xa3") or blob.startswith(b"OggS")):
+                            raise RuntimeError("download did not return recognizable video data")
+                        if ext==".webm" and not blob.startswith(b"\x1a\x45\xdf\xa3"):
+                            raise RuntimeError("WebM EBML signature is missing")
+                        if ext in {".mp4",".m4v",".mov"} and not (len(blob)>12 and blob[4:8]==b"ftyp"):
+                            raise RuntimeError("ISO BMFF video signature is missing")
+                    target_dir=root/"third-party/wikimedia"/("audio" if is_audio else "video")
+                    target_dir.mkdir(parents=True,exist_ok=True)
+                    title=str((meta.get("ObjectName") or {}).get("value") or page.get("title") or identity)
+                    filename=f"{category}-{slugify(title)[:48]}-{slugify(identity)}{ext}"
+                    target=target_dir/filename
+                    target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    license_url=str((meta.get("LicenseUrl") or {}).get("value") or imageinfo.get("descriptionurl") or "https://commons.wikimedia.org/wiki/Commons:Licensing")
+                    creator=str((meta.get("Artist") or {}).get("value") or (meta.get("Credit") or {}).get("value") or "")
+                    description=str((meta.get("ImageDescription") or {}).get("value") or "")
+                    page_url=str(imageinfo.get("descriptionurl") or ("https://commons.wikimedia.org/wiki/"+urllib.parse.quote(str(page.get("title") or "").replace(" ","_"))))
+                    asset_id="wikimedia-"+kind+"-"+slugify(identity)
+                    entry={"id":asset_id,"path":target.relative_to(root).as_posix(),
+                           "type":"wikimedia-cc0-"+kind,"category":category,"title":title,
+                           "creator":creator,"description":description[:1600],"source_page":page_url,
+                           "source_file_url":file_url,"license":short,"license_url":license_url,
+                           "license_verified_from_item_metadata":True,"size_bytes":len(blob),"sha256":digest,
+                           "redistributable":True,
+                           "note":"Bundled only because exact Commons file metadata explicitly labelled this item CC0 or Public Domain. Review contextual rights and intended use."}
+                    index.append(entry); total+=1; successes+=1
+                    if is_audio: total_audio+=1
+                    else: total_videos+=1
+                    report.append({"id":asset_id,"status":"downloaded","media_type":kind,"category":category,
+                                   "path":entry["path"],"title":title,"source_page":page_url,
+                                   "license":short,"size_bytes":len(blob),"sha256":digest})
+                    print("[Wikimedia Commons AV] OK:",kind,category,title[:45],len(blob))
+                except Exception as item_exc:
+                    report.append({"id":"wikimedia-"+kind+"-"+slugify(identity),"status":"failed","media_type":kind,
+                                   "category":category,"title":str(page.get("title") or identity),
+                                   "reason":str(item_exc)[:300],"source_page":imageinfo.get("descriptionurl")})
+            time.sleep(.45)
+            if not successes:
+                report.append({"id":"wikimedia-"+category,"status":"no_eligible_media","media_type":kind,
+                               "category":category,"query":q,"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing",
+                               "reason":"No distinct small media file passed exact license, size, host and container filters."})
+        except Exception as exc:
+            report.append({"id":"wikimedia-"+category,"status":"failed","media_type":kind,"category":category,
+                           "query":q,"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing",
+                           "reason":str(exc)[:300]})
+            print("[Wikimedia Commons AV] search failed:",category,str(exc))
+    return report
+
 def download_openverse(root,index):
     # A small CC0-only fallback. The upstream host has intermittent tunnel timeouts in CI,
     # so requests are intentionally short and failures are recorded rather than retried for minutes.
@@ -1995,9 +2117,9 @@ def make_asset_catalog(root,index,summary):
         license_url=item.get("license_url") or ""
         if ext in {".svg",".png",".jpg",".jpeg",".webp"}:
             preview=f'<img loading="lazy" alt="{html.escape(title,quote=True)}" src="{html.escape(rel,quote=True)}">'
-        elif ext in {".mp4",".mov",".m4v",".webm"}:
+        elif ext in {".mp4",".mov",".m4v",".webm",".ogv"}:
             preview=f'<video controls preload="metadata" playsinline src="{html.escape(rel,quote=True)}" style="width:100%;height:100%;object-fit:contain"></video>'
-        elif ext in {".wav",".mp3",".ogg",".flac",".m4a"}:
+        elif ext in {".wav",".mp3",".ogg",".oga",".flac",".m4a"}:
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
@@ -2063,6 +2185,7 @@ def main():
     nasa_report=download_nasa_media(STAGE,index)
     loc_report=download_loc_public_domain(STAGE,index)
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
+    wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -2075,8 +2198,10 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
       "\n\n## Smithsonian Open Access CC0 media\nThe builder queries Smithsonian Open Access and only considers records whose top-level metadata_usage.access is exactly CC0. It then checks each candidate media object's usage.access independently and downloads only media explicitly marked CC0. The official IDS image delivery service is requested at a bounded size; source record, unit, title, creator, media URL, exact rights values and SHA-256 are kept. A caller may configure the optional GitHub Actions secret SMITHSONIAN_API_KEY; if absent, the builder makes a low-volume attempt with DEMO_KEY and records any rate-limit/authentication failure rather than claiming success. CC0 does not grant trademark, privacy, publicity or other non-copyright rights. Sources: https://www.si.edu/openaccess/faq and https://www.si.edu/openaccess/devtools.\n\n"+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
       "\n\n## Library of Congress photographs\nThe builder downloads only image records with an explicit item-level rights statement containing ‘No known restrictions on publication’, ‘Public Domain’, or ‘No known copyright restrictions’, and rejects explicit conflicting limitations. Records without a rights statement are skipped. Each selected file records the exact statement, item URL, direct image URL, and SHA-256. LOC notes users remain responsible for evaluating copyright and other rights, so inspect the item/context before publication. Sources: https://www.loc.gov/apis/json-and-yaml/ and https://ask.loc.gov/faq/305466.\n\n"+
-      "\n\n## Wikimedia Commons imagery\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Creator, file page, license URL and SHA-256 are stored for each downloaded image. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
+      "\n\n## Wikimedia Commons images, video and audio\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Images, small video clips and audio files are bundled only when exact file-level metadata explicitly labels them CC0 or Public Domain. Video/audio downloads are limited by byte size, official upload.wikimedia.org host, filename extension, MIME type and recognizable container signature; records retain creator, source page, license URL and SHA-256. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_report)+
+      "\n\n## Wikimedia Commons video/audio download results\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
@@ -2096,6 +2221,8 @@ def main():
               "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
+              "wikimedia_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in wikimedia_av_report),
+              "wikimedia_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in wikimedia_av_report),
               "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
@@ -2106,6 +2233,7 @@ def main():
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
+               "wikimedia_video_audio_downloads":wikimedia_av_report,
                "openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)

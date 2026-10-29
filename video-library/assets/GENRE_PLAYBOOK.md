@@ -84,3 +84,14 @@ A texture should support the material/story, not become a noisy overlay on every
 ## Smithsonian CC0 media
 
 For natural history, spaceflight, objects, botany, birds, archaeology, design and historical culture, the library can pull Smithsonian Open Access media. Automatic bundling is intentionally strict: both `metadata_usage.access` on the item and `usage.access` on the exact media entry must equal `CC0`. If the API rejects the default demo key or rate-limits requests, use the optional `SMITHSONIAN_API_KEY` GitHub Actions secret; no key value should be committed to the repository. Retain the museum record URL and review privacy, publicity, trademarks and cultural-property context even when copyright is CC0.
+
+
+## Rights-verified short source footage and audio
+
+For quick factual inserts, real ambience and visual transitions, search the bundled Wikimedia Commons video/audio lane as well as NASA clips. Only exact file-level CC0/Public Domain labels are accepted; each file has a source page, creator where available, license URL and checksum. Size is capped, and the builder checks MIME type plus a recognizable container signature before packaging. Many Commons media files are large or carry CC BY/SA licenses, so zero eligible downloads is an expected possible outcome, not a reason to loosen the rights gate.
+
+- **Space / Earth science:** look for short public-domain satellite, aurora or launch clips; keep source notes on each shot.
+- **Nature / ocean / weather:** use licensed source recordings for establishing shots and ambience, then layer original vector/diagram visuals where explanations need labels.
+- **Interviews / music / human stories:** use source audio only when the exact item rights and context are appropriate; the 125 original procedural SFX presets remain a dependable fallback.
+
+Factual status matters more than an impressive clip: public-domain archival footage should not be edited to imply it depicts a different event or date.

@@ -64,6 +64,18 @@ class RightsGateTests(unittest.TestCase):
         )
         self.assertFalse(library.loc_rights_are_eligible(None)[0])
 
+    def test_wikimedia_media_accepts_only_explicit_cc0_or_public_domain_labels(self):
+        self.assertTrue(library.wikimedia_license_is_eligible("CC0"))
+        self.assertTrue(library.wikimedia_license_is_eligible("CC0-1.0"))
+        self.assertTrue(library.wikimedia_license_is_eligible("Public domain"))
+        self.assertTrue(library.wikimedia_license_is_eligible("Public domain (United States)"))
+        self.assertTrue(library.wikimedia_license_is_eligible("Public Domain Mark"))
+        self.assertFalse(library.wikimedia_license_is_eligible("CC BY 4.0"))
+        self.assertFalse(library.wikimedia_license_is_eligible("CC BY-SA 4.0"))
+        self.assertFalse(library.wikimedia_license_is_eligible("CC BY-NC"))
+        self.assertFalse(library.wikimedia_license_is_eligible("rights unclear"))
+        self.assertFalse(library.wikimedia_license_is_eligible(None))
+
     def test_nasa_screen_accepts_known_center_and_skips_explicit_restrictions(self):
         ok, _ = library.nasa_item_is_eligible(
             {"center": "JPL", "title": "Mars surface landscape", "keywords": ["Mars", "rover"]}
