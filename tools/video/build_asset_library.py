@@ -15,6 +15,15 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
+
+# Discovery ceilings for official sources. These are maximums, not promised download counts;
+# item-level rights and file validation remain mandatory for every downloaded asset.
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+MET_OPEN_ACCESS_IMAGE_CAP = 110
+RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
+WIKIMEDIA_CC0_SVG_CAP = 60
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 36
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -1510,7 +1519,7 @@ def choose_poly_texture_selection(tree):
 
 def download_polyhaven(root,index):
     report=[]
-    counts={"hdris":20,"models":28,"textures":48}
+    counts=POLYHAVEN_SELECTION_LIMITS
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -1603,7 +1612,7 @@ def download_polyhaven(root,index):
     return report
 
 def download_met_open_access(root,index):
-    report=[]; total=0; cap=110
+    report=[]; total=0; cap=MET_OPEN_ACCESS_IMAGE_CAP
     queries=[
         ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
         ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
@@ -2033,7 +2042,7 @@ def wikimedia_license_is_eligible(short_name):
 
 
 def download_wikimedia_public_domain(root,index):
-    report=[]; total=0; cap=240; seen=set()
+    report=[]; total=0; cap=WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP; seen=set()
     queries=[
         ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
         ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
@@ -2148,7 +2157,7 @@ def rijksmuseum_license_from_rights(rights_text):
 def download_smithsonian_open_access(root,index):
     """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
     import os
-    report=[]; total=0; cap=60; seen=set()
+    report=[]; total=0; cap=WIKIMEDIA_CC0_SVG_CAP; seen=set()
     api_key=(os.environ.get("SMITHSONIAN_API_KEY") or "").strip() or "DEMO_KEY"
     topics=[
         ("natural-history","NMNH"),("botany","NMNHBOTANY"),("birds","NMNHBIRDS"),
@@ -2327,7 +2336,7 @@ def download_rijksmuseum_open_access(root,index):
     """Harvest a capped sample of Rijksmuseum records, but only image media with explicit CC0/PDM rights."""
     import xml.etree.ElementTree as ET
     from urllib.parse import urlencode
-    report=[]; total=0; cap=90; seen=set()
+    report=[]; total=0; cap=RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP; seen=set()
     oai_ns="http://www.openarchives.org/OAI/2.0/"
     edm_ns="http://www.europeana.eu/schemas/edm/"
     dc_ns="http://purl.org/dc/elements/1.1/"
@@ -2607,7 +2616,7 @@ def download_wikimedia_vector_svg(root,index):
 
 def download_wikimedia_video_audio(root,index):
     """Bundle a small set of video/audio files only when the Commons file page explicitly marks CC0 or Public Domain."""
-    report=[]; total=0; total_videos=0; total_audio=0; cap=36; seen=set()
+    report=[]; total=0; total_videos=0; total_audio=0; cap=WIKIMEDIA_CC0_AUDIO_VIDEO_CAP; seen=set()
     queries=[
         ("spaceflight","video spaceflight rocket launch filetype:video"),
         ("earth-observation","video satellite Earth clouds filetype:video"),
