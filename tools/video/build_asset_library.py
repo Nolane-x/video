@@ -953,7 +953,7 @@ def choose_poly_texture_selection(tree):
 
 def download_polyhaven(root,index):
     report=[]
-    counts={"hdris":10,"models":12,"textures":18}
+    counts={"hdris":16,"models":22,"textures":36}
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -1046,7 +1046,7 @@ def download_polyhaven(root,index):
     return report
 
 def download_met_open_access(root,index):
-    report=[]; total=0; cap=60
+    report=[]; total=0; cap=90
     queries=[
         ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
         ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
@@ -1061,7 +1061,7 @@ def download_met_open_access(root,index):
         try:
             response=request_json(search_url,timeout=20)
             for object_id in response.get("objectIDs") or []:
-                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=5: break
+                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=7: break
                 if object_id in seen: continue
                 seen.add(object_id)
                 try:
@@ -1179,12 +1179,19 @@ def download_nasa_media(root,index):
                     if media_type=="image":
                         allowed_ext={".jpg",".jpeg",".png",".webp"}; cap=MAX_MEDIA_FILE
                     elif media_type=="video":
-                        allowed_ext={".mp4",".mov",".m4v"}; cap=12*1024*1024
+                        allowed_ext={".mp4",".mov",".m4v"}; cap=18*1024*1024
                     else:
-                        allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=10*1024*1024
+                        allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=15*1024*1024
                     candidates=[]
                     for media_url in urls:
                         media_url=media_url.replace("http://","https://",1)
+                        raw_parsed=urllib.parse.urlsplit(media_url)
+                        # NASA manifest filenames often contain literal spaces and curly apostrophes.
+                        # Quote only the URL path, preserving safe delimiters and any query string.
+                        safe_path=urllib.parse.quote(raw_parsed.path,safe="/%:@-._~!                    for media_url in urls:
+                        media_url=media_url.replace("http://","https://",1)
+                        parsed=urllib.parse.urlparse(media_url)'()*+,;=")
+                        media_url=urllib.parse.urlunsplit((raw_parsed.scheme,raw_parsed.netloc,safe_path,raw_parsed.query,raw_parsed.fragment))
                         parsed=urllib.parse.urlparse(media_url)
                         if parsed.hostname!="images-assets.nasa.gov":
                             continue
@@ -1418,7 +1425,7 @@ def openverse_extension(url,ctype,kind,item):
 
 
 def download_wikimedia_public_domain(root,index):
-    report=[]; total=0; cap=100; seen=set()
+    report=[]; total=0; cap=160; seen=set()
     queries=[
         ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
         ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
@@ -1429,11 +1436,20 @@ def download_wikimedia_public_domain(root,index):
         ("landscape","landscape public domain photo filetype:bitmap"),("industry","industrial machinery public domain filetype:bitmap"),
         ("urban","historic city street public domain filetype:bitmap"),("bridges","bridge public domain photo filetype:bitmap"),
         ("spaceflight","lunar surface public domain filetype:bitmap"),("geology","geology rock formation public domain filetype:bitmap"),
-        ("insects","insect scientific illustration public domain filetype:bitmap"),("portraits-archive","historic building public domain photo filetype:bitmap")
+        ("insects","insect scientific illustration public domain filetype:bitmap"),("portraits-archive","historic building public domain photo filetype:bitmap"),
+        ("astronomy-archive","star chart astronomy public domain filetype:bitmap"),("engineering-plans","engineering drawing bridge public domain filetype:bitmap"),
+        ("historic-transport","steam locomotive public domain filetype:bitmap"),("airships","airship aviation public domain filetype:bitmap"),
+        ("scientific-instruments","scientific equipment public domain filetype:bitmap"),("volcanoes","volcanic eruption public domain filetype:bitmap"),
+        ("coral","coral reef marine biology public domain filetype:bitmap"),("mammals","mammal natural history public domain filetype:bitmap"),
+        ("botanical-prints","botanical plate flower public domain filetype:bitmap"),("world-maps","world map antique public domain filetype:bitmap"),
+        ("railway","historic railroad station public domain filetype:bitmap"),("bridges-archive","historic bridge construction public domain filetype:bitmap"),
+        ("craft","ceramics textile craft public domain filetype:bitmap"),("early-computing","early computer machinery public domain filetype:bitmap"),
+        ("weather-maps","weather map storm public domain filetype:bitmap"),("lunar","Apollo Moon surface public domain filetype:bitmap"),
+        ("historic-labs","laboratory scientific equipment public domain filetype:bitmap"),("urban-archive","historic city architecture public domain filetype:bitmap")
     ]
     for category,q in queries:
         if total>=cap: break
-        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":20,
+        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":30,
                 "prop":"imageinfo","iiprop":"url|extmetadata","iiurlwidth":1600}
         url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
         successes=0
@@ -1441,7 +1457,7 @@ def download_wikimedia_public_domain(root,index):
             response=request_json(url,timeout=16)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=6: break
+                if total>=cap or successes>=8: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
