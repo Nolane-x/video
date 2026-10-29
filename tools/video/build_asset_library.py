@@ -2075,6 +2075,11 @@ def download_rijksmuseum_open_access(root,index):
     return report
 
 
+def google_font_license_is_ofl(license_text):
+    text_value=str(license_text or "").upper()
+    return "SIL OPEN FONT LICENSE" in text_value and re.search(r"VERSION\s+1\.1",text_value) is not None
+
+
 def download_google_fonts(root,index):
     """Bundle selected Google Fonts only after verifying the family's official OFL and metadata listing."""
     report=[]; total_bytes=0; max_total=42*1024*1024; max_font=9*1024*1024
@@ -2086,7 +2091,7 @@ def download_google_fonts(root,index):
         try:
             license_blob,license_mime=request_bytes(base+"OFL.txt",timeout=20,limit=300000)
             license_text=license_blob.decode("utf-8","replace")
-            if "SIL OPEN FONT LICENSE" not in license_text.upper() or "VERSION 1.1" not in license_text.upper():
+            if not google_font_license_is_ofl(license_text):
                 raise RuntimeError("Family license file does not explicitly confirm SIL Open Font License 1.1")
             metadata_blob,metadata_mime=request_bytes(base+"METADATA.pb",timeout=20,limit=1_500_000)
             metadata_text=metadata_blob.decode("utf-8","replace")
@@ -2096,7 +2101,11 @@ def download_google_fonts(root,index):
             source_name_match=re.search(r'name:\s*"([^"]+)"',metadata_text)
             official_name=source_name_match.group(1) if source_name_match else family
             languages=[x for x in re.findall(r'languages:\s*"([^"]+)"',metadata_text) if x]
-            supports_vietnamese=any(x.lower().startswith("vi_") or x.lower()=="vi" for x in languages) or vietnamese_priority
+            metadata_has_vietnamese=any(x.lower().startswith("vi_") or x.lower()=="vi" for x in languages)
+            supports_vietnamese=metadata_has_vietnamese or slug=="bevietnampro"
+            coverage_note=("Vietnamese explicitly present in upstream language metadata." if metadata_has_vietnamese else
+                           "Vietnamese-first family; still render-test all tone marks in the final composition." if slug=="bevietnampro" else
+                           "Latin-script family selected for typography variety; render-test Vietnamese tone marks before production.")
             family_dir=root/"third-party/google-fonts"/slug
             family_dir.mkdir(parents=True,exist_ok=True)
             (family_dir/"OFL.txt").write_bytes(license_blob)
@@ -2142,6 +2151,7 @@ def download_google_fonts(root,index):
                           "title":family+" — "+filename,"font_family":official_name,"font_family_id":slug,
                           "font_filename":filename,"font_weight":weight,"font_style":"italic" if italic else "normal",
                           "font_format":"truetype","font_role":role,"supports_vietnamese":bool(supports_vietnamese),
+                          "language_coverage_note":coverage_note,"source_metadata_file":(family_dir/"METADATA.pb").relative_to(root).as_posix(),
                           "category":"typography","creator":"Google Fonts upstream family contributors",
                           "source_page":"https://fonts.google.com/specimen/"+urllib.parse.quote(family.replace(" ","+"),safe="+"),
                           "source_file_url":source_url,"source_license_file":(family_dir/"OFL.txt").relative_to(root).as_posix(),
