@@ -2616,6 +2616,35 @@ def main():
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
                "google_font_downloads":google_fonts_report,"openverse_downloads":openverse_report,"assets":index}
+    font_guide=[
+      "# Typography Pack Guide",
+      "",
+      "Font files in this package come from the official Google Fonts repository. Every bundled file was listed in the family's METADATA.pb and is accompanied by its exact OFL.txt. Fonts are independently hash-indexed. Keep license text when redistributing.",
+      "",
+      "## Suggested font roles",
+      "",
+      "| Font family | Suggested role | Bundle status |",
+      "|---|---|---|"
+    ]
+    font_download_by_slug={row.get("id","").replace("google-font-",""):row for row in google_fonts_report}
+    for slug,family,filenames,role,vietnamese_priority in FONT_FAMILIES:
+        row=font_download_by_slug.get(slug,{})
+        count=row.get("downloaded_count",0)
+        status=f"{count} file(s) bundled" if count else row.get("status","not downloaded")
+        font_guide.append(f"| {family} | {role} | {status} |")
+    font_guide.extend([
+      "",
+      "## Vietnamese subtitle and title rules",
+      "",
+      "- Start with Be Vietnam Pro or Noto Sans for Vietnamese subtitles/body text; preview tone marks, kerning, line spacing and clipping at the final video resolution.",
+      "- Inter, IBM Plex Sans and Space Grotesk are useful for technology, AI, software and product explainers.",
+      "- IBM Plex Mono is for code, terminal and compact data labels, not long paragraphs.",
+      "- Playfair Display and Noto Serif fit editorial, history and culture; Barlow and Oswald can suit sports/broadcast headlines.",
+      "- Use one display family and one body family per series. Keep subtitles readable and avoid overly thin weights on busy footage.",
+      "- SIL Open Font License permits broad use and redistribution subject to its terms. Preserve OFL.txt and honor any Reserved Font Name terms if you modify a font.",
+      "- The catalog's font specimen is a preview, not an exhaustive character-coverage test. Always render-test Vietnamese diacritics on the actual target system."
+    ])
+    write_text(STAGE/"FONT_GUIDE.md","\\n".join(font_guide)+"\\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
