@@ -94,6 +94,21 @@ jobs:
               assert clip.get("width") == 1280 and clip.get("height") == 720
               assert 5.8 <= clip.get("duration_seconds", 0) <= 6.2
               assert len(clip.get("sha256", "")) == 64 and clip.get("size_bytes", 0) > 1024
+          assert "wikimedia_svgs_downloaded" in expected, "Wikimedia SVG count is missing"
+          svg_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-svg"]
+          assert len(svg_items) == expected["wikimedia_svgs_downloaded"]
+          for vector in svg_items:
+              normalized = re.sub(r"[\s\-®()]+", "", str(vector.get("license") or "").lower())
+              assert normalized in eligible_license_labels, f"Unexpected Wikimedia SVG license: {vector.get('license')}"
+              assert vector.get("license_verified_from_item_metadata") is True
+              assert vector.get("sanitized_svg") is True and vector.get("redistributable") is True
+              assert vector.get("source_page", "").startswith("https://commons.wikimedia.org/")
+              assert vector.get("source_file_url", "").startswith("https://upload.wikimedia.org/")
+              assert len(vector.get("sha256", "")) == 64 and vector.get("size_bytes", 0) > 100
+              svg_text = (root / vector["path"]).read_text(encoding="utf-8", errors="replace").lower()
+              assert "<script" not in svg_text and "javascript:" not in svg_text
+              assert not re.search(r"\son[a-z]+\s*=", svg_text), "SVG event handler survived sanitization"
+              assert not re.search(r"\s(?:href|src)\s*=\s*['\"](?:https?:|//|data:)", svg_text), "External SVG resource survived sanitization"
           assert "wikimedia_videos_downloaded" in expected, "Wikimedia video count is missing"
           assert "wikimedia_audio_downloaded" in expected, "Wikimedia audio count is missing"
           wikimedia_video_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-video"]
