@@ -335,8 +335,22 @@ def generate_original_audio(root: Path, index: list[dict], cc0_url: str) -> int:
         with wave.open(str(path),"wb") as wav:
             wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(48000); wav.writeframes(payload)
         digest=hashlib.sha256(payload).hexdigest()
+        ambience_kinds={"wind","rain","city","forest","ocean","bubbles","fire","thunder","crowd","birds","train","drone","warmdrone","vinyl"}
+        interface_kinds={"click","click-sharp","chime","chime-soft","buzz","pulse","scifi","laser","glitch","tapestop","typing","morse","shutter"}
+        foley_kinds={"paper","steps","steps-wood","steps-gravel","impact","impact-heavy","metal","glass","glassbreak","heartbeat","heartbeat-fast"}
+        if kind in ambience_kinds:
+            category="ambience"
+        elif kind in interface_kinds or name.startswith("ui-"):
+            category="interface / technology"
+        elif kind in foley_kinds:
+            category="foley / physical action"
+        else:
+            category="cinematic transition / musical accent"
+        tags=sorted(set([category,kind]+[part for part in name.split("-") if len(part)>2]))
         index.append({"id":name,"path":path.relative_to(root).as_posix(),"type":"original-procedural-sfx",
-                      "description":name.replace("-"," ").title(),"duration_seconds":duration,"sample_rate":48000,
+                      "description":name.replace("-"," ").title(),"category":category,"tags":tags,
+                      "intended_use":"loopable background bed" if kind in ambience_kinds else "one-shot / timed cue",
+                      "loopable":kind in ambience_kinds,"duration_seconds":duration,"sample_rate":48000,
                       "channels":1,"sample_format":"PCM_S16LE","license":"CC0-1.0","license_url":cc0_url,
                       "redistributable":True,"originally_synthesized":True,"sha256":digest,"size_bytes":path.stat().st_size})
         count+=1
