@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create the cross-genre resource library, preserve provenance, and gate redistribution by license."""
 from __future__ import annotations
-import hashlib, html, json, mimetypes, re, shutil, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
+import hashlib, html, json, mimetypes, re, shutil, subprocess, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -145,6 +145,21 @@ ILLUSTRATIONS = [
  ("paw-nature-hero","Wildlife / animal","nature","paw"),("recycle-hero","Circular economy / recycling","environment","recycle"),
  ("shopping-cart-hero","Commerce / shopping","business","shopping-bag"),("security-lock-hero","Privacy / security","technology","lock"),
  ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave")
+]
+
+MOTION_LOOPS = [
+    ("orbital-grid-loop","Orbital Grid Loop","space","0x071521","orbital"),
+    ("data-signal-loop","Data Signal Loop","technology","0x08172a","data"),
+    ("neon-circuit-loop","Neon Circuit Loop","technology","0x101026","circuit"),
+    ("ocean-ripple-loop","Ocean Ripple Loop","nature","0x052b42","water"),
+    ("aurora-flow-loop","Aurora Flow Loop","nature","0x10223a","aurora"),
+    ("retro-scanline-loop","Retro Scanline Loop","gaming","0x171323","retro"),
+    ("film-grain-loop","Archival Film Grain Loop","documentary","0x191817","film"),
+    ("hazard-light-loop","Industrial Hazard Loop","industry","0x211f19","hazard"),
+    ("audio-spectrum-loop","Audio Spectrum Loop","music","0x101a2a","spectrum"),
+    ("particle-field-loop","Particle Field Loop","abstract","0x081420","particles"),
+    ("route-tracer-loop","Route Tracer Loop","travel","0x102229","route"),
+    ("soft-bokeh-loop","Soft Bokeh Loop","cinematic","0x181a2a","bokeh"),
 ]
 
 OVERLAYS = [
@@ -339,6 +354,103 @@ def generate_original_illustrations(root,index):
                       "redistributable":True,
                       "note":"Original repository-generated vector illustration; may be scaled for a shot. The included title strip is part of the artwork."})
     return len(ILLUSTRATIONS)
+
+
+def motion_loop_filters(style):
+    """Return an original, periodic vector-like filter chain for a six-second 24 fps loop."""
+    orbital = "drawgrid=width=72:height=72:thickness=1:color=0x3ed9c7@0.18,drawbox=x='550+240*sin(2*PI*t/6)':y='260+110*cos(2*PI*t/6)':w=180:h=180:color=0x3ed9c7@0.12:t=fill,drawbox=x='550+240*sin(2*PI*t/6)':y='260+110*cos(2*PI*t/6)':w=180:h=180:color=0x3ed9c7@0.75:t=3"
+    data = "drawgrid=width=48:height=48:thickness=1:color=0x55baff@0.12,drawbox=x='100+420*(1+sin(2*PI*t/6))/2':y=0:w=5:h=720:color=0x55baff@0.6:t=fill,drawbox=x='500+420*(1+sin(2*PI*t/6+2.1))/2':y=0:w=3:h=720:color=0x66e2c5@0.55:t=fill,drawbox=x=0:y='170+90*sin(2*PI*t/6)':w=1280:h=2:color=0x55baff@0.45:t=fill"
+    circuit = "drawgrid=width=64:height=64:thickness=1:color=0xff58c9@0.13,drawbox=x='160+420*(1+sin(2*PI*t/6))/2':y=180:w=240:h=5:color=0xff58c9@0.72:t=fill,drawbox=x='760+210*(1+sin(2*PI*t/6+1.4))/2':y=420:w=190:h=4:color=0x58e8ff@0.72:t=fill,drawbox=x=300:y=180:w=4:h=260:color=0xff58c9@0.42:t=fill,drawbox=x=850:y=420:w=4:h=160:color=0x58e8ff@0.42:t=fill"
+    water = "drawgrid=width=128:height=64:thickness=1:color=0x5ad4e8@0.10,drawbox=x=0:y='170+45*sin(2*PI*t/6)':w=1280:h=3:color=0x5ad4e8@0.35:t=fill,drawbox=x=0:y='260+38*sin(2*PI*t/6+1.2)':w=1280:h=2:color=0x5ad4e8@0.27:t=fill,drawbox=x=0:y='360+30*sin(2*PI*t/6+2.0)':w=1280:h=3:color=0x83e8dc@0.30:t=fill,drawbox=x=0:y='490+34*sin(2*PI*t/6+3.1)':w=1280:h=2:color=0x5ad4e8@0.22:t=fill"
+    aurora = "drawbox=x='-80+110*sin(2*PI*t/6)':y='80+30*cos(2*PI*t/6)':w=1440:h=80:color=0x40e0c0@0.12:t=fill,drawbox=x='-80+120*sin(2*PI*t/6+1.2)':y='180+28*cos(2*PI*t/6+1.2)':w=1440:h=50:color=0x5c8dff@0.10:t=fill,drawbox=x='-80+130*sin(2*PI*t/6+2.4)':y='270+25*cos(2*PI*t/6+2.4)':w=1440:h=36:color=0xbf68ff@0.10:t=fill,drawgrid=width=160:height=120:thickness=1:color=0xc7e8ff@0.07"
+    retro = "drawgrid=width=64:height=24:thickness=1:color=0xb28cff@0.18,drawbox=x=0:y='120+12*sin(2*PI*t/6)':w=1280:h=3:color=0xff70c9@0.55:t=fill,drawbox=x='420+160*sin(2*PI*t/6)':y=250:w=440:h=220:color=0xff70c9@0.05:t=fill,drawbox=x='420+160*sin(2*PI*t/6)':y=250:w=440:h=220:color=0xff70c9@0.55:t=3"
+    film = "noise=alls=5:allf=t,drawbox=x=0:y='140+6*sin(2*PI*t/6)':w=1280:h=2:color=0xf0e6d2@0.18:t=fill,drawbox=x=0:y=718:w=1280:h=2:color=0xf0e6d2@0.25:t=fill,drawgrid=width=160:height=120:thickness=1:color=0xe5d7bd@0.04"
+    hazard = "drawgrid=width=84:height=84:thickness=1:color=0xffc84a@0.10,drawbox=x='100+380*(1+sin(2*PI*t/6))/2':y=0:w=30:h=720:color=0xffc84a@0.2:t=fill,drawbox=x='100+380*(1+sin(2*PI*t/6))/2':y=160:w=420:h=6:color=0xffc84a@0.65:t=fill,drawbox=x='100+380*(1+sin(2*PI*t/6))/2':y=550:w=420:h=4:color=0xffc84a@0.45:t=fill"
+    spectrum_parts = ["drawgrid=width=128:height=120:thickness=1:color=0x7eaaff@0.08"]
+    for i in range(28):
+        x=72+i*42
+        phase=i*0.37
+        height_expr=f"30+200*(1+sin(2*PI*t/1.5+{phase:.3f}))/2"
+        spectrum_parts.append(f"drawbox=x={x}:y='360-({height_expr})/2':w=18:h='({height_expr})':color=0x76e0d2@{0.25+(i%5)*0.1:.2f}:t=fill")
+    spectrum=",".join(spectrum_parts)
+    particle_parts = ["drawgrid=width=160:height=120:thickness=1:color=0xa5d5ff@0.07"]
+    for i in range(18):
+        base_x=40+(i*173)%1160
+        base_y=35+(i*101)%650
+        phase=i*0.53
+        size=2+(i%4)*2
+        particle_parts.append(
+            f"drawbox=x='{base_x}+70*sin(2*PI*t/6+{phase:.3f})':"
+            f"y='{base_y}+42*cos(2*PI*t/6+{phase:.3f})':"
+            f"w={size}:h={size}:color=0x90ddff@{0.35+(i%4)*0.1:.2f}:t=fill"
+        )
+    particles=",".join(particle_parts)
+    route = "drawgrid=width=96:height=96:thickness=1:color=0x81d7c6@0.12,drawbox=x=150:y=530:w=980:h=3:color=0x81d7c6@0.34:t=fill,drawbox=x='160+900*(1+sin(2*PI*t/6))/2':y=520:w=24:h=24:color=0x81d7c6@0.85:t=fill,drawbox=x='160+900*(1+sin(2*PI*t/6))/2':y=530:w=24:h=3:color=0xeafff8@0.95:t=fill"
+    bokeh_parts = []
+    for i in range(18):
+        x=(i*191+47)%1180
+        y=(i*113+37)%650
+        radius=20+(i%5)*14
+        phase=i*0.42
+        color=["0x65cfff","0x86e6c9","0xc99cff","0xffc59c"][i%4]
+        bokeh_parts.append(
+            f"drawbox=x='{x}+55*sin(2*PI*t/6+{phase:.3f})':"
+            f"y='{y}+35*cos(2*PI*t/6+{phase:.3f})':"
+            f"w={radius}:h={radius}:color={color}@0.10:t=fill"
+        )
+    bokeh=",".join(bokeh_parts)
+    choices={"orbital":orbital,"data":data,"circuit":circuit,"water":water,
+             "aurora":aurora,"retro":retro,"film":film,"hazard":hazard,
+             "spectrum":spectrum,"particles":particles,"route":route,"bokeh":bokeh}
+    if style not in choices:
+        raise ValueError(f"Unknown motion-loop style: {style}")
+    return choices[style]
+
+
+def generate_original_motion_loops(root,index):
+    """Render original six-second motion loops and verify each file with ffprobe."""
+    ffmpeg=shutil.which("ffmpeg")
+    ffprobe=shutil.which("ffprobe")
+    if not ffmpeg or not ffprobe:
+        raise RuntimeError("ffmpeg and ffprobe are required to create/verify original motion loops")
+    target_dir=root/"originals/video-loops"
+    target_dir.mkdir(parents=True,exist_ok=True)
+    for loop_id,title,category,base_color,style in MOTION_LOOPS:
+        path=target_dir/(loop_id+".mp4")
+        filter_chain=motion_loop_filters(style)
+        command=[
+            ffmpeg,"-hide_banner","-loglevel","error","-y",
+            "-f","lavfi","-i",f"color=c={base_color}:s=1280x720:r=24:d=6",
+            "-vf",filter_chain,"-an","-t","6","-r","24",
+            "-c:v","libx264","-preset","veryfast","-crf","25",
+            "-pix_fmt","yuv420p","-movflags","+faststart",str(path)
+        ]
+        result=subprocess.run(command,capture_output=True,text=True,timeout=240,check=False)
+        if result.returncode!=0:
+            raise RuntimeError(f"ffmpeg failed to render {loop_id}: {(result.stderr or result.stdout)[-1400:]}")
+        probe=subprocess.run([
+            ffprobe,"-v","error","-show_entries","format=duration:stream=codec_name,width,height,avg_frame_rate",
+            "-of","json",str(path)
+        ],capture_output=True,text=True,timeout=30,check=False)
+        if probe.returncode!=0:
+            raise RuntimeError(f"ffprobe could not inspect {loop_id}: {(probe.stderr or probe.stdout)[-800:]}")
+        metadata=json.loads(probe.stdout or "{}")
+        streams=metadata.get("streams") or []
+        video=next((s for s in streams if s.get("codec_name")),None)
+        duration=float((metadata.get("format") or {}).get("duration") or 0)
+        if not video or video.get("codec_name")!="h264" or video.get("width")!=1280 or video.get("height")!=720:
+            raise RuntimeError(f"Generated loop failed video-stream verification: {loop_id} ({metadata})")
+        if not 5.8<=duration<=6.2:
+            raise RuntimeError(f"Generated loop duration is not approximately 6 seconds: {loop_id}={duration}")
+        digest=sha256_path(path)
+        index.append({"id":loop_id,"path":path.relative_to(root).as_posix(),
+                      "type":"original-procedural-video-loop","title":title,"category":category,
+                      "duration_seconds":round(duration,3),"width":1280,"height":720,"fps":"24/1",
+                      "codec":"h264","license":CC0,"license_url":CC0_URL,"redistributable":True,
+                      "size_bytes":path.stat().st_size,"sha256":digest,
+                      "note":"Original six-second procedural motion loop generated in-repository from FFmpeg filters; no external footage, audio or image assets are embedded."})
+        print("[Motion loop] verified:",loop_id,path.stat().st_size,"bytes")
+    return len(MOTION_LOOPS)
 
 
 def make_texture_svg(texture_id,title,index):
@@ -2176,7 +2288,8 @@ def main():
     generate_originals(STAGE,index)
     texture_count=generate_original_textures(STAGE,index)
     illustration_count=generate_original_illustrations(STAGE,index)
-    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures and",illustration_count,"editorial illustrations")
+    motion_loop_count=generate_original_motion_loops(STAGE,index)
+    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
@@ -2209,6 +2322,7 @@ def main():
     summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),
               "original_textures":len(TEXTURES),
               "original_illustrations":len(ILLUSTRATIONS),
+              "original_motion_loops":len(MOTION_LOOPS),
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
@@ -2248,7 +2362,7 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30 and len(ILLUSTRATIONS)>=50
+    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30 and len(ILLUSTRATIONS)>=50 and len(MOTION_LOOPS)>=10
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}

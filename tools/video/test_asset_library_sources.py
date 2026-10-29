@@ -119,6 +119,19 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
             with self.subTest(family=family):
                 self.assertEqual(len(entries), len(set(entries)))
 
+    def test_original_motion_loops_have_unique_ids_and_valid_filter_chains(self):
+        self.assertEqual(len(library.MOTION_LOOPS), 12)
+        ids = [row[0] for row in library.MOTION_LOOPS]
+        self.assertEqual(len(ids), len(set(ids)))
+        styles = [row[4] for row in library.MOTION_LOOPS]
+        self.assertEqual(len(styles), len(set(styles)))
+        for style in styles:
+            with self.subTest(style=style):
+                chain = library.motion_loop_filters(style)
+                self.assertTrue(chain)
+                self.assertIn("drawbox=", chain)
+                self.assertNotIn("http://", chain)
+
     def test_illustrations_reference_existing_original_icons(self):
         missing = [row[3] for row in library.ILLUSTRATIONS if row[3] not in library.ICONS]
         self.assertEqual(missing, [])

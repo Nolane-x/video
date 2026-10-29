@@ -519,6 +519,19 @@
       "verified_page_license": true,
       "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
       "note": "NOAA describes most agency content as public domain unless specifically noted; third-party footage, logos, identifiable people and endorsement implications need separate handling. Preserve official credit and only bundle after item-level rights checks."
+    },
+    {
+      "id": "original-procedural-motion-loops",
+      "title": "Original in-repository procedural motion loops",
+      "provider": "Nolane-x/video",
+      "kind": "procedurally generated video assets",
+      "category": "technology, science, atmosphere, retro, documentary, music and abstract transitions",
+      "source_page": "https://github.com/Nolane-x/video",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "generated-by-build-using-local-ffmpeg-filters",
+      "note": "The build generates 12 six-second 1280×720 H.264 loops from FFmpeg filter graphs; no external footage, imagery or audio are embedded. Each output is verified with ffprobe for codec, dimensions and duration, and the file receives a SHA-256 digest in the asset manifest. These are illustrative loops, not factual footage."
     }
   ]
 }
