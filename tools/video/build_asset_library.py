@@ -88,7 +88,7 @@ PALETTES = [
 ("data-visualization",("#08172a","#193c5a","#73d8ff"),"network"),
 ("village-evening",("#1d2831","#4e5660","#ffc589"),"city"),
 ("mountain-storm",("#131e34","#465a72","#bfd5e4"),"mountain"),
-("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater")
+("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater"),
 ("arctic-research-base",("#102231","#536f80","#d5f5f0"),"snow"),
 ("volcanic-observatory",("#211a25","#6f3a38","#ffad65"),"desert"),
 ("rice-terraces-dawn",("#173a35","#648e74","#ffd49a"),"forest"),
@@ -138,7 +138,7 @@ TEXTURES = [
  ("rubber-diamond","Rubber diamond plate"),("perforated-metal","Perforated metal"),
  ("blueprint-dimensions","Blueprint dimension grid"),("isometric-grid","Isometric construction grid"),
  ("neon-circuit","Neon circuit traces"),("soft-clouds","Cloud contour texture"),
- ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands")
+ ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands"),
 ("rusted-steel","Oxidized and weathered steel"),
 ("weathered-concrete","Weathered architectural concrete"),
 ("salt-crystal","Salt crystal flecks"),
@@ -198,7 +198,7 @@ ILLUSTRATIONS = [
  ("film-strip-hero","Film / cinema","film","film-strip"),("speech-bubble-hero","Conversation / interview","people","speech-bubble"),
  ("paw-nature-hero","Wildlife / animal","nature","paw"),("recycle-hero","Circular economy / recycling","environment","recycle"),
  ("shopping-cart-hero","Commerce / shopping","business","shopping-bag"),("security-lock-hero","Privacy / security","technology","lock"),
- ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave")
+ ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave"),
 ("molecular-structure-hero","Molecular structure","science","molecule"),
 ("lab-test-tube-hero","Laboratory test tube","science","test-tube"),
 ("magnetism-hero","Magnetism demonstration","science","magnet"),
@@ -292,7 +292,7 @@ OVERLAYS = [
 ("map-route","Route line and location markers"),("spectrum-bars","Audio spectrum bars"),
 ("rain-on-glass","Rain-on-glass droplets"),("underwater-caustics","Underwater caustic light"),
 ("film-frame-counter","Film frame counter"),("focus-pull","Focus-distance marks"),
-("caution-stripes","Caution / industrial stripe edge"),("vertical-safe-area","Vertical 9:16 safe-area guide")
+("caution-stripes","Caution / industrial stripe edge"),("vertical-safe-area","Vertical 9:16 safe-area guide"),
 ("light-rays","Soft volumetric light rays"),
 ("wet-lens","Water droplets on lens"),
 ("comic-burst","Comic-book impact burst"),
@@ -334,7 +334,7 @@ INFO = [
 ("scorecard","KPI / evaluation scorecard"),("milestone-grid","Milestone grid"),
 ("funnel-conversion","Conversion funnel"),("story-beat-board","Story beat board"),
 ("shot-list","Shot list / coverage checklist"),("accessibility-checklist","Accessibility review"),
-("source-ledger","Source and citation ledger")
+("source-ledger","Source and citation ledger"),
 ("quadrant-matrix","2×2 quadrant matrix"),
 ("hierarchy-tree","Hierarchy and organization tree"),
 ("swimlane-flow","Swimlane process flow"),
