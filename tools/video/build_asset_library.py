@@ -1650,6 +1650,12 @@ def download_rijksmuseum_open_access(root,index):
                      "public domain mark" in rights_norm)
                 if not (cc0 or pdm):
                     continue
+                def read_values(local_name):
+                    result=[]
+                    for el in metadata.iter():
+                        if el.tag.rsplit("}",1)[-1].lower()==local_name.lower() and (el.text or "").strip():
+                            result.append((el.text or "").strip())
+                    return result
                 media_url=""
                 for ref_url in image_refs:
                     parsed=urllib.parse.urlparse(ref_url)
@@ -1671,12 +1677,6 @@ def download_rijksmuseum_open_access(root,index):
                     ext=Path(urllib.parse.urlparse(media_url).path).suffix.lower()
                     if ext not in {".jpg",".jpeg",".png",".webp"}:
                         ext={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"}.get(ctype.split(";")[0].lower(),".jpg")
-                    def read_values(local_name):
-                        result=[]
-                        for el in metadata.iter():
-                            if el.tag.rsplit("}",1)[-1].lower()==local_name.lower() and (el.text or "").strip():
-                                result.append((el.text or "").strip())
-                        return result
                     title=(read_values("title") or [identifier])[:1][0]
                     creator=(read_values("creator") or [""])[:1][0]
                     date=(read_values("date") or read_values("created") or [""])[:1][0]
