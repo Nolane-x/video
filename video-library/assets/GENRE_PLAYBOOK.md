@@ -72,3 +72,10 @@ The library now includes a tileable vector texture family. Use these as controll
 - **Gaming / pop-art / retro:** comic-dots, pixel-grid, dither-noise, geometric-triangles and star-map.
 
 A texture should support the material/story, not become a noisy overlay on every shot. Test at output resolution, keep key text zones clear, and avoid using a decorative texture where an actual source image is needed as evidence.
+
+
+## Rijksmuseum / museum-art source routing
+
+- For European art, old maps, historical objects and visual biographies, search the Rijksmuseum records before defaulting to generic stock. The automated lane admits only exact item metadata carrying CC0 or Public Domain Mark, then downloads a size-limited IIIF image.
+- Use the work's source record and creator/date in the shot notes; do not present a painting, museum photograph or illustrative object as a contemporary photograph of a historical event.
+- Do not treat “museum website” as a license. CC BY images, ambiguous rights, missing rights, and items whose media URL does not match the official image host remain excluded from the automatic bundle.
