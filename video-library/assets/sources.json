@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
-  "checked_on": "2026-10-28",
+  "checked_on": "2026-10-29",
   "bundling_policy": {
     "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
     "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
@@ -519,6 +519,21 @@
       "verified_page_license": true,
       "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
       "note": "NOAA describes most agency content as public domain unless specifically noted; third-party footage, logos, identifiable people and endorsement implications need separate handling. Preserve official credit and only bundle after item-level rights checks."
+    },
+    {
+      "id": "ambientcg-cc0",
+      "title": "ambientCG — CC0 PBR materials, HDRIs, decals, atlases and 3D models",
+      "provider": "ambientCG",
+      "kind": "procedural and photogrammetry asset library",
+      "category": "PBR surfaces, tiling materials, HDRI lighting environments, decals, terrain and 3D models",
+      "source_page": "https://ambientcg.com/",
+      "api": "https://ambientcg.com/api/v2/full_json",
+      "license": "CC0-1.0 for downloadable ambientCG asset files",
+      "license_url": "https://docs.ambientcg.com/license/",
+      "api_docs": "https://docs.ambientcg.com/api/v2/full_json/",
+      "verified_page_license": true,
+      "bundling": "automatic-bounded-package-download-with-allow-list-extraction-and-checksums",
+      "note": "The official docs state all downloadable ambientCG assets are CC0 1.0 and document the full_json endpoint, ZIP download variants and asset IDs. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
     },
     {
       "id": "original-procedural-motion-loops",
