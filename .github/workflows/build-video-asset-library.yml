@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
+      - "tools/video/test_asset_library_sources.py"
       - "tools/video/generate_sfx_library.py"
       - "video-library/assets/sources.json"
   workflow_dispatch:
@@ -34,6 +35,9 @@ jobs:
 
       - name: Compile asset builder before any network downloads
         run: python -m py_compile tools/video/build_asset_library.py
+
+      - name: Run offline source-rights and asset-family regression tests
+        run: python tools/video/test_asset_library_sources.py
 
       - name: Build vector originals and download licensed resources
         run: python tools/video/build_asset_library.py dist/video-assets
