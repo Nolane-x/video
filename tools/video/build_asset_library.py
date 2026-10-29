@@ -1425,7 +1425,7 @@ def download_loc_public_domain(root,index):
         try:
             response=request_json(url,timeout=12)
             for item in response.get("results") or []:
-                if total>=cap or successes>=3 or checked>=8: break
+                if total>=cap or successes>=3 or checked>=6: break
                 item_url=str(item.get("url") or item.get("id") or "")
                 if not item_url: continue
                 identity=item_url.rstrip("/").split("/")[-1]
@@ -1434,10 +1434,14 @@ def download_loc_public_domain(root,index):
                 detail_url=item_url.replace("http://","https://")
                 detail_url += ("&" if "?" in detail_url else "?")+"fo=json"
                 try:
-                    detail=request_json(detail_url,timeout=10)
+                    detail=request_json(detail_url,timeout=14)
                 except Exception as detail_exc:
-                    rejections.append("item metadata timeout/error: "+str(detail_exc))
+                    reason=str(detail_exc)
+                    rejections.append("item metadata timeout/error: "+reason)
+                    # The LOC endpoint rate-limits bursty consumers; back off on 429s instead of hammering it.
+                    time.sleep(2.0 if "429" in reason else 0.6)
                     continue
+                time.sleep(1.15)
                 eligible,rights_text,item_record=loc_rights_from_item(detail)
                 if not eligible:
                     rejections.append("rights not positively stated: "+rights_text[:120])
