@@ -1209,7 +1209,7 @@ def overlay_svg(name):
         p.append('<path d="M0 0H1920V1080H0Z" fill="none" stroke="#fff8dd" stroke-opacity=".5" stroke-width="18"/>')
     elif name=="screen-reflection":
         p.append('<path d="M-250 0H80L920 1080H590ZM250 0H470L1310 1080H1090ZM1030 0H1180L1920 880V1080Z" fill="#dff6ff" fill-opacity=".055"/>')
-    else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')    else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
+    else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
     return svg_doc("".join(p),defs)
 
 def icon_svg(drawing):
@@ -1352,8 +1352,6 @@ def infographic_svg(asset_id,title,index):
             p.append(f'<rect x="{x}" y="385" width="360" height="255" rx="18" fill="{accent}" fill-opacity=".1" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/><text x="{x+180}" y="455" text-anchor="middle" font-size="27">STEP {i+1}</text><path d="M{x+48} 505H{x+312}M{x+48} 555H{x+280}" stroke="#e8e6df" stroke-opacity=".45" stroke-width="7" stroke-linecap="round"/><text x="{x+180}" y="610" text-anchor="middle" font-size="19">DEFINE TERMS</text>')
 
     else:
-        for i in range(5):
-            y=330+i*112    else:
         for i in range(5):
             y=330+i*112
             p.append(f'<circle cx="230" cy="{y}" r="28" fill="{accent}" fill-opacity=".22" stroke="{accent}" stroke-width="3"/><text x="230" y="{y+10}" text-anchor="middle" font-size="28">{i+1}</text><text x="300" y="{y+10}" font-size="28">ITEM / SHORT EXPLANATION</text><path d="M300 {y+35}H1640" stroke="#e8e6df" stroke-opacity=".2" stroke-width="3"/>')
