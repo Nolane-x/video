@@ -79,6 +79,14 @@ jobs:
           assert expected["original_illustrations"] >= 65, "Original editorial illustration library is incomplete"
           assert expected["original_infographics"] >= 35
           assert expected["original_sfx"] >= 120, "Procedural sound-effect bank is incomplete"
+          assert expected["original_motion_loops"] == 12, "Original motion-loop library is incomplete"
+          motion_items = [a for a in index["assets"] if a.get("type") == "original-procedural-video-loop"]
+          assert len(motion_items) == expected["original_motion_loops"]
+          for clip in motion_items:
+              assert clip.get("license") == "CC0-1.0" and clip.get("redistributable") is True
+              assert clip.get("width") == 1280 and clip.get("height") == 720
+              assert 5.8 <= clip.get("duration_seconds", 0) <= 6.2
+              assert len(clip.get("sha256", "")) == 64 and clip.get("size_bytes", 0) > 1024
           assert "wikimedia_videos_downloaded" in expected, "Wikimedia video count is missing"
           assert "wikimedia_audio_downloaded" in expected, "Wikimedia audio count is missing"
           wikimedia_video_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-video"]
