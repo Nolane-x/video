@@ -19,6 +19,7 @@ This is the shared asset pool for future videos, not a collection dedicated to t
 The Actions builder generates a versioned downloadable ZIP containing:
 - 63 original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
 - 68 large-format editorial SVG illustrations for satellites, telescopes, rockets, laboratory tools, biology, nature, transport, architecture, robotics, finance, food, travel, film and music. Each is generated in-repository and licensed CC0.
+- 12 original, six-second 1280×720 H.264 motion loops for orbital grids, data signals, neon circuits, water, aurora, retro scanlines, film grain, industrial hazard, audio spectrum, particles, map routes and bokeh. They are generated with FFmpeg filters, contain no external footage/audio, and are verified by `ffprobe` before packaging.
 - 56 original transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
 - 98 original icon SVGs and 40 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
@@ -35,6 +36,8 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - 34 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
 - `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
+
+The workflow fails before source downloads if the offline rights tests fail, verifies every generated MP4's codec/resolution/duration, and matches the motion-loop manifest count against real indexed files.
 
 The GitHub Actions workflow runs offline license-gate regression tests before making external requests, then validates the new media counts against actual indexed entries.
 
