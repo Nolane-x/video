@@ -59,3 +59,16 @@ The resource library is a toolbox, not a fixed art style. The story's intended g
 3. For reconstructions, tell the viewer when that distinction materially affects interpretation; never pass a stylized 3D render off as archival footage.
 4. Use at least four meaningful shot families per minute, and vary shot scale, movement, subject and composition—not merely color.
 5. The catalog’s “source/license” links are an audit trail, not a blanket permission slip. When uncertain, keep the file out of the release bundle and link to the official source instead.
+
+
+## Surface-texture palette
+
+The library now includes a tileable vector texture family. Use these as controlled overlays, matte/shader inputs or backgrounds at low contrast; they are generic original illustrations, not scans of real materials.
+
+- **Engineering / software / AI:** blueprint-grid, crosshair-grid, circuit-board, neon-circuit, hex-mesh and isometric-grid.
+- **Documentary / history / archives:** archival-paper, paper-fibers, newspaper-halftone, film-scratches and diagonal-hatch.
+- **Architecture / product / industrial:** concrete-speckle, marble-veins, brushed-metal, carbon-fiber, wood-grain, ceramic-tile, terrazzo-speckle, rubber-diamond and perforated-metal.
+- **Nature / earth science / water:** topographic-contours, bathymetry-contours, geology-strata, ocean-waves, soft-clouds and rain-droplets.
+- **Gaming / pop-art / retro:** comic-dots, pixel-grid, dither-noise, geometric-triangles and star-map.
+
+A texture should support the material/story, not become a noisy overlay on every shot. Test at output resolution, keep key text zones clear, and avoid using a decorative texture where an actual source image is needed as evidence.
