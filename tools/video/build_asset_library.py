@@ -1734,6 +1734,123 @@ def download_rijksmuseum_open_access(root,index):
     return report
 
 
+def download_wikimedia_video_audio(root,index):
+    """Bundle a small set of video/audio files only when the Commons file page explicitly marks CC0 or Public Domain."""
+    report=[]; total=0; total_videos=0; total_audio=0; cap=20; seen=set()
+    queries=[
+        ("spaceflight","video spaceflight rocket launch filetype:video"),
+        ("earth-observation","video satellite Earth clouds filetype:video"),
+        ("nature","wildlife nature landscape filetype:video"),
+        ("ocean","ocean underwater marine filetype:video"),
+        ("weather","storm lightning aurora filetype:video"),
+        ("architecture","historic architecture city filetype:video"),
+        ("astronomy","star trails night sky time lapse filetype:video"),
+        ("science","microscopy laboratory scientific demonstration filetype:video"),
+        ("birds","bird song nature field recording filetype:audio"),
+        ("ocean-audio","ocean waves rain wind ambience filetype:audio"),
+        ("industrial-audio","machine workshop field recording filetype:audio"),
+        ("ambience-audio","forest city ambience field recording filetype:audio")
+    ]
+    for category,q in queries:
+        if total>=cap: break
+        is_audio=category.endswith("-audio") or category=="birds"
+        kind="audio" if is_audio else "video"
+        extensions={".mp3",".wav",".ogg",".flac",".m4a",".oga"} if is_audio else {".mp4",".m4v",".mov",".webm",".ogv"}
+        cap_size=8*1024*1024 if is_audio else 18*1024*1024
+        params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":25,
+                "prop":"imageinfo","iiprop":"url|extmetadata|size|mime"}
+        url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
+        successes=0; checked=0
+        try:
+            response=request_json(url,timeout=18)
+            pages=(response.get("query") or {}).get("pages") or {}
+            for page in pages.values():
+                if total>=cap or successes>=3 or checked>=18: break
+                imageinfo=(page.get("imageinfo") or [{}])[0]
+                if not isinstance(imageinfo,dict): continue
+                meta=imageinfo.get("extmetadata") or {}
+                short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
+                normalized=short.lower().replace(" ","").replace("-","").replace("®","")
+                if normalized not in {"cc0","cc01.0","creativecommonszero","publicdomain","publicdomainmark","publicdomainus"}:
+                    continue
+                file_url=str(imageinfo.get("url") or "")
+                parsed=urllib.parse.urlparse(file_url)
+                ext=Path(parsed.path).suffix.lower()
+                mime=str(imageinfo.get("mime") or "").lower()
+                byte_size=int(imageinfo.get("size") or 0)
+                if parsed.scheme!="https" or parsed.hostname!="upload.wikimedia.org":
+                    continue
+                if ext not in extensions or byte_size<2048 or byte_size>cap_size:
+                    continue
+                if mime and not mime.startswith("audio/" if is_audio else "video/"):
+                    # A few Commons records return a generic MIME; the container check below still applies.
+                    continue
+                identity=str(page.get("pageid") or page.get("title") or "")
+                if not identity or identity in seen: continue
+                seen.add(identity); checked+=1
+                try:
+                    blob,ctype=request_bytes(file_url,timeout=25,limit=cap_size)
+                    if len(blob)<2048: raise RuntimeError("file too small to be a useful media source")
+                    mime2=ctype.split(";")[0].strip().lower()
+                    if is_audio:
+                        if not (mime2.startswith("audio/") or blob.startswith(b"RIFF") or blob.startswith(b"OggS") or blob.startswith(b"ID3")):
+                            raise RuntimeError("download did not return recognizable audio data")
+                        if ext==".mp3" and not (blob.startswith(b"ID3") or (len(blob)>2 and blob[0]==0xff and blob[1]&0xe0==0xe0)):
+                            raise RuntimeError("MP3 signature is missing")
+                        if ext in {".ogg",".oga"} and not blob.startswith(b"OggS"):
+                            raise RuntimeError("Ogg signature is missing")
+                        if ext==".wav" and not blob.startswith(b"RIFF"):
+                            raise RuntimeError("WAV RIFF signature is missing")
+                    else:
+                        if not (mime2.startswith("video/") or (len(blob)>12 and blob[4:8]==b"ftyp") or blob.startswith(b"\x1a\x45\xdf\xa3") or blob.startswith(b"OggS")):
+                            raise RuntimeError("download did not return recognizable video data")
+                        if ext==".webm" and not blob.startswith(b"\x1a\x45\xdf\xa3"):
+                            raise RuntimeError("WebM EBML signature is missing")
+                        if ext in {".mp4",".m4v",".mov"} and not (len(blob)>12 and blob[4:8]==b"ftyp"):
+                            raise RuntimeError("ISO BMFF video signature is missing")
+                    target_dir=root/"third-party/wikimedia"/("audio" if is_audio else "video")
+                    target_dir.mkdir(parents=True,exist_ok=True)
+                    title=str((meta.get("ObjectName") or {}).get("value") or page.get("title") or identity)
+                    filename=f"{category}-{slugify(title)[:48]}-{slugify(identity)}{ext}"
+                    target=target_dir/filename
+                    target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    license_url=str((meta.get("LicenseUrl") or {}).get("value") or imageinfo.get("descriptionurl") or "https://commons.wikimedia.org/wiki/Commons:Licensing")
+                    creator=str((meta.get("Artist") or {}).get("value") or (meta.get("Credit") or {}).get("value") or "")
+                    description=str((meta.get("ImageDescription") or {}).get("value") or "")
+                    page_url=str(imageinfo.get("descriptionurl") or ("https://commons.wikimedia.org/wiki/"+urllib.parse.quote(str(page.get("title") or "").replace(" ","_"))))
+                    asset_id="wikimedia-"+kind+"-"+slugify(identity)
+                    entry={"id":asset_id,"path":target.relative_to(root).as_posix(),
+                           "type":"wikimedia-cc0-"+kind,"category":category,"title":title,
+                           "creator":creator,"description":description[:1600],"source_page":page_url,
+                           "source_file_url":file_url,"license":short,"license_url":license_url,
+                           "license_verified_from_item_metadata":True,"size_bytes":len(blob),"sha256":digest,
+                           "redistributable":True,
+                           "note":"Bundled only because exact Commons file metadata explicitly labelled this item CC0 or Public Domain. Review contextual rights and intended use."}
+                    index.append(entry); total+=1; successes+=1
+                    if is_audio: total_audio+=1
+                    else: total_videos+=1
+                    report.append({"id":asset_id,"status":"downloaded","media_type":kind,"category":category,
+                                   "path":entry["path"],"title":title,"source_page":page_url,
+                                   "license":short,"size_bytes":len(blob),"sha256":digest})
+                    print("[Wikimedia Commons AV] OK:",kind,category,title[:45],len(blob))
+                except Exception as item_exc:
+                    report.append({"id":"wikimedia-"+kind+"-"+slugify(identity),"status":"failed","media_type":kind,
+                                   "category":category,"title":str(page.get("title") or identity),
+                                   "reason":str(item_exc)[:300],"source_page":imageinfo.get("descriptionurl")})
+            time.sleep(.45)
+            if not successes:
+                report.append({"id":"wikimedia-"+category,"status":"no_eligible_media","media_type":kind,
+                               "category":category,"query":q,"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing",
+                               "reason":"No distinct small media file passed exact license, size, host and container filters."})
+        except Exception as exc:
+            report.append({"id":"wikimedia-"+category,"status":"failed","media_type":kind,"category":category,
+                           "query":q,"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing",
+                           "reason":str(exc)[:300]})
+            print("[Wikimedia Commons AV] search failed:",category,str(exc))
+    return report
+
+
 def download_openverse(root,index):
     # A small CC0-only fallback. The upstream host has intermittent tunnel timeouts in CI,
     # so requests are intentionally short and failures are recorded rather than retried for minutes.
