@@ -1135,7 +1135,12 @@ def download_met_open_access(root,index):
         ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
         ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
         ("food","still life fruit"),("textiles","textile pattern"),("instruments","musical instrument"),
-        ("mythology","mythological painting"),("fashion","historical costume"),("science","scientific instrument")
+        ("mythology","mythological painting"),("fashion","historical costume"),("science","scientific instrument"),
+        ("archaeology","archaeology artifact"),("sculpture","sculpture statue"),("printmaking","etching engraving print"),
+        ("marine","marine life painting"),("geology","minerals geology illustration"),("navigation","nautical instrument"),
+        ("manuscripts","illuminated manuscript"),("coins","historic coin medal"),("ceramics","historic pottery vessel"),
+        ("photography","historic photograph city"),("astronomy-instruments","astrolabe celestial globe"),("textile-heritage","historic textile embroidery"),
+        ("architecture-plans","architectural plan drawing"),("birds","bird natural history painting"),("botanical-prints","botanical plate flowers")
     ]
     seen=set()
     for category,q in queries:
@@ -1228,12 +1233,20 @@ def download_nasa_media(root,index):
         ("telescope","James Webb space telescope"),("moon","Moon lunar surface"),
         ("climate","hurricane satellite view"),("observatory","deep space galaxy"),
         ("planetary","Saturn rings spacecraft"),("earth-science","Earth observation"),
-        ("asteroid","asteroid Bennu surface"),("space-station","International Space Station exterior")
+        ("asteroid","asteroid Bennu surface"),("space-station","International Space Station exterior"),
+        ("mars-audio","Mars rover microphone audio sound recording"),
+        ("jupiter-audio","Jupiter radio emissions audio NASA"),
+        ("solar-audio","solar activity sonification audio NASA"),
+        ("rocket-audio","rocket engine test sound recording NASA"),
+        ("spacecraft-audio","spacecraft radio signal audio recording NASA"),
+        ("earth-audio","Earth ocean sound NASA audio")
     ]
     media_types=("image","video","audio")
     for category,q in searches:
         for media_type in media_types:
-            if media_type=="audio" and category not in {"space","earth","launch","atmosphere"}:
+            if category.endswith("-audio") and media_type!="audio":
+                continue
+            if not category.endswith("-audio") and media_type=="audio" and category not in {"space","earth","launch","atmosphere"}:
                 continue
             params={"q":q,"media_type":media_type,"page_size":25}
             search_url="https://images-api.nasa.gov/search?"+urllib.parse.urlencode(params)
