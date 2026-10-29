@@ -49,6 +49,7 @@ jobs:
           python - <<'PY'
           import json
           import hashlib
+          import re
           import zipfile
           from pathlib import Path
 
@@ -64,6 +65,9 @@ jobs:
           assert archive.is_file() and archive.stat().st_size > 1024, "ZIP is missing/too small"
           catalog_path = root / "ASSET_CATALOG.html"
           assert catalog_path.is_file(), "Offline searchable catalog missing"
+          catalog_html = catalog_path.read_text(encoding="utf-8")
+          assert "<video controls" in catalog_html, "Video previews are missing from the offline catalog"
+          assert "<audio controls" in catalog_html, "Audio previews are missing from the offline catalog"
           assert summary_path.is_file(), "Build summary missing"
 
           index = json.loads(index_path.read_text(encoding="utf-8"))
@@ -75,6 +79,23 @@ jobs:
           assert expected["original_illustrations"] >= 65, "Original editorial illustration library is incomplete"
           assert expected["original_infographics"] >= 35
           assert expected["original_sfx"] >= 120, "Procedural sound-effect bank is incomplete"
+          assert "wikimedia_videos_downloaded" in expected, "Wikimedia video count is missing"
+          assert "wikimedia_audio_downloaded" in expected, "Wikimedia audio count is missing"
+          wikimedia_video_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-video"]
+          wikimedia_audio_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-audio"]
+          assert len(wikimedia_video_items) == expected["wikimedia_videos_downloaded"]
+          assert len(wikimedia_audio_items) == expected["wikimedia_audio_downloaded"]
+          eligible_license_labels = {"cc0", "cc01.0", "creativecommonszero", "publicdomain", "publicdomainmark", "publicdomainus", "publicdomainunitedstates"}
+          for media in wikimedia_video_items + wikimedia_audio_items:
+              normalized = re.sub(r"[\\s\\-®().]+", "", str(media.get("license") or "").lower())
+              assert normalized in eligible_license_labels, f"Unexpected Wikimedia media license: {media.get('license')}"
+              assert media.get("license_verified_from_item_metadata") is True
+              assert media.get("redistributable") is True
+              assert media.get("source_page", "").startswith("https://commons.wikimedia.org/")
+              assert media.get("source_file_url", "").startswith("https://upload.wikimedia.org/")
+              assert len(media.get("sha256", "")) == 64
+              assert media.get("size_bytes", 0) >= 2048
+
           assert "wikimedia_videos_downloaded" in expected, "Wikimedia video manifest count missing"
           assert "wikimedia_audio_downloaded" in expected, "Wikimedia audio manifest count missing"
           wikimedia_video_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-video"]
