@@ -70,7 +70,7 @@ SFX_PRESETS = [
     ("wind-chimes-distant","chime",2.0),("music-intro-sting","hope",1.6),
     ("dark-reveal-sting","darksting",1.3),("soft-transition-swish","sweepbright",1.2),
     ("buzz-low","buzz",0.7),("electrical-pulse","pulse",0.8),
-    ("notification-double-chime","chime",0.9)
+    ("notification-double-chime","chime",0.9),
     ("wind-through-alley","wind",5.5),
     ("forest-wind-canopy","wind",5.5),
     ("night-insects-bed","forest",5.5),
