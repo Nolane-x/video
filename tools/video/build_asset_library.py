@@ -1603,6 +1603,25 @@ def download_wikimedia_public_domain(root,index):
             print("[Wikimedia Commons] search failed:",q,str(exc))
     return report
 
+def smithsonian_rights_are_cc0(record_access,media_access):
+    """Require both record and exact-media rights fields to explicitly say CC0."""
+    return str(record_access or "").strip().upper()=="CC0" and str(media_access or "").strip().upper()=="CC0"
+
+
+def rijksmuseum_license_from_rights(rights_text):
+    """Return the narrow rights class explicitly represented in a Rijksmuseum EDM rights field."""
+    rights_norm=str(rights_text or "").lower()
+    cc0=("creativecommons.org/publicdomain/zero/1.0" in rights_norm or
+         "creativecommons.org/publicdomain/zero/" in rights_norm or
+         rights_norm.strip() in {"cc0","cc0-1.0","creative commons zero"})
+    pdm=("creativecommons.org/publicdomain/mark/1.0" in rights_norm or
+         "creativecommons.org/publicdomain/mark/" in rights_norm or
+         "public domain mark" in rights_norm)
+    if cc0: return "CC0-1.0"
+    if pdm: return "Public Domain Mark 1.0"
+    return None
+
+
 def download_smithsonian_open_access(root,index):
     """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
     import os
@@ -1658,8 +1677,8 @@ def download_smithsonian_open_access(root,index):
                 if total>=cap or successes>=5 or candidates_checked>=18: break
                 content=row.get("content") if isinstance(row,dict) else None
                 if not isinstance(content,dict): continue
-                meta_access=str(((content.get("metadata_usage") or {}).get("access") or "")).strip().upper()
-                if meta_access!="CC0":
+                meta_access=str(((content.get("metadata_usage") or {}).get("access") or "")).strip()
+                if meta_access.upper()!="CC0":
                     continue
                 desc=content.get("descriptiveNonRepeating") or {}
                 record_id=str(desc.get("record_ID") or row.get("id") or "")
@@ -1672,8 +1691,8 @@ def download_smithsonian_open_access(root,index):
                     if not isinstance(media_item,dict): continue
                     if str(media_item.get("type") or "").strip().lower() not in {"images","image"}:
                         continue
-                    media_rights=str(((media_item.get("usage") or {}).get("access") or "")).strip().upper()
-                    if media_rights!="CC0":
+                    media_rights=str(((media_item.get("usage") or {}).get("access") or "")).strip()
+                    if not smithsonian_rights_are_cc0(meta_access,media_rights):
                         continue
                     original=str(media_item.get("content") or "")
                     thumbnail=str(media_item.get("thumbnail") or "")
@@ -1796,15 +1815,10 @@ def download_rijksmuseum_open_access(root,index):
                     elif local in {"isshownat","shownat"}:
                         page_refs.append(value)
                 rights_text=" | ".join(dict.fromkeys(rights))
-                rights_norm=rights_text.lower()
-                cc0=("creativecommons.org/publicdomain/zero/1.0" in rights_norm or
-                     "creativecommons.org/publicdomain/zero/" in rights_norm or
-                     rights_norm.strip() in {"cc0","cc0-1.0","creative commons zero"})
-                pdm=("creativecommons.org/publicdomain/mark/1.0" in rights_norm or
-                     "creativecommons.org/publicdomain/mark/" in rights_norm or
-                     "public domain mark" in rights_norm)
-                if not (cc0 or pdm):
+                license_name=rijksmuseum_license_from_rights(rights_text)
+                if not license_name:
                     continue
+                cc0=license_name=="CC0-1.0"
                 def read_values(local_name):
                     result=[]
                     for el in metadata.iter():
@@ -1842,7 +1856,6 @@ def download_rijksmuseum_open_access(root,index):
                     target=root/"third-party/rijksmuseum"/(f"{slugify(title)[:52]}-{slugify(identifier)[:48]}{ext}")
                     target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
                     digest=sha256_path(target)
-                    license_name="CC0-1.0" if cc0 else "Public Domain Mark 1.0"
                     entry={"id":asset_id,"path":target.relative_to(root).as_posix(),"type":"rijksmuseum-open-access-image",
                            "title":title,"creator":creator,"date":date,"rights_statement":rights_text,
                            "source_page":object_page,"source_file_url":media_url,"license":license_name,
