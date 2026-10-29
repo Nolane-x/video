@@ -2462,6 +2462,7 @@ def download_openverse(root,index):
 
 def make_asset_catalog(root,index,summary):
     cards=[]
+    font_faces=[]
     for item in index:
         rel=item.get("path")
         if not isinstance(rel,str) or not (root/rel).is_file(): continue
@@ -2478,6 +2479,15 @@ def make_asset_catalog(root,index,summary):
             preview=f'<video controls preload="metadata" playsinline src="{html.escape(rel,quote=True)}" style="width:100%;height:100%;object-fit:contain"></video>'
         elif ext in {".wav",".mp3",".ogg",".oga",".flac",".m4a"}:
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
+        elif ext in {".ttf",".otf",".woff",".woff2"} and item.get("type")=="open-font-license-font":
+            preview_family="font-preview-"+slugify(str(item.get("font_family_id") or path.stem))
+            css_weight=str(item.get("font_weight") or 400)
+            css_style=str(item.get("font_style") or "normal")
+            if not re.fullmatch(r"(?:[1-9]00|100 900)",css_weight): css_weight="400"
+            if css_style not in {"normal","italic"}: css_style="normal"
+            font_faces.append(f"@font-face{{font-family:'{preview_family}';src:url('{html.escape(rel,quote=True)}') format('truetype');font-style:{css_style};font-weight:{css_weight};font-display:swap;}}")
+            sample_weight="700" if ("bold" in str(item.get("font_filename") or "").lower()) else ("600" if css_weight=="100 900" else css_weight)
+            preview=f'<div class="font-preview" style="font-family:\'{preview_family}\';font-weight:{sample_weight};font-style:{css_style}"><span>Ánh dương Việt Nam</span><small>Ă Â Đ Ê Ô Ơ Ư · 0123456789</small></div>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
         size=(root/rel).stat().st_size
@@ -2506,8 +2516,9 @@ input,select{{min-width:0;background:var(--panel);color:var(--text);border:1px s
 main{{padding:24px clamp(16px,4vw,60px) 65px}}.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}}
 .card{{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--panel);display:flex;flex-direction:column}}
 .preview{{height:190px;background:#111923;display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid var(--line)}}
-.preview img{{width:100%;height:100%;object-fit:contain;background:#111923}}.preview audio{{width:90%}}.file-preview{{width:100%;height:100%;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:var(--accent);background:radial-gradient(circle at 50% 40%,#283748,#111923)}}.file-preview span{{font-size:28px;font-weight:750;letter-spacing:.07em}}.file-preview small{{color:var(--muted)}}
+.preview img{{width:100%;height:100%;object-fit:contain;background:#111923}}.preview audio{{width:90%}}.font-preview{{width:100%;height:100%;padding:18px;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;text-align:center;color:var(--text);font-size:clamp(20px,2vw,30px);line-height:1.25;overflow-wrap:anywhere}}.font-preview small{{font-size:12px;color:var(--muted);font-family:system-ui,sans-serif;line-height:1.6}}.file-preview{{width:100%;height:100%;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:var(--accent);background:radial-gradient(circle at 50% 40%,#283748,#111923)}}.file-preview span{{font-size:28px;font-weight:750;letter-spacing:.07em}}.file-preview small{{color:var(--muted)}}
 .body{{padding:15px;display:flex;flex-direction:column;flex:1}}.kicker{{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);overflow-wrap:anywhere}}h3{{font-size:16px;line-height:1.3;margin:8px 0 6px;overflow-wrap:anywhere}}.meta{{font-size:12px;color:var(--muted);margin:0 0 15px}}.links{{display:flex;gap:12px;flex-wrap:wrap;margin-top:auto}}a{{color:var(--accent);font-size:12px;text-decoration:none}}a:hover{{text-decoration:underline}}.file-link{{font-weight:700}}#count{{color:var(--muted);font-size:13px;margin:0 0 12px}}footer{{padding:24px clamp(16px,4vw,60px);border-top:1px solid var(--line);color:var(--muted);font-size:12px}}
+__FONT_FACES__
 @media(max-width:600px){{.controls{{flex-direction:column}}.preview{{height:160px}}}}
 </style></head><body>
 <header><h1>Nolane · Video Asset Library</h1>
@@ -2523,7 +2534,7 @@ for(const c of categories){const o=document.createElement('option');o.value=c;o.
 function filter(){const q=search.value.trim().toLowerCase(),cat=select.value;let n=0;for(const c of cards){const ok=(!q||c.dataset.search.includes(q))&&(!cat||c.dataset.category===cat);c.hidden=!ok;if(ok)n++}count.textContent=n+' assets shown';}
 search.addEventListener('input',filter);select.addEventListener('change',filter);filter();
 </script></body></html>"""
-    document=document.replace("__CATALOG_COUNTS__",counts).replace("__CATALOG_CARDS__","".join(cards))
+    document=document.replace("__FONT_FACES__","\n".join(font_faces)).replace("__CATALOG_COUNTS__",counts).replace("__CATALOG_CARDS__","".join(cards))
     write_text(root/"ASSET_CATALOG.html",document)
 
 def main():
