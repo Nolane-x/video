@@ -1,0 +1,107 @@
+name: Validate video asset library changes
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-video-asset-library-pr.yml"
+      - ".github/workflows/build-video-asset-library.yml"
+      - "tools/video/build_asset_library.py"
+      - "tools/video/generate_sfx_library.py"
+      - "tools/video/test_asset_library_sources.py"
+      - "video-library/assets/sources.json"
+      - "video-library/assets/README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-asset-validation:
+    name: Offline rights tests and generated-asset smoke build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg for motion-loop validation
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+          ffprobe -version
+
+      - name: Compile all changed Python sources
+        run: |
+          python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/generate_sfx_library.py
+          python -m py_compile tools/video/test_asset_library_sources.py
+
+      - name: Run offline source-rights and asset-family regression tests
+        run: python tools/video/test_asset_library_sources.py
+
+      - name: Generate and verify every original asset family without network access
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          sys.path.insert(0, "tools/video")
+          import build_asset_library as lib
+          import generate_sfx_library as sfx
+
+          root = Path(tempfile.mkdtemp(prefix="asset-library-offline-")) / "library"
+          root.mkdir(parents=True)
+          index = []
+          lib.generate_originals(root, index)
+          lib.generate_original_textures(root, index)
+          lib.generate_original_illustrations(root, index)
+          lib.generate_original_motion_loops(root, index)
+
+          expected = {
+              "backgrounds": len(lib.PALETTES),
+              "overlays": len(lib.OVERLAYS),
+              "icons": len(lib.ICONS),
+              "infographics": len(lib.INFO),
+              "textures": len(lib.TEXTURES),
+              "illustrations": len(lib.ILLUSTRATIONS),
+              "motion_loops": len(lib.MOTION_LOOPS),
+              "sfx_presets": len(sfx.SFX_PRESETS),
+          }
+          actual = {
+              "backgrounds": len(list((root / "originals/backgrounds").glob("*.svg"))),
+              "overlays": len(list((root / "originals/overlays").glob("*.svg"))),
+              "icons": len(list((root / "originals/icons").glob("*.svg"))),
+              "infographics": len(list((root / "originals/infographics").glob("*.svg"))),
+              "textures": len(list((root / "originals/textures").glob("*.svg"))),
+              "illustrations": len(list((root / "originals/illustrations").glob("*.svg"))),
+              "motion_loops": len(list((root / "originals/video-loops").glob("*.mp4"))),
+              "sfx_presets": len(list((root / "originals/audio").glob("*.wav"))),
+          }
+          assert actual == expected, json.dumps({"expected": expected, "actual": actual}, indent=2)
+          assert expected["backgrounds"] >= 90 and expected["overlays"] >= 75
+          assert expected["icons"] >= 110 and expected["infographics"] >= 50
+          assert expected["textures"] >= 55 and expected["illustrations"] >= 105
+          assert expected["motion_loops"] == 24 and expected["sfx_presets"] >= 175
+
+          files = [p for p in root.rglob("*") if p.is_file()]
+          assert len(files) >= sum(expected.values())
+          for path in files:
+              assert path.stat().st_size > 0, f"empty generated file: {path}"
+          print(json.dumps({
+              "expected": expected,
+              "actual": actual,
+              "files_created": len(files),
+              "generated_bytes": sum(p.stat().st_size for p in files),
+              "motion_loops_ffprobe_verified": True,
+              "rights_tests": "passed",
+          }, indent=2))
+          PY
