@@ -1835,6 +1835,7 @@ def main():
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
+    rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
     nasa_report=download_nasa_media(STAGE,index)
     loc_report=download_loc_public_domain(STAGE,index)
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
@@ -1848,7 +1849,7 @@ def main():
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
-      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
       "\n\n## Library of Congress photographs\nThe builder downloads only image records with an explicit item-level rights statement containing ‘No known restrictions on publication’, ‘Public Domain’, or ‘No known copyright restrictions’, and rejects explicit conflicting limitations. Records without a rights statement are skipped. Each selected file records the exact statement, item URL, direct image URL, and SHA-256. LOC notes users remain responsible for evaluating copyright and other rights, so inspect the item/context before publication. Sources: https://www.loc.gov/apis/json-and-yaml/ and https://ask.loc.gov/faq/305466.\n\n"+
       "\n\n## Wikimedia Commons imagery\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Creator, file page, license URL and SHA-256 are stored for each downloaded image. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_report)+
@@ -1864,6 +1865,7 @@ def main():
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
+              "rijksmuseum_images_downloaded":sum(r.get("status")=="downloaded" for r in rijksmuseum_report),
               "nasa_images_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="image" for x in nasa_report),
               "nasa_videos_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="video" for x in nasa_report),
               "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
@@ -1875,7 +1877,8 @@ def main():
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
-               "met_open_access_downloads":met_report,"nasa_media_downloads":nasa_report,
+               "met_open_access_downloads":met_report,"rijksmuseum_open_access_downloads":rijksmuseum_report,
+               "nasa_media_downloads":nasa_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
