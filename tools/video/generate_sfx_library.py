@@ -70,7 +70,78 @@ SFX_PRESETS = [
     ("wind-chimes-distant","chime",2.0),("music-intro-sting","hope",1.6),
     ("dark-reveal-sting","darksting",1.3),("soft-transition-swish","sweepbright",1.2),
     ("buzz-low","buzz",0.7),("electrical-pulse","pulse",0.8),
-    ("notification-double-chime","chime",0.9)
+    ("notification-double-chime","chime",0.9),
+    ("wind-through-alley","wind",5.5),
+    ("forest-wind-canopy","wind",5.5),
+    ("night-insects-bed","forest",5.5),
+    ("rain-on-metal-roof","rainwindow",5.5),
+    ("waves-on-pebbles","ocean",5.5),
+    ("distant-harbor-roomtone","city",5.5),
+    ("crowd-in-station","crowd",3),
+    ("subway-arrival-rumble","train",4),
+    ("industrial-fan-roomtone","city",5.5),
+    ("campfire-close-crackle","fire",5.5),
+    ("storm-rumble-low","thunder",5.5),
+    ("underwater-pressure-drone","drone",5),
+    ("dawn-bird-chorus","birds",5.5),
+    ("vinyl-room-tone","vinyl",4),
+    ("desert-wind-gust","wind",5.5),
+    ("transition-airy-swell","sweepbright",1.8),
+    ("transition-deep-swell","sweepdark",1.8),
+    ("impact-low-cinematic","impact-heavy",1.1),
+    ("impact-metal-short","metal",0.65),
+    ("reveal-hopeful-sting","hope",1.8),
+    ("reveal-dark-sting","darksting",1.5),
+    ("reverse-cymbal-style-swell","sweep",1.6),
+    ("cinematic-riser-short","riser",1.7),
+    ("cinematic-riser-long","riser",3.5),
+    ("transition-soft-whoosh","whoosh",0.9),
+    ("transition-fast-whoosh","whoosh",0.42),
+    ("title-card-chime","chime",1),
+    ("logo-reveal-sparkle","sparkle",1.5),
+    ("quiet-piano-resolve","piano",2.1),
+    ("tension-pulse-slow","pulse",2),
+    ("tension-pulse-fast","pulse",1),
+    ("ui-hover-tick","click",0.16),
+    ("ui-menu-open","chime-soft",0.48),
+    ("ui-menu-close","tapestop",0.38),
+    ("ui-navigation-confirm","chime",0.65),
+    ("ui-notification-triple","chime",1),
+    ("ui-warning-pulse","buzz",0.55),
+    ("ui-data-arrival","scifi",0.7),
+    ("ui-loading-sweep","sweepbright",1.1),
+    ("ui-scan-complete","chime",1),
+    ("digital-packet-burst","glitch",0.7),
+    ("terminal-keystroke-run","typing",2.2),
+    ("server-power-up","drone",2.2),
+    ("scanner-calibration","scifi",0.9),
+    ("radio-signal-dropout","glitch",1),
+    ("camera-focus-confirm","chime-soft",0.55),
+    ("camera-reel-start","train",1.3),
+    ("film-projector-roomtone","vinyl",4),
+    ("tape-rewind-short","tapestop",1),
+    ("footsteps-marble-hall","steps-wood",2.7),
+    ("footsteps-tile-corridor","steps",2.4),
+    ("footsteps-wet-pavement","steps-gravel",2.4),
+    ("footsteps-wood-staircase","steps-wood",2.5),
+    ("footsteps-running-concrete","steps",2),
+    ("paper-stack-drop","paper",0.75),
+    ("pen-and-notebook-rustle","paper",1.25),
+    ("page-turn-heavy-book","paper",0.8),
+    ("glass-fragments-settle","glassbreak",1.5),
+    ("metal-door-clang","metal",0.85),
+    ("small-object-drop","impact",0.32),
+    ("heavy-object-set-down","impact-heavy",0.7),
+    ("clock-slow-tick","tick",1),
+    ("clock-urgent-tick","tick",1.4),
+    ("alarm-digital-short","alarm",1.2),
+    ("heartbeat-muted","heartbeat",2.8),
+    ("heartbeat-race-close","heartbeat-fast",2.5),
+    ("doorway-wind-swell","wind",2.4),
+    ("subtle-magic-shimmer","sparkle",1.2),
+    ("morse-transmission","morse",1.8),
+    ("low-voltage-buzz","buzz",0.8),
+    ("electrical-switch-snap","click-sharp",0.16),
 ]
 
 def synthesize(kind: str, duration: float, seed: int, sample_rate: int = 48000) -> bytes:
@@ -264,8 +335,33 @@ def generate_original_audio(root: Path, index: list[dict], cc0_url: str) -> int:
         with wave.open(str(path),"wb") as wav:
             wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(48000); wav.writeframes(payload)
         digest=hashlib.sha256(payload).hexdigest()
+        ambience_kinds={"wind","rain","city","forest","ocean","bubbles","fire","thunder","crowd","birds","train","drone","warmdrone","vinyl"}
+        interface_kinds={"click","click-sharp","chime","chime-soft","buzz","pulse","scifi","laser","glitch","tapestop","typing","morse","shutter"}
+        foley_kinds={"paper","steps","steps-wood","steps-gravel","impact","impact-heavy","metal","glass","glassbreak","heartbeat","heartbeat-fast"}
+        loopable_names={
+            "wind-ambience","rain-ambience","city-ambience","forest-night-stylized","ocean-waves-ambience",
+            "fire-crackle-stylized","thunder-roll-stylized","drone-tension","drone-warm","forest-ambience-dawn",
+            "forest-insects-night","ocean-surf-close","ocean-surf-distant","deep-ocean-drone","industrial-ambience",
+            "distant-harbor-roomtone","industrial-fan-roomtone","night-insects-bed","rain-on-metal-roof",
+            "waves-on-pebbles","wind-through-alley","forest-wind-canopy","campfire-close-crackle",
+            "storm-rumble-low","underwater-pressure-drone","dawn-bird-chorus","vinyl-room-tone"
+        }
+        loopable= name in loopable_names or "ambience" in name or "roomtone" in name or "room-tone" in name
+        if kind in interface_kinds or name.startswith("ui-"):
+            category="interface / technology"
+        elif kind in foley_kinds or name.startswith("footsteps-") or any(term in name for term in ("page-turn","paper-rustle","object-drop","door-clang","fragments-settle")):
+            category="foley / physical action"
+        elif loopable:
+            category="ambience"
+        elif kind in ambience_kinds:
+            category="environmental cue"
+        else:
+            category="cinematic transition / musical accent"
+        tags=sorted(set([category,kind]+[part for part in name.split("-") if len(part)>2]))
         index.append({"id":name,"path":path.relative_to(root).as_posix(),"type":"original-procedural-sfx",
-                      "description":name.replace("-"," ").title(),"duration_seconds":duration,"sample_rate":48000,
+                      "description":name.replace("-"," ").title(),"category":category,"tags":tags,
+                      "intended_use":"loopable background bed" if loopable else "one-shot / timed cue",
+                      "loopable":loopable,"duration_seconds":duration,"sample_rate":48000,
                       "channels":1,"sample_format":"PCM_S16LE","license":"CC0-1.0","license_url":cc0_url,
                       "redistributable":True,"originally_synthesized":True,"sha256":digest,"size_bytes":path.stat().st_size})
         count+=1

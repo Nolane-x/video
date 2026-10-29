@@ -88,7 +88,37 @@ PALETTES = [
 ("data-visualization",("#08172a","#193c5a","#73d8ff"),"network"),
 ("village-evening",("#1d2831","#4e5660","#ffc589"),"city"),
 ("mountain-storm",("#131e34","#465a72","#bfd5e4"),"mountain"),
-("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater")
+("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater"),
+("arctic-research-base",("#102231","#536f80","#d5f5f0"),"snow"),
+("volcanic-observatory",("#211a25","#6f3a38","#ffad65"),"desert"),
+("rice-terraces-dawn",("#173a35","#648e74","#ffd49a"),"forest"),
+("old-town-alley",("#242638","#68515b","#f4bb86"),"city"),
+("rainy-bus-terminal",("#101d2b","#3e5263","#91d5e0"),"metro"),
+("suburban-evening",("#202638","#5b6976","#ffc795"),"city"),
+("hospital-night-shift",("#11282d","#31515a","#a7f0dc"),"hospital"),
+("university-library",("#211f2b","#56434b","#e9c995"),"museum"),
+("industrial-foundry",("#1d2428","#4a4543","#ff9f55"),"factory"),
+("underwater-cave",("#042b3b","#086c7c","#8bf3e9"),"underwater"),
+("reef-at-noon",("#06405a","#1297a3","#b0fff1"),"underwater"),
+("satellite-control-room",("#071a2a","#263852","#8bd7ff"),"network"),
+("observatory-interior",("#10142b","#34355d","#c5b3ff"),"space"),
+("retro-computer-lab",("#171b2a","#3d3554","#a2ffc8"),"studio"),
+("artisan-workshop",("#2a211d","#6a4935","#f5c68b"),"factory"),
+("street-food-stall",("#2f211e","#6f4435","#ffd27f"),"food"),
+("morning-greenhouse",("#123126","#38745c","#e4d79c"),"greenhouse"),
+("marble-museum-hall",("#20242b","#55545c","#f0d5a1"),"museum"),
+("high-speed-rail-platform",("#131d2b","#3c4f61","#9ce3ed"),"metro"),
+("stadium-tunnel",("#111a2b","#344361","#ffca70"),"sports"),
+("boxing-gym-night",("#191923","#473b4b","#e99b85"),"studio"),
+("desert-caravan-dusk",("#30202b","#8d514d","#ffd39b"),"desert"),
+("canyon-storm",("#1b2331","#71545a","#d9b5a0"),"mountain"),
+("deep-forest-river",("#082b2b","#285d53","#a3d9bd"),"forest"),
+("glacial-blue-cavern",("#09263d","#4d8fa5","#d2fbff"),"snow"),
+("orbital-greenhouse",("#0d282d","#295a55","#a5e8c5"),"space"),
+("planetary-mining-site",("#171d2a","#53414f","#f4b36c"),"space"),
+("modern-architecture-plaza",("#242b35","#687987","#f6d6a4"),"city"),
+("night-market-monsoon",("#182432","#4d4c5a","#ffae7d"),"city"),
+("cinema-projection-room",("#171722","#3c3544","#f0d2a1"),"studio"),
 ]
  
 TEXTURES = [
@@ -108,7 +138,31 @@ TEXTURES = [
  ("rubber-diamond","Rubber diamond plate"),("perforated-metal","Perforated metal"),
  ("blueprint-dimensions","Blueprint dimension grid"),("isometric-grid","Isometric construction grid"),
  ("neon-circuit","Neon circuit traces"),("soft-clouds","Cloud contour texture"),
- ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands")
+ ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands"),
+("rusted-steel","Oxidized and weathered steel"),
+("weathered-concrete","Weathered architectural concrete"),
+("salt-crystal","Salt crystal flecks"),
+("stained-glass","Stained glass mosaic"),
+("linen-paper","Fine linen paper fibers"),
+("plaster-wall","Hand-finished plaster wall"),
+("leather-grain","Fine leather grain"),
+("sand-ripples","Wind-shaped sand ripples"),
+("ice-crystals","Frost and ice crystal lines"),
+("watercolor-wash","Watercolor pigment wash"),
+("map-ink-hatching","Cartographic ink hatching"),
+("microchip-routing","Dense microchip routing traces"),
+("celestial-dust","Celestial dust and stars"),
+("biological-cells","Microscopy cell silhouettes"),
+("oxidized-copper","Aged copper patina"),
+("chalkboard-dust","Chalkboard dust and erased marks"),
+("ceramic-crackle","Ceramic glaze crackle"),
+("carbon-smudge","Carbon and charcoal smudges"),
+("woven-denim","Denim textile weave"),
+("worn-wood-planks","Weathered wood grain"),
+("stone-strata","Layered sedimentary stone"),
+("rain-puddle-rings","Rain impact rings"),
+("soft-focus-grain","Soft optical grain"),
+("engineering-isolines","Engineering contour isolines"),
 ]
 ILLUSTRATIONS = [
  ("satellite-hero","Satellite / orbital hardware","space","satellite"),("telescope-hero","Space telescope","space","telescope"),
@@ -144,7 +198,51 @@ ILLUSTRATIONS = [
  ("film-strip-hero","Film / cinema","film","film-strip"),("speech-bubble-hero","Conversation / interview","people","speech-bubble"),
  ("paw-nature-hero","Wildlife / animal","nature","paw"),("recycle-hero","Circular economy / recycling","environment","recycle"),
  ("shopping-cart-hero","Commerce / shopping","business","shopping-bag"),("security-lock-hero","Privacy / security","technology","lock"),
- ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave")
+ ("data-chart-hero","Data / statistics","business","chart"),("sound-wave-hero","Sound wave / waveform","music","audio-wave"),
+("molecular-structure-hero","Molecular structure","science","molecule"),
+("lab-test-tube-hero","Laboratory test tube","science","test-tube"),
+("magnetism-hero","Magnetism demonstration","science","magnet"),
+("temperature-hero","Temperature / thermal physics","science","thermometer"),
+("antenna-array-hero","Antenna array","technology","antenna"),
+("solar-farm-hero","Solar energy farm","energy","solar-panel"),
+("wind-farm-hero","Wind energy farm","energy","wind-turbine"),
+("battery-storage-hero","Battery storage","energy","battery-cell"),
+("freshwater-hero","Freshwater system","nature","water-drop"),
+("winter-weather-hero","Snow and winter weather","weather","snowflake"),
+("storm-front-hero","Rainstorm system","weather","cloud-rain"),
+("volcano-geology-hero","Volcanic geology","geology","volcano"),
+("coral-reef-hero","Coral reef ecosystem","marine biology","coral"),
+("whale-migration-hero","Whale migration","wildlife","whale"),
+("fish-anatomy-hero","Fish / marine life","wildlife","fish"),
+("bird-flight-hero","Bird flight","wildlife","bird"),
+("pollinator-hero","Butterfly pollinator","nature","butterfly"),
+("flower-botany-hero","Flower structure","botany","flower"),
+("fungus-ecology-hero","Fungal ecology","nature","mushroom"),
+("desert-botany-hero","Desert cactus","botany","cactus"),
+("field-observation-hero","Field observation","research","binoculars"),
+("railway-hero","Railway engineering","transport","train-engine"),
+("maritime-trade-hero","Maritime trade","transport","ship"),
+("bridge-engineering-hero","Bridge engineering","engineering","bridge-arch"),
+("urban-skyscraper-hero","Urban skyline","architecture","skyscraper"),
+("learning-path-hero","Learning and graduation","education","graduation-cap"),
+("note-taking-hero","Note taking","education","notebook"),
+("mathematics-calculator-hero","Mathematics / calculation","education","calculator"),
+("creative-idea-hero","Creative idea / discovery","education","lightbulb"),
+("culinary-chef-hero","Cooking / chef","food","chef-hat"),
+("coffee-culture-hero","Coffee culture","food","coffee-cup"),
+("shipping-logistics-hero","Shipping and logistics","business","package-box"),
+("public-speaking-hero","Public speaking","communication","megaphone"),
+("collaboration-hero","Collaboration / partnership","people","handshake"),
+("film-production-hero","Film production","film","film-clapper"),
+("analog-recording-hero","Analog audio / vinyl","music","vinyl-record"),
+("live-performance-hero","Live concert","music","concert-stage"),
+("achievement-medal-hero","Achievement / medal","sport","medal-ribbon"),
+("strength-training-hero","Strength training","sport","dumbbell"),
+("sports-football-hero","Football / sport","sport","football"),
+("sports-basketball-hero","Basketball / sport","sport","basketball"),
+("interactive-gaming-hero","Interactive gaming","gaming","joystick"),
+("surveillance-camera-hero","CCTV camera / security","technology","cctv-camera"),
+("ethical-balance-hero","Balance / decision","education","scales-balance"),
 ]
 
 MOTION_LOOPS = [
@@ -160,6 +258,18 @@ MOTION_LOOPS = [
     ("particle-field-loop","Particle Field Loop","abstract","0x081420","particles"),
     ("route-tracer-loop","Route Tracer Loop","travel","0x102229","route"),
     ("soft-bokeh-loop","Soft Bokeh Loop","cinematic","0x181a2a","bokeh"),
+("matrix-rain-loop","Matrix Rain Loop","technology","0x07141e","matrix"),
+    ("radar-sweep-loop","Radar Sweep Loop","news","0x0a1c27","radar"),
+    ("heat-shimmer-loop","Heat Shimmer Loop","nature","0x35221f","heat"),
+    ("cloud-drift-loop","Cloud Drift Loop","nature","0x182838","clouds"),
+    ("snowfall-loop","Snowfall Loop","nature","0x102438","snow"),
+    ("star-twinkle-loop","Starfield Drift Loop","space","0x060b22","stars"),
+    ("paper-scrub-loop","Archival Paper Scrub Loop","documentary","0x27231e","paper"),
+    ("metro-flow-loop","Metro Signal Flow Loop","transport","0x101b29","metro"),
+    ("medical-pulse-loop","Medical Pulse Loop","science","0x0d252b","medical"),
+    ("waveform-energy-loop","Waveform Energy Loop","music","0x10172b","waveform"),
+    ("compass-route-loop","Compass Route Loop","travel","0x10252b","compass"),
+    ("cinema-gate-loop","Cinema Gate Loop","film","0x161616","cinema"),
 ]
 
 OVERLAYS = [
@@ -182,7 +292,31 @@ OVERLAYS = [
 ("map-route","Route line and location markers"),("spectrum-bars","Audio spectrum bars"),
 ("rain-on-glass","Rain-on-glass droplets"),("underwater-caustics","Underwater caustic light"),
 ("film-frame-counter","Film frame counter"),("focus-pull","Focus-distance marks"),
-("caution-stripes","Caution / industrial stripe edge"),("vertical-safe-area","Vertical 9:16 safe-area guide")
+("caution-stripes","Caution / industrial stripe edge"),("vertical-safe-area","Vertical 9:16 safe-area guide"),
+("light-rays","Soft volumetric light rays"),
+("wet-lens","Water droplets on lens"),
+("comic-burst","Comic-book impact burst"),
+("radar-scan","Radar sweep and target marks"),
+("molecule-links","Molecule links and nodes"),
+("medical-grid","Clinical alignment grid"),
+("broadcast-safe","Broadcast title/action safe guides"),
+("paper-tear","Torn paper edge"),
+("vhs-timecode","VHS timecode and tracking"),
+("lens-dirt","Subtle lens dust and smudges"),
+("starlight-crosses","Small star glints"),
+("heat-haze","Heat-wave shimmer bands"),
+("leaf-shadows","Botanical leaf shadows"),
+("audio-peak-meter","Audio peak meter"),
+("film-sprockets","Film sprocket edges"),
+("focus-marks","Cinematic focus distance marks"),
+("subtitle-contrast","Subtitle contrast wash"),
+("evidence-stamp","Documentary evidence stamp"),
+("blueprint-labels","Blueprint labels and dimensions"),
+("scan-ripple","Scanner and sonar ripple"),
+("sports-scorebug","Broadcast sports score frame"),
+("product-glint","Restrained product highlight streak"),
+("map-coordinate","Coordinate graticule and map labels"),
+("storyboard-frame","Storyboard frame and shot number"),
 ]
 INFO = [
 ("title-card","Title / chapter card"),("lower-third","Lower third"),("stat-number","Big statistic"),("timeline","Horizontal timeline"),
@@ -200,7 +334,22 @@ INFO = [
 ("scorecard","KPI / evaluation scorecard"),("milestone-grid","Milestone grid"),
 ("funnel-conversion","Conversion funnel"),("story-beat-board","Story beat board"),
 ("shot-list","Shot list / coverage checklist"),("accessibility-checklist","Accessibility review"),
-("source-ledger","Source and citation ledger")
+("source-ledger","Source and citation ledger"),
+("quadrant-matrix","2×2 quadrant matrix"),
+("hierarchy-tree","Hierarchy and organization tree"),
+("swimlane-flow","Swimlane process flow"),
+("risk-matrix","Impact × likelihood risk matrix"),
+("waterfall-chart","Waterfall contribution chart"),
+("network-graph","Relationship network graph"),
+("periodic-table","Category grid / periodic-table layout"),
+("radial-diagram","Radial concept map"),
+("learning-ladder","Learning progression ladder"),
+("journey-map","Journey and experience map"),
+("decision-matrix","Decision scoring matrix"),
+("timeline-evidence","Evidence-led chronology"),
+("anatomy-callout","Labeled structure callouts"),
+("equation-derivation","Stepwise equation derivation"),
+("sankey-flow","Flow-volume / Sankey-style path"),
 ]
 # Original, standalone vector icons. The visual style is intentionally neutral and adaptable.
 ICONS = {
@@ -269,7 +418,70 @@ ICONS = {
 "database":'<ellipse cx="32" cy="13" rx="23" ry="7"/><path d="M9 13V49C9 59 55 59 55 49V13M9 31C9 40 55 40 55 31"/>',
 "shield-lock":'<path d="M32 6L53 14V31Q51 47 32 58Q13 47 11 31V14Z"/><rect x="23" y="28" width="18" height="15" rx="3"/><path d="M27 28V23A5 5 0 0 1 37 23V28"/>',
 "paw":'<ellipse cx="32" cy="42" rx="15" ry="11"/><circle cx="15" cy="24" r="6"/><circle cx="28" cy="17" r="6"/><circle cx="42" cy="18" r="6"/><circle cx="53" cy="27" r="6"/>',
-"camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>'
+"camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>',
+"test-tube":'<path d="M24 7H40M28 7V31L15 49Q11 57 22 58H42Q53 57 49 49L36 31V7"/><path d="M21 45H43M24 39H40"/>',
+"molecule":'<circle cx="15" cy="20" r="7"/><circle cx="45" cy="15" r="7"/><circle cx="38" cy="46" r="8"/><circle cx="14" cy="49" r="6"/><path d="M21 22L39 17M19 26L15 43M21 48L31 46M42 22L39 38"/>',
+"magnet":'<path d="M18 10H30V34Q30 42 38 42Q46 42 46 34V10H58V35Q58 55 38 55Q18 55 18 35Z"/><path d="M18 20H30M46 20H58"/>',
+"thermometer":'<rect x="26" y="7" width="12" height="36" rx="6"/><circle cx="32" cy="48" r="12"/><path d="M32 20V48M42 17H49M42 27H47"/>',
+"telescope-dish":'<path d="M9 20L51 10L57 27L15 37Z"/><path d="M22 35L32 55M45 31L32 55M32 55H48"/><path d="M15 37L10 44"/>',
+"satellite-dish":'<path d="M15 17Q33 4 51 17Q48 36 33 42Q18 36 15 17Z"/><path d="M33 42L29 55M23 55H42M45 16L55 9M47 25L60 25"/>',
+"antenna":'<path d="M32 29V57M22 57H42M32 29L18 15M32 29L46 15"/><path d="M11 22Q1 10 12 2M53 22Q63 10 52 2M18 27Q12 21 18 15M46 27Q52 21 46 15"/>',
+"solar-panel":'<path d="M11 15H53L58 39H6Z"/><path d="M22 15L18 39M32 15V39M43 15L47 39M8 27H56M32 39V56M21 56H43"/>',
+"wind-turbine":'<path d="M32 25V58M24 58H40M32 25L22 7Q20 4 23 3Q26 2 29 9L34 20M32 25L53 21Q58 21 58 24Q58 27 51 28L37 29M32 25L21 42Q18 45 15 42Q13 39 19 34L28 25"/>',
+"battery-cell":'<rect x="12" y="20" width="40" height="32" rx="4"/><path d="M25 20V14H39V20M20 36H28M24 32V40M37 36H45"/>',
+"water-drop":'<path d="M32 4C26 18 12 30 12 41A20 20 0 0 0 52 41C52 30 38 18 32 4Z"/><path d="M22 42Q23 51 32 52"/>',
+"snowflake":'<path d="M32 5V59M8 18L56 46M8 46L56 18M32 5L26 12M32 5L38 12M32 59L26 52M32 59L38 52M8 18L18 18M8 18L12 27M56 46L46 46M56 46L52 37M8 46L18 46M8 46L12 37M56 18L46 18M56 18L52 27"/>',
+"cloud-rain":'<path d="M12 33Q7 17 22 13Q31 1 42 14Q57 13 57 29Q57 39 44 39H19Q12 39 12 33Z"/><path d="M20 46L16 54M33 46L29 56M46 46L42 54"/>',
+"volcano":'<path d="M5 55L21 20L29 33L37 20L59 55Z"/><path d="M25 21L31 12L35 20M29 9L25 3M38 11L43 5M19 11L14 6"/>',
+"coral":'<path d="M32 56V34M32 42L20 30M20 30V18M20 30L11 27M32 38L43 27M43 27V14M43 27L53 22M32 49L22 43M22 43V36"/>',
+"whale":'<path d="M7 34Q15 14 37 23L49 27L58 18L56 33Q48 48 31 48Q16 48 7 34Z"/><path d="M26 47L21 55L34 50M18 29H18.5M38 27Q42 21 41 17"/>',
+"fish":'<path d="M8 32Q22 12 43 32Q22 52 8 32Z"/><path d="M43 32L57 20V44Z"/><circle cx="20" cy="29" r="2"/>',
+"bird":'<path d="M7 42Q18 21 31 32Q41 19 56 20Q49 38 31 43Q19 48 7 42Z"/><path d="M27 39L22 54M40 37L45 49"/>',
+"butterfly":'<path d="M32 18Q17 1 9 14Q4 27 25 32Q4 38 11 51Q21 58 32 39Q43 58 53 51Q60 38 39 32Q60 27 55 14Q47 1 32 18Z"/><path d="M32 16V48M32 17L26 8M32 17L38 8"/>',
+"flower":'<circle cx="32" cy="28" r="7"/><circle cx="32" cy="14" r="8"/><circle cx="46" cy="28" r="8"/><circle cx="32" cy="42" r="8"/><circle cx="18" cy="28" r="8"/><path d="M32 49V60M32 55L22 49"/>',
+"mushroom":'<path d="M8 28Q11 6 32 6Q53 6 56 28Z"/><path d="M27 28L24 50Q32 55 40 50L37 28M14 18H17M30 13H34M44 19H47"/>',
+"cactus":'<path d="M26 58V15Q26 7 32 7Q38 7 38 15V58M26 30H18Q12 30 12 24V20M38 40H45Q51 40 51 34V29M19 58H45"/>',
+"binoculars":'<path d="M13 18H25L29 43H16ZM39 18H51L48 43H35ZM25 29H39M17 43H47"/>',
+"train-engine":'<path d="M9 19H43L54 33V48H9Z"/><path d="M16 19V9H35V19M44 27H52M17 29H25V37H17Z"/><circle cx="19" cy="49" r="6"/><circle cx="44" cy="49" r="6"/>',
+"ship":'<path d="M7 38H57L48 51H18Z"/><path d="M17 38V18H32V38M34 38V9H45V38M11 55Q20 60 29 55T47 55T58 55"/>',
+"bridge-arch":'<path d="M5 24H59M10 24V42M54 24V42M10 42H54M10 42Q32 10 54 42M5 49H59M17 49V56M47 49V56"/>',
+"skyscraper":'<path d="M10 58V25H24V14H38V29H54V58Z"/><path d="M16 32H20M16 40H20M30 22H34M30 31H34M30 40H34M44 36H49M44 45H49M21 58V49H28V58"/>',
+"graduation-cap":'<path d="M4 24L32 10L60 24L32 38Z"/><path d="M15 30V42Q32 55 49 42V30M55 27V43M55 43L51 50H59L55 43"/>',
+"pencil":'<path d="M13 47L43 17L51 25L21 55L10 58Z"/><path d="M39 21L47 29M10 58L13 47"/>',
+"notebook":'<rect x="15" y="6" width="38" height="52" rx="3"/><path d="M23 6V58M28 18H45M28 28H45M28 38H45M28 48H42M9 15H15M9 26H15M9 37H15M9 48H15"/>',
+"calculator":'<rect x="14" y="5" width="36" height="54" rx="4"/><rect x="20" y="12" width="24" height="10" rx="2"/><path d="M21 31H26M34 31H39M21 40H26M34 40H39M21 49H26M34 49H39"/>',
+"lightbulb":'<path d="M22 27Q12 15 21 7Q32 -1 43 7Q52 15 42 27L39 36H25Z"/><path d="M25 42H39M27 48H37M29 53H35"/>',
+"chef-hat":'<path d="M17 31Q7 28 11 18Q14 10 23 15Q25 3 35 7Q44 8 43 17Q55 10 58 22Q60 32 48 33V53H17Z"/><path d="M17 39H48"/>',
+"coffee-cup":'<path d="M12 20H44V42Q44 52 32 52H24Q12 52 12 42Z"/><path d="M44 25H51Q60 25 56 36Q54 41 44 41M20 13Q15 7 20 3M31 13Q26 7 31 3"/>',
+"package-box":'<path d="M8 18L32 7L56 18V47L32 59L8 47Z"/><path d="M8 18L32 30L56 18M32 30V59M20 13L44 25"/>',
+"megaphone":'<path d="M8 29H22L50 14V48L22 34H8Z"/><path d="M18 35L24 52H34L28 38M54 23L60 19M55 32H62M54 40L60 44"/>',
+"handshake":'<path d="M7 24L18 14L29 22L36 17L52 29L43 39L34 33L27 40L18 33L11 38Z"/><path d="M22 37L29 44Q33 47 36 42M29 32L38 40Q42 43 45 38"/>',
+"film-clapper":'<path d="M8 24H56V57H8Z"/><path d="M8 24L13 8H61L56 24Z"/><path d="M20 8L25 24M36 8L41 24M52 8L57 24M18 36H46M18 44H39"/>',
+"vinyl-record":'<circle cx="32" cy="32" r="25"/><circle cx="32" cy="32" r="14"/><circle cx="32" cy="32" r="3"/><path d="M33 9Q50 15 54 30M12 38Q17 50 29 53"/>',
+"concert-stage":'<path d="M7 58V15H57V58M17 15V7H47V15M18 28L32 19L46 28M17 44H47M22 58V44M42 58V44"/>',
+"medal-ribbon":'<circle cx="32" cy="30" r="17"/><path d="M22 44L18 59L32 52L46 59L42 44M32 21L35 27L42 28L37 33L38 40L32 36L26 40L27 33L22 28L29 27Z"/>',
+"dumbbell":'<path d="M6 24H14V40H6ZM50 24H58V40H50ZM14 29H50M14 35H50M18 19V45M46 19V45"/>',
+"football":'<path d="M9 21Q32 5 55 21Q59 32 55 43Q32 59 9 43Q5 32 9 21Z"/><path d="M24 22L40 42M20 29L29 22M28 37L37 30M35 44L44 37"/>',
+"basketball":'<circle cx="32" cy="32" r="25"/><path d="M7 32H57M32 7V57M14 15Q32 32 14 49M50 15Q32 32 50 49"/>',
+"joystick":'<rect x="10" y="36" width="44" height="19" rx="7"/><path d="M32 36V17M32 17Q25 17 25 10Q25 5 32 5Q39 5 39 10Q39 17 32 17Z"/><circle cx="22" cy="45" r="2"/><circle cx="42" cy="45" r="2"/>',
+"cctv-camera":'<path d="M8 22L41 13L49 29L16 38Z"/><path d="M41 15L54 10L60 22L49 29M20 38L16 50H34M23 50H39"/>',
+"scales-balance":'<path d="M32 9V55M17 55H47M12 18H52M32 9L27 15M32 9L37 15M18 18L9 36H27ZM46 18L37 36H55Z"/>',
+"satellite":'<path d="M22 22L42 42M19 16L29 6L38 15L28 25Z"/><path d="M38 42L48 32L57 41L47 51Z"/><path d="M7 11L15 3M49 57L58 48"/>',
+"telescope":'<path d="M10 16L45 5L54 23L19 34Z"/><path d="M25 32L31 55M43 27L31 55M23 55H43"/>',
+"moon-stars":'<path d="M42 7Q20 10 19 31Q20 51 42 54Q26 64 12 49Q-1 31 14 14Q27 2 42 7Z"/><path d="M48 12L51 20L59 23L51 26L48 34L45 26L37 23L45 20ZM35 42L37 47L42 49L37 51L35 56L33 51L28 49L33 47Z"/>',
+"pulse":'<path d="M5 34H17L24 18L33 49L42 25L48 34H59"/>',
+"virus":'<circle cx="32" cy="32" r="16"/><path d="M32 4V16M32 48V60M4 32H16M48 32H60M12 12L21 21M43 43L52 52M52 12L43 21M21 43L12 52"/><circle cx="27" cy="28" r="3"/><circle cx="39" cy="36" r="3"/>',
+"wave":'<path d="M4 34Q12 16 20 34T36 34T52 34T68 34"/>',
+"train":'<path d="M10 17H44L55 30V48H10Z"/><path d="M17 25H27V35H17ZM33 25H43V35H33ZM18 48V55M45 48V55M8 56H57"/>',
+"bicycle":'<circle cx="16" cy="44" r="10"/><circle cx="49" cy="44" r="10"/><path d="M16 44L27 26L38 44H16L31 44L40 25H49M24 26H34M36 19H43"/>',
+"map-route":'<path d="M6 14L23 7L41 14L58 7V48L41 56L23 48L6 56Z"/><path d="M23 7V48M41 14V56M14 40Q20 22 31 32T49 22"/><circle cx="14" cy="40" r="3"/><circle cx="49" cy="22" r="3"/>',
+"shopping-bag":'<path d="M12 22H52L56 57H8Z"/><path d="M22 24V17Q22 7 32 7Q42 7 42 17V24"/>',
+"laptop":'<path d="M13 10H51V39H13Z"/><path d="M7 46H57L52 53H12Z"/>',
+"clapperboard":'<path d="M8 24H56V57H8Z"/><path d="M8 24L13 8H61L56 24Z"/><path d="M20 8L25 24M36 8L41 24M52 8L57 24"/>',
+"package":'<path d="M8 18L32 7L56 18V47L32 59L8 47Z"/><path d="M8 18L32 30L56 18M32 30V59"/>',
+"film-strip":'<rect x="10" y="7" width="44" height="50" rx="3"/><path d="M20 7V17M32 7V17M44 7V17M20 47V57M32 47V57M44 47V57M20 25L43 32L20 39Z"/>',
+"speech-bubble":'<path d="M8 10H56V42H31L18 54V42H8Z"/><path d="M17 22H47M17 31H39"/>',
+"recycle":'<path d="M24 8L33 8L39 18L33 22ZM45 22L55 39L48 45L38 29ZM39 48L22 56L16 48L34 40ZM17 34L7 18L16 13L25 28Z"/>',
 }
 
 
@@ -399,9 +611,48 @@ def motion_loop_filters(style):
             f"w={radius}:h={radius}:color={color}@0.10:t=fill"
         )
     bokeh=",".join(bokeh_parts)
+
+    matrix_parts = ["drawgrid=width=48:height=48:thickness=1:color=0x62efb3@0.08"]
+    for i in range(24):
+        x=18+i*53
+        speed=38+(i%5)*17
+        phase=i*29
+        matrix_parts.append(f"drawbox=x={x}:y='mod(t*{speed}+{phase},720)':w=3:h={18+(i%4)*8}:color=0x62efb3@{0.22+(i%4)*0.1:.2f}:t=fill")
+    matrix=",".join(matrix_parts)
+    radar="drawgrid=width=80:height=80:thickness=1:color=0x5fe2d1@0.08,drawbox=x='640+530*sin(2*PI*t/6)':y=0:w=3:h=720:color=0x5fe2d1@0.65:t=fill,drawbox=x='640+530*sin(2*PI*t/6)':y=0:w=130:h=720:color=0x5fe2d1@0.06:t=fill"
+    heat="drawbox=x=0:y='160+22*sin(2*PI*t/3)':w=1280:h=3:color=0xffb06c@0.28:t=fill,drawbox=x=0:y='310+30*sin(2*PI*t/3+1.3)':w=1280:h=2:color=0xffd58b@0.26:t=fill,drawbox=x=0:y='470+24*sin(2*PI*t/3+2.4)':w=1280:h=2:color=0xf9a17a@0.22:t=fill,drawgrid=width=120:height=90:thickness=1:color=0xffbe7a@0.05"
+    clouds="drawbox=x='mod(70*t,1600)-200':y=130:w=420:h=90:color=0xcce8f5@0.08:t=fill,drawbox=x='mod(45*t+430,1700)-260':y=290:w=500:h=115:color=0xcce8f5@0.06:t=fill,drawbox=x='mod(58*t+880,1800)-300':y=470:w=620:h=125:color=0x91c6e4@0.05:t=fill"
+    snow_parts=["drawgrid=width=160:height=120:thickness=1:color=0xe6f7ff@0.035"]
+    for i in range(42):
+        x=(i*173+29)%1270
+        y=(i*137+11)%720
+        speed=20+(i%6)*13
+        phase=i*19
+        snow_parts.append(f"drawbox=x='{x}+9*sin(2*PI*t/4+{i*0.17:.2f})':y='mod(t*{speed}+{phase},720)':w={1+i%3}:h={1+i%3}:color=0xe9f8ff@{0.3+(i%5)*0.1:.2f}:t=fill")
+    snow=",".join(snow_parts)
+    star_parts=["drawgrid=width=160:height=120:thickness=1:color=0x9baeff@0.04"]
+    for i in range(34):
+        x=(i*181+43)%1250
+        y=(i*97+31)%700
+        star_parts.append(f"drawbox=x='{x}+3*sin(2*PI*t/6+{i*0.29:.2f})':y='{y}+2*cos(2*PI*t/6+{i*0.29:.2f})':w={1+i%3}:h={1+i%3}:color=0xb8caff@{0.3+(i%4)*0.12:.2f}:t=fill")
+    stars=",".join(star_parts)
+    paper="noise=alls=8:allf=t,drawbox=x=0:y='120+4*sin(2*PI*t/6)':w=1280:h=2:color=0xf4e4c7@0.2:t=fill,drawbox=x=0:y='420+6*sin(2*PI*t/6+1)':w=1280:h=2:color=0xf4e4c7@0.13:t=fill,drawgrid=width=128:height=96:thickness=1:color=0xdbc8a8@0.045"
+    metro="drawgrid=width=96:height=72:thickness=1:color=0x6ad6dd@0.08,drawbox=x='mod(t*140,1500)-100':y=200:w=210:h=5:color=0x6ad6dd@0.58:t=fill,drawbox=x='mod(t*105+460,1500)-100':y=360:w=250:h=4:color=0xf5b96b@0.55:t=fill,drawbox=x='mod(t*175+870,1500)-100':y=510:w=180:h=4:color=0x6ad6dd@0.42:t=fill"
+    medical="drawgrid=width=64:height=64:thickness=1:color=0x6fe7d5@0.07,drawbox=x=60:y=358:w=170:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x=230:y=358:w=26:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x=256:y=358:w=24:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x=280:y=320:w=20:h=80:color=0x6fe7d5@0.8:t=fill,drawbox=x=300:y=358:w=90:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x=390:y=342:w=24:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x=414:y=358:w=130:h=3:color=0x6fe7d5@0.68:t=fill,drawbox=x='mod(t*180,1300)-60':y=160:w=2:h=400:color=0x6fe7d5@0.16:t=fill"
+    waveform_parts=["drawgrid=width=64:height=64:thickness=1:color=0x7eaaff@0.07"]
+    for i in range(34):
+        x=30+i*36
+        h_expr=f"20+180*(1+sin(2*PI*t/1.9+{i*0.41:.2f}))/2"
+        waveform_parts.append(f"drawbox=x={x}:y='360-({h_expr})/2':w=14:h='({h_expr})':color=0x85e6d8@{0.24+(i%5)*0.1:.2f}:t=fill")
+    waveform=",".join(waveform_parts)
+    compass="drawgrid=width=96:height=96:thickness=1:color=0xf1c982@0.08,drawbox=x='640+260*sin(2*PI*t/6)':y='360+260*cos(2*PI*t/6)':w=9:h=9:color=0xf1c982@0.85:t=fill,drawbox=x='640-260*sin(2*PI*t/6)':y='360-260*cos(2*PI*t/6)':w=7:h=7:color=0x82dfcf@0.85:t=fill,drawbox=x=638:y=80:w=4:h=560:color=0xf1c982@0.12:t=fill,drawbox=x=360:y=358:w=560:h=4:color=0xf1c982@0.12:t=fill"
+    cinema="noise=alls=4:allf=t,drawbox=x='mod(t*90,1280)':y=80:w=2:h=640:color=0xf4e9ce@0.17:t=fill,drawbox=x=0:y=0:w=1280:h=36:color=0x050505@0.85:t=fill,drawbox=x=0:y=684:w=1280:h=36:color=0x050505@0.85:t=fill"
+
     choices={"orbital":orbital,"data":data,"circuit":circuit,"water":water,
              "aurora":aurora,"retro":retro,"film":film,"hazard":hazard,
-             "spectrum":spectrum,"particles":particles,"route":route,"bokeh":bokeh}
+             "spectrum":spectrum,"particles":particles,"route":route,"bokeh":bokeh,
+             "matrix":matrix,"radar":radar,"heat":heat,"clouds":clouds,"snow":snow,"stars":stars,
+             "paper":paper,"metro":metro,"medical":medical,"waveform":waveform,"compass":compass,"cinema":cinema}
     if style not in choices:
         raise ValueError(f"Unknown motion-loop style: {style}")
     return choices[style]
@@ -886,6 +1137,78 @@ def overlay_svg(name):
             p.append('<path d="M0 0H1920V30H0ZM0 1050H1920V1080H0Z" fill="#f4c84a" fill-opacity=".45"/>')
         else:
             p.append('<rect x="540" y="40" width="840" height="1000" fill="none" stroke="#76f1cf" stroke-opacity=".42" stroke-width="4" stroke-dasharray="18 14"/><rect x="615" y="120" width="690" height="840" fill="none" stroke="#76f1cf" stroke-opacity=".2" stroke-width="2" stroke-dasharray="8 12"/><text x="960" y="1020" text-anchor="middle" font-size="22" fill="#76f1cf">9:16 SAFE AREA</text>')
+
+    elif name in {"light-rays","product-glint"}:
+        for i in range(13):
+            x=-350+i*190
+            opacity=.035 if name=="light-rays" else .055
+            p.append(f'<path d="M{x} 0L{x+230} 0L{x+860} 1080L{x+630} 1080Z" fill="#ffe6b5" fill-opacity="{opacity:.3f}"/>')
+    elif name in {"wet-lens","lens-dirt"}:
+        for i in range(95):
+            x=(i*173+37)%1920; y=(i*97+19)%1080; r=4+(i%9)*2
+            op=.12 if name=="wet-lens" else .055
+            p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="#bde7f3" fill-opacity="{op}" stroke="#f4fbff" stroke-opacity="{op*1.8}" stroke-width="2"/>')
+    elif name in {"comic-burst","starlight-crosses"}:
+        for i in range(38):
+            x=(i*179+31)%1920; y=(i*131+27)%1080; r=8+(i%6)*4
+            if name=="comic-burst":
+                p.append(f'<path d="M{x} {y-r*2}L{x+r//2} {y-r//2}L{x+r*2} {y}L{x+r//2} {y+r//2}L{x} {y+r*2}L{x-r//2} {y+r//2}L{x-r*2} {y}L{x-r//2} {y-r//2}Z" fill="#ffcf76" fill-opacity=".11" stroke="#ffcf76" stroke-opacity=".22" stroke-width="2"/>')
+            else:
+                p.append(f'<path d="M{x} {y-r*2}V{y+r*2}M{x-r*2} {y}H{x+r*2}" stroke="#fff4d8" stroke-opacity=".42" stroke-width="2"/>')
+    elif name in {"radar-scan","scan-ripple"}:
+        for i in range(7):
+            r=80+i*105
+            p.append(f'<circle cx="960" cy="540" r="{r}" fill="none" stroke="#68e6d4" stroke-opacity="{.22-i*.022:.3f}" stroke-width="3" stroke-dasharray="14 16"/>')
+        p.append('<path d="M960 540L1530 230" stroke="#68e6d4" stroke-opacity=".45" stroke-width="5"/>')
+    elif name in {"molecule-links","leaf-shadows"}:
+        if name=="molecule-links":
+            pts=[(330,300),(650,210),(940,390),(1240,250),(1530,430),(860,700),(1350,790)]
+            for a,b in [(0,1),(1,2),(2,3),(3,4),(2,5),(5,6),(4,6)]:
+                p.append(f'<path d="M{pts[a][0]} {pts[a][1]}L{pts[b][0]} {pts[b][1]}" stroke="#73e2d3" stroke-opacity=".34" stroke-width="4"/>')
+            for x,y in pts:p.append(f'<circle cx="{x}" cy="{y}" r="17" fill="#73e2d3" fill-opacity=".24" stroke="#73e2d3" stroke-opacity=".55" stroke-width="3"/>')
+        else:
+            for i in range(15):
+                x=(i*151+15)%1920; y=(i*83+90)%1080
+                p.append(f'<path d="M{x} {y}q-50 -70 -5 -110q50 35 5 110ZM{x} {y}q50 -70 5 -110q-50 35 -5 110Z" fill="#d8ebc5" fill-opacity=".07"/>')
+    elif name in {"medical-grid","blueprint-labels","map-coordinate"}:
+        p.append('<path d="M0 180H1920M0 360H1920M0 540H1920M0 720H1920M320 0V1080M640 0V1080M960 0V1080M1280 0V1080M1600 0V1080" stroke="#8adfd4" stroke-opacity=".15" stroke-width="2"/>')
+        for i in range(12):
+            x=100+i*145
+            p.append(f'<path d="M{x} 150V185M{x-10} 168H{x+10}" stroke="#8adfd4" stroke-opacity=".4" stroke-width="2"/>')
+    elif name in {"broadcast-safe","focus-marks","storyboard-frame"}:
+        p.append('<rect x="70" y="45" width="1780" height="990" fill="none" stroke="#e8f0f3" stroke-opacity=".4" stroke-width="4"/><rect x="160" y="115" width="1600" height="850" fill="none" stroke="#e8f0f3" stroke-opacity=".22" stroke-width="3" stroke-dasharray="12 12"/>')
+        for x,y in [(70,45),(1850,45),(70,1035),(1850,1035)]:
+            p.append(f'<path d="M{x-30} {y}H{x+30}M{x} {y-30}V{y+30}" stroke="#e8f0f3" stroke-opacity=".6" stroke-width="4"/>')
+    elif name in {"paper-tear","evidence-stamp","vhs-timecode"}:
+        p.append('<path d="M0 920L110 908L210 923L330 909L430 925L540 910L650 923L770 909L890 925L1010 909L1130 923L1250 908L1370 924L1490 909L1610 924L1730 909L1920 922V1080H0Z" fill="#e7d9b7" fill-opacity=".16"/>')
+        if name=="evidence-stamp":
+            p.append('<g transform="rotate(-8 1510 240)"><rect x="1320" y="170" width="380" height="135" rx="8" fill="none" stroke="#f2a07b" stroke-width="8" stroke-opacity=".55"/><text x="1510" y="255" text-anchor="middle" font-size="48" font-family="monospace" fill="#f2a07b" fill-opacity=".65">VERIFIED</text></g>')
+        elif name=="vhs-timecode":
+            p.append('<rect x="70" y="70" width="440" height="72" fill="#000" fill-opacity=".6"/><text x="90" y="118" font-family="monospace" font-size="34" fill="#fff">PLAY 00:12:48 SP</text>')
+    elif name=="heat-haze":
+        for i in range(14):
+            y=120+i*62
+            p.append(f'<path d="M0 {y}Q320 {y-18} 640 {y}T1280 {y}T1920 {y}" fill="none" stroke="#ffca88" stroke-opacity="{.12+i%3*.025:.3f}" stroke-width="3"/>')
+    elif name=="audio-peak-meter":
+        for i in range(54):
+            x=420+i*20; h=16+((i*71+31)%105)
+            c="#64d9bd" if i<38 else "#f2c46d" if i<48 else "#ed8d8d"
+            p.append(f'<rect x="{x}" y="{540-h}" width="12" height="{h}" rx="3" fill="{c}" fill-opacity=".5"/>')
+    elif name=="film-sprockets":
+        p.append('<rect x="0" y="0" width="1920" height="1080" fill="#000" fill-opacity=".08"/>')
+        for y in range(35,1080,80):
+            p.append(f'<rect x="24" y="{y}" width="24" height="44" rx="4" fill="#f6e9cf" fill-opacity=".4"/><rect x="1872" y="{y}" width="24" height="44" rx="4" fill="#f6e9cf" fill-opacity=".4"/>')
+    elif name=="subtitle-contrast":
+        p.append('<rect x="100" y="825" width="1720" height="175" rx="24" fill="#080a0d" fill-opacity=".35"/>')
+    elif name=="sports-scorebug":
+        p.append('<rect x="120" y="70" width="530" height="110" rx="12" fill="#0a111c" fill-opacity=".72" stroke="#b9c9d7" stroke-opacity=".55" stroke-width="3"/><path d="M385 70V180" stroke="#b9c9d7" stroke-opacity=".4" stroke-width="2"/><text x="250" y="135" fill="#fff" font-size="30">HOME 00</text><text x="500" y="135" fill="#fff" font-size="30">AWAY 00</text>')
+
+
+    elif name=="flash-frame":
+        p.append('<rect width="1920" height="1080" fill="#fff8dd" fill-opacity=".16"/>')
+        p.append('<path d="M0 0H1920V1080H0Z" fill="none" stroke="#fff8dd" stroke-opacity=".5" stroke-width="18"/>')
+    elif name=="screen-reflection":
+        p.append('<path d="M-250 0H80L920 1080H590ZM250 0H470L1310 1080H1090ZM1030 0H1180L1920 880V1080Z" fill="#dff6ff" fill-opacity=".055"/>')
     else: p.append('<rect width="1920" height="1080" fill="url(#vign)"/>')
     return svg_doc("".join(p),defs)
 
@@ -990,6 +1313,44 @@ def infographic_svg(asset_id,title,index):
             for i in range(5):
                 x=260+i*330; y=500+(i%2)*120
                 p.append(f'<circle cx="{x}" cy="{y}" r="32" fill="{accent}" fill-opacity=".22" stroke="{accent}" stroke-width="4"/><path d="M{x+35} {y}H{x+155}" stroke="{accent}" stroke-width="5"/><text x="{x}" y="{y+85}" text-anchor="middle" font-size="23">PHASE {i+1}</text>')
+
+    elif asset_id in {"quadrant-matrix","risk-matrix","decision-matrix","periodic-table"}:
+        labels = ["HIGH / HIGH","HIGH / LOW","LOW / HIGH","LOW / LOW"] if asset_id!="periodic-table" else ["A · TYPE","B · TYPE","C · TYPE","D · TYPE"]
+        colors = [accent,"#5dd7ca","#ed9e88","#a9a2ff"]
+        for i,(x,y) in enumerate([(210,320),(1000,320),(210,600),(1000,600)]):
+            p.append(f'<rect x="{x}" y="{y}" width="700" height="235" rx="15" fill="{colors[i]}" fill-opacity=".12" stroke="{colors[i]}" stroke-opacity=".55" stroke-width="3"/><text x="{x+35}" y="{y+53}" font-size="28">{labels[i]}</text><path d="M{x+35} {y+105}H{x+640}M{x+35} {y+145}H{x+570}M{x+35} {y+185}H{x+600}" stroke="#dfe7ed" stroke-opacity=".26" stroke-width="7" stroke-linecap="round"/>')
+        p.append('<text x="960" y="930" text-anchor="middle" font-size="25" fill="#c7d0db">LABEL AXES · DEFINE SCALE · CITE EVIDENCE</text>')
+    elif asset_id in {"hierarchy-tree","network-graph","radial-diagram"}:
+        coords=[(960,330),(610,470),(850,500),(1080,500),(1320,470),(480,700),(720,740),(960,700),(1200,740),(1450,700)]
+        for i,(x,y) in enumerate(coords[1:],1):
+            p.append(f'<path d="M960 330L{x} {y}" stroke="{accent}" stroke-opacity=".42" stroke-width="5"/>')
+        for i,(x,y) in enumerate(coords):
+            r=50 if i==0 else 36
+            p.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{accent}" fill-opacity="{.2 if i==0 else .1}" stroke="{accent}" stroke-opacity=".65" stroke-width="3"/><text x="{x}" y="{y+7}" text-anchor="middle" font-size="{20 if i==0 else 16}">{"CORE" if i==0 else "NODE "+str(i)}</text>')
+    elif asset_id in {"swimlane-flow","journey-map","learning-ladder","timeline-evidence"}:
+        lane_names=["DISCOVER","UNDERSTAND","APPLY","REVIEW"] if asset_id=="learning-ladder" else ["STAGE 1","STAGE 2","STAGE 3","STAGE 4"]
+        for lane in range(4):
+            y=315+lane*135
+            p.append(f'<rect x="185" y="{y}" width="1550" height="100" rx="13" fill="{accent}" fill-opacity="{.05+lane*.025:.3f}" stroke="{accent}" stroke-opacity=".24" stroke-width="2"/><text x="215" y="{y+39}" font-size="23">{lane_names[lane]}</text><path d="M480 {y+30}H1645M480 {y+62}H{1480-lane*45}" stroke="#dfe7ed" stroke-opacity=".28" stroke-width="6" stroke-linecap="round"/>')
+        p.append(f'<path d="M500 280H1630" stroke="{accent}" stroke-width="5" stroke-dasharray="12 12"/>')
+    elif asset_id in {"waterfall-chart","sankey-flow"}:
+        base=790
+        for i in range(7):
+            x=230+i*210
+            h=110+((i*113+index*29)%410)
+            y=base-h
+            col=accent if i%2==0 else "#5dd7ca"
+            p.append(f'<rect x="{x}" y="{y}" width="115" height="{h}" rx="6" fill="{col}" fill-opacity=".55"/><text x="{x+57}" y="835" text-anchor="middle" font-size="18">STEP {i+1}</text>')
+            if i<6:p.append(f'<path d="M{x+115} {y}H{x+210}" stroke="#d4dae2" stroke-opacity=".55" stroke-width="3" stroke-dasharray="8 7"/>')
+    elif asset_id=="anatomy-callout":
+        p.append(f'<circle cx="960" cy="550" r="210" fill="{accent}" fill-opacity=".08" stroke="{accent}" stroke-opacity=".55" stroke-width="4"/><circle cx="960" cy="550" r="125" fill="none" stroke="{accent}" stroke-opacity=".28" stroke-width="3"/><path d="M960 340L650 300H400M1140 440L1400 360H1620M1120 680L1400 760H1620M800 675L560 790H310" fill="none" stroke="{accent}" stroke-width="3"/>')
+        for x,y,label in [(330,292,"PART A"),(1630,352,"PART B"),(1630,752,"PART C"),(290,782,"PART D")]:
+            p.append(f'<text x="{x}" y="{y}" font-size="25" fill="{accent}">{label}</text>')
+    elif asset_id=="equation-derivation":
+        for i in range(4):
+            x=155+i*420
+            p.append(f'<rect x="{x}" y="385" width="360" height="255" rx="18" fill="{accent}" fill-opacity=".1" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/><text x="{x+180}" y="455" text-anchor="middle" font-size="27">STEP {i+1}</text><path d="M{x+48} 505H{x+312}M{x+48} 555H{x+280}" stroke="#e8e6df" stroke-opacity=".45" stroke-width="7" stroke-linecap="round"/><text x="{x+180}" y="610" text-anchor="middle" font-size="19">DEFINE TERMS</text>')
+
     else:
         for i in range(5):
             y=330+i*112
@@ -2497,7 +2858,7 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30 and len(ILLUSTRATIONS)>=50 and len(MOTION_LOOPS)>=10
+    assert len(PALETTES)>=90 and len(OVERLAYS)>=75 and len(ICONS)>=125 and len(INFO)>=50 and len(TEXTURES)>=55 and len(ILLUSTRATIONS)>=105 and len(MOTION_LOOPS)==24
     expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}

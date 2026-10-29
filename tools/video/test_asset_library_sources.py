@@ -113,12 +113,12 @@ class RightsGateTests(unittest.TestCase):
 
 class GeneratedAssetFamilyTests(unittest.TestCase):
     def test_asset_families_have_enough_unique_ids(self):
-        self.assertGreaterEqual(len(library.PALETTES), 60)
-        self.assertGreaterEqual(len(library.OVERLAYS), 50)
-        self.assertGreaterEqual(len(library.ICONS), 90)
-        self.assertGreaterEqual(len(library.TEXTURES), 30)
-        self.assertGreaterEqual(len(library.ILLUSTRATIONS), 65)
-        self.assertGreaterEqual(len(library.INFO), 35)
+        self.assertGreaterEqual(len(library.PALETTES), 90)
+        self.assertGreaterEqual(len(library.OVERLAYS), 75)
+        self.assertGreaterEqual(len(library.ICONS), 125)
+        self.assertGreaterEqual(len(library.TEXTURES), 55)
+        self.assertGreaterEqual(len(library.ILLUSTRATIONS), 105)
+        self.assertGreaterEqual(len(library.INFO), 50)
 
         for entries, family in [
             ([x[0] for x in library.PALETTES], "palettes"),
@@ -131,7 +131,7 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
                 self.assertEqual(len(entries), len(set(entries)))
 
     def test_original_motion_loops_have_unique_ids_and_valid_filter_chains(self):
-        self.assertEqual(len(library.MOTION_LOOPS), 12)
+        self.assertEqual(len(library.MOTION_LOOPS), 24)
         ids = [row[0] for row in library.MOTION_LOOPS]
         self.assertEqual(len(ids), len(set(ids)))
         styles = [row[4] for row in library.MOTION_LOOPS]
@@ -161,6 +161,21 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
         self.assertIn("<svg ", illustration)
         self.assertIn(title.upper(), illustration)
         self.assertIn("viewBox=", illustration)
+
+
+    def test_original_sound_bank_is_large_unique_and_categorized(self):
+        import generate_sfx_library
+        ids = [row[0] for row in generate_sfx_library.SFX_PRESETS]
+        self.assertGreaterEqual(len(ids), 175)
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertTrue(all(row[1] and row[2] > 0 for row in generate_sfx_library.SFX_PRESETS))
+
+    def test_overlay_and_icon_ids_are_unique_and_illustrations_resolve(self):
+        overlay_ids = [row[0] for row in library.OVERLAYS]
+        icon_ids = list(library.ICONS)
+        self.assertGreaterEqual(len(overlay_ids), 75)
+        self.assertEqual(len(overlay_ids), len(set(overlay_ids)))
+        self.assertEqual(len(icon_ids), len(set(icon_ids)))
 
 
 if __name__ == "__main__":
