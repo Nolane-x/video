@@ -95,3 +95,15 @@ For quick factual inserts, real ambience and visual transitions, search the bund
 - **Interviews / music / human stories:** use source audio only when the exact item rights and context are appropriate; the 125 original procedural SFX presets remain a dependable fallback.
 
 Factual status matters more than an impressive clip: public-domain archival footage should not be edited to imply it depicts a different event or date.
+
+
+## Original motion-loop footage
+
+The library adds 12 original six-second 1280×720 H.264 loops created by FFmpeg filter graphs rather than scraped stock clips. Use them as a motion bed, transition plate, visualizer background or atmospheric layer; they are CC0 and safe to recolor/crop for a composition. Each loop is probed for H.264 codec, dimensions and duration before packaging.
+
+- **Science / technology:** orbital-grid, data-signal and neon-circuit loops support diagrams, UI, network and computational explanations.
+- **Nature / travel / atmosphere:** ocean-ripple, aurora-flow, particle-field and route-tracer loops create movement beneath labels and maps.
+- **Music / gaming / documentary:** audio-spectrum, retro-scanline, film-grain and bokeh loops provide distinct visual grammar without reusing one style for every genre.
+- **Industrial / business:** hazard-light loops work for machine/process shots; keep the effect subtle enough that key labels remain readable.
+
+These loops are illustrations, not factual footage. Never use them to imply that a stylized scene is a real recording or measurement.
