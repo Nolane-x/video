@@ -338,19 +338,30 @@ def generate_original_audio(root: Path, index: list[dict], cc0_url: str) -> int:
         ambience_kinds={"wind","rain","city","forest","ocean","bubbles","fire","thunder","crowd","birds","train","drone","warmdrone","vinyl"}
         interface_kinds={"click","click-sharp","chime","chime-soft","buzz","pulse","scifi","laser","glitch","tapestop","typing","morse","shutter"}
         foley_kinds={"paper","steps","steps-wood","steps-gravel","impact","impact-heavy","metal","glass","glassbreak","heartbeat","heartbeat-fast"}
-        if kind in ambience_kinds:
-            category="ambience"
-        elif kind in interface_kinds or name.startswith("ui-"):
+        loopable_names={
+            "wind-ambience","rain-ambience","city-ambience","forest-night-stylized","ocean-waves-ambience",
+            "fire-crackle-stylized","thunder-roll-stylized","drone-tension","drone-warm","forest-ambience-dawn",
+            "forest-insects-night","ocean-surf-close","ocean-surf-distant","deep-ocean-drone","industrial-ambience",
+            "distant-harbor-roomtone","industrial-fan-roomtone","night-insects-bed","rain-on-metal-roof",
+            "waves-on-pebbles","wind-through-alley","forest-wind-canopy","campfire-close-crackle",
+            "storm-rumble-low","underwater-pressure-drone","dawn-bird-chorus","vinyl-room-tone"
+        }
+        loopable= name in loopable_names or "ambience" in name or "roomtone" in name or "room-tone" in name
+        if kind in interface_kinds or name.startswith("ui-"):
             category="interface / technology"
-        elif kind in foley_kinds:
+        elif kind in foley_kinds or name.startswith("footsteps-") or any(term in name for term in ("page-turn","paper-rustle","object-drop","door-clang","fragments-settle")):
             category="foley / physical action"
+        elif loopable:
+            category="ambience"
+        elif kind in ambience_kinds:
+            category="environmental cue"
         else:
             category="cinematic transition / musical accent"
         tags=sorted(set([category,kind]+[part for part in name.split("-") if len(part)>2]))
         index.append({"id":name,"path":path.relative_to(root).as_posix(),"type":"original-procedural-sfx",
                       "description":name.replace("-"," ").title(),"category":category,"tags":tags,
-                      "intended_use":"loopable background bed" if kind in ambience_kinds else "one-shot / timed cue",
-                      "loopable":kind in ambience_kinds,"duration_seconds":duration,"sample_rate":48000,
+                      "intended_use":"loopable background bed" if loopable else "one-shot / timed cue",
+                      "loopable":loopable,"duration_seconds":duration,"sample_rate":48000,
                       "channels":1,"sample_format":"PCM_S16LE","license":"CC0-1.0","license_url":cc0_url,
                       "redistributable":True,"originally_synthesized":True,"sha256":digest,"size_bytes":path.stat().st_size})
         count+=1
