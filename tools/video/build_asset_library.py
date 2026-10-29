@@ -2099,8 +2099,8 @@ def download_google_fonts(root,index):
             supports_vietnamese=any(x.lower().startswith("vi_") or x.lower()=="vi" for x in languages) or vietnamese_priority
             family_dir=root/"third-party/google-fonts"/slug
             family_dir.mkdir(parents=True,exist_ok=True)
-            write_bytes(family_dir/"OFL.txt",license_blob)
-            write_bytes(family_dir/"METADATA.pb",metadata_blob)
+            (family_dir/"OFL.txt").write_bytes(license_blob)
+            (family_dir/"METADATA.pb").write_bytes(metadata_blob)
             family_report.update({"status":"metadata_verified","license":"SIL Open Font License 1.1",
                                   "license_url":base+"OFL.txt","metadata_url":base+"METADATA.pb",
                                   "font_files_requested":filenames})
@@ -2123,7 +2123,7 @@ def download_google_fonts(root,index):
                         family_report["fonts"].append({"file":filename,"status":"skipped_total_font_budget"})
                         continue
                     target=family_dir/filename
-                    write_bytes(target,blob)
+                    target.write_bytes(blob)
                     digest=sha256_path(target)
                     italic=("italic" in filename.lower())
                     variable=("[" in filename and "]" in filename)
