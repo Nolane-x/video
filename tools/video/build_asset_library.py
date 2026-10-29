@@ -1603,6 +1603,144 @@ def download_wikimedia_public_domain(root,index):
             print("[Wikimedia Commons] search failed:",q,str(exc))
     return report
 
+def download_smithsonian_open_access(root,index):
+    """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
+    import os
+    report=[]; total=0; cap=60; seen=set()
+    api_key=(os.environ.get("SMITHSONIAN_API_KEY") or "").strip() or "DEMO_KEY"
+    topics=[
+        ("natural-history","NMNH"),("botany","NMNHBOTANY"),("birds","NMNHBIRDS"),
+        ("paleontology","NMNHPALEO"),("minerals","NMNHMINSCI"),("air-and-space","NASM"),
+        ("american-history","NMAH"),("asian-art","FSG"),("design-and-craft","CHNDM"),
+        ("american-art","SAAM"),("portraits","NPG"),("african-american-history","NMAAHC"),
+        ("native-american-culture","NMAI"),("zoo-wildlife","NZP"),("archives","SIA")
+    ]
+    def field_title(content):
+        value=((content.get("descriptiveNonRepeating") or {}).get("title") or {})
+        return str(value.get("content") or value.get("label") or "").strip()
+    def field_creator(content):
+        names=((content.get("indexedStructured") or {}).get("name") or [])
+        if isinstance(names,str): names=[names]
+        for name in names:
+            if isinstance(name,str) and name.strip(): return name.strip()
+            if isinstance(name,dict):
+                candidate=str(name.get("name") or name.get("content") or "").strip()
+                if candidate: return candidate
+        free_names=((content.get("freetext") or {}).get("name") or [])
+        if isinstance(free_names,dict): free_names=[free_names]
+        for name in free_names:
+            if isinstance(name,dict):
+                candidate=str(name.get("content") or "").strip()
+                if candidate: return candidate
+        return ""
+    def bounded_media_url(raw_url,limit_px):
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        host=(parsed.hostname or "").lower()
+        if host not in {"ids.si.edu","collections.nmnh.si.edu"}:
+            return ""
+        query=urllib.parse.parse_qsl(parsed.query,keep_blank_values=True)
+        if host=="ids.si.edu":
+            # The official IDS delivery service accepts a bounded max parameter.
+            query=[(k,v) for k,v in query if k.lower() not in {"max","thumb"}]
+            query.append(("max",str(limit_px)))
+        elif not any(k.lower()=="thumb" for k,v in query):
+            query.append(("thumb","yes"))
+        return urllib.parse.urlunsplit((parsed.scheme or "https",parsed.netloc,parsed.path,urllib.parse.urlencode(query),parsed.fragment))
+    for category,unit_code in topics:
+        if total>=cap: break
+        params={"api_key":api_key,"q":f"unit_code:{unit_code}","rows":30}
+        url="https://api.si.edu/openaccess/api/v1.0/search?"+urllib.parse.urlencode(params)
+        try:
+            data=request_json(url,timeout=22)
+            rows=((data.get("response") or {}).get("rows") or [])
+            successes=0; candidates_checked=0
+            for row in rows:
+                if total>=cap or successes>=5 or candidates_checked>=18: break
+                content=row.get("content") if isinstance(row,dict) else None
+                if not isinstance(content,dict): continue
+                meta_access=str(((content.get("metadata_usage") or {}).get("access") or "")).strip().upper()
+                if meta_access!="CC0":
+                    continue
+                desc=content.get("descriptiveNonRepeating") or {}
+                record_id=str(desc.get("record_ID") or row.get("id") or "")
+                if not record_id or record_id in seen: continue
+                media=desc.get("online_media") or {}
+                media_items=media.get("media") or []
+                if isinstance(media_items,dict): media_items=[media_items]
+                eligible=[]
+                for media_item in media_items:
+                    if not isinstance(media_item,dict): continue
+                    if str(media_item.get("type") or "").strip().lower() not in {"images","image"}:
+                        continue
+                    media_rights=str(((media_item.get("usage") or {}).get("access") or "")).strip().upper()
+                    if media_rights!="CC0":
+                        continue
+                    original=str(media_item.get("content") or "")
+                    thumbnail=str(media_item.get("thumbnail") or "")
+                    for candidate in (bounded_media_url(original,1400),bounded_media_url(thumbnail,900)):
+                        if candidate and candidate not in eligible:
+                            eligible.append(candidate)
+                if not eligible: continue
+                title=field_title(content) or record_id
+                creator=field_creator(content)
+                record_url=str(desc.get("record_link") or row.get("url") or "")
+                if record_url.startswith("http://"):
+                    record_url="https://"+record_url[len("http://"):]
+                if not record_url.startswith("https://"):
+                    guid=str(desc.get("guid") or "")
+                    record_url=guid if guid.startswith("https://") else "https://www.si.edu/openaccess"
+                used=None; failure_reasons=[]
+                candidates_checked+=1
+                for media_url in eligible:
+                    try:
+                        blob,ctype=request_bytes(media_url,timeout=22,limit=MAX_MEDIA_FILE)
+                        mime=ctype.split(";")[0].strip().lower()
+                        if not mime.startswith("image/") or len(blob)<2048:
+                            raise RuntimeError("media endpoint did not return a usable image")
+                        ext=Path(urllib.parse.urlparse(media_url).path).suffix.lower()
+                        if ext not in {".jpg",".jpeg",".png",".webp"}:
+                            ext={"image/jpeg":".jpg","image/jpg":".jpg","image/png":".png","image/webp":".webp","image/tiff":".tif"}.get(mime,"")
+                        if not ext:
+                            raise RuntimeError("unrecognized image MIME type: "+mime)
+                        used=(media_url,ext,blob); break
+                    except Exception as media_exc:
+                        failure_reasons.append(str(media_exc))
+                if not used:
+                    report.append({"id":"smithsonian-"+slugify(record_id),"status":"failed","category":category,
+                                   "title":title,"source_page":record_url,
+                                   "reason":"No candidate image could be retrieved: "+" | ".join(failure_reasons[-2:])})
+                    continue
+                media_url,ext,blob=used
+                target=root/"third-party/smithsonian"/category/(f"{slugify(title)[:48]}-{slugify(record_id)}{ext}")
+                target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                digest=sha256_path(target); seen.add(record_id)
+                note=str(((content.get("freetext") or {}).get("notes") or [{}])[0].get("content") or "") if isinstance((content.get("freetext") or {}).get("notes") or [{}],list) else ""
+                entry={"id":"smithsonian-"+slugify(record_id),"path":target.relative_to(root).as_posix(),
+                       "type":"smithsonian-open-access-image","title":title,"creator":creator,"category":category,
+                       "unit_code":unit_code,"description":note[:1800],"record_id":record_id,"source_page":record_url,
+                       "source_file_url":media_url,"license":"CC0-1.0",
+                       "license_url":"https://www.si.edu/openaccess/faq",
+                       "rights_verified_from_item_metadata":True,"record_access":"CC0","media_access":"CC0",
+                       "size_bytes":len(blob),"sha256":digest,"redistributable":True,
+                       "usage_notes":"Both the record-level metadata_usage.access and this exact media file's usage.access were CC0. CC0 handles copyright only; review privacy, publicity, trademark, cultural-property and other non-copyright rights where relevant."}
+                index.append(entry); total+=1; successes+=1
+                report.append({"id":entry["id"],"status":"downloaded","title":title,"category":category,
+                               "path":entry["path"],"source_page":record_url,"license":"CC0-1.0",
+                               "size_bytes":len(blob),"sha256":digest})
+                print("[Smithsonian Open Access] OK:",category,title[:48],len(blob))
+            if not successes:
+                report.append({"id":"smithsonian-"+category,"status":"no_eligible_item","category":category,
+                               "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
+                               "reason":"No distinct image passed both record-level and media-level CC0 filters in the current page."})
+        except Exception as exc:
+            report.append({"id":"smithsonian-"+category,"status":"failed","category":category,
+                           "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
+                           "reason":str(exc)[:400]})
+            print("[Smithsonian Open Access] query failed:",category,str(exc))
+        time.sleep(.35)
+    return report
+
+
 def download_rijksmuseum_open_access(root,index):
     """Harvest a capped sample of Rijksmuseum records, but only image media with explicit CC0/PDM rights."""
     import xml.etree.ElementTree as ET
