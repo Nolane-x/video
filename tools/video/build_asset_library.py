@@ -1727,7 +1727,7 @@ def download_nasa_media(root,index):
         ("deep-field","deep field galaxy telescope"),
         ("lunar-geology","lunar craters Moon terrain"),
         ("earth-weather","Earth storm systems satellite imagery"),
-        ("mars-audio","Mars rover microphone acoustic recording NASA") 
+        ("saturn-audio","Saturn radio emissions audio NASA") 
     ]
     media_types=("image","video","audio")
     for category,q in searches:
