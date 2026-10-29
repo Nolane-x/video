@@ -64,6 +64,17 @@ class RightsGateTests(unittest.TestCase):
         )
         self.assertFalse(library.loc_rights_are_eligible(None)[0])
 
+    def test_svg_sanitizer_removes_active_content_and_remote_refs(self):
+        raw = b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect onclick="alert(2)" fill="red"/><image href="https://evil.example/pixel.png"/></svg>'
+        cleaned = library.sanitize_cc0_svg(raw)
+        lowered = cleaned.lower()
+        self.assertIn(b"svg", lowered)
+        self.assertNotIn(b"<script", lowered)
+        self.assertNotIn(b"onclick", lowered)
+        self.assertNotIn(b"evil.example", lowered)
+        with self.assertRaises(RuntimeError):
+            library.sanitize_cc0_svg(b'<!DOCTYPE svg [<!ENTITY x "bad">]><svg>&x;</svg>')
+
     def test_wikimedia_media_accepts_only_explicit_cc0_or_public_domain_labels(self):
         self.assertTrue(library.wikimedia_license_is_eligible("CC0"))
         self.assertTrue(library.wikimedia_license_is_eligible("CC0-1.0"))

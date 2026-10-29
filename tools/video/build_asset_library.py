@@ -2060,6 +2060,136 @@ def download_rijksmuseum_open_access(root,index):
     return report
 
 
+def sanitize_cc0_svg(data):
+    """Strip active SVG elements, event handlers and external resources."""
+    import xml.etree.ElementTree as ET
+    if not data or len(data)>2*1024*1024:
+        raise RuntimeError("SVG is empty or exceeds the 2 MiB safety limit")
+    text=data.decode("utf-8","replace")
+    if "<!doctype" in text.lower() or "<!entity" in text.lower():
+        raise RuntimeError("SVG with a DOCTYPE/entity declaration is not accepted")
+    try:
+        root=ET.fromstring(text)
+    except ET.ParseError as exc:
+        raise RuntimeError("SVG XML is invalid") from exc
+    if root.tag.rsplit("}",1)[-1].lower()!="svg":
+        raise RuntimeError("Downloaded XML root is not an SVG element")
+    dangerous={"script","foreignobject","iframe","object","embed","audio","video","applet"}
+    for parent in list(root.iter()):
+        for child in list(parent):
+            if child.tag.rsplit("}",1)[-1].lower() in dangerous:
+                parent.remove(child)
+    for elem in root.iter():
+        for attr in list(elem.attrib):
+            local=attr.rsplit("}",1)[-1].lower()
+            value=str(elem.attrib.get(attr) or "").strip()
+            if local.startswith("on"):
+                del elem.attrib[attr]
+            elif local in {"href","src"} and value and not value.startswith("#"):
+                del elem.attrib[attr]
+            elif "url(" in value.lower():
+                urls=re.findall(r"url\(\s*['\"]?([^)'\" ]+)",value,flags=re.IGNORECASE)
+                if any(not target.startswith("#") for target in urls):
+                    del elem.attrib[attr]
+        if elem.tag.rsplit("}",1)[-1].lower()=="style" and elem.text:
+            if "@import" in elem.text.lower() or re.search(r"url\(\s*['\"]?(?!#)",elem.text,flags=re.IGNORECASE):
+                elem.text=""
+    cleaned=ET.tostring(root,encoding="utf-8",xml_declaration=True)
+    low=cleaned.lower()
+    if b"<script" in low or b"javascript:" in low:
+        raise RuntimeError("Active content remained after SVG sanitization")
+    return cleaned
+
+
+def download_wikimedia_vector_svg(root,index):
+    """Bundle small Commons vectors only when exact file metadata says CC0 or Public Domain."""
+    report=[]; total=0; cap=45; seen=set()
+    queries=[
+        ("world-maps","world map countries svg filetype:svg"),
+        ("historical-maps","historical map outline svg filetype:svg"),
+        ("science-diagrams","physics scientific diagram svg filetype:svg"),
+        ("chemistry","chemical structure molecule diagram svg filetype:svg"),
+        ("biology","botanical biology anatomy illustration svg filetype:svg"),
+        ("astronomy","astronomy star chart planet diagram svg filetype:svg"),
+        ("architecture","architecture section plan elevation svg filetype:svg"),
+        ("engineering","engineering schematic circuit diagram svg filetype:svg"),
+        ("transit","transit network railway route map svg filetype:svg"),
+        ("music","music notation instrument diagram svg filetype:svg"),
+        ("geography","topographic contour geographic map svg filetype:svg"),
+        ("infographic","flowchart cycle infographic diagram svg filetype:svg"),
+        ("geometric","geometric pattern ornament svg filetype:svg"),
+        ("education","educational diagram school science svg filetype:svg"),
+        ("environment","renewable energy ecology diagram svg filetype:svg")
+    ]
+    for category,q in queries:
+        if total>=cap: break
+        url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode({
+            "action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":25,
+            "prop":"imageinfo","iiprop":"url|extmetadata|size|mime"
+        })
+        success=0; checked=0
+        try:
+            response=request_json(url,timeout=16)
+            pages=(response.get("query") or {}).get("pages") or {}
+            for page in pages.values():
+                if total>=cap or success>=3 or checked>=16: break
+                info=(page.get("imageinfo") or [{}])[0]
+                if not isinstance(info,dict): continue
+                meta=info.get("extmetadata") or {}
+                short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
+                if not wikimedia_license_is_eligible(short): continue
+                file_url=str(info.get("url") or "")
+                parsed=urllib.parse.urlparse(file_url)
+                ext=Path(parsed.path).suffix.lower()
+                mime=str(info.get("mime") or "").lower()
+                byte_size=int(info.get("size") or 0)
+                allowed_mimes={"image/svg+xml","application/svg+xml","text/xml","application/xml","application/octet-stream"}
+                if parsed.scheme!="https" or parsed.hostname!="upload.wikimedia.org" or ext!=".svg": continue
+                if mime not in allowed_mimes or byte_size<100 or byte_size>2*1024*1024: continue
+                identity=str(page.get("pageid") or page.get("title") or "")
+                if not identity or identity in seen: continue
+                seen.add(identity); checked+=1
+                try:
+                    blob,ctype=request_bytes(file_url,timeout=18,limit=2*1024*1024)
+                    mime2=ctype.split(";")[0].strip().lower()
+                    if mime2 not in allowed_mimes:
+                        raise RuntimeError("media endpoint returned a non-SVG MIME type")
+                    cleaned=sanitize_cc0_svg(blob)
+                    title=str((meta.get("ObjectName") or {}).get("value") or page.get("title") or identity)
+                    target_dir=root/"third-party/wikimedia"/"svg"
+                    target_dir.mkdir(parents=True,exist_ok=True)
+                    target=target_dir/(f"{category}-{slugify(title)[:48]}-{slugify(identity)}.svg")
+                    target.write_bytes(cleaned)
+                    digest=sha256_path(target)
+                    creator=str((meta.get("Artist") or {}).get("value") or (meta.get("Credit") or {}).get("value") or "")
+                    page_url=str(info.get("descriptionurl") or ("https://commons.wikimedia.org/wiki/"+urllib.parse.quote(str(page.get("title") or "").replace(" ","_"))))
+                    license_url=str((meta.get("LicenseUrl") or {}).get("value") or info.get("descriptionurl") or "https://commons.wikimedia.org/wiki/Commons:Licensing")
+                    entry={"id":"wikimedia-svg-"+slugify(identity),"path":target.relative_to(root).as_posix(),
+                           "type":"wikimedia-cc0-svg","category":category,"title":title,"creator":creator,
+                           "source_page":page_url,"source_file_url":file_url,"license":short,"license_url":license_url,
+                           "license_verified_from_item_metadata":True,"redistributable":True,"sanitized_svg":True,
+                           "size_bytes":len(cleaned),"sha256":digest,
+                           "note":"Exact Commons metadata marked CC0/Public Domain; active elements and external references are removed."}
+                    index.append(entry); total+=1; success+=1
+                    report.append({"id":entry["id"],"status":"downloaded","category":category,"title":title,
+                                   "path":entry["path"],"source_page":page_url,"license":short,
+                                   "size_bytes":len(cleaned),"sha256":digest})
+                    print("[Wikimedia SVG] OK:",category,title[:42],short,len(cleaned))
+                except Exception as item_exc:
+                    report.append({"id":"wikimedia-svg-"+slugify(identity),"status":"failed","category":category,
+                                   "title":str(page.get("title") or identity),"reason":str(item_exc)[:300],
+                                   "source_page":info.get("descriptionurl")})
+            time.sleep(.35)
+            if not success:
+                report.append({"id":"wikimedia-svg-"+category,"status":"no_eligible_svg","category":category,
+                               "query":q,"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing",
+                               "reason":"No small, correctly licensed and sanitizable SVG passed item-level checks."})
+        except Exception as exc:
+            report.append({"id":"wikimedia-svg-"+category,"status":"failed","category":category,
+                           "query":q,"reason":str(exc)[:300],"source_page":"https://commons.wikimedia.org/wiki/Commons:Licensing"})
+    return report
+
+
 def download_wikimedia_video_audio(root,index):
     """Bundle a small set of video/audio files only when the Commons file page explicitly marks CC0 or Public Domain."""
     report=[]; total=0; total_videos=0; total_audio=0; cap=20; seen=set()
@@ -2298,6 +2428,7 @@ def main():
     nasa_report=download_nasa_media(STAGE,index)
     loc_report=download_loc_public_domain(STAGE,index)
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
+    wikimedia_svg_report=download_wikimedia_vector_svg(STAGE,index)
     wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
@@ -2313,6 +2444,8 @@ def main():
       "\n\n## Library of Congress photographs\nThe builder downloads only image records with an explicit item-level rights statement containing ‘No known restrictions on publication’, ‘Public Domain’, or ‘No known copyright restrictions’, and rejects explicit conflicting limitations. Records without a rights statement are skipped. Each selected file records the exact statement, item URL, direct image URL, and SHA-256. LOC notes users remain responsible for evaluating copyright and other rights, so inspect the item/context before publication. Sources: https://www.loc.gov/apis/json-and-yaml/ and https://ask.loc.gov/faq/305466.\n\n"+
       "\n\n## Wikimedia Commons images, video and audio\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Images, small video clips and audio files are bundled only when exact file-level metadata explicitly labels them CC0 or Public Domain. Video/audio downloads are limited by byte size, official upload.wikimedia.org host, filename extension, MIME type and recognizable container signature; records retain creator, source page, license URL and SHA-256. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_report)+
+      "\n\n## Wikimedia Commons vector SVG download results\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_svg_report)+
       "\n\n## Wikimedia Commons video/audio download results\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
@@ -2335,6 +2468,7 @@ def main():
               "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
+              "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
               "wikimedia_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in wikimedia_av_report),
               "wikimedia_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in wikimedia_av_report),
               "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
@@ -2347,6 +2481,7 @@ def main():
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
+               "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
                "openverse_downloads":openverse_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
