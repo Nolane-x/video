@@ -479,6 +479,46 @@
       "verified_page_license": true,
       "bundling": "source-only-until-item-license-and-api-key-are-available",
       "note": "Potential high-value source for later expansion. Requires an API key and item-level CC0 status check; this build does not bundle from Smithsonian until the credentials and license verification can be safely configured."
+    },
+    {
+      "id": "rijksmuseum-open-access",
+      "title": "Rijksmuseum Open Access — public-domain and CC0 artwork",
+      "provider": "Rijksmuseum",
+      "kind": "museum collection / visual arts",
+      "category": "art, history, design, historical objects, portraits, archaeology",
+      "source_page": "https://www.rijksmuseum.nl/en/collection",
+      "api": "https://data.rijksmuseum.nl/oai",
+      "license": "CC0-1.0 or Public Domain Mark, only when the exact record marks it",
+      "license_url": "https://data.rijksmuseum.nl/policy/",
+      "verified_page_license": true,
+      "bundling": "auto-only-on-item-level-cc0-or-public-domain-mark",
+      "note": "The builder harvests the official OAI-PMH EDM feed without an API key, but only downloads image records whose item metadata explicitly includes a CC0 or Public Domain Mark URL. Images are downloaded from the official IIIF host at bounded size. CC BY, ambiguous, and missing rights are skipped; item title, creator, rights statement, source and SHA-256 are retained. The museum asks for source credit where possible."
+    },
+    {
+      "id": "usgs-multimedia-gallery",
+      "title": "USGS Multimedia Gallery — official science, geology, wildlife, water and hazards",
+      "provider": "U.S. Geological Survey",
+      "kind": "government multimedia collection",
+      "category": "geology, volcanology, earthquakes, water, wildlife, science and environment",
+      "source_page": "https://www.usgs.gov/products/multimedia-gallery",
+      "license": "U.S. public domain unless otherwise noted; each item still requires rights-marker checks",
+      "license_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "verified_page_license": true,
+      "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
+      "note": "USGS states gallery items are public domain unless otherwise noted; third-party media and identifiable personnel/publicity rights can still require review. Do not bundle an item merely because it appears on a USGS page."
+    },
+    {
+      "id": "noaa-multimedia",
+      "title": "NOAA multimedia — ocean, weather, atmosphere and climate media",
+      "provider": "National Oceanic and Atmospheric Administration",
+      "kind": "government multimedia collection",
+      "category": "ocean, climate, storms, weather, marine science and research vessels",
+      "source_page": "https://www.noaa.gov/multimedia",
+      "license": "Generally public domain unless item credit/caption identifies restrictions; not a blanket CC0 license",
+      "license_url": "https://oceanservice.noaa.gov/about/faq.html",
+      "verified_page_license": true,
+      "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
+      "note": "NOAA describes most agency content as public domain unless specifically noted; third-party footage, logos, identifiable people and endorsement implications need separate handling. Preserve official credit and only bundle after item-level rights checks."
     }
   ]
 }
