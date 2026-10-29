@@ -21,6 +21,33 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP, 240)
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 60)
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 36)
+        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 30)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 20 * 1024 * 1024)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 250 * 1024 * 1024)
+
+    def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
+        self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("http://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com.evil.example/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://example.com/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/api/v2/full_json?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=../payload.zip"))
+
+    def test_ambientcg_download_picker_prefers_small_official_zip(self):
+        asset = {"downloadFolders": {"default": {"downloadFiletypeCategories": {"zip": {"downloads": [
+            {"attribute": "2K-JPG", "extension": "zip", "size": 8_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_2K-JPG.zip"},
+            {"attribute": "1K-JPG", "extension": "zip", "size": 2_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_1K-JPG.zip"},
+            {"attribute": "1K-JPG", "extension": "zip", "size": 1_000_000, "downloadLink": "https://evil.example/get?file=Other_1K-JPG.zip"}
+        ]}}}}
+        choice = library.ambientcg_choose_download(asset)
+        self.assertEqual(choice["attribute"], "1K-JPG")
+        self.assertTrue(library.ambientcg_download_url_is_allowed(choice["url"]))
+        self.assertEqual(len(library.ambientcg_download_candidates(asset)), 2)
+
+    def test_ambientcg_api_response_handles_documented_asset_lists(self):
+        self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
+        self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
+        self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
 
 class RightsGateTests(unittest.TestCase):
     def test_smithsonian_requires_cc0_for_record_and_exact_media(self):
