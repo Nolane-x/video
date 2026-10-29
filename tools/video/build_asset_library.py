@@ -1525,7 +1525,7 @@ def openverse_extension(url,ctype,kind,item):
 
 def wikimedia_license_is_eligible(short_name):
     """Only accept file-level CC0 or Public Domain labels from the Commons metadata record."""
-    normalized=re.sub(r"[\s\-®().]+","",str(short_name or "").lower())
+    normalized=re.sub(r"[\s\-®()]+","",str(short_name or "").lower())
     return normalized in {
         "cc0","cc01.0","creativecommonszero",
         "publicdomain","publicdomainmark","publicdomainus","publicdomainunitedstates"
