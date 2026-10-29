@@ -87,7 +87,7 @@ jobs:
           assert len(wikimedia_audio_items) == expected["wikimedia_audio_downloaded"]
           eligible_license_labels = {"cc0", "cc01.0", "creativecommonszero", "publicdomain", "publicdomainmark", "publicdomainus", "publicdomainunitedstates"}
           for media in wikimedia_video_items + wikimedia_audio_items:
-              normalized = re.sub(r"[\\s\\-®().]+", "", str(media.get("license") or "").lower())
+              normalized = re.sub(r"[\s\-®()]+", "", str(media.get("license") or "").lower())
               assert normalized in eligible_license_labels, f"Unexpected Wikimedia media license: {media.get('license')}"
               assert media.get("license_verified_from_item_metadata") is True
               assert media.get("redistributable") is True
