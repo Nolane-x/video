@@ -17,9 +17,9 @@ This is the shared asset pool for future videos, not a collection dedicated to t
 ## Release deliverables
 
 The Actions builder generates a versioned downloadable ZIP containing:
-- 63+ original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
-- 56+ transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
-- 98+ original icon SVGs and 40+ infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
+- 63 original vector backgrounds spanning city/neon, coastal, mountains, ocean, underwater, rainforest, medical/science, finance, broadcast, product, food, heritage, gaming and narrative settings.
+- 56 original transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
+- 98 original icon SVGs and 40 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
 - Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
 - Up to 100 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
@@ -28,6 +28,7 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
 - Larger Poly Haven selection: up to 10 HDRIs, 12 models and 18 texture packages; bundle available models/dependencies and PBR maps (base color, normal, roughness, AO/displacement where available). Item/source metadata and SHA-256 are retained.
 - 125 original procedural sound-effect WAV presets for UI, foley-like accents, multiple weather/forest/ocean/city ambiences, camera, heartbeat, tension, science-fiction, magic, transitions and impacts. These are synthesized by code, not copied recordings.
+- 34 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
 - `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
 
