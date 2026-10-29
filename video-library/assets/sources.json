@@ -477,8 +477,8 @@
       "license": "CC0 only for items explicitly released under Smithsonian Open Access; other collection records may have different rights",
       "license_url": "https://www.si.edu/openaccess/faq",
       "verified_page_license": true,
-      "bundling": "source-only-until-item-license-and-api-key-are-available",
-      "note": "Potential high-value source for later expansion. Requires an API key and item-level CC0 status check; this build does not bundle from Smithsonian until the credentials and license verification can be safely configured."
+      "bundling": "automated-via-openaccess-api-with-item-and-media-level-cc0-gate",
+      "note": "The builder queries the official Open Access API. It only bundles when both metadata_usage.access and the exact chosen media object's usage.access are CC0. Set the optional GitHub Actions secret SMITHSONIAN_API_KEY for more reliable higher-volume use; absent a secret the build tries DEMO_KEY at low volume and records API errors without claiming download success."
     },
     {
       "id": "rijksmuseum-open-access",

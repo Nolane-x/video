@@ -1603,6 +1603,203 @@ def download_wikimedia_public_domain(root,index):
             print("[Wikimedia Commons] search failed:",q,str(exc))
     return report
 
+def smithsonian_rights_are_cc0(record_access,media_access):
+    """Require both record and exact-media rights fields to explicitly say CC0."""
+    return str(record_access or "").strip().upper()=="CC0" and str(media_access or "").strip().upper()=="CC0"
+
+
+def rijksmuseum_license_from_rights(rights_text):
+    """Return the narrow rights class explicitly represented in a Rijksmuseum EDM rights field."""
+    rights_norm=str(rights_text or "").lower()
+    cc0=("creativecommons.org/publicdomain/zero/1.0" in rights_norm or
+         "creativecommons.org/publicdomain/zero/" in rights_norm or
+         rights_norm.strip() in {"cc0","cc0-1.0","creative commons zero"})
+    pdm=("creativecommons.org/publicdomain/mark/1.0" in rights_norm or
+         "creativecommons.org/publicdomain/mark/" in rights_norm or
+         "public domain mark" in rights_norm)
+    if cc0: return "CC0-1.0"
+    if pdm: return "Public Domain Mark 1.0"
+    return None
+
+
+def download_smithsonian_open_access(root,index):
+    """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
+    import os
+    report=[]; total=0; cap=60; seen=set()
+    api_key=(os.environ.get("SMITHSONIAN_API_KEY") or "").strip() or "DEMO_KEY"
+    topics=[
+        ("natural-history","NMNH"),("botany","NMNHBOTANY"),("birds","NMNHBIRDS"),
+        ("paleontology","NMNHPALEO"),("minerals","NMNHMINSCI"),("air-and-space","NASM"),
+        ("american-history","NMAH"),("asian-art","FSG"),("design-and-craft","CHNDM"),
+        ("american-art","SAAM"),("portraits","NPG"),("african-american-history","NMAAHC"),
+        ("native-american-culture","NMAI"),("zoo-wildlife","NZP"),("archives","SIA")
+    ]
+    def field_title(content):
+        value=((content.get("descriptiveNonRepeating") or {}).get("title") or {})
+        return str(value.get("content") or value.get("label") or "").strip()
+    def field_creator(content):
+        names=((content.get("indexedStructured") or {}).get("name") or [])
+        if isinstance(names,str): names=[names]
+        for name in names:
+            if isinstance(name,str) and name.strip(): return name.strip()
+            if isinstance(name,dict):
+                candidate=str(name.get("name") or name.get("content") or "").strip()
+                if candidate: return candidate
+        free_names=((content.get("freetext") or {}).get("name") or [])
+        if isinstance(free_names,dict): free_names=[free_names]
+        for name in free_names:
+            if isinstance(name,dict):
+                candidate=str(name.get("content") or "").strip()
+                if candidate: return candidate
+        return ""
+    def bounded_media_url(raw_url,limit_px):
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        host=(parsed.hostname or "").lower()
+        if host not in {"ids.si.edu","collections.nmnh.si.edu"}:
+            return ""
+        query=urllib.parse.parse_qsl(parsed.query,keep_blank_values=True)
+        if host=="ids.si.edu":
+            # The official IDS delivery service accepts a bounded max parameter.
+            query=[(k,v) for k,v in query if k.lower() not in {"max","thumb"}]
+            query.append(("max",str(limit_px)))
+        elif not any(k.lower()=="thumb" for k,v in query):
+            query.append(("thumb","yes"))
+        return urllib.parse.urlunsplit((parsed.scheme or "https",parsed.netloc,parsed.path,urllib.parse.urlencode(query),parsed.fragment))
+    for category,unit_code in topics:
+        if total>=cap: break
+        params={"api_key":api_key,"q":f"unit_code:{unit_code}","rows":30}
+        url="https://api.si.edu/openaccess/api/v1.0/search?"+urllib.parse.urlencode(params)
+        try:
+            data=request_json(url,timeout=22)
+            rows=((data.get("response") or {}).get("rows") or [])
+            successes=0; candidates_checked=0
+            for row in rows:
+                if total>=cap or successes>=5 or candidates_checked>=18: break
+                content=row.get("content") if isinstance(row,dict) else None
+                if not isinstance(content,dict): continue
+                meta_access=str(((content.get("metadata_usage") or {}).get("access") or "")).strip()
+                if meta_access.upper()!="CC0":
+                    continue
+                desc=content.get("descriptiveNonRepeating") or {}
+                record_id=str(desc.get("record_ID") or row.get("id") or "")
+                if not record_id or record_id in seen: continue
+                media=desc.get("online_media") or {}
+                media_items=media.get("media") or []
+                if isinstance(media_items,dict): media_items=[media_items]
+                eligible=[]
+                for media_item in media_items:
+                    if not isinstance(media_item,dict): continue
+                    if str(media_item.get("type") or "").strip().lower() not in {"images","image"}:
+                        continue
+                    media_rights=str(((media_item.get("usage") or {}).get("access") or "")).strip()
+                    if not smithsonian_rights_are_cc0(meta_access,media_rights):
+                        continue
+                    original=str(media_item.get("content") or "")
+                    thumbnail=str(media_item.get("thumbnail") or "")
+                    for candidate in (bounded_media_url(original,1400),bounded_media_url(thumbnail,900)):
+                        if candidate and candidate not in eligible:
+                            eligible.append(candidate)
+                if not eligible: continue
+                title=field_title(content) or record_id
+                creator=field_creator(content)
+                record_url=str(desc.get("record_link") or row.get("url") or "")
+                if record_url.startswith("http://"):
+                    record_url="https://"+record_url[len("http://"):]
+                if not record_url.startswith("https://"):
+                    guid=str(desc.get("guid") or "")
+                    record_url=guid if guid.startswith("https://") else "https://www.si.edu/openaccess"
+                used=None; failure_reasons=[]
+                candidates_checked+=1
+                for media_url in eligible:
+                    try:
+                        blob,ctype=request_bytes(media_url,timeout=22,limit=MAX_MEDIA_FILE)
+                        mime=ctype.split(";")[0].strip().lower()
+                        if not mime.startswith("image/") or len(blob)<2048:
+                            raise RuntimeError("media endpoint did not return a usable image")
+                        ext=Path(urllib.parse.urlparse(media_url).path).suffix.lower()
+                        if ext not in {".jpg",".jpeg",".png",".webp"}:
+                            ext={"image/jpeg":".jpg","image/jpg":".jpg","image/png":".png","image/webp":".webp","image/tiff":".tif"}.get(mime,"")
+                        if not ext:
+                            raise RuntimeError("unrecognized image MIME type: "+mime)
+                        used=(media_url,ext,blob); break
+                    except Exception as media_exc:
+                        failure_reasons.append(str(media_exc))
+                if not used:
+                    report.append({"id":"smithsonian-"+slugify(record_id),"status":"failed","category":category,
+                                   "title":title,"source_page":record_url,
+                                   "reason":"No candidate image could be retrieved: "+" | ".join(failure_reasons[-2:])})
+                    continue
+                media_url,ext,blob=used
+                target=root/"third-party/smithsonian"/category/(f"{slugify(title)[:48]}-{slugify(record_id)}{ext}")
+                target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                digest=sha256_path(target); seen.add(record_id)
+                notes=(content.get("freetext") or {}).get("notes") or []
+                if isinstance(notes,dict): notes=[notes]
+                if not isinstance(notes,list): notes=[]
+                note=next((str(n.get("content") or "") for n in notes if isinstance(n,dict) and n.get("content")), "")
+                entry={"id":"smithsonian-"+slugify(record_id),"path":target.relative_to(root).as_posix(),
+                       "type":"smithsonian-open-access-image","title":title,"creator":creator,"category":category,
+                       "unit_code":unit_code,"description":note[:1800],"record_id":record_id,"source_page":record_url,
+                       "source_file_url":media_url,"license":"CC0-1.0",
+                       "license_url":"https://www.si.edu/openaccess/faq",
+                       "rights_verified_from_item_metadata":True,"record_access":"CC0","media_access":"CC0",
+                       "size_bytes":len(blob),"sha256":digest,"redistributable":True,
+                       "usage_notes":"Both the record-level metadata_usage.access and this exact media file's usage.access were CC0. CC0 handles copyright only; review privacy, publicity, trademark, cultural-property and other non-copyright rights where relevant."}
+                index.append(entry); total+=1; successes+=1
+                report.append({"id":entry["id"],"status":"downloaded","title":title,"category":category,
+                               "path":entry["path"],"source_page":record_url,"license":"CC0-1.0",
+                               "size_bytes":len(blob),"sha256":digest})
+                print("[Smithsonian Open Access] OK:",category,title[:48],len(blob))
+            if not successes:
+                report.append({"id":"smithsonian-"+category,"status":"no_eligible_item","category":category,
+                               "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
+                               "reason":"No distinct image passed both record-level and media-level CC0 filters in the current page."})
+        except Exception as exc:
+            report.append({"id":"smithsonian-"+category,"status":"failed","category":category,
+                           "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
+                           "reason":str(exc)[:400]})
+            print("[Smithsonian Open Access] query failed:",category,str(exc))
+        time.sleep(.35)
+    return report
+
+
+def resolve_rijksmuseum_iiif(record_identifier):
+    """Resolve a Rijksmuseum Linked Art record to its official bounded IIIF image URL."""
+    uri=str(record_identifier or "").strip()
+    parsed=urllib.parse.urlparse(uri)
+    if parsed.hostname!="id.rijksmuseum.nl":
+        return ""
+    record_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",parsed.path,"_profile=la-framed",""))
+    record=request_json(record_uri,timeout=8)
+    shows=record.get("shows") or []
+    if isinstance(shows,dict): shows=[shows]
+    visual_uri=next((str(x.get("id") or "") for x in shows if isinstance(x,dict) and x.get("id")), "")
+    if urllib.parse.urlparse(visual_uri).hostname!="id.rijksmuseum.nl":
+        return ""
+    visual_parsed=urllib.parse.urlparse(visual_uri)
+    visual_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",visual_parsed.path,"_profile=la-framed",""))
+    visual=request_json(visual_uri,timeout=8)
+    digitals=visual.get("digitally_shown_by") or []
+    if isinstance(digitals,dict): digitals=[digitals]
+    digital_uri=next((str(x.get("id") or "") for x in digitals if isinstance(x,dict) and x.get("id")), "")
+    if urllib.parse.urlparse(digital_uri).hostname!="id.rijksmuseum.nl":
+        return ""
+    digital_parsed=urllib.parse.urlparse(digital_uri)
+    digital_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",digital_parsed.path,"_profile=la-framed",""))
+    digital=request_json(digital_uri,timeout=8)
+    access_points=digital.get("access_point") or []
+    if isinstance(access_points,dict): access_points=[access_points]
+    for point in access_points:
+        raw=str(point.get("id") or "") if isinstance(point,dict) else ""
+        media=urllib.parse.urlparse(raw)
+        if media.hostname=="iiif.micr.io":
+            parts=[p for p in media.path.split("/") if p]
+            if parts:
+                ident=urllib.parse.quote(parts[0],safe="-._~")
+                return f"https://iiif.micr.io/{ident}/full/1200,/0/default.jpg"
+    return ""
+
+
 def download_rijksmuseum_open_access(root,index):
     """Harvest a capped sample of Rijksmuseum records, but only image media with explicit CC0/PDM rights."""
     import xml.etree.ElementTree as ET
@@ -1613,7 +1810,7 @@ def download_rijksmuseum_open_access(root,index):
     dc_ns="http://purl.org/dc/elements/1.1/"
     dcterms_ns="http://purl.org/dc/terms/"
     rdf_resource="{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"
-    token=None; page_num=0
+    token=None; page_num=0; iiif_resolutions=0; iiif_resolution_limit=18
     while total<cap and page_num<16:
         page_num+=1
         if token:
@@ -1654,19 +1851,21 @@ def download_rijksmuseum_open_access(root,index):
                     if local in {"rights","rightsstatement","rights_statement"}:
                         rights.append(value)
                     elif local=="isshownby":
-                        image_refs.append(value)
+                        if value: image_refs.append(value)
+                        # EDM represents media URIs on nested edm:WebResource rdf:about attributes.
+                        for child in el.iter():
+                            child_uri=(child.attrib.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip()
+                            if child_uri: image_refs.append(child_uri)
                     elif local in {"isshownat","shownat"}:
-                        page_refs.append(value)
+                        if value: page_refs.append(value)
+                        for child in el.iter():
+                            child_uri=(child.attrib.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip()
+                            if child_uri: page_refs.append(child_uri)
                 rights_text=" | ".join(dict.fromkeys(rights))
-                rights_norm=rights_text.lower()
-                cc0=("creativecommons.org/publicdomain/zero/1.0" in rights_norm or
-                     "creativecommons.org/publicdomain/zero/" in rights_norm or
-                     rights_norm.strip() in {"cc0","cc0-1.0","creative commons zero"})
-                pdm=("creativecommons.org/publicdomain/mark/1.0" in rights_norm or
-                     "creativecommons.org/publicdomain/mark/" in rights_norm or
-                     "public domain mark" in rights_norm)
-                if not (cc0 or pdm):
+                license_name=rijksmuseum_license_from_rights(rights_text)
+                if not license_name:
                     continue
+                cc0=license_name=="CC0-1.0"
                 def read_values(local_name):
                     result=[]
                     for el in metadata.iter():
@@ -1685,6 +1884,14 @@ def download_rijksmuseum_open_access(root,index):
                             break
                     elif host in {"images.micr.io","www.rijksmuseum.nl","rijksmuseum.nl"} and Path(parsed.path).suffix.lower() in {".jpg",".jpeg",".png",".webp"}:
                         media_url=ref_url; break
+                if not media_url and iiif_resolutions<iiif_resolution_limit:
+                    iiif_resolutions+=1
+                    try:
+                        media_url=resolve_rijksmuseum_iiif(identifier)
+                    except Exception as resolve_exc:
+                        report.append({"id":"rijksmuseum-resolve-"+slugify(identifier),"status":"resolution_failed",
+                                       "reason":str(resolve_exc)[:300],
+                                       "source_page":"https://data.rijksmuseum.nl/docs/iiif/"})
                 if not media_url:
                     continue
                 try:
@@ -1704,7 +1911,6 @@ def download_rijksmuseum_open_access(root,index):
                     target=root/"third-party/rijksmuseum"/(f"{slugify(title)[:52]}-{slugify(identifier)[:48]}{ext}")
                     target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
                     digest=sha256_path(target)
-                    license_name="CC0-1.0" if cc0 else "Public Domain Mark 1.0"
                     entry={"id":asset_id,"path":target.relative_to(root).as_posix(),"type":"rijksmuseum-open-access-image",
                            "title":title,"creator":creator,"date":date,"rights_statement":rights_text,
                            "source_page":object_page,"source_file_url":media_url,"license":license_name,
@@ -1852,6 +2058,7 @@ def main():
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
+    smithsonian_report=download_smithsonian_open_access(STAGE,index)
     rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
     nasa_report=download_nasa_media(STAGE,index)
     loc_report=download_loc_public_domain(STAGE,index)
@@ -1866,7 +2073,7 @@ def main():
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
-      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
+      "\n\n## Smithsonian Open Access CC0 media\nThe builder queries Smithsonian Open Access and only considers records whose top-level metadata_usage.access is exactly CC0. It then checks each candidate media object's usage.access independently and downloads only media explicitly marked CC0. The official IDS image delivery service is requested at a bounded size; source record, unit, title, creator, media URL, exact rights values and SHA-256 are kept. A caller may configure the optional GitHub Actions secret SMITHSONIAN_API_KEY; if absent, the builder makes a low-volume attempt with DEMO_KEY and records any rate-limit/authentication failure rather than claiming success. CC0 does not grant trademark, privacy, publicity or other non-copyright rights. Sources: https://www.si.edu/openaccess/faq and https://www.si.edu/openaccess/devtools.\n\n"+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
       "\n\n## Library of Congress photographs\nThe builder downloads only image records with an explicit item-level rights statement containing ‘No known restrictions on publication’, ‘Public Domain’, or ‘No known copyright restrictions’, and rejects explicit conflicting limitations. Records without a rights statement are skipped. Each selected file records the exact statement, item URL, direct image URL, and SHA-256. LOC notes users remain responsible for evaluating copyright and other rights, so inspect the item/context before publication. Sources: https://www.loc.gov/apis/json-and-yaml/ and https://ask.loc.gov/faq/305466.\n\n"+
       "\n\n## Wikimedia Commons imagery\nOnly file-level metadata explicitly labelled CC0 or Public Domain is auto-bundled. CC BY, CC BY-SA, NC, missing, or ambiguous licenses are skipped. Creator, file page, license URL and SHA-256 are stored for each downloaded image. Source: https://commons.wikimedia.org/wiki/Commons:Licensing.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_report)+
@@ -1882,6 +2089,7 @@ def main():
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
+              "smithsonian_images_downloaded":sum(r.get("status")=="downloaded" for r in smithsonian_report),
               "rijksmuseum_images_downloaded":sum(r.get("status")=="downloaded" for r in rijksmuseum_report),
               "nasa_images_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="image" for x in nasa_report),
               "nasa_videos_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="video" for x in nasa_report),
@@ -1894,7 +2102,8 @@ def main():
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
-               "met_open_access_downloads":met_report,"rijksmuseum_open_access_downloads":rijksmuseum_report,
+               "met_open_access_downloads":met_report,"smithsonian_open_access_downloads":smithsonian_report,
+               "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "openverse_downloads":openverse_report,"assets":index}

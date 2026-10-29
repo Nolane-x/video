@@ -79,3 +79,8 @@ A texture should support the material/story, not become a noisy overlay on every
 - For European art, old maps, historical objects and visual biographies, search the Rijksmuseum records before defaulting to generic stock. The automated lane admits only exact item metadata carrying CC0 or Public Domain Mark, then downloads a size-limited IIIF image.
 - Use the work's source record and creator/date in the shot notes; do not present a painting, museum photograph or illustrative object as a contemporary photograph of a historical event.
 - Do not treat “museum website” as a license. CC BY images, ambiguous rights, missing rights, and items whose media URL does not match the official image host remain excluded from the automatic bundle.
+
+
+## Smithsonian CC0 media
+
+For natural history, spaceflight, objects, botany, birds, archaeology, design and historical culture, the library can pull Smithsonian Open Access media. Automatic bundling is intentionally strict: both `metadata_usage.access` on the item and `usage.access` on the exact media entry must equal `CC0`. If the API rejects the default demo key or rate-limits requests, use the optional `SMITHSONIAN_API_KEY` GitHub Actions secret; no key value should be committed to the repository. Retain the museum record URL and review privacy, publicity, trademarks and cultural-property context even when copyright is CC0.
