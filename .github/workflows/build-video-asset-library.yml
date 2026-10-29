@@ -81,7 +81,7 @@ jobs:
           expected = index["summary"]
           assert expected["original_backgrounds"] >= 90
           assert expected["original_overlays"] >= 75
-          assert expected["original_icons"] >= 110
+          assert expected["original_icons"] >= 125
           assert expected["original_textures"] >= 55, "Original surface texture library is incomplete"
           assert expected["original_illustrations"] >= 105, "Original editorial illustration library is incomplete"
           assert expected["original_infographics"] >= 50
