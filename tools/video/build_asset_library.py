@@ -648,7 +648,7 @@ def motion_loop_filters(style):
     compass="drawgrid=width=96:height=96:thickness=1:color=0xf1c982@0.08,drawbox=x='640+260*sin(2*PI*t/6)':y='360+260*cos(2*PI*t/6)':w=9:h=9:color=0xf1c982@0.85:t=fill,drawbox=x='640-260*sin(2*PI*t/6)':y='360-260*cos(2*PI*t/6)':w=7:h=7:color=0x82dfcf@0.85:t=fill,drawbox=x=638:y=80:w=4:h=560:color=0xf1c982@0.12:t=fill,drawbox=x=360:y=358:w=560:h=4:color=0xf1c982@0.12:t=fill"
     cinema="noise=alls=4:allf=t,drawbox=x='mod(t*90,1280)':y=80:w=2:h=640:color=0xf4e9ce@0.17:t=fill,drawbox=x=0:y=0:w=1280:h=36:color=0x050505@0.85:t=fill,drawbox=x=0:y=684:w=1280:h=36:color=0x050505@0.85:t=fill"
 
-    choices={"orbital":orbital,"data":data,"circuit":circuit,"water":water,    choices={"orbital":orbital,"data":data,"circuit":circuit,"water":water,
+    choices={"orbital":orbital,"data":data,"circuit":circuit,"water":water,
              "aurora":aurora,"retro":retro,"film":film,"hazard":hazard,
              "spectrum":spectrum,"particles":particles,"route":route,"bokeh":bokeh,
              "matrix":matrix,"radar":radar,"heat":heat,"clouds":clouds,"snow":snow,"stars":stars,
