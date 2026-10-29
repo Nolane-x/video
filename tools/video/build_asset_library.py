@@ -1272,9 +1272,7 @@ def download_nasa_media(root,index):
                         raw_parsed=urllib.parse.urlsplit(media_url)
                         # NASA manifest filenames often contain literal spaces and curly apostrophes.
                         # Quote only the URL path, preserving safe delimiters and any query string.
-                        safe_path=urllib.parse.quote(raw_parsed.path,safe="/%:@-._~!                    for media_url in urls:
-                        media_url=media_url.replace("http://","https://",1)
-                        parsed=urllib.parse.urlparse(media_url)'()*+,;=")
+                        safe_path=urllib.parse.quote(raw_parsed.path,safe="/%:@-._~!$&'()*+,;=")
                         media_url=urllib.parse.urlunsplit((raw_parsed.scheme,raw_parsed.netloc,safe_path,raw_parsed.query,raw_parsed.fragment))
                         parsed=urllib.parse.urlparse(media_url)
                         if parsed.hostname!="images-assets.nasa.gov":
