@@ -1763,6 +1763,43 @@ def download_smithsonian_open_access(root,index):
     return report
 
 
+def resolve_rijksmuseum_iiif(record_identifier):
+    """Resolve a Rijksmuseum Linked Art record to its official bounded IIIF image URL."""
+    uri=str(record_identifier or "").strip()
+    parsed=urllib.parse.urlparse(uri)
+    if parsed.hostname!="id.rijksmuseum.nl":
+        return ""
+    record_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",parsed.path,"_profile=la-framed",""))
+    record=request_json(record_uri,timeout=8)
+    shows=record.get("shows") or []
+    if isinstance(shows,dict): shows=[shows]
+    visual_uri=next((str(x.get("id") or "") for x in shows if isinstance(x,dict) and x.get("id")), "")
+    if urllib.parse.urlparse(visual_uri).hostname!="id.rijksmuseum.nl":
+        return ""
+    visual_parsed=urllib.parse.urlparse(visual_uri)
+    visual_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",visual_parsed.path,"_profile=la-framed",""))
+    visual=request_json(visual_uri,timeout=8)
+    digitals=visual.get("digitally_shown_by") or []
+    if isinstance(digitals,dict): digitals=[digitals]
+    digital_uri=next((str(x.get("id") or "") for x in digitals if isinstance(x,dict) and x.get("id")), "")
+    if urllib.parse.urlparse(digital_uri).hostname!="id.rijksmuseum.nl":
+        return ""
+    digital_parsed=urllib.parse.urlparse(digital_uri)
+    digital_uri=urllib.parse.urlunsplit(("https","data.rijksmuseum.nl",digital_parsed.path,"_profile=la-framed",""))
+    digital=request_json(digital_uri,timeout=8)
+    access_points=digital.get("access_point") or []
+    if isinstance(access_points,dict): access_points=[access_points]
+    for point in access_points:
+        raw=str(point.get("id") or "") if isinstance(point,dict) else ""
+        media=urllib.parse.urlparse(raw)
+        if media.hostname=="iiif.micr.io":
+            parts=[p for p in media.path.split("/") if p]
+            if parts:
+                ident=urllib.parse.quote(parts[0],safe="-._~")
+                return f"https://iiif.micr.io/{ident}/full/1200,/0/default.jpg"
+    return ""
+
+
 def download_rijksmuseum_open_access(root,index):
     """Harvest a capped sample of Rijksmuseum records, but only image media with explicit CC0/PDM rights."""
     import xml.etree.ElementTree as ET
@@ -1773,7 +1810,7 @@ def download_rijksmuseum_open_access(root,index):
     dc_ns="http://purl.org/dc/elements/1.1/"
     dcterms_ns="http://purl.org/dc/terms/"
     rdf_resource="{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"
-    token=None; page_num=0
+    token=None; page_num=0; iiif_resolutions=0; iiif_resolution_limit=18
     while total<cap and page_num<16:
         page_num+=1
         if token:
@@ -1814,9 +1851,16 @@ def download_rijksmuseum_open_access(root,index):
                     if local in {"rights","rightsstatement","rights_statement"}:
                         rights.append(value)
                     elif local=="isshownby":
-                        image_refs.append(value)
+                        if value: image_refs.append(value)
+                        # EDM represents media URIs on nested edm:WebResource rdf:about attributes.
+                        for child in el.iter():
+                            child_uri=(child.attrib.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip()
+                            if child_uri: image_refs.append(child_uri)
                     elif local in {"isshownat","shownat"}:
-                        page_refs.append(value)
+                        if value: page_refs.append(value)
+                        for child in el.iter():
+                            child_uri=(child.attrib.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip()
+                            if child_uri: page_refs.append(child_uri)
                 rights_text=" | ".join(dict.fromkeys(rights))
                 license_name=rijksmuseum_license_from_rights(rights_text)
                 if not license_name:
@@ -1840,6 +1884,14 @@ def download_rijksmuseum_open_access(root,index):
                             break
                     elif host in {"images.micr.io","www.rijksmuseum.nl","rijksmuseum.nl"} and Path(parsed.path).suffix.lower() in {".jpg",".jpeg",".png",".webp"}:
                         media_url=ref_url; break
+                if not media_url and iiif_resolutions<iiif_resolution_limit:
+                    iiif_resolutions+=1
+                    try:
+                        media_url=resolve_rijksmuseum_iiif(identifier)
+                    except Exception as resolve_exc:
+                        report.append({"id":"rijksmuseum-resolve-"+slugify(identifier),"status":"resolution_failed",
+                                       "reason":str(resolve_exc)[:300],
+                                       "source_page":"https://data.rijksmuseum.nl/docs/iiif/"})
                 if not media_url:
                     continue
                 try:
