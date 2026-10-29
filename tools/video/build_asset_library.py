@@ -1523,6 +1523,15 @@ def openverse_extension(url,ctype,kind,item):
     return "."+ft if "."+ft in allowed else ""
 
 
+def wikimedia_license_is_eligible(short_name):
+    """Only accept file-level CC0 or Public Domain labels from the Commons metadata record."""
+    normalized=re.sub(r"[\\s\\-®().]+","",str(short_name or "").lower())
+    return normalized in {
+        "cc0","cc01.0","creativecommonszero",
+        "publicdomain","publicdomainmark","publicdomainus","publicdomainunitedstates"
+    }
+
+
 def download_wikimedia_public_domain(root,index):
     report=[]; total=0; cap=160; seen=set()
     queries=[
@@ -1561,8 +1570,7 @@ def download_wikimedia_public_domain(root,index):
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
                 license_url=str((meta.get("LicenseUrl") or {}).get("value") or imageinfo.get("descriptionurl") or "")
-                normalized=short.lower().replace(" ","").replace("-","").replace("®","")
-                if normalized not in {"cc0","cc01.0","creativecommonszero","publicdomain","publicdomainmark"}:
+                if not wikimedia_license_is_eligible(short):
                     continue
                 asset_url=imageinfo.get("thumburl") or imageinfo.get("url")
                 page_url=imageinfo.get("descriptionurl") or "https://commons.wikimedia.org/wiki/"+urllib.parse.quote(page.get("title","").replace(" ","_"))
@@ -1770,8 +1778,7 @@ def download_wikimedia_video_audio(root,index):
                 if not isinstance(imageinfo,dict): continue
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
-                normalized=short.lower().replace(" ","").replace("-","").replace("®","")
-                if normalized not in {"cc0","cc01.0","creativecommonszero","publicdomain","publicdomainmark","publicdomainus"}:
+                if not wikimedia_license_is_eligible(short):
                     continue
                 file_url=str(imageinfo.get("url") or "")
                 parsed=urllib.parse.urlparse(file_url)
@@ -1782,8 +1789,7 @@ def download_wikimedia_video_audio(root,index):
                     continue
                 if ext not in extensions or byte_size<2048 or byte_size>cap_size:
                     continue
-                if mime and not mime.startswith("audio/" if is_audio else "video/"):
-                    # A few Commons records return a generic MIME; the container check below still applies.
+                if mime and mime!="application/octet-stream" and not mime.startswith("audio/" if is_audio else "video/"):
                     continue
                 identity=str(page.get("pageid") or page.get("title") or "")
                 if not identity or identity in seen: continue
@@ -1906,9 +1912,9 @@ def make_asset_catalog(root,index,summary):
         license_url=item.get("license_url") or ""
         if ext in {".svg",".png",".jpg",".jpeg",".webp"}:
             preview=f'<img loading="lazy" alt="{html.escape(title,quote=True)}" src="{html.escape(rel,quote=True)}">'
-        elif ext in {".mp4",".mov",".m4v",".webm"}:
+        elif ext in {".mp4",".mov",".m4v",".webm",".ogv"}:
             preview=f'<video controls preload="metadata" playsinline src="{html.escape(rel,quote=True)}" style="width:100%;height:100%;object-fit:contain"></video>'
-        elif ext in {".wav",".mp3",".ogg",".flac",".m4a"}:
+        elif ext in {".wav",".mp3",".ogg",".oga",".flac",".m4a"}:
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
