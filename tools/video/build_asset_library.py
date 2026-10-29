@@ -418,7 +418,7 @@ ICONS = {
 "database":'<ellipse cx="32" cy="13" rx="23" ry="7"/><path d="M9 13V49C9 59 55 59 55 49V13M9 31C9 40 55 40 55 31"/>',
 "shield-lock":'<path d="M32 6L53 14V31Q51 47 32 58Q13 47 11 31V14Z"/><rect x="23" y="28" width="18" height="15" rx="3"/><path d="M27 28V23A5 5 0 0 1 37 23V28"/>',
 "paw":'<ellipse cx="32" cy="42" rx="15" ry="11"/><circle cx="15" cy="24" r="6"/><circle cx="28" cy="17" r="6"/><circle cx="42" cy="18" r="6"/><circle cx="53" cy="27" r="6"/>',
-"camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>'
+"camera-film":'<rect x="8" y="10" width="48" height="44" rx="4"/><path d="M17 10V18M29 10V18M41 10V18M53 10V18M17 46V54M29 46V54M41 46V54M53 46V54"/><path d="M25 23L42 32L25 41Z"/>',
 "test-tube":'<path d="M24 7H40M28 7V31L15 49Q11 57 22 58H42Q53 57 49 49L36 31V7"/><path d="M21 45H43M24 39H40"/>',
 "molecule":'<circle cx="15" cy="20" r="7"/><circle cx="45" cy="15" r="7"/><circle cx="38" cy="46" r="8"/><circle cx="14" cy="49" r="6"/><path d="M21 22L39 17M19 26L15 43M21 48L31 46M42 22L39 38"/>',
 "magnet":'<path d="M18 10H30V34Q30 42 38 42Q46 42 46 34V10H58V35Q58 55 38 55Q18 55 18 35Z"/><path d="M18 20H30M46 20H58"/>',
