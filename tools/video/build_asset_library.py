@@ -466,6 +466,22 @@ ICONS = {
 "joystick":'<rect x="10" y="36" width="44" height="19" rx="7"/><path d="M32 36V17M32 17Q25 17 25 10Q25 5 32 5Q39 5 39 10Q39 17 32 17Z"/><circle cx="22" cy="45" r="2"/><circle cx="42" cy="45" r="2"/>',
 "cctv-camera":'<path d="M8 22L41 13L49 29L16 38Z"/><path d="M41 15L54 10L60 22L49 29M20 38L16 50H34M23 50H39"/>',
 "scales-balance":'<path d="M32 9V55M17 55H47M12 18H52M32 9L27 15M32 9L37 15M18 18L9 36H27ZM46 18L37 36H55Z"/>',
+"satellite":'<path d="M22 22L42 42M19 16L29 6L38 15L28 25Z"/><path d="M38 42L48 32L57 41L47 51Z"/><path d="M7 11L15 3M49 57L58 48"/>',
+"telescope":'<path d="M10 16L45 5L54 23L19 34Z"/><path d="M25 32L31 55M43 27L31 55M23 55H43"/>',
+"moon-stars":'<path d="M42 7Q20 10 19 31Q20 51 42 54Q26 64 12 49Q-1 31 14 14Q27 2 42 7Z"/><path d="M48 12L51 20L59 23L51 26L48 34L45 26L37 23L45 20ZM35 42L37 47L42 49L37 51L35 56L33 51L28 49L33 47Z"/>',
+"pulse":'<path d="M5 34H17L24 18L33 49L42 25L48 34H59"/>',
+"virus":'<circle cx="32" cy="32" r="16"/><path d="M32 4V16M32 48V60M4 32H16M48 32H60M12 12L21 21M43 43L52 52M52 12L43 21M21 43L12 52"/><circle cx="27" cy="28" r="3"/><circle cx="39" cy="36" r="3"/>',
+"wave":'<path d="M4 34Q12 16 20 34T36 34T52 34T68 34"/>',
+"train":'<path d="M10 17H44L55 30V48H10Z"/><path d="M17 25H27V35H17ZM33 25H43V35H33ZM18 48V55M45 48V55M8 56H57"/>',
+"bicycle":'<circle cx="16" cy="44" r="10"/><circle cx="49" cy="44" r="10"/><path d="M16 44L27 26L38 44H16L31 44L40 25H49M24 26H34M36 19H43"/>',
+"map-route":'<path d="M6 14L23 7L41 14L58 7V48L41 56L23 48L6 56Z"/><path d="M23 7V48M41 14V56M14 40Q20 22 31 32T49 22"/><circle cx="14" cy="40" r="3"/><circle cx="49" cy="22" r="3"/>',
+"shopping-bag":'<path d="M12 22H52L56 57H8Z"/><path d="M22 24V17Q22 7 32 7Q42 7 42 17V24"/>',
+"laptop":'<path d="M13 10H51V39H13Z"/><path d="M7 46H57L52 53H12Z"/>',
+"clapperboard":'<path d="M8 24H56V57H8Z"/><path d="M8 24L13 8H61L56 24Z"/><path d="M20 8L25 24M36 8L41 24M52 8L57 24"/>',
+"package":'<path d="M8 18L32 7L56 18V47L32 59L8 47Z"/><path d="M8 18L32 30L56 18M32 30V59"/>',
+"film-strip":'<rect x="10" y="7" width="44" height="50" rx="3"/><path d="M20 7V17M32 7V17M44 7V17M20 47V57M32 47V57M44 47V57M20 25L43 32L20 39Z"/>',
+"speech-bubble":'<path d="M8 10H56V42H31L18 54V42H8Z"/><path d="M17 22H47M17 31H39"/>',
+"recycle":'<path d="M24 8L33 8L39 18L33 22ZM45 22L55 39L48 45L38 29ZM39 48L22 56L16 48L34 40ZM17 34L7 18L16 13L25 28Z"/>',
 }
 
 
