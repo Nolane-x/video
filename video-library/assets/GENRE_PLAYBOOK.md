@@ -107,3 +107,8 @@ The library adds 12 original six-second 1280×720 H.264 loops created by FFmpeg 
 - **Industrial / business:** hazard-light loops work for machine/process shots; keep the effect subtle enough that key labels remain readable.
 
 These loops are illustrations, not factual footage. Never use them to imply that a stylized scene is a real recording or measurement.
+
+
+## CC0/Public Domain SVG source library
+
+A separate Commons vector lane can add compact SVG maps, scientific diagrams, transit layouts, botany plates, engineering schematics and geometric patterns. The downloader requires exact file-level CC0/Public Domain metadata, an official upload.wikimedia.org file URL, SVG MIME/extension, and a small file size. Before the asset reaches the catalog it removes scripts, event handlers, active embedded elements, and external references; a missing/unclear rights label excludes the file. The vector is still a source asset: verify labels, dates and facts before using it as evidence.
