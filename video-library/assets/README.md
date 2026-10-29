@@ -21,7 +21,7 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - 112 large-format editorial SVG illustrations for satellites, telescopes, rockets, laboratory tools, biology, nature, transport, architecture, robotics, finance, food, travel, film and music. Each is generated in-repository and licensed CC0.
 - 24 original, six-second 1280×720 H.264 motion loops for orbital grids, data signals, neon circuits, water, aurora, retro scanlines, film grain, industrial hazard, audio spectrum, particles, map routes and bokeh. They are generated with FFmpeg filters, contain no external footage/audio, and are verified by `ffprobe` before packaging.
 - 80 original transparent motion-graphics overlays / VFX: archive/timecode, news tickers, blueprint dimensions, comic panels, lens bloom, rain-on-glass, thermal map, caustics, tracking marks, vertical safe areas and many more.
-- 129 original icon SVGs and 55 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
+- 141 original icon SVGs and 55 infographic/storyboard templates: Venn/cycle/scatter diagrams, budget breakdown, Gantt, roadmap, scorecard, fact-check/source ledger and lower thirds.
 - Official Kenney GitHub starter kits whose repository docs explicitly confirm CC0 media; code/executable assets are filtered out and provenance is attached.
 - Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
 - Up to 160 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
@@ -33,12 +33,12 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - Library of Congress images only when the specific record carries an explicit positive rights statement (e.g. “No Known Restrictions on Publication”); ambiguous or conflicting rights records are skipped.
 - Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
 - Larger Poly Haven selection: up to 16 HDRIs, 22 models and 36 texture packages; bundle available models/dependencies and PBR maps (base color, normal, roughness, AO/displacement where available). Item/source metadata and SHA-256 are retained.
-- 125 original procedural sound-effect WAV presets for UI, foley-like accents, multiple weather/forest/ocean/city ambiences, camera, heartbeat, tension, science-fiction, magic, transitions and impacts. These are synthesized by code, not copied recordings.
-- 34 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
+- 196 original procedural sound-effect WAV presets for UI, foley-like accents, multiple weather/forest/ocean/city ambiences, camera, heartbeat, tension, science-fiction, magic, transitions and impacts. These are synthesized by code, not copied recordings.
+- 58 original tileable SVG surface textures for blueprint grids, contours, paper, concrete, marble, metal, carbon fiber, wood grain, textiles, circuits, halftones, ocean patterns and retro looks.
 - `ASSET_CATALOG.html` — searchable offline catalog with image/video previews and audio players, category filtering, direct file links, and source/license links.
 - `ASSET_INDEX.json`, `SOURCES_AND_LICENSES.md`, and `SHA256SUMS.txt`.
 
-The workflow fails before source downloads if the offline rights tests fail, verifies every generated MP4's codec/resolution/duration, and matches the motion-loop manifest count against real indexed files.
+The workflow runs the offline rights tests before external source downloads, verifies every generated MP4's codec/resolution/duration, and matches the motion-loop manifest count against real indexed files.
 
 The GitHub Actions workflow runs offline license-gate regression tests before making external requests, then validates the new media counts against actual indexed entries.
 
@@ -67,7 +67,7 @@ The next release raises the reusable, repository-generated core rather than only
 
 - 93+ art-directed background plates for more locations and genres.
 - 80+ overlays, including light rays, wet lens, scan/radar, film edges, subtitle contrast and evidence/broadcast frames.
-- 125+ icons and 105+ large editorial illustrations across science, ecology, energy, transport, education, cooking, sports, film and sound.
+- 141 icons and 112 large editorial illustrations across science, ecology, energy, transport, education, cooking, sports, film and sound.
 - 55+ infographic templates, including risk/quadrant matrices, hierarchy/network layouts, chronology, learning progression and equation derivation.
 - 24 six-second original motion loops, each rendered with FFmpeg and checked with ffprobe.
 - 175+ original procedural WAV cues, indexed by category, tags, intended use and loopability so later scene selection can search beyond filename guesses.
