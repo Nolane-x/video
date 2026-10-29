@@ -25,6 +25,7 @@ The Actions builder generates a versioned downloadable ZIP containing:
 - Up to 60 The Met Open Access images, after checking each object's `isPublicDomain` flag; each record retains the official object/image URL and metadata.
 - Up to 100 Wikimedia Commons images whose individual file metadata says CC0 or Public Domain; CC BY/SA, noncommercial, unclear, or missing rights are skipped.
 - Up to 60 Rijksmuseum Open Access artwork images, downloaded through the no-key OAI-PMH feed and official IIIF image service only when the individual EDM record explicitly carries CC0 or Public Domain Mark rights.
+- Up to 60 Smithsonian Open Access images from the official API, with a strict two-level gate: both the item metadata and the exact media file must say CC0. A `SMITHSONIAN_API_KEY` GitHub Actions secret is optional but recommended; without it, the build makes a low-volume attempt using `DEMO_KEY` and records any authentication/rate-limit failure.
 - NASA Image and Video Library items: screened small images, short video clips and audio files from NASA-center records. The NASA lane is **not CC0**; it retains NASA’s media usage guidance, attribution requirements, logo/endorsement warnings and item-level source.
 - Library of Congress images only when the specific record carries an explicit positive rights statement (e.g. “No Known Restrictions on Publication”); ambiguous or conflicting rights records are skipped.
 - Openverse CC0 images/audio where the live API responds; transient API failures are recorded and do not block the more stable sources.
@@ -38,6 +39,7 @@ Large binary assets are shipped as a GitHub Release asset, not ordinary Git blob
 
 ## New source and rights rules
 
+- **Smithsonian:** only images that are explicitly CC0 both at the collection record and at the selected media object are bundled. The API may require a registered key for reliable usage; API failures are recorded, not represented as zero uncertainty.
 - **Rijksmuseum:** only item-level CC0/Public Domain Mark images are bundled. Source record, creator, exact rights statement and IIIF image URL stay in the manifest. Other rights, including culturally sensitive context or trademarks, must still be reviewed.
 - USGS and NOAA are documented as future source lanes, not claimed as downloaded automatically; their official guidance says public-domain status can have item-level exceptions and credit/endorsement rules.
 
