@@ -90,6 +90,26 @@ PALETTES = [
 ("mountain-storm",("#131e34","#465a72","#bfd5e4"),"mountain"),
 ("underwater-reef",("#06334c","#087f8d","#a9fff0"),"underwater")
 ]
+ 
+TEXTURES = [
+ ("blueprint-grid","Blueprint engineering grid"),("crosshair-grid","Measurement crosshair grid"),
+ ("topographic-contours","Topographic contour map"),("bathymetry-contours","Ocean bathymetry lines"),
+ ("archival-paper","Archival paper grain"),("newspaper-halftone","Printed newspaper halftone"),
+ ("concrete-speckle","Concrete and stone fleck"),("marble-veins","Marble vein pattern"),
+ ("brushed-metal","Brushed metal grain"),("carbon-fiber","Carbon-fiber weave"),
+ ("wood-grain","Wood grain"),("textile-weave","Textile weave"),
+ ("terrazzo-speckle","Terrazzo stone chips"),("ceramic-tile","Ceramic tile grid"),
+ ("hex-mesh","Hexagonal technical mesh"),("circuit-board","Circuit-board tracks"),
+ ("pixel-grid","Pixel-art grid"),("comic-dots","Comic halftone dots"),
+ ("star-map","Star chart dots"),("ocean-waves","Ocean wave lines"),
+ ("geometric-triangles","Geometric triangle mosaic"),("diagonal-hatch","Diagonal hatch"),
+ ("rain-droplets","Rain droplets"),("film-scratches","Film scratches"),
+ ("paper-fibers","Paper fiber lines"),("woven-basket","Basket weave"),
+ ("rubber-diamond","Rubber diamond plate"),("perforated-metal","Perforated metal"),
+ ("blueprint-dimensions","Blueprint dimension grid"),("isometric-grid","Isometric construction grid"),
+ ("neon-circuit","Neon circuit traces"),("soft-clouds","Cloud contour texture"),
+ ("dither-noise","Retro dither pattern"),("geology-strata","Geology strata bands")
+]
 OVERLAYS = [
 ("film-grain","Fine film grain"),("scanlines","CRT scanlines"),("halftone","Halftone dots"),("light-leak","Warm/cool light leak"),
 ("vignette","Cinematic vignette"),("letterbox","Cinematic letterbox"),("film-gate","Film gate frame"),("dust","Floating dust motes"),
@@ -236,6 +256,124 @@ ICONS.update({
 "puzzle":'<path d="M8 8H25A7 7 0 1 1 39 8H56V25A7 7 0 1 0 56 39V56H39A7 7 0 1 1 25 56H8V39A7 7 0 1 0 8 25Z"/>',
 "speech-bubble":'<path d="M7 11H57V43H33L19 56V43H7Z"/><path d="M16 22H48M16 31H40"/>'
 })
+
+def make_texture_svg(texture_id,title,index):
+    """Create tileable, original, vector texture plates with no external dependencies."""
+    palettes=[
+        ("#0c1d2b","#64dcca"),("#17202c","#c6d2dc"),("#d9c7a2","#7a6850"),
+        ("#222832","#8fa9b8"),("#173a4a","#7be3d6"),("#e8e2d6","#4f5d69"),
+        ("#2c2025","#dcad87"),("#101b29","#84c7ff")
+    ]
+    bg,accent=palettes[index%len(palettes)]
+    pattern=""
+    if texture_id in {"blueprint-grid","crosshair-grid","blueprint-dimensions","isometric-grid"}:
+        step=64 if texture_id!="isometric-grid" else 96
+        lines=[f'<path d="M0 {step//2}H1024M{step//2} 0V1024" stroke="{accent}" stroke-opacity=".19" stroke-width="1"/>']
+        for x in range(0,1025,step):
+            lines.append(f'<path d="M{x} 0V1024" stroke="{accent}" stroke-opacity="{.25 if x% (step*4)==0 else .1}" stroke-width="1"/>')
+        for y in range(0,1025,step):
+            lines.append(f'<path d="M0 {y}H1024" stroke="{accent}" stroke-opacity="{.25 if y%(step*4)==0 else .1}" stroke-width="1"/>')
+        if texture_id=="crosshair-grid":
+            for x in range(32,1024,128):
+                for y in range(32,1024,128):
+                    lines.append(f'<path d="M{x-8} {y}H{x+8}M{x} {y-8}V{y+8}" stroke="{accent}" stroke-opacity=".45"/>')
+        if texture_id=="isometric-grid":
+            for n in range(-1024,2048,96):
+                lines.append(f'<path d="M{n} 0L{n+1024} 1024M{n} 1024L{n+1024} 0" stroke="{accent}" stroke-opacity=".13"/>')
+        pattern="".join(lines)
+    elif texture_id in {"topographic-contours","bathymetry-contours","soft-clouds","geology-strata"}:
+        for i in range(24):
+            x=(i*97+31)%1024; y=(i*67+20)%1024
+            rx=90+(i%7)*26; ry=55+(i%5)*21
+            pattern+=f'<ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" transform="rotate({(i*19)%70-35} {x} {y})" fill="none" stroke="{accent}" stroke-opacity="{.08+(i%5)*.035:.3f}" stroke-width="{1+i%3}"/>'
+        if texture_id=="geology-strata":
+            for i in range(10):
+                y=i*110+40
+                pattern+=f'<path d="M0 {y}Q250 {y-40} 470 {y+12}T1024 {y}" fill="none" stroke="{accent}" stroke-opacity=".22" stroke-width="{3+i%3}"/>'
+    elif texture_id in {"archival-paper","paper-fibers","wood-grain","brushed-metal","film-scratches","diagonal-hatch"}:
+        for i in range(110):
+            x=(i*173+13)%1024; y=(i*97+7)%1024
+            if texture_id=="wood-grain":
+                pattern+=f'<path d="M0 {y}Q250 {y-20+(i%7)*6} 520 {y+8}T1024 {y}" fill="none" stroke="{accent}" stroke-opacity=".13" stroke-width="{1+i%4}"/>'
+            elif texture_id=="diagonal-hatch":
+                pattern+=f'<path d="M{x} {y}l90 -90" stroke="{accent}" stroke-opacity=".16" stroke-width="{1+i%3}"/>'
+            else:
+                x2=min(1024,x+(10+(i%55) if texture_id!="film-scratches" else 1+(i%3)))
+                y2=min(1024,y+(2+(i%5) if texture_id=="film-scratches" else 1))
+                pattern+=f'<path d="M{x} {y}L{x2} {y2}" stroke="{accent}" stroke-opacity="{.06+(i%6)*.025:.3f}" stroke-width="{1+i%3}"/>'
+    elif texture_id in {"newspaper-halftone","comic-dots","pixel-grid","dither-noise","star-map","rain-droplets"}:
+        step=12 if texture_id in {"newspaper-halftone","comic-dots","dither-noise"} else 32
+        for y in range(step//2,1024,step):
+            for x in range(step//2,1024,step):
+                n=(x*31+y*17+index*7)%11
+                if texture_id=="rain-droplets":
+                    pattern+=f'<ellipse cx="{x}" cy="{y}" rx="{2+n%5}" ry="{4+n%8}" fill="{accent}" fill-opacity=".18"/>'
+                elif texture_id=="star-map":
+                    pattern+=f'<circle cx="{x}" cy="{y}" r="{.8+n%3}" fill="{accent}" fill-opacity="{.2+(n%6)*.1:.2f}"/>'
+                elif texture_id=="pixel-grid":
+                    pattern+=f'<rect x="{x-step/2}" y="{y-step/2}" width="{step-2}" height="{step-2}" fill="{accent}" fill-opacity="{.04+(n%6)*.045:.3f}"/>'
+                else:
+                    pattern+=f'<circle cx="{x}" cy="{y}" r="{.5+n%6}" fill="{accent}" fill-opacity="{.05+(n%7)*.04:.3f}"/>'
+    elif texture_id in {"carbon-fiber","textile-weave","woven-basket","rubber-diamond","perforated-metal","ceramic-tile","terrazzo-speckle","concrete-speckle","marble-veins","hex-mesh","circuit-board","neon-circuit","geometric-triangles"}:
+        if texture_id in {"carbon-fiber","textile-weave","woven-basket"}:
+            step=16 if texture_id!="carbon-fiber" else 24
+            for y in range(0,1024,step):
+                for x in range(0,1024,step):
+                    alt=(x//step+y//step)%2
+                    fill=accent if alt else "#ffffff"
+                    pattern+=f'<rect x="{x}" y="{y}" width="{step}" height="{step}" fill="{fill}" fill-opacity="{.08 if alt else .025}"/><path d="M{x} {y+step//2}H{x+step}M{x+step//2} {y}V{y+step}" stroke="{accent}" stroke-opacity=".13"/>'
+        elif texture_id=="ceramic-tile":
+            step=128
+            for y in range(0,1024,step):
+                for x in range(0,1024,step):
+                    pattern+=f'<rect x="{x+4}" y="{y+4}" width="{step-8}" height="{step-8}" rx="4" fill="{accent}" fill-opacity=".04" stroke="{accent}" stroke-opacity=".23" stroke-width="3"/>'
+        elif texture_id=="rubber-diamond":
+            for x in range(-1024,2048,64):
+                pattern+=f'<path d="M{x} 0L{x+1024} 1024M{x} 1024L{x+1024} 0" stroke="{accent}" stroke-opacity=".18" stroke-width="12"/>'
+        elif texture_id=="perforated-metal":
+            for y in range(16,1024,32):
+                for x in range(16,1024,32):
+                    pattern+=f'<circle cx="{x}" cy="{y}" r="5" fill="{accent}" fill-opacity=".18"/>'
+        elif texture_id=="terrazzo-speckle":
+            for i in range(260):
+                x=(i*151+17)%1024; y=(i*89+27)%1024; r=2+(i%9)
+                pattern+=f'<path d="M{x} {y}l{r*2} {r}l{-r} {r*2}l{-r*2} {-r}Z" fill="{accent}" fill-opacity=".16"/>'
+        elif texture_id=="concrete-speckle":
+            for i in range(400):
+                x=(i*137+21)%1024; y=(i*83+19)%1024; r=1+(i%4)
+                pattern+=f'<circle cx="{x}" cy="{y}" r="{r}" fill="{accent}" fill-opacity=".1"/>'
+        elif texture_id=="marble-veins":
+            for i in range(14):
+                y=i*83+25
+                pattern+=f'<path d="M0 {y}Q220 {y-35} 420 {y+8}T820 {y-12}T1024 {y+15}" fill="none" stroke="{accent}" stroke-opacity=".24" stroke-width="{1+i%4}"/>'
+        elif texture_id=="hex-mesh":
+            for y in range(-32,1056,56):
+                for x in range(-32,1056,64):
+                    xx=x+(32 if (y//56)%2 else 0)
+                    pattern+=f'<path d="M{xx} {y-18}l16 -9l16 9v18l-16 9l-16 -9Z" fill="none" stroke="{accent}" stroke-opacity=".22" stroke-width="2"/>'
+        elif texture_id in {"circuit-board","neon-circuit"}:
+            for i in range(60):
+                x=(i*139+17)%1024; y=(i*83+29)%1024
+                pattern+=f'<path d="M{x} {y}h{32+(i%5)*18}v{16+(i%4)*19}h{28+(i%3)*17}" fill="none" stroke="{accent}" stroke-opacity="{.15 if texture_id=="circuit-board" else .4}" stroke-width="{1+i%3}"/><circle cx="{x}" cy="{y}" r="4" fill="{accent}" fill-opacity=".6"/>'
+        else:
+            for i in range(26):
+                x=(i*173+23)%1024; y=(i*97+31)%1024; pts=[(x,y),(x+45+(i%5)*7,y+18),(x+8,y+70+(i%4)*9)]
+                pattern+=f'<polygon points="{" ".join(f"{px},{py}" for px,py in pts)}" fill="{accent}" fill-opacity="{.045+(i%5)*.025:.3f}"/>'
+    return svg_doc(f'<rect width="1024" height="1024" fill="{bg}"/><g>{pattern}</g>',width=1024,height=1024)
+
+
+def generate_original_textures(root,index):
+    out=root/"originals/textures"
+    out.mkdir(parents=True,exist_ok=True)
+    for i,(texture_id,title) in enumerate(TEXTURES):
+        path=out/(texture_id+".svg")
+        write_text(path,make_texture_svg(texture_id,title,i))
+        index.append({"id":texture_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-texture",
+                      "title":title,"category":"texture / surface","license":CC0,"license_url":CC0_URL,
+                      "redistributable":True,"tileable":True,
+                      "note":"Original vector-generated texture. Preview at reduced opacity or use as a surface shader input."})
+    return len(TEXTURES)
+
 
 def request_bytes(url, timeout=45, limit=None):
     req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"*/*"})
@@ -1046,13 +1184,24 @@ def download_nasa_media(root,index):
                         allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=10*1024*1024
                     candidates=[]
                     for media_url in urls:
-                        if not media_url.startswith("https://images-assets.nasa.gov/"):
+                        media_url=media_url.replace("http://","https://",1)
+                        parsed=urllib.parse.urlparse(media_url)
+                        if parsed.hostname!="images-assets.nasa.gov":
                             continue
-                        ext=Path(urllib.parse.urlparse(media_url).path).suffix.lower()
+                        ext=Path(parsed.path).suffix.lower()
+                        path_lower=parsed.path.lower()
+                        # NASA manifest rendition URLs may omit the extension entirely (e.g. ~smal).
                         if ext not in allowed_ext:
-                            continue
-                        name=Path(urllib.parse.urlparse(media_url).path).name.lower()
-                        preference=0 if "~small" in name else 1 if "~medium" in name else 2 if "~large" in name else 3 if "~orig" in name else 4
+                            if media_type=="image" and "/image/" in path_lower and ext=="":
+                                ext=".unknown"
+                            elif media_type=="video" and "/video/" in path_lower and ext=="":
+                                ext=".unknown"
+                            elif media_type=="audio" and "/audio/" in path_lower and ext=="":
+                                ext=".unknown"
+                            else:
+                                continue
+                        name=Path(parsed.path).name.lower()
+                        preference=0 if "~smal" in name or "~small" in name else 1 if "~medi" in name or "~medium" in name else 2 if "~larg" in name or "~large" in name else 3 if "~orig" in name else 4
                         candidates.append((preference,len(media_url),media_url,ext))
                     candidates.sort()
                     downloaded=None; failures=[]
@@ -1067,6 +1216,18 @@ def download_nasa_media(root,index):
                                 raise RuntimeError("URL did not return a usable MP4/MOV container")
                             if media_type=="audio" and not (ctype.lower().startswith("audio/") or blob.startswith(b"RIFF") or blob.startswith(b"ID3")):
                                 raise RuntimeError("URL did not return a recognizable audio file")
+                            if ext==".unknown":
+                                mime=ctype.split(";")[0].lower()
+                                inferred={"image/jpeg":".jpg","image/png":".png","image/webp":".webp","image/tiff":".tif",
+                                          "video/mp4":".mp4","video/quicktime":".mov","audio/mpeg":".mp3",
+                                          "audio/mp4":".m4a","audio/wav":".wav","audio/x-wav":".wav","audio/ogg":".ogg"}.get(mime)
+                                if inferred is None:
+                                    if blob.startswith(b"RIFF") and media_type=="audio": inferred=".wav"
+                                    elif blob.startswith(b"ID3") and media_type=="audio": inferred=".mp3"
+                                    elif len(blob)>12 and blob[4:8]==b"ftyp" and media_type=="video": inferred=".mp4"
+                                if inferred is None:
+                                    raise RuntimeError("extensionless NASA media has unrecognized MIME/container: "+ctype)
+                                ext=inferred
                             downloaded=(media_url,ext,blob,ctype); break
                         except Exception as file_exc:
                             failures.append(str(file_exc))
@@ -1439,7 +1600,8 @@ def main():
     STAGE.mkdir(parents=True)
     index=[]
     generate_originals(STAGE,index)
-    print("[Originals] generated",len(index),"SVG assets")
+    texture_count=generate_original_textures(STAGE,index)
+    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable surface textures")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
@@ -1465,6 +1627,7 @@ def main():
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
     )
     summary={"original_backgrounds":len(PALETTES),"original_overlays":len(OVERLAYS),"original_icons":len(ICONS),
+              "original_textures":len(TEXTURES),
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
@@ -1497,8 +1660,8 @@ def main():
     index_doc["summary"]=summary
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
-    assert len(PALETTES)>=50 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35
-    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)
+    assert len(PALETTES)>=60 and len(OVERLAYS)>=50 and len(ICONS)>=90 and len(INFO)>=35 and len(TEXTURES)>=30
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}
     for path in STAGE.rglob("*"):
