@@ -10,6 +10,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
 
 
+
+class ExternalSourceExpansionTests(unittest.TestCase):
+    def test_external_source_ceilings_remain_expanded(self):
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 20)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["models"], 28)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["textures"], 48)
+        self.assertGreaterEqual(library.MET_OPEN_ACCESS_IMAGE_CAP, 110)
+        self.assertGreaterEqual(library.RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP, 90)
+        self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP, 240)
+        self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 60)
+        self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 36)
+
 class RightsGateTests(unittest.TestCase):
     def test_smithsonian_requires_cc0_for_record_and_exact_media(self):
         self.assertTrue(library.smithsonian_rights_are_cc0("CC0", "CC0"))

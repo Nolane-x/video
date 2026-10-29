@@ -15,6 +15,15 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
+
+# Discovery ceilings for official sources. These are maximums, not promised download counts;
+# item-level rights and file validation remain mandatory for every downloaded asset.
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+MET_OPEN_ACCESS_IMAGE_CAP = 110
+RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
+WIKIMEDIA_CC0_SVG_CAP = 60
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 36
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -1510,7 +1519,7 @@ def choose_poly_texture_selection(tree):
 
 def download_polyhaven(root,index):
     report=[]
-    counts={"hdris":16,"models":22,"textures":36}
+    counts=POLYHAVEN_SELECTION_LIMITS
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -1603,7 +1612,7 @@ def download_polyhaven(root,index):
     return report
 
 def download_met_open_access(root,index):
-    report=[]; total=0; cap=90
+    report=[]; total=0; cap=MET_OPEN_ACCESS_IMAGE_CAP
     queries=[
         ("landscape","landscape painting"),("botanical","botanical illustration"),("astronomy","astronomy celestial chart"),
         ("maps","antique map"),("architecture","architectural drawing"),("animals","animal painting"),
@@ -1613,7 +1622,13 @@ def download_met_open_access(root,index):
         ("marine","marine life painting"),("geology","minerals geology illustration"),("navigation","nautical instrument"),
         ("manuscripts","illuminated manuscript"),("coins","historic coin medal"),("ceramics","historic pottery vessel"),
         ("photography","historic photograph city"),("astronomy-instruments","astrolabe celestial globe"),("textile-heritage","historic textile embroidery"),
-        ("architecture-plans","architectural plan drawing"),("birds","bird natural history painting"),("botanical-prints","botanical plate flowers")
+        ("architecture-plans","architectural plan drawing"),("birds","bird natural history painting"),("botanical-prints","botanical plate flowers"),
+        ("technical-drawings","technical engineering drawing"),("cartography","historic world map"),
+        ("music-manuscripts","historic music manuscript"),("naturalist-sketches","natural history illustration"),
+        ("vietnamese-art","Vietnamese art painting"),("southeast-asian-art","Southeast Asian art"),
+        ("printing-history","historic printing press"),("oceanography","oceanography scientific illustration"),
+        ("aviation-history","historic aircraft art"),("ornamental-design","historic decorative ornament"),
+        ("textile-patterns","historic textile fabric pattern"),("mechanical-diagrams","mechanical engineering diagram")
     ]
     seen=set()
     for category,q in queries:
@@ -1712,7 +1727,16 @@ def download_nasa_media(root,index):
         ("solar-audio","solar activity sonification audio NASA"),
         ("rocket-audio","rocket engine test sound recording NASA"),
         ("spacecraft-audio","spacecraft radio signal audio recording NASA"),
-        ("earth-audio","Earth ocean sound NASA audio")
+        ("earth-audio","Earth ocean sound NASA audio"),
+        ("planetary-rings","Saturn rings spacecraft observation"),
+        ("jupiter-system","Jupiter moons planetary probe"),
+        ("solar-wind","solar wind coronal mass ejection"),
+        ("mars-geology","Mars canyon geology rover"),
+        ("earth-atmosphere","Earth atmospheric phenomena satellite"),
+        ("deep-field","deep field galaxy telescope"),
+        ("lunar-geology","lunar craters Moon terrain"),
+        ("earth-weather","Earth storm systems satellite imagery"),
+        ("saturn-audio","Saturn radio emissions audio NASA") 
     ]
     media_types=("image","video","audio")
     for category,q in searches:
@@ -1888,7 +1912,19 @@ def download_loc_public_domain(root,index):
         ("science","scientific instrument laboratory"),("astronomy","astronomy observatory"),
         ("architecture","historic architecture building"),("transport","railroad locomotive"),
         ("ocean","ship harbor ocean"),("history","historic poster"),("botanical","botanical illustration"),
-        ("engineering","bridge engineering"),("weather","storm weather"),("culture","textile pattern pottery")
+        ("engineering","bridge engineering"),("weather","storm weather"),("culture","textile pattern pottery"),
+        ("early-film","early motion picture camera film production"),
+        ("railway-interiors","historic passenger train interior"),
+        ("astronomical-photography","historic telescope astronomy plate"),
+        ("shipbuilding","shipyard ship construction"),
+        ("botanical-atlas","botanical plate natural history"),
+        ("scientific-apparatus","scientific equipment microscope"),
+        ("historic-computing","historic computer machinery"),
+        ("urban-planning","city planning architectural street"),
+        ("southeast-asia","Vietnam Southeast Asia historic photograph"),
+        ("weather-instruments","weather instruments storm observation"),
+        ("textile-process","historic textile loom weaving"),
+        ("energy-infrastructure","hydroelectric dam power plant")
     ]
     seen=set()
     for category,q in queries:
@@ -2006,7 +2042,7 @@ def wikimedia_license_is_eligible(short_name):
 
 
 def download_wikimedia_public_domain(root,index):
-    report=[]; total=0; cap=160; seen=set()
+    report=[]; total=0; cap=WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP; seen=set()
     queries=[
         ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
         ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
@@ -2026,7 +2062,22 @@ def download_wikimedia_public_domain(root,index):
         ("railway","historic railroad station public domain filetype:bitmap"),("bridges-archive","historic bridge construction public domain filetype:bitmap"),
         ("craft","ceramics textile craft public domain filetype:bitmap"),("early-computing","early computer machinery public domain filetype:bitmap"),
         ("weather-maps","weather map storm public domain filetype:bitmap"),("lunar","Apollo Moon surface public domain filetype:bitmap"),
-        ("historic-labs","laboratory scientific equipment public domain filetype:bitmap"),("urban-archive","historic city architecture public domain filetype:bitmap")
+        ("historic-labs","laboratory scientific equipment public domain filetype:bitmap"),("urban-archive","historic city architecture public domain filetype:bitmap"),
+        ("cinema-history","historical cinema film camera public domain filetype:bitmap"),
+        ("medical-history","historic medical illustration public domain filetype:bitmap"),
+        ("marine-biology","marine biology public domain illustration filetype:bitmap"),
+        ("earth-science","mineral crystals geology public domain filetype:bitmap"),
+        ("climate-science","weather satellite hurricane public domain filetype:bitmap"),
+        ("agriculture-archive","historic farming agriculture public domain photograph filetype:bitmap"),
+        ("computer-history","early computer mainframe public domain photograph filetype:bitmap"),
+        ("aviation-engineering","aircraft engine technical illustration public domain filetype:bitmap"),
+        ("observatories","historic telescope observatory public domain photograph filetype:bitmap"),
+        ("botany-microscopy","plant anatomy microscopic public domain illustration filetype:bitmap"),
+        ("maps-vietnam","Vietnam historical map public domain filetype:bitmap"),
+        ("southeast-asia","Southeast Asia historic architecture public domain filetype:bitmap"),
+        ("workshops","historic machine tool workshop public domain filetype:bitmap"),
+        ("music-archive","historic musical instrument public domain image filetype:bitmap"),
+        ("space-programme-archive","space exploration historic spacecraft public domain filetype:bitmap")
     ]
     for category,q in queries:
         if total>=cap: break
@@ -2106,7 +2157,7 @@ def rijksmuseum_license_from_rights(rights_text):
 def download_smithsonian_open_access(root,index):
     """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
     import os
-    report=[]; total=0; cap=60; seen=set()
+    report=[]; total=0; cap=WIKIMEDIA_CC0_SVG_CAP; seen=set()
     api_key=(os.environ.get("SMITHSONIAN_API_KEY") or "").strip() or "DEMO_KEY"
     topics=[
         ("natural-history","NMNH"),("botany","NMNHBOTANY"),("birds","NMNHBIRDS"),
@@ -2285,7 +2336,7 @@ def download_rijksmuseum_open_access(root,index):
     """Harvest a capped sample of Rijksmuseum records, but only image media with explicit CC0/PDM rights."""
     import xml.etree.ElementTree as ET
     from urllib.parse import urlencode
-    report=[]; total=0; cap=60; seen=set()
+    report=[]; total=0; cap=RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP; seen=set()
     oai_ns="http://www.openarchives.org/OAI/2.0/"
     edm_ns="http://www.europeana.eu/schemas/edm/"
     dc_ns="http://purl.org/dc/elements/1.1/"
@@ -2464,7 +2515,7 @@ def sanitize_cc0_svg(data):
 
 def download_wikimedia_vector_svg(root,index):
     """Bundle small Commons vectors only when exact file metadata says CC0 or Public Domain."""
-    report=[]; total=0; cap=45; seen=set()
+    report=[]; total=0; cap=60; seen=set()
     queries=[
         ("world-maps","world map countries svg filetype:svg"),
         ("historical-maps","historical map outline svg filetype:svg"),
@@ -2480,7 +2531,19 @@ def download_wikimedia_vector_svg(root,index):
         ("infographic","flowchart cycle infographic diagram svg filetype:svg"),
         ("geometric","geometric pattern ornament svg filetype:svg"),
         ("education","educational diagram school science svg filetype:svg"),
-        ("environment","renewable energy ecology diagram svg filetype:svg")
+        ("environment","renewable energy ecology diagram svg filetype:svg"),
+        ("weather-symbols","weather fronts climate symbols SVG filetype:svg"),
+        ("renewable-energy","solar wind hydropower technical diagram SVG filetype:svg"),
+        ("medical-diagrams","anatomy medical schematic SVG filetype:svg"),
+        ("animal-anatomy","animal skeleton botanical biology diagram SVG filetype:svg"),
+        ("geological-maps","geology cross section strata map SVG filetype:svg"),
+        ("water-cycle","water cycle watershed diagram SVG filetype:svg"),
+        ("historical-flags","historical flags heraldry SVG filetype:svg"),
+        ("heritage-architecture","architectural plan facade historic building SVG filetype:svg"),
+        ("computer-network","computer networking topology diagram SVG filetype:svg"),
+        ("astronomy-charts","planet orbit celestial chart SVG filetype:svg"),
+        ("agriculture","agricultural crop diagram irrigation SVG filetype:svg"),
+        ("navigation","nautical chart compass navigation SVG filetype:svg")
     ]
     for category,q in queries:
         if total>=cap: break
@@ -2553,7 +2616,7 @@ def download_wikimedia_vector_svg(root,index):
 
 def download_wikimedia_video_audio(root,index):
     """Bundle a small set of video/audio files only when the Commons file page explicitly marks CC0 or Public Domain."""
-    report=[]; total=0; total_videos=0; total_audio=0; cap=20; seen=set()
+    report=[]; total=0; total_videos=0; total_audio=0; cap=WIKIMEDIA_CC0_AUDIO_VIDEO_CAP; seen=set()
     queries=[
         ("spaceflight","video spaceflight rocket launch filetype:video"),
         ("earth-observation","video satellite Earth clouds filetype:video"),
@@ -2566,7 +2629,23 @@ def download_wikimedia_video_audio(root,index):
         ("birds","bird song nature field recording filetype:audio"),
         ("ocean-audio","ocean waves rain wind ambience filetype:audio"),
         ("industrial-audio","machine workshop field recording filetype:audio"),
-        ("ambience-audio","forest city ambience field recording filetype:audio")
+        ("ambience-audio","forest city ambience field recording filetype:audio"),
+        ("microbiology-video","microscopy laboratory public domain video filetype:video"),
+        ("manufacturing-video","manufacturing machines public domain footage filetype:video"),
+        ("transport-video","railway locomotive journey public domain video filetype:video"),
+        ("vintage-film-video","silent film public domain video filetype:video"),
+        ("waterfall-video","waterfall river public domain video filetype:video"),
+        ("agriculture-video","harvest field public domain video filetype:video"),
+        ("animation-video","public domain animation short filetype:video"),
+        ("city-archive-video","historic city street public domain video filetype:video"),
+        ("rainfall-audio","rainfall outdoor ambience public domain audio filetype:audio"),
+        ("machinery-audio","historic machine operating audio public domain filetype:audio"),
+        ("railway-audio","train station railway ambience public domain audio filetype:audio"),
+        ("ocean-close-audio","ocean surf ambience public domain audio filetype:audio"),
+        ("animal-field-audio","bird insects animal field recording public domain audio filetype:audio"),
+        ("clock-mechanism-audio","clock bell ticking public domain audio filetype:audio"),
+        ("wind-forest-audio","wind forest leaves public domain audio filetype:audio"),
+        ("historic-broadcast-audio","historic radio broadcast public domain audio filetype:audio")
     ]
     for category,q in queries:
         if total>=cap: break
