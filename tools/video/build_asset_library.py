@@ -162,6 +162,21 @@ MOTION_LOOPS = [
     ("soft-bokeh-loop","Soft Bokeh Loop","cinematic","0x181a2a","bokeh"),
 ]
 
+FONT_FAMILIES = [
+    ("bevietnampro","Be Vietnam Pro",["BeVietnamPro-Regular.ttf","BeVietnamPro-Bold.ttf","BeVietnamPro-Italic.ttf"],"Vietnamese-first captions, body copy and subtitles",True),
+    ("inter","Inter",["Inter[opsz,wght].ttf","Inter-Italic[opsz,wght].ttf"],"Modern titles, body copy and UI",True),
+    ("notosans","Noto Sans",["NotoSans[wdth,wght].ttf"],"Broad-script fallback and body copy",True),
+    ("notoserif","Noto Serif",["NotoSerif[wdth,wght].ttf"],"Editorial, education and long-form titles",True),
+    ("ibmplexsans","IBM Plex Sans",["IBMPlexSans[wdth,wght].ttf","IBMPlexSans-Italic[wdth,wght].ttf"],"Technical explainers, labels and charts",True),
+    ("ibmplexmono","IBM Plex Mono",["IBMPlexMono-Regular.ttf","IBMPlexMono-Bold.ttf"],"Code, terminal, measurement and data labels",True),
+    ("spacegrotesk","Space Grotesk",["SpaceGrotesk[wght].ttf"],"Technology, modern editorial and product",True),
+    ("playfairdisplay","Playfair Display",["PlayfairDisplay[wght].ttf","PlayfairDisplay-Italic[wght].ttf"],"Editorial, history and cultural storytelling",True),
+    ("barlow","Barlow",["Barlow-Regular.ttf","Barlow-Bold.ttf"],"Broadcast titles, sports and condensed layouts",True),
+    ("oswald","Oswald",["Oswald[wght].ttf"],"Tall headline treatments and vertical video",True),
+    ("manrope","Manrope",["Manrope[wght].ttf"],"Clean product, business and explanatory video",True),
+    ("merriweather","Merriweather",["Merriweather[opsz,wdth,wght].ttf"],"Reading-heavy education and documentary titles",True)
+]
+
 OVERLAYS = [
 ("film-grain","Fine film grain"),("scanlines","CRT scanlines"),("halftone","Halftone dots"),("light-leak","Warm/cool light leak"),
 ("vignette","Cinematic vignette"),("letterbox","Cinematic letterbox"),("film-gate","Film gate frame"),("dust","Floating dust motes"),
@@ -2057,6 +2072,96 @@ def download_rijksmuseum_open_access(root,index):
                            "source_page":"https://data.rijksmuseum.nl/docs/oai-pmh"})
             print("[Rijksmuseum Open Access] page failed:",page_num,str(exc))
             break
+    return report
+
+
+def download_google_fonts(root,index):
+    """Bundle selected Google Fonts only after verifying the family's official OFL and metadata listing."""
+    report=[]; total_bytes=0; max_total=42*1024*1024; max_font=9*1024*1024
+    allowed_signatures={b"\x00\x01\x00\x00",b"OTTO",b"ttcf"}
+    for slug,family,filenames,role,vietnamese_priority in FONT_FAMILIES:
+        base=f"https://raw.githubusercontent.com/google/fonts/main/ofl/{slug}/"
+        family_report={"id":"google-font-"+slug,"family":family,"source_page":"https://fonts.google.com/specimen/"+urllib.parse.quote(family.replace(" ","+"),safe="+"),
+                       "status":"started","fonts":[]}
+        try:
+            license_blob,license_mime=request_bytes(base+"OFL.txt",timeout=20,limit=300000)
+            license_text=license_blob.decode("utf-8","replace")
+            if "SIL OPEN FONT LICENSE" not in license_text.upper() or "VERSION 1.1" not in license_text.upper():
+                raise RuntimeError("Family license file does not explicitly confirm SIL Open Font License 1.1")
+            metadata_blob,metadata_mime=request_bytes(base+"METADATA.pb",timeout=20,limit=1_500_000)
+            metadata_text=metadata_blob.decode("utf-8","replace")
+            listed=set(re.findall(r'filename:\s*"([^"]+\.ttf)"',metadata_text))
+            if not listed:
+                raise RuntimeError("Official METADATA.pb lists no TTF font files")
+            source_name_match=re.search(r'name:\s*"([^"]+)"',metadata_text)
+            official_name=source_name_match.group(1) if source_name_match else family
+            languages=[x for x in re.findall(r'languages:\s*"([^"]+)"',metadata_text) if x]
+            supports_vietnamese=any(x.lower().startswith("vi_") or x.lower()=="vi" for x in languages) or vietnamese_priority
+            family_dir=root/"third-party/google-fonts"/slug
+            family_dir.mkdir(parents=True,exist_ok=True)
+            write_bytes(family_dir/"OFL.txt",license_blob)
+            write_bytes(family_dir/"METADATA.pb",metadata_blob)
+            family_report.update({"status":"metadata_verified","license":"SIL Open Font License 1.1",
+                                  "license_url":base+"OFL.txt","metadata_url":base+"METADATA.pb",
+                                  "font_files_requested":filenames})
+            for filename in filenames:
+                if total_bytes>=max_total:
+                    family_report["font_budget_exhausted"]=True
+                    break
+                if filename not in listed:
+                    family_report["fonts"].append({"file":filename,"status":"not_in_official_metadata"})
+                    continue
+                encoded=urllib.parse.quote(filename,safe="-_.")
+                source_url=base+encoded
+                try:
+                    blob,ctype=request_bytes(source_url,timeout=28,limit=max_font)
+                    if len(blob)<2048:
+                        raise RuntimeError("font file is too small to be valid")
+                    if blob[:4] not in allowed_signatures:
+                        raise RuntimeError("downloaded file does not have a recognized TTF/OTF sfnt signature")
+                    if total_bytes+len(blob)>max_total:
+                        family_report["fonts"].append({"file":filename,"status":"skipped_total_font_budget"})
+                        continue
+                    target=family_dir/filename
+                    write_bytes(target,blob)
+                    digest=sha256_path(target)
+                    italic=("italic" in filename.lower())
+                    variable=("[" in filename and "]" in filename)
+                    weight= "100 900" if variable else (
+                        100 if "thin" in filename.lower() else
+                        200 if "extralight" in filename.lower() else
+                        300 if "light" in filename.lower() else
+                        500 if "medium" in filename.lower() else
+                        600 if "semibold" in filename.lower() else
+                        700 if "bold" in filename.lower() else
+                        800 if "extrabold" in filename.lower() else
+                        900 if "black" in filename.lower() else 400
+                    )
+                    item_id="google-font-"+slug+"-"+slugify(filename)
+                    item={"id":item_id,"path":target.relative_to(root).as_posix(),"type":"open-font-license-font",
+                          "title":family+" — "+filename,"font_family":official_name,"font_family_id":slug,
+                          "font_filename":filename,"font_weight":weight,"font_style":"italic" if italic else "normal",
+                          "font_format":"truetype","font_role":role,"supports_vietnamese":bool(supports_vietnamese),
+                          "category":"typography","creator":"Google Fonts upstream family contributors",
+                          "source_page":"https://fonts.google.com/specimen/"+urllib.parse.quote(family.replace(" ","+"),safe="+"),
+                          "source_file_url":source_url,"source_license_file":(family_dir/"OFL.txt").relative_to(root).as_posix(),
+                          "license":"SIL Open Font License 1.1","license_url":base+"OFL.txt",
+                          "rights_verified_from_item_metadata":True,"redistributable":True,"size_bytes":len(blob),"sha256":digest,
+                          "note":"Font file was listed in the official Google Fonts METADATA.pb, and the family's OFL.txt explicitly identifies SIL Open Font License 1.1. Keep the license when redistributing the font file and observe any Reserved Font Name terms."}
+                    index.append(item); total_bytes+=len(blob)
+                    family_report["fonts"].append({"file":filename,"status":"downloaded","path":item["path"],
+                                                   "size_bytes":len(blob),"sha256":digest,"weight":weight,"style":item["font_style"]})
+                    print("[Google Fonts] OK:",family,filename,len(blob))
+                except Exception as font_exc:
+                    family_report["fonts"].append({"file":filename,"status":"failed","reason":str(font_exc)[:240]})
+            family_report["downloaded_count"]=sum(x.get("status")=="downloaded" for x in family_report["fonts"])
+            family_report["status"]="downloaded" if family_report["downloaded_count"] else "no_valid_font_downloaded"
+        except Exception as family_exc:
+            family_report["status"]="failed"
+            family_report["reason"]=str(family_exc)[:300]
+            print("[Google Fonts] family failed:",slug,str(family_exc))
+        report.append(family_report)
+        time.sleep(.18)
     return report
 
 
