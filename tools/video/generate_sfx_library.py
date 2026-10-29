@@ -110,7 +110,7 @@ SFX_PRESETS = [
     ("ui-warning-pulse","buzz",0.55),
     ("ui-data-arrival","scifi",0.7),
     ("ui-loading-sweep","sweepbright",1.1),
-    ("ui-scan-complete","success-chime",1),
+    ("ui-scan-complete","chime",1),
     ("digital-packet-burst","glitch",0.7),
     ("terminal-keystroke-run","typing",2.2),
     ("server-power-up","drone",2.2),
