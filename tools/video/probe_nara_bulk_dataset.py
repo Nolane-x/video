@@ -40,6 +40,10 @@ def fetch_bytes(url: str, limit: int, timeout: int = 60) -> bytes:
         return body
 
 
+def _local_name(tag: str) -> str:
+    return str(tag).rsplit("}", 1)[-1]
+
+
 def list_json_objects(record_group: str) -> list[dict[str, Any]]:
     prefix = f"descriptions/record-groups/rg_{record_group}/"
     query = urllib.parse.urlencode(
@@ -47,14 +51,32 @@ def list_json_objects(record_group: str) -> list[dict[str, Any]]:
     )
     xml_body = fetch_bytes(BUCKET_URL + "?" + query, 2 * 1024 * 1024, timeout=30)
     root = ET.fromstring(xml_body)
-    ns = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
+    contents = [element for element in root.iter() if _local_name(element.tag) == "Contents"]
     rows = []
-    for item in root.findall("s3:Contents", ns):
-        key = item.findtext("s3:Key", default="", namespaces=ns)
-        size_text = item.findtext("s3:Size", default="0", namespaces=ns)
-        modified = item.findtext("s3:LastModified", default="", namespaces=ns)
+    for item in contents:
+        fields = {_local_name(child.tag): (child.text or "") for child in item}
+        key = fields.get("Key", "")
+        size_text = fields.get("Size", "0")
+        modified = fields.get("LastModified", "")
         if key.endswith(".json"):
             rows.append({"key": key, "size_bytes": int(size_text), "last_modified": modified})
+
+    if not rows:
+        debug = {
+            "requested_prefix": prefix,
+            "response_root": _local_name(root.tag),
+            "response_fields": {
+                _local_name(child.tag): (child.text or "")[:240]
+                for child in list(root)
+                if _local_name(child.tag) != "Contents"
+            },
+            "contents_count": len(contents),
+            "first_content_keys": [
+                {_local_name(child.tag): (child.text or "")[:160] for child in list(item)}
+                for item in contents[:3]
+            ],
+        }
+        raise RuntimeError("S3 listing returned no JSON objects for NARA record group: " + json.dumps(debug))
     return sorted(rows, key=lambda row: row["key"])
 
 
