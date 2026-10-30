@@ -22,6 +22,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 60)
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 36)
         self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 30)
+        self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 20 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 250 * 1024 * 1024)
 
@@ -32,6 +33,9 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertFalse(library.ambientcg_download_url_is_allowed("https://example.com/get?file=Wood096_1K-JPG.zip"))
         self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/api/v2/full_json?file=Wood096_1K-JPG.zip"))
         self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=../payload.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com:8443/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://user@ambientcg.com/get?file=Wood096_1K-JPG.zip"))
+        self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip#fragment"))
 
     def test_ambientcg_download_picker_prefers_small_official_zip(self):
         # Fixture mirrors the live official v2 full_json schema: filetype, fileName,
