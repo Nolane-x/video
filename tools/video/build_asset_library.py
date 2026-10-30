@@ -2028,6 +2028,8 @@ def download_lazytextures(root, index):
                     row.update(status="invalid_item_url", reason="The computed item detail URL failed the official-host allow-list.")
                     report.append(row)
                     continue
+                choice = None
+                target = None
                 try:
                     detail = request_json(detail_url, timeout=30)
                     time.sleep(.35)
@@ -2037,6 +2039,7 @@ def download_lazytextures(root, index):
                         continue
                     detail_name = str(detail.get("name") or detail.get("assetName") or "").strip()
                     detail_type = str(detail.get("assetType") or detail.get("type") or "").strip().lower()
+                    detail_type = {"model": "models", "material": "materials", "hdri": "hdris", "texture": "textures"}.get(detail_type, detail_type)
                     if detail_name.casefold() != name.casefold() or detail_type != asset_type:
                         row.update(status="skipped_item_identity", reason="The item detail name/type did not match the browse result.")
                         report.append(row)
@@ -2046,7 +2049,6 @@ def download_lazytextures(root, index):
                         row.update(status="skipped_rights", reason=rights["evidence"])
                         report.append(row)
                         continue
-                    choice = None
                     choice = lazytextures_choose_archive(detail)
                     if not choice:
                         row.update(status="no_eligible_archive", reason="No official, size-bounded ZIP was listed in archiveFiles.")
@@ -2130,6 +2132,8 @@ def download_lazytextures(root, index):
                     report.append(row)
                     print("[LazyTextures] OK:", asset_type, name, len(blob), "archive bytes,", extracted, "files,", unpacked, "unpacked bytes")
                 except Exception as item_exc:
+                    if target is not None:
+                        shutil.rmtree(target, ignore_errors=True)
                     row.update(status="failed", reason=str(item_exc)[:420], file_name=choice.get("name") if choice else None)
                     report.append(row)
                 time.sleep(.45)
