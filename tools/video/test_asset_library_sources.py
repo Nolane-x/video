@@ -23,6 +23,7 @@ import build_asset_library_shard as shard_builder  # noqa: E402
 import finalize_asset_library_release as release_finalizer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
+import hashlib
 
 
 
@@ -1546,17 +1547,22 @@ class DistributedAssetLibraryTests(unittest.TestCase):
                 "paths": [asset["path"]],
             }],
         }
-        with self.assertRaisesRegex(RuntimeError, "Duplicate asset path"):
-            release_finalizer.merge_shard_manifests(
-                [shard, {**shard, "lane": "two", "bundles": [{
+        second_shard = {
+            **shard,
+            "lane": "two",
+            "assets": [{**asset, "id": "other-asset"}],
+            "bundles": [{
                     "name": "video-assets-two-misc-001.zip",
                     "sha256": "c" * 64,
                     "archive_bytes": 1024,
                     "uncompressed_bytes": 3,
                     "file_count": 1,
                     "paths": [asset["path"]],
-                }]}],
-                expected_lanes={"one", "two"},
+                }],
+        }
+        with self.assertRaisesRegex(RuntimeError, "Duplicate asset path"):
+            release_finalizer.merge_shard_manifests(
+                [shard, second_shard], expected_lanes={"one", "two"}
             )
 
 
