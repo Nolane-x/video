@@ -2506,11 +2506,39 @@ def poly_pizza_download_glb(url, max_bytes=POLY_PIZZA_MAX_MODEL_BYTES):
 
 
 def poly_pizza_glb_is_valid(blob):
-    if not isinstance(blob, (bytes, bytearray)) or len(blob) < 20 or bytes(blob[:4]) != b"glTF":
+    if not isinstance(blob, (bytes, bytearray)) or len(blob) < 28 or bytes(blob[:4]) != b"glTF":
         return False
     version = int.from_bytes(blob[4:8], "little")
     declared_length = int.from_bytes(blob[8:12], "little")
-    return version == 2 and declared_length == len(blob)
+    if version != 2 or declared_length != len(blob):
+        return False
+    json_length = int.from_bytes(blob[12:16], "little")
+    if json_length <= 0 or json_length % 4 or blob[16:20] != b"JSON":
+        return False
+    json_end = 20 + json_length
+    if json_end > len(blob):
+        return False
+    try:
+        gltf = json.loads(bytes(blob[20:json_end]).rstrip(b" \\t\\r\\n\\x00").decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        return False
+    if not isinstance(gltf, dict) or not isinstance(gltf.get("asset"), dict):
+        return False
+    if str(gltf["asset"].get("version", "")) != "2.0":
+        return False
+    offset = json_end
+    while offset < len(blob):
+        if offset + 8 > len(blob):
+            return False
+        chunk_length = int.from_bytes(blob[offset:offset + 4], "little")
+        chunk_type = bytes(blob[offset + 4:offset + 8])
+        offset += 8
+        if chunk_length < 0 or offset + chunk_length > len(blob):
+            return False
+        if chunk_type not in {b"BIN\\x00"} and not chunk_type.isalpha():
+            return False
+        offset += chunk_length
+    return offset == len(blob)
 
 
 def download_poly_pizza(root, index):
