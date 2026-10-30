@@ -1537,19 +1537,19 @@ def generate_originals(root,index):
     for asset_id,palette,kind in PALETTES:
         path=root/"originals/backgrounds"/(asset_id+".svg")
         write_text(path,make_background(asset_id,palette,kind))
-        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-background","category":kind,"license":CC0,"license_url":CC0_URL,"redistributable":True})
+        index.append({"id":"background-"+asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-background","category":kind,"license":CC0,"license_url":CC0_URL,"redistributable":True})
     for asset_id,title in OVERLAYS:
         path=root/"originals/overlays"/(asset_id+".svg")
         write_text(path,overlay_svg(asset_id))
-        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-overlay","description":title,"license":CC0,"license_url":CC0_URL,"transparent":True,"redistributable":True})
+        index.append({"id":"overlay-"+asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-overlay","description":title,"license":CC0,"license_url":CC0_URL,"transparent":True,"redistributable":True})
     for name,drawing in ICONS.items():
         path=root/"originals/icons"/(name+".svg")
         write_text(path,icon_svg(drawing))
-        index.append({"id":name,"path":path.relative_to(root).as_posix(),"type":"original-svg-icon","license":CC0,"license_url":CC0_URL,"redistributable":True})
+        index.append({"id":"icon-"+name,"path":path.relative_to(root).as_posix(),"type":"original-svg-icon","license":CC0,"license_url":CC0_URL,"redistributable":True})
     for i,(asset_id,title) in enumerate(INFO):
         path=root/"originals/infographics"/(asset_id+".svg")
         write_text(path,infographic_svg(asset_id,title,i))
-        index.append({"id":asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-infographic-template","title":title,"license":CC0,"license_url":CC0_URL,"redistributable":True,"warning":"Replace placeholders and verify all data and sources before publishing."})
+        index.append({"id":"infographic-"+asset_id,"path":path.relative_to(root).as_posix(),"type":"original-svg-infographic-template","title":title,"license":CC0,"license_url":CC0_URL,"redistributable":True,"warning":"Replace placeholders and verify all data and sources before publishing."})
     from generate_sfx_library import generate_original_audio
     audio_count=generate_original_audio(root,index,CC0_URL)
     print("[Original SFX] generated",audio_count,"WAV files")
