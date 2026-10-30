@@ -188,3 +188,18 @@ The build now adds the pinned **OpenMoji 17.0** official npm package's color and
 Suggested attribution: “All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0.”
 
 Official sources: [OpenMoji 17.0 release](https://github.com/hfg-gmuend/openmoji/releases/tag/17.0.0), [official FAQ](https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md), [npm package 17.0.0](https://www.npmjs.com/package/openmoji/v/17.0.0), [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
+
+## Build 48: Internet Archive moving-image footage
+
+This lane adds two curated Internet Archive collections for longer-form and historical moving images: **Prelinger** educational/industrial films and **NASA** mission/spaceflight videos. The advanced-search collection filter is discovery only. The item metadata endpoint must confirm the exact identifier, `mediatype=movies`, the requested collection and an approved item-level license URL.
+
+Accepted item rights:
+- CC0 1.0 and CC0 3.0, when the exact item's `licenseurl` field points to the official Creative Commons URL.
+- The legacy Creative Commons Public Domain URL only when that same item's `rights` field is exactly `Public Domain`.
+- Public Domain Mark is not silently treated as CC0 or a license.
+
+Only MP4, WebM and OGV files within the configured file/duration limits are considered. The importer compares downloaded bytes against the Internet Archive file record's MD5 and SHA-1 when present, then records its own SHA-256, creator, year, duration, item URL, metadata URL, direct media URL and exact license/right fields.
+
+Current ceilings: 40 items from Prelinger and 40 from NASA; 250 MiB per file and 4 GiB total per build. These are maximums, not promised downloads. The generated report and `ASSET_INDEX.json` show what actually passed rights review and file integrity checks.
+
+Official source and API documentation: [Internet Archive](https://archive.org/), [Advanced Search API](https://archive.org/advancedsearch.php), [Metadata API](https://archive.org/developers/metadata.html).
