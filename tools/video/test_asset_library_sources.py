@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
 import generate_original_stickers as sticker_library  # noqa: E402
 import package_asset_library as packer  # noqa: E402
+import generate_sfx_library as sfx_library  # noqa: E402
 
 
 
@@ -135,6 +136,21 @@ class OriginalStickerAndMemeGeneratorTests(unittest.TestCase):
             self.assertIn("<svg ", svg)
             self.assertIn("viewBox=", svg)
             self.assertGreater(svg.count("<rect"), 1)
+
+
+class OriginalSFXIntegrityTests(unittest.TestCase):
+    def test_sfx_index_digest_matches_complete_wav_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            count = sfx_library.generate_original_audio(root, index, library.CC0_URL)
+            self.assertGreater(count, 0)
+            self.assertEqual(count, len(index))
+            for item in index:
+                audio_path = root / item["path"]
+                self.assertTrue(audio_path.is_file())
+                self.assertEqual(item["sha256"], library.sha256_path(audio_path), item["path"])
+                self.assertEqual(item["size_bytes"], audio_path.stat().st_size)
 
 
 class SafeArchiveExtractionTests(unittest.TestCase):
