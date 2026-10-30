@@ -101,3 +101,27 @@ The search ceiling is 30 packages across these types, not a promised download co
 
 Official documentation: [ambientCG API v2](https://docs.ambientcg.com/api/v2/full_json/) and [ambientCG license](https://docs.ambientcg.com/license/). All downloadable ambientCG assets are published under CC0 1.0 according to the provider's license documentation.
 
+
+## Build 44: USGS Multimedia Gallery with exact item-level rights
+
+The next source lane adds a bounded sample from the official USGS image, video and audio galleries. At the latest source inspection, those gallery pages displayed 21,392 image items, 2,905 video items and 629 audio items. These are discovery-catalog totals, not promised downloads.
+
+The builder scans up to four listing pages per type and caps successful downloads at 24 images, 8 videos and 8 audio items. Crucially, the gallery-wide "public domain unless otherwise noted" notice is **not** treated as proof for an individual asset: the exact detail page must have a complete `Sources/Usage` statement equal to `Public Domain.`. Mixed wording, missing labels and any other rights statement are skipped.
+
+Direct media links are constrained to the official USGS storage hosts and expected per-type paths. The builder verifies MIME and file signatures, caps each file and the aggregate USGS media byte budget, and records the item page, direct media URL, title, creator/date metadata, exact rights statement, source note, and SHA-256. USGS credit guidance and other rights such as privacy/publicity still apply; public-domain status is not a blanket clearance for every possible use.
+
+Official sources: [USGS Multimedia Gallery](https://www.usgs.gov/products/multimedia-gallery), [USGS crediting guidance](https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs).
+
+## Build 44: OpenGameArt item-level CC0 library
+
+This source lane uses OpenGameArt's official advanced-search CC0 filter to discover five different families: 2D sprites and tiles, 3D models, textures, sound effects, and music. A search filter is not treated as a license grant: every candidate's own item page must have exactly one CC0 1.0 entry in its License(s) field. Items with CC-BY, CC-BY-SA, GPL, mixed, missing or ambiguous license fields are skipped.
+
+The downloader accepts attachments only from the official HTTPS `opengameart.org/sites/default/files/` host path, checks the actual media file signatures, validates ZIP integrity, extracts through the existing safe archive allow-list, and records creator, item URL, direct attachment URL, CC0 basis, archive digest and per-file SHA-256. SVG and native Blender project files are excluded from these third-party archives to avoid bundling active content. The current search ceilings are 6 2D packs, 6 3D packs, 5 texture packs, 5 SFX packs and 5 music packs; these are ceilings, not promised downloads. The generated report is authoritative.
+
+Official source: [OpenGameArt advanced search](https://opengameart.org/art-search-advanced) and [site FAQ](https://opengameart.org/content/faq).
+
+## Build 44: curated Google Fonts with verified OFL licenses
+
+The typography source lane selects up to 20 curated family directories from the official `google/fonts` repository. Each family's own `OFL.txt` is downloaded and inspected before any font binary is accepted. Only families carrying the SIL Open Font License Version 1.1 marker and a copyright statement proceed. At most two TTF faces are retained per family, each with a TrueType/OpenType sfnt signature check and SHA-256; the exact family `OFL.txt`, its checksum, raw font URL and family page are kept alongside the font. The aggregate font-download ceiling is 90 MiB. These files remain under their individual SIL OFL 1.1 terms rather than being relabelled CC0.
+
+Official repository: [Google Fonts](https://github.com/google/fonts). License: [SIL Open Font License](https://openfontlicense.org/).

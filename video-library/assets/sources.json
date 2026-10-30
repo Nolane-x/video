@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
-  "checked_on": "2026-10-29",
+  "checked_on": "2026-10-30",
   "bundling_policy": {
     "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
     "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
@@ -496,16 +496,44 @@
     },
     {
       "id": "usgs-multimedia-gallery",
-      "title": "USGS Multimedia Gallery — official science, geology, wildlife, water and hazards",
+      "title": "USGS Multimedia Gallery — image, video and audio items with exact Public Domain label",
       "provider": "U.S. Geological Survey",
       "kind": "government multimedia collection",
       "category": "geology, volcanology, earthquakes, water, wildlife, science and environment",
       "source_page": "https://www.usgs.gov/products/multimedia-gallery",
-      "license": "U.S. public domain unless otherwise noted; each item still requires rights-marker checks",
-      "license_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "license": "Public Domain only when that exact item's Sources/Usage section is exactly Public Domain; all other labels or mixed notices are skipped",
+      "license_url": "https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs",
       "verified_page_license": true,
-      "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
-      "note": "USGS states gallery items are public domain unless otherwise noted; third-party media and identifiable personnel/publicity rights can still require review. Do not bundle an item merely because it appears on a USGS page."
+      "bundling": "automatic-only-after-exact-item-page-public-domain-label-and-official-media-host-validation",
+      "note": "The source has large official image, video and audio collections. The builder follows official item pages and only accepts an item's own Sources/Usage block when its complete visible statement is exactly Public Domain. It does not infer rights from the gallery-wide default. Direct media URLs must use the expected official USGS storage hosts and media paths; MIME, magic bytes, type-specific and aggregate byte caps, source page, creator/date metadata and SHA-256 are retained. USGS credit guidance still applies and other rights (including privacy, publicity, and third-party materials) must be considered before publication."
+    },
+    {
+      "id": "opengameart-cc0-catalog",
+      "title": "OpenGameArt — item-level CC0 2D, 3D, texture, sound and music assets",
+      "provider": "OpenGameArt",
+      "kind": "community game-art and audio asset catalog",
+      "category": "2D sprites and tiles, 3D models, textures and decals, UI, sound effects, music and ambience",
+      "source_page": "https://opengameart.org/art-search-advanced",
+      "api": "https://opengameart.org/art-search-advanced?field_art_licenses_tid%5B0%5D=4",
+      "license": "CC0-1.0 only when the exact item's License(s) field exposes exactly one CC0 1.0 license link",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "automatic-bounded-download-after-item-level-cc0-and-attachment-validation",
+      "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Active SVG and native Blender project files are excluded from community archives. Category limits are ceilings, not promised download counts."
+    },
+    {
+      "id": "google-fonts-curated-ofl",
+      "title": "Google Fonts — curated TTF families under SIL Open Font License 1.1",
+      "provider": "Google Fonts / google/fonts",
+      "kind": "type family and font file repository",
+      "category": "Display typography, editorial titles, captions, subtitles, UI labels and mono numerals",
+      "source_page": "https://github.com/google/fonts/tree/main/ofl",
+      "api": "https://api.github.com/repos/google/fonts/contents/ofl/",
+      "license": "SIL Open Font License 1.1, verified from each exact family OFL.txt",
+      "license_url": "https://openfontlicense.org/",
+      "verified_page_license": true,
+      "bundling": "curated-bounded-ttf-download-only-after-family-ofl-text-check",
+      "note": "The builder queries a fixed set of 20 official family directories. It downloads a family's TTF files only after fetching the OFL.txt file from that same exact family folder and verifying the SIL Open Font License Version 1.1 marker and copyright statement. At most two TTF faces per family and 90 MiB total are downloaded. The original OFL.txt, exact family page, raw font URL, family license-file SHA-256 and per-font SHA-256 are preserved. Each font remains under its own SIL OFL 1.1 terms, not CC0."
     },
     {
       "id": "noaa-multimedia",

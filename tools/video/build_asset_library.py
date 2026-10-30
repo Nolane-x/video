@@ -3,6 +3,7 @@
 from __future__ import annotations
 import hashlib, html, json, mimetypes, re, shutil, subprocess, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 
 REPO = Path(__file__).resolve().parents[2]
@@ -24,6 +25,40 @@ POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
 AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
+# USGS media is bundled only when its individual detail page's Sources/Usage block
+# contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
+USGS_GALLERY_PAGE_SCAN_LIMIT = 4
+USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
+USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
+# OpenGameArt search uses the official CC0 license taxonomy filter, but every result
+# must still pass its own item's license and attachment checks before being downloaded.
+OPENGAMEART_SELECTION_CAPS = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 2
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
+OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
+OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+GOOGLE_FONTS_FAMILY_SLUGS = [
+    "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
+    "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
+    "lora","sourcecodepro","jetbrainsmono","bebasneue","worksans","nunito","raleway"
+]
+GOOGLE_FONTS_MAX_FAMILIES = 20
+GOOGLE_FONTS_MAX_TTF_PER_FAMILY = 2
+GOOGLE_FONTS_MAX_FONT_BYTES = 8 * 1024 * 1024
+GOOGLE_FONTS_MAX_TOTAL_BYTES = 90 * 1024 * 1024
+# Exclude active-content formats such as SVG and native Blender project files from
+# untrusted community archives; ordinary raster, audio, video and exchange formats remain.
+OPENGAMEART_ALLOWED_MEDIA_EXTS = {
+    ".png",".jpg",".jpeg",".webp",".gif",".tif",".tiff",
+    ".wav",".mp3",".ogg",".oga",".flac",".mp4",".mov",".m4v",".webm",
+    ".obj",".mtl",".glb",".gltf",".fbx",".abc",".dae",".stl",
+    ".ttf",".otf",".woff",".woff2"
+}
 MET_OPEN_ACCESS_IMAGE_CAP = 110
 RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
 WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
@@ -1401,9 +1436,12 @@ def safe_extract(blob,target,max_bytes=350*1024*1024):
         bad=z.testzip()
         if bad: raise RuntimeError("corrupt ZIP member: "+bad)
         for info in z.infolist():
-            name=info.filename.replace("\\\\","/")
+            name=info.filename.replace("\\","/")
             pp=PurePosixPath(name); ext=Path(name).suffix.lower()
-            if pp.is_absolute() or ".." in pp.parts: raise RuntimeError("unsafe ZIP path: "+name)
+            unix_type=(info.external_attr >> 16) & 0o170000
+            if (not name or "\x00" in name or pp.is_absolute() or ".." in pp.parts or
+                    (pp.parts and ":" in pp.parts[0]) or unix_type==0o120000):
+                raise RuntimeError("unsafe ZIP path or symlink: "+name)
             if info.is_dir() or ext in DENIED or ext not in ALLOWED: continue
             total+=info.file_size
             if total>max_bytes: raise RuntimeError("pack extraction size limit exceeded")
@@ -1697,6 +1735,826 @@ def download_ambientcg(root,index):
             report.append({"id":"ambientcg-"+asset_type.lower(),"status":"failed","asset_type":asset_type,
                            "source_page":"https://ambientcg.com/","reason":str(exc)[:400]})
             print("[ambientCG] source request failed:",asset_type,str(exc)[:220])
+    return report
+
+
+class USGSMediaPageParser(HTMLParser):
+    """Extract only explicit USGS item-level rights and source links from public HTML."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.source_depth=0
+        self.h1_depth=0
+        self.title_parts=[]
+        self.source_parts=[]
+        self.all_text=[]
+        self.links=[]
+        self.meta={}
+        self.dates=[]
+
+    def handle_starttag(self,tag,attrs):
+        attrs=dict(attrs)
+        if tag=="section" and "source" in (attrs.get("class") or "").split():
+            self.source_depth+=1
+        if tag=="h1":
+            self.h1_depth+=1
+        if tag in {"a","source","video","audio"}:
+            for attr in ("href","src"):
+                value=attrs.get(attr)
+                if value:
+                    self.links.append(value.strip())
+        if tag=="meta":
+            key=(attrs.get("property") or attrs.get("name") or "").strip().lower()
+            value=(attrs.get("content") or "").strip()
+            if key and value:
+                self.meta[key]=value
+        if tag=="time":
+            value=(attrs.get("datetime") or "").strip()
+            if value:
+                self.dates.append(value)
+
+    def handle_endtag(self,tag):
+        if tag=="h1" and self.h1_depth:
+            self.h1_depth-=1
+        if tag=="section" and self.source_depth:
+            self.source_depth-=1
+
+    def handle_data(self,data):
+        value=" ".join(data.split())
+        if not value:
+            return
+        self.all_text.append(value)
+        if self.source_depth:
+            self.source_parts.append(value)
+        if self.h1_depth:
+            self.title_parts.append(value)
+
+
+def usgs_rights_are_public_domain(statement):
+    """Require the exact item-level Public Domain label; reject all other notices."""
+    normalized=" ".join(str(statement or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
+    return normalized=="public domain"
+
+
+def usgs_media_detail_url_is_allowed(raw_url,media_type):
+    try:
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        if parsed.scheme!="https" or parsed.username or parsed.password or parsed.port not in (None,443) or parsed.fragment:
+            return False
+        host=(parsed.hostname or "").lower()
+        suffix=Path(parsed.path).suffix.lower()
+        if media_type=="images":
+            return (host=="d9-wret.s3.us-west-2.amazonaws.com"
+                    and "/media/images/" in parsed.path
+                    and "/styles/" not in parsed.path
+                    and suffix in {".jpg",".jpeg",".png",".gif",".tif",".tiff",".webp"})
+        if media_type=="videos":
+            return (host=="usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com"
+                    and "/media/video/" in parsed.path
+                    and suffix in {".mp4",".mov"})
+        if media_type=="audio":
+            return (host=="d9-wret.s3.us-west-2.amazonaws.com"
+                    and "/media/audio/" in parsed.path
+                    and suffix in {".mp3",".wav",".ogg",".flac"})
+        return False
+    except Exception:
+        return False
+
+
+def usgs_media_signature_is_valid(blob,media_type,content_type,extension):
+    mime=str(content_type or "").split(";",1)[0].strip().lower()
+    if media_type=="images":
+        valid_mime=mime.startswith("image/") or mime=="application/octet-stream"
+        valid_sig=(
+            blob.startswith(b"\xff\xd8\xff") or
+            blob.startswith(b"\x89PNG\r\n\x1a\n") or
+            blob.startswith((b"GIF87a",b"GIF89a")) or
+            blob.startswith((b"II*\x00",b"MM\x00*")) or
+            (len(blob)>=12 and blob[:4]==b"RIFF" and blob[8:12]==b"WEBP")
+        )
+        return valid_mime and valid_sig
+    if media_type=="videos":
+        return ((mime.startswith("video/") or mime in {"application/mp4","application/octet-stream"})
+                and len(blob)>20000 and b"ftyp" in blob[:64])
+    if media_type=="audio":
+        valid_mime=mime.startswith("audio/") or mime in {"application/ogg","application/octet-stream"}
+        valid_sig=(
+            blob.startswith((b"ID3",b"RIFF",b"OggS",b"fLaC")) or
+            (len(blob)>2 and blob[0]==0xff and (blob[1]&0xe0)==0xe0)
+        )
+        return valid_mime and valid_sig
+    return False
+
+
+def usgs_page_detail_candidates(page_html,media_type):
+    parser=USGSMediaPageParser()
+    parser.feed(page_html)
+    prefix={"images":"/media/images/","videos":"/media/videos/","audio":"/media/audio/"}[media_type]
+    result=[]
+    for link in parser.links:
+        absolute=urllib.parse.urljoin("https://www.usgs.gov/",link)
+        parsed=urllib.parse.urlsplit(absolute)
+        if parsed.scheme=="https" and parsed.hostname=="www.usgs.gov" and parsed.path.startswith(prefix):
+            canonical=urllib.parse.urlunsplit(("https","www.usgs.gov",parsed.path,"",""))
+            if canonical not in result:
+                result.append(canonical)
+    return result
+
+
+def usgs_parse_media_detail(page_html,media_type):
+    parser=USGSMediaPageParser()
+    parser.feed(page_html)
+    rights=" ".join(part for part in parser.source_parts if part.strip().casefold()!="sources/usage").strip()
+    title=(parser.meta.get("og:title") or parser.meta.get("twitter:title") or
+           " ".join(parser.title_parts) or "USGS media").strip()
+    description=(parser.meta.get("og:description") or parser.meta.get("description") or "").strip()
+    creator=(parser.meta.get("author") or parser.meta.get("dcterms.creator") or
+             parser.meta.get("article:author") or "").strip()
+    direct=[]
+    for link in parser.links:
+        absolute=urllib.parse.urljoin("https://www.usgs.gov/",link)
+        if usgs_media_detail_url_is_allowed(absolute,media_type) and absolute not in direct:
+            direct.append(absolute)
+    page_date=(parser.meta.get("article:published_time") or parser.meta.get("dcterms.date") or
+               parser.meta.get("date") or (parser.dates[0] if parser.dates else ""))
+    return {
+        "title":title[:300],"description":description[:1200],"creator":creator[:240],
+        "rights_statement":rights,"date":page_date[:80],"direct_media_urls":direct
+    }
+
+
+def download_usgs_gallery(root,index):
+    """Download a bounded USGS gallery sample only after exact item-level Public Domain checks."""
+    report=[]
+    gallery_roots={
+        "images":"https://www.usgs.gov/products/multimedia-gallery/images",
+        "videos":"https://www.usgs.gov/products/multimedia-gallery/videos",
+        "audio":"https://www.usgs.gov/products/multimedia-gallery/audio"
+    }
+    type_labels={"images":"Official USGS photography and satellite imagery",
+                 "videos":"USGS science videos, field footage and animations",
+                 "audio":"USGS natural sounds, interviews and science podcasts"}
+    total_bytes=0
+    for media_type,cap in USGS_SELECTION_CAPS.items():
+        candidates=[]
+        for page_number in range(USGS_GALLERY_PAGE_SCAN_LIMIT):
+            list_url=gallery_roots[media_type]+"?page="+str(page_number)
+            try:
+                page,_=request_bytes(list_url,timeout=22,limit=8*1024*1024)
+                page_candidates=usgs_page_detail_candidates(page.decode("utf-8","replace"),media_type)
+                for item_url in page_candidates:
+                    if item_url not in candidates:
+                        candidates.append(item_url)
+                if len(candidates)>=cap*5:
+                    break
+                time.sleep(.25)
+            except Exception as exc:
+                report.append({"id":"usgs-"+media_type+"-page-"+str(page_number),
+                               "status":"page_failed","media_type":media_type,"source_page":list_url,
+                               "reason":str(exc)[:300]})
+        downloaded_for_type=0
+        for item_url in candidates:
+            if downloaded_for_type>=cap or total_bytes>=USGS_TOTAL_MAX_BYTES:
+                break
+            try:
+                page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
+                detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
+                row={"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                     "provider":"U.S. Geological Survey","media_type":media_type[:-1] if media_type.endswith("s") else media_type,
+                     "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
+                     "date":detail["date"],"rights_statement":detail["rights_statement"],
+                     "license":"Public Domain (item-level USGS Sources/Usage label)",
+                     "license_url":"https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs",
+                     "category":type_labels[media_type]}
+                if not usgs_rights_are_public_domain(detail["rights_statement"]):
+                    row.update(status="skipped_rights",reason="The item's own Sources/Usage section is not exactly Public Domain.")
+                    report.append(row)
+                    continue
+                if not detail["direct_media_urls"]:
+                    row.update(status="no_eligible_download",reason="No direct original media URL on an approved official USGS media host.")
+                    report.append(row)
+                    continue
+                if media_type=="images":
+                    allowed_ext={".jpg",".jpeg",".png",".gif",".tif",".tiff",".webp"}
+                    max_bytes=USGS_IMAGE_MAX_BYTES
+                elif media_type=="videos":
+                    allowed_ext={".mp4",".mov"}
+                    max_bytes=USGS_VIDEO_MAX_BYTES
+                else:
+                    allowed_ext={".mp3",".wav",".ogg",".flac"}
+                    max_bytes=USGS_AUDIO_MAX_BYTES
+                downloaded=None; failures=[]
+                for media_url in detail["direct_media_urls"]:
+                    ext=Path(urllib.parse.urlsplit(media_url).path).suffix.lower()
+                    if ext not in allowed_ext:
+                        continue
+                    try:
+                        blob,content_type=request_bytes(media_url,timeout=40,limit=max_bytes)
+                        if len(blob)<2048:
+                            raise RuntimeError("media response was too small to be a usable asset")
+                        if not usgs_media_signature_is_valid(blob,media_type,content_type,ext):
+                            raise RuntimeError("media MIME/signature does not match the permitted media family")
+                        downloaded=(media_url,ext,blob,content_type)
+                        break
+                    except Exception as file_exc:
+                        failures.append(str(file_exc)[:180])
+                if not downloaded:
+                    row.update(status="download_failed",reason="No eligible media candidate could be fetched and validated.",
+                               failures=failures[:3])
+                    report.append(row)
+                    continue
+                media_url,ext,blob,content_type=downloaded
+                if total_bytes+len(blob)>USGS_TOTAL_MAX_BYTES:
+                    row.update(status="skipped_total_size_limit",reason="The media item would exceed the aggregate USGS extraction ceiling.")
+                    report.append(row)
+                    break
+                item_slug=slugify(detail["title"])[:100] or slugify(item_url.rsplit("/",1)[-1])
+                item_dir=root/"third-party/usgs"/media_type/item_slug
+                item_dir.mkdir(parents=True,exist_ok=True)
+                filename=item_slug+ext
+                target=item_dir/filename
+                target.write_bytes(blob)
+                digest=sha256_path(target)
+                note=(
+                    f"# {detail['title']}\\n\\n"
+                    f"- Provider: U.S. Geological Survey\\n- Media type: {media_type}\\n"
+                    f"- Item page: {item_url}\\n- Direct media URL: {media_url}\\n"
+                    f"- Sources/Usage: {detail['rights_statement']}\\n- Rights basis: public-domain label on this exact item page\\n"
+                    f"- Creator / credit metadata: {detail['creator'] or 'Not separately exposed in the item metadata'}\\n"
+                    f"- Date: {detail['date'] or 'Not separately exposed'}\\n- MIME: {content_type}\\n"
+                    f"- SHA-256: {digest}\\n\\n{detail['description']}\\n"
+                )
+                write_text(item_dir/"SOURCE_AND_LICENSE.md",note)
+                asset_type="usgs-public-domain-"+media_type[:-1]
+                index.append({"id":row["id"],"path":target.relative_to(root).as_posix(),
+                              "type":asset_type,"provider":"U.S. Geological Survey",
+                              "title":detail["title"],"description":detail["description"],
+                              "creator":detail["creator"],"date":detail["date"],
+                              "category":type_labels[media_type],"source_page":item_url,
+                              "source_file_url":media_url,"rights_statement":detail["rights_statement"],
+                              "license":"Public Domain (item-level USGS Sources/Usage label)",
+                              "license_verified_from_item_page":True,
+                              "size_bytes":len(blob),"sha256":digest,"redistributable":True})
+                total_bytes+=len(blob); downloaded_for_type+=1
+                row.update(status="downloaded",file=filename,source_file_url=media_url,
+                           content_type=content_type,size_bytes=len(blob),sha256=digest)
+                report.append(row)
+                print("[USGS] OK:",media_type,detail["title"],len(blob),"bytes")
+                time.sleep(.35)
+            except Exception as exc:
+                report.append({"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                               "provider":"U.S. Geological Survey","media_type":media_type[:-1],
+                               "status":"item_failed","source_page":item_url,"reason":str(exc)[:350]})
+        print("[USGS] "+media_type+":",downloaded_for_type,"downloaded; scanned",len(candidates),"item pages")
+    return report
+
+
+class OpenGameArtItemParser(HTMLParser):
+    """Read only the CC0 license field and official File(s) attachments on one OGA item."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.depths={"license":0,"files":0,"title":0,"author":0,"description":0}
+        self.license_links=[]
+        self.license_text=[]
+        self.files=[]
+        self.title_parts=[]
+        self.author_parts=[]
+        self.author_links=[]
+        self.description_parts=[]
+        self.meta={}
+        self.current_file=None
+
+    def handle_starttag(self,tag,attrs):
+        attrs=dict(attrs)
+        if tag=="div":
+            classes=set((attrs.get("class") or "").split())
+            markers={
+                "license":"field-name-field-art-licenses",
+                "files":"field-name-field-art-files",
+                "title":"field-name-title",
+                "author":"field-name-author-submitter",
+                "description":"field-name-body"
+            }
+            for key,marker in markers.items():
+                if self.depths[key]:
+                    self.depths[key]+=1
+                elif marker in classes:
+                    self.depths[key]=1
+        if tag=="meta":
+            key=(attrs.get("property") or attrs.get("name") or "").strip().lower()
+            value=(attrs.get("content") or "").strip()
+            if key and value:
+                self.meta[key]=value
+        if tag=="a":
+            href=(attrs.get("href") or "").strip()
+            if self.depths["license"] and href:
+                self.license_links.append(href)
+            if self.depths["author"] and href:
+                self.author_links.append(href)
+            if self.depths["files"] and href:
+                mime=str(attrs.get("type") or "").split(";",1)[0].strip().lower()
+                length=0
+                type_value=str(attrs.get("type") or "")
+                match=re.search(r"(?:^|;)\s*length\s*=\s*(\d+)",type_value,re.I)
+                if match:
+                    length=int(match.group(1))
+                self.files.append({"url":href,"filename":attrs.get("download") or Path(urllib.parse.urlsplit(href).path).name,
+                                   "mime":mime,"declared_size":length,"link_text":""})
+                self.current_file=len(self.files)-1
+        if tag in {"h1","h2"} and self.depths["title"]:
+            pass
+
+    def handle_endtag(self,tag):
+        if tag=="div":
+            for key in self.depths:
+                if self.depths[key]:
+                    self.depths[key]-=1
+                    if not self.depths[key] and key=="files":
+                        self.current_file=None
+
+    def handle_data(self,data):
+        value=" ".join(data.split())
+        if not value:
+            return
+        if self.depths["license"]:
+            self.license_text.append(value)
+        if self.depths["title"]:
+            self.title_parts.append(value)
+        if self.depths["author"]:
+            self.author_parts.append(value)
+        if self.depths["description"] and len(self.description_parts)<80:
+            self.description_parts.append(value)
+        if self.current_file is not None and self.depths["files"]:
+            self.files[self.current_file]["link_text"]+=(" " if self.files[self.current_file]["link_text"] else "")+value
+
+
+def opengameart_item_page_is_allowed(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (parsed.scheme=="https" and parsed.hostname=="opengameart.org" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and re.fullmatch(r"/content/[a-z0-9][a-z0-9-]*",parsed.path or "") is not None)
+    except Exception:
+        return False
+
+
+def opengameart_search_page_is_allowed(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        if parsed.scheme!="https" or parsed.hostname!="opengameart.org" or parsed.port not in (None,443):
+            return False
+        if parsed.username or parsed.password or parsed.path!="/art-search-advanced" or parsed.fragment:
+            return False
+        query=urllib.parse.parse_qs(parsed.query)
+        return query.get("field_art_licenses_tid[0]")==["4"] and query.get("field_art_type_tid[0]") in [["9"],["10"],["14"],["13"],["12"]]
+    except Exception:
+        return False
+
+
+def opengameart_file_url_is_allowed(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        if (parsed.scheme!="https" or parsed.hostname!="opengameart.org" or parsed.port not in (None,443) or
+                parsed.username or parsed.password or parsed.fragment or not parsed.path.startswith("/sites/default/files/")):
+            return False
+        ext=Path(parsed.path).suffix.lower()
+        return ext==".zip" or ext in OPENGAMEART_ALLOWED_MEDIA_EXTS
+    except Exception:
+        return False
+
+
+def opengameart_cc0_link_is_valid(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (parsed.hostname=="creativecommons.org" and
+                parsed.path.rstrip("/")=="/publicdomain/zero/1.0" and
+                parsed.scheme in {"http","https"})
+    except Exception:
+        return False
+
+
+class OpenGameArtSearchParser(HTMLParser):
+    """Collect only result links inside the main advanced-search results view."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.depth=0
+        self.links=[]
+
+    def handle_starttag(self,tag,attrs):
+        if tag=="div":
+            classes=set(dict(attrs).get("class","").split())
+            required={"view-art","view-id-art","view-display-id-search_art_advanced"}
+            if self.depth:
+                self.depth+=1
+            elif required.issubset(classes):
+                self.depth=1
+        if tag=="a" and self.depth:
+            href=dict(attrs).get("href","")
+            if href:
+                self.links.append(href)
+
+    def handle_endtag(self,tag):
+        if tag=="div" and self.depth:
+            self.depth-=1
+
+
+def opengameart_parse_search_page(page_html):
+    parser=OpenGameArtSearchParser()
+    parser.feed(page_html)
+    result=[]
+    for link in parser.links:
+        absolute=urllib.parse.urljoin("https://opengameart.org/",link)
+        if opengameart_item_page_is_allowed(absolute) and absolute not in result:
+            result.append(absolute)
+    return result
+
+
+def opengameart_parse_item_page(page_html):
+    parser=OpenGameArtItemParser()
+    parser.feed(page_html)
+    title=(parser.meta.get("og:title") or parser.meta.get("twitter:title") or " ".join(parser.title_parts)).strip()
+    creator=" ".join(parser.author_parts).strip()
+    licenses=[]
+    for link in parser.license_links:
+        if opengameart_cc0_link_is_valid(link):
+            licenses.append("CC0-1.0")
+        else:
+            licenses.append("OTHER")
+    exact_cc0=(len(licenses)==1 and licenses[0]=="CC0-1.0")
+    files=[]
+    seen=set()
+    for item in parser.files:
+        absolute=urllib.parse.urljoin("https://opengameart.org/",item["url"])
+        if not opengameart_file_url_is_allowed(absolute) or absolute in seen:
+            continue
+        seen.add(absolute)
+        item=dict(item); item["url"]=absolute
+        files.append(item)
+    return {"title":title[:240] or "OpenGameArt resource",
+            "creator":creator[:240],"license_records":licenses,
+            "cc0_verified_from_item_page":exact_cc0,
+            "files":files,
+            "description":" ".join(parser.description_parts)[:1200]}
+
+
+def opengameart_file_signature_is_valid(blob,extension,content_type):
+    ext=str(extension or "").lower()
+    mime=str(content_type or "").split(";",1)[0].strip().lower()
+    if ext in {".jpg",".jpeg"}: return blob.startswith(b"\xff\xd8\xff") and (mime.startswith("image/") or mime=="application/octet-stream")
+    if ext==".png": return blob.startswith(b"\x89PNG\r\n\x1a\n") and (mime.startswith("image/") or mime=="application/octet-stream")
+    if ext==".gif": return blob.startswith((b"GIF87a",b"GIF89a")) and mime.startswith("image/")
+    if ext in {".tif",".tiff"}: return blob.startswith((b"II*\x00",b"MM\x00*")) and mime.startswith("image/")
+    if ext==".webp": return len(blob)>12 and blob[:4]==b"RIFF" and blob[8:12]==b"WEBP"
+    if ext in {".wav"}: return blob.startswith(b"RIFF") and blob[8:12]==b"WAVE"
+    if ext==".ogg" or ext==".oga": return blob.startswith(b"OggS")
+    if ext==".flac": return blob.startswith(b"fLaC")
+    if ext==".mp3": return blob.startswith(b"ID3") or (len(blob)>2 and blob[0]==0xff and (blob[1]&0xe0)==0xe0)
+    if ext==".mp4" or ext==".m4v" or ext==".mov": return len(blob)>12 and b"ftyp" in blob[:64]
+    if ext==".webm": return blob.startswith(b"\x1a\x45\xdf\xa3")
+    if ext==".glb": return blob.startswith(b"glTF")
+    if ext==".gltf":
+        try:
+            value=json.loads(blob.decode("utf-8"))
+            return isinstance(value,dict) and isinstance(value.get("asset"),dict) and bool(value["asset"].get("version"))
+        except Exception: return False
+    if ext==".fbx": return blob.startswith(b"Kaydara FBX Binary") or blob.lstrip().startswith(b"; FBX")
+    if ext==".ttf": return blob.startswith((b"\x00\x01\x00\x00",b"true"))
+    if ext==".otf": return blob.startswith(b"OTTO")
+    if ext==".woff": return blob.startswith(b"wOFF")
+    if ext==".woff2": return blob.startswith(b"wOF2")
+    if ext==".woff": return blob.startswith(b"wOFF")
+    if ext==".woff2": return blob.startswith(b"wOF2")
+    if ext==".pdf": return blob.startswith(b"%PDF-")
+    if ext==".zip": return blob.startswith(b"PK\x03\x04")
+    if ext in {".obj",".mtl",".stl",".dae",".abc"}:
+        return len(blob)>32 and b"\x00" not in blob[:128]
+    return False
+
+
+def download_opengameart(root,index):
+    """Harvest a small, diverse set of explicitly item-level CC0 OpenGameArt packages."""
+    report=[]
+    total_bytes=0
+    seen_items=set()
+    seen_file_urls=set()
+    category_labels={
+        "2d":"2D sprites, tiles, icons and visual elements",
+        "3d":"3D models, characters, environments and props",
+        "textures":"Tileable surfaces, decals and interface textures",
+        "sfx":"Sound effects, UI sounds, ambience and voice packs",
+        "music":"Music loops, themes and cinematic background tracks"
+    }
+    base="https://opengameart.org/art-search-advanced"
+    for category,cap in OPENGAMEART_SELECTION_CAPS.items():
+        type_id=OPENGAMEART_TYPE_IDS[category]
+        candidates=[]
+        for page_number in range(OPENGAMEART_SEARCH_PAGES_PER_TYPE):
+            params={"field_art_licenses_tid[0]":"4","field_art_type_tid[0]":str(type_id),
+                    "sort_by":"count","sort_order":"DESC","items_per_page":"24","page":str(page_number)}
+            search_url=base+"?"+urllib.parse.urlencode(params)
+            if not opengameart_search_page_is_allowed(search_url):
+                report.append({"id":"opengameart-"+category+"-search","status":"invalid_search_query",
+                               "source_page":search_url,"category":category})
+                continue
+            try:
+                blob,_=request_bytes(search_url,timeout=22,limit=8*1024*1024)
+                found=opengameart_parse_search_page(blob.decode("utf-8","replace"))
+                for item_url in found:
+                    if item_url not in candidates and item_url not in seen_items:
+                        candidates.append(item_url)
+                print("[OpenGameArt] search",category,"page",page_number+1,"found",len(found),"candidate item pages")
+                time.sleep(.3)
+            except Exception as exc:
+                report.append({"id":"opengameart-"+category+"-search-"+str(page_number),
+                               "status":"search_failed","category":category,"source_page":search_url,
+                               "reason":str(exc)[:300]})
+        downloaded_for_category=0
+        examined=0
+        for item_url in candidates:
+            if downloaded_for_category>=cap or examined>=OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE or total_bytes>=OPENGAMEART_MAX_TOTAL_BYTES:
+                break
+            examined+=1
+            seen_items.add(item_url)
+            try:
+                page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
+                detail=opengameart_parse_item_page(page.decode("utf-8","replace"))
+                row={"id":"opengameart-"+category+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                     "provider":"OpenGameArt","category":category_labels[category],
+                     "source_page":item_url,"title":detail["title"],"creator":detail["creator"],
+                     "asset_category":category,"license":"CC0-1.0" if detail["cc0_verified_from_item_page"] else "not eligible",
+                     "license_url":"https://creativecommons.org/publicdomain/zero/1.0/"}
+                if not detail["cc0_verified_from_item_page"]:
+                    row.update(status="skipped_rights",reason="The item's own License(s) field is not exactly one CC0 1.0 license.")
+                    report.append(row)
+                    continue
+                file_candidates=[]
+                for item in detail["files"]:
+                    ext=Path(urllib.parse.urlsplit(item["url"]).path).suffix.lower()
+                    if item["url"] in seen_file_urls:
+                        continue
+                    if item.get("declared_size",0) and item["declared_size"]>OPENGAMEART_MAX_FILE_BYTES:
+                        continue
+                    if item.get("mime")=="application/zip" or ext==".zip":
+                        priority=0
+                    else:
+                        priority=1
+                    file_candidates.append((priority,item.get("declared_size",0) or 10**18,item))
+                file_candidates.sort(key=lambda value:(value[0],value[1]))
+                if not file_candidates:
+                    row.update(status="no_eligible_file",reason="The item page exposes no allowed direct attachment under OpenGameArt's official files directory.")
+                    report.append(row)
+                    continue
+                item_slug=slugify(detail["title"])[:90] or slugify(item_url.rsplit("/",1)[-1])
+                package_dir=root/"third-party/opengameart"/category/item_slug
+                package_downloads=[]
+                item_new_bytes=0
+                item_file_limit=2
+                for _,__,candidate in file_candidates:
+                    if len(package_downloads)>=item_file_limit or total_bytes+item_new_bytes>=OPENGAMEART_MAX_TOTAL_BYTES:
+                        break
+                    file_url=candidate["url"]
+                    if not opengameart_file_url_is_allowed(file_url) or file_url in seen_file_urls:
+                        continue
+                    extension=Path(urllib.parse.urlsplit(file_url).path).suffix.lower()
+                    try:
+                        blob,content_type=request_bytes(file_url,timeout=40,limit=OPENGAMEART_MAX_FILE_BYTES)
+                        if len(blob)<64:
+                            raise RuntimeError("attachment is too small to be a usable asset")
+                        archive_sha=""
+                        if extension==".zip":
+                            if not opengameart_file_signature_is_valid(blob,extension,content_type or candidate.get("mime")):
+                                raise RuntimeError("attachment is not a valid ZIP container")
+                            archive_sha=hashlib.sha256(blob).hexdigest()
+                            with zipfile.ZipFile(__import__("io").BytesIO(blob)) as zf:
+                                corrupt=zf.testzip()
+                                if corrupt: raise RuntimeError("corrupt ZIP member: "+str(corrupt))
+                            target_dir=package_dir/slugify(Path(urllib.parse.urlsplit(file_url).path).name)
+                            extracted,unpacked=safe_extract(blob,target_dir,max_bytes=OPENGAMEART_MAX_PACKAGE_BYTES)
+                            # Discard SVG and native Blender projects: they may contain active content or scripts.
+                            for unsafe_path in list(target_dir.rglob("*")):
+                                if unsafe_path.is_file() and unsafe_path.suffix.lower() not in OPENGAMEART_ALLOWED_MEDIA_EXTS:
+                                    unsafe_path.unlink()
+                            media_files=[p for p in target_dir.rglob("*") if p.is_file()]
+                            if extracted<=0 or not media_files:
+                                shutil.rmtree(target_dir,ignore_errors=True)
+                                raise RuntimeError("ZIP had no allow-listed media files")
+                            item_new_bytes+=unpacked
+                            package_downloads.append({"url":file_url,"filename":Path(urllib.parse.urlsplit(file_url).path).name,
+                                                      "archive_sha256":archive_sha,"extracted_files":extracted,
+                                                      "unpacked_bytes":unpacked,"media_paths":[p for p in media_files]})
+                        else:
+                            if extension not in OPENGAMEART_ALLOWED_MEDIA_EXTS:
+                                raise RuntimeError("attachment extension is excluded by the community asset safety policy")
+                            if not opengameart_file_signature_is_valid(blob,extension,content_type or candidate.get("mime")):
+                                raise RuntimeError("downloaded attachment failed its media signature check")
+                            target_dir=package_dir
+                            target_dir.mkdir(parents=True,exist_ok=True)
+                            target=target_dir/Path(urllib.parse.urlsplit(file_url).path).name
+                            target.write_bytes(blob)
+                            item_new_bytes+=len(blob)
+                            package_downloads.append({"url":file_url,"filename":target.name,"archive_sha256":"",
+                                                      "extracted_files":1,"unpacked_bytes":len(blob),"media_paths":[target]})
+                        seen_file_urls.add(file_url)
+                        print("[OpenGameArt] file",category,detail["title"],Path(urllib.parse.urlsplit(file_url).path).name,len(blob),"bytes")
+                    except Exception as file_exc:
+                        row.setdefault("file_failures",[]).append({"url":file_url,"reason":str(file_exc)[:240]})
+                if not package_downloads:
+                    row.update(status="download_failed",reason="All item attachments failed allowlist, size, ZIP or file-signature validation.")
+                    report.append(row)
+                    shutil.rmtree(package_dir,ignore_errors=True)
+                    continue
+                if total_bytes+item_new_bytes>OPENGAMEART_MAX_TOTAL_BYTES:
+                    row.update(status="skipped_total_size_limit",reason="The item would exceed the aggregate OpenGameArt byte ceiling.")
+                    report.append(row)
+                    shutil.rmtree(package_dir,ignore_errors=True)
+                    break
+                note_lines=[f"# {detail['title']} — OpenGameArt","",
+                            f"- Creator: {detail['creator'] or 'Not separately exposed'}",
+                            f"- Item page: {item_url}",
+                            "- Exact item-page license: CC0 1.0 Universal",
+                            "- License: https://creativecommons.org/publicdomain/zero/1.0/"]
+                for pkg in package_downloads:
+                    note_lines.append(f"- Download: {pkg['url']}")
+                    note_lines.append(f"- Archive SHA-256: {pkg['archive_sha256']}" if pkg["archive_sha256"] else f"- File: {pkg['filename']}")
+                    for media_path in pkg["media_paths"]:
+                        if not media_path.is_file():
+                            continue
+                        digest=sha256_path(media_path)
+                        rel=media_path.relative_to(root).as_posix()
+                        index.append({"id":"opengameart-"+category+"-"+slugify(item_slug+"-"+rel),
+                                      "path":rel,"type":"opengameart-cc0-"+category,
+                                      "provider":"OpenGameArt","title":detail["title"],
+                                      "creator":detail["creator"],"category":category_labels[category],
+                                      "source_page":item_url,"source_file_url":pkg["url"],
+                                      "license":"CC0-1.0",
+                                      "license_url":"https://creativecommons.org/publicdomain/zero/1.0/",
+                                      "license_verified_from_item_page":True,
+                                      "archive_sha256":pkg["archive_sha256"],
+                                      "size_bytes":media_path.stat().st_size,"sha256":digest,"redistributable":True})
+                        note_lines.append(f"- File: {rel} — SHA-256: {digest}")
+                write_text(package_dir/"SOURCE_AND_LICENSE.md","\n".join(note_lines)+"\n")
+                total_bytes+=item_new_bytes
+                downloaded_for_category+=1
+                row.update(status="downloaded",download_count=len(package_downloads),
+                           extracted_files=sum(len(p["media_paths"]) for p in package_downloads),
+                           unpacked_bytes=item_new_bytes,
+                           files=[{"url":p["url"],"filename":p["filename"],"archive_sha256":p["archive_sha256"],
+                                   "extracted_files":p["extracted_files"]} for p in package_downloads])
+                report.append(row)
+                time.sleep(.4)
+            except Exception as exc:
+                report.append({"id":"opengameart-"+category+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                               "provider":"OpenGameArt","status":"item_failed","source_page":item_url,
+                               "category":category,"reason":str(exc)[:360]})
+        print("[OpenGameArt] "+category+":",downloaded_for_category,"items downloaded from",examined,"detail pages")
+    return report
+
+
+def google_fonts_api_url_is_allowed(url,family):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        query=urllib.parse.parse_qs(parsed.query)
+        expected="/repos/google/fonts/contents/ofl/"+str(family)
+        return (parsed.scheme=="https" and parsed.hostname=="api.github.com" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and parsed.path==expected and query.get("ref")==["main"])
+    except Exception:
+        return False
+
+
+def google_fonts_raw_url_is_allowed(url,family,filename=None):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        prefix="/google/fonts/main/ofl/"+str(family)+"/"
+        path=urllib.parse.unquote(parsed.path or "")
+        ext=Path(path).suffix.lower()
+        return (parsed.scheme=="https" and parsed.hostname=="raw.githubusercontent.com" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and path.startswith(prefix) and
+                (filename is None or Path(path).name==filename) and
+                (ext==".ttf" or Path(path).name=="OFL.txt"))
+    except Exception:
+        return False
+
+
+def google_fonts_ofl_is_valid(text):
+    normalized=str(text or "").replace("\r\n","\n")
+    upper=normalized.upper()
+    return ("SIL OPEN FONT LICENSE VERSION 1.1" in upper and
+            "COPYRIGHT" in upper[:1200])
+
+
+def google_fonts_ttf_signature_is_valid(blob):
+    return (len(blob)>=4096 and blob.startswith((b"\x00\x01\x00\x00",b"true",b"OTTO")))
+
+
+def download_google_fonts(root,index):
+    """Download a curated, bounded set of TTFs only when the family's own OFL file verifies."""
+    report=[]; total_bytes=0
+    api_base="https://api.github.com/repos/google/fonts/contents/ofl/"
+    license_name="SIL Open Font License 1.1"
+    for family in GOOGLE_FONTS_FAMILY_SLUGS[:GOOGLE_FONTS_MAX_FAMILIES]:
+        api_url=api_base+urllib.parse.quote(family,safe="") +"?ref=main"
+        source_page="https://github.com/google/fonts/tree/main/ofl/"+family
+        row={"id":"google-fonts-"+family,"provider":"Google Fonts / google/fonts",
+             "family_slug":family,"title":family.replace("-", " ").title(),
+             "category":"Typography / video titles, captions and editorial text",
+             "source_page":source_page,"api_source":api_url,
+             "license":"SIL Open Font License 1.1 only after the family's OFL.txt is validated",
+             "license_url":"https://openfontlicense.org/"}
+        if not google_fonts_api_url_is_allowed(api_url,family):
+            row.update(status="invalid_api_url",reason="The computed family API URL failed the official endpoint allow-list.")
+            report.append(row); continue
+        try:
+            payload=request_json(api_url,timeout=25)
+            if not isinstance(payload,list):
+                raise RuntimeError("GitHub contents API did not return a family directory listing")
+            entries=[item for item in payload if isinstance(item,dict) and item.get("type")=="file"]
+            license_entry=next((item for item in entries if str(item.get("name","")).lower()=="ofl.txt"),None)
+            if not license_entry:
+                row.update(status="skipped_license",reason="The family directory has no OFL.txt file.")
+                report.append(row); continue
+            license_url=license_entry.get("download_url") or ""
+            if not google_fonts_raw_url_is_allowed(license_url,family,"OFL.txt"):
+                row.update(status="skipped_license",reason="The OFL file URL is not on the official raw.githubusercontent.com family path.")
+                report.append(row); continue
+            license_blob,_=request_bytes(license_url,timeout=25,limit=512*1024)
+            license_text=license_blob.decode("utf-8","replace")
+            if not google_fonts_ofl_is_valid(license_text):
+                row.update(status="skipped_license",reason="The actual OFL.txt does not contain the SIL Open Font License 1.1 marker.")
+                report.append(row); continue
+            font_entries=[]
+            for item in entries:
+                name=str(item.get("name") or "")
+                url=str(item.get("download_url") or "")
+                if Path(name).suffix.lower()!=".ttf":
+                    continue
+                if not google_fonts_raw_url_is_allowed(url,family,name):
+                    continue
+                try:
+                    declared=int(item.get("size") or 0)
+                except (TypeError,ValueError):
+                    declared=0
+                if declared and declared>GOOGLE_FONTS_MAX_FONT_BYTES:
+                    continue
+                font_entries.append({"name":name,"url":url,"declared_size":declared})
+            # Prefer the regular face, then include an italic companion where present.
+            font_entries.sort(key=lambda item:("italic" in item["name"].lower(),item["name"].lower()))
+            selected=font_entries[:GOOGLE_FONTS_MAX_TTF_PER_FAMILY]
+            if not selected:
+                row.update(status="no_ttf_font",reason="No allow-listed TTF file was listed in the family directory.")
+                report.append(row); continue
+            family_dir=root/"third-party/google-fonts"/family
+            family_dir.mkdir(parents=True,exist_ok=True)
+            license_path=family_dir/"OFL.txt"
+            license_path.write_bytes(license_blob)
+            license_sha=sha256_path(license_path)
+            font_rows=[]
+            for font in selected:
+                if total_bytes>=GOOGLE_FONTS_MAX_TOTAL_BYTES:
+                    break
+                try:
+                    blob,ctype=request_bytes(font["url"],timeout=35,limit=GOOGLE_FONTS_MAX_FONT_BYTES)
+                    if not google_fonts_ttf_signature_is_valid(blob):
+                        raise RuntimeError("Downloaded font failed TrueType/OpenType sfnt signature validation.")
+                    target=family_dir/Path(font["name"]).name
+                    target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    index.append({"id":"google-font-"+family+"-"+slugify(target.name),
+                                  "path":target.relative_to(root).as_posix(),
+                                  "type":"google-font-ttf","provider":"Google Fonts",
+                                  "title":family.replace("-", " ").title()+" — "+target.name,
+                                  "family_slug":family,"category":"Typography / titles, captions and editorial text",
+                                  "source_page":source_page,"source_file_url":font["url"],
+                                  "license":license_name,"license_url":"https://openfontlicense.org/",
+                                  "license_file":license_path.relative_to(root).as_posix(),
+                                  "license_file_url":license_url,"license_file_sha256":license_sha,
+                                  "license_verified_from_family_ofl":True,
+                                  "size_bytes":len(blob),"sha256":digest,"redistributable":True})
+                    total_bytes+=len(blob)
+                    font_rows.append({"name":font["name"],"path":target.relative_to(root).as_posix(),
+                                      "size_bytes":len(blob),"sha256":digest,"source_file_url":font["url"]})
+                except Exception as font_exc:
+                    row.setdefault("font_failures",[]).append({"name":font["name"],"reason":str(font_exc)[:240]})
+            if not font_rows:
+                shutil.rmtree(family_dir,ignore_errors=True)
+                row.update(status="download_failed",reason="No font file passed download and signature validation.")
+                report.append(row); continue
+            note=(f"# {family.replace('-', ' ').title()} — Google Fonts\\n\\n"
+                  f"- Official family page: {source_page}\\n- License: SIL Open Font License 1.1\\n"
+                  f"- License source: {license_url}\\n- OFL.txt SHA-256: {license_sha}\\n"
+                  "- Only TTF files with validated sfnt signatures were retained.\\n")
+            write_text(family_dir/"SOURCE_AND_LICENSE.md",note)
+            row.update(status="downloaded",license=license_name,license_file=license_path.relative_to(root).as_posix(),
+                       license_file_sha256=license_sha,font_files_downloaded=len(font_rows),fonts=font_rows)
+            report.append(row)
+            print("[Google Fonts] OK:",family,len(font_rows),"TTFs",sum(x["size_bytes"] for x in font_rows),"bytes")
+            time.sleep(.25)
+        except Exception as exc:
+            row.update(status="failed",reason=str(exc)[:360])
+            report.append(row)
+            print("[Google Fonts] failed:",family,str(exc)[:180])
+        if total_bytes>=GOOGLE_FONTS_MAX_TOTAL_BYTES:
+            break
     return report
 
 
@@ -3054,6 +3912,9 @@ def main():
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
     wikimedia_svg_report=download_wikimedia_vector_svg(STAGE,index)
     wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
+    usgs_report=download_usgs_gallery(STAGE,index)
+    opengameart_report=download_opengameart(STAGE,index)
+    google_fonts_report=download_google_fonts(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -3074,6 +3935,12 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_svg_report)+
       "\n\n## Wikimedia Commons video/audio download results\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
+      "\n\n## Google Fonts — curated type families under SIL Open Font License 1.1\nThe builder queries a fixed list of Google Fonts family directories through the official google/fonts GitHub contents API. A family is eligible only if its own OFL.txt download URL is inside the exact official family folder and the downloaded license text contains the SIL Open Font License Version 1.1 and copyright statement. The build selects at most two TTF faces per family, verifies the sfnt font signature, retains the full OFL.txt, records the exact family/file URL and license-file SHA-256, and enforces per-file and aggregate download caps. These fonts are redistributable under their own OFL 1.1 terms; they are not relabelled CC0. Sources: https://github.com/google/fonts and https://openfontlicense.org/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in google_fonts_report)+
+      "\n\n## OpenGameArt — item-level CC0 media packs\nThe builder searches OpenGameArt's official advanced-search page using its CC0 taxonomy filter for 2D art, 3D art, textures, sound effects and music. Search filters are discovery only: each item's own License(s) field must expose exactly one CC0 1.0 license link; mixed or non-CC0 items are skipped. The downloader follows only official item pages and attachments under the site's official HTTPS /sites/default/files/ path. ZIP files are integrity-tested and extracted with the repository's safe path and extension allow-list; individual media files are checked against their extension and file signature. Per-item archive and per-file digests, creator, source page, license basis and actual download outcome are preserved. The category ceilings are search caps, not promised downloads. Sources: https://opengameart.org/art-search-advanced and https://opengameart.org/content/faq.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in opengameart_report)+
+      "\n\n## USGS Multimedia Gallery — item-level Public Domain only\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly 'Public Domain.'. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in usgs_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
@@ -3099,7 +3966,14 @@ def main():
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
               "wikimedia_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in wikimedia_av_report),
               "wikimedia_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in wikimedia_av_report),
-              "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
+              "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),
+              "usgs_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in usgs_report),
+              "usgs_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in usgs_report),
+              "usgs_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in usgs_report),
+              "opengameart_items_downloaded":sum(r.get("status")=="downloaded" for r in opengameart_report),
+              "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
+              "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
+              "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf")}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
@@ -3112,7 +3986,7 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
