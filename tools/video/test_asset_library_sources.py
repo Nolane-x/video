@@ -13,6 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
 import generate_sticker_meme_library as sticker_meme  # noqa: E402
+import package_asset_bundles as bundle_packager  # noqa: E402
+import json
 
 
 
@@ -207,6 +209,65 @@ class OpenGameArtRightsAndParsingTests(unittest.TestCase):
         self.assertTrue(library.opengameart_file_signature_is_valid(b"\x1a\x45\xdf\xa3" + b"x" * 64, ".webm", "video/webm"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a zip</html>", ".zip", "text/html"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a png</html>", ".png", "text/html"))
+
+class ScalableBundlePackagingTests(unittest.TestCase):
+    def _create_library(self, root, asset_sizes):
+        library_root = root / "video-asset-library"
+        library_root.mkdir(parents=True)
+        assets = []
+        for i, size in enumerate(asset_sizes):
+            rel = f"originals/stickers/sticker-{i}.svg"
+            path = library_root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((f"<svg id='{i}'>" + "x" * (size - 20) + "</svg>").encode("utf-8"))
+            assets.append({
+                "id": f"sticker-{i}", "path": rel, "type": "original-video-sticker",
+                "license": "CC0-1.0", "redistributable": True
+            })
+        (library_root / "ASSET_INDEX.json").write_text(json.dumps({
+            "built_at": "2026-10-30T00:00:00Z", "assets": assets, "summary": {}
+        }), encoding="utf-8")
+        (library_root / "ASSET_CATALOG.html").write_text("<html>catalog</html>", encoding="utf-8")
+        (library_root / "SOURCES_AND_LICENSES.md").write_text("# rights", encoding="utf-8")
+        (library_root / "SHA256SUMS.txt").write_text("", encoding="utf-8")
+        return library_root
+
+    def test_compact_library_keeps_one_click_legacy_zip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [128, 128])
+            manifest = bundle_packager.package_library(output)
+            self.assertEqual(manifest["mode"], "single-archive")
+            self.assertEqual(manifest["bundle_count"], 1)
+            self.assertTrue((output / "video-asset-library.zip").is_file())
+            self.assertFalse((output / "video-assets-catalog.zip").exists())
+            bundle_packager.verify_manifest(output, root, manifest)
+
+    def test_large_library_splits_by_family_and_extracts_into_same_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [35_000, 35_000, 35_000])
+            with unittest.mock.patch.object(bundle_packager, "MAX_BUNDLE_UNCOMPRESSED_BYTES", 50_000):
+                manifest = bundle_packager.package_library(output)
+                self.assertEqual(manifest["mode"], "multi-volume")
+                self.assertGreaterEqual(manifest["bundle_count"], 3)
+                names = {row["name"] for row in manifest["bundles"]}
+                self.assertIn("video-assets-catalog.zip", names)
+                self.assertTrue(any(name.startswith("video-assets-original-graphics-") for name in names))
+                self.assertFalse((output / "video-asset-library.zip").exists())
+                self.assertTrue((output / "ASSET_BUNDLES.json").is_file())
+                bundle_packager.verify_manifest(output, root, manifest)
+
+    def test_bundle_manifest_detects_missing_or_modified_zip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [128])
+            manifest = bundle_packager.package_library(output)
+            first = output / manifest["bundles"][0]["name"]
+            first.write_bytes(first.read_bytes() + b"tamper")
+            with self.assertRaises(RuntimeError):
+                bundle_packager.verify_manifest(output, root, manifest)
+
 
 class NOAAMultimediaRightsAndParsingTests(unittest.TestCase):
     IMAGE_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-image.jpg"
