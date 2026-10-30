@@ -8,6 +8,8 @@ import tempfile
 import tarfile
 import unittest
 import urllib.parse
+import urllib.error
+from datetime import datetime, timezone
 from unittest import mock
 import zipfile
 import xml.etree.ElementTree as ET
@@ -1168,6 +1170,42 @@ class RightsGateTests(unittest.TestCase):
         self.assertFalse(library.smithsonian_rights_are_cc0("Usage conditions apply", "CC0"))
         self.assertFalse(library.smithsonian_rights_are_cc0(None, "CC0"))
         self.assertFalse(library.smithsonian_rights_are_cc0("CC0", None))
+
+    def test_smithsonian_retry_delay_honors_retry_after_and_rate_limit_reset(self):
+        self.assertEqual(
+            library.smithsonian_retry_delay_seconds({"Retry-After": "9"}, 0, 429),
+            9.0,
+        )
+        now = datetime(2026, 10, 30, 12, 0, tzinfo=timezone.utc)
+        reset = str(int(now.timestamp() + 17))
+        self.assertEqual(
+            library.smithsonian_retry_delay_seconds(
+                {"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": reset},
+                0, 429, now=now,
+            ),
+            18.0,
+        )
+        self.assertEqual(library.smithsonian_retry_delay_seconds({}, 1, 429), 120.0)
+        self.assertEqual(library.smithsonian_retry_delay_seconds({}, 1, 503), 10.0)
+
+    def test_smithsonian_request_retries_429_then_recovers_without_network(self):
+        url = "https://api.si.edu/openaccess/api/v1.0/search?q=unit_code%3ANMNH"
+        limited = urllib.error.HTTPError(
+            url, 429, "Too Many Requests", {"Retry-After": "7"}, None
+        )
+        expected = {"response": {"rows": []}}
+        with mock.patch.object(library, "request_json", side_effect=[limited, expected]) as request,              mock.patch.object(library.time, "sleep") as sleep:
+            self.assertEqual(library.smithsonian_request_json(url), expected)
+        self.assertEqual(request.call_count, 2)
+        sleep.assert_called_once_with(7.0)
+
+    def test_smithsonian_request_does_not_retry_permanent_http_errors(self):
+        url = "https://api.si.edu/openaccess/api/v1.0/search?q=unit_code%3ANMNH"
+        denied = urllib.error.HTTPError(url, 401, "Unauthorized", {}, None)
+        with mock.patch.object(library, "request_json", side_effect=denied),              mock.patch.object(library.time, "sleep") as sleep:
+            with self.assertRaises(urllib.error.HTTPError):
+                library.smithsonian_request_json(url)
+        sleep.assert_not_called()
 
     def test_rijksmuseum_resolver_rejects_nonofficial_hosts_without_network_access(self):
         self.assertEqual(library.resolve_rijksmuseum_iiif("https://example.com/123"), "")
