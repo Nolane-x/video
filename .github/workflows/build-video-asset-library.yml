@@ -126,6 +126,29 @@ jobs:
               assert len(media.get("sha256", "")) == 64
               assert media.get("size_bytes", 0) >= 2048
 
+          assert "ambientcg_packages_downloaded" in expected, "ambientCG package count is missing"
+          assert "ambientcg_files_downloaded" in expected, "ambientCG file count is missing"
+          ambientcg_report = index.get("ambientcg_downloads")
+          assert isinstance(ambientcg_report, list), "ambientCG source report is missing"
+          ambientcg_downloaded = [row for row in ambientcg_report if row.get("status") == "downloaded"]
+          ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
+          assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
+          assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
+          assert expected["ambientcg_packages_downloaded"] <= 30, "ambientCG search ceiling exceeded"
+          for row in ambientcg_downloaded:
+              assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
+              assert row.get("license") == "CC0-1.0"
+              assert len(row.get("archive_sha256", "")) == 64
+              assert row.get("extracted_files", 0) > 0 and row.get("unpacked_bytes", 0) > 0
+          for asset in ambientcg_assets:
+              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
+              assert asset.get("license_verified_from_provider_collection_terms") is True
+              assert asset.get("source_page", "").startswith("https://ambientcg.com/a/")
+              assert asset.get("source_file_url", "").startswith("https://ambientcg.com/get?file=")
+              assert asset.get("path", "").startswith("third-party/ambientcg/")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
+              assert asset.get("download_archive_sha256", "") in {row.get("archive_sha256") for row in ambientcg_downloaded}
+
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
