@@ -2120,8 +2120,33 @@ def opengameart_cc0_link_is_valid(url):
         return False
 
 
+class OpenGameArtSearchParser(HTMLParser):
+    """Collect only result links inside the main advanced-search results view."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.depth=0
+        self.links=[]
+
+    def handle_starttag(self,tag,attrs):
+        if tag=="div":
+            classes=set(dict(attrs).get("class","").split())
+            required={"view-art","view-id-art","view-display-id-search_art_advanced"}
+            if self.depth:
+                self.depth+=1
+            elif required.issubset(classes):
+                self.depth=1
+        if tag=="a" and self.depth:
+            href=dict(attrs).get("href","")
+            if href:
+                self.links.append(href)
+
+    def handle_endtag(self,tag):
+        if tag=="div" and self.depth:
+            self.depth-=1
+
+
 def opengameart_parse_search_page(page_html):
-    parser=USGSMediaPageParser()
+    parser=OpenGameArtSearchParser()
     parser.feed(page_html)
     result=[]
     for link in parser.links:
