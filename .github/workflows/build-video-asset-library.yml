@@ -166,6 +166,45 @@ jobs:
               assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
               assert asset.get("download_archive_sha256", "") in {row.get("archive_sha256") for row in ambientcg_downloaded}
 
+          assert "lazytextures_packages_downloaded" in expected and "lazytextures_files_downloaded" in expected
+          assert "lazytextures_archive_bytes_downloaded" in expected
+          lazytextures_report = index.get("lazytextures_downloads")
+          assert isinstance(lazytextures_report, list), "LazyTextures source report is missing"
+          lazytextures_downloaded = [row for row in lazytextures_report if row.get("status") == "downloaded"]
+          lazytextures_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("lazytextures-") and str(asset.get("type", "")).endswith("-asset-file")]
+          assert len(lazytextures_downloaded) == expected["lazytextures_packages_downloaded"]
+          assert len(lazytextures_assets) == expected["lazytextures_files_downloaded"]
+          assert sum(row.get("extracted_files", 0) for row in lazytextures_downloaded) == expected["lazytextures_files_downloaded"]
+          assert sum(row.get("archive_bytes", 0) for row in lazytextures_downloaded) == expected["lazytextures_archive_bytes_downloaded"]
+          assert expected["lazytextures_packages_downloaded"] <= sum([10, 16, 10, 18])
+          assert expected["lazytextures_archive_bytes_downloaded"] <= 512 * 1024 * 1024
+          caps = {"models": 10, "materials": 16, "hdris": 10, "textures": 18}
+          for asset_type, cap in caps.items():
+              assert sum(row.get("status") == "downloaded" and row.get("asset_type") == asset_type for row in lazytextures_report) <= cap
+          assert sum(row.get("unpacked_bytes", 0) for row in lazytextures_downloaded) <= 1536 * 1024 * 1024
+          successful_archive_hashes = set()
+          for row in lazytextures_downloaded:
+              assert row.get("license") == "CC0-1.0"
+              assert row.get("source_page", "").startswith("https://lazytextures.net:3000/Asset/")
+              assert 0 < row.get("archive_bytes", 0) <= 64 * 1024 * 1024
+              assert len(row.get("archive_sha256", "")) == 64
+              assert row.get("extracted_files", 0) > 0 and row.get("unpacked_bytes", 0) > 0
+              successful_archive_hashes.add(row["archive_sha256"])
+          for asset in lazytextures_assets:
+              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
+              assert asset.get("license_verified_from_provider_api_policy") is True
+              assert asset.get("license_evidence_url") == "https://lazytextures.com/PublicAPI"
+              assert asset.get("source_page", "").startswith("https://lazytextures.net:3000/Asset/")
+              assert asset.get("source_file_url", "").startswith("https://lazytextures.net:3000/Assets/")
+              assert asset.get("source_file_url", "").endswith(".zip")
+              assert asset.get("path", "").startswith("third-party/lazytextures/")
+              assert asset.get("download_archive_sha256") in successful_archive_hashes
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
+              lazy_path = Path(asset["path"])
+              assert not lazy_path.is_absolute() and ".." not in lazy_path.parts
+              target = root / lazy_path
+              assert target.is_file(), "LazyTextures extracted asset file is missing"
+              assert hashlib.sha256(target.read_bytes()).hexdigest() == asset["sha256"], "LazyTextures per-file SHA-256 mismatch"
           assert "usgs_images_downloaded" in expected and "usgs_videos_downloaded" in expected and "usgs_audio_downloaded" in expected
           usgs_report = index.get("usgs_gallery_downloads")
           assert isinstance(usgs_report, list), "USGS Gallery source report is missing"
