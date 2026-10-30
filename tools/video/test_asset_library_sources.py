@@ -58,6 +58,63 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
 
+class OpenGameArtRightsAndParsingTests(unittest.TestCase):
+    ZIP_URL = "https://opengameart.org/sites/default/files/sample-pack.zip"
+    PNG_URL = "https://opengameart.org/sites/default/files/sample.png"
+
+    def test_opengameart_search_requires_official_cc0_and_known_art_type_taxonomy(self):
+        good = "https://opengameart.org/art-search-advanced?field_art_licenses_tid%5B0%5D=4&field_art_type_tid%5B0%5D=13&sort_by=count&sort_order=DESC&items_per_page=24&page=0"
+        self.assertTrue(library.opengameart_search_page_is_allowed(good))
+        self.assertFalse(library.opengameart_search_page_is_allowed(good.replace("=4&", "=2&")))
+        self.assertFalse(library.opengameart_search_page_is_allowed(good.replace("%5B0%5D=13", "%5B0%5D=999")))
+        self.assertFalse(library.opengameart_search_page_is_allowed("https://evil.example/art-search-advanced?field_art_licenses_tid%5B0%5D=4&field_art_type_tid%5B0%5D=13"))
+
+    def test_opengameart_item_page_requires_single_exact_cc0_license(self):
+        self.assertTrue(library.opengameart_item_page_is_allowed("https://opengameart.org/content/rpg-sound-pack"))
+        self.assertFalse(library.opengameart_item_page_is_allowed("http://opengameart.org/content/rpg-sound-pack"))
+        self.assertFalse(library.opengameart_item_page_is_allowed("https://opengameart.org/content/rpg-sound-pack/extra"))
+        self.assertTrue(library.opengameart_cc0_link_is_valid("http://creativecommons.org/publicdomain/zero/1.0/"))
+        self.assertFalse(library.opengameart_cc0_link_is_valid("https://creativecommons.org/licenses/by/4.0/"))
+        cc0 = """<div class="field-name-field-art-licenses"><div><a href="http://creativecommons.org/publicdomain/zero/1.0/"><div class="license-name">CC0</div></a></div></div>"""
+        parsed = library.opengameart_parse_item_page(cc0)
+        self.assertTrue(parsed["cc0_verified_from_item_page"])
+        non_cc0 = """<div class="field-name-field-art-licenses"><div><a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a></div></div>"""
+        self.assertFalse(library.opengameart_parse_item_page(non_cc0)["cc0_verified_from_item_page"])
+        mixed = """<div class="field-name-field-art-licenses"><div><a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a><a href="https://creativecommons.org/licenses/by/4.0/">CC BY</a></div></div>"""
+        self.assertFalse(library.opengameart_parse_item_page(mixed)["cc0_verified_from_item_page"])
+
+    def test_opengameart_parser_extracts_only_file_section_and_creator(self):
+        page = f"""<html><head><meta property="og:title" content="Sample game asset pack"></head><body>
+        <div class="field-name-title"><div><h2>Sample game asset pack</h2></div></div>
+        <div class="field-name-author-submitter"><div><span>Maker One</span><a href="https://opengameart.org/users/maker-one">Maker One</a></div></div>
+        <div class="field-name-field-art-licenses"><div><a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a></div></div>
+        <a href="https://opengameart.org/sites/default/files/preview.png">Not an attachment</a>
+        <div class="field-name-field-art-files"><div><span class="file"><a type="application/zip; length=1234" download="sample-pack.zip" href="{self.ZIP_URL}">sample-pack.zip</a></span></div></div>
+        </body></html>"""
+        parsed = library.opengameart_parse_item_page(page)
+        self.assertTrue(parsed["cc0_verified_from_item_page"])
+        self.assertEqual(parsed["title"], "Sample game asset pack")
+        self.assertIn("Maker One", parsed["creator"])
+        self.assertEqual(len(parsed["files"]), 1)
+        self.assertEqual(parsed["files"][0]["url"], self.ZIP_URL)
+        self.assertEqual(parsed["files"][0]["declared_size"], 1234)
+
+    def test_opengameart_file_allowlist_requires_official_file_host_and_path(self):
+        self.assertTrue(library.opengameart_file_url_is_allowed(self.ZIP_URL))
+        self.assertTrue(library.opengameart_file_url_is_allowed(self.PNG_URL))
+        self.assertFalse(library.opengameart_file_url_is_allowed("https://example.com/sites/default/files/sample.zip"))
+        self.assertFalse(library.opengameart_file_url_is_allowed("https://opengameart.org/other/sample.zip"))
+        self.assertFalse(library.opengameart_file_url_is_allowed("http://opengameart.org/sites/default/files/sample.zip"))
+        self.assertFalse(library.opengameart_file_url_is_allowed("https://user@opengameart.org/sites/default/files/sample.zip"))
+
+    def test_opengameart_signature_gate_rejects_html_and_bad_media_bytes(self):
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"PK\x03\x04" + b"x" * 64, ".zip", "application/zip"))
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"\x89PNG\r\n\x1a\n" + b"x" * 64, ".png", "image/png"))
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"OggS" + b"x" * 64, ".ogg", "audio/ogg"))
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"BLENDER" + b"x" * 64, ".blend", "application/octet-stream"))
+        self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a zip</html>", ".zip", "text/html"))
+        self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a png</html>", ".png", "text/html"))
+
 class USGSGalleryRightsAndParsingTests(unittest.TestCase):
     IMAGE_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/images/sample.jpg"
     AUDIO_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/audio/sample.mp3"
