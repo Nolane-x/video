@@ -43,6 +43,12 @@ OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 48
 OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+OPENMOJI_VERSION = "17.0.0"
+OPENMOJI_PACKAGE_METADATA_URL = "https://registry.npmjs.org/openmoji/17.0.0"
+OPENMOJI_EXPECTED_FILE_COUNT = 11539
+OPENMOJI_MAX_ARCHIVE_BYTES = 80 * 1024 * 1024
+OPENMOJI_MAX_EXTRACTED_BYTES = 100 * 1024 * 1024
+OPENMOJI_MAX_SELECTED_FILES = 12000
 GOOGLE_FONTS_FAMILY_SLUGS = [
     "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
     "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
@@ -2935,6 +2941,219 @@ def download_noaa_ocean_exploration(root, index):
                            "provider": "NOAA Ocean Exploration", "status": "item_failed",
                            "source_page": item_url, "reason": str(exc)[:360]})
     print("[NOAA Ocean Exploration] downloaded", downloaded_counts, "from", len(candidates), "candidate detail pages")
+    return report
+
+
+def openmoji_tarball_url_is_allowed(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (parsed.scheme=="https" and parsed.hostname=="registry.npmjs.org" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and parsed.path=="/openmoji/-/openmoji-"+OPENMOJI_VERSION+".tgz" and
+                not parsed.query)
+    except Exception:
+        return False
+
+
+def openmoji_metadata_is_eligible(payload):
+    if not isinstance(payload,dict) or payload.get("version")!=OPENMOJI_VERSION:
+        return False
+    if str(payload.get("license") or "").strip().upper()!="CC-BY-SA-4.0":
+        return False
+    repository=payload.get("repository") or {}
+    repo_url=str(repository.get("url") or "") if isinstance(repository,dict) else str(repository)
+    if "github.com/hfg-gmuend/openmoji" not in repo_url:
+        return False
+    dist=payload.get("dist") or {}
+    return (openmoji_tarball_url_is_allowed(dist.get("tarball")) and
+            bool(re.fullmatch(r"[0-9a-f]{40}",str(dist.get("shasum") or ""))) and
+            str(dist.get("integrity") or "").startswith("sha512-"))
+
+
+def openmoji_selected_archive_path(raw_name):
+    """Map only approved exported artwork and the central data file from the npm archive."""
+    name=str(raw_name or "").replace("\\","/")
+    parsed=PurePosixPath(name)
+    if not name or parsed.is_absolute() or ".." in parsed.parts or (parsed.parts and ":" in parsed.parts[0]):
+        return None
+    parts=parsed.parts
+    if len(parts)>=4 and parts[0]=="package" and parts[1] in {"color","black"}:
+        folder=parts[2]
+        extension=Path(name).suffix.lower()
+        if folder=="svg" and extension==".svg":
+            return PurePosixPath(*parts[1:]).as_posix()
+        if folder in {"618x618","72x72"} and extension==".png":
+            return PurePosixPath(*parts[1:]).as_posix()
+    if parts==("package","data","openmoji.json"):
+        return "data/openmoji.json"
+    return None
+
+
+def openmoji_extract_selected_assets(archive_blob,target):
+    """Safely extract only OpenMoji SVG/PNG exports and central metadata; ignore code and links."""
+    import io
+    import tarfile
+    selected=[]; metadata_bytes=None; total=0
+    target=Path(target).resolve()
+    with tarfile.open(fileobj=io.BytesIO(archive_blob),mode="r:gz") as archive:
+        members=archive.getmembers()
+        if len(members)>OPENMOJI_MAX_SELECTED_FILES+2000:
+            raise RuntimeError("OpenMoji archive has an unexpected member count")
+        for member in members:
+            rel=openmoji_selected_archive_path(member.name)
+            if not rel or not member.isfile():
+                continue
+            if member.size<=0 or member.size>2*1024*1024:
+                continue
+            total+=member.size
+            if total>OPENMOJI_MAX_EXTRACTED_BYTES:
+                raise RuntimeError("OpenMoji selected artwork exceeds aggregate extraction ceiling")
+            stream=archive.extractfile(member)
+            if stream is None:
+                continue
+            blob=stream.read()
+            if len(blob)!=member.size:
+                raise RuntimeError("OpenMoji archive member length mismatch: "+member.name)
+            if rel=="data/openmoji.json":
+                metadata_bytes=blob
+                continue
+            ext=Path(rel).suffix.lower()
+            if ext==".svg":
+                blob=sanitize_cc0_svg(blob)
+            elif ext==".png":
+                if not blob.startswith(b"\x89PNG\r\n\x1a\n"):
+                    continue
+            else:
+                continue
+            if not blob:
+                continue
+            out=(target/Path(*PurePosixPath(rel).parts)).resolve()
+            if target not in out.parents:
+                raise RuntimeError("OpenMoji extraction path escaped its destination")
+            out.parent.mkdir(parents=True,exist_ok=True)
+            out.write_bytes(blob)
+            selected.append({"path":out,"relative_path":rel,"extension":ext,"size_bytes":len(blob)})
+            if len(selected)>OPENMOJI_MAX_SELECTED_FILES:
+                raise RuntimeError("OpenMoji selected file count exceeds safety ceiling")
+    metadata=[]
+    if metadata_bytes:
+        parsed=json.loads(metadata_bytes.decode("utf-8"))
+        if isinstance(parsed,list):
+            metadata=[row for row in parsed if isinstance(row,dict)]
+        elif isinstance(parsed,dict):
+            for key in ("openmoji","emojis","data"):
+                if isinstance(parsed.get(key),list):
+                    metadata=[row for row in parsed[key] if isinstance(row,dict)]
+                    break
+    return selected,metadata
+
+
+def download_openmoji_assets(root,index):
+    """Bundle the OpenMoji 17.0 artwork exports with exact CC BY-SA attribution and provenance."""
+    import base64
+    report=[]
+    source_page="https://github.com/hfg-gmuend/openmoji/tree/"+OPENMOJI_VERSION
+    license_url="https://creativecommons.org/licenses/by-sa/4.0/"
+    faq_url="https://github.com/hfg-gmuend/openmoji/blob/"+OPENMOJI_VERSION+"/FAQ.md"
+    raw_base="https://raw.githubusercontent.com/hfg-gmuend/openmoji/"+OPENMOJI_VERSION+"/"
+    attribution="All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0."
+    row={"id":"openmoji-17-0","provider":"OpenMoji","version":OPENMOJI_VERSION,
+         "title":"OpenMoji 17.0 — color/black SVG and PNG emoji artwork",
+         "category":"Emoji, stickers, reaction symbols and video overlays",
+         "source_page":source_page,"api_source":OPENMOJI_PACKAGE_METADATA_URL,
+         "license":"CC-BY-SA-4.0 (OpenMoji artwork; do not relabel as CC0)",
+         "license_url":license_url,"attribution_text":attribution,
+         "video_attribution_guidance":"Add the suggested attribution to the video description and/or mention OpenMoji in end credits, voice track or a footnote when the first OpenMoji appears."}
+    try:
+        npm=request_json(OPENMOJI_PACKAGE_METADATA_URL,timeout=25)
+        if not openmoji_metadata_is_eligible(npm):
+            raise RuntimeError("OpenMoji registry metadata does not match the pinned 17.0.0 CC BY-SA package")
+        dist=npm["dist"]; archive_url=dist["tarball"]
+        archive_blob,content_type=request_bytes(archive_url,timeout=50,limit=OPENMOJI_MAX_ARCHIVE_BYTES)
+        sha1=hashlib.sha1(archive_blob).hexdigest()
+        if sha1!=str(dist["shasum"]).lower():
+            raise RuntimeError("OpenMoji npm tarball SHA-1 does not match registry metadata")
+        integrity=str(dist["integrity"])
+        actual_integrity="sha512-"+base64.b64encode(hashlib.sha512(archive_blob).digest()).decode("ascii")
+        if actual_integrity!=integrity:
+            raise RuntimeError("OpenMoji npm tarball SHA-512 integrity does not match registry metadata")
+        target=root/"third-party"/"openmoji"
+        selected,metadata_rows=openmoji_extract_selected_assets(archive_blob,target)
+        if not selected:
+            raise RuntimeError("OpenMoji archive contained no approved SVG or PNG exports")
+        license_file_url=raw_base+"LICENSE.txt"
+        faq_file_url=raw_base+"FAQ.md"
+        license_blob,_=request_bytes(license_file_url,timeout=25,limit=512*1024)
+        faq_blob,_=request_bytes(faq_file_url,timeout=25,limit=512*1024)
+        license_text=license_blob.decode("utf-8","replace")
+        faq_text=faq_blob.decode("utf-8","replace")
+        if "Attribution-ShareAlike 4.0 International" not in license_text:
+            raise RuntimeError("Pinned OpenMoji LICENSE.txt did not verify CC BY-SA 4.0")
+        if "How to attribute OpenMoji in a film" not in faq_text or "ShareAlike" not in faq_text:
+            raise RuntimeError("Pinned OpenMoji FAQ lacks video attribution / ShareAlike guidance")
+        write_text(target/"LICENSE.txt",license_text)
+        write_text(target/"FAQ.md",faq_text)
+        write_text(target/"SOURCE_AND_LICENSE.md",
+            "# OpenMoji 17.0 artwork\n\n"
+            f"- Official release: {source_page}\n- npm package metadata: {OPENMOJI_PACKAGE_METADATA_URL}\n"
+            f"- Verified npm tarball: {archive_url}\n- Tarball SHA-1: {sha1}\n- Tarball integrity: {integrity}\n"
+            "- Artwork license: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)\n"
+            f"- License text: {license_file_url}\n- Official video attribution guidance: {faq_url}\n"
+            f"- Required attribution: {attribution}\n"
+            "- Video credit: put the attribution in the video description and/or end credits, voice track or a footnote at first use.\n"
+            "- ShareAlike: if an emoji artwork is remixed, transformed or built upon, distribute that adapted artwork under CC BY-SA 4.0.\n"
+            "- This package contains exported SVG and PNG artwork only. npm JavaScript/build code is not included.\n")
+        metadata_by_code={}
+        for item in metadata_rows:
+            key=str(item.get("hexcode") or item.get("hexCode") or item.get("codepoint") or "").replace(" ","-").upper()
+            if key:
+                metadata_by_code[key]=item
+        for item in selected:
+            rel=item["relative_path"]
+            code=Path(rel).stem.upper()
+            meta=metadata_by_code.get(code,{})
+            title=str(meta.get("annotation") or meta.get("name") or ("OpenMoji "+code)).strip()[:220]
+            tags=meta.get("tags") or meta.get("openmoji_tags") or []
+            if isinstance(tags,str):
+                tags=[tag.strip() for tag in re.split(r"[,;]",tags) if tag.strip()]
+            if not isinstance(tags,list):
+                tags=[]
+            tags=[str(tag)[:80] for tag in tags[:40]]
+            relative_file=item["path"].relative_to(root).as_posix()
+            ext=item["extension"]
+            style=PurePosixPath(rel).parts[0]
+            family=PurePosixPath(rel).parts[1]
+            entry_type="openmoji-cc-by-sa-svg" if ext==".svg" else "openmoji-cc-by-sa-png"
+            raw_url=raw_base+urllib.parse.quote(rel,safe="/")
+            index.append({"id":"openmoji-"+slugify(rel),"path":relative_file,
+                          "type":entry_type,"provider":"OpenMoji","version":OPENMOJI_VERSION,
+                          "title":title,"codepoint":code,"style":style,"export_family":family,
+                          "category":"Emoji / stickers / reactions / video overlays","tags":tags,
+                          "source_page":source_page,"source_file_url":raw_url,
+                          "license":"CC-BY-SA-4.0","license_url":license_url,
+                          "license_verified_from_npm_metadata_and_official_faq":True,
+                          "npm_tarball_sha1":sha1,"npm_tarball_integrity":integrity,
+                          "attribution_required":True,"attribution_text":attribution,
+                          "video_attribution_guidance":row["video_attribution_guidance"],
+                          "sharealike_requirement":"Adaptations of OpenMoji artwork must be distributed under CC BY-SA 4.0.",
+                          "license_text_path":"third-party/openmoji/LICENSE.txt",
+                          "faq_path":"third-party/openmoji/FAQ.md",
+                          "size_bytes":item["path"].stat().st_size,
+                          "sha256":sha256_path(item["path"]),"redistributable":True})
+        row.update(status="downloaded",license="CC-BY-SA-4.0",
+                   tarball_bytes=len(archive_blob),tarball_sha1=sha1,tarball_integrity=integrity,
+                   npm_unpacked_size=int(dist.get("unpackedSize") or 0),
+                   extracted_files=len(selected),
+                   svg_files=sum(item["extension"]==".svg" for item in selected),
+                   png_files=sum(item["extension"]==".png" for item in selected),
+                   extracted_bytes=sum(item["path"].stat().st_size for item in selected),
+                   metadata_rows=len(metadata_rows))
+        report.append(row)
+        print("[OpenMoji] OK:",row["extracted_files"],"artwork exports",row["extracted_bytes"],"bytes")
+    except Exception as exc:
+        row.update(status="failed",reason=str(exc)[:500])
+        report.append(row)
+        print("[OpenMoji] failed:",str(exc)[:300])
     return report
 
 
