@@ -1368,9 +1368,6 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
         self.assertEqual(len(icon_ids), len(set(icon_ids)))
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
-
 class ParallelAssetSourceLaneTests(unittest.TestCase):
     def test_source_lanes_run_concurrently_and_merge_indexes_in_declared_order(self):
         import threading
@@ -1399,3 +1396,7 @@ class ParallelAssetSourceLaneTests(unittest.TestCase):
         self.assertEqual(reports["second"][0]["status"], "downloaded")
         self.assertEqual([entry["id"] for entry in shared_index], ["first", "second"])
 
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
