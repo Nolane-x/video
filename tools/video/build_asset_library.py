@@ -17,10 +17,12 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 12 * 1024 * 1024
 MAX_POLY_FILE = 60 * 1024 * 1024
+SOURCE_DOWNLOAD_WORKERS = 6  # Provider-level parallelism; provider-specific pacing remains enabled.
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
 POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
+POLYHAVEN_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
 AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
@@ -946,6 +948,64 @@ def request_bytes(url, timeout=45, limit=None):
 def request_json(url, timeout=45):
     raw,_=request_bytes(url,timeout,25*1024*1024)
     return json.loads(raw.decode("utf-8"))
+
+def run_parallel_source_lanes(root, index, lanes, max_workers=6):
+    """Run isolated provider downloaders concurrently with deterministic index merging.
+
+    Every provider receives its own index list. This prevents concurrent mutation of
+    the shared catalog and keeps final asset ordering stable regardless of completion
+    order. Provider-specific rate limits and license gates remain inside each lane.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    lane_specs = tuple(lanes)
+    if not isinstance(max_workers, int) or isinstance(max_workers, bool) or max_workers < 1:
+        raise ValueError("max_workers must be a positive integer")
+    if not lane_specs:
+        return {}
+
+    names = [name for name, _ in lane_specs]
+    if any(not isinstance(name, str) or not name.strip() for name in names):
+        raise ValueError("every source lane needs a non-empty string name")
+    if len(names) != len(set(names)):
+        raise ValueError("source lane names must be unique")
+    if any(not callable(worker) for _, worker in lane_specs):
+        raise TypeError("every source lane must provide a callable downloader")
+
+    local_indexes = {name: [] for name in names}
+    completed_reports = {}
+    worker_count = min(max_workers, len(lane_specs))
+    started_at = time.monotonic()
+
+    print(
+        f"[Sources] starting {len(lane_specs)} independent source lanes "
+        f"with concurrency={worker_count}"
+    )
+    with ThreadPoolExecutor(
+        max_workers=worker_count, thread_name_prefix="asset-library"
+    ) as executor:
+        future_names = {
+            executor.submit(worker, root, local_indexes[name]): name
+            for name, worker in lane_specs
+        }
+        for future in as_completed(future_names):
+            name = future_names[future]
+            report = future.result()
+            completed_reports[name] = report
+            elapsed = time.monotonic() - started_at
+            print(
+                f"[Sources] completed {name}: "
+                f"{len(local_indexes[name])} indexed assets; "
+                f"{elapsed:.1f}s elapsed"
+            )
+
+    # Merge only after all providers finish, in declaration order rather than
+    # nondeterministic thread-completion order.
+    for name, _ in lane_specs:
+        index.extend(local_indexes[name])
+
+    return {name: completed_reports[name] for name, _ in lane_specs}
+
 
 def write_text(path, content):
     path.parent.mkdir(parents=True,exist_ok=True)
@@ -4704,6 +4764,7 @@ def download_internet_archive_videos(root,index):
 def download_polyhaven(root,index):
     report=[]
     counts=POLYHAVEN_SELECTION_LIMITS
+    total_downloaded_bytes=0
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -4719,6 +4780,9 @@ def download_polyhaven(root,index):
                 chosen.append((asset_id,meta)); seen.add(cat)
                 if len(chosen)>=limit: break
             for asset_id,meta in chosen:
+                if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                    print("[Poly Haven] reached aggregate byte ceiling", total_downloaded_bytes)
+                    break
                 row={"id":"polyhaven-"+asset_id,"title":meta.get("name",asset_id),"provider":"Poly Haven",
                      "source_page":f"https://polyhaven.com/a/{asset_id}","license":CC0,
                      "license_url":"https://polyhaven.com/license","category":meta.get("category",kind)}
@@ -4730,13 +4794,17 @@ def download_polyhaven(root,index):
                         if not file_objects: raise RuntimeError("no supported PBR maps returned by official API")
                         pack_dir=root/"third-party/polyhaven"/"textures"/slugify(asset_id)
                         for fo in file_objects:
+                            if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                                break
                             url=fo["url"]
                             try:
-                                blob,ctype=request_bytes(url,timeout=35,limit=dependency_cap)
+                                remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                                blob,ctype=request_bytes(url,timeout=35,limit=min(dependency_cap,remaining))
                                 name=Path(urllib.parse.urlparse(url).path).name
                                 if Path(name).suffix.lower() not in ALLOWED: continue
                                 target=pack_dir/name
                                 target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                                total_downloaded_bytes += len(blob)
                                 digest=sha256_path(target)
                                 entry={"id":f"polyhaven-{asset_id}-{slugify(name)}","path":target.relative_to(root).as_posix(),
                                        "type":"polyhaven-pbr-map","title":name,"parent_asset_id":"polyhaven-"+asset_id,
@@ -4750,18 +4818,22 @@ def download_polyhaven(root,index):
                     else:
                         fileobj=choose_poly_file(tree,kind)
                         if not fileobj: raise RuntimeError("no suitable direct file in API response")
-                        url=fileobj["url"]; blob,ctype=request_bytes(url,timeout=70,limit=MAX_POLY_FILE)
+                        url=fileobj["url"]
+                        remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                        blob,ctype=request_bytes(url,timeout=70,limit=min(MAX_POLY_FILE,remaining))
                         name=Path(urllib.parse.urlparse(url).path).name or (asset_id+(".hdr" if kind=="hdris" else ".blend"))
                         if Path(name).suffix.lower() not in ALLOWED: name += ".bin"
                         pack_dir=root/"third-party/polyhaven"/kind/slugify(asset_id)
                         pack_dir.mkdir(parents=True,exist_ok=True)
-                        target=pack_dir/name; target.write_bytes(blob); digest=sha256_path(target)
+                        target=pack_dir/name; target.write_bytes(blob); total_downloaded_bytes += len(blob); digest=sha256_path(target)
                         entry={"id":"polyhaven-"+asset_id,"path":target.relative_to(root).as_posix(),
                                "type":"polyhaven-"+kind,"title":row["title"],"category":row["category"],
                                "source_page":row["source_page"],"license":CC0,"license_url":"https://polyhaven.com/license",
                                "size_bytes":len(blob),"sha256":digest,"redistributable":True,"file_url":url}
                         index.append(entry); downloaded.append(entry)
                         for relpath,dep in (fileobj.get("include") or {}).items():
+                            if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                                break
                             try:
                                 rel=PurePosixPath(str(relpath).replace("\\\\","/"))
                                 ext=Path(rel.name).suffix.lower()
@@ -4769,10 +4841,12 @@ def download_polyhaven(root,index):
                                 dep_url=dep.get("url") if isinstance(dep,dict) else None
                                 if not dep_url: continue
                                 if int(dep.get("size",0) or 0)>dependency_cap: continue
-                                dep_blob,dep_ctype=request_bytes(dep_url,timeout=35,limit=dependency_cap)
+                                remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                                dep_blob,dep_ctype=request_bytes(dep_url,timeout=35,limit=min(dependency_cap,remaining))
                                 dep_path=(pack_dir/Path(*rel.parts)).resolve()
                                 if pack_dir.resolve() not in dep_path.parents: raise RuntimeError("unsafe dependency path")
                                 dep_path.parent.mkdir(parents=True,exist_ok=True); dep_path.write_bytes(dep_blob)
+                                total_downloaded_bytes += len(dep_blob)
                                 dep_sha=sha256_path(dep_path)
                                 index.append({"id":"polyhaven-"+asset_id+"-dependency-"+slugify(rel.as_posix()),
                                               "path":dep_path.relative_to(root).as_posix(),"type":"polyhaven-model-dependency",
@@ -6044,7 +6118,9 @@ def make_asset_catalog(root,index,summary):
     cards=[]
     for item in index:
         rel=item.get("path")
-        if not isinstance(rel,str) or not (root/rel).is_file(): continue
+        if not isinstance(rel,str): continue
+        local_path=root/rel
+        if not local_path.is_file() and int(item.get("size_bytes") or 0) <= 0: continue
         path=Path(rel); ext=path.suffix.lower()
         title=str(item.get("title") or item.get("description") or item.get("id") or path.name)
         category=str(item.get("category") or item.get("type") or "asset")
@@ -6060,7 +6136,7 @@ def make_asset_catalog(root,index,summary):
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
-        size=(root/rel).stat().st_size
+        size=local_path.stat().st_size if local_path.is_file() else int(item.get("size_bytes") or 0)
         size_text=f"{size/1024:.0f} KB" if size<1024*1024 else f"{size/(1024*1024):.1f} MB"
         links=[f'<a class="file-link" href="{html.escape(rel,quote=True)}" download>Open / download</a>']
         if source: links.append(f'<a href="{html.escape(str(source),quote=True)}" target="_blank" rel="noreferrer">Source</a>')
@@ -6116,27 +6192,55 @@ def main():
     illustration_count=generate_original_illustrations(STAGE,index)
     motion_loop_count=generate_original_motion_loops(STAGE,index)
     print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
-    kenney_report=download_kenney(STAGE,index)
-    kenney_splash_report=download_kenney_godot_splashscreens(STAGE,index)
-    polyhaven_report=download_polyhaven(STAGE,index)
-    ambientcg_report=download_ambientcg(STAGE,index)
-    lazytextures_report=download_lazytextures(STAGE,index)
-    poly_pizza_report=download_poly_pizza(STAGE,index)
-    met_report=download_met_open_access(STAGE,index)
-    smithsonian_report=download_smithsonian_open_access(STAGE,index)
-    rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
-    nasa_report=download_nasa_media(STAGE,index)
-    loc_report=download_loc_public_domain(STAGE,index)
-    wikimedia_report=download_wikimedia_public_domain(STAGE,index)
-    wikimedia_svg_report=download_wikimedia_vector_svg(STAGE,index)
-    wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
-    usgs_report=download_usgs_gallery(STAGE,index)
-    noaa_report=download_noaa_ocean_exploration(STAGE,index)
-    opengameart_report=download_opengameart(STAGE,index)
-    google_fonts_report=download_google_fonts(STAGE,index)
-    openmoji_report=download_openmoji_assets(STAGE,index)
-    internet_archive_report=download_internet_archive_videos(STAGE,index)
-    openverse_report=download_openverse(STAGE,index)
+    source_reports=run_parallel_source_lanes(
+        STAGE,
+        index,
+        [
+            ("kenney", download_kenney),
+            ("kenney_splash", download_kenney_godot_splashscreens),
+            ("polyhaven", download_polyhaven),
+            ("ambientcg", download_ambientcg),
+            ("lazytextures", download_lazytextures),
+            ("poly_pizza", download_poly_pizza),
+            ("met", download_met_open_access),
+            ("smithsonian", download_smithsonian_open_access),
+            ("rijksmuseum", download_rijksmuseum_open_access),
+            ("nasa", download_nasa_media),
+            ("loc", download_loc_public_domain),
+            ("wikimedia", download_wikimedia_public_domain),
+            ("wikimedia_svg", download_wikimedia_vector_svg),
+            ("wikimedia_av", download_wikimedia_video_audio),
+            ("usgs", download_usgs_gallery),
+            ("noaa", download_noaa_ocean_exploration),
+            ("opengameart", download_opengameart),
+            ("google_fonts", download_google_fonts),
+            ("openmoji", download_openmoji_assets),
+            ("internet_archive", download_internet_archive_videos),
+            ("openverse", download_openverse),
+        ],
+        max_workers=SOURCE_DOWNLOAD_WORKERS,
+    )
+    kenney_report=source_reports["kenney"]
+    kenney_splash_report=source_reports["kenney_splash"]
+    polyhaven_report=source_reports["polyhaven"]
+    ambientcg_report=source_reports["ambientcg"]
+    lazytextures_report=source_reports["lazytextures"]
+    poly_pizza_report=source_reports["poly_pizza"]
+    met_report=source_reports["met"]
+    smithsonian_report=source_reports["smithsonian"]
+    rijksmuseum_report=source_reports["rijksmuseum"]
+    nasa_report=source_reports["nasa"]
+    loc_report=source_reports["loc"]
+    wikimedia_report=source_reports["wikimedia"]
+    wikimedia_svg_report=source_reports["wikimedia_svg"]
+    wikimedia_av_report=source_reports["wikimedia_av"]
+    usgs_report=source_reports["usgs"]
+    noaa_report=source_reports["noaa"]
+    opengameart_report=source_reports["opengameart"]
+    google_fonts_report=source_reports["google_fonts"]
+    openmoji_report=source_reports["openmoji"]
+    internet_archive_report=source_reports["internet_archive"]
+    openverse_report=source_reports["openverse"]
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
       "## Original vector and sound assets\nAll SVG backgrounds, overlays, icons, editorial illustrations, infographic templates, tileable vector textures, procedural WAV cues, reaction stickers, caption presets and meme-layout templates in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"

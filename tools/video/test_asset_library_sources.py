@@ -19,8 +19,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
 import generate_sticker_meme_library as sticker_meme  # noqa: E402
 import package_asset_bundles as bundle_packager  # noqa: E402
+import build_asset_library_shard as shard_builder  # noqa: E402
+import finalize_asset_library_release as release_finalizer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
+import hashlib
 
 
 
@@ -1366,6 +1369,292 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
         self.assertGreaterEqual(len(overlay_ids), 75)
         self.assertEqual(len(overlay_ids), len(set(overlay_ids)))
         self.assertEqual(len(icon_ids), len(set(icon_ids)))
+
+
+class ParallelAssetSourceLaneTests(unittest.TestCase):
+    def test_source_lanes_run_concurrently_and_merge_indexes_in_declared_order(self):
+        import threading
+
+        barrier = threading.Barrier(2)
+        shared_index = []
+
+        def make_lane(source_name):
+            def run(_root, local_index):
+                barrier.wait(timeout=5)
+                local_index.append({"id": source_name})
+                return [{"id": source_name, "status": "downloaded"}]
+
+            return run
+
+        lanes = [
+            ("first", make_lane("first")),
+            ("second", make_lane("second")),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            reports = library.run_parallel_source_lanes(
+                Path(tmp), shared_index, lanes, max_workers=2
+            )
+
+        self.assertEqual(reports["first"][0]["status"], "downloaded")
+        self.assertEqual(reports["second"][0]["status"], "downloaded")
+        self.assertEqual([entry["id"] for entry in shared_index], ["first", "second"])
+
+
+
+
+class DistributedAssetLibraryTests(unittest.TestCase):
+    def _asset(self, root, relative, asset_id):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((asset_id + "-verified-content").encode("utf-8"))
+        return {
+            "id": asset_id,
+            "path": relative,
+            "type": "nasa-video",
+            "title": asset_id,
+            "license": "Public Domain",
+            "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+            "redistributable": True,
+            "size_bytes": path.stat().st_size,
+            "sha256": library.sha256_path(path),
+        }
+
+    def test_volume_is_uploaded_before_source_files_are_removed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            assets = [
+                self._asset(root, "third-party/nasa/video/one.mp4", "nasa-one"),
+                self._asset(root, "third-party/nasa/video/two.mp4", "nasa-two"),
+            ]
+            volume_dir = Path(tmp) / "volumes"
+            with mock.patch.object(shard_builder, "upload_release_asset") as upload:
+                rows = shard_builder.create_source_volumes(
+                    root, volume_dir, "nasa", assets, bundle_packager, release_tag="test-release"
+                )
+
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["source_lane"], "nasa")
+            self.assertEqual(rows[0]["category"], "footage")
+            self.assertTrue(rows[0]["uploaded_to_release"])
+            self.assertEqual(len(rows[0]["sha256"]), 64)
+            upload.assert_called_once()
+            self.assertFalse((root / assets[0]["path"]).exists())
+            self.assertFalse((root / assets[1]["path"]).exists())
+            self.assertFalse((volume_dir / rows[0]["name"]).exists())
+
+    def test_failed_volume_upload_keeps_original_source_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            asset = self._asset(root, "third-party/nasa/video/one.mp4", "nasa-one")
+            volume_dir = Path(tmp) / "volumes"
+            with mock.patch.object(
+                shard_builder, "upload_release_asset", side_effect=RuntimeError("upload rejected")
+            ):
+                with self.assertRaisesRegex(RuntimeError, "upload rejected"):
+                    shard_builder.create_source_volumes(
+                        root, volume_dir, "nasa", [asset], bundle_packager, release_tag="test-release"
+                    )
+            self.assertTrue((root / asset["path"]).is_file())
+
+    def test_global_catalog_renders_metadata_for_volumes_already_uploaded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            asset = {
+                "id": "mars-rover-shot",
+                "path": "third-party/nasa/video/mars-rover.mp4",
+                "type": "nasa-video",
+                "title": "Mars rover exploration footage",
+                "license": "Public Domain",
+                "source_page": "https://images.nasa.gov/",
+                "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+                "size_bytes": 123456,
+                "sha256": "a" * 64,
+                "redistributable": True,
+            }
+            library.make_asset_catalog(root, [asset], {"indexed_asset_count": 1})
+            catalog = (root / "ASSET_CATALOG.html").read_text(encoding="utf-8")
+            self.assertIn("Mars rover exploration footage", catalog)
+            self.assertIn("third-party/nasa/video/mars-rover.mp4", catalog)
+            self.assertIn("121 KB", catalog)
+
+    def test_shard_merge_verifies_volume_coverage_and_exact_license_metadata(self):
+        def make_shard(lane, asset_id, relative, payload):
+            digest = hashlib.sha256(payload).hexdigest()
+            asset = {
+                "id": asset_id,
+                "path": relative,
+                "type": "original-svg-background",
+                "license": "CC0-1.0",
+                "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                "redistributable": True,
+                "size_bytes": len(payload),
+                "sha256": digest,
+            }
+            return {
+                "lane": lane,
+                "summary": {"indexed_asset_count": 1},
+                "source_report": [],
+                "assets": [asset],
+                "file_checksums": [{"path": relative, "size_bytes": len(payload), "sha256": digest}],
+                "bundles": [{
+                    "name": f"video-assets-{lane}-original-graphics-001.zip",
+                    "sha256": "b" * 64,
+                    "archive_bytes": 1024,
+                    "uncompressed_bytes": len(payload),
+                    "file_count": 1,
+                    "paths": [relative],
+                    "source_lane": lane,
+                }],
+            }
+
+        merged = release_finalizer.merge_shard_manifests(
+            [
+                make_shard("one", "asset-one", "originals/one.svg", b"one"),
+                make_shard("two", "asset-two", "originals/two.svg", b"two"),
+            ],
+            expected_lanes={"one", "two"},
+        )
+        self.assertEqual(merged["summary"]["indexed_asset_count"], 2)
+        self.assertEqual(merged["summary"]["indexed_resource_bytes"], 6)
+        self.assertEqual(len(merged["bundles"]), 2)
+        self.assertEqual(merged["assets"][0]["license"], "CC0-1.0")
+
+    def test_shard_merge_rejects_duplicate_resource_paths(self):
+        digest = "a" * 64
+        asset = {
+            "id": "same-asset",
+            "path": "third-party/shared/asset.bin",
+            "license": "CC0-1.0",
+            "redistributable": True,
+            "size_bytes": 3,
+            "sha256": digest,
+        }
+        shard = {
+            "lane": "one",
+            "summary": {},
+            "source_report": [],
+            "assets": [asset],
+            "file_checksums": [{"path": asset["path"], "size_bytes": 3, "sha256": digest}],
+            "bundles": [{
+                "name": "video-assets-one-misc-001.zip",
+                "sha256": "b" * 64,
+                "archive_bytes": 1024,
+                "uncompressed_bytes": 3,
+                "file_count": 1,
+                "paths": [asset["path"]],
+            }],
+        }
+        second_shard = {
+            **shard,
+            "lane": "two",
+            "assets": [{**asset, "id": "other-asset"}],
+            "bundles": [{
+                    "name": "video-assets-two-misc-001.zip",
+                    "sha256": "c" * 64,
+                    "archive_bytes": 1024,
+                    "uncompressed_bytes": 3,
+                    "file_count": 1,
+                    "paths": [asset["path"]],
+                }],
+        }
+        with self.assertRaisesRegex(RuntimeError, "Duplicate asset path"):
+            release_finalizer.merge_shard_manifests(
+                [shard, second_shard], expected_lanes={"one", "two"}
+            )
+
+
+
+class ReleaseAssetVerificationTests(unittest.TestCase):
+    def test_release_verification_requires_all_uploaded_asset_hashes_and_sizes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle_path = root / "video-assets-nasa-footage-001.zip"
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            bundle_path.write_bytes(b"zip-like-bundle-payload")
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+
+            expected_rows = [
+                (bundle_path.name, bundle_path.stat().st_size, hashlib.sha256(bundle_path.read_bytes()).hexdigest()),
+                (manifest_path.name, manifest_path.stat().st_size, hashlib.sha256(manifest_path.read_bytes()).hexdigest()),
+                (metadata_path.name, metadata_path.stat().st_size, hashlib.sha256(metadata_path.read_bytes()).hexdigest()),
+            ]
+            remote_assets = [
+                {"name": name, "size": size, "digest": "sha256:" + digest}
+                for name, size, digest in expected_rows
+            ]
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                result = release_finalizer.verify_release_assets(
+                    "Nolane-x/video",
+                    "draft-build",
+                    {"bundles": [{"name": expected_rows[0][0], "archive_bytes": expected_rows[0][1], "sha256": expected_rows[0][2]}]},
+                    [metadata_path],
+                    [manifest_path],
+                )
+
+            self.assertEqual(result["verified_assets"], 3)
+            self.assertTrue(result["all_remote_names_exact"])
+            self.assertTrue(result["github_sha256_verified"])
+
+    def test_release_verification_rejects_stale_or_unexpected_assets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+            expected = [
+                (path.name, path.stat().st_size, hashlib.sha256(path.read_bytes()).hexdigest())
+                for path in (manifest_path, metadata_path)
+            ]
+            remote_assets = [
+                {"name": name, "size": size, "digest": "sha256:" + digest}
+                for name, size, digest in expected
+            ]
+            remote_assets.append({"name": "video-assets-stale.zip", "size": 1, "digest": "sha256:" + "0" * 64})
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                with self.assertRaisesRegex(RuntimeError, "unexpected/stale"):
+                    release_finalizer.verify_release_assets(
+                        "Nolane-x/video",
+                        "draft-build",
+                        {"bundles": []},
+                        [metadata_path],
+                        [manifest_path],
+                    )
+
+    def test_release_verification_rejects_missing_github_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+            remote_assets = [
+                {"name": path.name, "size": path.stat().st_size, "digest": ""}
+                for path in (manifest_path, metadata_path)
+            ]
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                with self.assertRaisesRegex(RuntimeError, "SHA-256 digest is missing"):
+                    release_finalizer.verify_release_assets(
+                        "Nolane-x/video",
+                        "draft-build",
+                        {"bundles": []},
+                        [metadata_path],
+                        [manifest_path],
+                    )
 
 
 if __name__ == "__main__":

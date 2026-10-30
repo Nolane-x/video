@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
+      - "tools/video/build_asset_library_shard.py"
+      - "tools/video/finalize_asset_library_release.py"
       - "tools/video/test_asset_library_sources.py"
       - "tools/video/generate_sfx_library.py"
       - "tools/video/generate_sticker_meme_library.py"
@@ -15,17 +17,69 @@ on:
 
 permissions:
   contents: write
-  actions: read
 
+# Serialize separate library builds, but fan out the independent source jobs inside one build.
 concurrency:
-  group: video-asset-library
+  group: video-asset-library-distributed-v2
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build, validate and publish CC0-safe assets
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
+  prepare-release:
+    name: Create draft release for this distributed build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      release_tag: ${{ steps.create.outputs.release_tag }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Create a unique draft Release before the source jobs start
+        id: create
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="video-asset-library-build-${GITHUB_RUN_ID}"
+          gh release create "${release_tag}" \
+            --draft \
+            --target "${GITHUB_SHA}" \
+            --title "Nolane Video Asset Library build ${GITHUB_RUN_NUMBER} — collecting source shards" \
+            --notes "This is a draft while independent source jobs download, rights-screen, checksum, split and upload their own volumes. It is published only after the global index and release assets pass verification."
+          echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+  build-source-shards:
+    name: Build source shard — ${{ matrix.lane }}
+    needs: prepare-release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        lane:
+          - originals
+          - kenney
+          - kenney-splash
+          - polyhaven
+          - ambientcg
+          - lazytextures
+          - poly-pizza
+          - met
+          - smithsonian
+          - rijksmuseum
+          - nasa
+          - loc
+          - wikimedia
+          - wikimedia-svg
+          - wikimedia-av
+          - usgs
+          - noaa
+          - opengameart
+          - google-fonts
+          - openmoji
+          - internet-archive
+          - openverse
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -35,494 +89,71 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install FFmpeg for original motion-loop rendering
+      - name: Install FFmpeg only for the generated motion-loop shard
+        if: matrix.lane == 'originals'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
           ffmpeg -version
           ffprobe -version
 
-      - name: Compile every asset pipeline module before network downloads
-        run: python -m py_compile tools/video/build_asset_library.py tools/video/generate_sfx_library.py tools/video/generate_sticker_meme_library.py tools/video/package_asset_bundles.py tools/video/test_asset_library_sources.py
+      - name: Compile the sharded downloader and shared source modules
+        run: |
+          python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/finalize_asset_library_release.py
+          python -m py_compile tools/video/package_asset_bundles.py
 
-      - name: Run offline source-rights and asset-family regression tests
-        run: python tools/video/test_asset_library_sources.py
-
-      - name: Build original assets and download rights-screened resources
-        run: python tools/video/build_asset_library.py dist/video-assets
+      - name: Download, verify, split and upload this source shard
         env:
+          GH_TOKEN: ${{ github.token }}
           SMITHSONIAN_API_KEY: ${{ secrets.SMITHSONIAN_API_KEY }}
           POLY_PIZZA_API_KEY: ${{ secrets.POLY_PIZZA_API_KEY }}
-
-      - name: Create size-safe single or multi-volume ZIP bundles
-        run: python tools/video/package_asset_bundles.py dist/video-assets
-
-      - name: Verify bundle manifest and every release ZIP
-        run: python tools/video/package_asset_bundles.py dist/video-assets --verify-only
-
-      - name: Validate index, checksums, bundle coverage and original asset counts
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+          SOURCE_LANE: ${{ matrix.lane }}
         run: |
-          python - <<'PY'
-          import json
-          import hashlib
-          import re
-          import zipfile
-          import urllib.parse
-          from pathlib import Path
+          set -euo pipefail
+          python tools/video/build_asset_library_shard.py \
+            --lane "${SOURCE_LANE}" \
+            --output-dir dist/video-assets \
+            --release-tag "${RELEASE_TAG}"
 
-          root = Path("dist/video-assets/video-asset-library")
-          index_path = root / "ASSET_INDEX.json"
-          sums_path = root / "SHA256SUMS.txt"
-          bundle_manifest_path = Path("dist/video-assets/ASSET_BUNDLES.json")
-          summary_path = Path("dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt"
+  finalize-and-publish:
+    name: Merge manifests, verify every upload and publish the library
+    needs: [prepare-release, build-source-shards]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
 
-          )
-          assert root.is_dir(), "Library folder missing"
-          assert index_path.is_file() and sums_path.is_file(), "Index or checksum ledger missing"
-          assert bundle_manifest_path.is_file(), "Size-safe bundle manifest is missing"
-          bundle_manifest = json.loads(bundle_manifest_path.read_text(encoding="utf-8"))
-          bundle_rows = bundle_manifest.get("bundles", [])
-          assert bundle_rows and bundle_manifest.get("bundle_count") == len(bundle_rows), "No release ZIP bundles were generated"
-          assert bundle_manifest.get("mode") in {"single-archive", "multi-volume"}
-          for bundle in bundle_rows:
-              bundle_path = Path("dist/video-assets") / bundle["name"]
-              assert bundle_path.is_file() and bundle_path.stat().st_size > 1024, f"Missing or empty release bundle: {bundle['name']}"
-              assert bundle_path.stat().st_size < 1_900_000_000, f"Release asset is too close to GitHub's 2 GiB ceiling: {bundle['name']}"
-              assert hashlib.sha256(bundle_path.read_bytes()).hexdigest() == bundle["sha256"], f"Bundle SHA-256 mismatch: {bundle['name']}"
-          catalog_path = root / "ASSET_CATALOG.html"
-          assert catalog_path.is_file(), "Offline searchable catalog missing"
-          catalog_html = catalog_path.read_text(encoding="utf-8")
-          assert "<video controls" in catalog_html, "Video previews are missing from the offline catalog"
-          assert "<audio controls" in catalog_html, "Audio previews are missing from the offline catalog"
-          assert summary_path.is_file(), "Build summary missing"
-
-          index = json.loads(index_path.read_text(encoding="utf-8"))
-          expected = index["summary"]
-          assert expected["original_backgrounds"] >= 90
-          assert expected["original_overlays"] >= 75
-          assert expected["original_icons"] >= 125
-          assert expected["original_textures"] >= 55, "Original surface texture library is incomplete"
-          assert expected["original_illustrations"] >= 105, "Original editorial illustration library is incomplete"
-          assert expected["original_infographics"] >= 50
-          assert expected["original_sfx"] >= 175, "Procedural sound-effect bank is incomplete"
-          assert "kenney_godot_splash_files_downloaded" in expected and "kenney_godot_splash_bytes_downloaded" in expected
-          kenney_splash_report = index.get("kenney_godot_splashscreens_downloads")
-          assert isinstance(kenney_splash_report, list), "Kenney Godot SplashScreens report is missing"
-          kenney_splash_downloaded = [row for row in kenney_splash_report if row.get("status") == "downloaded"]
-          kenney_splash_assets = [asset for asset in index["assets"] if asset.get("type") == "kenney-godot-splashscreens-cc0-asset-file"]
-          assert len(kenney_splash_downloaded) <= 1
-          assert len(kenney_splash_assets) == expected["kenney_godot_splash_files_downloaded"]
-          assert sum(row.get("file_count", 0) for row in kenney_splash_downloaded) == expected["kenney_godot_splash_files_downloaded"]
-          assert sum(row.get("unpacked_bytes", 0) for row in kenney_splash_downloaded) == expected["kenney_godot_splash_bytes_downloaded"]
-          assert expected["kenney_godot_splash_files_downloaded"] <= 40
-          assert expected["kenney_godot_splash_bytes_downloaded"] <= 32 * 1024 * 1024
-          kenney_splash_archive_hashes = set()
-          for row in kenney_splash_downloaded:
-              assert row.get("license") == "CC0-1.0"
-              assert row.get("archive_bytes", 0) > 0
-              assert len(row.get("archive_sha256", "")) == 64
-              assert row.get("file_count", 0) > 0
-              kenney_splash_archive_hashes.add(row["archive_sha256"])
-          for asset in kenney_splash_assets:
-              assert asset.get("license") == "CC0-1.0"
-              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
-              assert asset.get("license_verified_from_repository_readme") is True
-              assert asset.get("redistributable") is True and asset.get("attribution_required") is False
-              assert asset.get("source_page") == "https://github.com/KenneyNL/Godot-SplashScreens"
-              assert asset.get("source_file_url", "").startswith("https://github.com/KenneyNL/Godot-SplashScreens/blob/main/")
-              assert asset.get("source_archive_sha256") in kenney_splash_archive_hashes
-              assert asset.get("path", "").startswith("third-party/kenney/godot-splashscreens/")
-              relative = asset["path"].removeprefix("third-party/kenney/godot-splashscreens/")
-              normalized = relative.casefold()
-              assert (
-                  normalized.startswith("logo/reimagined") or normalized.startswith("logo/text")
-                  or normalized.startswith("screen/cog logo/") or normalized.startswith("screen/reimagined logo/")
-                  or normalized.startswith("screen/text logo/")
-              ), "A non-CC0 Godot logo folder entered the library"
-              assert Path(relative).suffix.lower() in {".png", ".svg"}
-              target = root / asset["path"]
-              assert target.is_file(), "Kenney CC0 splash-screen asset is missing"
-              raw = target.read_bytes()
-              assert hashlib.sha256(raw).hexdigest() == asset["sha256"]
-              if target.suffix.lower() == ".png":
-                  assert raw.startswith(b"\x89PNG\r\n\x1a\n")
-              else:
-                  assert b"<svg" in raw[:1024].lower()
-          assert expected["original_motion_loops"] == 24, "Original motion-loop library is incomplete"
-          motion_items = [a for a in index["assets"] if a.get("type") == "original-procedural-video-loop"]
-          assert len(motion_items) == expected["original_motion_loops"]
-          for clip in motion_items:
-              assert clip.get("license") == "CC0-1.0" and clip.get("redistributable") is True
-              assert clip.get("width") == 1280 and clip.get("height") == 720
-              assert 5.8 <= clip.get("duration_seconds", 0) <= 6.2
-              assert len(clip.get("sha256", "")) == 64 and clip.get("size_bytes", 0) > 1024
-          eligible_license_labels = {"cc0", "cc01.0", "creativecommonszero", "publicdomain", "publicdomainmark", "publicdomainus", "publicdomainunitedstates"}
-          assert "wikimedia_svgs_downloaded" in expected, "Wikimedia SVG count is missing"
-          svg_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-svg"]
-          assert len(svg_items) == expected["wikimedia_svgs_downloaded"]
-          for vector in svg_items:
-              normalized = re.sub(r"[\s\-®()]+", "", str(vector.get("license") or "").lower())
-              assert normalized in eligible_license_labels, f"Unexpected Wikimedia SVG license: {vector.get('license')}"
-              assert vector.get("license_verified_from_item_metadata") is True
-              assert vector.get("sanitized_svg") is True and vector.get("redistributable") is True
-              assert vector.get("source_page", "").startswith("https://commons.wikimedia.org/")
-              assert vector.get("source_file_url", "").startswith("https://upload.wikimedia.org/")
-              assert len(vector.get("sha256", "")) == 64 and vector.get("size_bytes", 0) > 100
-              svg_text = (root / vector["path"]).read_text(encoding="utf-8", errors="replace").lower()
-              assert "<script" not in svg_text and "javascript:" not in svg_text
-              assert not re.search(r"\son[a-z]+\s*=", svg_text), "SVG event handler survived sanitization"
-              assert not re.search(r"\s(?:href|src)\s*=\s*['\"](?:https?:|//|data:)", svg_text), "External SVG resource survived sanitization"
-          assert "wikimedia_videos_downloaded" in expected, "Wikimedia video count is missing"
-          assert "wikimedia_audio_downloaded" in expected, "Wikimedia audio count is missing"
-          wikimedia_video_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-video"]
-          wikimedia_audio_items = [a for a in index["assets"] if a.get("type") == "wikimedia-cc0-audio"]
-          assert len(wikimedia_video_items) == expected["wikimedia_videos_downloaded"]
-          assert len(wikimedia_audio_items) == expected["wikimedia_audio_downloaded"]
-          for media in wikimedia_video_items + wikimedia_audio_items:
-              normalized = re.sub(r"[\s\-®()]+", "", str(media.get("license") or "").lower())
-              assert normalized in eligible_license_labels, f"Unexpected Wikimedia media license: {media.get('license')}"
-              assert media.get("license_verified_from_item_metadata") is True
-              assert media.get("redistributable") is True
-              assert media.get("source_page", "").startswith("https://commons.wikimedia.org/")
-              assert media.get("source_file_url", "").startswith("https://upload.wikimedia.org/")
-              assert len(media.get("sha256", "")) == 64
-              assert media.get("size_bytes", 0) >= 2048
-
-          assert "ambientcg_packages_downloaded" in expected, "ambientCG package count is missing"
-          assert "ambientcg_files_downloaded" in expected, "ambientCG file count is missing"
-          ambientcg_report = index.get("ambientcg_downloads")
-          assert isinstance(ambientcg_report, list), "ambientCG source report is missing"
-          ambientcg_downloaded = [row for row in ambientcg_report if row.get("status") == "downloaded"]
-          ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
-          assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
-          assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
-          assert expected["ambientcg_packages_downloaded"] <= 140, "ambientCG search ceiling exceeded"
-          for row in ambientcg_downloaded:
-              assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
-              assert row.get("license") == "CC0-1.0"
-              assert len(row.get("archive_sha256", "")) == 64
-              assert row.get("extracted_files", 0) > 0 and row.get("unpacked_bytes", 0) > 0
-          for asset in ambientcg_assets:
-              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
-              assert asset.get("license_verified_from_provider_collection_terms") is True
-              assert asset.get("source_page", "").startswith("https://ambientcg.com/a/")
-              assert asset.get("source_file_url", "").startswith("https://ambientcg.com/get?file=")
-              assert asset.get("path", "").startswith("third-party/ambientcg/")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
-              assert asset.get("download_archive_sha256", "") in {row.get("archive_sha256") for row in ambientcg_downloaded}
-
-          assert "lazytextures_packages_downloaded" in expected and "lazytextures_files_downloaded" in expected
-          assert "lazytextures_archive_bytes_downloaded" in expected
-          assert "lazytextures_unpacked_bytes_downloaded" in expected
-          assert "lazytextures_other_downloaded" in expected
-          lazytextures_report = index.get("lazytextures_downloads")
-          assert isinstance(lazytextures_report, list), "LazyTextures source report is missing"
-          lazytextures_downloaded = [row for row in lazytextures_report if row.get("status") == "downloaded"]
-          lazytextures_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("lazytextures-") and str(asset.get("type", "")).endswith("-asset-file")]
-          assert len(lazytextures_downloaded) == expected["lazytextures_packages_downloaded"]
-          assert len(lazytextures_assets) == expected["lazytextures_files_downloaded"]
-          assert sum(row.get("extracted_files", 0) for row in lazytextures_downloaded) == expected["lazytextures_files_downloaded"]
-          assert sum(row.get("archive_bytes", 0) for row in lazytextures_downloaded) == expected["lazytextures_archive_bytes_downloaded"]
-          assert expected["lazytextures_packages_downloaded"] <= sum([10, 16, 10, 18, 8])
-          assert expected["lazytextures_archive_bytes_downloaded"] <= 512 * 1024 * 1024
-          assert expected["lazytextures_unpacked_bytes_downloaded"] <= 1536 * 1024 * 1024
-          caps = {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8}
-          for asset_type, cap in caps.items():
-              assert sum(row.get("status") == "downloaded" and row.get("asset_type") == asset_type for row in lazytextures_report) <= cap
-          assert sum(row.get("unpacked_bytes", 0) for row in lazytextures_downloaded) == expected["lazytextures_unpacked_bytes_downloaded"]
-          assert expected["lazytextures_unpacked_bytes_downloaded"] <= 1536 * 1024 * 1024
-          successful_archive_hashes = set()
-          for row in lazytextures_downloaded:
-              assert row.get("license") == "CC0-1.0"
-              assert row.get("source_page", "").startswith("https://lazytextures.net:3000/Asset/")
-              assert 0 < row.get("archive_bytes", 0) <= 64 * 1024 * 1024
-              assert len(row.get("archive_sha256", "")) == 64
-              assert 0 < row.get("archive_members", 0) <= 2500
-              assert 0 < row.get("declared_unpacked_bytes", 0) <= 128 * 1024 * 1024
-              assert row.get("extracted_files", 0) > 0 and row.get("unpacked_bytes", 0) > 0
-              assert row.get("rejected_invalid_files", 0) >= 0
-              successful_archive_hashes.add(row["archive_sha256"])
-          for asset in lazytextures_assets:
-              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
-              assert asset.get("license_verified_from_provider_api_policy") is True
-              assert asset.get("license_evidence_url") == "https://lazytextures.com/PublicAPI"
-              assert asset.get("source_page", "").startswith("https://lazytextures.net:3000/Asset/")
-              assert asset.get("source_file_url", "").startswith("https://lazytextures.net:3000/Assets/")
-              assert asset.get("source_file_url", "").endswith(".zip")
-              assert asset.get("path", "").startswith("third-party/lazytextures/")
-              assert asset.get("download_archive_sha256") in successful_archive_hashes
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
-              lazy_path = Path(asset["path"])
-              assert not lazy_path.is_absolute() and ".." not in lazy_path.parts
-              target = root / lazy_path
-              assert target.is_file(), "LazyTextures extracted asset file is missing"
-              assert hashlib.sha256(target.read_bytes()).hexdigest() == asset["sha256"], "LazyTextures per-file SHA-256 mismatch"
-          assert "poly_pizza_models_downloaded" in expected and "poly_pizza_model_bytes_downloaded" in expected
-          poly_pizza_report = index.get("poly_pizza_downloads")
-          assert isinstance(poly_pizza_report, list), "Poly Pizza source report is missing"
-          poly_pizza_downloaded = [row for row in poly_pizza_report if row.get("status") == "downloaded"]
-          poly_pizza_assets = [asset for asset in index["assets"] if asset.get("type") == "poly-pizza-cc0-model"]
-          assert len(poly_pizza_downloaded) == expected["poly_pizza_models_downloaded"]
-          assert len(poly_pizza_assets) == expected["poly_pizza_models_downloaded"]
-          assert sum(row.get("size_bytes", 0) for row in poly_pizza_downloaded) == expected["poly_pizza_model_bytes_downloaded"]
-          assert expected["poly_pizza_models_downloaded"] <= 48
-          assert expected["poly_pizza_model_bytes_downloaded"] <= 4 * 1024 * 1024 * 1024
-          successful_poly_ids = set()
-          for row in poly_pizza_downloaded:
-              assert row.get("license") == "CC0-1.0"
-              assert row.get("license_verified_from_item_metadata") is True
-              assert row.get("redistributable") is True
-              assert row.get("source_page", "").startswith("https://poly.pizza/m/")
-              assert 0 < row.get("size_bytes", 0) <= 128 * 1024 * 1024
-              assert len(row.get("sha256", "")) == 64
-              successful_poly_ids.add(row.get("model_id"))
-          for asset in poly_pizza_assets:
-              assert asset.get("license") == "CC0-1.0"
-              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
-              assert asset.get("license_verified_from_item_metadata") is True
-              assert asset.get("redistributable") is True
-              assert asset.get("source_page", "").startswith("https://poly.pizza/m/")
-              assert asset.get("source_file_url", "").startswith("https://")
-              poly_host = urllib.parse.urlsplit(asset["source_file_url"]).hostname or ""
-              assert poly_host == "poly.pizza" or poly_host.endswith(".poly.pizza")
-              assert asset.get("model_id") in successful_poly_ids
-              assert asset.get("path", "").startswith("third-party/poly-pizza/models/")
-              assert asset.get("path", "").endswith(".glb")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
-              poly_path = root / asset["path"]
-              assert poly_path.is_file(), "Poly Pizza GLB is missing"
-              poly_bytes = poly_path.read_bytes()
-              assert poly_bytes[:4] == b"glTF"
-              assert int.from_bytes(poly_bytes[4:8], "little") == 2
-              assert int.from_bytes(poly_bytes[8:12], "little") == len(poly_bytes)
-              assert hashlib.sha256(poly_bytes).hexdigest() == asset["sha256"]
-          assert "usgs_images_downloaded" in expected and "usgs_videos_downloaded" in expected and "usgs_audio_downloaded" in expected
-          usgs_report = index.get("usgs_gallery_downloads")
-          assert isinstance(usgs_report, list), "USGS Gallery source report is missing"
-          usgs_downloaded = [row for row in usgs_report if row.get("status") == "downloaded"]
-          usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
-          assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
-          assert len(usgs_assets) == len(usgs_downloaded)
-          assert expected["usgs_images_downloaded"] <= 80 and expected["usgs_videos_downloaded"] <= 40 and expected["usgs_audio_downloaded"] <= 24
-          for asset in usgs_assets:
-              media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
-              assert media_type in {"image", "video", "audio"}
-              assert asset.get("rights_statement", "").strip().rstrip(".").casefold() == "public domain"
-              assert asset.get("license_verified_from_item_page") is True and asset.get("redistributable") is True
-              assert asset.get("license") == "Public Domain (item-level USGS Sources/Usage label)"
-              listing_kind = "audio" if media_type == "audio" else media_type + "s"
-              assert asset.get("source_page", "").startswith("https://www.usgs.gov/media/" + listing_kind + "/")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
-              direct = asset.get("source_file_url", "")
-              if media_type == "video":
-                  assert direct.startswith("https://usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com/") and "/media/video/" in direct
-              else:
-                  assert direct.startswith("https://d9-wret.s3.us-west-2.amazonaws.com/") and "/media/" + listing_kind + "/" in direct
-          assert "opengameart_items_downloaded" in expected and "opengameart_files_downloaded" in expected
-          opengameart_report = index.get("opengameart_downloads")
-          assert isinstance(opengameart_report, list), "OpenGameArt report is missing"
-          opengameart_downloaded = [row for row in opengameart_report if row.get("status") == "downloaded"]
-          opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
-          assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
-          assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
-          assert expected["opengameart_items_downloaded"] <= sum([24, 24, 20, 20, 20]), "OpenGameArt search ceilings exceeded"
-          caps = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
-          for category, cap in caps.items():
-              assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
-          for asset in opengameart_assets:
-              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
-              assert asset.get("license_verified_from_item_page") is True
-              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
-              assert asset.get("source_page", "").startswith("https://opengameart.org/content/")
-              assert asset.get("source_file_url", "").startswith("https://opengameart.org/sites/default/files/")
-              assert asset.get("path", "").startswith("third-party/opengameart/")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
-          assert "google_font_families_downloaded" in expected and "google_font_files_downloaded" in expected
-          google_fonts_report = index.get("google_fonts_downloads")
-          assert isinstance(google_fonts_report, list), "Google Fonts report is missing"
-          google_families = [row for row in google_fonts_report if row.get("status") == "downloaded"]
-          google_font_assets = [asset for asset in index["assets"] if asset.get("type") == "google-font-ttf"]
-          assert len(google_families) == expected["google_font_families_downloaded"]
-          assert len(google_font_assets) == expected["google_font_files_downloaded"]
-          assert expected["google_font_families_downloaded"] <= 20
-          assert expected["google_font_files_downloaded"] <= 40
-          for family in google_families:
-              assert family.get("license") == "SIL Open Font License 1.1"
-              assert family.get("license_file", "").startswith("third-party/google-fonts/")
-              assert len(family.get("license_file_sha256", "")) == 64
-              assert 1 <= family.get("font_files_downloaded", 0) <= 2
-          for asset in google_font_assets:
-              assert asset.get("license") == "SIL Open Font License 1.1"
-              assert asset.get("license_verified_from_family_ofl") is True and asset.get("redistributable") is True
-              assert asset.get("source_page", "").startswith("https://github.com/google/fonts/tree/main/ofl/")
-              assert asset.get("source_file_url", "").startswith("https://raw.githubusercontent.com/google/fonts/main/ofl/")
-              assert asset.get("path", "").startswith("third-party/google-fonts/") and asset.get("path", "").lower().endswith(".ttf")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 4096
-              license_path = root / asset.get("license_file", "")
-              assert license_path.is_file(), "Google Fonts OFL.txt is missing"
-              license_bytes = license_path.read_bytes()
-              assert hashlib.sha256(license_bytes).hexdigest() == asset.get("license_file_sha256")
-              assert b"SIL OPEN FONT LICENSE Version 1.1" in license_bytes
-          assert "noaa_images_downloaded" in expected and "noaa_videos_downloaded" in expected
-          noaa_report = index.get("noaa_ocean_exploration_downloads")
-          assert isinstance(noaa_report, list), "NOAA Ocean Exploration report is missing"
-          noaa_downloaded = [row for row in noaa_report if row.get("status") == "downloaded"]
-          noaa_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("noaa-ocean-exploration-")]
-          assert len(noaa_downloaded) == expected["noaa_images_downloaded"] + expected["noaa_videos_downloaded"]
-          assert len(noaa_assets) == len(noaa_downloaded)
-          assert expected["noaa_images_downloaded"] <= 200 and expected["noaa_videos_downloaded"] <= 120
-          for asset in noaa_assets:
-              media_type = asset.get("type", "").removeprefix("noaa-ocean-exploration-")
-              assert media_type in {"image", "video"}
-              assert asset.get("license_verified_from_provider_policy_and_item_page") is True
-              assert asset.get("item_page_copyright_marker_absent") is True
-              assert asset.get("redistributable") is True
-              assert asset.get("credit", "").lower().find("noaa") >= 0
-              assert asset.get("source_page", "").startswith("https://oceanexplorer.noaa.gov/multimedia/")
-              assert asset.get("source_file_url", "").startswith("https://oceanexplorer.noaa.gov/wp-content/uploads/")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
-              assert asset.get("path", "").startswith("third-party/noaa-ocean-exploration/")
-          assert "internet_archive_videos_downloaded" in expected
-          assert "internet_archive_video_bytes_downloaded" in expected
-          assert "internet_archive_prelinger_videos_downloaded" in expected and "internet_archive_nasa_videos_downloaded" in expected
-          ia_report = index.get("internet_archive_video_downloads")
-          assert isinstance(ia_report, list), "Internet Archive moving-image report is missing"
-          ia_downloaded = [row for row in ia_report if row.get("status") == "downloaded"]
-          ia_assets = [asset for asset in index["assets"] if asset.get("type") == "internet-archive-public-domain-video"]
-          assert len(ia_downloaded) == expected["internet_archive_videos_downloaded"]
-          assert len(ia_assets) == len(ia_downloaded)
-          assert sum(row.get("size_bytes", 0) for row in ia_downloaded) == expected["internet_archive_video_bytes_downloaded"]
-          assert sum(row.get("collection") == "prelinger" for row in ia_downloaded) == expected["internet_archive_prelinger_videos_downloaded"] <= 40
-          assert sum(row.get("collection") == "nasa" for row in ia_downloaded) == expected["internet_archive_nasa_videos_downloaded"] <= 40
-          assert expected["internet_archive_videos_downloaded"] <= 80
-          for asset in ia_assets:
-              assert asset.get("collection") in {"prelinger", "nasa"}
-              assert asset.get("source_page", "").startswith("https://archive.org/details/")
-              assert asset.get("metadata_url", "").startswith("https://archive.org/metadata/")
-              assert asset.get("source_file_url", "").startswith("https://archive.org/download/")
-              assert asset.get("license_verified_from_item_metadata") is True and asset.get("redistributable") is True
-              assert asset.get("license") in {"CC0-1.0", "CC0-3.0", "Public Domain (item-level Internet Archive rights statement)"}
-              if asset.get("license", "").startswith("Public Domain"):
-                  assert asset.get("rights_statement", "").strip().rstrip(".").casefold() == "public domain"
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 2048
-              assert len(asset.get("archive_file_md5", "")) == 32
-              ia_path = root / asset["path"]
-              assert ia_path.is_file() and ia_path.suffix.lower() in {".mp4", ".ogv", ".webm"}
-              ia_bytes = ia_path.read_bytes()
-              assert hashlib.sha256(ia_bytes).hexdigest() == asset["sha256"]
-              assert hashlib.md5(ia_bytes).hexdigest() == asset["archive_file_md5"]
-              if asset.get("archive_file_sha1"):
-                  assert hashlib.sha1(ia_bytes).hexdigest() == asset["archive_file_sha1"]
-              assert b"ftyp" in ia_bytes[:64] or ia_bytes.startswith(b"\x1a\x45\xdf\xa3") or ia_bytes.startswith(b"OggS")
-          assert expected["original_stickers"] >= 200 and expected["original_meme_templates"] >= 70 and expected["original_caption_overlays"] >= 60
-          sticker_assets = [a for a in index["assets"] if a.get("type") == "original-video-sticker"]
-          meme_assets = [a for a in index["assets"] if a.get("type") == "original-meme-layout-template"]
-          caption_assets = [a for a in index["assets"] if a.get("type") == "original-caption-overlay"]
-          assert len(sticker_assets) == expected["original_stickers"]
-          assert len(meme_assets) == expected["original_meme_templates"]
-          assert len(caption_assets) == expected["original_caption_overlays"]
-          for asset in sticker_assets + meme_assets + caption_assets:
-              assert asset.get("license") == "CC0-1.0" and asset.get("original_artwork") is True and asset.get("redistributable") is True
-              sticker_path = Path(asset.get("path", ""))
-              assert not sticker_path.is_absolute() and sticker_path.parts and ".." not in sticker_path.parts
-              assert (root / sticker_path).is_file(), "Original sticker/meme/caption source file is missing"
-              assert len(asset.get("sha256", "")) == 64
-          assert "openmoji_files_downloaded" in expected
-          openmoji_report = index.get("openmoji_downloads")
-          assert isinstance(openmoji_report, list), "OpenMoji report is missing"
-          openmoji_downloaded = [row for row in openmoji_report if row.get("status") == "downloaded"]
-          openmoji_assets = [asset for asset in index["assets"] if asset.get("type") in {"openmoji-cc-by-sa-svg", "openmoji-cc-by-sa-png"}]
-          assert len(openmoji_assets) == expected["openmoji_files_downloaded"]
-          assert expected["openmoji_files_downloaded"] <= 12000
-          for row in openmoji_downloaded:
-              assert row.get("version") == "17.0.0"
-              assert row.get("license") == "CC-BY-SA-4.0"
-              assert len(row.get("tarball_sha1", "")) == 40
-              assert row.get("tarball_integrity", "").startswith("sha512-")
-              assert row.get("extracted_files", 0) > 0
-          for asset in openmoji_assets:
-              assert asset.get("license") == "CC-BY-SA-4.0"
-              assert asset.get("license_verified_from_npm_metadata_and_official_faq") is True
-              assert asset.get("attribution_required") is True
-              assert asset.get("attribution_text") == "All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0."
-              assert asset.get("video_attribution_guidance")
-              assert "CC BY-SA 4.0" in asset.get("sharealike_requirement", "")
-              assert asset.get("source_page", "").startswith("https://github.com/hfg-gmuend/openmoji/tree/17.0.0")
-              assert asset.get("source_file_url", "").startswith("https://raw.githubusercontent.com/hfg-gmuend/openmoji/17.0.0/")
-              assert asset.get("path", "").startswith("third-party/openmoji/")
-              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
-          openmoji_license = root / "third-party/openmoji/LICENSE.txt"
-          openmoji_faq = root / "third-party/openmoji/FAQ.md"
-          assert openmoji_license.is_file() and b"Attribution-ShareAlike 4.0 International" in openmoji_license.read_bytes()
-          assert openmoji_faq.is_file() and b"How to attribute OpenMoji in a film" in openmoji_faq.read_bytes()
-          for line in sums_path.read_text(encoding="utf-8").splitlines():
-              if not line.strip():
-                  continue
-              digest, rel = line.split("  ", 1)
-              target = root / rel
-              assert target.is_file(), f"Checksum target missing: {rel}"
-              h = hashlib.sha256(target.read_bytes()).hexdigest()
-              assert h == digest, f"Checksum mismatch: {rel}"
-
-          all_bundle_paths = []
-          for bundle in bundle_rows:
-              with zipfile.ZipFile(Path("dist/video-assets") / bundle["name"]) as zf:
-                  assert zf.testzip() is None, f"Bundle integrity test failed: {bundle['name']}"
-                  names = zf.namelist()
-                  all_bundle_paths.extend(bundle["paths"])
-                  if bundle["category"] in {"complete-library", "catalog-and-metadata"}:
-                      assert any(p.endswith("ASSET_INDEX.json") for p in names)
-                      assert any(p.endswith("ASSET_CATALOG.html") for p in names), "Offline catalog missing from metadata bundle"
-                      assert any(p.endswith("SOURCES_AND_LICENSES.md") for p in names)
-                      assert any(p.endswith("SHA256SUMS.txt") for p in names)
-          assert len(all_bundle_paths) == len(set(all_bundle_paths)), "A library file appears in more than one bundle"
-          assert sorted(all_bundle_paths) == sorted(
-              p.relative_to(root).as_posix() for p in root.rglob("*")
-              if p.is_file() and p.name != "ASSET_BUNDLES.json"
-          ), "Bundle set does not cover every library file exactly once"
-
-          print(json.dumps({
-              "summary": expected,
-              "bundle_mode": bundle_manifest["mode"],
-              "total_uncompressed_bytes": bundle_manifest["total_uncompressed_bytes"],
-              "bundle_count": len(bundle_rows),
-              "bundle_assets": [{"name": x["name"], "archive_bytes": x["archive_bytes"], "sha256": x["sha256"]} for x in bundle_rows],
-              "checksummed_entries": len(sums_path.read_text(encoding="utf-8").splitlines()),
-          }, indent=2))
-          PY
-
-      - name: Publish versioned downloadable library
-        uses: softprops/action-gh-release@v2
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          tag_name: video-asset-library-build-${{ github.run_number }}
-          name: Video Asset Library Build ${{ github.run_number }}
-          fail_on_unmatched_files: true
-          files: |
-            dist/video-assets/*.zip
-            dist/video-assets/ASSET_BUNDLES.json
-            dist/video-assets/BUNDLE_INSTRUCTIONS.md
-            dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
-          body: |
-            Automated cross-genre video resources for Nolane Video Studio.
+          python-version: "3.12"
 
-            The package includes original CC0 backgrounds, overlays, icons, editorial illustrations, infographic templates, textures, procedural motion loops, 196+ WAV cues, 220+ reaction stickers, 76+ original meme-layout templates and 64+ caption/lower-third overlays; Poly Haven HDRIs/models/PBR textures; Met Open Access and verified Wikimedia CC0/Public Domain images; NOAA Ocean Exploration images/videos screened against item captions and credits; NASA-center media screened under NASA Media Usage Guidelines (not CC0); and Library of Congress images only when item-level rights statements explicitly support use. Rijksmuseum and Smithsonian artwork is included only when the exact item/media rights metadata permits it; Smithsonian media requires CC0 at both record and media level. Item-level source, usage notes and SHA-256 data are included.
-
-            Large libraries are automatically split into independently downloadable, SHA-256 verified ZIP volumes. Each release asset stays below a 1.9 GB safety ceiling (GitHub's documented limit is 2 GiB per release asset); there is no fixed total-size cap for one release.
-            
-            Some external providers can be unreachable or change their API; the build index records successful, failed and skipped downloads. "Free to use" sources with limits on raw-file redistribution are documented as source-only and are not mirrored into this archive.
+      - name: Download only the small shard manifests from the draft Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/shard-manifests
+          gh release download "${RELEASE_TAG}" \
+            --pattern "asset-shard--*.json" \
+            --dir dist/shard-manifests
+          count=$(find dist/shard-manifests -maxdepth 1 -type f -name 'asset-shard--*.json' | wc -l)
+          test "${count}" -eq 22
 
-      - name: Upload index and license report for inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: video-asset-library-reports-${{ github.run_number }}
-          path: |
-            dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
-            dist/video-assets/video-asset-library/ASSET_INDEX.json
-            dist/video-assets/video-asset-library/SOURCES_AND_LICENSES.md
-            dist/video-assets/video-asset-library/SHA256SUMS.txt
-            dist/video-assets/ASSET_BUNDLES.json
-            dist/video-assets/BUNDLE_INSTRUCTIONS.md
-          if-no-files-found: error
-          retention-days: 30
+      - name: Merge catalog and verify remote Release assets before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python tools/video/finalize_asset_library_release.py \
+            --manifest-dir dist/shard-manifests \
+            --output-dir dist/final \
+            --repository "${REPOSITORY}" \
+            --release-tag "${RELEASE_TAG}"
