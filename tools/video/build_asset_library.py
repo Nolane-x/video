@@ -16,6 +16,8 @@ CC0_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 12 * 1024 * 1024
+WIKIMEDIA_PUBLIC_DOMAIN_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+WIKIMEDIA_PUBLIC_DOMAIN_MAX_IMAGE_BYTES = 24 * 1024 * 1024
 MAX_POLY_FILE = 60 * 1024 * 1024
 NASA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
 NASA_VIDEO_MAX_BYTES = 250 * 1024 * 1024
@@ -79,19 +81,19 @@ USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
 USGS_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 40, "3d": 40, "textures": 32, "sfx": 28, "music": 28}
+OPENGAMEART_SELECTION_CAPS = {"2d": 60, "3d": 60, "textures": 48, "sfx": 36, "music": 36}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 8
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 80
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 10
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 120
 OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 8 * 1024 * 1024 * 1024
 # Internet Archive public-domain/CC0 moving-image selections. A collection is a
 # discovery scope only: every item must pass its own licenseurl/rights and file checks.
-INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 80, "nasa": 80}
+INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 120, "nasa": 120}
 INTERNET_ARCHIVE_SEARCH_ROWS = 100
-INTERNET_ARCHIVE_SEARCH_PAGES = 3
-INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 160
+INTERNET_ARCHIVE_SEARCH_PAGES = 5
+INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 220
 INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
 INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
@@ -121,9 +123,9 @@ OPENGAMEART_ALLOWED_MEDIA_EXTS = {
 }
 MET_OPEN_ACCESS_IMAGE_CAP = 300
 RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 360
-WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 1200
-WIKIMEDIA_CC0_SVG_CAP = 150
-WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 150
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 1600
+WIKIMEDIA_CC0_SVG_CAP = 200
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 200
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -5005,7 +5007,51 @@ def download_nasa_media(root,index):
         ("deep-field","deep field galaxy telescope"),
         ("lunar-geology","lunar craters Moon terrain"),
         ("earth-weather","Earth storm systems satellite imagery"),
-        ("saturn-audio","Saturn radio emissions audio NASA") 
+        ("saturn-audio","Saturn radio emissions audio NASA"),
+        ("black-hole","NASA black hole event horizon telescope space imagery"),
+        ("exoplanet","NASA exoplanet artist concept transit observation"),
+        ("star-formation","NASA stellar nursery nebula star formation"),
+        ("cosmic-web","NASA deep field galaxy cluster cosmic web"),
+        ("spacewalk","NASA astronaut spacewalk exterior station"),
+        ("space-shuttle","NASA Space Shuttle launch landing footage"),
+        ("apollo-program","NASA Apollo lunar mission surface footage"),
+        ("lunar-lander","NASA lunar lander moon exploration"),
+        ("mars-rover","NASA Perseverance Curiosity rover Mars surface"),
+        ("mars-helicopter","NASA Ingenuity helicopter flight Mars"),
+        ("jupiter-moons","NASA Europa Ganymede Io spacecraft imagery"),
+        ("saturn-rings","NASA Cassini Saturn rings spacecraft"),
+        ("comet-mission","NASA comet spacecraft close approach"),
+        ("asteroid-mission","NASA OSIRIS REx asteroid Bennu sample"),
+        ("solar-eclipse","NASA total solar eclipse corona"),
+        ("coronal-mass-ejection","NASA solar corona coronal mass ejection"),
+        ("aurora-earth","NASA aurora borealis Earth atmosphere"),
+        ("hurricane-earth","NASA hurricane satellite view Earth"),
+        ("wildfire-earth","NASA wildfire smoke satellite imagery"),
+        ("volcano-earth","NASA volcanic eruption satellite observation"),
+        ("ocean-earth","NASA ocean currents plankton color satellite"),
+        ("earth-at-night","NASA Earth city lights night satellite"),
+        ("climate-earth","NASA climate change Earth observation"),
+        ("weather-earth","NASA atmospheric river storm satellite"),
+        ("space-telescope","NASA Hubble telescope nebula galaxies"),
+        ("webb-telescope","NASA James Webb telescope infrared imagery"),
+        ("chandra-observatory","NASA Chandra X ray observatory galaxy"),
+        ("spitzer-observatory","NASA Spitzer telescope infrared space"),
+        ("planetary-probe","NASA spacecraft planetary flyby mission"),
+        ("rocket-test","NASA rocket engine test stand ignition"),
+        ("launch-complex","NASA launch complex pad crawler transporter"),
+        ("mission-control","NASA mission control room operations"),
+        ("iss-science","NASA International Space Station experiment footage"),
+        ("space-habitat","NASA spacecraft habitat research analog"),
+        ("microgravity","NASA astronaut microgravity experiment"),
+        ("aircraft-research","NASA experimental aircraft wind tunnel flight"),
+        ("earth-limb","NASA Earth limb sunrise from orbit"),
+        ("lunar-orbit","NASA Moon orbit spacecraft perspective"),
+        ("planetary-geology","NASA planetary geology surface texture"),
+        ("meteorite","NASA meteor meteorite fireball atmosphere"),
+        ("deep-space-network","NASA Deep Space Network antennas"),
+        ("radio-astronomy","NASA radio astronomy space signal"),
+        ("rocket-launch-audio","NASA launch countdown rocket ignition audio"),
+        ("space-ambience-audio","NASA spacecraft ambience audio recording")
     ]
     media_types=("image","video","audio")
     for category,q in searches:
@@ -5322,7 +5368,7 @@ def wikimedia_license_is_eligible(short_name):
 
 
 def download_wikimedia_public_domain(root,index):
-    report=[]; total=0; cap=WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP; seen=set()
+    report=[]; total=0; total_bytes=0; cap=WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP; seen=set()
     queries=[
         ("maps","historical map filetype:bitmap"),("space","space nebula public domain filetype:bitmap"),
         ("museum","museum artifact CC0 filetype:bitmap"),("architecture","architecture public domain filetype:bitmap"),
@@ -5357,10 +5403,61 @@ def download_wikimedia_public_domain(root,index):
         ("southeast-asia","Southeast Asia historic architecture public domain filetype:bitmap"),
         ("workshops","historic machine tool workshop public domain filetype:bitmap"),
         ("music-archive","historic musical instrument public domain image filetype:bitmap"),
-        ("space-programme-archive","space exploration historic spacecraft public domain filetype:bitmap")
+        ("space-programme-archive","space exploration historic spacecraft public domain filetype:bitmap"),
+        ("astronaut-archive","astronaut spaceflight NASA public domain photograph filetype:bitmap"),
+        ("planetary-science","planetary geology public domain image filetype:bitmap"),
+        ("deep-sea-archive","deep sea ocean exploration public domain photograph filetype:bitmap"),
+        ("ocean-maps","oceanographic map bathymetry public domain filetype:bitmap"),
+        ("historic-bridges","historic steel bridge construction public domain photograph filetype:bitmap"),
+        ("steam-engines","steam engine industrial history public domain image filetype:bitmap"),
+        ("power-stations","historic power station electrical engineering public domain filetype:bitmap"),
+        ("railway-engineering","railway engineering locomotive public domain photograph filetype:bitmap"),
+        ("early-flight","early aviation aircraft public domain photograph filetype:bitmap"),
+        ("flight-testing","experimental aircraft flight test public domain photograph filetype:bitmap"),
+        ("observatory-instruments","astronomical observatory telescope public domain photograph filetype:bitmap"),
+        ("planetarium","planetarium astronomy public domain illustration filetype:bitmap"),
+        ("microscopy","microscope scientific specimen public domain image filetype:bitmap"),
+        ("geological-specimens","geological mineral specimen public domain photograph filetype:bitmap"),
+        ("fossils","fossil paleontology public domain photograph filetype:bitmap"),
+        ("botanical-specimens","herbarium botanical specimen public domain image filetype:bitmap"),
+        ("forest-ecology","forest ecology public domain scientific photograph filetype:bitmap"),
+        ("marine-ecology","marine ecology plankton public domain image filetype:bitmap"),
+        ("coral-archive","coral reef scientific public domain photograph filetype:bitmap"),
+        ("arctic-research","Arctic ice research public domain photograph filetype:bitmap"),
+        ("glacier-records","glacier ice sheet public domain satellite image filetype:bitmap"),
+        ("volcanic-ash","volcano lava geology public domain photograph filetype:bitmap"),
+        ("earthquakes","earthquake geology public domain scientific illustration filetype:bitmap"),
+        ("meteorology","meteorology cloud formation public domain photograph filetype:bitmap"),
+        ("hurricanes-archive","hurricane cyclone weather public domain satellite image filetype:bitmap"),
+        ("floods-archive","historic flood aerial public domain photograph filetype:bitmap"),
+        ("drought-archive","drought landscape public domain scientific photograph filetype:bitmap"),
+        ("agricultural-machinery","agricultural machinery farming public domain photograph filetype:bitmap"),
+        ("food-history","historic food production public domain photograph filetype:bitmap"),
+        ("textile-machinery","industrial textile machinery public domain photograph filetype:bitmap"),
+        ("printing-history","printing press typography public domain photograph filetype:bitmap"),
+        ("cinema-equipment","historic film camera cinema public domain photograph filetype:bitmap"),
+        ("recording-studios","historic audio recording equipment public domain photograph filetype:bitmap"),
+        ("computer-circuits","early computing electronic circuit public domain photograph filetype:bitmap"),
+        ("telecommunications","historic radio antenna communications public domain photograph filetype:bitmap"),
+        ("satellite-history","historic satellite space technology public domain photograph filetype:bitmap"),
+        ("rocket-history","historic rocket launch spaceflight public domain photograph filetype:bitmap"),
+        ("moon-archive","historic lunar surface Apollo public domain photograph filetype:bitmap"),
+        ("mars-archive","Mars planetary surface public domain NASA image filetype:bitmap"),
+        ("earth-at-night-archive","Earth city lights night public domain satellite image filetype:bitmap"),
+        ("coastal-geography","coastline estuary delta aerial public domain image filetype:bitmap"),
+        ("river-geography","river watershed aerial public domain image filetype:bitmap"),
+        ("cartographic-atlas","antique atlas cartography public domain scan filetype:bitmap"),
+        ("urban-architecture","historic architecture city public domain photograph filetype:bitmap"),
+        ("southeast-asia-archive","Southeast Asia landscape public domain historical photograph filetype:bitmap"),
+        ("vietnam-archive","Vietnam historical public domain photograph map filetype:bitmap"),
+        ("museum-collections","museum collection public domain artwork CC0 filetype:bitmap"),
+        ("sculpture-archive","historic sculpture public domain museum photograph filetype:bitmap"),
+        ("decorative-arts","decorative arts ceramics metalwork public domain image filetype:bitmap"),
+        ("scientific-posters","scientific poster chart public domain scan filetype:bitmap"),
+        ("engineering-diagrams","engineering schematic public domain illustration filetype:bitmap")
     ]
     for category,q in queries:
-        if total>=cap: break
+        if total>=cap or total_bytes>=WIKIMEDIA_PUBLIC_DOMAIN_TOTAL_MAX_BYTES: break
         params={"action":"query","format":"json","generator":"search","gsrsearch":q,"gsrnamespace":6,"gsrlimit":30,
                 "prop":"imageinfo","iiprop":"url|extmetadata","iiurlwidth":1600}
         url="https://commons.wikimedia.org/w/api.php?"+urllib.parse.urlencode(params)
@@ -5369,7 +5466,7 @@ def download_wikimedia_public_domain(root,index):
             response=request_json(url,timeout=16)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=16: break
+                if total>=cap or successes>=16 or total_bytes>=WIKIMEDIA_PUBLIC_DOMAIN_TOTAL_MAX_BYTES: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
@@ -5383,9 +5480,13 @@ def download_wikimedia_public_domain(root,index):
                 if identity in seen: continue
                 seen.add(identity)
                 try:
-                    blob,ctype=request_bytes(asset_url,timeout=22,limit=MAX_MEDIA_FILE)
+                    blob,ctype=request_bytes(asset_url,timeout=22,limit=WIKIMEDIA_PUBLIC_DOMAIN_MAX_IMAGE_BYTES)
                     if not ctype.lower().startswith("image/") or len(blob)<2048:
                         raise RuntimeError("thumbnail endpoint did not return a usable image")
+                    if total_bytes + len(blob) > WIKIMEDIA_PUBLIC_DOMAIN_TOTAL_MAX_BYTES:
+                        report.append({"id":"wikimedia-"+slugify(identity),"status":"skipped_total_size_limit","category":category,
+                                       "source_page":page_url,"reason":"The image would exceed the aggregate Wikimedia byte ceiling."})
+                        break
                     name=Path(urllib.parse.urlparse(asset_url).path).name
                     ext=Path(name).suffix.lower()
                     if ext not in {".jpg",".jpeg",".png",".webp"}:
@@ -5403,7 +5504,7 @@ def download_wikimedia_public_domain(root,index):
                            "license_url":license_url or "https://commons.wikimedia.org/wiki/Commons:Licensing",
                            "license_verified_from_item_metadata":True,"size_bytes":len(blob),"sha256":digest,"redistributable":True,
                            "note":"Only exact CC0/Public Domain metadata is auto-bundled; other licenses are skipped."}
-                    index.append(entry); total+=1; successes+=1
+                    index.append(entry); total+=1; total_bytes+=len(blob); successes+=1
                     report.append({"id":entry["id"],"status":"downloaded","category":category,"path":entry["path"],
                                    "title":title,"source_page":page_url,"license":short,"size_bytes":len(blob),"sha256":digest})
                     print("[Wikimedia Commons] OK:",category,short,title[:48],len(blob))
