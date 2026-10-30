@@ -149,6 +149,27 @@ jobs:
               assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
               assert asset.get("download_archive_sha256", "") in {row.get("archive_sha256") for row in ambientcg_downloaded}
 
+          assert "usgs_images_downloaded" in expected and "usgs_videos_downloaded" in expected and "usgs_audio_downloaded" in expected
+          usgs_report = index.get("usgs_gallery_downloads")
+          assert isinstance(usgs_report, list), "USGS Gallery source report is missing"
+          usgs_downloaded = [row for row in usgs_report if row.get("status") == "downloaded"]
+          usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
+          assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
+          assert len(usgs_assets) == len(usgs_downloaded)
+          assert expected["usgs_images_downloaded"] <= 24 and expected["usgs_videos_downloaded"] <= 8 and expected["usgs_audio_downloaded"] <= 8
+          for asset in usgs_assets:
+              media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
+              assert media_type in {"image", "video", "audio"}
+              assert asset.get("rights_statement", "").strip().rstrip(".").casefold() == "public domain"
+              assert asset.get("license_verified_from_item_page") is True and asset.get("redistributable") is True
+              assert asset.get("license") == "Public Domain (item-level USGS Sources/Usage label)"
+              assert asset.get("source_page", "").startswith("https://www.usgs.gov/media/" + media_type + "s/")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
+              direct = asset.get("source_file_url", "")
+              if media_type == "video":
+                  assert direct.startswith("https://usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com/") and "/media/video/" in direct
+              else:
+                  assert direct.startswith("https://d9-wret.s3.us-west-2.amazonaws.com/") and "/media/" + media_type + "s/" in direct
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
