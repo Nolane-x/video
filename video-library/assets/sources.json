@@ -612,6 +612,23 @@
       "note": "The importer uses the official previewsModels, previewsMaterials, previewsHDRIs and previewsTextures endpoints, then matches each item by exact name/type against its official /Asset/{type}/{name} detail response. The provider's API documentation states that all library assets are CC0 1.0. Any contradictory item license metadata is rejected. Only ZIP files listed in archiveFiles or textureFiles and served from the exact HTTPS lazytextures.net:3000 /Assets/ path are considered; standalone non-ZIP texture paths are skipped by this archive-only importer. Per-file maximum 64 MiB, 512 MiB total downloaded archives, 128 MiB extracted bytes per item, 1.5 GiB extracted bytes total, and 2,500 ZIP members per archive. Discovery ceilings: 10 models, 16 materials, 10 HDRIs, 18 texture archives and 8 other/miscellaneous packages (62 maximum); per archive 64 MiB, 512 MiB total compressed, 128 MiB unpacked per archive and 1.5 GiB total unpacked. ZIP path/member/size/compression-ratio/CRC preflight occurs before extraction; extracted media passes format-signature checks and SVG sanitization. Requests are paced because downloads are subject to fair-use limits."
     },
     {
+      "id": "poly-pizza-cc0-api",
+      "title": "Poly Pizza — item-verified CC0 low-poly GLB models",
+      "provider": "Poly Pizza",
+      "kind": "low-poly 3D model catalogue and published API",
+      "category": "3D models, low-poly nature, characters, buildings, vehicles, furniture, props and environments",
+      "source_page": "https://poly.pizza/",
+      "api": "https://api.poly.pizza/v1.1",
+      "api_key_page": "https://poly.pizza/settings/api",
+      "terms": "https://poly.pizza/docs/tos",
+      "license": "Per-model Creative Commons licence; this importer accepts exact CC0 1.0 only",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "authentication": "Optional POLY_PIZZA_API_KEY GitHub Actions secret; key is sent only to api.poly.pizza",
+      "bundling": "optional-bounded-published-api-import-only-after-per-model-cc0-verification",
+      "note": "Poly Pizza lists 10,700+ models, but licensing is per model and may vary (CC0 and CC-BY are both present). This importer uses the published API only (no HTML scraping), re-fetches each chosen model by ID, and downloads only a model whose own Licence field is exactly recognized as CC0 1.0. CC-BY, unknown and missing licence records are skipped. The direct GLB URL must be HTTPS on poly.pizza or a subdomain; only GLB v2 with a matching declared length is indexed. Limits: 48 models, 128 MiB per GLB and 4 GiB total. The API key is never forwarded to the asset CDN. The provider's Terms prohibit scraping/automated extraction outside published interfaces; this lane uses the published API. Check the current account plan/terms before enabling commercial use: the provider's press page has described API access as free for hobby use and pay-as-you-go for commercial use."
+    },
+    {
       "id": "quaternius-current-qal-source-only",
       "title": "Quaternius — 3D packs for use in finished products (not raw library redistribution)",
       "provider": "Quaternius",
