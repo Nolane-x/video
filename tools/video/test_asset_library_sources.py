@@ -59,6 +59,17 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.OPENMOJI_MAX_EXTRACTED_BYTES, 100 * 1024 * 1024)
         self.assertGreaterEqual(library.NOAA_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
 
+    def test_quaternius_current_qal_is_catalogued_source_only(self):
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(
+            row for row in catalog["sources"]
+            if row.get("id") == "quaternius-current-qal-source-only"
+        )
+        self.assertIn("QAL v1.0", entry["license"])
+        self.assertIn("source-only", entry["bundling"])
+        self.assertIn("redistributing the assets themselves", entry["note"])
+        self.assertEqual(entry["license_url"], "https://quaternius.com/license.html")
+
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
         self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
         self.assertFalse(library.ambientcg_download_url_is_allowed("http://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
