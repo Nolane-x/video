@@ -4016,7 +4016,7 @@ def main():
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=90 and len(OVERLAYS)>=75 and len(ICONS)>=125 and len(INFO)>=50 and len(TEXTURES)>=55 and len(ILLUSTRATIONS)>=105 and len(MOTION_LOOPS)==24
-    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)+sticker_count+meme_template_count
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
     indexed={line.split("  ",1)[1] for line in digest_lines}
     for path in STAGE.rglob("*"):
