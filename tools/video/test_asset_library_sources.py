@@ -1821,8 +1821,13 @@ class NARABulkDatasetProbeTests(unittest.TestCase):
         self.assertEqual(summary["item_records"], 2)
         self.assertEqual(summary["both_unrestricted"], 1)
         self.assertEqual(summary["item_records_with_both_rights_and_objects"], 1)
+        self.assertEqual(summary["eligible_audiovisual_item_records"], 1)
+        self.assertEqual(summary["eligible_audiovisual_items_with_objects"], 1)
+        self.assertEqual(summary["eligible_video_objects"], 1)
+        self.assertEqual(summary["eligible_video_object_bytes"], 123456789)
         self.assertEqual(summary["candidate_media_count"], 2)
-        self.assertEqual(summary["sample_candidate_objects"][0]["object_url_host"], "catalog.archives.gov")
+        self.assertEqual(summary["sample_eligible_video_objects"][0]["object_url_host"], "catalog.archives.gov")
+        self.assertNotIn("restricted.mp4", [x.get("object_filename") for x in summary["sample_eligible_video_objects"]])
         self.assertFalse("media_downloaded" in summary)
 
 
