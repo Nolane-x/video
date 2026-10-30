@@ -294,10 +294,10 @@ def verify_manifest(output_dir: Path, root: Path, manifest: dict) -> None:
         )
     else:
         expected = sorted(
-            p.relative_to(root).as_posix()
-            for p in root.rglob("*")
-            if p.is_file() and p.name not in METADATA_FILES and p.name != "ASSET_BUNDLES.json"
-        ) + sorted(METADATA_FILES)
+            [p.relative_to(root).as_posix() for p in root.rglob("*")
+             if p.is_file() and p.name not in METADATA_FILES and p.name != "ASSET_BUNDLES.json"]
+            + list(METADATA_FILES)
+        )
     if sorted(included) != expected:
         duplicates = sorted({p for p in included if included.count(p) > 1})
         missing = sorted(set(expected) - set(included))
