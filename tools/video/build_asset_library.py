@@ -1794,7 +1794,7 @@ def usgs_media_detail_url_is_allowed(raw_url,media_type):
 def usgs_media_signature_is_valid(blob,media_type,content_type,extension):
     mime=str(content_type or "").split(";",1)[0].strip().lower()
     if media_type=="images":
-        valid_mime=mime.startswith("image/")
+        valid_mime=mime.startswith("image/") or mime=="application/octet-stream"
         valid_sig=(
             blob.startswith(b"\xff\xd8\xff") or
             blob.startswith(b"\x89PNG\r\n\x1a\n") or
@@ -1804,8 +1804,8 @@ def usgs_media_signature_is_valid(blob,media_type,content_type,extension):
         )
         return valid_mime and valid_sig
     if media_type=="videos":
-        return (mime.startswith("video/") and len(blob)>20000 and
-                (b"ftyp" in blob[:64] or blob.startswith(b"\x1aE\xdf\xa3")))
+        return ((mime.startswith("video/") or mime in {"application/mp4","application/octet-stream"})
+                and len(blob)>20000 and b"ftyp" in blob[:64])
     if media_type=="audio":
         valid_mime=mime.startswith("audio/") or mime in {"application/ogg","application/octet-stream"}
         valid_sig=(
@@ -3354,8 +3354,8 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_svg_report)+
       "\n\n## Wikimedia Commons video/audio download results\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
-      "\n\n## USGS Multimedia Gallery — item-level Public Domain only\\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly \`Public Domain.\`. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\\n\\n"+
-      "\\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in usgs_report)+
+      "\n\n## USGS Multimedia Gallery — item-level Public Domain only\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly 'Public Domain.'. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in usgs_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
