@@ -2327,6 +2327,347 @@ def download_lazytextures(root, index):
             print("[LazyTextures] source request failed:", asset_type, str(exc)[:220])
     return report
 
+
+def poly_pizza_api_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == POLY_PIZZA_API_HOST
+            and parsed.port in (None, 443)
+            and not parsed.username and not parsed.password
+            and not parsed.fragment
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def poly_pizza_asset_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        host = (parsed.hostname or "").lower().rstrip(".")
+        return (
+            parsed.scheme == "https"
+            and (host == "poly.pizza" or host.endswith(".poly.pizza"))
+            and parsed.port in (None, 443)
+            and not parsed.username and not parsed.password
+            and not parsed.fragment
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def poly_pizza_model_id_is_allowed(value):
+    text = str(value or "").strip()
+    return bool(text and len(text) <= 128 and re.fullmatch(r"[A-Za-z0-9_-]+", text))
+
+
+def poly_pizza_cc0_license(value):
+    if not isinstance(value, str):
+        return None
+    normalized = re.sub(r"[\s_\-]+", " ", value).strip().casefold()
+    accepted = {
+        "cc0", "cc0 1.0", "cc0 1.0 universal",
+        "creative commons zero", "creative commons zero 1.0",
+    }
+    return POLY_PIZZA_LICENSE if normalized in accepted else None
+
+
+def poly_pizza_creator_name(model):
+    creator = model.get("Creator") or model.get("creator")
+    if isinstance(creator, dict):
+        creator = creator.get("Username") or creator.get("Name") or creator.get("username") or creator.get("name")
+    if creator is None:
+        return ""
+    return str(creator).strip()[:200]
+
+
+def poly_pizza_source_url(model, model_id):
+    value = model.get("URL") or model.get("Url") or model.get("Permalink") or model.get("url") or model.get("permalink")
+    if value:
+        candidate = str(value).strip()
+        if poly_pizza_asset_url_is_allowed(candidate):
+            return candidate
+        return ""
+    return "https://poly.pizza/m/" + urllib.parse.quote(model_id, safe="")
+
+
+def poly_pizza_parse_model(model, require_download=False):
+    if not isinstance(model, dict):
+        return None, "invalid_model_record"
+    model_id = str(model.get("ID") or model.get("Id") or model.get("id") or "").strip()
+    if not poly_pizza_model_id_is_allowed(model_id):
+        return None, "invalid_model_id"
+    license_value = model.get("Licence") or model.get("License") or model.get("licence") or model.get("license")
+    license_name = poly_pizza_cc0_license(license_value)
+    if not license_name:
+        return None, "license_not_cc0_or_unrecognized"
+    creator = poly_pizza_creator_name(model)
+    title = str(model.get("Title") or model.get("title") or model_id).strip()[:240]
+    source_url = poly_pizza_source_url(model, model_id)
+    if not source_url:
+        return None, "source_url_not_official"
+    raw_download = model.get("Download") or model.get("download")
+    if require_download and not raw_download:
+        return None, "download_url_missing"
+    download_url = str(raw_download).strip() if raw_download else ""
+    if download_url and not poly_pizza_asset_url_is_allowed(download_url):
+        return None, "download_url_not_official"
+    tags = model.get("Tags") or model.get("tags") or []
+    if isinstance(tags, str):
+        tags = [tags]
+    tags = [str(tag)[:80] for tag in tags[:40] if str(tag).strip()] if isinstance(tags, list) else []
+    return {
+        "model_id": model_id,
+        "title": title,
+        "creator": creator,
+        "license": license_name,
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "source_page": source_url,
+        "download_url": download_url,
+        "tags": tags,
+        "category": str(model.get("Category") or model.get("category") or "low-poly 3D model")[:120],
+        "triangle_count": model.get("Tri Count") or model.get("TriCount") or model.get("triangle_count"),
+        "animated": bool(model.get("Animated") or model.get("animated")),
+    }, None
+
+
+def poly_pizza_api_json(path, params, token):
+    url = POLY_PIZZA_API_BASE + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    if not poly_pizza_api_url_is_allowed(url):
+        raise RuntimeError("Poly Pizza API URL failed the exact official HTTPS host allow-list")
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": UA,
+            "X-Auth-Token": token,
+            "Accept": "application/json",
+        },
+    )
+    last_error = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=35) as response:
+                final_url = response.geturl()
+                if not poly_pizza_api_url_is_allowed(final_url):
+                    raise RuntimeError("Poly Pizza API redirected outside api.poly.pizza")
+                if getattr(response, "status", 200) != 200:
+                    raise RuntimeError("Poly Pizza API returned HTTP " + str(response.status))
+                payload = response.read(POLY_PIZZA_MAX_JSON_BYTES + 1)
+            if len(payload) > POLY_PIZZA_MAX_JSON_BYTES:
+                raise RuntimeError("Poly Pizza API response exceeded the 4 MiB JSON safety limit")
+            result = json.loads(payload.decode("utf-8"))
+            if not isinstance(result, dict):
+                raise RuntimeError("Poly Pizza API response is not a JSON object")
+            if result.get("success") is False or result.get("error"):
+                raise RuntimeError("Poly Pizza API reported an error")
+            return result
+        except urllib.error.HTTPError as exc:
+            last_error = RuntimeError("Poly Pizza API HTTP " + str(exc.code))
+            if exc.code == 429 and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise last_error
+        except (urllib.error.URLError, TimeoutError) as exc:
+            last_error = RuntimeError("Poly Pizza API request failed: " + str(exc)[:240])
+            if attempt < 2:
+                time.sleep(1 + attempt)
+                continue
+            raise last_error
+    raise last_error or RuntimeError("Poly Pizza API request failed")
+
+
+def poly_pizza_download_glb(url, max_bytes=POLY_PIZZA_MAX_MODEL_BYTES):
+    if not poly_pizza_asset_url_is_allowed(url):
+        raise RuntimeError("Poly Pizza model download URL failed the official HTTPS host allow-list")
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": UA, "Accept": "model/gltf-binary,application/octet-stream"},
+    )
+    with urllib.request.urlopen(request, timeout=70) as response:
+        final_url = response.geturl()
+        if not poly_pizza_asset_url_is_allowed(final_url):
+            raise RuntimeError("Poly Pizza CDN redirected outside the official poly.pizza domain")
+        length = response.headers.get("Content-Length")
+        if length:
+            try:
+                if int(length) > max_bytes:
+                    raise RuntimeError("Poly Pizza GLB exceeds the per-model download ceiling")
+            except ValueError:
+                pass
+        blob = response.read(max_bytes + 1)
+    if len(blob) > max_bytes:
+        raise RuntimeError("Poly Pizza GLB exceeded the per-model download ceiling")
+    if len(blob) < 20 or blob[:4] != b"glTF":
+        raise RuntimeError("Poly Pizza download is not a valid GLB (missing glTF magic)")
+    version = int.from_bytes(blob[4:8], "little")
+    declared_length = int.from_bytes(blob[8:12], "little")
+    if version != 2 or declared_length != len(blob):
+        raise RuntimeError("Poly Pizza GLB version or declared length does not match the downloaded bytes")
+    return blob, final_url
+
+
+def download_poly_pizza(root, index):
+    """Download a bounded set of exact item-level CC0 models via Poly Pizza's published API."""
+    import os
+    token = (os.environ.get(POLY_PIZZA_API_KEY_ENV) or "").strip()
+    if not token:
+        return [{
+            "id": "poly-pizza-api",
+            "provider": "Poly Pizza",
+            "status": "skipped_missing_api_key",
+            "source_page": "https://poly.pizza/settings/api",
+            "reason": "Set the optional POLY_PIZZA_API_KEY GitHub Actions secret to activate this published-API lane.",
+        }]
+
+    report = []
+    selected = []
+    seen_ids = set()
+    search_failures = []
+    for term in POLY_PIZZA_SEARCH_TERMS:
+        try:
+            payload = poly_pizza_api_json(
+                "/search/" + urllib.parse.quote(term, safe=""),
+                {"Limit": POLY_PIZZA_SEARCH_LIMIT, "Page": 0, "License": 1},
+                token,
+            )
+            rows = payload.get("results")
+            if not isinstance(rows, list):
+                data = payload.get("data")
+                rows = data.get("results") if isinstance(data, dict) else None
+            if not isinstance(rows, list):
+                search_failures.append({"term": term, "reason": "results_not_a_list"})
+                continue
+            for model in rows:
+                normalized, reason = poly_pizza_parse_model(model, require_download=True)
+                if not normalized:
+                    continue
+                model_id = normalized["model_id"]
+                if model_id in seen_ids:
+                    continue
+                seen_ids.add(model_id)
+                selected.append(normalized)
+                if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+                    break
+            print("[Poly Pizza] search", term, "returned", len(rows), "rows; CC0 candidates", len(selected))
+            if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+                break
+            time.sleep(1)
+        except Exception as exc:
+            search_failures.append({"term": term, "reason": str(exc)[:320]})
+            print("[Poly Pizza] search failed for", term, str(exc)[:220])
+
+    total_bytes = 0
+    downloaded = 0
+    for candidate in selected:
+        if downloaded >= POLY_PIZZA_MAX_MODELS or total_bytes >= POLY_PIZZA_TOTAL_MAX_BYTES:
+            break
+        model_id = candidate["model_id"]
+        row = {
+            "id": "poly-pizza-" + slugify(model_id),
+            "provider": "Poly Pizza",
+            "model_id": model_id,
+            "title": candidate["title"],
+            "creator": candidate["creator"],
+            "source_page": candidate["source_page"],
+            "license": POLY_PIZZA_LICENSE,
+            "license_url": candidate["license_url"],
+            "license_verified_from_item_metadata": True,
+            "redistributable": True,
+        }
+        try:
+            # Re-fetch the individual model record and use only its own license and download URL.
+            detail_payload = poly_pizza_api_json(
+                "/model/" + urllib.parse.quote(model_id, safe=""),
+                {},
+                token,
+            )
+            detail = detail_payload.get("model") if isinstance(detail_payload.get("model"), dict) else detail_payload.get("data")
+            if not isinstance(detail, dict):
+                detail = detail_payload
+            verified, reason = poly_pizza_parse_model(detail, require_download=True)
+            if not verified or verified["model_id"] != model_id:
+                raise RuntimeError(reason or "Poly Pizza item detail ID did not match the search result")
+            if verified["license"] != POLY_PIZZA_LICENSE:
+                raise RuntimeError("Poly Pizza item detail no longer carries the required CC0 license")
+            if verified["source_page"] != candidate["source_page"]:
+                raise RuntimeError("Poly Pizza source page changed between search and detail lookup")
+            if total_bytes >= POLY_PIZZA_TOTAL_MAX_BYTES:
+                row.update(status="skipped_total_size_limit", reason="The Poly Pizza total download ceiling has been reached.")
+                report.append(row)
+                break
+            remaining = POLY_PIZZA_TOTAL_MAX_BYTES - total_bytes
+            blob, final_url = poly_pizza_download_glb(
+                verified["download_url"],
+                max_bytes=min(POLY_PIZZA_MAX_MODEL_BYTES, remaining),
+            )
+            digest = hashlib.sha256(blob).hexdigest()
+            target_dir = root / "third-party/poly-pizza/models" / slugify(model_id)
+            target_dir.mkdir(parents=True, exist_ok=True)
+            target = target_dir / "model.glb"
+            target.write_bytes(blob)
+            note = (
+                f"# {verified['title']} — Poly Pizza\n\n"
+                f"- Model ID: {model_id}\n- Creator: {verified['creator'] or 'Not supplied in the API record'}\n"
+                f"- Official model page: {verified['source_page']}\n- Download URL: {final_url}\n"
+                f"- Exact item license field: CC0 1.0\n- License URL: {verified['license_url']}\n"
+                "- This model was discovered and downloaded through Poly Pizza's published API. Its own model-detail record was re-fetched before download and required to retain the exact CC0 license.\n"
+                "- The GLB magic, version and declared byte length were checked. The file SHA-256 is recorded in ASSET_INDEX.json.\n"
+            )
+            write_text(target_dir / "SOURCE_AND_LICENSE.md", note)
+            item = {
+                "id": "poly-pizza-" + slugify(model_id),
+                "path": target.relative_to(root).as_posix(),
+                "type": "poly-pizza-cc0-model",
+                "provider": "Poly Pizza",
+                "model_id": model_id,
+                "title": verified["title"],
+                "creator": verified["creator"],
+                "category": "3D models / low-poly",
+                "source_page": verified["source_page"],
+                "source_file_url": final_url,
+                "api_source": POLY_PIZZA_API_BASE + "/model/" + urllib.parse.quote(model_id, safe=""),
+                "tags": verified["tags"],
+                "triangle_count": verified["triangle_count"],
+                "animated": verified["animated"],
+                "license": POLY_PIZZA_LICENSE,
+                "license_url": verified["license_url"],
+                "license_verified_from_item_metadata": True,
+                "redistributable": True,
+                "size_bytes": len(blob),
+                "sha256": digest,
+            }
+            index.append(item)
+            total_bytes += len(blob)
+            downloaded += 1
+            row.update(
+                status="downloaded",
+                download_url=final_url,
+                size_bytes=len(blob),
+                sha256=digest,
+                path=item["path"],
+                triangle_count=verified["triangle_count"],
+                tags=verified["tags"],
+            )
+            report.append(row)
+            print("[Poly Pizza] OK:", model_id, verified["title"], len(blob), "bytes")
+        except Exception as exc:
+            row.update(status="failed", reason=str(exc)[:420])
+            report.append(row)
+        time.sleep(1)
+    if search_failures:
+        report.append({
+            "id": "poly-pizza-search-report",
+            "provider": "Poly Pizza",
+            "status": "partial_search_failures",
+            "failed_searches": search_failures[:30],
+        })
+    print("[Poly Pizza] downloaded", downloaded, "models,", total_bytes, "bytes")
+    return report
+
+
 class USGSMediaPageParser(HTMLParser):
     """Extract only explicit USGS item-level rights and source links from public HTML."""
     def __init__(self):
