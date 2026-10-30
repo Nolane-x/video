@@ -72,7 +72,7 @@ def list_json_objects(record_group: str) -> list[dict[str, Any]]:
             modified = fields.get("LastModified", "")
             if key and len(first_key_samples) < 8:
                 first_key_samples.append(key)
-            if key.endswith(".json"):
+            if key.endswith((".json", ".jsonl")):
                 rows.append({"key": key, "size_bytes": int(size_text), "last_modified": modified})
 
         truncated = False
@@ -151,7 +151,16 @@ def _digital_objects(record: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> dict[str, Any]:
-    document = json.loads(body.decode("utf-8-sig"))
+    decoded = body.decode("utf-8-sig")
+    try:
+        document = json.loads(decoded)
+    except json.JSONDecodeError:
+        # The NARA bulk record-group shards use JSON Lines: one JSON description per line.
+        document = [
+            json.loads(line)
+            for line in decoded.splitlines()
+            if line.strip()
+        ]
     summary = {
         "record_group": record_group,
         "object_key": object_key,
@@ -260,7 +269,7 @@ def probe_record_group(record_group: str, remaining_budget: int) -> tuple[dict[s
             "status": "no-small-json-sample",
         }, 0
 
-    selected = eligible[0]
+    selected = min(eligible, key=lambda row: row["size_bytes"])
     if selected["size_bytes"] > remaining_budget:
         return {
             "record_group": record_group,
