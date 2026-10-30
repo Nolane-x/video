@@ -190,6 +190,32 @@ jobs:
               assert asset.get("source_file_url", "").startswith("https://opengameart.org/sites/default/files/")
               assert asset.get("path", "").startswith("third-party/opengameart/")
               assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
+          assert "google_font_families_downloaded" in expected and "google_font_files_downloaded" in expected
+          google_fonts_report = index.get("google_fonts_downloads")
+          assert isinstance(google_fonts_report, list), "Google Fonts report is missing"
+          google_families = [row for row in google_fonts_report if row.get("status") == "downloaded"]
+          google_font_assets = [asset for asset in index["assets"] if asset.get("type") == "google-font-ttf"]
+          assert len(google_families) == expected["google_font_families_downloaded"]
+          assert len(google_font_assets) == expected["google_font_files_downloaded"]
+          assert expected["google_font_families_downloaded"] <= 20
+          assert expected["google_font_files_downloaded"] <= 40
+          for family in google_families:
+              assert family.get("license") == "SIL Open Font License 1.1"
+              assert family.get("license_file", "").startswith("third-party/google-fonts/")
+              assert len(family.get("license_file_sha256", "")) == 64
+              assert 1 <= family.get("font_files_downloaded", 0) <= 2
+          for asset in google_font_assets:
+              assert asset.get("license") == "SIL Open Font License 1.1"
+              assert asset.get("license_verified_from_family_ofl") is True and asset.get("redistributable") is True
+              assert asset.get("source_page", "").startswith("https://github.com/google/fonts/tree/main/ofl/")
+              assert asset.get("source_file_url", "").startswith("https://raw.githubusercontent.com/google/fonts/main/ofl/")
+              assert asset.get("path", "").startswith("third-party/google-fonts/") and asset.get("path", "").lower().endswith(".ttf")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 4096
+              license_path = root / asset.get("license_file", "")
+              assert license_path.is_file(), "Google Fonts OFL.txt is missing"
+              license_bytes = license_path.read_bytes()
+              assert hashlib.sha256(license_bytes).hexdigest() == asset.get("license_file_sha256")
+              assert b"SIL OPEN FONT LICENSE Version 1.1" in license_bytes
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
