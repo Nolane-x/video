@@ -42,6 +42,14 @@ OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
 OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+# Exclude active-content formats such as SVG and native Blender project files from
+# untrusted community archives; ordinary raster, audio, video and exchange formats remain.
+OPENGAMEART_ALLOWED_MEDIA_EXTS = {
+    ".png",".jpg",".jpeg",".webp",".gif",".tif",".tiff",
+    ".wav",".mp3",".ogg",".oga",".flac",".mp4",".mov",".m4v",".webm",
+    ".obj",".mtl",".glb",".gltf",".fbx",".abc",".dae",".stl",
+    ".ttf",".otf",".woff",".woff2"
+}
 MET_OPEN_ACCESS_IMAGE_CAP = 110
 RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
 WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
@@ -2097,10 +2105,7 @@ def opengameart_file_url_is_allowed(url):
                 parsed.username or parsed.password or parsed.fragment or not parsed.path.startswith("/sites/default/files/")):
             return False
         ext=Path(parsed.path).suffix.lower()
-        return ext in {".zip",".png",".jpg",".jpeg",".webp",".gif",".tif",".tiff",".svg",
-                       ".wav",".mp3",".ogg",".oga",".flac",".mp4",".mov",".m4v",".webm",
-                       ".obj",".mtl",".glb",".gltf",".fbx",".blend",".abc",".dae",".stl",
-                       ".ttf",".otf",".woff",".woff2",".pdf",".json",".csv",".xml",".mtlx",".usdz"}
+        return ext==".zip" or ext in OPENGAMEART_ALLOWED_MEDIA_EXTS
     except Exception:
         return False
 
@@ -2173,7 +2178,6 @@ def opengameart_file_signature_is_valid(blob,extension,content_type):
             value=json.loads(blob.decode("utf-8"))
             return isinstance(value,dict) and isinstance(value.get("asset"),dict) and bool(value["asset"].get("version"))
         except Exception: return False
-    if ext==".blend": return blob.startswith(b"BLENDER")
     if ext==".fbx": return blob.startswith(b"Kaydara FBX Binary") or blob.lstrip().startswith(b"; FBX")
     if ext==".ttf": return blob.startswith((b"\x00\x01\x00\x00",b"true"))
     if ext==".otf": return blob.startswith(b"OTTO")
@@ -2181,7 +2185,7 @@ def opengameart_file_signature_is_valid(blob,extension,content_type):
     if ext==".woff2": return blob.startswith(b"wOF2")
     if ext==".pdf": return blob.startswith(b"%PDF-")
     if ext==".zip": return blob.startswith(b"PK\x03\x04")
-    if ext in {".svg",".obj",".mtl",".stl",".dae",".abc",".mtlx",".usdz",".json",".csv",".xml"}:
+    if ext in {".obj",".mtl",".stl",".dae",".abc"}:
         return len(blob)>32 and b"\x00" not in blob[:128]
     return False
 
@@ -2285,6 +2289,10 @@ def download_opengameart(root,index):
                                 if corrupt: raise RuntimeError("corrupt ZIP member: "+str(corrupt))
                             target_dir=package_dir/slugify(Path(urllib.parse.urlsplit(file_url).path).name)
                             extracted,unpacked=safe_extract(blob,target_dir,max_bytes=OPENGAMEART_MAX_PACKAGE_BYTES)
+                            # Discard SVG and native Blender projects: they may contain active content or scripts.
+                            for unsafe_path in list(target_dir.rglob("*")):
+                                if unsafe_path.is_file() and unsafe_path.suffix.lower() not in OPENGAMEART_ALLOWED_MEDIA_EXTS:
+                                    unsafe_path.unlink()
                             media_files=[p for p in target_dir.rglob("*") if p.is_file()]
                             if extracted<=0 or not media_files:
                                 shutil.rmtree(target_dir,ignore_errors=True)
@@ -2294,6 +2302,8 @@ def download_opengameart(root,index):
                                                       "archive_sha256":archive_sha,"extracted_files":extracted,
                                                       "unpacked_bytes":unpacked,"media_paths":[p for p in media_files]})
                         else:
+                            if extension not in OPENGAMEART_ALLOWED_MEDIA_EXTS:
+                                raise RuntimeError("attachment extension is excluded by the community asset safety policy")
                             if not opengameart_file_signature_is_valid(blob,extension,content_type or candidate.get("mime")):
                                 raise RuntimeError("downloaded attachment failed its media signature check")
                             target_dir=package_dir
