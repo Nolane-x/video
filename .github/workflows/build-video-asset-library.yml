@@ -55,7 +55,7 @@ jobs:
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 18
       matrix:
         lane:
           - originals
