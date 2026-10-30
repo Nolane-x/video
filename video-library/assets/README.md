@@ -191,24 +191,9 @@ Official sources: [OpenMoji 17.0 release](https://github.com/hfg-gmuend/openmoji
 
 ## Build 48: Internet Archive moving-image footage
 
-This lane adds two curated Internet Archive collections for longer-form and historical moving images: **Prelinger** educational/industrial films and **NASA** mission/spaceflight videos. The advanced-search collection filter is discovery only. The item metadata endpoint must confirm the exact identifier, `mediatype=movies`, the requested collection and an approved item-level license URL.
-
-Accepted item rights:
-- CC0 1.0 and CC0 3.0, when the exact item's `licenseurl` field points to the official Creative Commons URL.
-- The legacy Creative Commons Public Domain URL only when that same item's `rights` field is exactly `Public Domain`.
-- Public Domain Mark is not silently treated as CC0 or a license.
-
-Only MP4, WebM and OGV files within the configured file/duration limits are considered. The importer compares downloaded bytes against the Internet Archive file record's MD5 and SHA-1 when present, then records its own SHA-256, creator, year, duration, item URL, metadata URL, direct media URL and exact license/right fields.
-
-Current ceilings: 40 items from Prelinger and 40 from NASA; 250 MiB per file and 4 GiB total per build. These are maximums, not promised downloads. The generated report and `ASSET_INDEX.json` show what actually passed rights review and file integrity checks.
-
-Official source and API documentation: [Internet Archive](https://archive.org/), [Advanced Search API](https://archive.org/advancedsearch.php), [Metadata API](https://archive.org/developers/metadata.html).
-
-## Build 48: Internet Archive moving-image footage
-
 The new media lane searches the official Internet Archive Advanced Search API within two curated discovery scopes: **Prelinger** historical/educational films and **NASA** moving-image records. A collection filter never grants reuse rights by itself. The exact item metadata must confirm the identifier, `mediatype=movies`, the same collection, and an approved item-level Creative Commons declaration.
 
-The importer currently allows CC0 1.0, CC0 3.0, or the legacy Creative Commons Public Domain item declaration only when that item's own `rights` value explicitly says `Public Domain`. It does not treat Public Domain Mark as CC0. It only selects MP4, WebM or OGV files within the size and duration limits, verifies the media signature, compares MD5 and SHA-1 to the Internet Archive file record when provided, and computes a separate SHA-256 for the library.
+The importer currently allows CC0 1.0, CC0 3.0, or the legacy Creative Commons Public Domain item declaration only when that item's own `rights` value explicitly says `Public Domain`. It does not treat Public Domain Mark as CC0. It only selects MP4, WebM or OGV files no larger than 250 MiB whose item metadata contains a valid duration from 5 seconds through 30 minutes; missing, malformed or longer durations are excluded. It verifies the media signature, compares MD5 and SHA-1 to the Internet Archive file record when provided, and computes a separate SHA-256 for the library.
 
 The ceilings are 40 Prelinger items, 40 NASA items, 250 MiB per file and 4 GiB total per build. The actual downloaded count and bytes are recorded in `ASSET_INDEX.json`; search hits and configured ceilings are never reported as downloaded resources.
 
