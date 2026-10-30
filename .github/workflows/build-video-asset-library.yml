@@ -105,6 +105,49 @@ jobs:
           assert expected["original_illustrations"] >= 105, "Original editorial illustration library is incomplete"
           assert expected["original_infographics"] >= 50
           assert expected["original_sfx"] >= 175, "Procedural sound-effect bank is incomplete"
+          assert "kenney_godot_splash_files_downloaded" in expected and "kenney_godot_splash_bytes_downloaded" in expected
+          kenney_splash_report = index.get("kenney_godot_splashscreens_downloads")
+          assert isinstance(kenney_splash_report, list), "Kenney Godot SplashScreens report is missing"
+          kenney_splash_downloaded = [row for row in kenney_splash_report if row.get("status") == "downloaded"]
+          kenney_splash_assets = [asset for asset in index["assets"] if asset.get("type") == "kenney-godot-splashscreens-cc0-asset-file"]
+          assert len(kenney_splash_downloaded) <= 1
+          assert len(kenney_splash_assets) == expected["kenney_godot_splash_files_downloaded"]
+          assert sum(row.get("file_count", 0) for row in kenney_splash_downloaded) == expected["kenney_godot_splash_files_downloaded"]
+          assert sum(row.get("unpacked_bytes", 0) for row in kenney_splash_downloaded) == expected["kenney_godot_splash_bytes_downloaded"]
+          assert expected["kenney_godot_splash_files_downloaded"] <= 40
+          assert expected["kenney_godot_splash_bytes_downloaded"] <= 32 * 1024 * 1024
+          kenney_splash_archive_hashes = set()
+          for row in kenney_splash_downloaded:
+              assert row.get("license") == "CC0-1.0"
+              assert row.get("archive_bytes", 0) > 0
+              assert len(row.get("archive_sha256", "")) == 64
+              assert row.get("file_count", 0) > 0
+              kenney_splash_archive_hashes.add(row["archive_sha256"])
+          for asset in kenney_splash_assets:
+              assert asset.get("license") == "CC0-1.0"
+              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
+              assert asset.get("license_verified_from_repository_readme") is True
+              assert asset.get("redistributable") is True and asset.get("attribution_required") is False
+              assert asset.get("source_page") == "https://github.com/KenneyNL/Godot-SplashScreens"
+              assert asset.get("source_file_url", "").startswith("https://github.com/KenneyNL/Godot-SplashScreens/blob/main/")
+              assert asset.get("source_archive_sha256") in kenney_splash_archive_hashes
+              assert asset.get("path", "").startswith("third-party/kenney/godot-splashscreens/")
+              relative = asset["path"].removeprefix("third-party/kenney/godot-splashscreens/")
+              normalized = relative.casefold()
+              assert (
+                  normalized.startswith("logo/reimagined") or normalized.startswith("logo/text")
+                  or normalized.startswith("screen/cog logo/") or normalized.startswith("screen/reimagined logo/")
+                  or normalized.startswith("screen/text logo/")
+              ), "A non-CC0 Godot logo folder entered the library"
+              assert Path(relative).suffix.lower() in {".png", ".svg"}
+              target = root / asset["path"]
+              assert target.is_file(), "Kenney CC0 splash-screen asset is missing"
+              raw = target.read_bytes()
+              assert hashlib.sha256(raw).hexdigest() == asset["sha256"]
+              if target.suffix.lower() == ".png":
+                  assert raw.startswith(b"\x89PNG\r\n\x1a\n")
+              else:
+                  assert b"<svg" in raw[:1024].lower()
           assert expected["original_motion_loops"] == 24, "Original motion-loop library is incomplete"
           motion_items = [a for a in index["assets"] if a.get("type") == "original-procedural-video-loop"]
           assert len(motion_items) == expected["original_motion_loops"]
