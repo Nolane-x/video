@@ -39,6 +39,12 @@ def classify_asset(asset: dict) -> str:
         return "original-graphics"
     if "openmoji" in asset_type or path.startswith("third-party/openmoji/"):
         return "original-graphics"
+    if asset_type.startswith("lazytextures-models-"):
+        return "3d-models"
+    if asset_type.startswith(("lazytextures-materials-", "lazytextures-hdris-", "lazytextures-textures-")):
+        return "3d-textures"
+    if asset_type.startswith("lazytextures-other-"):
+        return "miscellaneous"
     if "texture" in asset_type or "texture" in category or "surface" in category:
         return "3d-textures"
     if "video" in asset_type or extension in {".mp4", ".mov", ".m4v", ".webm", ".ogv"}:
@@ -67,7 +73,15 @@ def classify_asset(asset: dict) -> str:
 
 
 def classify_unindexed_path(relative_path: str) -> str:
-    path = relative_path.lower()
+    path = relative_path.lower().replace("\\", "/")
+    if "/lazytextures/models/" in path:
+        return "3d-models"
+    if "/lazytextures/other/" in path:
+        return "miscellaneous"
+    if "/lazytextures/" in path:
+        return "3d-textures"
+    if "/poly-pizza/" in path:
+        return "3d-models"
     if "google-fonts" in path:
         return "typography"
     if "ambientcg" in path or "polyhaven" in path:

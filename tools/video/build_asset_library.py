@@ -26,6 +26,43 @@ POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
 AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
+# LazyTextures documents a provider-wide CC0 1.0 grant and a public API with no key.
+# Keep the import bounded and polite; API browsing is open but media downloads are fair-use.
+LAZYTEXTURES_ASSET_CAPS = {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8}
+LAZYTEXTURES_API_BASE = "https://lazytextures.net:3000"
+LAZYTEXTURES_DOCS_URL = "https://lazytextures.com/PublicAPI"
+LAZYTEXTURES_MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
+LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES = 512 * 1024 * 1024
+LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES = 128 * 1024 * 1024
+LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES = 1536 * 1024 * 1024
+LAZYTEXTURES_MAX_ZIP_MEMBERS = 2500
+LAZYTEXTURES_MAX_EXAMINED_PER_TYPE = 80
+LAZYTEXTURES_API_TYPES = {
+    "models": {"endpoint": "previewsModels", "list_key": "PreviewModels", "label": "3D models"},
+    "materials": {"endpoint": "previewsMaterials", "list_key": "PreviewMaterials", "label": "PBR materials"},
+    "hdris": {"endpoint": "previewsHDRIs", "list_key": "PreviewHDRIs", "label": "HDRI lighting environments"},
+    "textures": {"endpoint": "previewsTextures", "list_key": "PreviewTextures", "label": "texture maps and decals"},
+    "other": {"endpoint": "previewsOther", "list_key": "PreviewOther", "label": "brushes, presets and miscellaneous assets"},
+}
+# Poly Pizza is an optional API-key source. Its licence is per model; only exact
+# CC0 records are imported by this lane. CC-BY, missing and unknown licences fail closed.
+POLY_PIZZA_API_BASE = "https://api.poly.pizza/v1.1"
+POLY_PIZZA_API_HOST = "api.poly.pizza"
+POLY_PIZZA_API_KEY_ENV = "POLY_PIZZA_API_KEY"
+POLY_PIZZA_SEARCH_TERMS = [
+    "tree", "plant", "rock", "building", "house", "vehicle",
+    "character", "animal", "furniture", "food", "tool", "medieval",
+    "sci-fi", "nature", "street", "industrial", "interior", "prop",
+]
+POLY_PIZZA_SEARCH_LIMIT = 24
+POLY_PIZZA_MAX_CANDIDATES = 240
+POLY_PIZZA_MAX_PAGES_PER_TERM = 2
+POLY_PIZZA_MAX_MODELS = 48
+POLY_PIZZA_MAX_MODEL_BYTES = 128 * 1024 * 1024
+POLY_PIZZA_TOTAL_MAX_BYTES = 4 * 1024 * 1024 * 1024
+POLY_PIZZA_MAX_JSON_BYTES = 4 * 1024 * 1024
+POLY_PIZZA_LICENSE = "CC0-1.0"
+
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
 USGS_GALLERY_PAGE_SCAN_LIMIT = 18
@@ -1752,6 +1789,975 @@ def download_ambientcg(root,index):
             report.append({"id":"ambientcg-"+asset_type.lower(),"status":"failed","asset_type":asset_type,
                            "source_page":"https://ambientcg.com/","reason":str(exc)[:400]})
             print("[ambientCG] source request failed:",asset_type,str(exc)[:220])
+    return report
+
+
+
+def lazytextures_asset_name_is_allowed(name):
+    value = str(name or "").strip()
+    return bool(
+        value and value not in {".", ".."} and len(value) <= 160
+        and "/" not in value and "\\" not in value
+        and not any(ord(ch) < 32 or ord(ch) == 127 for ch in value)
+    )
+
+
+def lazytextures_api_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            parsed.scheme == "https" and parsed.hostname == "lazytextures.net"
+            and parsed.port == 3000 and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and parsed.path.startswith("/") and ".." not in urllib.parse.unquote(parsed.path).split("/")
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_detail_url(asset_type, asset_name):
+    if asset_type not in LAZYTEXTURES_API_TYPES or not lazytextures_asset_name_is_allowed(asset_name):
+        raise ValueError("LazyTextures asset type or name is not allowed")
+    url = LAZYTEXTURES_API_BASE + "/Asset/" + asset_type + "/" + urllib.parse.quote(asset_name, safe="")
+    if not lazytextures_api_url_is_allowed(url):
+        raise ValueError("LazyTextures detail URL failed the official-host allow-list")
+    return url
+
+
+def lazytextures_detail_url_is_allowed(url, asset_type, asset_name):
+    try:
+        expected = "/Asset/" + str(asset_type) + "/" + urllib.parse.quote(str(asset_name), safe="")
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            asset_type in LAZYTEXTURES_API_TYPES and lazytextures_asset_name_is_allowed(asset_name)
+            and lazytextures_api_url_is_allowed(url) and parsed.path == expected
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_download_url(raw_path):
+    value = str(raw_path or "").strip()
+    if not value or "\\" in value or "\x00" in value:
+        return ""
+    decoded = urllib.parse.unquote(value)
+    parts = PurePosixPath(decoded).parts
+    if ".." in parts or "." in parts:
+        return ""
+    url = urllib.parse.urljoin(LAZYTEXTURES_API_BASE + "/", value)
+    return url if lazytextures_download_url_is_allowed(url) else ""
+
+
+def lazytextures_download_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        decoded_path = urllib.parse.unquote(parsed.path)
+        parts = PurePosixPath(decoded_path).parts
+        return (
+            parsed.scheme == "https" and parsed.hostname == "lazytextures.net"
+            and parsed.port == 3000 and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and decoded_path.startswith("/Assets/")
+            and ".." not in parts and "." not in parts
+            and Path(decoded_path).suffix.lower() == ".zip"
+            and not any(ord(ch) < 32 for ch in decoded_path)
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_download_bytes(url, timeout=65, limit=LAZYTEXTURES_MAX_ARCHIVE_BYTES):
+    """Fetch only an allow-listed LazyTextures ZIP and reject redirects off its official file host."""
+    if not lazytextures_download_url_is_allowed(url):
+        raise RuntimeError("LazyTextures download URL failed the official HTTPS /Assets ZIP allow-list")
+    request = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/zip,application/octet-stream"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        final_url = response.geturl()
+        if not lazytextures_download_url_is_allowed(final_url):
+            raise RuntimeError("LazyTextures download redirected outside its official ZIP path")
+        data = response.read(limit + 1)
+        if len(data) > limit:
+            raise RuntimeError("LazyTextures ZIP exceeded the configured archive byte limit")
+        return data, response.headers.get("Content-Type", "application/octet-stream")
+
+
+def lazytextures_response_assets(payload, asset_type):
+    if not isinstance(payload, dict) or asset_type not in LAZYTEXTURES_API_TYPES:
+        return []
+    if payload.get("success") is not True:
+        return []
+    key = LAZYTEXTURES_API_TYPES[asset_type]["list_key"]
+    rows = payload.get(key)
+    if not isinstance(rows, list):
+        data = payload.get("data")
+        if isinstance(data, list):
+            rows = data
+        elif isinstance(data, dict):
+            rows = data.get(key)
+            if not isinstance(rows, list) and asset_type == "other":
+                for fallback_key in ("PreviewOthers", "PreviewOtherAssets", "Other", "Others", "assets"):
+                    candidate = data.get(fallback_key)
+                    if isinstance(candidate, list):
+                        rows = candidate
+                        break
+    if not isinstance(rows, list) and asset_type == "other":
+        for fallback_key in ("PreviewOthers", "PreviewOtherAssets", "Others", "OtherAssets"):
+            candidate = payload.get(fallback_key)
+            if isinstance(candidate, list):
+                rows = candidate
+                break
+    if not isinstance(rows, list):
+        return []
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def lazytextures_license_detail(detail):
+    """Use LazyTextures' official provider-wide CC0 grant, rejecting contradictory item metadata."""
+    if not isinstance(detail, dict):
+        return {"verified": False, "license": None, "evidence": "missing item detail"}
+    explicit = []
+    for key in ("license", "licenseName", "license_name", "licenseUrl", "license_url"):
+        value = detail.get(key)
+        if isinstance(value, str) and value.strip():
+            explicit.append(value.strip())
+    if not explicit:
+        return {
+            "verified": True, "license": "CC0-1.0",
+            "evidence": "Official LazyTextures Public API documentation states all library assets are CC0 1.0.",
+            "provider_wide_policy": True,
+        }
+    accepted = {
+        "cc0", "cc0-1.0", "cc0 1.0", "cc0 1.0 universal",
+        "https://creativecommons.org/publicdomain/zero/1.0/",
+        "http://creativecommons.org/publicdomain/zero/1.0/",
+    }
+    normalized = {value.strip().rstrip("/").casefold() for value in explicit}
+    if not normalized.issubset({x.rstrip("/").casefold() for x in accepted}):
+        return {"verified": False, "license": None, "evidence": "conflicting item-level license metadata"}
+    return {
+        "verified": True, "license": "CC0-1.0",
+        "evidence": "Official provider-wide CC0 declaration and consistent item detail metadata.",
+        "provider_wide_policy": True,
+    }
+
+
+def lazytextures_archive_candidates(detail):
+    """Read documented archiveFiles groups and return bounded, official ZIP candidates."""
+    if not isinstance(detail, dict):
+        return []
+    archive_groups = detail.get("archiveFiles")
+    texture_groups = detail.get("textureFiles")
+    if not isinstance(archive_groups, (dict, list)) and not isinstance(texture_groups, (dict, list)):
+        data = detail.get("data")
+        if isinstance(data, dict):
+            archive_groups = data.get("archiveFiles")
+            texture_groups = data.get("textureFiles")
+    if not isinstance(archive_groups, (dict, list)) and not isinstance(texture_groups, (dict, list)):
+        return []
+    found = []
+    seen = set()
+
+    def walk(value, hint=""):
+        if isinstance(value, list):
+            for item in value:
+                walk(item, hint)
+            return
+        if not isinstance(value, dict):
+            return
+        name = str(value.get("name") or "").strip()
+        path = str(value.get("path") or "").strip()
+        size_raw = value.get("size") or value.get("sizeBytes") or value.get("size_bytes") or 0
+        try:
+            size = int(size_raw)
+        except (TypeError, ValueError):
+            size = 0
+        if name and path and size > 0:
+            url = lazytextures_download_url(path)
+            if (url and Path(name).name == name and Path(name).suffix.lower() == ".zip"
+                    and PurePosixPath(urllib.parse.unquote(urllib.parse.urlsplit(url).path)).name == name):
+                key = (url, size)
+                if key not in seen and size <= LAZYTEXTURES_MAX_ARCHIVE_BYTES:
+                    seen.add(key)
+                    resolution = str(value.get("resolution") or hint or name).casefold()
+                    found.append({
+                        "name": name, "path": path, "url": url, "size_bytes": size,
+                        "resolution": resolution,
+                        "contains_all_assets": value.get("containsAllAssets") is True,
+                    })
+        for key, child in value.items():
+            if isinstance(child, (dict, list)):
+                walk(child, str(key) if not hint else hint + " " + str(key))
+
+    # The API exposes resolution archives separately from texture-file download records.
+    # Both must still resolve to an official ZIP path before being eligible for this importer.
+    walk(archive_groups, "archive")
+    walk(texture_groups, "texture")
+    return found
+
+
+def lazytextures_choose_archive(detail):
+    candidates = lazytextures_archive_candidates(detail)
+    if not candidates:
+        return None
+    def rank(candidate):
+        label = (candidate.get("resolution") or "") + " " + candidate.get("name", "")
+        for position, token in enumerate(("1k", "2k", "4k", "8k", "16k")):
+            if re.search(r"(?<![a-z0-9])" + token + r"(?![a-z0-9])", label):
+                return position
+        # If no resolution is labelled, prefer the smallest validated archive.
+        return 20
+    candidates.sort(key=lambda row: (rank(row), row["size_bytes"], row["name"].casefold()))
+    return candidates[0]
+
+
+def lazytextures_validate_zip_archive(blob):
+    """Validate central-directory sizes and paths before any CRC scan or extraction."""
+    import io
+    try:
+        with zipfile.ZipFile(io.BytesIO(blob)) as archive:
+            infos = archive.infolist()
+            if not infos or len(infos) > LAZYTEXTURES_MAX_ZIP_MEMBERS:
+                raise RuntimeError("ZIP member count is empty or exceeds the safety ceiling")
+            total_unpacked = 0
+            for info in infos:
+                name = str(info.filename or "").replace("\\", "/")
+                path = PurePosixPath(name)
+                unix_type = (info.external_attr >> 16) & 0o170000
+                if (
+                    not name or "\x00" in name or path.is_absolute()
+                    or ".." in path.parts or (path.parts and ":" in path.parts[0])
+                    or unix_type == 0o120000
+                ):
+                    raise RuntimeError("ZIP contains an unsafe path or symbolic link: " + name[:180])
+                if info.flag_bits & 0x1:
+                    raise RuntimeError("Encrypted ZIP members are not accepted")
+                if info.is_dir():
+                    continue
+                if info.file_size < 0 or info.compress_size < 0:
+                    raise RuntimeError("ZIP contains invalid member size metadata")
+                total_unpacked += info.file_size
+                if total_unpacked > LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES:
+                    raise RuntimeError("ZIP declared uncompressed size exceeds the per-item safety ceiling")
+                if info.file_size and not info.compress_size:
+                    raise RuntimeError("ZIP contains a non-empty member with zero compressed size")
+                if info.compress_size and info.file_size / info.compress_size > 500:
+                    raise RuntimeError("ZIP compression ratio exceeds the safety ceiling")
+            bad = archive.testzip()
+            if bad:
+                raise RuntimeError("Corrupt ZIP member: " + str(bad))
+            return len(infos), total_unpacked
+    except zipfile.BadZipFile as exc:
+        raise RuntimeError("Invalid ZIP archive") from exc
+
+
+def lazytextures_media_signature_is_valid(blob, extension):
+    """Conservatively recognize supported assets before they enter the library index."""
+    ext = str(extension or "").lower()
+    if not blob:
+        return False
+    if ext == ".png":
+        return blob.startswith(b"\x89PNG\r\n\x1a\n")
+    if ext in {".jpg", ".jpeg"}:
+        return blob.startswith(b"\xff\xd8\xff")
+    if ext == ".webp":
+        return len(blob) >= 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WEBP"
+    if ext == ".gif":
+        return blob.startswith((b"GIF87a", b"GIF89a"))
+    if ext in {".tif", ".tiff"}:
+        return blob.startswith((b"II*\x00", b"MM\x00*"))
+    if ext == ".exr":
+        return blob.startswith(b"\x76\x2f\x31\x01")
+    if ext == ".hdr":
+        return blob.startswith((b"#?RADIANCE", b"#?RGBE"))
+    if ext == ".fbx":
+        return blob.startswith(b"Kaydara FBX Binary") or blob.lstrip().startswith(b"; FBX")
+    if ext == ".glb":
+        return blob.startswith(b"glTF")
+    if ext == ".gltf":
+        try:
+            data = json.loads(blob.decode("utf-8-sig"))
+            return isinstance(data, dict) and isinstance(data.get("asset"), dict) and bool(data["asset"].get("version"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return False
+    if ext == ".blend":
+        return blob.startswith(b"BLENDER")
+    if ext == ".wav":
+        return len(blob) >= 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WAVE"
+    if ext == ".mp3":
+        return blob.startswith(b"ID3") or (len(blob) > 2 and blob[0] == 0xff and (blob[1] & 0xe0) == 0xe0)
+    if ext in {".ogg", ".oga"}:
+        return blob.startswith(b"OggS")
+    if ext == ".flac":
+        return blob.startswith(b"fLaC")
+    if ext in {".mp4", ".mov", ".m4v"}:
+        return b"ftyp" in blob[:64]
+    if ext == ".webm":
+        return blob.startswith(b"\x1a\x45\xdf\xa3")
+    if ext == ".ttf":
+        return blob.startswith((b"\x00\x01\x00\x00", b"true"))
+    if ext == ".otf":
+        return blob.startswith(b"OTTO")
+    if ext == ".woff":
+        return blob.startswith(b"wOFF")
+    if ext == ".woff2":
+        return blob.startswith(b"wOF2")
+    if ext == ".pdf":
+        return blob.startswith(b"%PDF-")
+    if ext == ".usdz":
+        return blob.startswith(b"PK\x03\x04")
+    if ext == ".stl":
+        if blob.lstrip().lower().startswith(b"solid"):
+            return True
+        if len(blob) >= 84:
+            triangles = int.from_bytes(blob[80:84], "little")
+            return 84 + triangles * 50 == len(blob)
+        return False
+    if ext == ".svg":
+        try:
+            clean = sanitize_cc0_svg(blob)
+            return b"<svg" in clean[:1024].lower()
+        except Exception:
+            return False
+    if ext in {".obj", ".mtl", ".dae", ".abc", ".mtlx", ".xml", ".json", ".txt", ".md", ".csv"}:
+        try:
+            text = blob.decode("utf-8-sig")
+            if "\x00" in text or not text.strip():
+                return False
+            if ext == ".json":
+                return isinstance(json.loads(text), (dict, list))
+            if ext in {".xml", ".dae", ".mtlx"}:
+                import xml.etree.ElementTree as ET
+                ET.fromstring(text)
+            if ext == ".abc" and text[:32].strip() and not text.lstrip().startswith(("<?xml", "<")):
+                return False
+            return True
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+            return False
+    return False
+
+
+def lazytextures_asset_tags(asset, detail):
+    values = (detail.get("tags") if isinstance(detail, dict) else None) or asset.get("tags") or []
+    if isinstance(values, str):
+        values = [values]
+    if not isinstance(values, list):
+        return []
+    return [str(tag)[:80] for tag in values[:50] if str(tag).strip()]
+
+
+def download_lazytextures(root, index):
+    """Import bounded CC0 model/material/HDRI/texture archives from the official LazyTextures API."""
+    report = []
+    total_archive_bytes = 0
+    total_unpacked_bytes = 0
+    seen_names = set()
+    seen_urls = set()
+    for asset_type, cap in LAZYTEXTURES_ASSET_CAPS.items():
+        spec = LAZYTEXTURES_API_TYPES[asset_type]
+        endpoint = LAZYTEXTURES_API_BASE + "/" + spec["endpoint"]
+        try:
+            payload = request_json(endpoint, timeout=35)
+            assets = lazytextures_response_assets(payload, asset_type)
+            if not assets:
+                report.append({
+                    "id": "lazytextures-" + asset_type, "status": "no_eligible_assets",
+                    "asset_type": asset_type, "source_page": LAZYTEXTURES_DOCS_URL,
+                    "reason": "The official browse endpoint returned no recognized asset list.",
+                })
+                continue
+            downloaded_for_type = 0
+            examined = 0
+            for asset in assets:
+                if downloaded_for_type >= cap or examined >= LAZYTEXTURES_MAX_EXAMINED_PER_TYPE:
+                    break
+                if total_archive_bytes >= LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES or total_unpacked_bytes >= LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
+                    break
+                if not isinstance(asset, dict):
+                    continue
+                name = str(asset.get("name") or asset.get("assetName") or "").strip()
+                if not lazytextures_asset_name_is_allowed(name):
+                    continue
+                identity = (asset_type, name.casefold())
+                if identity in seen_names:
+                    continue
+                seen_names.add(identity)
+                examined += 1
+                detail_url = lazytextures_detail_url(asset_type, name)
+                row = {
+                    "id": "lazytextures-" + asset_type + "-" + slugify(name),
+                    "provider": "LazyTextures", "asset_type": asset_type,
+                    "title": name[:240], "category": spec["label"],
+                    "source_page": detail_url, "api_source": endpoint,
+                    "license": "CC0-1.0", "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "license_evidence_url": LAZYTEXTURES_DOCS_URL,
+                }
+                if not lazytextures_detail_url_is_allowed(detail_url, asset_type, name):
+                    row.update(status="invalid_item_url", reason="The computed item detail URL failed the official-host allow-list.")
+                    report.append(row)
+                    continue
+                choice = None
+                target = None
+                try:
+                    detail = request_json(detail_url, timeout=30)
+                    time.sleep(.35)
+                    if not isinstance(detail, dict) or detail.get("success") is not True:
+                        row.update(status="missing_item_detail", reason="The official API did not return a successful item detail response.")
+                        report.append(row)
+                        continue
+                    detail_name = str(detail.get("name") or detail.get("assetName") or "").strip()
+                    detail_type = str(detail.get("assetType") or detail.get("type") or "").strip().lower()
+                    detail_type = {"model": "models", "material": "materials", "hdri": "hdris", "texture": "textures"}.get(detail_type, detail_type)
+                    if detail_name.casefold() != name.casefold() or detail_type != asset_type:
+                        row.update(status="skipped_item_identity", reason="The item detail name/type did not match the browse result.")
+                        report.append(row)
+                        continue
+                    rights = lazytextures_license_detail(detail)
+                    if not rights["verified"]:
+                        row.update(status="skipped_rights", reason=rights["evidence"])
+                        report.append(row)
+                        continue
+                    choice = lazytextures_choose_archive(detail)
+                    if not choice:
+                        row.update(status="no_eligible_archive", reason="No official, size-bounded ZIP was listed in archiveFiles.")
+                        report.append(row)
+                        continue
+                    if choice["url"] in seen_urls:
+                        row.update(status="duplicate_file_url", reason="This archive URL was already selected for another item.")
+                        report.append(row)
+                        continue
+                    seen_urls.add(choice["url"])
+                    if total_archive_bytes + choice["size_bytes"] > LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES:
+                        row.update(status="skipped_total_archive_limit", reason="The archive would exceed the total LazyTextures download ceiling.")
+                        report.append(row)
+                        break
+                    blob, content_type = lazytextures_download_bytes(choice["url"], timeout=70, limit=LAZYTEXTURES_MAX_ARCHIVE_BYTES)
+                    if len(blob) < 22 or not blob.startswith(b"PK"):
+                        raise RuntimeError("The selected media endpoint did not return a ZIP archive.")
+                    if len(blob) != choice["size_bytes"]:
+                        raise RuntimeError("Downloaded ZIP byte count did not match the API file metadata.")
+                    archive_sha = hashlib.sha256(blob).hexdigest()
+                    import io
+                    archive_members, archive_unpacked = lazytextures_validate_zip_archive(blob)
+                    target = root / "third-party/lazytextures" / asset_type / slugify(name)
+                    if target.exists():
+                        shutil.rmtree(target)
+                    extracted, unpacked = safe_extract(blob, target, max_bytes=LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES)
+                    media_files = []
+                    rejected_files = []
+                    for path in sorted(p for p in target.rglob("*") if p.is_file()):
+                        raw = path.read_bytes()
+                        extension = path.suffix.lower()
+                        if extension == ".svg":
+                            try:
+                                raw = sanitize_cc0_svg(raw)
+                                path.write_bytes(raw)
+                            except Exception:
+                                path.unlink(missing_ok=True)
+                                rejected_files.append(path.name)
+                                continue
+                        if lazytextures_media_signature_is_valid(raw, extension):
+                            media_files.append(path)
+                        else:
+                            path.unlink(missing_ok=True)
+                            rejected_files.append(path.name)
+                    if extracted <= 0 or not media_files:
+                        shutil.rmtree(target, ignore_errors=True)
+                        raise RuntimeError("ZIP had no files that passed the media signature and safe-extraction policy.")
+                    if total_unpacked_bytes + unpacked > LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
+                        shutil.rmtree(target, ignore_errors=True)
+                        row.update(status="skipped_total_unpacked_limit", reason="Package would exceed the total uncompressed LazyTextures ceiling.")
+                        report.append(row)
+                        break
+                    tags = lazytextures_asset_tags(asset, detail)
+                    license_note = (
+                        f"# {name} — LazyTextures\n\n"
+                        f"- Asset type: {asset_type}\n- Official item detail API: {detail_url}\n"
+                        f"- Download file: {choice['name']}\n- Resolution metadata: {choice['resolution']}\n"
+                        f"- Archive size: {len(blob)} bytes\n- Archive SHA-256: {archive_sha}\n"
+                        f"- License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/\n"
+                        f"- License evidence: {LAZYTEXTURES_DOCS_URL}\n"
+                        "- Provider documentation states all library assets are CC0 1.0. This item was matched by exact name/type against the official API detail response.\n"
+                        "- The original ZIP was integrity-tested and extracted with the repository media allow-list; executable files, nested ZIPs and unsafe paths are not included.\n"
+                    )
+                    write_text(target / "SOURCE_AND_LICENSE.md", license_note)
+                    package_assets = []
+                    for path in sorted(p for p in target.rglob("*") if p.is_file() and p.name != "SOURCE_AND_LICENSE.md"):
+                        entry = {
+                            "id": "lazytextures-" + asset_type + "-" + slugify(name) + "-" + slugify(path.relative_to(target).as_posix()),
+                            "path": path.relative_to(root).as_posix(),
+                            "type": "lazytextures-" + asset_type + "-asset-file",
+                            "provider": "LazyTextures", "parent_asset_id": row["id"],
+                            "asset_name": name, "asset_type": asset_type, "title": name[:240],
+                            "category": spec["label"], "tags": tags,
+                            "source_page": detail_url, "source_file_url": choice["url"],
+                            "download_archive_sha256": archive_sha,
+                            "license": "CC0-1.0", "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                            "license_verified_from_provider_api_policy": True,
+                            "license_evidence_url": LAZYTEXTURES_DOCS_URL,
+                            "size_bytes": path.stat().st_size, "sha256": sha256_path(path),
+                            "redistributable": True,
+                        }
+                        index.append(entry)
+                        package_assets.append({"path": entry["path"], "sha256": entry["sha256"], "size_bytes": entry["size_bytes"]})
+                    total_archive_bytes += len(blob)
+                    total_unpacked_bytes += unpacked
+                    downloaded_for_type += 1
+                    row.update(
+                        status="downloaded", file_name=choice["name"], resolution=choice["resolution"],
+                        archive_bytes=len(blob), archive_sha256=archive_sha,
+                        extracted_files=len(package_assets), unpacked_bytes=unpacked,
+                        archive_members=archive_members, declared_unpacked_bytes=archive_unpacked,
+                        rejected_invalid_files=len(rejected_files),
+                        tags=tags, files=package_assets,
+                    )
+                    report.append(row)
+                    print("[LazyTextures] OK:", asset_type, name, len(blob), "archive bytes,", extracted, "files,", unpacked, "unpacked bytes")
+                except Exception as item_exc:
+                    if target is not None:
+                        shutil.rmtree(target, ignore_errors=True)
+                    row.update(status="failed", reason=str(item_exc)[:420], file_name=choice.get("name") if choice else None)
+                    report.append(row)
+                time.sleep(.45)
+            print("[LazyTextures]", asset_type, ":", downloaded_for_type, "downloaded from", examined, "API entries")
+        except Exception as exc:
+            report.append({
+                "id": "lazytextures-" + asset_type, "provider": "LazyTextures",
+                "asset_type": asset_type, "status": "failed",
+                "source_page": LAZYTEXTURES_DOCS_URL, "reason": str(exc)[:420],
+            })
+            print("[LazyTextures] source request failed:", asset_type, str(exc)[:220])
+    return report
+
+
+def poly_pizza_api_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == POLY_PIZZA_API_HOST
+            and parsed.port in (None, 443)
+            and not parsed.username and not parsed.password
+            and not parsed.fragment
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def poly_pizza_asset_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        host = (parsed.hostname or "").lower().rstrip(".")
+        return (
+            parsed.scheme == "https"
+            and (host == "poly.pizza" or host.endswith(".poly.pizza"))
+            and parsed.port in (None, 443)
+            and not parsed.username and not parsed.password
+            and not parsed.fragment
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def poly_pizza_download_url_is_allowed(url):
+    if not poly_pizza_asset_url_is_allowed(url):
+        return False
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return parsed.path.lower().endswith(".glb")
+    except (TypeError, ValueError):
+        return False
+
+
+def poly_pizza_model_id_is_allowed(value):
+    text = str(value or "").strip()
+    return bool(text and len(text) <= 128 and re.fullmatch(r"[A-Za-z0-9_-]+", text))
+
+
+def poly_pizza_cc0_license(value):
+    if isinstance(value, dict):
+        value = (
+            value.get("Name") or value.get("Title") or value.get("Slug")
+            or value.get("name") or value.get("title") or value.get("slug")
+            or value.get("ID") or value.get("id")
+        )
+    if isinstance(value, bool) or value is None:
+        return None
+    normalized = re.sub(r"[\s_\-]+", " ", str(value)).strip().casefold()
+    accepted = {
+        "1", "cc0", "cc0 1.0", "cc0 1.0 universal",
+        "creative commons zero", "creative commons zero 1.0",
+    }
+    return POLY_PIZZA_LICENSE if normalized in accepted else None
+
+
+def poly_pizza_creator_name(model):
+    creator = model.get("Creator") or model.get("creator")
+    if isinstance(creator, dict):
+        creator = creator.get("Username") or creator.get("Name") or creator.get("username") or creator.get("name")
+    if creator is None:
+        return ""
+    return str(creator).strip()[:200]
+
+
+def poly_pizza_source_url(model, model_id):
+    canonical = "https://poly.pizza/m/" + urllib.parse.quote(model_id, safe="")
+    value = model.get("URL") or model.get("Url") or model.get("Permalink") or model.get("url") or model.get("permalink")
+    if not value:
+        return canonical
+    try:
+        parsed = urllib.parse.urlsplit(str(value).strip())
+        expected = urllib.parse.urlsplit(canonical)
+        if (
+            parsed.scheme == "https" and parsed.hostname == "poly.pizza"
+            and parsed.port in (None, 443)
+            and parsed.path.rstrip("/") == expected.path
+            and not parsed.username and not parsed.password and not parsed.fragment
+        ):
+            return canonical
+    except (TypeError, ValueError):
+        pass
+    return ""
+
+
+def poly_pizza_parse_model(model, require_download=False):
+    if not isinstance(model, dict):
+        return None, "invalid_model_record"
+    model_id = str(model.get("ID") or model.get("Id") or model.get("id") or "").strip()
+    if not poly_pizza_model_id_is_allowed(model_id):
+        return None, "invalid_model_id"
+    license_value = model.get("Licence") or model.get("License") or model.get("licence") or model.get("license")
+    license_name = poly_pizza_cc0_license(license_value)
+    if not license_name:
+        return None, "license_not_cc0_or_unrecognized"
+    creator = poly_pizza_creator_name(model)
+    title = str(model.get("Title") or model.get("title") or model_id).strip()[:240]
+    source_url = poly_pizza_source_url(model, model_id)
+    if not source_url:
+        return None, "source_url_not_official"
+    raw_download = model.get("Download") or model.get("download")
+    if require_download and not raw_download:
+        return None, "download_url_missing"
+    download_url = str(raw_download).strip() if raw_download else ""
+    if download_url and not poly_pizza_download_url_is_allowed(download_url):
+        return None, "download_url_not_official_glb"
+    tags = model.get("Tags") or model.get("tags") or []
+    if isinstance(tags, str):
+        tags = [tags]
+    tags = [str(tag)[:80] for tag in tags[:40] if str(tag).strip()] if isinstance(tags, list) else []
+    return {
+        "model_id": model_id,
+        "title": title,
+        "creator": creator,
+        "license": license_name,
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "source_page": source_url,
+        "download_url": download_url,
+        "tags": tags,
+        "category": str(model.get("Category") or model.get("category") or "low-poly 3D model")[:120],
+        "triangle_count": model.get("Tri Count") or model.get("TriCount") or model.get("triangle_count"),
+        "animated": bool(model.get("Animated") or model.get("animated")),
+    }, None
+
+
+def poly_pizza_api_json(path, params, token):
+    url = POLY_PIZZA_API_BASE + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    if not poly_pizza_api_url_is_allowed(url):
+        raise RuntimeError("Poly Pizza API URL failed the exact official HTTPS host allow-list")
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": UA,
+            "X-Auth-Token": token,
+            "Accept": "application/json",
+        },
+    )
+    last_error = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=35) as response:
+                final_url = response.geturl()
+                if not poly_pizza_api_url_is_allowed(final_url):
+                    raise RuntimeError("Poly Pizza API redirected outside api.poly.pizza")
+                if getattr(response, "status", 200) != 200:
+                    raise RuntimeError("Poly Pizza API returned HTTP " + str(response.status))
+                payload = response.read(POLY_PIZZA_MAX_JSON_BYTES + 1)
+            if len(payload) > POLY_PIZZA_MAX_JSON_BYTES:
+                raise RuntimeError("Poly Pizza API response exceeded the 4 MiB JSON safety limit")
+            result = json.loads(payload.decode("utf-8"))
+            if not isinstance(result, dict):
+                raise RuntimeError("Poly Pizza API response is not a JSON object")
+            if result.get("success") is False or result.get("error"):
+                raise RuntimeError("Poly Pizza API reported an error")
+            return result
+        except urllib.error.HTTPError as exc:
+            last_error = RuntimeError("Poly Pizza API HTTP " + str(exc.code))
+            if exc.code == 429 and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise last_error
+        except (urllib.error.URLError, TimeoutError) as exc:
+            last_error = RuntimeError("Poly Pizza API request failed: " + str(exc)[:240])
+            if attempt < 2:
+                time.sleep(1 + attempt)
+                continue
+            raise last_error
+    raise last_error or RuntimeError("Poly Pizza API request failed")
+
+
+def poly_pizza_download_glb(url, max_bytes=POLY_PIZZA_MAX_MODEL_BYTES):
+    if not poly_pizza_download_url_is_allowed(url):
+        raise RuntimeError("Poly Pizza model download URL must be a GLB on an official HTTPS host")
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": UA, "Accept": "model/gltf-binary,application/octet-stream"},
+    )
+    with urllib.request.urlopen(request, timeout=70) as response:
+        final_url = response.geturl()
+        if not poly_pizza_download_url_is_allowed(final_url):
+            raise RuntimeError("Poly Pizza CDN redirect did not remain on an official GLB URL")
+        length = response.headers.get("Content-Length")
+        if length:
+            try:
+                if int(length) > max_bytes:
+                    raise RuntimeError("Poly Pizza GLB exceeds the per-model download ceiling")
+            except ValueError:
+                pass
+        blob = response.read(max_bytes + 1)
+    if len(blob) > max_bytes:
+        raise RuntimeError("Poly Pizza GLB exceeded the per-model download ceiling")
+    if not poly_pizza_glb_is_valid(blob):
+        raise RuntimeError("Poly Pizza download is not a valid GLB v2 with a matching declared length")
+    return blob, final_url
+
+
+def poly_pizza_glb_is_valid(blob):
+    if not isinstance(blob, (bytes, bytearray)) or len(blob) < 28 or bytes(blob[:4]) != b"glTF":
+        return False
+    version = int.from_bytes(blob[4:8], "little")
+    declared_length = int.from_bytes(blob[8:12], "little")
+    if version != 2 or declared_length != len(blob):
+        return False
+    json_length = int.from_bytes(blob[12:16], "little")
+    if json_length <= 0 or json_length % 4 or blob[16:20] != b"JSON":
+        return False
+    json_end = 20 + json_length
+    if json_end > len(blob):
+        return False
+    try:
+        gltf = json.loads(bytes(blob[20:json_end]).rstrip(b" ").decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        return False
+    if not isinstance(gltf, dict) or not isinstance(gltf.get("asset"), dict):
+        return False
+    if str(gltf["asset"].get("version", "")) != "2.0":
+        return False
+
+    # A standalone GLB must not rely on remote or sidecar files being fetched later.
+    buffers = gltf.get("buffers", [])
+    images = gltf.get("images", [])
+    if not isinstance(buffers, list) or not isinstance(images, list):
+        return False
+    for resource in list(buffers) + list(images):
+        if not isinstance(resource, dict):
+            return False
+        uri = resource.get("uri")
+        if uri is not None and (not isinstance(uri, str) or not uri.startswith("data:")):
+            return False
+
+    offset = json_end
+    bin_chunk_seen = False
+    bin_chunk_length = 0
+    while offset < len(blob):
+        if offset + 8 > len(blob):
+            return False
+        chunk_length = int.from_bytes(blob[offset:offset + 4], "little")
+        chunk_type = bytes(blob[offset + 4:offset + 8])
+        offset += 8
+        if chunk_length % 4 or offset + chunk_length > len(blob):
+            return False
+        if chunk_type == b"BIN\x00":
+            if bin_chunk_seen:
+                return False
+            bin_chunk_seen = True
+            bin_chunk_length = chunk_length
+        elif len(chunk_type) != 4 or not all(65 <= value <= 90 for value in chunk_type):
+            return False
+        offset += chunk_length
+    if offset != len(blob):
+        return False
+    for buffer in buffers:
+        if buffer.get("uri") is None:
+            byte_length = buffer.get("byteLength")
+            if isinstance(byte_length, bool) or not isinstance(byte_length, int) or byte_length < 0:
+                return False
+            if byte_length > bin_chunk_length or (byte_length > 0 and not bin_chunk_seen):
+                return False
+    return True
+
+
+def download_poly_pizza(root, index):
+    """Download a bounded set of exact item-level CC0 models via Poly Pizza's published API."""
+    import os
+    token = (os.environ.get(POLY_PIZZA_API_KEY_ENV) or "").strip()
+    if not token:
+        return [{
+            "id": "poly-pizza-api",
+            "provider": "Poly Pizza",
+            "status": "skipped_missing_api_key",
+            "source_page": "https://poly.pizza/settings/api",
+            "reason": "Set the optional POLY_PIZZA_API_KEY GitHub Actions secret to activate this published-API lane.",
+        }]
+
+    report = []
+    selected = []
+    seen_ids = set()
+    search_failures = []
+    for term in POLY_PIZZA_SEARCH_TERMS:
+        for page in range(POLY_PIZZA_MAX_PAGES_PER_TERM):
+            try:
+                payload = poly_pizza_api_json(
+                    "/search/" + urllib.parse.quote(term, safe=""),
+                    {"Limit": POLY_PIZZA_SEARCH_LIMIT, "Page": page, "License": 1},
+                    token,
+                )
+                rows = payload.get("results")
+                if not isinstance(rows, list):
+                    data = payload.get("data")
+                    rows = data.get("results") if isinstance(data, dict) else None
+                if not isinstance(rows, list):
+                    search_failures.append({"term": term, "page": page, "reason": "results_not_a_list"})
+                    break
+                for model in rows:
+                    normalized, reason = poly_pizza_parse_model(model, require_download=True)
+                    if not normalized:
+                        continue
+                    model_id = normalized["model_id"]
+                    if model_id in seen_ids:
+                        continue
+                    seen_ids.add(model_id)
+                    selected.append(normalized)
+                    if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+                        break
+                print("[Poly Pizza] search", term, "page", page, "returned", len(rows), "rows; CC0 candidates", len(selected))
+                if len(selected) >= POLY_PIZZA_MAX_CANDIDATES or not rows:
+                    break
+                time.sleep(1)
+            except Exception as exc:
+                search_failures.append({"term": term, "page": page, "reason": str(exc)[:320]})
+                print("[Poly Pizza] search failed for", term, "page", page, str(exc)[:220])
+                break
+        if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+            break
+
+    total_bytes = 0
+    downloaded = 0
+    for candidate in selected:
+        if downloaded >= POLY_PIZZA_MAX_MODELS or total_bytes >= POLY_PIZZA_TOTAL_MAX_BYTES:
+            break
+        model_id = candidate["model_id"]
+        row = {
+            "id": "poly-pizza-" + slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10],
+            "provider": "Poly Pizza",
+            "model_id": model_id,
+            "title": candidate["title"],
+            "creator": candidate["creator"],
+            "source_page": candidate["source_page"],
+            "license": POLY_PIZZA_LICENSE,
+            "license_url": candidate["license_url"],
+            "license_verified_from_item_metadata": True,
+            "redistributable": True,
+        }
+        try:
+            # Re-fetch the individual model record and use only its own license and download URL.
+            detail_payload = poly_pizza_api_json(
+                "/model/" + urllib.parse.quote(model_id, safe=""),
+                {},
+                token,
+            )
+            detail = detail_payload.get("model") if isinstance(detail_payload.get("model"), dict) else detail_payload.get("data")
+            if not isinstance(detail, dict):
+                detail = detail_payload
+            verified, reason = poly_pizza_parse_model(detail, require_download=True)
+            if not verified or verified["model_id"] != model_id:
+                raise RuntimeError(reason or "Poly Pizza item detail ID did not match the search result")
+            if verified["license"] != POLY_PIZZA_LICENSE:
+                raise RuntimeError("Poly Pizza item detail no longer carries the required CC0 license")
+            if verified["source_page"] != candidate["source_page"]:
+                raise RuntimeError("Poly Pizza source page changed between search and detail lookup")
+            if total_bytes >= POLY_PIZZA_TOTAL_MAX_BYTES:
+                row.update(status="skipped_total_size_limit", reason="The Poly Pizza total download ceiling has been reached.")
+                report.append(row)
+                break
+            remaining = POLY_PIZZA_TOTAL_MAX_BYTES - total_bytes
+            blob, final_url = poly_pizza_download_glb(
+                verified["download_url"],
+                max_bytes=min(POLY_PIZZA_MAX_MODEL_BYTES, remaining),
+            )
+            digest = hashlib.sha256(blob).hexdigest()
+            model_folder = slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10]
+            target_dir = root / "third-party/poly-pizza/models" / model_folder
+            target_dir.mkdir(parents=True, exist_ok=True)
+            target = target_dir / "model.glb"
+            target.write_bytes(blob)
+            note = (
+                f"# {verified['title']} — Poly Pizza\n\n"
+                f"- Model ID: {model_id}\n- Creator: {verified['creator'] or 'Not supplied in the API record'}\n"
+                f"- Official model page: {verified['source_page']}\n- Download URL: {final_url}\n"
+                f"- Exact item license field: CC0 1.0\n- License URL: {verified['license_url']}\n"
+                "- This model was discovered and downloaded through Poly Pizza's published API. Its own model-detail record was re-fetched before download and required to retain the exact CC0 license.\n"
+                "- The GLB magic, version and declared byte length were checked. The file SHA-256 is recorded in ASSET_INDEX.json.\n"
+            )
+            write_text(target_dir / "SOURCE_AND_LICENSE.md", note)
+            item = {
+                "id": "poly-pizza-" + slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10],
+                "path": target.relative_to(root).as_posix(),
+                "type": "poly-pizza-cc0-model",
+                "provider": "Poly Pizza",
+                "model_id": model_id,
+                "title": verified["title"],
+                "creator": verified["creator"],
+                "category": "3D models / low-poly",
+                "source_page": verified["source_page"],
+                "source_file_url": final_url,
+                "api_source": POLY_PIZZA_API_BASE + "/model/" + urllib.parse.quote(model_id, safe=""),
+                "tags": verified["tags"],
+                "triangle_count": verified["triangle_count"],
+                "animated": verified["animated"],
+                "license": POLY_PIZZA_LICENSE,
+                "license_url": verified["license_url"],
+                "license_verified_from_item_metadata": True,
+                "redistributable": True,
+                "size_bytes": len(blob),
+                "sha256": digest,
+            }
+            index.append(item)
+            total_bytes += len(blob)
+            downloaded += 1
+            row.update(
+                status="downloaded",
+                download_url=final_url,
+                size_bytes=len(blob),
+                sha256=digest,
+                path=item["path"],
+                triangle_count=verified["triangle_count"],
+                tags=verified["tags"],
+            )
+            report.append(row)
+            print("[Poly Pizza] OK:", model_id, verified["title"], len(blob), "bytes")
+        except Exception as exc:
+            row.update(status="failed", reason=str(exc)[:420])
+            report.append(row)
+        time.sleep(1)
+    if search_failures:
+        report.append({
+            "id": "poly-pizza-search-report",
+            "provider": "Poly Pizza",
+            "status": "partial_search_failures",
+            "failed_searches": search_failures[:30],
+        })
+    print("[Poly Pizza] downloaded", downloaded, "models,", total_bytes, "bytes")
     return report
 
 
@@ -4840,6 +5846,8 @@ def main():
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     ambientcg_report=download_ambientcg(STAGE,index)
+    lazytextures_report=download_lazytextures(STAGE,index)
+    poly_pizza_report=download_poly_pizza(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
     smithsonian_report=download_smithsonian_open_access(STAGE,index)
     rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
@@ -4864,6 +5872,10 @@ def main():
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
       "\n\n## ambientCG CC0 materials, environments and models\nThe builder uses ambientCG's documented /api/v2/full_json endpoint to discover a bounded sample of materials, HDRIs, 3D models, decals, atlases, plain textures, brushes and Substance materials. ambientCG explicitly publishes its downloadable asset files under CC0 1.0. Every request uses the official HTTPS /get?file=...zip endpoint, prefers small 1K variants, checks ZIP integrity, caps archive and total extraction sizes, extracts only allow-listed media, and records source page, selected variant, archive digest and per-file SHA-256. Sources: https://docs.ambientcg.com/api/v2/full_json/ and https://docs.ambientcg.com/license/.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in ambientcg_report)+
+      "\n\n## LazyTextures CC0 3D, materials, HDRIs and textures\nThe builder uses the official public API browse endpoints and exact per-item detail endpoint. The provider's API documentation states that all assets in the library are CC0 1.0 and that no API key is required; any contradictory license field in an item detail is rejected. Each selected detail name/type must match the browse entry, and downloads are restricted to ZIP files on the exact official HTTPS host and /Assets/ path. ZIP size, member count, CRC, safe extraction path/extensions, total compressed/uncompressed budgets and per-file SHA-256 are validated. Requests are paced and capped because downloads are subject to fair-use limits. Sources: "+LAZYTEXTURES_DOCS_URL+" and https://creativecommons.org/publicdomain/zero/1.0/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in lazytextures_report)+
+      "\n\n## Poly Pizza — optional published API, model-level CC0 only\nThis lane is opt-in through the GitHub Actions secret POLY_PIZZA_API_KEY. It uses Poly Pizza's published API only; no HTML scraping or manual page crawling is performed. Every result is re-fetched from its own model endpoint immediately before download and must carry an exact CC0 1.0 license field. CC-BY, missing or unknown license fields are skipped in this first importer. GLB downloads are restricted to official HTTPS poly.pizza hosts, capped at 128 MiB per model and 4 GiB total, and validated for GLB v2 magic/version/declared length plus SHA-256. The API key is sent only to api.poly.pizza and never to the asset CDN. Poly Pizza's Terms prohibit automated scraping outside published interfaces; this importer uses the published API. Its press page has described API access as free for hobby use and pay-as-you-go for commercial use, so check the current plan/usage terms before enabling this secret for commercial workflows. Sources: https://poly.pizza/docs/tos, https://poly.pizza/settings/api, https://poly.pizza/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in poly_pizza_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
       "\n\n## Smithsonian Open Access CC0 media\nThe builder queries Smithsonian Open Access and only considers records whose top-level metadata_usage.access is exactly CC0. It then checks each candidate media object's usage.access independently and downloads only media explicitly marked CC0. The official IDS image delivery service is requested at a bounded size; source record, unit, title, creator, media URL, exact rights values and SHA-256 are kept. A caller may configure the optional GitHub Actions secret SMITHSONIAN_API_KEY; if absent, the builder makes a low-volume attempt with DEMO_KEY and records any rate-limit/authentication failure rather than claiming success. CC0 does not grant trademark, privacy, publicity or other non-copyright rights. Sources: https://www.si.edu/openaccess/faq and https://www.si.edu/openaccess/devtools.\n\n"+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
@@ -4898,6 +5910,17 @@ def main():
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "ambientcg_packages_downloaded":sum(r.get("status")=="downloaded" for r in ambientcg_report),
               "ambientcg_files_downloaded":sum(1 for x in index if x.get("type")=="ambientcg-asset-file"),
+              "lazytextures_packages_downloaded":sum(r.get("status")=="downloaded" for r in lazytextures_report),
+              "lazytextures_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("lazytextures-") and x.get("type","").endswith("-asset-file")),
+              "lazytextures_archive_bytes_downloaded":sum(r.get("archive_bytes",0) for r in lazytextures_report if r.get("status")=="downloaded"),
+              "lazytextures_unpacked_bytes_downloaded":sum(r.get("unpacked_bytes",0) for r in lazytextures_report if r.get("status")=="downloaded"),
+              "lazytextures_models_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="models" for r in lazytextures_report),
+              "lazytextures_materials_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="materials" for r in lazytextures_report),
+              "lazytextures_hdris_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="hdris" for r in lazytextures_report),
+              "lazytextures_textures_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="textures" for r in lazytextures_report),
+              "lazytextures_other_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="other" for r in lazytextures_report),
+              "poly_pizza_models_downloaded":sum(r.get("status")=="downloaded" for r in poly_pizza_report),
+              "poly_pizza_model_bytes_downloaded":sum(r.get("size_bytes",0) for r in poly_pizza_report if r.get("status")=="downloaded"),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
               "smithsonian_images_downloaded":sum(r.get("status")=="downloaded" for r in smithsonian_report),
               "rijksmuseum_images_downloaded":sum(r.get("status")=="downloaded" for r in rijksmuseum_report),
@@ -4935,6 +5958,8 @@ def main():
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
                "ambientcg_downloads":ambientcg_report,
+               "lazytextures_downloads":lazytextures_report,
+               "poly_pizza_downloads":poly_pizza_report,
                "met_open_access_downloads":met_report,"smithsonian_open_access_downloads":smithsonian_report,
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,

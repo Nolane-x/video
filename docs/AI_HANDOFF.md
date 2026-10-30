@@ -1,5 +1,19 @@
 # AI session handoff
 
+## Asset-library handoff — 2026-10-30
+
+Continue the source-library lane separately from the film projects below.
+
+- Repository: `Nolane-x/video`. Core files: `tools/video/build_asset_library.py`, `tools/video/package_asset_bundles.py`, `.github/workflows/build-video-asset-library.yml`, `tools/video/test_asset_library_sources.py`, `video-library/assets/sources.json`.
+- [Build 48 run #48](https://github.com/Nolane-x/video/actions/runs/41037407715) is the main-branch resource build. It was still in the external-source download step at the last check. Packaging/release has not been confirmed.
+- [PR #15](https://github.com/Nolane-x/video/pull/15) adds LazyTextures and optional Poly Pizza. LazyTextures: provider-wide CC0 API, 10 models / 16 materials / 10 HDRIs / 18 texture archives / 8 other packages ceilings; 64 MiB per ZIP, 512 MiB compressed, 128 MiB expanded per package and 1.5 GiB expanded total. All ceilings are caps, not actual counts.
+- Poly Pizza: optional `POLY_PIZZA_API_KEY`; API key only to `api.poly.pizza`; exact per-model CC0 1.0 required after detail re-fetch; CC-BY/missing/unknown license is skipped. At most 48 models, 128 MiB each, 4 GiB total. `.glb` URL host allow-list, GLB v2 JSON/BIN chunk and byte-length checks, external-sidecar rejection, per-file SHA-256 and ID-hash folders.
+- Current Quaternius QAL v1.0 is source-only because raw asset-library redistribution is prohibited by the current license. Do not use stale FAQ copies that broadly describe the whole catalog as CC0.
+- **Branch repair complete:** PR #15 is now based directly on current `main` at repaired commit `df62b0d1da774665b4f4e175ab3797c966dff341`. The live PR diff contains exactly 8 modified files, zero removed files; its tree has 263 entries, matching `main`. The pre-repair branch is saved as `backup/pr15-pre-main-tree-repair-627897c`.
+- [CI #104](https://github.com/Nolane-x/video/actions/runs/41047791114) passed on that exact commit: compilation, offline rights/regression tests and generated-asset smoke build.
+- PR #15 sets `cancel-in-progress: false`. After merge, Build 49 should queue behind the still-running Build 48 rather than cancelling it; verify both workflow runs before proceeding.
+- Last confirmed durable release is Build 43 (1,095,394,051-byte ZIP). Do not invent Build 48/49 size or counts before release artifacts and checksum manifests are available.
+
 ## Current verified state — continue from these, not historical render numbers
 - Primary candidate: **THE WEIGHT OF YES — render #31**, [workflow](https://github.com/Nolane-x/video/actions/runs/40532086413), source [commit](https://github.com/Nolane-x/video/commit/58c95de849405b0ae5d1636851bb883ffa3870ec), manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
 - **THE FIRST HOUR #55** is now the current technical + targeted-visual candidate ([workflow](https://github.com/Nolane-x/video/actions/runs/40626868973)); manifest and QA ledger: `video-library/the-first-hour/manifest.json` and `video-library/the-first-hour/QA.md`. The downloaded artifact was checksum-verified. Full-resolution B27 frames at 154.5, 157.2, 158.2 and 159.5 s confirm the whisper is below the calendar and the final line sits inside the left safe area. The root cause was that the workflow overwrote `tune_story.py` args with `shot-overrides.json`; the actual override was fixed in `1fc7a4c0e9fae34b2f1847204a63ad3a96e771f2` and a post-merge regression gate was added in `9d86d9a4195982924868468887ff68a2fbcf1790`. Runs #52/#53 remain historical candidates with a known B27 placement issue; #54 was cancelled. Full-length viewing with audio and perceptual listening remain pending.

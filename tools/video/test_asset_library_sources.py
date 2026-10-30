@@ -38,6 +38,17 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 5 * 1024 * 1024 * 1024)
+        self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8})
+        self.assertEqual(library.LAZYTEXTURES_API_TYPES["other"]["endpoint"], "previewsOther")
+        self.assertEqual(library.POLY_PIZZA_MAX_MODELS, 48)
+        self.assertEqual(library.POLY_PIZZA_MAX_PAGES_PER_TERM, 2)
+        self.assertEqual(library.POLY_PIZZA_MAX_MODEL_BYTES, 128 * 1024 * 1024)
+        self.assertEqual(library.POLY_PIZZA_TOTAL_MAX_BYTES, 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.POLY_PIZZA_API_BASE, "https://api.poly.pizza/v1.1")
+        self.assertEqual(library.LAZYTEXTURES_MAX_ZIP_MEMBERS, 2500)
+        self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
+        self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
+        self.assertGreaterEqual(library.LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
         self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 18)
         self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 80, "videos": 40, "audio": 24})
         self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 6 * 1024 * 1024 * 1024)
@@ -52,6 +63,29 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.OPENMOJI_MAX_ARCHIVE_BYTES, 80 * 1024 * 1024)
         self.assertGreaterEqual(library.OPENMOJI_MAX_EXTRACTED_BYTES, 100 * 1024 * 1024)
         self.assertGreaterEqual(library.NOAA_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
+
+    def test_poly_pizza_source_catalog_requires_optional_key_and_item_level_cc0(self):
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(row for row in catalog["sources"] if row.get("id") == "poly-pizza-cc0-api")
+        self.assertIn("per-model-cc0", entry["bundling"])
+        self.assertIn("POLY_PIZZA_API_KEY", entry["authentication"])
+        self.assertIn("optional", entry["authentication"].lower())
+        self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
+        self.assertFalse(entry["verified_page_license"])
+        self.assertIn("CC0 1.0 only", entry["license"])
+        self.assertEqual(entry["license_url"], "https://creativecommons.org/publicdomain/zero/1.0/")
+
+    def test_quaternius_current_qal_is_catalogued_source_only(self):
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(
+            row for row in catalog["sources"]
+            if row.get("id") == "quaternius-current-qal-source-only"
+        )
+        self.assertIn("QAL", entry["license"])
+        self.assertIn("v1.0", entry["license"])
+        self.assertIn("source-only", entry["bundling"])
+        self.assertIn("redistributing the assets themselves", entry["note"])
+        self.assertEqual(entry["license_url"], "https://quaternius.com/license.html")
 
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
         self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
@@ -81,6 +115,341 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+
+class PolyPizzaCC0APITests(unittest.TestCase):
+    def _model(self):
+        return {
+            "ID": "TreeOne",
+            "Title": "Low Poly Tree",
+            "Creator": {"Username": "ExampleArtist", "PURL": "https://poly.pizza/u/ExampleArtist"},
+            "Licence": "CC0 1.0",
+            "URL": "https://poly.pizza/m/TreeOne",
+            "Download": "https://cdn.poly.pizza/models/TreeOne.glb",
+            "Tags": ["tree", "nature"],
+            "Tri Count": 1200,
+        }
+
+    def test_api_and_asset_url_allowlists_are_https_and_host_pinned(self):
+        self.assertTrue(library.poly_pizza_api_url_is_allowed("https://api.poly.pizza/v1.1/search/tree"))
+        self.assertFalse(library.poly_pizza_api_url_is_allowed("https://api.poly.pizza.evil.example/v1.1/search/tree"))
+        self.assertFalse(library.poly_pizza_api_url_is_allowed("http://api.poly.pizza/v1.1/search/tree"))
+        self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://cdn.poly.pizza/models/tree.glb"))
+        self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://poly.pizza/m/TreeOne"))
+        self.assertTrue(library.poly_pizza_download_url_is_allowed("https://cdn.poly.pizza/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_download_url_is_allowed("https://cdn.poly.pizza/models/tree.zip"))
+        self.assertFalse(library.poly_pizza_download_url_is_allowed("https://evil.example/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://evil.example/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("http://cdn.poly.pizza/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://user@cdn.poly.pizza/models/tree.glb"))
+
+    def test_model_parser_accepts_exact_cc0_and_fails_closed_on_other_licenses(self):
+        parsed, reason = library.poly_pizza_parse_model(self._model(), require_download=True)
+        self.assertIsNone(reason)
+        self.assertEqual(parsed["license"], "CC0-1.0")
+        self.assertEqual(parsed["model_id"], "TreeOne")
+        self.assertEqual(parsed["creator"], "ExampleArtist")
+        self.assertTrue(parsed["source_page"].startswith("https://poly.pizza/m/"))
+        self.assertEqual(parsed["download_url"], "https://cdn.poly.pizza/models/TreeOne.glb")
+
+        numeric_cc0 = self._model()
+        numeric_cc0["Licence"] = 1
+        self.assertEqual(library.poly_pizza_parse_model(numeric_cc0)[0]["license"], "CC0-1.0")
+        nested_cc0 = self._model()
+        nested_cc0["Licence"] = {"ID": 1, "Name": "CC0"}
+        self.assertEqual(library.poly_pizza_parse_model(nested_cc0)[0]["license"], "CC0-1.0")
+        numeric_by = self._model()
+        numeric_by["Licence"] = 0
+        self.assertEqual(library.poly_pizza_parse_model(numeric_by)[1], "license_not_cc0_or_unrecognized")
+
+        by_model = self._model()
+        by_model["Licence"] = "CC-BY 4.0"
+        self.assertEqual(library.poly_pizza_parse_model(by_model)[1], "license_not_cc0_or_unrecognized")
+        unknown = self._model()
+        unknown.pop("Licence")
+        self.assertEqual(library.poly_pizza_parse_model(unknown)[1], "license_not_cc0_or_unrecognized")
+        hostile = self._model()
+        hostile["Download"] = "https://evil.example/tree.glb"
+        self.assertEqual(library.poly_pizza_parse_model(hostile, require_download=True)[1], "download_url_not_official_glb")
+        wrong_extension = self._model()
+        wrong_extension["Download"] = "https://cdn.poly.pizza/tree.zip"
+        self.assertEqual(library.poly_pizza_parse_model(wrong_extension, require_download=True)[1], "download_url_not_official_glb")
+        wrong_source = self._model()
+        wrong_source["URL"] = "https://poly.pizza/m/AnotherModel"
+        self.assertEqual(library.poly_pizza_parse_model(wrong_source)[1], "source_url_not_official")
+
+    def test_glb_validator_checks_magic_version_json_chunk_and_declared_length(self):
+        payload = json.dumps({"asset": {"version": "2.0"}}).encode("utf-8")
+        payload += b" " * ((4 - len(payload) % 4) % 4)
+        total = 12 + 8 + len(payload)
+        valid = b"glTF" + (2).to_bytes(4, "little") + total.to_bytes(4, "little") + len(payload).to_bytes(4, "little") + b"JSON" + payload
+        self.assertTrue(library.poly_pizza_glb_is_valid(valid))
+        bin_data = b"1234"
+        bin_chunk = len(bin_data).to_bytes(4, "little") + b"BIN\x00" + bin_data
+        with_bin = b"glTF" + (2).to_bytes(4, "little") + (len(valid) + len(bin_chunk)).to_bytes(4, "little") + valid[12:] + bin_chunk
+        self.assertTrue(library.poly_pizza_glb_is_valid(with_bin))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"<html>blocked</html>"))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (1).to_bytes(4, "little") + total.to_bytes(4, "little") + valid[12:]))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (2).to_bytes(4, "little") + (total + 4).to_bytes(4, "little") + valid[12:]))
+        invalid_json = b"not-json".ljust(8, b" ")
+        bad = b"glTF" + (2).to_bytes(4, "little") + (28).to_bytes(4, "little") + (8).to_bytes(4, "little") + b"JSON" + invalid_json
+        self.assertFalse(library.poly_pizza_glb_is_valid(bad))
+
+        remote_payload = json.dumps({
+            "asset": {"version": "2.0"},
+            "buffers": [{"byteLength": 4, "uri": "https://evil.example/model.bin"}],
+        }).encode("utf-8")
+        remote_payload += b" " * ((4 - len(remote_payload) % 4) % 4)
+        remote_total = 12 + 8 + len(remote_payload)
+        remote_glb = b"glTF" + (2).to_bytes(4, "little") + remote_total.to_bytes(4, "little") + len(remote_payload).to_bytes(4, "little") + b"JSON" + remote_payload
+        self.assertFalse(library.poly_pizza_glb_is_valid(remote_glb))
+
+        no_bin_payload = json.dumps({
+            "asset": {"version": "2.0"},
+            "buffers": [{"byteLength": 16}],
+        }).encode("utf-8")
+        no_bin_payload += b" " * ((4 - len(no_bin_payload) % 4) % 4)
+        no_bin_total = 12 + 8 + len(no_bin_payload)
+        no_bin_glb = b"glTF" + (2).to_bytes(4, "little") + no_bin_total.to_bytes(4, "little") + len(no_bin_payload).to_bytes(4, "little") + b"JSON" + no_bin_payload
+        self.assertFalse(library.poly_pizza_glb_is_valid(no_bin_glb))
+
+    def test_importer_skips_without_secret_and_does_not_attempt_network(self):
+        with mock.patch.dict(library.os.environ if hasattr(library, "os") else __import__("os").environ,
+                             {"POLY_PIZZA_API_KEY": ""}, clear=False):
+            with mock.patch.object(library, "poly_pizza_api_json", side_effect=AssertionError("network must not run")):
+                report = library.download_poly_pizza(Path("."), [])
+        self.assertEqual(len(report), 1)
+        self.assertEqual(report[0]["status"], "skipped_missing_api_key")
+
+    def test_importer_rechecks_detail_and_records_glb_receipt(self):
+        model = self._model()
+        gltf_json = json.dumps({"asset": {"version": "2.0"}}).encode("utf-8")
+        gltf_json += b" " * ((4 - len(gltf_json) % 4) % 4)
+        glb_length = 12 + 8 + len(gltf_json)
+        glb = b"glTF" + (2).to_bytes(4, "little") + glb_length.to_bytes(4, "little") + len(gltf_json).to_bytes(4, "little") + b"JSON" + gltf_json
+        def fake_api(path, params, token):
+            if path == "/model/TreeOne":
+                return model
+            if "/search/tree" in path:
+                return {"results": [model]}
+            return {"results": []}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            with mock.patch.dict(__import__("os").environ, {"POLY_PIZZA_API_KEY": "test-token"}, clear=False), \
+                 mock.patch.object(library, "poly_pizza_api_json", side_effect=fake_api), \
+                 mock.patch.object(library, "poly_pizza_download_glb", return_value=(glb, model["Download"])), \
+                 mock.patch.object(library.time, "sleep", return_value=None):
+                report = library.download_poly_pizza(root, index)
+            downloaded = [row for row in report if row.get("status") == "downloaded"]
+            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(len(index), 1)
+            asset = index[0]
+            self.assertEqual(asset["license"], "CC0-1.0")
+            self.assertTrue(asset["license_verified_from_item_metadata"])
+            path = root / asset["path"]
+            self.assertTrue(path.is_file())
+            self.assertEqual(path.read_bytes(), glb)
+            self.assertEqual(asset["sha256"], library.sha256_path(path))
+            self.assertTrue((path.parent / "SOURCE_AND_LICENSE.md").is_file())
+            self.assertEqual(path.parent.parent.name, "models")
+            self.assertRegex(path.parent.name, r"^treeone-[0-9a-f]{10}$")
+
+
+class LazyTexturesCC0APITests(unittest.TestCase):
+    def test_asset_names_and_detail_urls_are_pinned(self):
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Concrete01"))
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Oak Wood 02"))
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Árbol de Navidad"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("../payload"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("folder/model"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("bad\\name"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed(""))
+
+        detail = library.lazytextures_detail_url("materials", "Concrete01")
+        self.assertEqual(
+            detail,
+            "https://lazytextures.net:3000/Asset/materials/Concrete01",
+        )
+        self.assertTrue(library.lazytextures_detail_url_is_allowed(detail, "materials", "Concrete01"))
+        self.assertFalse(library.lazytextures_detail_url_is_allowed(
+            "https://evil.example:3000/Asset/materials/Concrete01", "materials", "Concrete01"
+        ))
+        self.assertFalse(library.lazytextures_detail_url_is_allowed(
+            "https://lazytextures.net:3000/Asset/models/Concrete01", "materials", "Concrete01"
+        ))
+        with self.assertRaises(ValueError):
+            library.lazytextures_detail_url("unknown", "Concrete01")
+
+    def test_zip_download_allowlist_rejects_untrusted_hosts_paths_and_formats(self):
+        good = "https://lazytextures.net:3000/Assets/Materials/Concrete01/Mat/1k/Concrete01_1k.zip"
+        self.assertTrue(library.lazytextures_download_url_is_allowed(good))
+        self.assertEqual(library.lazytextures_download_url("/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip"),
+                         "https://lazytextures.net:3000/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip")
+        for bad in [
+            "http://lazytextures.net:3000/Assets/Materials/a.zip",
+            "https://lazytextures.net/Assets/Materials/a.zip",
+            "https://lazytextures.net:3000.evil.example/Assets/Materials/a.zip",
+            "https://evil.example:3000/Assets/Materials/a.zip",
+            "https://lazytextures.net:3000/Asset/materials/a.zip",
+            "https://lazytextures.net:3000/Assets/Materials/../escape.zip",
+            "https://lazytextures.net:3000/Assets/Materials/a.exe",
+            "https://lazytextures.net:3000/Assets/Materials/a.zip?redirect=1",
+            "https://user@lazytextures.net:3000/Assets/Materials/a.zip",
+        ]:
+            self.assertFalse(library.lazytextures_download_url_is_allowed(bad), bad)
+        self.assertEqual(library.lazytextures_download_url("/Assets/../../escape.zip"), "")
+
+    def test_api_browse_parser_requires_success_and_documented_asset_list(self):
+        expected = [{"name": "Concrete01", "category": "Concrete"}]
+        self.assertEqual(
+            library.lazytextures_response_assets({"success": True, "PreviewMaterials": expected}, "materials"),
+            expected,
+        )
+        self.assertEqual(
+            library.lazytextures_response_assets({"success": True, "data": {"PreviewModels": [{"name": "SpaceKit"}]}}, "models"),
+            [{"name": "SpaceKit"}],
+        )
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "data": [{"name": "Brush01"}]}, "other"), [{"name": "Brush01"}])
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "PreviewOthers": [{"name": "Preset01"}]}, "other"), [{"name": "Preset01"}])
+        self.assertEqual(library.lazytextures_response_assets({"success": False, "PreviewMaterials": expected}, "materials"), [])
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "PreviewMaterials": expected}, "models"), [])
+
+    def test_provider_wide_cc0_policy_accepts_absent_or_exact_cc0_and_rejects_conflicts(self):
+        self.assertTrue(library.lazytextures_license_detail({"name": "Concrete01"})["verified"])
+        self.assertEqual(library.lazytextures_license_detail({"name": "Concrete01"})["license"], "CC0-1.0")
+        self.assertTrue(library.lazytextures_license_detail({"license": "CC0 1.0 Universal"})["verified"])
+        self.assertTrue(library.lazytextures_license_detail({
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+        })["verified"])
+        self.assertFalse(library.lazytextures_license_detail({"license": "CC BY 4.0"})["verified"])
+        self.assertFalse(library.lazytextures_license_detail({"license_url": "unknown"})["verified"])
+        self.assertFalse(library.lazytextures_license_detail(None)["verified"])
+
+    def test_archive_picker_prefers_smallest_available_resolution_and_checks_path_size(self):
+        detail = {
+            "archiveFiles": {
+                "4k": [{"name": "Concrete01_4k.zip",
+                         "path": "/Assets/Materials/Concrete01/Mat/4k/Concrete01_4k.zip",
+                         "size": 22_020_096}],
+                "1k": [{"name": "Concrete01_1k.zip",
+                         "path": "/Assets/Materials/Concrete01/Mat/1k/Concrete01_1k.zip",
+                         "size": 2_000_000}],
+                "unsafe": [{"name": "escape.zip", "path": "/Assets/../../escape.zip", "size": 1_000}],
+                "huge": [{"name": "huge.zip", "path": "/Assets/Materials/huge.zip",
+                          "size": library.LAZYTEXTURES_MAX_ARCHIVE_BYTES + 1}],
+                "wrong": [{"name": "not-a-zip.exe", "path": "/Assets/Materials/not-a-zip.exe", "size": 1000}],
+            },
+            "textureFiles": {
+                "1k": [{"name": "Texture_Rust_1k.zip",
+                        "path": "/Assets/Textures/Rust/1k/Texture_Rust_1k.zip",
+                        "size": 3_500_000}],
+            }
+        }
+        candidates = library.lazytextures_archive_candidates(detail)
+        self.assertEqual(len(candidates), 3)
+        self.assertTrue(any(row["name"] == "Texture_Rust_1k.zip" for row in candidates))
+        choice = library.lazytextures_choose_archive(detail)
+        self.assertEqual(choice["name"], "Concrete01_1k.zip")
+        self.assertEqual(choice["size_bytes"], 2_000_000)
+        self.assertEqual(library.lazytextures_archive_candidates({"archiveFiles": [], "textureFiles": []}), [])
+
+    def test_zip_preflight_bounds_paths_members_expansion_and_compression_ratio(self):
+        safe = io.BytesIO()
+        with zipfile.ZipFile(safe, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("model/scene.obj", "o Example\nv 0 0 0\n")
+            archive.writestr("model/material.mtl", "newmtl Example\nKd 1 1 1\n")
+        count, unpacked = library.lazytextures_validate_zip_archive(safe.getvalue())
+        self.assertEqual(count, 2)
+        self.assertGreater(unpacked, 0)
+
+        traversal = io.BytesIO()
+        with zipfile.ZipFile(traversal, "w") as archive:
+            archive.writestr("../escape.obj", "v 0 0 0\n")
+        with self.assertRaises(RuntimeError):
+            library.lazytextures_validate_zip_archive(traversal.getvalue())
+
+        too_many = io.BytesIO()
+        with zipfile.ZipFile(too_many, "w") as archive:
+            for i in range(library.LAZYTEXTURES_MAX_ZIP_MEMBERS + 1):
+                archive.writestr(f"item-{i}.txt", "x")
+        with self.assertRaises(RuntimeError):
+            library.lazytextures_validate_zip_archive(too_many.getvalue())
+
+    def test_lazytextures_file_signatures_accept_supported_assets_and_reject_mislabeled_files(self):
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"\x89PNG\r\n\x1a\n" + b"x" * 32, ".png"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"Kaydara FBX Binary  \x00\x1a\x00", ".fbx"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"BLENDER-v300", ".blend"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"RIFF" + b"\x00" * 4 + b"WAVE" + b"\x00" * 8, ".wav"))
+        self.assertFalse(library.lazytextures_media_signature_is_valid(b"<html>blocked</html>", ".png"))
+        self.assertFalse(library.lazytextures_media_signature_is_valid(b"PK\x03\x04", ".fbx"))
+
+    def test_bounded_importer_records_only_verified_files_and_source_provenance(self):
+        buffer = io.BytesIO()
+        payload = b"Kaydara FBX Binary  \x00\x1a\x00"
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("SpaceKit.fbx", payload)
+        archive_blob = buffer.getvalue()
+        expected_size = len(archive_blob)
+
+        browse_payloads = {
+            "models": [{"name": "SpaceKit", "tags": ["space", "vehicle"]}],
+            "materials": [], "hdris": [], "textures": [], "other": [],
+        }
+        responses = {}
+        for asset_type, spec in library.LAZYTEXTURES_API_TYPES.items():
+            responses[library.LAZYTEXTURES_API_BASE + "/" + spec["endpoint"]] = {
+                "success": True, spec["list_key"]: browse_payloads[asset_type]
+            }
+        detail_url = library.lazytextures_detail_url("models", "SpaceKit")
+        responses[detail_url] = {
+            "success": True, "name": "SpaceKit", "assetType": "models",
+            "tags": ["space", "vehicle"],
+            "archiveFiles": {"1k": [{
+                "name": "SpaceKit_1k.zip",
+                "path": "/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip",
+                "size": expected_size,
+            }]},
+        }
+
+        def fake_request_json(url, timeout=25):
+            return responses[url]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            with mock.patch.object(library, "request_json", side_effect=fake_request_json), \
+                 mock.patch.object(library, "lazytextures_download_bytes", return_value=(archive_blob, "application/zip")), \
+                 mock.patch.object(library.time, "sleep", return_value=None):
+                report = library.download_lazytextures(root, index)
+
+            downloaded = [row for row in report if row.get("status") == "downloaded"]
+            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(downloaded[0]["asset_type"], "models")
+            self.assertEqual(downloaded[0]["extracted_files"], 1)
+            self.assertEqual(len(index), 1)
+            item = index[0]
+            self.assertEqual(item["provider"], "LazyTextures")
+            self.assertEqual(item["license"], "CC0-1.0")
+            self.assertTrue(item["license_verified_from_provider_api_policy"])
+            self.assertEqual(item["source_page"], detail_url)
+            self.assertEqual(item["download_archive_sha256"], downloaded[0]["archive_sha256"])
+            path = root / item["path"]
+            self.assertTrue(path.is_file())
+            self.assertEqual(path.read_bytes(), payload)
+            self.assertEqual(item["sha256"], library.sha256_path(path))
+
+    def test_download_helper_rejects_redirects_outside_the_official_host(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.geturl.return_value = "https://evil.example/payload.zip"
+        response.__enter__.return_value.read.return_value = b"PK\\x03\\x04"
+        response.__enter__.return_value.headers.get.return_value = "application/zip"
+        with mock.patch.object(library.urllib.request, "urlopen", return_value=response):
+            with self.assertRaises(RuntimeError):
+                library.lazytextures_download_bytes(
+                    "https://lazytextures.net:3000/Assets/Materials/Concrete01/1k/a.zip",
+                    limit=1024,
+                )
 
 class OpenMojiCCBYSAAssetTests(unittest.TestCase):
     def test_openmoji_npm_metadata_requires_pinned_version_and_sharealike_license(self):
@@ -365,6 +734,16 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
         self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-svg", "path": "third-party/openmoji/color/svg/1F600.svg"}), "original-graphics")
         self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-png", "path": "third-party/openmoji/color/618x618/1F600.png"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-models-asset-file", "path": "third-party/lazytextures/models/SpaceKit/model.fbx"}), "3d-models")
+        self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-materials-asset-file", "path": "third-party/lazytextures/materials/Concrete01/Color.png"}), "3d-textures")
+        self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-hdris-asset-file", "path": "third-party/lazytextures/hdris/Studio/lighting.exr"}), "3d-textures")
+        self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-textures-asset-file", "path": "third-party/lazytextures/textures/Rust/overlay.png"}), "3d-textures")
+        self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-other-asset-file", "path": "third-party/lazytextures/other/Brush01/brush.png"}), "miscellaneous")
+        self.assertEqual(bundle_packager.classify_asset({"type": "poly-pizza-cc0-model", "path": "third-party/poly-pizza/models/TreeOne/model.glb"}), "3d-models")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/poly-pizza/models/TreeOne/SOURCE_AND_LICENSE.md"), "3d-models")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/models/SpaceKit/SOURCE_AND_LICENSE.md"), "3d-models")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/materials/Concrete01/SOURCE_AND_LICENSE.md"), "3d-textures")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/other/Brush01/SOURCE_AND_LICENSE.md"), "miscellaneous")
 
     def test_bundle_manifest_detects_missing_or_modified_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
