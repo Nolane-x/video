@@ -38,6 +38,10 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 5 * 1024 * 1024 * 1024)
+        self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18})
+        self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
+        self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
+        self.assertGreaterEqual(library.LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
         self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 18)
         self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 80, "videos": 40, "audio": 24})
         self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 6 * 1024 * 1024 * 1024)
@@ -81,6 +85,108 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+
+class LazyTexturesCC0APITests(unittest.TestCase):
+    def test_asset_names_and_detail_urls_are_pinned(self):
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Concrete01"))
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Oak Wood 02"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("../payload"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("folder/model"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed("bad\\name"))
+        self.assertFalse(library.lazytextures_asset_name_is_allowed(""))
+
+        detail = library.lazytextures_detail_url("materials", "Concrete01")
+        self.assertEqual(
+            detail,
+            "https://lazytextures.net:3000/Asset/materials/Concrete01",
+        )
+        self.assertTrue(library.lazytextures_detail_url_is_allowed(detail, "materials", "Concrete01"))
+        self.assertFalse(library.lazytextures_detail_url_is_allowed(
+            "https://evil.example:3000/Asset/materials/Concrete01", "materials", "Concrete01"
+        ))
+        self.assertFalse(library.lazytextures_detail_url_is_allowed(
+            "https://lazytextures.net:3000/Asset/models/Concrete01", "materials", "Concrete01"
+        ))
+        with self.assertRaises(ValueError):
+            library.lazytextures_detail_url("unknown", "Concrete01")
+
+    def test_zip_download_allowlist_rejects_untrusted_hosts_paths_and_formats(self):
+        good = "https://lazytextures.net:3000/Assets/Materials/Concrete01/Mat/1k/Concrete01_1k.zip"
+        self.assertTrue(library.lazytextures_download_url_is_allowed(good))
+        self.assertEqual(library.lazytextures_download_url("/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip"),
+                         "https://lazytextures.net:3000/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip")
+        for bad in [
+            "http://lazytextures.net:3000/Assets/Materials/a.zip",
+            "https://lazytextures.net/Assets/Materials/a.zip",
+            "https://lazytextures.net:3000.evil.example/Assets/Materials/a.zip",
+            "https://evil.example:3000/Assets/Materials/a.zip",
+            "https://lazytextures.net:3000/Asset/materials/a.zip",
+            "https://lazytextures.net:3000/Assets/Materials/../escape.zip",
+            "https://lazytextures.net:3000/Assets/Materials/a.exe",
+            "https://lazytextures.net:3000/Assets/Materials/a.zip?redirect=1",
+            "https://user@lazytextures.net:3000/Assets/Materials/a.zip",
+        ]:
+            self.assertFalse(library.lazytextures_download_url_is_allowed(bad), bad)
+        self.assertEqual(library.lazytextures_download_url("/Assets/../../escape.zip"), "")
+
+    def test_api_browse_parser_requires_success_and_documented_asset_list(self):
+        expected = [{"name": "Concrete01", "category": "Concrete"}]
+        self.assertEqual(
+            library.lazytextures_response_assets({"success": True, "PreviewMaterials": expected}, "materials"),
+            expected,
+        )
+        self.assertEqual(
+            library.lazytextures_response_assets({"success": True, "data": {"PreviewModels": [{"name": "SpaceKit"}]}}, "models"),
+            [{"name": "SpaceKit"}],
+        )
+        self.assertEqual(library.lazytextures_response_assets({"success": False, "PreviewMaterials": expected}, "materials"), [])
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "PreviewMaterials": expected}, "models"), [])
+
+    def test_provider_wide_cc0_policy_accepts_absent_or_exact_cc0_and_rejects_conflicts(self):
+        self.assertTrue(library.lazytextures_license_detail({"name": "Concrete01"})["verified"])
+        self.assertEqual(library.lazytextures_license_detail({"name": "Concrete01"})["license"], "CC0-1.0")
+        self.assertTrue(library.lazytextures_license_detail({"license": "CC0 1.0 Universal"})["verified"])
+        self.assertTrue(library.lazytextures_license_detail({
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+        })["verified"])
+        self.assertFalse(library.lazytextures_license_detail({"license": "CC BY 4.0"})["verified"])
+        self.assertFalse(library.lazytextures_license_detail({"license_url": "unknown"})["verified"])
+        self.assertFalse(library.lazytextures_license_detail(None)["verified"])
+
+    def test_archive_picker_prefers_smallest_available_resolution_and_checks_path_size(self):
+        detail = {
+            "archiveFiles": {
+                "4k": [{"name": "Concrete01_4k.zip",
+                         "path": "/Assets/Materials/Concrete01/Mat/4k/Concrete01_4k.zip",
+                         "size": 22_020_096}],
+                "1k": [{"name": "Concrete01_1k.zip",
+                         "path": "/Assets/Materials/Concrete01/Mat/1k/Concrete01_1k.zip",
+                         "size": 2_000_000}],
+                "unsafe": [{"name": "escape.zip", "path": "/Assets/../../escape.zip", "size": 1_000}],
+                "huge": [{"name": "huge.zip", "path": "/Assets/Materials/huge.zip",
+                          "size": library.LAZYTEXTURES_MAX_ARCHIVE_BYTES + 1}],
+                "wrong": [{"name": "not-a-zip.exe", "path": "/Assets/Materials/not-a-zip.exe", "size": 1000}],
+            }
+        }
+        candidates = library.lazytextures_archive_candidates(detail)
+        self.assertEqual(len(candidates), 2)
+        choice = library.lazytextures_choose_archive(detail)
+        self.assertEqual(choice["name"], "Concrete01_1k.zip")
+        self.assertEqual(choice["size_bytes"], 2_000_000)
+        self.assertEqual(library.lazytextures_archive_candidates({"archiveFiles": []}), [])
+
+    def test_download_helper_rejects_redirects_outside_the_official_host(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.geturl.return_value = "https://evil.example/payload.zip"
+        response.__enter__.return_value.read.return_value = b"PK\\x03\\x04"
+        response.__enter__.return_value.headers.get.return_value = "application/zip"
+        with mock.patch.object(library.urllib.request, "urlopen", return_value=response):
+            with self.assertRaises(RuntimeError):
+                library.lazytextures_download_bytes(
+                    "https://lazytextures.net:3000/Assets/Materials/Concrete01/1k/a.zip",
+                    limit=1024,
+                )
 
 class OpenMojiCCBYSAAssetTests(unittest.TestCase):
     def test_openmoji_npm_metadata_requires_pinned_version_and_sharealike_license(self):
