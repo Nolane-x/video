@@ -1696,8 +1696,15 @@ def download_kenney_godot_splashscreens(root, index):
                 extension = Path(relative).suffix.lower()
                 if extension == ".svg":
                     raw = sanitize_cc0_svg(raw)
-                    if b"<svg" not in raw[:1024].lower():
-                        raise RuntimeError("Selected SVG did not pass sanitization")
+                    # ElementTree may serialize a valid namespaced SVG as <ns0:svg>,
+                    # so validate the XML root by local-name rather than raw byte prefix.
+                    import xml.etree.ElementTree as ET
+                    try:
+                        sanitized_root = ET.fromstring(raw)
+                    except ET.ParseError as exc:
+                        raise RuntimeError("Selected SVG did not remain valid XML after sanitization") from exc
+                    if sanitized_root.tag.rsplit("}", 1)[-1].lower() != "svg":
+                        raise RuntimeError("Selected XML root is not an SVG element after sanitization")
                 elif extension == ".png" and not raw.startswith(b"\x89PNG\r\n\x1a\n"):
                     raise RuntimeError("Selected PNG has invalid signature")
                 selected.append((relative, raw))

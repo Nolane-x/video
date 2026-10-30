@@ -99,6 +99,11 @@ class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
             self.assertEqual(report[0]["status"], "downloaded")
             self.assertEqual(report[0]["file_count"], 2)
             self.assertEqual(len(index), 2)
+            svg_asset = next(asset for asset in index if asset["path"].endswith(".svg"))
+            sanitized_svg = (root / svg_asset["path"]).read_bytes()
+            import xml.etree.ElementTree as ET
+            svg_root = ET.fromstring(sanitized_svg)
+            self.assertEqual(svg_root.tag.rsplit("}", 1)[-1].lower(), "svg")
             paths = {asset["path"] for asset in index}
             self.assertIn("third-party/kenney/godot-splashscreens/Logo/reimagined-horizontal-dark.svg", paths)
             self.assertIn("third-party/kenney/godot-splashscreens/Screen/Cog logo/cog-blue.png", paths)
