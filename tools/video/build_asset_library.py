@@ -15,34 +15,40 @@ CC0 = "CC0-1.0"
 CC0_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
-MAX_MEDIA_FILE = 3 * 1024 * 1024
-MAX_POLY_FILE = 35 * 1024 * 1024
+MAX_MEDIA_FILE = 12 * 1024 * 1024
+MAX_POLY_FILE = 60 * 1024 * 1024
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
-AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
-AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
+AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
+AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 4
-USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
-USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
-USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
-USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
+USGS_GALLERY_PAGE_SCAN_LIMIT = 18
+USGS_SELECTION_CAPS = {"images": 80, "videos": 40, "audio": 24}
+USGS_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 100 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 6 * 1024 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+OPENGAMEART_SELECTION_CAPS = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 2
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
-OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
-OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
-OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 5
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 48
+OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
+OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+OPENMOJI_VERSION = "17.0.0"
+OPENMOJI_PACKAGE_METADATA_URL = "https://registry.npmjs.org/openmoji/17.0.0"
+OPENMOJI_EXPECTED_FILE_COUNT = 11539
+OPENMOJI_MAX_ARCHIVE_BYTES = 80 * 1024 * 1024
+OPENMOJI_MAX_EXTRACTED_BYTES = 100 * 1024 * 1024
+OPENMOJI_MAX_SELECTED_FILES = 12000
 GOOGLE_FONTS_FAMILY_SLUGS = [
     "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
     "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
@@ -60,11 +66,11 @@ OPENGAMEART_ALLOWED_MEDIA_EXTS = {
     ".obj",".mtl",".glb",".gltf",".fbx",".abc",".dae",".stl",
     ".ttf",".otf",".woff",".woff2"
 }
-MET_OPEN_ACCESS_IMAGE_CAP = 110
-RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
-WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
-WIKIMEDIA_CC0_SVG_CAP = 60
-WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 36
+MET_OPEN_ACCESS_IMAGE_CAP = 300
+RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 240
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 800
+WIKIMEDIA_CC0_SVG_CAP = 100
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 100
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -2569,11 +2575,11 @@ def download_google_fonts(root,index):
 
 # NOAA Ocean Exploration uses a public-domain default for its own media, but
 # item captions/credits can identify selected copyrighted or partner-owned content.
-NOAA_MEDIA_PAGE_SCAN_LIMIT = 6
-NOAA_MEDIA_SELECTION_CAPS = {"image": 72, "video": 36}
-NOAA_IMAGE_MAX_BYTES = 24 * 1024 * 1024
-NOAA_VIDEO_MAX_BYTES = 150 * 1024 * 1024
-NOAA_TOTAL_MAX_BYTES = 3 * 1024 * 1024 * 1024
+NOAA_MEDIA_PAGE_SCAN_LIMIT = 20
+NOAA_MEDIA_SELECTION_CAPS = {"image": 200, "video": 120}
+NOAA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
+NOAA_VIDEO_MAX_BYTES = 200 * 1024 * 1024
+NOAA_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 
 
 class NOAAMultimediaListingParser(HTMLParser):
@@ -2938,6 +2944,229 @@ def download_noaa_ocean_exploration(root, index):
     return report
 
 
+def openmoji_tarball_url_is_allowed(url):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (parsed.scheme=="https" and parsed.hostname=="registry.npmjs.org" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and parsed.path=="/openmoji/-/openmoji-"+OPENMOJI_VERSION+".tgz" and
+                not parsed.query)
+    except Exception:
+        return False
+
+
+def openmoji_metadata_is_eligible(payload):
+    if not isinstance(payload,dict) or payload.get("version")!=OPENMOJI_VERSION:
+        return False
+    if str(payload.get("license") or "").strip().upper()!="CC-BY-SA-4.0":
+        return False
+    repository=payload.get("repository") or {}
+    repo_url=str(repository.get("url") or "") if isinstance(repository,dict) else str(repository)
+    if "github.com/hfg-gmuend/openmoji" not in repo_url:
+        return False
+    dist=payload.get("dist") or {}
+    try:
+        file_count=int(dist.get("fileCount") or 0)
+        unpacked_size=int(dist.get("unpackedSize") or 0)
+    except (TypeError,ValueError):
+        return False
+    return (openmoji_tarball_url_is_allowed(dist.get("tarball")) and
+            bool(re.fullmatch(r"[0-9a-f]{40}",str(dist.get("shasum") or ""))) and
+            str(dist.get("integrity") or "").startswith("sha512-") and
+            file_count==OPENMOJI_EXPECTED_FILE_COUNT and
+            0<unpacked_size<=OPENMOJI_MAX_EXTRACTED_BYTES)
+
+
+def openmoji_selected_archive_path(raw_name):
+    """Map only approved exported artwork and the central data file from the npm archive."""
+    name=str(raw_name or "").replace("\\","/")
+    parsed=PurePosixPath(name)
+    if not name or parsed.is_absolute() or ".." in parsed.parts or (parsed.parts and ":" in parsed.parts[0]):
+        return None
+    parts=parsed.parts
+    if len(parts)>=4 and parts[0]=="package" and parts[1] in {"color","black"}:
+        folder=parts[2]
+        extension=Path(name).suffix.lower()
+        if folder=="svg" and extension==".svg":
+            return PurePosixPath(*parts[1:]).as_posix()
+        if folder in {"618x618","72x72"} and extension==".png":
+            return PurePosixPath(*parts[1:]).as_posix()
+    if parts==("package","data","openmoji.json"):
+        return "data/openmoji.json"
+    return None
+
+
+def openmoji_extract_selected_assets(archive_blob,target):
+    """Safely extract only OpenMoji SVG/PNG exports and central metadata; ignore code and links."""
+    import io
+    import tarfile
+    selected=[]; metadata_bytes=None; total=0
+    target=Path(target).resolve()
+    with tarfile.open(fileobj=io.BytesIO(archive_blob),mode="r:gz") as archive:
+        members=archive.getmembers()
+        if len(members)>OPENMOJI_MAX_SELECTED_FILES+2000:
+            raise RuntimeError("OpenMoji archive has an unexpected member count")
+        for member in members:
+            rel=openmoji_selected_archive_path(member.name)
+            if not rel or not member.isfile():
+                continue
+            if member.size<=0 or member.size>2*1024*1024:
+                continue
+            total+=member.size
+            if total>OPENMOJI_MAX_EXTRACTED_BYTES:
+                raise RuntimeError("OpenMoji selected artwork exceeds aggregate extraction ceiling")
+            stream=archive.extractfile(member)
+            if stream is None:
+                continue
+            blob=stream.read()
+            if len(blob)!=member.size:
+                raise RuntimeError("OpenMoji archive member length mismatch: "+member.name)
+            if rel=="data/openmoji.json":
+                metadata_bytes=blob
+                continue
+            ext=Path(rel).suffix.lower()
+            if ext==".svg":
+                blob=sanitize_cc0_svg(blob)
+            elif ext==".png":
+                if not blob.startswith(b"\x89PNG\r\n\x1a\n"):
+                    continue
+            else:
+                continue
+            if not blob:
+                continue
+            out=(target/Path(*PurePosixPath(rel).parts)).resolve()
+            if target not in out.parents:
+                raise RuntimeError("OpenMoji extraction path escaped its destination")
+            out.parent.mkdir(parents=True,exist_ok=True)
+            out.write_bytes(blob)
+            selected.append({"path":out,"relative_path":rel,"extension":ext,"size_bytes":len(blob)})
+            if len(selected)>OPENMOJI_MAX_SELECTED_FILES:
+                raise RuntimeError("OpenMoji selected file count exceeds safety ceiling")
+    metadata=[]
+    if metadata_bytes:
+        parsed=json.loads(metadata_bytes.decode("utf-8"))
+        if isinstance(parsed,list):
+            metadata=[row for row in parsed if isinstance(row,dict)]
+        elif isinstance(parsed,dict):
+            for key in ("openmoji","emojis","data"):
+                if isinstance(parsed.get(key),list):
+                    metadata=[row for row in parsed[key] if isinstance(row,dict)]
+                    break
+    return selected,metadata
+
+
+def download_openmoji_assets(root,index):
+    """Bundle the OpenMoji 17.0 artwork exports with exact CC BY-SA attribution and provenance."""
+    import base64
+    report=[]
+    target=root/"third-party"/"openmoji"
+    source_page="https://github.com/hfg-gmuend/openmoji/tree/"+OPENMOJI_VERSION
+    license_url="https://creativecommons.org/licenses/by-sa/4.0/"
+    faq_url="https://github.com/hfg-gmuend/openmoji/blob/"+OPENMOJI_VERSION+"/FAQ.md"
+    raw_base="https://raw.githubusercontent.com/hfg-gmuend/openmoji/"+OPENMOJI_VERSION+"/"
+    attribution="All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0."
+    row={"id":"openmoji-17-0","provider":"OpenMoji","version":OPENMOJI_VERSION,
+         "title":"OpenMoji 17.0 — color/black SVG and PNG emoji artwork",
+         "category":"Emoji, stickers, reaction symbols and video overlays",
+         "source_page":source_page,"api_source":OPENMOJI_PACKAGE_METADATA_URL,
+         "license":"CC-BY-SA-4.0 (OpenMoji artwork; do not relabel as CC0)",
+         "license_url":license_url,"attribution_text":attribution,
+         "video_attribution_guidance":"Add the suggested attribution to the video description and/or mention OpenMoji in end credits, voice track or a footnote when the first OpenMoji appears."}
+    try:
+        npm=request_json(OPENMOJI_PACKAGE_METADATA_URL,timeout=25)
+        if not openmoji_metadata_is_eligible(npm):
+            raise RuntimeError("OpenMoji registry metadata does not match the pinned 17.0.0 CC BY-SA package")
+        dist=npm["dist"]; archive_url=dist["tarball"]
+        archive_blob,content_type=request_bytes(archive_url,timeout=50,limit=OPENMOJI_MAX_ARCHIVE_BYTES)
+        sha1=hashlib.sha1(archive_blob).hexdigest()
+        if sha1!=str(dist["shasum"]).lower():
+            raise RuntimeError("OpenMoji npm tarball SHA-1 does not match registry metadata")
+        integrity=str(dist["integrity"])
+        actual_integrity="sha512-"+base64.b64encode(hashlib.sha512(archive_blob).digest()).decode("ascii")
+        if actual_integrity!=integrity:
+            raise RuntimeError("OpenMoji npm tarball SHA-512 integrity does not match registry metadata")
+        if target.exists():
+            shutil.rmtree(target)
+        selected,metadata_rows=openmoji_extract_selected_assets(archive_blob,target)
+        if not selected:
+            raise RuntimeError("OpenMoji archive contained no approved SVG or PNG exports")
+        license_file_url=raw_base+"LICENSE.txt"
+        faq_file_url=raw_base+"FAQ.md"
+        license_blob,_=request_bytes(license_file_url,timeout=25,limit=512*1024)
+        faq_blob,_=request_bytes(faq_file_url,timeout=25,limit=512*1024)
+        license_text=license_blob.decode("utf-8","replace")
+        faq_text=faq_blob.decode("utf-8","replace")
+        if "Attribution-ShareAlike 4.0 International" not in license_text:
+            raise RuntimeError("Pinned OpenMoji LICENSE.txt did not verify CC BY-SA 4.0")
+        if "How to attribute OpenMoji in a film" not in faq_text or "ShareAlike" not in faq_text:
+            raise RuntimeError("Pinned OpenMoji FAQ lacks video attribution / ShareAlike guidance")
+        write_text(target/"LICENSE.txt",license_text)
+        write_text(target/"FAQ.md",faq_text)
+        write_text(target/"SOURCE_AND_LICENSE.md",
+            "# OpenMoji 17.0 artwork\n\n"
+            f"- Official release: {source_page}\n- npm package metadata: {OPENMOJI_PACKAGE_METADATA_URL}\n"
+            f"- Verified npm tarball: {archive_url}\n- Tarball SHA-1: {sha1}\n- Tarball integrity: {integrity}\n"
+            "- Artwork license: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)\n"
+            f"- License text: {license_file_url}\n- Official video attribution guidance: {faq_url}\n"
+            f"- Required attribution: {attribution}\n"
+            "- Video credit: put the attribution in the video description and/or end credits, voice track or a footnote at first use.\n"
+            "- ShareAlike: if an emoji artwork is remixed, transformed or built upon, distribute that adapted artwork under CC BY-SA 4.0.\n"
+            "- This package contains exported SVG and PNG artwork only. npm JavaScript/build code is not included.\n")
+        metadata_by_code={}
+        for item in metadata_rows:
+            key=str(item.get("hexcode") or item.get("hexCode") or item.get("codepoint") or "").replace(" ","-").upper()
+            if key:
+                metadata_by_code[key]=item
+        for item in selected:
+            rel=item["relative_path"]
+            code=Path(rel).stem.upper()
+            meta=metadata_by_code.get(code,{})
+            title=str(meta.get("annotation") or meta.get("name") or ("OpenMoji "+code)).strip()[:220]
+            tags=meta.get("tags") or meta.get("openmoji_tags") or []
+            if isinstance(tags,str):
+                tags=[tag.strip() for tag in re.split(r"[,;]",tags) if tag.strip()]
+            if not isinstance(tags,list):
+                tags=[]
+            tags=[str(tag)[:80] for tag in tags[:40]]
+            relative_file=item["path"].relative_to(root).as_posix()
+            ext=item["extension"]
+            style=PurePosixPath(rel).parts[0]
+            family=PurePosixPath(rel).parts[1]
+            entry_type="openmoji-cc-by-sa-svg" if ext==".svg" else "openmoji-cc-by-sa-png"
+            raw_url=raw_base+urllib.parse.quote(rel,safe="/")
+            index.append({"id":"openmoji-"+slugify(rel),"path":relative_file,
+                          "type":entry_type,"provider":"OpenMoji","version":OPENMOJI_VERSION,
+                          "title":title,"codepoint":code,"style":style,"export_family":family,
+                          "category":"Emoji / stickers / reactions / video overlays","tags":tags,
+                          "source_page":source_page,"source_file_url":raw_url,
+                          "license":"CC-BY-SA-4.0","license_url":license_url,
+                          "license_verified_from_npm_metadata_and_official_faq":True,
+                          "npm_tarball_sha1":sha1,"npm_tarball_integrity":integrity,
+                          "attribution_required":True,"attribution_text":attribution,
+                          "video_attribution_guidance":row["video_attribution_guidance"],
+                          "sharealike_requirement":"Adaptations of OpenMoji artwork must be distributed under CC BY-SA 4.0.",
+                          "license_text_path":"third-party/openmoji/LICENSE.txt",
+                          "faq_path":"third-party/openmoji/FAQ.md",
+                          "size_bytes":item["path"].stat().st_size,
+                          "sha256":sha256_path(item["path"]),"redistributable":True})
+        row.update(status="downloaded",license="CC-BY-SA-4.0",
+                   tarball_bytes=len(archive_blob),tarball_sha1=sha1,tarball_integrity=integrity,
+                   npm_unpacked_size=int(dist.get("unpackedSize") or 0),
+                   extracted_files=len(selected),
+                   svg_files=sum(item["extension"]==".svg" for item in selected),
+                   png_files=sum(item["extension"]==".png" for item in selected),
+                   extracted_bytes=sum(item["path"].stat().st_size for item in selected),
+                   metadata_rows=len(metadata_rows))
+        report.append(row)
+        print("[OpenMoji] OK:",row["extracted_files"],"artwork exports",row["extracted_bytes"],"bytes")
+    except Exception as exc:
+        shutil.rmtree(target,ignore_errors=True)
+        row.update(status="failed",reason=str(exc)[:500])
+        report.append(row)
+        print("[OpenMoji] failed:",str(exc)[:300])
+    return report
+
+
 def download_polyhaven(root,index):
     report=[]
     counts=POLYHAVEN_SELECTION_LIMITS
@@ -3059,7 +3288,7 @@ def download_met_open_access(root,index):
         try:
             response=request_json(search_url,timeout=20)
             for object_id in response.get("objectIDs") or []:
-                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=7: break
+                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=12: break
                 if object_id in seen: continue
                 seen.add(object_id)
                 try:
@@ -3326,7 +3555,7 @@ def loc_rights_from_item(detail):
 
 def download_loc_public_domain(root,index):
     """Only bundle LOC photos after verifying a positive rights statement on the exact item record."""
-    report=[]; total=0; cap=48
+    report=[]; total=0; cap=160
     queries=[
         ("aviation","aircraft aviation"),("maps","historical map"),("industry","industrial machinery"),
         ("agriculture","farm harvest"),("city","historic city street"),("nature","national park landscape"),
@@ -3355,7 +3584,7 @@ def download_loc_public_domain(root,index):
         try:
             response=request_json(url,timeout=12)
             for item in response.get("results") or []:
-                if total>=cap or successes>=3 or checked>=6: break
+                if total>=cap or successes>=6 or checked>=12: break
                 item_url=str(item.get("url") or item.get("id") or "")
                 if not item_url: continue
                 identity=item_url.rstrip("/").split("/")[-1]
@@ -3510,7 +3739,7 @@ def download_wikimedia_public_domain(root,index):
             response=request_json(url,timeout=16)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=8: break
+                if total>=cap or successes>=16: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
@@ -3764,7 +3993,7 @@ def download_rijksmuseum_open_access(root,index):
     dcterms_ns="http://purl.org/dc/terms/"
     rdf_resource="{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"
     token=None; page_num=0; iiif_resolutions=0; iiif_resolution_limit=18
-    while total<cap and page_num<16:
+    while total<cap and page_num<50:
         page_num+=1
         if token:
             params={"verb":"ListRecords","resumptionToken":token}
@@ -4082,7 +4311,7 @@ def download_wikimedia_video_audio(root,index):
             response=request_json(url,timeout=18)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=3 or checked>=18: break
+                if total>=cap or successes>=5 or checked>=18: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 if not isinstance(imageinfo,dict): continue
                 meta=imageinfo.get("extmetadata") or {}
@@ -4297,6 +4526,7 @@ def main():
     noaa_report=download_noaa_ocean_exploration(STAGE,index)
     opengameart_report=download_opengameart(STAGE,index)
     google_fonts_report=download_google_fonts(STAGE,index)
+    openmoji_report=download_openmoji_assets(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -4358,6 +4588,9 @@ def main():
               "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
               "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
               "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf"),
+              "openmoji_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("openmoji-cc-by-sa-")),
+              "openmoji_svg_downloaded":sum(1 for x in index if x.get("type")=="openmoji-cc-by-sa-svg"),
+              "openmoji_png_downloaded":sum(1 for x in index if x.get("type")=="openmoji-cc-by-sa-png"),
               "noaa_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in noaa_report),
               "noaa_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in noaa_report),
               "original_stickers":sticker_meme_counts["stickers"],
@@ -4365,7 +4598,7 @@ def main():
               "original_caption_overlays":sticker_meme_counts["caption_overlays"]}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "policy":"Original assets are CC0; NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
+               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
                "ambientcg_downloads":ambientcg_report,
@@ -4375,7 +4608,13 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"noaa_ocean_exploration_downloads":noaa_report,"sticker_meme_library":sticker_meme_counts,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"openmoji_downloads":openmoji_report,"noaa_ocean_exploration_downloads":noaa_report,"sticker_meme_library":sticker_meme_counts,"assets":index}
+    openmoji_note=(
+      "\n\n## OpenMoji 17.0 emoji and sticker artwork — CC BY-SA 4.0\n"
+      "The builder downloads the pinned official npm package openmoji@17.0.0, verifies package version, artwork license metadata, official npm tarball URL, SHA-1 and SHA-512 integrity against the registry response, and safely extracts only the exported color/black SVG and PNG directories plus central emoji metadata. JavaScript, build scripts and unrelated repository files are not bundled. SVG assets are sanitized; PNG signatures, archive member paths and size limits are checked. Each graphic retains a per-file SHA-256, tag-pinned GitHub source URL, the full CC BY-SA 4.0 license text and the OpenMoji FAQ. OpenMoji artwork is not CC0: use the required credit, indicate changes, and keep adapted artwork under CC BY-SA 4.0. The official FAQ specifically recommends attribution in the video description and/or end credits, voice track or a footnote at first use. Source: https://github.com/hfg-gmuend/openmoji/tree/17.0.0 and https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md.\n"
+      + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in openmoji_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+openmoji_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 

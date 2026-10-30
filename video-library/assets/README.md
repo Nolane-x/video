@@ -154,3 +154,37 @@ The library is no longer tied to a single ZIP. The packager estimates the raw re
 - `ASSET_BUNDLES.json` records every volume, SHA-256, byte count, file count and the exact paths it contains. The workflow verifies all ZIPs and confirms every library file is included exactly once.
 
 For a multi-volume release, download the catalog bundle and the resource families you need, then extract all selected ZIPs into the same parent folder. Keep the `video-asset-library/` paths intact. This is the foundation for growing toward tens of gigabytes without one unmanageable archive.
+
+## Build 47: high-capacity source expansion for multi-volume libraries
+
+Build 47 raises discovery and download ceilings so the library can grow from a small starter resource set toward a multi-volume, multi-tens-of-gigabytes collection. The figures below are **maximum ceilings**, not guaranteed downloads; item-level rights, provider availability, file validation, size budgets and the release report determine the actual results.
+
+| Source family | Build 47 ceiling |
+|---|---:|
+| Poly Haven | 48 HDRIs, 72 models, 160 texture assets |
+| ambientCG | Up to 140 packages across materials, HDRIs, models, decals, atlases, plain textures, brushes and Substance |
+| OpenGameArt | Up to 108 CC0 packs across 2D, 3D, textures, SFX and music |
+| Wikimedia Commons | Up to 800 item-rights-verified images, 100 SVG vectors and 100 video/audio files |
+| USGS | Up to 80 images, 40 videos and 24 audio files |
+| NOAA Ocean Exploration | Up to 200 images and 120 videos |
+| The Met Open Access | Up to 300 item-verified public-domain images |
+| Rijksmuseum | Up to 240 CC0/Public Domain Mark images |
+| Library of Congress | Up to 160 photos with positive item-level rights statements |
+
+The per-source aggregate ceilings are also raised: ambientCG 5 GiB, OpenGameArt 4 GiB, USGS 6 GiB and NOAA Ocean Exploration 8 GiB. The workflow is allowed 180 minutes for the larger source collection. These budgets are independent guards, not promises that each source will fill its quota.
+
+### Multi-volume download design
+
+The resource tree can exceed one archive. The packager creates a small catalog/metadata ZIP plus independently downloadable family volumes and splits a family again when needed. Each ZIP remains below the 1.9 GB release-asset safety ceiling; its exact file list, uncompressed/compressed sizes and SHA-256 are recorded in `ASSET_BUNDLES.json`. The verifier checks every archive and exact file coverage. Download the catalog and the family volumes needed for the current video project, then extract all selected archives into the same parent folder while preserving the `video-asset-library/` directory.
+
+This architecture is intended to support multi-volume libraries in the tens of gigabytes without a single oversized ZIP. Actual released size and successful counts are written to the build report and must be inspected after the run.
+
+## Build 47: OpenMoji 17.0 emoji and sticker exports
+
+The build now adds the pinned **OpenMoji 17.0** official npm package's color and black emoji artwork in SVG, 618×618 PNG and 72×72 PNG formats, together with the central emoji metadata. The importer checks the exact npm package version and CC BY-SA 4.0 label, validates both the registry SHA-1 and SHA-512 integrity values, and extracts only approved artwork/metadata paths from the tarball. JavaScript and build scripts are not included; SVGs are sanitized and PNG signatures are checked.
+
+**Important license distinction:** OpenMoji artwork is CC BY-SA 4.0, not CC0. Commercial use is permitted with attribution. Credit must be given and changes indicated; if artwork is adapted, the adaptation must remain under CC BY-SA 4.0. The official OpenMoji FAQ specifically recommends putting the credit in the video's description and/or end credits, voice track or a footnote when the first OpenMoji appears. Each indexed file carries the CC BY-SA license, required credit text, video-attribution guidance, and the share-alike condition. The full license text and FAQ are stored next to the downloaded assets.
+
+Suggested attribution: “All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0.”
+
+Official sources: [OpenMoji 17.0 release](https://github.com/hfg-gmuend/openmoji/releases/tag/17.0.0), [official FAQ](https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md), [npm package 17.0.0](https://www.npmjs.com/package/openmoji/v/17.0.0), [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).

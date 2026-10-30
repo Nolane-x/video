@@ -37,6 +37,8 @@ def classify_asset(asset: dict) -> str:
         return "typography"
     if asset_type in {"original-video-sticker", "original-meme-layout-template", "original-caption-overlay"}:
         return "original-graphics"
+    if "openmoji" in asset_type or path.startswith("third-party/openmoji/"):
+        return "original-graphics"
     if "texture" in asset_type or "texture" in category or "surface" in category:
         return "3d-textures"
     if "video" in asset_type or extension in {".mp4", ".mov", ".m4v", ".webm", ".ogv"}:

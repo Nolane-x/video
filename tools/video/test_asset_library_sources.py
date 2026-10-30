@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import sys
 import tempfile
+import tarfile
 import unittest
 from unittest import mock
 import zipfile
@@ -22,21 +23,34 @@ import json
 
 class ExternalSourceExpansionTests(unittest.TestCase):
     def test_external_source_ceilings_remain_expanded(self):
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 20)
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["models"], 28)
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["textures"], 48)
-        self.assertGreaterEqual(library.MET_OPEN_ACCESS_IMAGE_CAP, 110)
-        self.assertGreaterEqual(library.RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP, 90)
-        self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP, 240)
-        self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 60)
-        self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 36)
-        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 30)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 48)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["models"], 72)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["textures"], 160)
+        self.assertGreaterEqual(library.MAX_POLY_FILE, 60 * 1024 * 1024)
+        self.assertGreaterEqual(library.MAX_MEDIA_FILE, 12 * 1024 * 1024)
+        self.assertGreaterEqual(library.MET_OPEN_ACCESS_IMAGE_CAP, 300)
+        self.assertGreaterEqual(library.RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP, 240)
+        self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP, 800)
+        self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 100)
+        self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 100)
+        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 140)
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
-        self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 20 * 1024 * 1024)
-        self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 250 * 1024 * 1024)
-        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 4)
-        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 24, "videos": 8, "audio": 8})
-        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 100 * 1024 * 1024)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 5 * 1024 * 1024 * 1024)
+        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 18)
+        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 80, "videos": 40, "audio": 24})
+        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 6 * 1024 * 1024 * 1024)
+        self.assertEqual(library.OPENGAMEART_SELECTION_CAPS, {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20})
+        self.assertEqual(library.OPENGAMEART_SEARCH_PAGES_PER_TYPE, 5)
+        self.assertEqual(library.OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE, 48)
+        self.assertGreaterEqual(library.OPENGAMEART_MAX_TOTAL_BYTES, 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.NOAA_MEDIA_PAGE_SCAN_LIMIT, 20)
+        self.assertEqual(library.NOAA_MEDIA_SELECTION_CAPS, {"image": 200, "video": 120})
+        self.assertEqual(library.OPENMOJI_VERSION, "17.0.0")
+        self.assertEqual(library.OPENMOJI_EXPECTED_FILE_COUNT, 11539)
+        self.assertGreaterEqual(library.OPENMOJI_MAX_ARCHIVE_BYTES, 80 * 1024 * 1024)
+        self.assertGreaterEqual(library.OPENMOJI_MAX_EXTRACTED_BYTES, 100 * 1024 * 1024)
+        self.assertGreaterEqual(library.NOAA_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
 
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
         self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
@@ -66,6 +80,87 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+class OpenMojiCCBYSAAssetTests(unittest.TestCase):
+    def test_openmoji_npm_metadata_requires_pinned_version_and_sharealike_license(self):
+        good = {
+            "version": "17.0.0",
+            "license": "CC-BY-SA-4.0",
+            "repository": {"url": "git+https://github.com/hfg-gmuend/openmoji.git"},
+            "dist": {
+                "tarball": "https://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz",
+                "shasum": "ee8094c5c0de0d2126b77ceb074d62b6fe2071d0",
+                "integrity": "sha512-EBnYrNGdcdw+OSXmENeNE1yBNRu6tOraTmoOyUbJkTmvT/+XETp8RZLSJFzD3lrPc5N9CzsyPnRTk0Vp4UaI9w==",
+                "fileCount": 11539,
+                "unpackedSize": 43405090,
+            },
+        }
+        self.assertTrue(library.openmoji_metadata_is_eligible(good))
+        bad = json.loads(json.dumps(good))
+        bad["license"] = "CC0-1.0"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["dist"]["fileCount"] = 11538
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["dist"]["unpackedSize"] = library.OPENMOJI_MAX_EXTRACTED_BYTES + 1
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["version"] = "latest"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["dist"]["tarball"] = "https://evil.example/openmoji-17.0.0.tgz"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+
+    def test_openmoji_tarball_and_asset_path_allowlists_are_strict(self):
+        self.assertTrue(library.openmoji_tarball_url_is_allowed(
+            "https://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "http://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "https://registry.npmjs.org/openmoji/-/openmoji-16.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "https://user@registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertEqual(library.openmoji_selected_archive_path("package/color/svg/1F600.svg"), "color/svg/1F600.svg")
+        self.assertEqual(library.openmoji_selected_archive_path("package/black/618x618/1F600.png"), "black/618x618/1F600.png")
+        self.assertEqual(library.openmoji_selected_archive_path("package/data/openmoji.json"), "data/openmoji.json")
+        self.assertIsNone(library.openmoji_selected_archive_path("package/helpers/install.js"))
+        self.assertIsNone(library.openmoji_selected_archive_path("package/src/generator.py"))
+        self.assertIsNone(library.openmoji_selected_archive_path("package/color/svg/../../outside.svg"))
+
+    def test_openmoji_extractor_keeps_only_safe_svg_png_and_central_metadata(self):
+        stream = io.BytesIO()
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><rect width="10" height="10"/></svg>'
+        png = b"\x89PNG\r\n\x1a\n" + b"valid-png-fixture"
+        metadata = json.dumps([{"hexcode": "1F600", "annotation": "grinning face"}]).encode()
+        with tarfile.open(fileobj=stream, mode="w:gz") as archive:
+            def add_file(name, payload):
+                info = tarfile.TarInfo(name)
+                info.size = len(payload)
+                archive.addfile(info, io.BytesIO(payload))
+            add_file("package/color/svg/1F600.svg", svg)
+            add_file("package/black/618x618/1F600.png", png)
+            add_file("package/data/openmoji.json", metadata)
+            add_file("package/helpers/install.js", b"console.log('do not extract')")
+            add_file("package/color/svg/unsafe.png", b"<html>not a png</html>")
+            link = tarfile.TarInfo("package/color/svg/symlink.svg")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../outside.svg"
+            archive.addfile(link)
+            add_file("package/../outside.svg", svg)
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "openmoji"
+            selected, rows = library.openmoji_extract_selected_assets(stream.getvalue(), target)
+            self.assertEqual(len(selected), 2)
+            self.assertEqual(len(rows), 1)
+            self.assertTrue((target / "color/svg/1F600.svg").is_file())
+            self.assertTrue((target / "black/618x618/1F600.png").is_file())
+            self.assertFalse((target / "helpers/install.js").exists())
+            self.assertFalse((Path(tmp) / "outside.svg").exists())
+            cleaned = (target / "color/svg/1F600.svg").read_text(encoding="utf-8")
+            self.assertNotIn("<script", cleaned.lower())
+            self.assertNotIn("onload=", cleaned.lower())
+
 
 class GoogleFontsOFLTests(unittest.TestCase):
     def test_google_fonts_api_endpoint_is_pinned_to_official_family_directory(self):
@@ -267,6 +362,8 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-sfx", "path": "originals/audio/cue.wav"}), "audio")
         self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-video-loop", "path": "originals/video-loops/loop.mp4"}), "footage")
         self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
+        self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-svg", "path": "third-party/openmoji/color/svg/1F600.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-png", "path": "third-party/openmoji/color/618x618/1F600.png"}), "original-graphics")
 
     def test_bundle_manifest_detects_missing_or_modified_zip(self):
         with tempfile.TemporaryDirectory() as tmp:

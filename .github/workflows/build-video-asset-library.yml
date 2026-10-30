@@ -25,7 +25,7 @@ jobs:
   build:
     name: Build, validate and publish CC0-safe assets
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -151,7 +151,7 @@ jobs:
           ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
           assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
           assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
-          assert expected["ambientcg_packages_downloaded"] <= 30, "ambientCG search ceiling exceeded"
+          assert expected["ambientcg_packages_downloaded"] <= 140, "ambientCG search ceiling exceeded"
           for row in ambientcg_downloaded:
               assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
               assert row.get("license") == "CC0-1.0"
@@ -173,7 +173,7 @@ jobs:
           usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
           assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
           assert len(usgs_assets) == len(usgs_downloaded)
-          assert expected["usgs_images_downloaded"] <= 24 and expected["usgs_videos_downloaded"] <= 8 and expected["usgs_audio_downloaded"] <= 8
+          assert expected["usgs_images_downloaded"] <= 80 and expected["usgs_videos_downloaded"] <= 40 and expected["usgs_audio_downloaded"] <= 24
           for asset in usgs_assets:
               media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
               assert media_type in {"image", "video", "audio"}
@@ -195,8 +195,8 @@ jobs:
           opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
           assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
           assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
-          assert expected["opengameart_items_downloaded"] <= sum([6, 6, 5, 5, 5]), "OpenGameArt search ceilings exceeded"
-          caps = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+          assert expected["opengameart_items_downloaded"] <= sum([24, 24, 20, 20, 20]), "OpenGameArt search ceilings exceeded"
+          caps = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
           for category, cap in caps.items():
               assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
           for asset in opengameart_assets:
@@ -240,7 +240,7 @@ jobs:
           noaa_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("noaa-ocean-exploration-")]
           assert len(noaa_downloaded) == expected["noaa_images_downloaded"] + expected["noaa_videos_downloaded"]
           assert len(noaa_assets) == len(noaa_downloaded)
-          assert expected["noaa_images_downloaded"] <= 72 and expected["noaa_videos_downloaded"] <= 36
+          assert expected["noaa_images_downloaded"] <= 200 and expected["noaa_videos_downloaded"] <= 120
           for asset in noaa_assets:
               media_type = asset.get("type", "").removeprefix("noaa-ocean-exploration-")
               assert media_type in {"image", "video"}
@@ -261,8 +261,38 @@ jobs:
           assert len(caption_assets) == expected["original_caption_overlays"]
           for asset in sticker_assets + meme_assets + caption_assets:
               assert asset.get("license") == "CC0-1.0" and asset.get("original_artwork") is True and asset.get("redistributable") is True
-              assert asset.get("path", "").startswith("originals/")
+              sticker_path = Path(asset.get("path", ""))
+              assert not sticker_path.is_absolute() and sticker_path.parts and ".." not in sticker_path.parts
+              assert (root / sticker_path).is_file(), "Original sticker/meme/caption source file is missing"
               assert len(asset.get("sha256", "")) == 64
+          assert "openmoji_files_downloaded" in expected
+          openmoji_report = index.get("openmoji_downloads")
+          assert isinstance(openmoji_report, list), "OpenMoji report is missing"
+          openmoji_downloaded = [row for row in openmoji_report if row.get("status") == "downloaded"]
+          openmoji_assets = [asset for asset in index["assets"] if asset.get("type") in {"openmoji-cc-by-sa-svg", "openmoji-cc-by-sa-png"}]
+          assert len(openmoji_assets) == expected["openmoji_files_downloaded"]
+          assert expected["openmoji_files_downloaded"] <= 12000
+          for row in openmoji_downloaded:
+              assert row.get("version") == "17.0.0"
+              assert row.get("license") == "CC-BY-SA-4.0"
+              assert len(row.get("tarball_sha1", "")) == 40
+              assert row.get("tarball_integrity", "").startswith("sha512-")
+              assert row.get("extracted_files", 0) > 0
+          for asset in openmoji_assets:
+              assert asset.get("license") == "CC-BY-SA-4.0"
+              assert asset.get("license_verified_from_npm_metadata_and_official_faq") is True
+              assert asset.get("attribution_required") is True
+              assert asset.get("attribution_text") == "All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0."
+              assert asset.get("video_attribution_guidance")
+              assert "CC BY-SA 4.0" in asset.get("sharealike_requirement", "")
+              assert asset.get("source_page", "").startswith("https://github.com/hfg-gmuend/openmoji/tree/17.0.0")
+              assert asset.get("source_file_url", "").startswith("https://raw.githubusercontent.com/hfg-gmuend/openmoji/17.0.0/")
+              assert asset.get("path", "").startswith("third-party/openmoji/")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
+          openmoji_license = root / "third-party/openmoji/LICENSE.txt"
+          openmoji_faq = root / "third-party/openmoji/FAQ.md"
+          assert openmoji_license.is_file() and b"Attribution-ShareAlike 4.0 International" in openmoji_license.read_bytes()
+          assert openmoji_faq.is_file() and b"How to attribute OpenMoji in a film" in openmoji_faq.read_bytes()
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
