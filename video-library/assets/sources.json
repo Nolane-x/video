@@ -596,6 +596,22 @@
       "note": "Build 47 raises the aggregate downloaded-and-extracted content ceiling to 5 GiB and package discovery limits to 140 across Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance. Downloads remain restricted to official HTTPS /get ZIP endpoints, validated ZIP integrity, allow-listed extraction and source/archive/per-file SHA-256."
     },
     {
+      "id": "lazytextures-cc0-api",
+      "title": "LazyTextures — CC0 materials, models, HDRIs and texture packs",
+      "provider": "LazyTextures",
+      "kind": "public 3D asset API and downloadable archive library",
+      "category": "3D models, PBR materials, HDRI environment lighting, texture maps and decals",
+      "source_page": "https://lazytextures.com/",
+      "api": "https://lazytextures.net:3000",
+      "api_docs": "https://lazytextures.com/PublicAPI",
+      "license": "CC0-1.0 — official API documentation states all library assets are CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "authentication": "No API key required for documented public endpoints",
+      "bundling": "bounded-official-api-discovery-and-cc0-policy-check-before-allowlisted-zip-extraction",
+      "note": "The importer uses the official previewsModels, previewsMaterials, previewsHDRIs and previewsTextures endpoints, then matches each item by exact name/type against its official /Asset/{type}/{name} detail response. The provider's API documentation states that all library assets are CC0 1.0. Any contradictory item license metadata is rejected. Only ZIP files listed in archiveFiles and served from the exact HTTPS lazytextures.net:3000 /Assets/ path are considered. Per-file maximum 64 MiB, 512 MiB total downloaded archives, 128 MiB extracted bytes per item, 1.5 GiB extracted bytes total, and 2,500 ZIP members per archive. Discovery ceilings: 10 models, 16 materials, 10 HDRIs and 18 texture archives; requests are paced because downloads are subject to fair-use limits."
+    },
+    {
       "id": "original-procedural-motion-loops",
       "title": "Original in-repository procedural motion loops",
       "provider": "Nolane-x/video",
