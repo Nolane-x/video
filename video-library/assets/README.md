@@ -209,3 +209,10 @@ Only ZIP archives enumerated in an item's `archiveFiles` or `textureFiles` respo
 The fair-use-aware ceilings are 10 models, 16 materials, 10 HDRIs, 18 texture archives and 8 miscellaneous/other packages (62 packages maximum); at most 64 MiB per archive and 512 MiB of compressed downloads; at most 128 MiB unpacked per item and 1.5 GiB across the lane. ZIP central-directory paths, member count, declared expansion size, compression ratio and CRC are checked before extraction. Extracted images, 3D files, fonts, audio and documents pass a format-signature check; SVG is sanitized. Unsupported or mismatched files are excluded and counted. Item requests are paced. These are ceilings, not promised download totals. Standalone preview images and undocumented direct files are not imported.
 
 Official references: [LazyTextures Public API](https://lazytextures.com/PublicAPI), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+
+## Source review: Quaternius — do not mirror current-QAL packs as raw assets
+
+Quaternius remains useful as a source for creating finished videos and games, but its current official **Quaternius Asset License (QAL) v1.0**, last updated 28 August 2026, allows use and incorporation into finished Products while prohibiting resale, repackaging or redistribution of the assets themselves as standalone files or asset packs, including inside a bundle with other assets. This repository distributes raw reusable assets, so current-QAL downloads are catalogued as **source-only** and are not imported. Do not rely on older copies of the FAQ that describe the whole catalogue as CC0; inspect the exact dated license for any legacy pack before reconsidering it.
+
+Official license: [Quaternius Asset License v1.0](https://quaternius.com/license.html). Older FAQ: [Quaternius FAQ](https://quaternius.com/faq.html).
