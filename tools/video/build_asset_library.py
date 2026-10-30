@@ -16,6 +16,7 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
+MAX_LEGACY_FULL_ZIP_BYTES = 1500 * 1024 * 1024
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
@@ -4023,15 +4024,25 @@ def main():
             if path.relative_to(STAGE).as_posix() not in indexed and path.name!="ASSET_INDEX.json":
                 raise RuntimeError("checksum missing for "+str(path))
     OUT.mkdir(parents=True,exist_ok=True)
-    # The release now uses bounded category packs; the packager creates a compact
-    # catalog archive after building the per-pack checksums and package manifest.
     archive=OUT/"video-asset-library.zip"
-    if archive.exists():
-        archive.unlink()
+    staged_files=[p for p in STAGE.rglob("*") if p.is_file()]
+    staged_bytes=sum(p.stat().st_size for p in staged_files)
+    archive_info={"mode":"catalog-only-pending","staged_bytes":staged_bytes}
+    if staged_bytes<=MAX_LEGACY_FULL_ZIP_BYTES:
+        if archive.exists(): archive.unlink()
+        with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=3,allowZip64=True) as z:
+            for path in sorted(staged_files):
+                z.write(path,Path("video-asset-library")/path.relative_to(STAGE))
+        archive_info.update(mode="full-library",zip_sha256=sha256_path(archive),zip_size_bytes=archive.stat().st_size)
+        print(f"[Package] created compatibility full-library ZIP size={archive.stat().st_size}")
+    else:
+        if archive.exists(): archive.unlink()
+        print(f"[Package] skipped monolithic ZIP: staged assets={staged_bytes} bytes; modular packs will be used")
     write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",
                f"built_at={index_doc['built_at']}\n"
                f"summary={json.dumps(summary)}\n"
-               "distribution_mode=modular-packs-pending\n")
+               f"staged_bytes={staged_bytes}\n"
+               f"full_archive_mode={archive_info['mode']}\n")
     print("[Package] staged",len(index),"indexed resources; modular packager will create independently downloadable archives")
 if __name__=="__main__":
     main()
