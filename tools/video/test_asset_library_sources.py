@@ -1194,17 +1194,19 @@ class RightsGateTests(unittest.TestCase):
             url, 429, "Too Many Requests", {"Retry-After": "7"}, None
         )
         expected = {"response": {"rows": []}}
-        with mock.patch.object(library, "request_json", side_effect=[limited, expected]) as request,              mock.patch.object(library.time, "sleep") as sleep:
-            self.assertEqual(library.smithsonian_request_json(url), expected)
+        with mock.patch.object(library, "request_json", side_effect=[limited, expected]) as request:
+            with mock.patch.object(library.time, "sleep") as sleep:
+                self.assertEqual(library.smithsonian_request_json(url), expected)
         self.assertEqual(request.call_count, 2)
         sleep.assert_called_once_with(7.0)
 
     def test_smithsonian_request_does_not_retry_permanent_http_errors(self):
         url = "https://api.si.edu/openaccess/api/v1.0/search?q=unit_code%3ANMNH"
         denied = urllib.error.HTTPError(url, 401, "Unauthorized", {}, None)
-        with mock.patch.object(library, "request_json", side_effect=denied),              mock.patch.object(library.time, "sleep") as sleep:
-            with self.assertRaises(urllib.error.HTTPError):
-                library.smithsonian_request_json(url)
+        with mock.patch.object(library, "request_json", side_effect=denied):
+            with mock.patch.object(library.time, "sleep") as sleep:
+                with self.assertRaises(urllib.error.HTTPError):
+                    library.smithsonian_request_json(url)
         sleep.assert_not_called()
 
     def test_rijksmuseum_resolver_rejects_nonofficial_hosts_without_network_access(self):
