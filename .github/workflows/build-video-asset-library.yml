@@ -316,6 +316,9 @@ jobs:
           path: |
             dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
             dist/video-assets/video-asset-library/ASSET_INDEX.json
+            dist/video-assets/video-asset-library/MODULAR_PACKS_INDEX.json
+            dist/video-assets/PACKAGES_INDEX.json
+            dist/video-assets/PACKAGES_INDEX.md
             dist/video-assets/video-asset-library/SOURCES_AND_LICENSES.md
             dist/video-assets/video-asset-library/SHA256SUMS.txt
           if-no-files-found: error
