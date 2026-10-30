@@ -204,7 +204,7 @@ Official API references: [Internet Archive Advanced Search](https://archive.org/
 
 The build adds a bounded importer for the official LazyTextures public API. Its documentation states that all library assets are CC0 1.0 and that the API does not require an API key. The importer requests the documented model, material, HDRI and texture browse endpoints, then matches each candidate to the exact official item detail response by name and type. If an item detail contains a contradictory license field, that item is rejected.
 
-Only ZIP archives enumerated in an item's \`archiveFiles\` response are eligible. Downloads must remain on the exact official HTTPS host and \`/Assets/\` path. Every archive is checked for ZIP signature, CRC integrity, a bounded member count and a safe extraction path/extension allow-list. Each extracted file receives SHA-256 and retains the item detail URL, direct archive URL, archive SHA-256 and CC0 evidence URL.
+Only ZIP archives enumerated in an item's `archiveFiles` response are eligible. Downloads must remain on the exact official HTTPS host and `/Assets/` path. Every archive is checked for ZIP signature, CRC integrity, a bounded member count and a safe extraction path/extension allow-list. Each extracted file receives SHA-256 and retains the item detail URL, direct archive URL, archive SHA-256 and CC0 evidence URL.
 
 The fair-use-aware ceilings are 10 models, 16 materials, 10 HDRIs and 18 texture archives; at most 64 MiB per archive and 512 MiB of compressed downloads; at most 128 MiB unpacked per item and 1.5 GiB across the lane. Item requests are paced. These are ceilings, not promised download totals. Standalone preview images and undocumented direct files are not imported.
 
