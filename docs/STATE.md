@@ -140,3 +140,18 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - Latest native H2 render: [run #14](https://github.com/Nolane-x/video/actions/runs/40429993482), all steps successful. 172.000 s, H.264 1920×1080 @24 fps + AAC 48 kHz stereo; −14.0 LUFS, −1.9 dBFS true peak.
 - B19 turning-action sample shows coherent limbs during motion. Full contact-sheet review and full-length video/audio watch remain pending; the artifact expires 2026-11-26T01:05:34Z.
 - Keep it separate from THE FIRST HOUR, THE WEIGHT OF YES and canonical ONE MORE SCROLL.
+
+
+## Distributed 50 GB asset-library pipeline — 2026-10-30
+
+- PR [#18](https://github.com/Nolane-x/video/pull/18) merged to `main` at commit [`6a44c974`](https://github.com/Nolane-x/video/commit/6a44c974ba4be413a5b5006a720a5db5ee8e1b69). It replaces the single serial source-download job with 22 independent lanes (original assets + 21 providers), up to 16 simultaneous GitHub-hosted runners.
+- Latest PR validation [run #131](https://github.com/Nolane-x/video/actions/runs/41066218856) passed: Python compilation, the full offline rights/source regression suite, and generated-asset smoke build.
+- New distributed workflow [Build #52](https://github.com/Nolane-x/video/actions/runs/41066528335) was created on the merge commit. At this snapshot it is **queued**; the source jobs were created but no asset volume has yet been confirmed uploaded by this run.
+- Source sharder: `tools/video/build_asset_library_shard.py`. Each lane runs its existing source importer, requires a license and `redistributable: true` for every indexed asset, validates paths/bytes/SHA-256, packages independent category volumes under 1.7 GB uncompressed, uploads directly into a unique draft Release, and deletes local copies only after successful upload. Failed uploads preserve raw files; reruns can overwrite same-name assets.
+- Finalizer: `tools/video/finalize_asset_library_release.py`. Merges all 22 manifests, rejects duplicate asset IDs/paths and incomplete volume coverage, builds the global offline catalog/index/license ledger/checksum list, then verifies exact Release asset names, sizes and GitHub-computed SHA-256 digests before publishing.
+- Poly Haven lane now has an 8 GiB aggregate download ceiling so a large model/texture selection does not exceed a standard runner's 14 GB SSD. Matrix concurrency is limited to 16 to remain within standard GitHub Actions concurrency.
+- The new workflow uses concurrency group `video-asset-library-distributed-v2` so it is not blocked behind the legacy serial build queue.
+- 50 GB is defined as **50,000,000,000 actual indexed media bytes**. The finalizer reports the exact measured value and never rounds a partial build up to 50 GB.
+- Legacy state at the time of merge: Build 49 [run](https://github.com/Nolane-x/video/actions/runs/41048645254) remained in progress in the old serial download step; Build 50 [run](https://github.com/Nolane-x/video/actions/runs/41054395607) was cancelled; Build 51 [run](https://github.com/Nolane-x/video/actions/runs/41059475106) remained pending behind the old queue. Do not count any of these as a completed release.
+- Last confirmed published library remains Build 43 at 1,095,394,051 bytes. **No new 50 GB release has been published yet.** Next: inspect Build 52's 22 lane jobs as runners become available; use actual per-lane byte counts and upload status to improve any slow/failing importer. Only announce 50 GB once the final Release and its remote digests are verified.
+
