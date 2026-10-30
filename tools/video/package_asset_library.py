@@ -247,14 +247,31 @@ def package_library(output_dir: Path) -> dict:
     }
     index_path.write_text(json.dumps(index_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    with (output_dir / "VIDEO_ASSET_LIBRARY_BUILD.txt").open("a", encoding="utf-8") as stream:
-        stream.write(
-            f"distribution_mode={pack_index['distribution_mode']}\n"
-            f"pack_count={pack_index['pack_count']}\n"
-            f"total_pack_compressed_bytes={pack_index['total_pack_compressed_bytes']}\n"
-            f"total_pack_raw_bytes={pack_index['total_pack_raw_bytes']}\n"
-            f"catalog_archive_bytes={archive_path.stat().st_size}\n"
-        )
+    if not legacy_full:
+        catalog_files = ["ASSET_INDEX.json", "ASSET_CATALOG.html", "SOURCES_AND_LICENSES.md", "SHA256SUMS.txt", "MODULAR_PACKS_INDEX.json"]
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1, allowZip64=True) as archive:
+            for rel in catalog_files:
+                file_path = root / rel
+                if file_path.is_file():
+                    archive.write(file_path, f"video-asset-library/{rel}")
+
+    summary_file = output_dir / "VIDEO_ASSET_LIBRARY_BUILD.txt"
+    if summary_file.is_file():
+        old_lines = [line for line in summary_file.read_text(encoding="utf-8").splitlines()
+                     if not line.startswith(("zip_sha256=", "zip_size_bytes=", "distribution_mode=", "pack_count=",
+                                             "total_pack_compressed_bytes=", "total_pack_raw_bytes=", "catalog_archive_bytes="))]
+    else:
+        old_lines = []
+    old_lines.extend([
+        f"zip_sha256={sha256_file(archive_path)}",
+        f"zip_size_bytes={archive_path.stat().st_size}",
+        f"distribution_mode={pack_index['distribution_mode']}",
+        f"pack_count={pack_index['pack_count']}",
+        f"total_pack_compressed_bytes={pack_index['total_pack_compressed_bytes']}",
+        f"total_pack_raw_bytes={pack_index['total_pack_raw_bytes']}",
+        f"catalog_archive_bytes={archive_path.stat().st_size}",
+    ])
+    summary_file.write_text("\n".join(old_lines) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in pack_index.items() if k != "packs"}, indent=2))
     return pack_index
 
