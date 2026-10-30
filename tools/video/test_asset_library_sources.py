@@ -40,6 +40,10 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 5 * 1024 * 1024 * 1024)
         self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8})
         self.assertEqual(library.LAZYTEXTURES_API_TYPES["other"]["endpoint"], "previewsOther")
+        self.assertEqual(library.POLY_PIZZA_MAX_MODELS, 48)
+        self.assertEqual(library.POLY_PIZZA_MAX_MODEL_BYTES, 128 * 1024 * 1024)
+        self.assertEqual(library.POLY_PIZZA_TOTAL_MAX_BYTES, 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.POLY_PIZZA_API_BASE, "https://api.poly.pizza/v1.1")
         self.assertEqual(library.LAZYTEXTURES_MAX_ZIP_MEMBERS, 2500)
         self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
         self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
@@ -98,6 +102,93 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+
+class PolyPizzaCC0APITests(unittest.TestCase):
+    def _model(self):
+        return {
+            "ID": "TreeOne",
+            "Title": "Low Poly Tree",
+            "Creator": {"Username": "ExampleArtist", "PURL": "https://poly.pizza/u/ExampleArtist"},
+            "Licence": "CC0 1.0",
+            "URL": "https://poly.pizza/m/TreeOne",
+            "Download": "https://cdn.poly.pizza/models/TreeOne.glb",
+            "Tags": ["tree", "nature"],
+            "Tri Count": 1200,
+        }
+
+    def test_api_and_asset_url_allowlists_are_https_and_host_pinned(self):
+        self.assertTrue(library.poly_pizza_api_url_is_allowed("https://api.poly.pizza/v1.1/search/tree"))
+        self.assertFalse(library.poly_pizza_api_url_is_allowed("https://api.poly.pizza.evil.example/v1.1/search/tree"))
+        self.assertFalse(library.poly_pizza_api_url_is_allowed("http://api.poly.pizza/v1.1/search/tree"))
+        self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://cdn.poly.pizza/models/tree.glb"))
+        self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://poly.pizza/m/TreeOne"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://evil.example/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("http://cdn.poly.pizza/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://user@cdn.poly.pizza/models/tree.glb"))
+
+    def test_model_parser_accepts_exact_cc0_and_fails_closed_on_other_licenses(self):
+        parsed, reason = library.poly_pizza_parse_model(self._model(), require_download=True)
+        self.assertIsNone(reason)
+        self.assertEqual(parsed["license"], "CC0-1.0")
+        self.assertEqual(parsed["model_id"], "TreeOne")
+        self.assertEqual(parsed["creator"], "ExampleArtist")
+        self.assertTrue(parsed["source_page"].startswith("https://poly.pizza/m/"))
+        self.assertEqual(parsed["download_url"], "https://cdn.poly.pizza/models/TreeOne.glb")
+
+        by_model = self._model()
+        by_model["Licence"] = "CC-BY 4.0"
+        self.assertEqual(library.poly_pizza_parse_model(by_model)[1], "license_not_cc0_or_unrecognized")
+        unknown = self._model()
+        unknown.pop("Licence")
+        self.assertEqual(library.poly_pizza_parse_model(unknown)[1], "license_not_cc0_or_unrecognized")
+        hostile = self._model()
+        hostile["Download"] = "https://evil.example/tree.glb"
+        self.assertEqual(library.poly_pizza_parse_model(hostile, require_download=True)[1], "download_url_not_official")
+
+    def test_glb_validator_checks_magic_version_and_declared_length(self):
+        valid = b"glTF" + (2).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"
+        self.assertTrue(library.poly_pizza_glb_is_valid(valid))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"<html>blocked</html>"))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (1).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (2).to_bytes(4, "little") + (21).to_bytes(4, "little") + b"12345678"))
+
+    def test_importer_skips_without_secret_and_does_not_attempt_network(self):
+        with mock.patch.dict(library.os.environ if hasattr(library, "os") else __import__("os").environ,
+                             {"POLY_PIZZA_API_KEY": ""}, clear=False):
+            with mock.patch.object(library, "poly_pizza_api_json", side_effect=AssertionError("network must not run")):
+                report = library.download_poly_pizza(Path("."), [])
+        self.assertEqual(len(report), 1)
+        self.assertEqual(report[0]["status"], "skipped_missing_api_key")
+
+    def test_importer_rechecks_detail_and_records_glb_receipt(self):
+        model = self._model()
+        glb = b"glTF" + (2).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"
+        def fake_api(path, params, token):
+            if path == "/model/TreeOne":
+                return model
+            if "/search/tree" in path:
+                return {"results": [model]}
+            return {"results": []}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            with mock.patch.dict(__import__("os").environ, {"POLY_PIZZA_API_KEY": "test-token"}, clear=False), \
+                 mock.patch.object(library, "poly_pizza_api_json", side_effect=fake_api), \
+                 mock.patch.object(library, "poly_pizza_download_glb", return_value=(glb, model["Download"])), \
+                 mock.patch.object(library.time, "sleep", return_value=None):
+                report = library.download_poly_pizza(root, index)
+            downloaded = [row for row in report if row.get("status") == "downloaded"]
+            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(len(index), 1)
+            asset = index[0]
+            self.assertEqual(asset["license"], "CC0-1.0")
+            self.assertTrue(asset["license_verified_from_item_metadata"])
+            path = root / asset["path"]
+            self.assertTrue(path.is_file())
+            self.assertEqual(path.read_bytes(), glb)
+            self.assertEqual(asset["sha256"], library.sha256_path(path))
+            self.assertTrue((path.parent / "SOURCE_AND_LICENSE.md").is_file())
 
 
 class LazyTexturesCC0APITests(unittest.TestCase):
