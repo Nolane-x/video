@@ -21,7 +21,7 @@ MAX_POLY_FILE = 35 * 1024 * 1024
 POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 14, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "Terrain": 2}
+AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
 MET_OPEN_ACCESS_IMAGE_CAP = 110
@@ -1668,7 +1668,7 @@ def download_ambientcg(root,index):
                         "- Original package was validated as a ZIP and extracted using the repository allow-list; executable types and nested ZIPs are not included.\n"
                     )
                     write_text(target/"SOURCE_AND_LICENSE.md",note)
-                    for path in sorted(p for p in target.rglob("*") if p.is_file()):
+                    for path in sorted(p for p in target.rglob("*") if p.is_file() and p.name!="SOURCE_AND_LICENSE.md"):
                         index.append({"id":"ambientcg-"+slugify(asset_id)+"-"+slugify(path.relative_to(target).as_posix()),
                                       "path":path.relative_to(root).as_posix(),"type":"ambientcg-asset-file","provider":"ambientCG",
                                       "parent_asset_id":"ambientcg-"+slugify(asset_id),"asset_id":asset_id,
