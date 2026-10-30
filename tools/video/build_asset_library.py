@@ -4974,7 +4974,7 @@ def nasa_item_is_eligible(data):
 
 def download_nasa_media(root,index):
     """Bundle small NASA-origin media when the item passes the conservative policy filters."""
-    report=[]; seen=set()
+    report=[]; seen=set(); total_downloaded_bytes=0
     searches=[
         ("space","nebula galaxy stars"),("planet","Mars surface rover"),
         ("earth","Earth from space clouds"),("solar","solar flare sun"),
@@ -5002,7 +5002,12 @@ def download_nasa_media(root,index):
     ]
     media_types=("image","video","audio")
     for category,q in searches:
+        if total_downloaded_bytes >= NASA_TOTAL_MAX_BYTES:
+            print("[NASA media] reached aggregate byte ceiling", total_downloaded_bytes)
+            break
         for media_type in media_types:
+            if total_downloaded_bytes >= NASA_TOTAL_MAX_BYTES:
+                break
             if category.endswith("-audio") and media_type!="audio":
                 continue
             if not category.endswith("-audio") and media_type=="audio" and category not in {"space","earth","launch","atmosphere"}:
@@ -5033,11 +5038,11 @@ def download_nasa_media(root,index):
                     manifest=request_json("https://images-api.nasa.gov/asset/"+urllib.parse.quote(chosen_id,safe=""),timeout=18)
                     urls=[str(x.get("href") or "") for x in ((manifest.get("collection") or {}).get("items") or [])]
                     if media_type=="image":
-                        allowed_ext={".jpg",".jpeg",".png",".webp"}; cap=MAX_MEDIA_FILE
+                        allowed_ext={".jpg",".jpeg",".png",".webp"}; cap=NASA_IMAGE_MAX_BYTES
                     elif media_type=="video":
-                        allowed_ext={".mp4",".mov",".m4v"}; cap=18*1024*1024
+                        allowed_ext={".mp4",".mov",".m4v"}; cap=NASA_VIDEO_MAX_BYTES
                     else:
-                        allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=15*1024*1024
+                        allowed_ext={".mp3",".wav",".m4a",".ogg"}; cap=NASA_AUDIO_MAX_BYTES
                     candidates=[]
                     for media_url in urls:
                         media_url=media_url.replace("http://","https://",1)
@@ -5062,7 +5067,7 @@ def download_nasa_media(root,index):
                             else:
                                 continue
                         name=Path(parsed.path).name.lower()
-                        preference=0 if "~smal" in name or "~small" in name else 1 if "~medi" in name or "~medium" in name else 2 if "~larg" in name or "~large" in name else 3 if "~orig" in name else 4
+                        preference=0 if "~larg" in name or "~large" in name else 1 if "~orig" in name else 2 if "~medi" in name or "~medium" in name else 3 if "~smal" in name or "~small" in name else 4
                         candidates.append((preference,len(media_url),media_url,ext))
                     candidates.sort()
                     downloaded=None; failures=[]
@@ -5095,11 +5100,17 @@ def download_nasa_media(root,index):
                     if not downloaded:
                         raise RuntimeError("no suitable small media file could be retrieved: "+"; ".join(failures[-3:]))
                     media_url,ext,blob,ctype=downloaded
+                    if total_downloaded_bytes + len(blob) > NASA_TOTAL_MAX_BYTES:
+                        report.append({"id":"nasa-"+media_type+"-"+slugify(chosen_id),"status":"skipped_total_size_limit",
+                                       "category":category,"media_type":media_type,"source_page":"https://images.nasa.gov/details/"+chosen_id,
+                                       "reason":"The selected higher-quality item would exceed the aggregate NASA media byte ceiling."})
+                        break
                     title=str(chosen_data.get("title") or chosen_id)
                     filename=f"{category}-{slugify(title)[:48]}-{slugify(chosen_id)}{ext}"
                     folder={"image":"images","video":"video","audio":"audio"}[media_type]
                     target=root/"third-party/nasa"/folder/filename
                     target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                    total_downloaded_bytes += len(blob)
                     digest=sha256_path(target)
                     page_url="https://images.nasa.gov/details/"+urllib.parse.quote(chosen_id,safe="")
                     license_name="NASA Media Usage Guidelines — generally not copyrighted; not CC0"
