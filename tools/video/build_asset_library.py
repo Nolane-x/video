@@ -2363,11 +2363,17 @@ def poly_pizza_model_id_is_allowed(value):
 
 
 def poly_pizza_cc0_license(value):
-    if not isinstance(value, str):
+    if isinstance(value, dict):
+        value = (
+            value.get("Name") or value.get("Title") or value.get("Slug")
+            or value.get("name") or value.get("title") or value.get("slug")
+            or value.get("ID") or value.get("id")
+        )
+    if isinstance(value, bool) or value is None:
         return None
-    normalized = re.sub(r"[\s_\-]+", " ", value).strip().casefold()
+    normalized = re.sub(r"[\s_\-]+", " ", str(value)).strip().casefold()
     accepted = {
-        "cc0", "cc0 1.0", "cc0 1.0 universal",
+        "1", "cc0", "cc0 1.0", "cc0 1.0 universal",
         "creative commons zero", "creative commons zero 1.0",
     }
     return POLY_PIZZA_LICENSE if normalized in accepted else None
