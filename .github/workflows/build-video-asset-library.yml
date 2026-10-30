@@ -20,7 +20,7 @@ permissions:
 
 # Serialize separate library builds, but fan out the independent source jobs inside one build.
 concurrency:
-  group: video-asset-library
+  group: video-asset-library-distributed-v2
   cancel-in-progress: false
 
 jobs:
