@@ -209,6 +209,22 @@ def probe_nara_mp4_range(url: str, expected_size: int | None = None) -> dict[str
                     expected_size is None or actual_total is None or int(expected_size) == actual_total
                 ),
             }
+    except urllib.error.HTTPError as exc:
+        try:
+            response_body = exc.read(512).decode("utf-8", "replace")
+        except Exception:
+            response_body = ""
+        return {
+            "url_allowed": True,
+            "status": "range-failed",
+            "http_status": exc.code,
+            "reason": str(exc)[:240],
+            "provider_error_body": response_body[:512],
+            "provider_error_code": (
+                (re.search(r"<Code>([^<]+)</Code>", response_body) or [None, ""])[1]
+                if response_body else ""
+            ),
+        }
     except Exception as exc:
         return {"url_allowed": True, "status": "range-failed", "reason": str(exc)[:400]}
 
