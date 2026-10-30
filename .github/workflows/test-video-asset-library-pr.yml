@@ -1,6 +1,17 @@
 name: Validate video asset library changes
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-video-asset-library-pr.yml"
+      - ".github/workflows/build-video-asset-library.yml"
+      - "tools/video/build_asset_library.py"
+      - "tools/video/build_asset_library_shard.py"
+      - "tools/video/finalize_asset_library_release.py"
+      - "tools/video/generate_sfx_library.py"
+      - "tools/video/test_asset_library_sources.py"
+      - "video-library/assets/sources.json"
   pull_request:
     branches: [main]
     paths:
