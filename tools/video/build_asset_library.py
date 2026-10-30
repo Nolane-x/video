@@ -3190,6 +3190,7 @@ def download_usgs_gallery(root,index):
                  "videos":"USGS science videos, field footage and animations",
                  "audio":"USGS natural sounds, interviews and science podcasts"}
     total_bytes=0
+    seen_item_urls=set()
     for media_type,cap in USGS_SELECTION_CAPS.items():
         candidates=[]
         for page_number in range(USGS_GALLERY_PAGE_SCAN_LIMIT):
@@ -3211,11 +3212,16 @@ def download_usgs_gallery(root,index):
         for item_url in candidates:
             if downloaded_for_type>=cap or total_bytes>=USGS_TOTAL_MAX_BYTES:
                 break
+            normalized_item_url=str(item_url).split("#",1)[0].rstrip("/")
+            if normalized_item_url in seen_item_urls:
+                continue
+            seen_item_urls.add(normalized_item_url)
+            item_identity=hashlib.sha256(normalized_item_url.encode("utf-8")).hexdigest()[:16]
             try:
                 page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
                 detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
                 singular_media_type=usgs_singular_media_type(media_type)
-                row={"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                row={"id":"usgs-"+media_type+"-"+item_identity,
                      "provider":"U.S. Geological Survey","media_type":singular_media_type,
                      "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
                      "date":detail["date"],"rights_statement":detail["rights_statement"],
@@ -3298,7 +3304,7 @@ def download_usgs_gallery(root,index):
                 print("[USGS] OK:",media_type,detail["title"],len(blob),"bytes")
                 time.sleep(.35)
             except Exception as exc:
-                report.append({"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                report.append({"id":"usgs-"+media_type+"-"+item_identity,
                                "provider":"U.S. Geological Survey","media_type":media_type[:-1],
                                "status":"item_failed","source_page":item_url,"reason":str(exc)[:350]})
         print("[USGS] "+media_type+":",downloaded_for_type,"downloaded; scanned",len(candidates),"item pages")
@@ -4116,12 +4122,13 @@ def download_noaa_ocean_exploration(root, index):
     total_bytes = 0
     seen = set()
     for item_url in candidates:
+        item_identity = hashlib.sha256(item_url.rstrip("/").encode("utf-8")).hexdigest()[:16]
         try:
             page, _ = request_bytes(item_url, timeout=25, limit=8 * 1024 * 1024)
             detail = noaa_parse_detail_page(page.decode("utf-8", "replace"))
             media_type = detail["media_type"]
             row = {
-                "id": "noaa-ocean-exploration-" + slugify(item_url.rstrip("/").rsplit("/", 1)[-1]),
+                "id": "noaa-ocean-exploration-" + item_identity,
                 "provider": "NOAA Ocean Exploration", "media_type": media_type,
                 "title": detail["title"], "source_page": item_url, "credit": detail["credit"],
                 "caption": detail["caption"], "license": "Public Domain (NOAA Ocean Exploration default; item exception screen)",
@@ -4180,7 +4187,7 @@ def download_noaa_ocean_exploration(root, index):
                 row.update(status="skipped_total_size_limit", reason="The aggregate NOAA media byte ceiling would be exceeded.")
                 report.append(row)
                 break
-            slug = slugify(detail["title"] or item_url.rstrip("/").rsplit("/", 1)[-1])[:90]
+            slug = slugify(detail["title"] or "noaa-media")[:64] + "-" + item_identity
             folder = root / "third-party" / "noaa-ocean-exploration" / (media_type + "s")
             folder.mkdir(parents=True, exist_ok=True)
             target = folder / (slug + extension)
@@ -4219,7 +4226,7 @@ def download_noaa_ocean_exploration(root, index):
             print("[NOAA Ocean Exploration] OK:", media_type, detail["title"], len(blob), "bytes")
             time.sleep(.3)
         except Exception as exc:
-            report.append({"id": "noaa-ocean-exploration-" + slugify(item_url.rstrip("/").rsplit("/", 1)[-1]),
+            report.append({"id": "noaa-ocean-exploration-" + item_identity,
                            "provider": "NOAA Ocean Exploration", "status": "item_failed",
                            "source_page": item_url, "reason": str(exc)[:360]})
     print("[NOAA Ocean Exploration] downloaded", downloaded_counts, "from", len(candidates), "candidate detail pages")
@@ -5414,7 +5421,7 @@ def smithsonian_rights_are_cc0(record_access,media_access):
 
 
 SMITHSONIAN_SELECTION_CAP = 100
-SMITHSONIAN_MAX_RETRIES = 2
+SMITHSONIAN_MAX_RETRIES = 1
 SMITHSONIAN_MAX_RETRY_WAIT_SECONDS = 300
 SMITHSONIAN_MIN_REQUEST_INTERVAL_SECONDS = 1.0
 
@@ -5468,6 +5475,12 @@ def smithsonian_request_json(url, timeout=22):
             if exc.code not in retryable_statuses or attempt >= SMITHSONIAN_MAX_RETRIES:
                 raise
             delay = smithsonian_retry_delay_seconds(exc.headers, attempt, exc.code)
+            if exc.code == 429 and delay > 30:
+                print(
+                    "[Smithsonian Open Access] HTTP 429 - provider requested a longer wait "
+                    f"({round(delay, 1)}s); stop this lane without retrying early"
+                )
+                raise
             print("[Smithsonian Open Access] HTTP", exc.code, "- retry", attempt + 1,
                   "of", SMITHSONIAN_MAX_RETRIES, "after", round(delay, 1), "seconds")
             time.sleep(delay)
