@@ -22,6 +22,95 @@ import json
 
 
 
+class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
+    def _readme(self):
+        return (
+            "# Godot SplashScreens\n"
+            "1. The original Godot logo is made by Andrea Calabro and is CC-BY-4.0 licensed.\n"
+            "2. Other derivative logos (reimagined logo, cog logo, text logo) featured in this pack "
+            "are made by Kenney and are CC0 licensed.\n"
+        )
+
+    def test_scope_requires_explicit_mixed_license_readme(self):
+        self.assertTrue(library.kenney_godot_splash_readme_confirms_cc0(self._readme()))
+        self.assertFalse(library.kenney_godot_splash_readme_confirms_cc0(
+            "The images are CC0 licensed, but no folder-specific license statement is available."
+        ))
+        self.assertFalse(library.kenney_godot_splash_readme_confirms_cc0(
+            self._readme().replace("CC0 licensed", "CC-BY licensed")
+        ))
+
+    def test_allowlist_includes_only_explicit_kenney_cc0_subpaths(self):
+        allowed = [
+            "Logo/reimagined-horizontal-dark.svg",
+            "Logo/text-dark.svg",
+            "Screen/Cog logo/cog-blue.png",
+            "Screen/Reimagined logo/blue-gradient.png",
+            "Screen/Text logo/text-light.png",
+        ]
+        denied = [
+            "Logo/original-horizontal-dark.svg",
+            "Logo/Pixel/original-large.png",
+            "Screen/Original logo/icon-dark.png",
+            "Screen/Pixel logo/reimagined-large.png",
+            "Screen/Pride logo/pride-light-a.png",
+            "../Screen/Reimagined logo/escape.png",
+            "/Screen/Cog logo/absolute.png",
+            "Screen/Cog logo/unsafe.exe",
+            "Screen/Cog logo/animation.gif",
+        ]
+        for path in allowed:
+            self.assertTrue(library.kenney_godot_splash_path_is_allowed(path), path)
+        for path in denied:
+            self.assertFalse(library.kenney_godot_splash_path_is_allowed(path), path)
+
+    def test_download_imports_only_cc0_paths_from_mixed_license_repository(self):
+        import io
+        buffer = io.BytesIO()
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg"><rect width="8" height="8"/></svg>'
+        png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 24
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("Godot-SplashScreens-main/README.md", self._readme())
+            archive.writestr("Godot-SplashScreens-main/Logo/reimagined-horizontal-dark.svg", svg)
+            archive.writestr("Godot-SplashScreens-main/Screen/Cog logo/cog-blue.png", png)
+            archive.writestr("Godot-SplashScreens-main/Screen/Original logo/icon-dark.png", png)
+            archive.writestr("Godot-SplashScreens-main/Screen/Pixel logo/reimagined-large.png", png)
+            archive.writestr("Godot-SplashScreens-main/Screen/Pride logo/pride-light-a.png", png)
+            archive.writestr("Godot-SplashScreens-main/Logo/original-horizontal-dark.svg", svg)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            with mock.patch.object(
+                library,
+                "request_bytes",
+                return_value=(
+                    buffer.getvalue(),
+                    "https://codeload.github.com/KenneyNL/Godot-SplashScreens/legacy.zip/refs/heads/main",
+                ),
+            ):
+                report = library.download_kenney_godot_splashscreens(root, index)
+            self.assertEqual(len(report), 1)
+            self.assertEqual(report[0]["status"], "downloaded")
+            self.assertEqual(report[0]["file_count"], 2)
+            self.assertEqual(len(index), 2)
+            paths = {asset["path"] for asset in index}
+            self.assertIn("third-party/kenney/godot-splashscreens/Logo/reimagined-horizontal-dark.svg", paths)
+            self.assertIn("third-party/kenney/godot-splashscreens/Screen/Cog logo/cog-blue.png", paths)
+            self.assertFalse(any(
+                "Original logo" in path or "Pixel logo" in path or "Pride logo" in path
+                for path in paths
+            ))
+            for asset in index:
+                self.assertEqual(asset["license"], "CC0-1.0")
+                self.assertTrue(asset["license_verified_from_repository_readme"])
+                self.assertTrue(asset["redistributable"])
+                asset_path = root / asset["path"]
+                self.assertTrue(asset_path.is_file())
+                self.assertEqual(asset["sha256"], library.sha256_path(asset_path))
+            self.assertTrue((root / "third-party/kenney/godot-splashscreens/SOURCE_AND_LICENSE.md").is_file())
+
+
 class ExternalSourceExpansionTests(unittest.TestCase):
     def test_external_source_ceilings_remain_expanded(self):
         self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 48)
@@ -45,6 +134,8 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.POLY_PIZZA_MAX_MODEL_BYTES, 128 * 1024 * 1024)
         self.assertEqual(library.POLY_PIZZA_TOTAL_MAX_BYTES, 4 * 1024 * 1024 * 1024)
         self.assertEqual(library.POLY_PIZZA_API_BASE, "https://api.poly.pizza/v1.1")
+        self.assertEqual(library.KENNEY_GODOT_SPLASHSCREEN_MAX_FILES, 40)
+        self.assertEqual(library.KENNEY_GODOT_SPLASHSCREEN_ALLOWED_EXTS, {".png", ".svg"})
         self.assertEqual(library.LAZYTEXTURES_MAX_ZIP_MEMBERS, 2500)
         self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
         self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
@@ -734,6 +825,8 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
         self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-svg", "path": "third-party/openmoji/color/svg/1F600.svg"}), "original-graphics")
         self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-png", "path": "third-party/openmoji/color/618x618/1F600.png"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "kenney-godot-splashscreens-cc0-asset-file", "path": "third-party/kenney/godot-splashscreens/Screen/Reimagined logo/blue.png"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/kenney/godot-splashscreens/SOURCE_AND_LICENSE.md"), "original-graphics")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-models-asset-file", "path": "third-party/lazytextures/models/SpaceKit/model.fbx"}), "3d-models")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-materials-asset-file", "path": "third-party/lazytextures/materials/Concrete01/Color.png"}), "3d-textures")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-hdris-asset-file", "path": "third-party/lazytextures/hdris/Studio/lighting.exr"}), "3d-textures")
