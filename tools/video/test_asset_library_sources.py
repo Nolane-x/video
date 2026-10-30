@@ -1566,5 +1566,96 @@ class DistributedAssetLibraryTests(unittest.TestCase):
             )
 
 
+
+class ReleaseAssetVerificationTests(unittest.TestCase):
+    def test_release_verification_requires_all_uploaded_asset_hashes_and_sizes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle_path = root / "video-assets-nasa-footage-001.zip"
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            bundle_path.write_bytes(b"zip-like-bundle-payload")
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+
+            expected_rows = [
+                (bundle_path.name, bundle_path.stat().st_size, hashlib.sha256(bundle_path.read_bytes()).hexdigest()),
+                (manifest_path.name, manifest_path.stat().st_size, hashlib.sha256(manifest_path.read_bytes()).hexdigest()),
+                (metadata_path.name, metadata_path.stat().st_size, hashlib.sha256(metadata_path.read_bytes()).hexdigest()),
+            ]
+            remote_assets = [
+                {"name": name, "size": size, "digest": "sha256:" + digest}
+                for name, size, digest in expected_rows
+            ]
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                result = release_finalizer.verify_release_assets(
+                    "Nolane-x/video",
+                    "draft-build",
+                    {"bundles": [{"name": expected_rows[0][0], "archive_bytes": expected_rows[0][1], "sha256": expected_rows[0][2]}]},
+                    [metadata_path],
+                    [manifest_path],
+                )
+
+            self.assertEqual(result["verified_assets"], 3)
+            self.assertTrue(result["all_remote_names_exact"])
+            self.assertTrue(result["github_sha256_verified"])
+
+    def test_release_verification_rejects_stale_or_unexpected_assets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+            expected = [
+                (path.name, path.stat().st_size, hashlib.sha256(path.read_bytes()).hexdigest())
+                for path in (manifest_path, metadata_path)
+            ]
+            remote_assets = [
+                {"name": name, "size": size, "digest": "sha256:" + digest}
+                for name, size, digest in expected
+            ]
+            remote_assets.append({"name": "video-assets-stale.zip", "size": 1, "digest": "sha256:" + "0" * 64})
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                with self.assertRaisesRegex(RuntimeError, "unexpected/stale"):
+                    release_finalizer.verify_release_assets(
+                        "Nolane-x/video",
+                        "draft-build",
+                        {"bundles": []},
+                        [metadata_path],
+                        [manifest_path],
+                    )
+
+    def test_release_verification_rejects_missing_github_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest_path = root / "asset-shard--nasa.json"
+            metadata_path = root / "ASSET_INDEX.json"
+            manifest_path.write_bytes(b'{"lane":"nasa"}')
+            metadata_path.write_bytes(b'{"assets":[]}')
+            remote_assets = [
+                {"name": path.name, "size": path.stat().st_size, "digest": ""}
+                for path in (manifest_path, metadata_path)
+            ]
+            with mock.patch.object(
+                release_finalizer, "_run_gh_json",
+                return_value={"id": 42, "draft": True, "assets": remote_assets},
+            ):
+                with self.assertRaisesRegex(RuntimeError, "SHA-256 digest is missing"):
+                    release_finalizer.verify_release_assets(
+                        "Nolane-x/video",
+                        "draft-build",
+                        {"bundles": []},
+                        [metadata_path],
+                        [manifest_path],
+                    )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
