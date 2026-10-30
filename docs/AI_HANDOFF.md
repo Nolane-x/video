@@ -1,5 +1,17 @@
 # AI session handoff
 
+## Asset-library handoff — 2026-10-30
+
+This is a separate workstream from the film-render candidates.
+
+- Repo: Nolane-x/video; asset library builder: tools/video/build_asset_library.py; packager: tools/video/package_asset_bundles.py; source catalog: video-library/assets/sources.json.
+- [Build 48 run #48](https://github.com/Nolane-x/video/actions/runs/41037407715) on main (commit 3d7050f3f0820d4f7daf5c38be449296c3f8b528) is still in step 7, downloading/screening external sources. Steps for volume packaging, ZIP verification, release and report upload have not started at the last check.
+- [PR #15 — Build 49 LazyTextures](https://github.com/Nolane-x/video/pull/15), branch feat/video-library-build-49-lazytextures-cc0. Latest source head then: 2311dd8008d4bd0596e860ffb98dce43bfd1e8b3; latest check [run #72](https://github.com/Nolane-x/video/actions/runs/41041611452) must be rechecked.
+- The importer handles official LazyTextures models/materials/HDRIs/textures/other browse categories, matches each item detail, checks its documented CC0 policy, downloads only official ZIP paths and records ZIP/per-file hashes. ZIP expansion and SVG/format checks are bounded. Its maximum allowance is 62 archives / 512 MiB compressed / 1.5 GiB extracted; do not report these caps as actual downloads.
+- Volume classifier has dedicated routes for LazyTextures models (3d-models), PBR/HDRI/texture files (3d-textures) and other resources (miscellaneous).
+- Last confirmed durable release is still Build 43 (1,095,394,051-byte ZIP). No Build 48 or 49 release size/count is yet verified.
+- Next actions: (1) inspect latest PR #15 CI head and fix any failure; (2) keep PR #15 unmerged until Build 48 finishes, because the main workflow's cancel-in-progress setting would cancel it; (3) verify Build 48 bundle manifest, all ZIPs and per-file coverage, then inspect release assets and checksums; (4) merge PR #15 and verify Build 49 actual source counts/download bytes, package volume classification and hashes; (5) update this section with measured results.
+
 ## Current verified state — continue from these, not historical render numbers
 - Primary candidate: **THE WEIGHT OF YES — render #31**, [workflow](https://github.com/Nolane-x/video/actions/runs/40532086413), source [commit](https://github.com/Nolane-x/video/commit/58c95de849405b0ae5d1636851bb883ffa3870ec), manifest/QA: `video-library/the-weight-of-yes/manifest.json` and `video-library/the-weight-of-yes/QA.md`.
 - **THE FIRST HOUR #55** is now the current technical + targeted-visual candidate ([workflow](https://github.com/Nolane-x/video/actions/runs/40626868973)); manifest and QA ledger: `video-library/the-first-hour/manifest.json` and `video-library/the-first-hour/QA.md`. The downloaded artifact was checksum-verified. Full-resolution B27 frames at 154.5, 157.2, 158.2 and 159.5 s confirm the whisper is below the calendar and the final line sits inside the left safe area. The root cause was that the workflow overwrote `tune_story.py` args with `shot-overrides.json`; the actual override was fixed in `1fc7a4c0e9fae34b2f1847204a63ad3a96e771f2` and a post-merge regression gate was added in `9d86d9a4195982924868468887ff68a2fbcf1790`. Runs #52/#53 remain historical candidates with a known B27 placement issue; #54 was cancelled. Full-length viewing with audio and perceptual listening remain pending.
