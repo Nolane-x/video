@@ -216,3 +216,14 @@ Official references: [LazyTextures Public API](https://lazytextures.com/PublicAP
 Quaternius remains useful as a source for creating finished videos and games, but its current official **Quaternius Asset License (QAL) v1.0**, last updated 28 August 2026, allows use and incorporation into finished Products while prohibiting resale, repackaging or redistribution of the assets themselves as standalone files or asset packs, including inside a bundle with other assets. This repository distributes raw reusable assets, so current-QAL downloads are catalogued as **source-only** and are not imported. Do not rely on older copies of the FAQ that describe the whole catalogue as CC0; inspect the exact dated license for any legacy pack before reconsidering it.
 
 Official license: [Quaternius Asset License v1.0](https://quaternius.com/license.html). Older FAQ: [Quaternius FAQ](https://quaternius.com/faq.html).
+
+
+## Poly Pizza — optional CC0 low-poly model lane
+
+Poly Pizza offers a large low-poly 3D model catalogue, but its Creative Commons licence is attached to each model and is not uniform across the site. The importer therefore uses only its published API, re-fetches each selected model by ID immediately before download, and accepts **CC0 1.0 only**. Models marked CC-BY, missing or unknown licence metadata are skipped in this first implementation. No HTML scraping is performed.
+
+The lane is opt-in: configure the GitHub Actions secret \`POLY_PIZZA_API_KEY\` using a key from [Poly Pizza API settings](https://poly.pizza/settings/api). The key is sent only to \`api.poly.pizza\`, never to a model CDN URL. The GLB download must come from an HTTPS \`poly.pizza\` host/subdomain, be no larger than 128 MiB, and pass GLB v2 magic/version/declared-length validation plus SHA-256. The ceilings are 48 models and 4 GiB aggregate; if the secret is absent, the report records \`skipped_missing_api_key\` and the rest of the build continues.
+
+**Commercial API note:** Poly Pizza's press page has described hobby API access as free and commercial API usage as pay-as-you-go. Verify the current plan and terms before enabling the secret for commercial workflows. The provider's terms prohibit scraping or automated extraction outside its published interfaces; this lane uses the published API only.
+
+Official references: [Poly Pizza](https://poly.pizza/), [API settings](https://poly.pizza/settings/api), [Terms of Service](https://poly.pizza/docs/tos), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
