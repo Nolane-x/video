@@ -1705,5 +1705,20 @@ class ExactDuplicateAssetRecordTests(unittest.TestCase):
                 shard_builder._validate_and_hash_assets(library, root, [first, second])
 
 
+
+class OriginalAssetNamespaceTests(unittest.TestCase):
+    def test_original_asset_families_have_unique_namespaced_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "library"
+            root.mkdir()
+            entries = []
+            library.generate_originals(root, entries)
+            ids = [entry["id"] for entry in entries]
+            self.assertEqual(len(ids), len(set(ids)))
+            self.assertIn("overlay-map-route", ids)
+            self.assertIn("icon-map-route", ids)
+            self.assertTrue(all(entry.get("redistributable") is True for entry in entries))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
