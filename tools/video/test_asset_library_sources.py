@@ -61,6 +61,43 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
 
+class GoogleFontsOFLTests(unittest.TestCase):
+    def test_google_fonts_api_endpoint_is_pinned_to_official_family_directory(self):
+        self.assertTrue(library.google_fonts_api_url_is_allowed(
+            "https://api.github.com/repos/google/fonts/contents/ofl/inter?ref=main", "inter"))
+        self.assertFalse(library.google_fonts_api_url_is_allowed(
+            "https://api.github.com/repos/other/fonts/contents/ofl/inter?ref=main", "inter"))
+        self.assertFalse(library.google_fonts_api_url_is_allowed(
+            "https://api.github.com/repos/google/fonts/contents/ofl/roboto?ref=main", "inter"))
+        self.assertFalse(library.google_fonts_api_url_is_allowed(
+            "https://api.github.com/repos/google/fonts/contents/ofl/inter?ref=dev", "inter"))
+
+    def test_google_fonts_raw_files_must_match_family_path(self):
+        self.assertTrue(library.google_fonts_raw_url_is_allowed(
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+            "inter", "Inter[opsz,wght].ttf"))
+        self.assertTrue(library.google_fonts_raw_url_is_allowed(
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt", "inter", "OFL.txt"))
+        self.assertFalse(library.google_fonts_raw_url_is_allowed(
+            "https://evil.example/google/fonts/main/ofl/inter/Inter.ttf", "inter", "Inter.ttf"))
+        self.assertFalse(library.google_fonts_raw_url_is_allowed(
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/Roboto.ttf", "inter", "Roboto.ttf"))
+
+    def test_google_fonts_requires_real_sil_ofl_1_1_text(self):
+        good = "Copyright 2024 A Font Author\nSIL OPEN FONT LICENSE Version 1.1\nPermission is hereby granted."
+        self.assertTrue(library.google_fonts_ofl_is_valid(good))
+        self.assertFalse(library.google_fonts_ofl_is_valid("Copyright 2024. CC0 1.0 public domain."))
+        self.assertFalse(library.google_fonts_ofl_is_valid("SIL OPEN FONT LICENSE Version 1.0"))
+
+    def test_google_fonts_accepts_sfnt_ttf_and_rejects_html(self):
+        self.assertTrue(library.google_fonts_ttf_signature_is_valid(b"\x00\x01\x00\x00" + b"x" * 5000))
+        self.assertTrue(library.google_fonts_ttf_signature_is_valid(b"OTTO" + b"x" * 5000))
+        self.assertFalse(library.google_fonts_ttf_signature_is_valid(b"<html>" + b"x" * 5000))
+        self.assertEqual(len(library.GOOGLE_FONTS_FAMILY_SLUGS), library.GOOGLE_FONTS_MAX_FAMILIES)
+        self.assertEqual(library.GOOGLE_FONTS_MAX_TTF_PER_FAMILY, 2)
+        self.assertGreaterEqual(library.GOOGLE_FONTS_MAX_TOTAL_BYTES, 50 * 1024 * 1024)
+
+
 class SafeArchiveExtractionTests(unittest.TestCase):
     def _archive(self, filename, payload=b"not-executable"):
         stream = io.BytesIO()
