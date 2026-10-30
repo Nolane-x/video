@@ -240,6 +240,7 @@ def package_library(output_dir: Path) -> dict:
     index_doc["summary"]["modular_pack_count"] = pack_index["pack_count"]
     index_doc["summary"]["modular_pack_compressed_bytes"] = pack_index["total_pack_compressed_bytes"]
     index_doc["summary"]["modular_pack_raw_bytes"] = pack_index["total_pack_raw_bytes"]
+    index_doc["summary"]["checksummed_files"] = len([line for line in sums_path.read_text(encoding="utf-8").splitlines() if line.strip()])
     index_doc["distribution"] = {
         "mode": pack_index["distribution_mode"],
         "pack_index": "PACKAGES_INDEX.json",
