@@ -3220,7 +3220,9 @@ def internet_archive_metadata_url_is_allowed(url,identifier):
 def internet_archive_license_from_item_metadata(license_url,rights):
     try:
         parsed=urllib.parse.urlsplit(str(license_url or ""))
-        if parsed.scheme not in {"http","https"} or parsed.hostname!="creativecommons.org":
+        if (parsed.scheme not in {"http","https"} or parsed.hostname!="creativecommons.org"
+                or parsed.port not in (None,443) or parsed.username or parsed.password
+                or parsed.query or parsed.fragment):
             return None
         path=parsed.path.rstrip("/")+"/"
         license_name=INTERNET_ARCHIVE_LICENSE_PATHS.get(path)
@@ -3333,7 +3335,9 @@ def internet_archive_choose_video_file(files):
 
 
 def internet_archive_search_url(collection,start):
-    query=f"collection:{collection} AND mediatype:movies AND licenseurl:http*publicdomain*"
+    if collection not in INTERNET_ARCHIVE_COLLECTION_CAPS or int(start)<0:
+        raise ValueError("Internet Archive collection or paging offset is not allowed")
+    query=f"collection:{collection} AND mediatype:movies AND (licenseurl:http*publicdomain* OR licenseurl:http*cc0*)"
     params=[
         ("q",query),("fl[]","identifier"),("fl[]","title"),("fl[]","licenseurl"),
         ("fl[]","creator"),("fl[]","year"),("rows",str(INTERNET_ARCHIVE_SEARCH_ROWS)),
