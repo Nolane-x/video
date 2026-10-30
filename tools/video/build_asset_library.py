@@ -5324,6 +5324,67 @@ def smithsonian_rights_are_cc0(record_access,media_access):
     return str(record_access or "").strip().upper()=="CC0" and str(media_access or "").strip().upper()=="CC0"
 
 
+SMITHSONIAN_SELECTION_CAP = 100
+SMITHSONIAN_MAX_RETRIES = 2
+SMITHSONIAN_MAX_RETRY_WAIT_SECONDS = 300
+SMITHSONIAN_MIN_REQUEST_INTERVAL_SECONDS = 1.0
+
+
+def smithsonian_retry_delay_seconds(headers, attempt, status_code=429, now=None):
+    """Return a bounded, polite retry delay using provider rate-limit headers when present."""
+    normalized = {}
+    if hasattr(headers, "items"):
+        normalized = {str(key).strip().lower(): str(value).strip() for key, value in headers.items()}
+    retry_after = normalized.get("retry-after", "")
+    delay = None
+    if retry_after:
+        try:
+            delay = float(retry_after)
+        except (TypeError, ValueError):
+            try:
+                from email.utils import parsedate_to_datetime
+                target = parsedate_to_datetime(retry_after)
+                if target.tzinfo is None:
+                    target = target.replace(tzinfo=timezone.utc)
+                reference = now or datetime.now(timezone.utc)
+                if reference.tzinfo is None:
+                    reference = reference.replace(tzinfo=timezone.utc)
+                delay = (target - reference).total_seconds()
+            except (TypeError, ValueError, OverflowError):
+                delay = None
+
+    if delay is None and normalized.get("x-ratelimit-remaining") == "0":
+        try:
+            reset_at = float(normalized.get("x-ratelimit-reset", ""))
+            reference = now or datetime.now(timezone.utc)
+            delay = reset_at - reference.timestamp() + 1.0
+        except (TypeError, ValueError, OverflowError):
+            delay = None
+
+    if delay is None:
+        # A 429 without guidance gets a conservative minute; transient 5xx responses
+        # use shorter exponential backoff. Retries are deliberately finite.
+        base = 60.0 if int(status_code) == 429 else 5.0
+        delay = base * (2 ** max(0, int(attempt)))
+    return min(SMITHSONIAN_MAX_RETRY_WAIT_SECONDS, max(1.0, float(delay)))
+
+
+def smithsonian_request_json(url, timeout=22):
+    """Fetch Smithsonian JSON with finite Retry-After-aware handling for transient limits."""
+    retryable_statuses = {408, 429, 500, 502, 503, 504}
+    for attempt in range(SMITHSONIAN_MAX_RETRIES + 1):
+        try:
+            return request_json(url, timeout=timeout)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in retryable_statuses or attempt >= SMITHSONIAN_MAX_RETRIES:
+                raise
+            delay = smithsonian_retry_delay_seconds(exc.headers, attempt, exc.code)
+            print("[Smithsonian Open Access] HTTP", exc.code, "- retry", attempt + 1,
+                  "of", SMITHSONIAN_MAX_RETRIES, "after", round(delay, 1), "seconds")
+            time.sleep(delay)
+    raise RuntimeError("Smithsonian Open Access retry loop ended unexpectedly")
+
+
 def rijksmuseum_license_from_rights(rights_text):
     """Return the narrow rights class explicitly represented in a Rijksmuseum EDM rights field."""
     rights_norm=str(rights_text or "").lower()
@@ -5341,7 +5402,7 @@ def rijksmuseum_license_from_rights(rights_text):
 def download_smithsonian_open_access(root,index):
     """Download Smithsonian media only when both record-level and media-level rights are explicitly CC0."""
     import os
-    report=[]; total=0; cap=WIKIMEDIA_CC0_SVG_CAP; seen=set()
+    report=[]; total=0; cap=SMITHSONIAN_SELECTION_CAP; seen=set()
     api_key=(os.environ.get("SMITHSONIAN_API_KEY") or "").strip() or "DEMO_KEY"
     topics=[
         ("natural-history","NMNH"),("botany","NMNHBOTANY"),("birds","NMNHBIRDS"),
@@ -5386,7 +5447,7 @@ def download_smithsonian_open_access(root,index):
         params={"api_key":api_key,"q":f"unit_code:{unit_code}","rows":30}
         url="https://api.si.edu/openaccess/api/v1.0/search?"+urllib.parse.urlencode(params)
         try:
-            data=request_json(url,timeout=22)
+            data=smithsonian_request_json(url,timeout=22)
             rows=((data.get("response") or {}).get("rows") or [])
             successes=0; candidates_checked=0
             for row in rows:
@@ -5470,12 +5531,22 @@ def download_smithsonian_open_access(root,index):
                 report.append({"id":"smithsonian-"+category,"status":"no_eligible_item","category":category,
                                "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
                                "reason":"No distinct image passed both record-level and media-level CC0 filters in the current page."})
+        except urllib.error.HTTPError as exc:
+            report.append({"id":"smithsonian-"+category,"status":"failed","category":category,
+                           "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
+                           "reason":str(exc)[:400]})
+            print("[Smithsonian Open Access] query failed:",category,str(exc))
+            if exc.code == 429:
+                report.append({"id":"smithsonian-rate-limit-stop","status":"halted_rate_limit",
+                               "provider":"Smithsonian Institution",
+                               "reason":"The API remained rate-limited after bounded Retry-After-aware retries; remaining unit searches were stopped to avoid hammering the provider."})
+                break
         except Exception as exc:
             report.append({"id":"smithsonian-"+category,"status":"failed","category":category,
                            "provider":"Smithsonian Institution","source_page":"https://www.si.edu/openaccess",
                            "reason":str(exc)[:400]})
             print("[Smithsonian Open Access] query failed:",category,str(exc))
-        time.sleep(.35)
+        time.sleep(SMITHSONIAN_MIN_REQUEST_INTERVAL_SECONDS)
     return report
 
 
