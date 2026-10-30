@@ -412,6 +412,10 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
             "https://creativecommons.org/licenses/by/4.0/", "Public Domain"))
         self.assertIsNone(library.internet_archive_license_from_item_metadata(
             "http://creativecommons.org/publicdomain/mark/1.0/", "Public Domain"))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "https://user@creativecommons.org/publicdomain/zero/1.0/", ""))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "https://creativecommons.org/publicdomain/zero/1.0/?redirect=1", ""))
 
     def test_internet_archive_metadata_normalizer_and_license_detail(self):
         payload = {
@@ -473,7 +477,12 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         self.assertEqual(parsed.netloc, "archive.org")
         self.assertIn("collection:prelinger", query["q"][0])
         self.assertIn("licenseurl:http*publicdomain*", query["q"][0])
+        self.assertIn("licenseurl:http*cc0*", query["q"][0])
         self.assertEqual(query["start"], ["100"])
+        with self.assertRaises(ValueError):
+            library.internet_archive_search_url("unknown", 0)
+        with self.assertRaises(ValueError):
+            library.internet_archive_search_url("nasa", -1)
         self.assertEqual(query["rows"], [str(library.INTERNET_ARCHIVE_SEARCH_ROWS)])
 
 class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
