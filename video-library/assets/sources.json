@@ -502,7 +502,7 @@
       "category": "geology, volcanology, earthquakes, water, wildlife, science and environment",
       "source_page": "https://www.usgs.gov/products/multimedia-gallery",
       "license": "Public Domain only when that exact item's Sources/Usage section is exactly Public Domain; all other labels or mixed notices are skipped",
-      "license_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "license_url": "https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs",
       "verified_page_license": true,
       "bundling": "automatic-only-after-exact-item-page-public-domain-label-and-official-media-host-validation",
       "note": "The source has large official image, video and audio collections. The builder follows official item pages and only accepts an item's own Sources/Usage block when its complete visible statement is exactly Public Domain. It does not infer rights from the gallery-wide default. Direct media URLs must use the expected official USGS storage hosts and media paths; MIME, magic bytes, type-specific and aggregate byte caps, source page, creator/date metadata and SHA-256 are retained. USGS credit guidance still applies and other rights (including privacy, publicity, and third-party materials) must be considered before publication."
