@@ -7,6 +7,8 @@ on:
       - ".github/workflows/test-video-asset-library-pr.yml"
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
+      - "tools/video/generate_original_stickers.py"
+      - "tools/video/package_asset_library.py"
       - "tools/video/generate_sfx_library.py"
       - "tools/video/test_asset_library_sources.py"
       - "video-library/assets/sources.json"
@@ -39,6 +41,8 @@ jobs:
       - name: Compile all changed Python sources
         run: |
           python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/generate_original_stickers.py
+          python -m py_compile tools/video/package_asset_library.py
           python -m py_compile tools/video/generate_sfx_library.py
           python -m py_compile tools/video/test_asset_library_sources.py
 
@@ -57,6 +61,7 @@ jobs:
           sys.path.insert(0, "tools/video")
           import build_asset_library as lib
           import generate_sfx_library as sfx
+          import generate_original_stickers as stickers
 
           root = Path(tempfile.mkdtemp(prefix="asset-library-offline-")) / "library"
           root.mkdir(parents=True)
@@ -65,6 +70,9 @@ jobs:
           lib.generate_original_textures(root, index)
           lib.generate_original_illustrations(root, index)
           lib.generate_original_motion_loops(root, index)
+          sticker_count, meme_count = stickers.generate_original_stickers(
+              root, index, "https://creativecommons.org/publicdomain/zero/1.0/"
+          )
 
           expected = {
               "backgrounds": len(lib.PALETTES),
@@ -75,6 +83,8 @@ jobs:
               "illustrations": len(lib.ILLUSTRATIONS),
               "motion_loops": len(lib.MOTION_LOOPS),
               "sfx_presets": len(sfx.SFX_PRESETS),
+              "stickers": sticker_count,
+              "meme_templates": meme_count,
           }
           actual = {
               "backgrounds": len(list((root / "originals/backgrounds").glob("*.svg"))),
@@ -85,12 +95,15 @@ jobs:
               "illustrations": len(list((root / "originals/illustrations").glob("*.svg"))),
               "motion_loops": len(list((root / "originals/video-loops").glob("*.mp4"))),
               "sfx_presets": len(list((root / "originals/audio").glob("*.wav"))),
+              "stickers": len(list((root / "originals/stickers").glob("*.svg"))),
+              "meme_templates": len(list((root / "originals/meme-templates").glob("*.svg"))),
           }
           assert actual == expected, json.dumps({"expected": expected, "actual": actual}, indent=2)
           assert expected["backgrounds"] >= 90 and expected["overlays"] >= 75
           assert expected["icons"] >= 110 and expected["infographics"] >= 50
           assert expected["textures"] >= 55 and expected["illustrations"] >= 105
           assert expected["motion_loops"] == 24 and expected["sfx_presets"] >= 175
+          assert expected["stickers"] >= 200 and expected["meme_templates"] >= 48
 
           files = [p for p in root.rglob("*") if p.is_file()]
           assert len(files) >= sum(expected.values())
