@@ -46,37 +46,56 @@ def _local_name(tag: str) -> str:
 
 def list_json_objects(record_group: str) -> list[dict[str, Any]]:
     prefix = f"descriptions/record-groups/rg_{record_group}/"
-    query = urllib.parse.urlencode(
-        {"list-type": "2", "prefix": prefix, "max-keys": str(MAX_LIST_KEYS_PER_GROUP)}
-    )
-    xml_body = fetch_bytes(BUCKET_URL + "?" + query, 2 * 1024 * 1024, timeout=30)
-    root = ET.fromstring(xml_body)
-    contents = [element for element in root.iter() if _local_name(element.tag) == "Contents"]
     rows = []
-    for item in contents:
-        fields = {_local_name(child.tag): (child.text or "") for child in item}
-        key = fields.get("Key", "")
-        size_text = fields.get("Size", "0")
-        modified = fields.get("LastModified", "")
-        if key.endswith(".json"):
-            rows.append({"key": key, "size_bytes": int(size_text), "last_modified": modified})
+    continuation_token = ""
+    first_key_samples = []
+    pages_scanned = 0
+
+    for _ in range(10):
+        params = {
+            "list-type": "2",
+            "prefix": prefix,
+            "max-keys": str(MAX_LIST_KEYS_PER_GROUP),
+        }
+        if continuation_token:
+            params["continuation-token"] = continuation_token
+        query = urllib.parse.urlencode(params)
+        xml_body = fetch_bytes(BUCKET_URL + "?" + query, 2 * 1024 * 1024, timeout=30)
+        root = ET.fromstring(xml_body)
+        pages_scanned += 1
+        contents = [element for element in root.iter() if _local_name(element.tag) == "Contents"]
+
+        for item in contents:
+            fields = {_local_name(child.tag): (child.text or "") for child in item}
+            key = fields.get("Key", "")
+            size_text = fields.get("Size", "0")
+            modified = fields.get("LastModified", "")
+            if key and len(first_key_samples) < 8:
+                first_key_samples.append(key)
+            if key.endswith(".json"):
+                rows.append({"key": key, "size_bytes": int(size_text), "last_modified": modified})
+
+        truncated = False
+        next_token = ""
+        for element in root.iter():
+            name = _local_name(element.tag)
+            if name == "IsTruncated":
+                truncated = (element.text or "").strip().casefold() == "true"
+            elif name == "NextContinuationToken":
+                next_token = (element.text or "").strip()
+        if not truncated or not next_token:
+            break
+        continuation_token = next_token
 
     if not rows:
-        debug = {
-            "requested_prefix": prefix,
-            "response_root": _local_name(root.tag),
-            "response_fields": {
-                _local_name(child.tag): (child.text or "")[:240]
-                for child in list(root)
-                if _local_name(child.tag) != "Contents"
-            },
-            "contents_count": len(contents),
-            "first_content_keys": [
-                {_local_name(child.tag): (child.text or "")[:160] for child in list(item)}
-                for item in contents[:3]
-            ],
-        }
-        raise RuntimeError("S3 listing returned no JSON objects for NARA record group: " + json.dumps(debug))
+        raise RuntimeError(
+            "S3 listing contained no JSON objects within the bounded scan: "
+            + json.dumps({
+                "requested_prefix": prefix,
+                "pages_scanned": pages_scanned,
+                "key_samples": first_key_samples,
+            })
+        )
     return sorted(rows, key=lambda row: row["key"])
 
 
