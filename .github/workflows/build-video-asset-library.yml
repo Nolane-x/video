@@ -1,18 +1,6 @@
 name: Build cross-genre video asset library
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/build-video-asset-library.yml"
-      - "tools/video/build_asset_library.py"
-      - "tools/video/build_asset_library_shard.py"
-      - "tools/video/finalize_asset_library_release.py"
-      - "tools/video/test_asset_library_sources.py"
-      - "tools/video/generate_sfx_library.py"
-      - "tools/video/generate_sticker_meme_library.py"
-      - "tools/video/package_asset_bundles.py"
-      - "video-library/assets/sources.json"
   workflow_dispatch:
 
 permissions:
