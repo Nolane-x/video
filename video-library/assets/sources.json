@@ -564,6 +564,19 @@
       "note": "The official docs list Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance as supported v2 API types and state all downloadable assets are CC0 1.0. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
     },
     {
+      "id": "original-stickers-meme-templates",
+      "title": "Nolane Video — original CC0 reaction stickers, annotation doodles and meme layouts",
+      "provider": "Nolane Video repository",
+      "kind": "repository-generated editable vector assets",
+      "category": "Reaction stickers, expressive faces, arrows, annotation doodles, comic bursts, generic meme layouts and caption templates",
+      "source_page": "https://github.com/Nolane-x/video/tree/main/tools/video/generate_original_stickers.py",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "generated-in-build-and-included-directly",
+      "note": "The repository generates 202 original transparent/editable SVG sticker assets and 48 original meme-layout templates. Layouts use generic visual patterns and editable placeholder text; they are not copies of existing viral meme images, protected characters, logos or branded stickers. Users must only place photos/video/audio they own or are otherwise licensed to use into the templates."
+    },
+    {
       "id": "original-procedural-motion-loops",
       "title": "Original in-repository procedural motion loops",
       "provider": "Nolane-x/video",
