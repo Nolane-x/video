@@ -217,6 +217,61 @@ class LazyTexturesCC0APITests(unittest.TestCase):
         self.assertFalse(library.lazytextures_media_signature_is_valid(b"<html>blocked</html>", ".png"))
         self.assertFalse(library.lazytextures_media_signature_is_valid(b"PK\x03\x04", ".fbx"))
 
+    def test_bounded_importer_records_only_verified_files_and_source_provenance(self):
+        buffer = io.BytesIO()
+        payload = b"Kaydara FBX Binary  \x00\x1a\x00"
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("SpaceKit.fbx", payload)
+        archive_blob = buffer.getvalue()
+        expected_size = len(archive_blob)
+
+        browse_payloads = {
+            "models": [{"name": "SpaceKit", "tags": ["space", "vehicle"]}],
+            "materials": [], "hdris": [], "textures": [], "other": [],
+        }
+        responses = {}
+        for asset_type, spec in library.LAZYTEXTURES_API_TYPES.items():
+            responses[library.LAZYTEXTURES_API_BASE + "/" + spec["endpoint"]] = {
+                "success": True, spec["list_key"]: browse_payloads[asset_type]
+            }
+        detail_url = library.lazytextures_detail_url("models", "SpaceKit")
+        responses[detail_url] = {
+            "success": True, "name": "SpaceKit", "assetType": "models",
+            "tags": ["space", "vehicle"],
+            "archiveFiles": {"1k": [{
+                "name": "SpaceKit_1k.zip",
+                "path": "/Assets/Models/SpaceKit/1k/SpaceKit_1k.zip",
+                "size": expected_size,
+            }]},
+        }
+
+        def fake_request_json(url, timeout=25):
+            return responses[url]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            with mock.patch.object(library, "request_json", side_effect=fake_request_json), \
+                 mock.patch.object(library, "lazytextures_download_bytes", return_value=(archive_blob, "application/zip")), \
+                 mock.patch.object(library.time, "sleep", return_value=None):
+                report = library.download_lazytextures(root, index)
+
+            downloaded = [row for row in report if row.get("status") == "downloaded"]
+            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(downloaded[0]["asset_type"], "models")
+            self.assertEqual(downloaded[0]["extracted_files"], 1)
+            self.assertEqual(len(index), 1)
+            item = index[0]
+            self.assertEqual(item["provider"], "LazyTextures")
+            self.assertEqual(item["license"], "CC0-1.0")
+            self.assertTrue(item["license_verified_from_provider_api_policy"])
+            self.assertEqual(item["source_page"], detail_url)
+            self.assertEqual(item["download_archive_sha256"], downloaded[0]["archive_sha256"])
+            path = root / item["path"]
+            self.assertTrue(path.is_file())
+            self.assertEqual(path.read_bytes(), payload)
+            self.assertEqual(item["sha256"], library.sha256_path(path))
+
     def test_download_helper_rejects_redirects_outside_the_official_host(self):
         response = mock.MagicMock()
         response.__enter__.return_value.geturl.return_value = "https://evil.example/payload.zip"
