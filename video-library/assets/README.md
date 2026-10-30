@@ -125,3 +125,32 @@ Official source: [OpenGameArt advanced search](https://opengameart.org/art-searc
 The typography source lane selects up to 20 curated family directories from the official `google/fonts` repository. Each family's own `OFL.txt` is downloaded and inspected before any font binary is accepted. Only families carrying the SIL Open Font License Version 1.1 marker and a copyright statement proceed. At most two TTF faces are retained per family, each with a TrueType/OpenType sfnt signature check and SHA-256; the exact family `OFL.txt`, its checksum, raw font URL and family page are kept alongside the font. The aggregate font-download ceiling is 90 MiB. These files remain under their individual SIL OFL 1.1 terms rather than being relabelled CC0.
 
 Official repository: [Google Fonts](https://github.com/google/fonts). License: [SIL Open Font License](https://openfontlicense.org/).
+
+## Build 45: original sticker, meme and caption studio pack
+
+The build now generates a large original CC0 vector library for editing and social-video storytelling:
+
+- Reaction stickers in several visual styles and palettes, including English and Vietnamese labels.
+- Generic meme-layout templates: top/bottom captions, expectation/reality, split reactions, chat layouts, timeline beats, plot twists, scoreboards and more.
+- Caption and editorial overlays: lower thirds, speaker IDs, chapter cards, source notes, fact callouts, quote panels, statistic cards, warnings, tips, maps and end cards.
+
+These are original editable SVG layouts, not reproductions of famous meme photos, copyrighted characters or third-party logos. Replace placeholder text and use only footage/images that you are entitled to publish. The generated pack is indexed item by item as CC0 1.0.
+
+## Build 45: NOAA Ocean Exploration media
+
+The new NOAA lane searches the official multimedia cards, follows each exact item page, and downloads only direct links exposed in the item's Download field from the official oceanexplorer.noaa.gov uploads host. It requires an item Credit field naming NOAA, screens caption, credit and image-alt text for the provider's copyright exception marker, and skips possible identifiable-person/interview contexts for manual review. It records the exact caption, credit, item page, download URL, preserved image metadata and SHA-256.
+
+NOAA Ocean Exploration's [FAQ](https://oceanexplorer.noaa.gov/faqs/) states that site content is public domain unless otherwise noted; its [media kit](https://oceanexplorer.noaa.gov/about/media-kit/) says selected copyrighted material is identified in captions. Keep the provided credit and never imply NOAA endorsement.
+
+The first automated pass is deliberately bounded to six listing pages, up to 72 images and 36 videos, with a combined 3 GiB download ceiling. Those are caps, not promised totals.
+
+## Build 45: multi-volume release packaging
+
+The library is no longer tied to a single ZIP. The packager estimates the raw resource size:
+
+- Compact builds keep the familiar `video-asset-library.zip` for one-click extraction.
+- Larger builds create a small `video-assets-catalog.zip` plus independently downloadable family volumes for original graphics, photography, footage, audio, 3D/models, textures and typography.
+- Each resource volume targets at most 1.7 GB uncompressed; each uploaded release asset is checked against a 1.9 GB ceiling, below GitHub's documented 2 GiB per-asset limit.
+- `ASSET_BUNDLES.json` records every volume, SHA-256, byte count, file count and the exact paths it contains. The workflow verifies all ZIPs and confirms every library file is included exactly once.
+
+For a multi-volume release, download the catalog bundle and the resource families you need, then extract all selected ZIPs into the same parent folder. Keep the `video-asset-library/` paths intact. This is the foundation for growing toward tens of gigabytes without one unmanageable archive.
