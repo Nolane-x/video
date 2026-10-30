@@ -1478,7 +1478,7 @@ class DistributedAssetLibraryTests(unittest.TestCase):
             catalog = (root / "ASSET_CATALOG.html").read_text(encoding="utf-8")
             self.assertIn("Mars rover exploration footage", catalog)
             self.assertIn("third-party/nasa/video/mars-rover.mp4", catalog)
-            self.assertIn("123456", catalog)
+            self.assertIn("121 KB", catalog)
 
     def test_shard_merge_verifies_volume_coverage_and_exact_license_metadata(self):
         def make_shard(lane, asset_id, relative, payload):
