@@ -22,6 +22,7 @@ SOURCE_DOWNLOAD_WORKERS = 6  # Provider-level parallelism; provider-specific pac
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
 POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
+POLYHAVEN_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
 AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
@@ -4763,6 +4764,7 @@ def download_internet_archive_videos(root,index):
 def download_polyhaven(root,index):
     report=[]
     counts=POLYHAVEN_SELECTION_LIMITS
+    total_downloaded_bytes=0
     dependency_cap=8*1024*1024
     for kind,limit in counts.items():
         try:
@@ -4778,6 +4780,9 @@ def download_polyhaven(root,index):
                 chosen.append((asset_id,meta)); seen.add(cat)
                 if len(chosen)>=limit: break
             for asset_id,meta in chosen:
+                if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                    print("[Poly Haven] reached aggregate byte ceiling", total_downloaded_bytes)
+                    break
                 row={"id":"polyhaven-"+asset_id,"title":meta.get("name",asset_id),"provider":"Poly Haven",
                      "source_page":f"https://polyhaven.com/a/{asset_id}","license":CC0,
                      "license_url":"https://polyhaven.com/license","category":meta.get("category",kind)}
@@ -4789,13 +4794,17 @@ def download_polyhaven(root,index):
                         if not file_objects: raise RuntimeError("no supported PBR maps returned by official API")
                         pack_dir=root/"third-party/polyhaven"/"textures"/slugify(asset_id)
                         for fo in file_objects:
+                            if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                                break
                             url=fo["url"]
                             try:
-                                blob,ctype=request_bytes(url,timeout=35,limit=dependency_cap)
+                                remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                                blob,ctype=request_bytes(url,timeout=35,limit=min(dependency_cap,remaining))
                                 name=Path(urllib.parse.urlparse(url).path).name
                                 if Path(name).suffix.lower() not in ALLOWED: continue
                                 target=pack_dir/name
                                 target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(blob)
+                                total_downloaded_bytes += len(blob)
                                 digest=sha256_path(target)
                                 entry={"id":f"polyhaven-{asset_id}-{slugify(name)}","path":target.relative_to(root).as_posix(),
                                        "type":"polyhaven-pbr-map","title":name,"parent_asset_id":"polyhaven-"+asset_id,
@@ -4809,18 +4818,22 @@ def download_polyhaven(root,index):
                     else:
                         fileobj=choose_poly_file(tree,kind)
                         if not fileobj: raise RuntimeError("no suitable direct file in API response")
-                        url=fileobj["url"]; blob,ctype=request_bytes(url,timeout=70,limit=MAX_POLY_FILE)
+                        url=fileobj["url"]
+                        remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                        blob,ctype=request_bytes(url,timeout=70,limit=min(MAX_POLY_FILE,remaining))
                         name=Path(urllib.parse.urlparse(url).path).name or (asset_id+(".hdr" if kind=="hdris" else ".blend"))
                         if Path(name).suffix.lower() not in ALLOWED: name += ".bin"
                         pack_dir=root/"third-party/polyhaven"/kind/slugify(asset_id)
                         pack_dir.mkdir(parents=True,exist_ok=True)
-                        target=pack_dir/name; target.write_bytes(blob); digest=sha256_path(target)
+                        target=pack_dir/name; target.write_bytes(blob); total_downloaded_bytes += len(blob); digest=sha256_path(target)
                         entry={"id":"polyhaven-"+asset_id,"path":target.relative_to(root).as_posix(),
                                "type":"polyhaven-"+kind,"title":row["title"],"category":row["category"],
                                "source_page":row["source_page"],"license":CC0,"license_url":"https://polyhaven.com/license",
                                "size_bytes":len(blob),"sha256":digest,"redistributable":True,"file_url":url}
                         index.append(entry); downloaded.append(entry)
                         for relpath,dep in (fileobj.get("include") or {}).items():
+                            if total_downloaded_bytes >= POLYHAVEN_TOTAL_MAX_BYTES:
+                                break
                             try:
                                 rel=PurePosixPath(str(relpath).replace("\\\\","/"))
                                 ext=Path(rel.name).suffix.lower()
@@ -4828,10 +4841,12 @@ def download_polyhaven(root,index):
                                 dep_url=dep.get("url") if isinstance(dep,dict) else None
                                 if not dep_url: continue
                                 if int(dep.get("size",0) or 0)>dependency_cap: continue
-                                dep_blob,dep_ctype=request_bytes(dep_url,timeout=35,limit=dependency_cap)
+                                remaining=POLYHAVEN_TOTAL_MAX_BYTES-total_downloaded_bytes
+                                dep_blob,dep_ctype=request_bytes(dep_url,timeout=35,limit=min(dependency_cap,remaining))
                                 dep_path=(pack_dir/Path(*rel.parts)).resolve()
                                 if pack_dir.resolve() not in dep_path.parents: raise RuntimeError("unsafe dependency path")
                                 dep_path.parent.mkdir(parents=True,exist_ok=True); dep_path.write_bytes(dep_blob)
+                                total_downloaded_bytes += len(dep_blob)
                                 dep_sha=sha256_path(dep_path)
                                 index.append({"id":"polyhaven-"+asset_id+"-dependency-"+slugify(rel.as_posix()),
                                               "path":dep_path.relative_to(root).as_posix(),"type":"polyhaven-model-dependency",
