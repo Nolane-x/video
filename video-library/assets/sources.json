@@ -536,6 +536,23 @@
       "note": "The builder queries a fixed set of 20 official family directories. It downloads a family's TTF files only after fetching the OFL.txt file from that same exact family folder and verifying the SIL Open Font License Version 1.1 marker and copyright statement. At most two TTF faces per family and 90 MiB total are downloaded. The original OFL.txt, exact family page, raw font URL, family license-file SHA-256 and per-font SHA-256 are preserved. Each font remains under its own SIL OFL 1.1 terms, not CC0."
     },
     {
+      "id": "openmoji-artwork-cc-by-sa",
+      "title": "OpenMoji 17.0 — color/black SVG and PNG emoji/sticker artwork",
+      "provider": "OpenMoji / HfG Schwäbisch Gmünd",
+      "kind": "emoji and sticker artwork collection",
+      "category": "reaction emoji, expressive symbols, UI stickers, illustrations and caption overlays",
+      "source_page": "https://github.com/hfg-gmuend/openmoji/releases/tag/17.0.0",
+      "api": "https://registry.npmjs.org/openmoji/17.0.0",
+      "license": "CC-BY-SA-4.0 (artwork only; not CC0)",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "verified_page_license": true,
+      "bundling": "pinned-npm-tarball-with-sha1-and-sha512-validation-and-selected-artwork-extraction",
+      "attribution_required": true,
+      "attribution_text": "All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0.",
+      "video_attribution_guidance": "The official OpenMoji FAQ recommends attribution in the video description and/or end credits, voice track or a footnote when the first OpenMoji appears.",
+      "note": "Pinned npm package openmoji@17.0.0. The builder verifies the npm registry version, CC-BY-SA-4.0 license label, official tarball URL, SHA-1 shasum and SHA-512 integrity before extracting only color/black SVG, 618x618 PNG and 72x72 PNG artwork plus central metadata. JavaScript/build code is excluded; SVGs are sanitized and PNG signatures checked. Each file carries its own SHA-256 and CC BY-SA license provenance. Commercial use is permitted with appropriate attribution; indicate changes, and any adapted artwork must remain under CC BY-SA 4.0. Full LICENSE.txt and official FAQ are retained with the resource set."
+    },
+    {
       "id": "noaa-multimedia",
       "title": "NOAA Ocean Exploration Multimedia — deep-ocean images and videos with caption/credit screening",
       "provider": "National Oceanic and Atmospheric Administration",
