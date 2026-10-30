@@ -168,6 +168,8 @@ jobs:
 
           assert "lazytextures_packages_downloaded" in expected and "lazytextures_files_downloaded" in expected
           assert "lazytextures_archive_bytes_downloaded" in expected
+          assert "lazytextures_unpacked_bytes_downloaded" in expected
+          assert "lazytextures_other_downloaded" in expected
           lazytextures_report = index.get("lazytextures_downloads")
           assert isinstance(lazytextures_report, list), "LazyTextures source report is missing"
           lazytextures_downloaded = [row for row in lazytextures_report if row.get("status") == "downloaded"]
@@ -176,19 +178,24 @@ jobs:
           assert len(lazytextures_assets) == expected["lazytextures_files_downloaded"]
           assert sum(row.get("extracted_files", 0) for row in lazytextures_downloaded) == expected["lazytextures_files_downloaded"]
           assert sum(row.get("archive_bytes", 0) for row in lazytextures_downloaded) == expected["lazytextures_archive_bytes_downloaded"]
-          assert expected["lazytextures_packages_downloaded"] <= sum([10, 16, 10, 18])
+          assert expected["lazytextures_packages_downloaded"] <= sum([10, 16, 10, 18, 8])
           assert expected["lazytextures_archive_bytes_downloaded"] <= 512 * 1024 * 1024
-          caps = {"models": 10, "materials": 16, "hdris": 10, "textures": 18}
+          assert expected["lazytextures_unpacked_bytes_downloaded"] <= 1536 * 1024 * 1024
+          caps = {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8}
           for asset_type, cap in caps.items():
               assert sum(row.get("status") == "downloaded" and row.get("asset_type") == asset_type for row in lazytextures_report) <= cap
-          assert sum(row.get("unpacked_bytes", 0) for row in lazytextures_downloaded) <= 1536 * 1024 * 1024
+          assert sum(row.get("unpacked_bytes", 0) for row in lazytextures_downloaded) == expected["lazytextures_unpacked_bytes_downloaded"]
+          assert expected["lazytextures_unpacked_bytes_downloaded"] <= 1536 * 1024 * 1024
           successful_archive_hashes = set()
           for row in lazytextures_downloaded:
               assert row.get("license") == "CC0-1.0"
               assert row.get("source_page", "").startswith("https://lazytextures.net:3000/Asset/")
               assert 0 < row.get("archive_bytes", 0) <= 64 * 1024 * 1024
               assert len(row.get("archive_sha256", "")) == 64
+              assert 0 < row.get("archive_members", 0) <= 2500
+              assert 0 < row.get("declared_unpacked_bytes", 0) <= 128 * 1024 * 1024
               assert row.get("extracted_files", 0) > 0 and row.get("unpacked_bytes", 0) > 0
+              assert row.get("rejected_invalid_files", 0) >= 0
               successful_archive_hashes.add(row["archive_sha256"])
           for asset in lazytextures_assets:
               assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
