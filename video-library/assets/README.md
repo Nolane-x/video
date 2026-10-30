@@ -178,3 +178,13 @@ The per-source aggregate ceilings are also raised: ambientCG 5 GiB, OpenGameArt 
 The resource tree can exceed one archive. The packager creates a small catalog/metadata ZIP plus independently downloadable family volumes and splits a family again when needed. Each ZIP remains below the 1.9 GB release-asset safety ceiling; its exact file list, uncompressed/compressed sizes and SHA-256 are recorded in `ASSET_BUNDLES.json`. The verifier checks every archive and exact file coverage. Download the catalog and the family volumes needed for the current video project, then extract all selected archives into the same parent folder while preserving the `video-asset-library/` directory.
 
 This architecture is intended to support multi-volume libraries in the tens of gigabytes without a single oversized ZIP. Actual released size and successful counts are written to the build report and must be inspected after the run.
+
+## Build 47: OpenMoji 17.0 emoji and sticker exports
+
+The build now adds the pinned **OpenMoji 17.0** official npm package's color and black emoji artwork in SVG, 618×618 PNG and 72×72 PNG formats, together with the central emoji metadata. The importer checks the exact npm package version and CC BY-SA 4.0 label, validates both the registry SHA-1 and SHA-512 integrity values, and extracts only approved artwork/metadata paths from the tarball. JavaScript and build scripts are not included; SVGs are sanitized and PNG signatures are checked.
+
+**Important license distinction:** OpenMoji artwork is CC BY-SA 4.0, not CC0. Commercial use is permitted with attribution. Credit must be given and changes indicated; if artwork is adapted, the adaptation must remain under CC BY-SA 4.0. The official OpenMoji FAQ specifically recommends putting the credit in the video's description and/or end credits, voice track or a footnote when the first OpenMoji appears. Each indexed file carries the CC BY-SA license, required credit text, video-attribution guidance, and the share-alike condition. The full license text and FAQ are stored next to the downloaded assets.
+
+Suggested attribution: “All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0.”
+
+Official sources: [OpenMoji 17.0 release](https://github.com/hfg-gmuend/openmoji/releases/tag/17.0.0), [official FAQ](https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md), [npm package 17.0.0](https://www.npmjs.com/package/openmoji/v/17.0.0), [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
