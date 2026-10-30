@@ -1136,6 +1136,16 @@ class USGSGalleryRightsAndParsingTests(unittest.TestCase):
         self.assertNotEqual(slug_a, slug_b)
         self.assertRegex(slug_a, r"^aerial-image-of-the-southwest-rift-zone-eruption-of-kilauea-[0-9a-f]{12}$")
 
+    def test_usgs_item_ids_are_url_hashed_and_type_scoped(self):
+        item_a = "https://www.usgs.gov/media/images/southwest-rift-zone-01"
+        item_a_with_slash = item_a + "/"
+        item_b = "https://www.usgs.gov/media/images/southwest-rift-zone-02"
+        image_id = library.usgs_asset_item_id("images", item_a)
+        self.assertEqual(image_id, library.usgs_asset_item_id("images", item_a_with_slash))
+        self.assertNotEqual(image_id, library.usgs_asset_item_id("images", item_b))
+        self.assertNotEqual(image_id, library.usgs_asset_item_id("videos", item_a))
+        self.assertRegex(image_id, r"^usgs-images-[0-9a-f]{16}$")
+
     def test_usgs_direct_media_allowlist_binds_exact_host_and_type_path(self):
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.IMAGE_URL, "images"))
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.AUDIO_URL, "audio"))
