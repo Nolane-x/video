@@ -128,9 +128,9 @@ class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
 
 class ExternalSourceExpansionTests(unittest.TestCase):
     def test_external_source_ceilings_remain_expanded(self):
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 72)
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["models"], 120)
-        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["textures"], 320)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["hdris"], 120)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["models"], 180)
+        self.assertGreaterEqual(library.POLYHAVEN_SELECTION_LIMITS["textures"], 480)
         self.assertGreaterEqual(library.MAX_POLY_FILE, 60 * 1024 * 1024)
         self.assertGreaterEqual(library.MAX_MEDIA_FILE, 12 * 1024 * 1024)
         self.assertGreaterEqual(library.MET_OPEN_ACCESS_IMAGE_CAP, 300)
@@ -140,7 +140,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 200)
         self.assertLessEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
         self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_MAX_IMAGE_BYTES, 24 * 1024 * 1024)
-        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 198)
+        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 792)
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 8 * 1024 * 1024 * 1024)
