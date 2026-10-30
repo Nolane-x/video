@@ -1584,6 +1584,14 @@ def download_kenney(root,index):
     return report
 
 
+def kenney_godot_splash_archive_root_is_allowed(root_name):
+    value = str(root_name or "").casefold()
+    return (
+        value.startswith("kenneynl-godot-splashscreens-")
+        or value.startswith("godot-splashscreens-")
+    )
+
+
 def kenney_godot_splash_path_is_allowed(relative_path):
     try:
         raw = str(relative_path or "").replace("\\", "/")
@@ -1628,12 +1636,12 @@ def download_kenney_godot_splashscreens(root, index):
     }
     target = root / "third-party/kenney/godot-splashscreens"
     try:
-        blob, final_url = request_bytes(KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL, timeout=70, limit=MAX_KENNEY_ZIP)
+        blob, content_type = request_bytes(KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL, timeout=70, limit=MAX_KENNEY_ZIP)
         if not blob.startswith(b"PK"):
             raise RuntimeError("GitHub did not return a ZIP archive")
-        final_host = (urllib.parse.urlsplit(str(final_url)).hostname or "").lower()
-        if final_host not in {"api.github.com", "github.com", "codeload.github.com"}:
-            raise RuntimeError("GitHub archive redirected outside official GitHub hosts")
+        normalized_content_type = str(content_type or "").split(";", 1)[0].strip().lower()
+        if normalized_content_type not in {"application/zip", "application/octet-stream", "application/x-zip-compressed"}:
+            raise RuntimeError("GitHub archive returned an unexpected content type")
         selected, selected_names = [], set()
         readme_text, declared_total = "", 0
         with zipfile.ZipFile(io.BytesIO(blob)) as archive:
@@ -1659,7 +1667,7 @@ def download_kenney_godot_splashscreens(root, index):
                 if info.compress_size and info.file_size / info.compress_size > 500:
                     raise RuntimeError("ZIP compression ratio exceeds safety ceiling")
                 parts = path.parts
-                if (len(parts) == 2 and parts[0].casefold().startswith("godot-splashscreens")
+                if (len(parts) == 2 and kenney_godot_splash_archive_root_is_allowed(parts[0])
                     and parts[1].casefold() == "readme.md"):
                     if info.file_size > 2 * 1024 * 1024:
                         raise RuntimeError("README exceeds safety limit")
@@ -1673,7 +1681,7 @@ def download_kenney_godot_splashscreens(root, index):
                 if info.is_dir():
                     continue
                 parts = PurePosixPath(info.filename.replace("\\", "/")).parts
-                if len(parts) < 2 or not parts[0].casefold().startswith("godot-splashscreens"):
+                if len(parts) < 2 or not kenney_godot_splash_archive_root_is_allowed(parts[0]):
                     continue
                 relative = PurePosixPath(*parts[1:]).as_posix()
                 if not kenney_godot_splash_path_is_allowed(relative):
