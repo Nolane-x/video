@@ -100,6 +100,12 @@ class OpenMojiCCBYSAAssetTests(unittest.TestCase):
         bad["license"] = "CC0-1.0"
         self.assertFalse(library.openmoji_metadata_is_eligible(bad))
         bad = json.loads(json.dumps(good))
+        bad["dist"]["fileCount"] = 11538
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["dist"]["unpackedSize"] = library.OPENMOJI_MAX_EXTRACTED_BYTES + 1
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
         bad["version"] = "latest"
         self.assertFalse(library.openmoji_metadata_is_eligible(bad))
         bad = json.loads(json.dumps(good))
