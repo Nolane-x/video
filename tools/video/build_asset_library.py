@@ -4516,6 +4516,7 @@ def main():
     noaa_report=download_noaa_ocean_exploration(STAGE,index)
     opengameart_report=download_opengameart(STAGE,index)
     google_fonts_report=download_google_fonts(STAGE,index)
+    openmoji_report=download_openmoji_assets(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -4577,6 +4578,9 @@ def main():
               "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
               "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
               "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf"),
+              "openmoji_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("openmoji-cc-by-sa-")),
+              "openmoji_svg_downloaded":sum(1 for x in index if x.get("type")=="openmoji-cc-by-sa-svg"),
+              "openmoji_png_downloaded":sum(1 for x in index if x.get("type")=="openmoji-cc-by-sa-png"),
               "noaa_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in noaa_report),
               "noaa_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in noaa_report),
               "original_stickers":sticker_meme_counts["stickers"],
@@ -4594,7 +4598,13 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"noaa_ocean_exploration_downloads":noaa_report,"sticker_meme_library":sticker_meme_counts,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"openmoji_downloads":openmoji_report,"noaa_ocean_exploration_downloads":noaa_report,"sticker_meme_library":sticker_meme_counts,"assets":index}
+    openmoji_note=(
+      "\n\n## OpenMoji 17.0 emoji and sticker artwork — CC BY-SA 4.0\n"
+      "The builder downloads the pinned official npm package openmoji@17.0.0, verifies package version, artwork license metadata, official npm tarball URL, SHA-1 and SHA-512 integrity against the registry response, and safely extracts only the exported color/black SVG and PNG directories plus central emoji metadata. JavaScript, build scripts and unrelated repository files are not bundled. SVG assets are sanitized; PNG signatures, archive member paths and size limits are checked. Each graphic retains a per-file SHA-256, tag-pinned GitHub source URL, the full CC BY-SA 4.0 license text and the OpenMoji FAQ. OpenMoji artwork is not CC0: use the required credit, indicate changes, and keep adapted artwork under CC BY-SA 4.0. The official FAQ specifically recommends attribution in the video description and/or end credits, voice track or a footnote at first use. Source: https://github.com/hfg-gmuend/openmoji/tree/17.0.0 and https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md.\n"
+      + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in openmoji_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+openmoji_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
