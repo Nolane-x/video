@@ -2658,7 +2658,7 @@ class NOAAMultimediaDetailParser(HTMLParser):
         if tag == "div":
             if self.eyebrow_depth:
                 self.eyebrow_depth -= 1
-            elif self.pair_depth and self.current_pair is not None:
+            if self.pair_depth and self.current_pair is not None:
                 self.pair_depth -= 1
                 if self.pair_depth == 0:
                     label = " ".join(" ".join(self.current_pair["label_parts"]).split()).strip()
@@ -2785,7 +2785,8 @@ def noaa_media_signature_is_valid(blob, media_type, content_type, extension):
     if media_type == "image":
         signature = (
             blob.startswith(b"\xff\xd8\xff") or blob.startswith(b"\x89PNG\r\n\x1a\n")
-            or blob.startswith((b"RIFF", b"GIF87a", b"GIF89a"))
+            or blob.startswith((b"GIF87a", b"GIF89a"))
+            or (len(blob) > 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WEBP")
         )
         return signature and (mime.startswith("image/") or mime == "application/octet-stream")
     if media_type == "video":
@@ -4350,7 +4351,6 @@ def main():
               "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
               "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
               "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf"),
-              "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
               "noaa_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in noaa_report),
               "noaa_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in noaa_report),
               "original_stickers":sticker_meme_counts["stickers"],
@@ -4383,8 +4383,9 @@ def main():
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=90 and len(OVERLAYS)>=75 and len(ICONS)>=125 and len(INFO)>=50 and len(TEXTURES)>=55 and len(ILLUSTRATIONS)>=105 and len(MOTION_LOOPS)==24
-    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)+sticker_meme_counts["total"]
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
+    assert sticker_meme_counts["stickers"] >= 200 and sticker_meme_counts["meme_templates"] >= 70 and sticker_meme_counts["caption_overlays"] >= 60
     indexed={line.split("  ",1)[1] for line in digest_lines}
     for path in STAGE.rglob("*"):
         if path.is_file() and path.name not in {"SHA256SUMS.txt"}:
