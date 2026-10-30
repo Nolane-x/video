@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library_shard as shard_builder  # noqa: E402
 
 EXPECTED_LANES = {"originals", *shard_builder.SOURCE_LANES.keys()}
-TARGET_BYTES = 50 * 1024 * 1024 * 1024
+TARGET_BYTES = 50_000_000_000
 MAX_RELEASE_ASSET_BYTES = 1_900_000_000
 METADATA_FILES = (
     "ASSET_INDEX.json",
@@ -144,7 +144,7 @@ def merge_shard_manifests(
     all_file_bytes = sum(int(row["size_bytes"]) for row in all_files)
     summary = {
         "target_bytes": TARGET_BYTES,
-        "target_gib": 50,
+        "target_gb": 50,
         "target_reached": indexed_bytes >= TARGET_BYTES,
         "indexed_asset_count": len(all_assets),
         "indexed_resource_bytes": indexed_bytes,
@@ -210,7 +210,7 @@ def write_release_metadata(merged: dict, output_dir: Path, repository: str, rele
         f"- Release: {release_tag}",
         f"- Indexed assets: {summary['indexed_asset_count']}",
         f"- Actual indexed resource bytes: {summary['indexed_resource_bytes']}",
-        f"- 50 GiB target reached: {summary['target_reached']}",
+        f"- 50 GB target reached: {summary['target_reached']}",
         "",
         "Each row below preserves the exact license label and source record from the item importer. "
         "Check the license and any non-copyright restrictions before publishing a video.",
@@ -369,19 +369,19 @@ def finalize_release(manifest_dir: Path, output_dir: Path, repository: str, rele
     verified = verify_release_assets(repository, release_tag, merged, metadata_paths)
     summary = merged["summary"]
     actual_gib = summary["indexed_resource_gib"]
-    title = f"Nolane Video Asset Library — {actual_gib:.2f} GiB / 50 GiB target"
+    title = f"Nolane Video Asset Library — {summary['indexed_resource_bytes'] / 1_000_000_000:.2f} GB / 50 GB target"
     notes_path = Path(output_dir).resolve() / "RELEASE_NOTES.md"
     notes_path.write_text(
         f"# Nolane Video Asset Library\n\n"
         f"- Actual indexed resource size: **{summary['indexed_resource_bytes']} bytes "
-        f"({actual_gib:.3f} GiB)**\n"
-        f"- Target: **50 GiB**\n"
+        f"({summary['indexed_resource_bytes'] / 1_000_000_000:.3f} GB)**\n"
+        f"- Target: **50 GB**\n"
         f"- Target status: **{'reached' if summary['target_reached'] else 'not reached'}**\n"
         f"- Indexed resources: **{summary['indexed_asset_count']}**\n"
         f"- Download volumes: **{summary['bundle_count']}**\n\n"
         "Every volume is under the release-file safety ceiling. The global index, source/license "
         "ledger, searchable catalog and SHA-256 list are included as separate release assets. "
-        "A target below 50 GiB is reported as partial progress, never rounded up or described as complete.\n",
+        "A target below 50 GB is reported as partial progress, never rounded up or described as complete.\n",
         encoding="utf-8",
     )
     published = publish_release(repository, release_tag, title, notes_path)
