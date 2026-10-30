@@ -102,3 +102,15 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Current first distributed build [Build #52](https://github.com/Nolane-x/video/actions/runs/41066528335) was created after merge and is queued at this snapshot; no 50 GB output has yet been established. Old serial Build 49 remained in progress, Build 50 was cancelled, and Build 51 was pending; these are not evidence of completion.
 - Existing last confirmed public library release remains Build 43 (1,095,394,051 bytes). Continue by inspecting every Build 52 source lane and improve source selection using measured bytes, not hypothetical caps.
 
+
+## Video asset library — later 2026-10-30 handoff
+- Latest source / cap changes are on main SHA `37fa3edaeab6cdbe992c754faac862ed9e779d4c`; CI #143 [passed](https://github.com/Nolane-x/video/actions/runs/41080103431).
+- Build 62 [run](https://github.com/Nolane-x/video/actions/runs/41078978167) has 39 draft-release ZIP volumes (8,154,719,650 compressed bytes), 21/22 manifests, and the USGS lane still running at the snapshot. The finalizer has not published it.
+- Completed Build 62 source logs account for 8,691,066,675 indexed resource bytes before USGS. Major totals: NASA 2.0306 GB, NOAA 1.9622 GB, OpenGameArt 1.4348 GB, Internet Archive 1.0923 GB, ambientCG 0.8693 GB, Wikimedia 0.5172 GB, Poly Haven 0.3850 GB. These are source file bytes from manifests, not ZIP sizes.
+- USGS IDs now contain a SHA-256-derived item URL identity; NOAA IDs and filenames do too. Smithsonian will not burn ten minutes retrying a 429 if the provider's Retry-After is longer than 30 seconds.
+- NASA adds 45 search topics with an 8 GiB aggregate ceiling; Wikimedia Commons adds 50 search topics, 1,600 image cap and 8 GiB ceiling; Internet Archive search depth is 5 pages × 100 and up to 220 item pages per collection; OpenGameArt has expanded category caps 60/60/48/36/36, 10 search pages and 120 item pages/category, 8 GiB total ceiling.
+- ambientCG caps sum to 792 selections; Poly Haven limits are 120 HDRIs / 180 models / 480 textures; both retain 8 GiB aggregate runner-safe ceilings.
+- Source matrix `max-parallel: 18` uses the 20 concurrent standard GitHub-hosted runner slots on Free, keeping a little room for CI and portable-skill packaging. Build 68 [run](https://github.com/Nolane-x/video/actions/runs/41080103332) is queued behind Build 62 and will pick up the latest caps.
+- DVIDS is a future option only after a user API key is added and item-level media rights / privacy / publicity / DoD non-endorsement checks are designed; it is not currently bundled.
+- The target remains exactly 50,000,000,000 indexed resource bytes. 50 GB is **not** yet achieved or published. Continue from Build 62's USGS lane, then inspect the newest distributed build's lane summaries, update caps based on actual yield and re-verify every Release asset SHA-256 before publication.
+
