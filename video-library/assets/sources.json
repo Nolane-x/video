@@ -522,6 +522,20 @@
       "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Active SVG and native Blender project files are excluded from community archives. Category limits are ceilings, not promised download counts."
     },
     {
+      "id": "google-fonts-curated-ofl",
+      "title": "Google Fonts — curated TTF families under SIL Open Font License 1.1",
+      "provider": "Google Fonts / google/fonts",
+      "kind": "type family and font file repository",
+      "category": "Display typography, editorial titles, captions, subtitles, UI labels and mono numerals",
+      "source_page": "https://github.com/google/fonts/tree/main/ofl",
+      "api": "https://api.github.com/repos/google/fonts/contents/ofl/",
+      "license": "SIL Open Font License 1.1, verified from each exact family OFL.txt",
+      "license_url": "https://openfontlicense.org/",
+      "verified_page_license": true,
+      "bundling": "curated-bounded-ttf-download-only-after-family-ofl-text-check",
+      "note": "The builder queries a fixed set of 20 official family directories. It downloads a family's TTF files only after fetching the OFL.txt file from that same exact family folder and verifying the SIL Open Font License Version 1.1 marker and copyright statement. At most two TTF faces per family and 90 MiB total are downloaded. The original OFL.txt, exact family page, raw font URL, family license-file SHA-256 and per-font SHA-256 are preserved. Each font remains under its own SIL OFL 1.1 terms, not CC0."
+    },
+    {
       "id": "noaa-multimedia",
       "title": "NOAA multimedia — ocean, weather, atmosphere and climate media",
       "provider": "National Oceanic and Atmospheric Administration",
