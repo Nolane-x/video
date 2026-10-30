@@ -445,6 +445,20 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         picked = library.internet_archive_choose_video_file(rows)
         self.assertEqual(picked["file"]["name"], "film-hd.mp4")
         self.assertEqual(picked["duration_seconds"], 120)
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "unknown-duration.mp4", "size": 90000000, "source": "original"}
+        ]))
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "malformed-duration.mp4", "size": 90000000, "length": "not-a-duration"}
+        ]))
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "too-long.mp4", "size": 90000000,
+             "length": library.INTERNET_ARCHIVE_MAX_DURATION_SECONDS + 0.01}
+        ]))
+        self.assertIsNotNone(library.internet_archive_choose_video_file([
+            {"name": "at-limit.mp4", "size": 90000000,
+             "length": library.INTERNET_ARCHIVE_MAX_DURATION_SECONDS}
+        ]))
 
     def test_internet_archive_direct_download_is_pinned_to_identifier_and_filename(self):
         self.assertTrue(library.internet_archive_file_url_is_allowed(
