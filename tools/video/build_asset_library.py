@@ -2197,6 +2197,7 @@ def opengameart_file_signature_is_valid(blob,extension,content_type):
     if ext==".flac": return blob.startswith(b"fLaC")
     if ext==".mp3": return blob.startswith(b"ID3") or (len(blob)>2 and blob[0]==0xff and (blob[1]&0xe0)==0xe0)
     if ext==".mp4" or ext==".m4v" or ext==".mov": return len(blob)>12 and b"ftyp" in blob[:64]
+    if ext==".webm": return blob.startswith(b"\x1a\x45\xdf\xa3")
     if ext==".glb": return blob.startswith(b"glTF")
     if ext==".gltf":
         try:
@@ -2206,6 +2207,8 @@ def opengameart_file_signature_is_valid(blob,extension,content_type):
     if ext==".fbx": return blob.startswith(b"Kaydara FBX Binary") or blob.lstrip().startswith(b"; FBX")
     if ext==".ttf": return blob.startswith((b"\x00\x01\x00\x00",b"true"))
     if ext==".otf": return blob.startswith(b"OTTO")
+    if ext==".woff": return blob.startswith(b"wOFF")
+    if ext==".woff2": return blob.startswith(b"wOF2")
     if ext==".woff": return blob.startswith(b"wOFF")
     if ext==".woff2": return blob.startswith(b"wOF2")
     if ext==".pdf": return blob.startswith(b"%PDF-")
