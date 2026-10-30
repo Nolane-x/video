@@ -25,6 +25,9 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 20 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 250 * 1024 * 1024)
+        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 4)
+        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 24, "videos": 8, "audio": 8})
+        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 100 * 1024 * 1024)
 
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
         self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
