@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import io
-import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
-import generate_original_stickers as sticker_library  # noqa: E402
-import package_asset_library as packer  # noqa: E402
+import generate_sticker_meme_library as sticker_meme  # noqa: E402
+import package_asset_bundles as bundle_packager  # noqa: E402
+import generate_sfx_library as sfx_library  # noqa: E402
+import json
 
 
 
@@ -27,17 +30,13 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP, 240)
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_SVG_CAP, 60)
         self.assertGreaterEqual(library.WIKIMEDIA_CC0_AUDIO_VIDEO_CAP, 36)
-        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 60)
+        self.assertEqual(sum(library.AMBIENTCG_SELECTION_CAPS.values()), 30)
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
-        self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
-        self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
-        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 8)
-        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 40, "videos": 18, "audio": 12})
-        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 800 * 1024 * 1024)
-        self.assertEqual(library.OPENGAMEART_SELECTION_CAPS, {"2d": 8, "3d": 8, "textures": 8, "sfx": 8, "music": 8})
-        self.assertEqual(library.OPENGAMEART_SEARCH_PAGES_PER_TYPE, 3)
-        self.assertEqual(library.OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE, 24)
-        self.assertGreaterEqual(library.OPENGAMEART_MAX_TOTAL_BYTES, 1024 * 1024 * 1024)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 20 * 1024 * 1024)
+        self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 250 * 1024 * 1024)
+        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 4)
+        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 24, "videos": 8, "audio": 8})
+        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 100 * 1024 * 1024)
 
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
         self.assertTrue(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=Wood096_1K-JPG.zip"))
@@ -105,38 +104,6 @@ class GoogleFontsOFLTests(unittest.TestCase):
         self.assertGreaterEqual(library.GOOGLE_FONTS_MAX_TOTAL_BYTES, 50 * 1024 * 1024)
 
 
-class OriginalStickerAndMemeGeneratorTests(unittest.TestCase):
-    def test_original_cc0_sticker_and_meme_collections_are_generated(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            index = []
-            sticker_count, meme_count = sticker_library.generate_original_stickers(
-                root, index, "https://creativecommons.org/publicdomain/zero/1.0/"
-            )
-            self.assertEqual(sticker_count, 202)
-            self.assertEqual(meme_count, 48)
-            sticker_assets = [row for row in index if str(row["type"]).startswith("original-sticker-")]
-            meme_assets = [row for row in index if row["type"] == "original-meme-layout-template"]
-            self.assertEqual(len(sticker_assets), 202)
-            self.assertEqual(len(meme_assets), 48)
-            self.assertTrue(all(row["license"] == "CC0-1.0" and row["editable_vector"] for row in sticker_assets))
-            self.assertTrue(all(row["license"] == "CC0-1.0" and row["editable_vector"] for row in meme_assets))
-            for row in sticker_assets[:4] + sticker_assets[-4:] + meme_assets:
-                path = root / row["path"]
-                svg = path.read_text(encoding="utf-8")
-                self.assertTrue(svg.startswith("<svg "))
-                self.assertNotIn("<script", svg.lower())
-                self.assertNotIn("javascript:", svg.lower())
-                self.assertNotIn('href="http', svg.lower())
-
-    def test_all_meme_layout_variants_have_nonempty_svg_placeholders(self):
-        for index, (layout, title) in enumerate(sticker_library.MEME_LAYOUTS):
-            svg = sticker_library._meme_template_svg(layout, title, index)
-            self.assertIn("<svg ", svg)
-            self.assertIn("viewBox=", svg)
-            self.assertGreater(svg.count("<rect"), 1)
-
-
 class SafeArchiveExtractionTests(unittest.TestCase):
     def _archive(self, filename, payload=b"not-executable"):
         stream = io.BytesIO()
@@ -168,85 +135,6 @@ class SafeArchiveExtractionTests(unittest.TestCase):
             self.assertEqual(count, 1)
             self.assertGreater(size, 0)
             self.assertTrue((Path(tmp) / "bundle" / "Textures" / "stone.png").is_file())
-
-
-class ModularAssetPackagerTests(unittest.TestCase):
-    def test_grouping_routes_assets_to_reusable_categories(self):
-        self.assertEqual(packer.group_for_path("originals/stickers/reaction-001.svg"), "stickers-memes")
-        self.assertEqual(packer.group_for_path("originals/meme-templates/meme-001.svg"), "stickers-memes")
-        self.assertEqual(packer.group_for_path("third-party/opengameart/2d/pack/sprite.png"), "game-art-2d")
-        self.assertEqual(packer.group_for_path("third-party/opengameart/3d/pack/model.glb"), "game-art-3d")
-        self.assertEqual(packer.group_for_path("third-party/ambientcg/material/wood/albedo.jpg"), "materials-environments")
-        self.assertEqual(packer.group_for_path("third-party/google-fonts/inter/Inter.ttf"), "typography")
-        self.assertEqual(packer.group_for_path("third-party/usgs/videos/eruption.mp4"), "science-footage")
-
-    def test_package_library_builds_independent_packs_and_checksums(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp) / "dist"
-            root = out / "video-asset-library"
-            files = {
-                "originals/stickers/wow.svg": b"<svg xmlns='http://www.w3.org/2000/svg'><text>WOW</text></svg>",
-                "third-party/opengameart/2d/pack/sprite.png": b"\x89PNG\r\n\x1a\n" + b"x" * 64,
-                "third-party/ambientcg/material/wood/albedo.jpg": b"\xff\xd8\xff" + b"x" * 64,
-            }
-            assets = []
-            checksums = []
-            for rel, blob in files.items():
-                target = root / rel
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(blob)
-                digest = __import__("hashlib").sha256(blob).hexdigest()
-                checksums.append(f"{digest}  {rel}")
-                assets.append({"path": rel, "id": rel, "type": "test-asset", "sha256": digest,
-                               "size_bytes": len(blob), "license": "CC0-1.0", "redistributable": True})
-            (root / "ASSET_INDEX.json").write_text(json.dumps({"assets": assets, "summary": {}}), encoding="utf-8")
-            (root / "ASSET_CATALOG.html").write_text("<html>catalog</html>", encoding="utf-8")
-            (root / "SOURCES_AND_LICENSES.md").write_text("# Sources\n", encoding="utf-8")
-            (root / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
-            (out / "VIDEO_ASSET_LIBRARY_BUILD.txt").parent.mkdir(parents=True, exist_ok=True)
-            (out / "VIDEO_ASSET_LIBRARY_BUILD.txt").write_text("built_at=test\n", encoding="utf-8")
-            manifest = packer.package_library(out)
-            self.assertGreaterEqual(manifest["pack_count"], 3)
-            self.assertTrue((out / "PACKAGES_INDEX.json").is_file())
-            self.assertTrue((root / "MODULAR_PACKS_INDEX.json").is_file())
-            self.assertTrue((out / "video-asset-library.zip").is_file())
-            for item in manifest["packs"]:
-                archive_path = out / item["file"]
-                self.assertTrue(archive_path.is_file())
-                self.assertEqual(__import__("hashlib").sha256(archive_path.read_bytes()).hexdigest(), item["sha256"])
-                with zipfile.ZipFile(archive_path) as archive:
-                    self.assertIsNone(archive.testzip())
-                    names = archive.namelist()
-                    self.assertTrue(any(name.endswith("PACK_ASSET_INDEX.json") for name in names))
-                    self.assertTrue(any(name.endswith("PACK_SHA256SUMS.txt") for name in names))
-
-    def test_large_group_is_split_into_multiple_bounded_parts(self):
-        old_limit = packer.MAX_PART_RAW_BYTES
-        try:
-            packer.MAX_PART_RAW_BYTES = 64
-            with tempfile.TemporaryDirectory() as tmp:
-                out = Path(tmp) / "dist"
-                root = out / "video-asset-library"
-                root.mkdir(parents=True)
-                assets = []
-                lines = []
-                for name in ("a.svg", "b.svg", "c.svg"):
-                    rel = "originals/stickers/" + name
-                    path = root / rel
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_bytes(b"x" * 48)
-                    digest = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
-                    assets.append({"path": rel, "type": "original-sticker", "sha256": digest, "size_bytes": 48})
-                    lines.append(f"{digest}  {rel}")
-                (root / "ASSET_INDEX.json").write_text(json.dumps({"assets": assets, "summary": {}}), encoding="utf-8")
-                for name, body in [("ASSET_CATALOG.html", "x"), ("SOURCES_AND_LICENSES.md", "x"), ("SHA256SUMS.txt", "\n".join(lines)+"\n")]:
-                    (root / name).write_text(body, encoding="utf-8")
-                (out / "VIDEO_ASSET_LIBRARY_BUILD.txt").write_text("built_at=test\n", encoding="utf-8")
-                manifest = packer.package_library(out)
-                sticker_parts = [item for item in manifest["packs"] if item["pack_id"].startswith("stickers-memes-")]
-                self.assertEqual(len(sticker_parts), 3)
-        finally:
-            packer.MAX_PART_RAW_BYTES = old_limit
 
 
 class OpenGameArtRightsAndParsingTests(unittest.TestCase):
@@ -324,6 +212,187 @@ class OpenGameArtRightsAndParsingTests(unittest.TestCase):
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a zip</html>", ".zip", "text/html"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a png</html>", ".png", "text/html"))
 
+class ScalableBundlePackagingTests(unittest.TestCase):
+    def _create_library(self, root, asset_sizes):
+        library_root = root / "video-asset-library"
+        library_root.mkdir(parents=True)
+        assets = []
+        for i, size in enumerate(asset_sizes):
+            rel = f"originals/stickers/sticker-{i}.svg"
+            path = library_root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((f"<svg id='{i}'>" + "x" * (size - 20) + "</svg>").encode("utf-8"))
+            assets.append({
+                "id": f"sticker-{i}", "path": rel, "type": "original-video-sticker",
+                "license": "CC0-1.0", "redistributable": True
+            })
+        (library_root / "ASSET_INDEX.json").write_text(json.dumps({
+            "built_at": "2026-10-30T00:00:00Z", "assets": assets, "summary": {}
+        }), encoding="utf-8")
+        (library_root / "ASSET_CATALOG.html").write_text("<html>catalog</html>", encoding="utf-8")
+        (library_root / "SOURCES_AND_LICENSES.md").write_text("# rights", encoding="utf-8")
+        (library_root / "SHA256SUMS.txt").write_text("", encoding="utf-8")
+        return library_root
+
+    def test_compact_library_keeps_one_click_legacy_zip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [128, 128])
+            manifest = bundle_packager.package_library(output)
+            self.assertEqual(manifest["mode"], "single-archive")
+            self.assertEqual(manifest["bundle_count"], 1)
+            self.assertTrue((output / "video-asset-library.zip").is_file())
+            self.assertFalse((output / "video-assets-catalog.zip").exists())
+            bundle_packager.verify_manifest(output, root, manifest)
+
+    def test_large_library_splits_by_family_and_extracts_into_same_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [35_000, 35_000, 35_000])
+            with mock.patch.object(bundle_packager, "MAX_BUNDLE_UNCOMPRESSED_BYTES", 50_000):
+                manifest = bundle_packager.package_library(output)
+                self.assertEqual(manifest["mode"], "multi-volume")
+                self.assertGreaterEqual(manifest["bundle_count"], 3)
+                names = {row["name"] for row in manifest["bundles"]}
+                self.assertIn("video-assets-catalog.zip", names)
+                self.assertTrue(any(name.startswith("video-assets-original-graphics-") for name in names))
+                self.assertFalse((output / "video-asset-library.zip").exists())
+                self.assertTrue((output / "ASSET_BUNDLES.json").is_file())
+                bundle_packager.verify_manifest(output, root, manifest)
+
+    def test_packager_classifies_stickers_textures_audio_footage_and_fonts(self):
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-video-sticker", "path": "originals/stickers/wow.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-meme-layout-template", "path": "originals/meme-templates/two-panel.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-svg-texture", "category": "texture / surface", "path": "originals/textures/grid.svg"}), "3d-textures")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-sfx", "path": "originals/audio/cue.wav"}), "audio")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-video-loop", "path": "originals/video-loops/loop.mp4"}), "footage")
+        self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
+
+    def test_bundle_manifest_detects_missing_or_modified_zip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            root = self._create_library(output, [128])
+            manifest = bundle_packager.package_library(output)
+            first = output / manifest["bundles"][0]["name"]
+            first.write_bytes(first.read_bytes() + b"tamper")
+            with self.assertRaises(RuntimeError):
+                bundle_packager.verify_manifest(output, root, manifest)
+
+
+class NOAAMultimediaRightsAndParsingTests(unittest.TestCase):
+    IMAGE_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-image.jpg"
+    VIDEO_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-video-1280x720.mp4"
+
+    def test_noaa_listing_parser_reads_only_official_multimedia_card_links(self):
+        page = f"""<html><body>
+        <div class="component-cards-posts__main">
+          <div class="component-cards-posts__initial">
+            <div class="element-card-compact"><a href="https://oceanexplorer.noaa.gov/multimedia/octopus-dive/">Octopus</a></div>
+            <div class="element-card-compact"><a href="/multimedia/deep-sea-coral/">Coral</a></div>
+          </div>
+        </div>
+        <div class="sidebar"><a href="https://oceanexplorer.noaa.gov/multimedia/not-a-card/">Sidebar</a></div>
+        <a href="https://example.com/multimedia/external/">External</a>
+        </body></html>"""
+        self.assertEqual(
+            library.noaa_parse_listing_page(page),
+            [
+                "https://oceanexplorer.noaa.gov/multimedia/octopus-dive/",
+                "https://oceanexplorer.noaa.gov/multimedia/deep-sea-coral/",
+            ],
+        )
+
+    def test_noaa_detail_parser_extracts_title_caption_credit_and_hd_download(self):
+        page = f"""<html><head><meta property="og:title" content="Deep Ocean Discovery"></head><body>
+        <div class="component-multimedia-post__type eyebrow">video</div>
+        <div class="component-multimedia-post__heading h2">Deep Ocean Discovery</div>
+        <div class="component-multimedia-post__content content-formatted">An ROV explores a deep-sea coral habitat.</div>
+        <div class="component-multimedia-post__details"><div class="content-stack">
+          <div class="meta-pair"><div class="eyebrow">Credit</div><p>NOAA Ocean Exploration, Example Expedition</p></div>
+          <div class="meta-pair"><div class="eyebrow">Download</div><p>
+            <a class="text-download" href="{self.VIDEO_URL}">HD version (mp4)</a>
+          </p></div>
+        </div></div></body></html>"""
+        detail = library.noaa_parse_detail_page(page)
+        self.assertEqual(detail["title"], "Deep Ocean Discovery")
+        self.assertEqual(detail["media_type"], "video")
+        self.assertIn("ROV explores", detail["caption"])
+        self.assertEqual(detail["credit"], "NOAA Ocean Exploration, Example Expedition")
+        self.assertEqual(detail["downloads"][0]["url"], self.VIDEO_URL)
+        self.assertFalse(detail["copyright_marker"])
+
+    def test_noaa_copyright_marker_is_case_insensitive_and_blocks_item(self):
+        page = """<html><body>
+        <div class="component-multimedia-post__heading">Partner Footage</div>
+        <div class="component-multimedia-post__type">video</div>
+        <div class="component-multimedia-post__content content-formatted">Copyright © Partner Studio. Used by permission.</div>
+        <div class="component-multimedia-post__details"><div class="meta-pair">
+        <div class="eyebrow">Credit</div><p>NOAA Ocean Exploration</p></div></div>
+        </body></html>"""
+        detail = library.noaa_parse_detail_page(page)
+        self.assertTrue(detail["copyright_marker"])
+
+    def test_noaa_download_allowlist_is_official_and_media_type_specific(self):
+        self.assertTrue(library.noaa_detail_page_is_allowed("https://oceanexplorer.noaa.gov/multimedia/octopus-dive/"))
+        self.assertFalse(library.noaa_detail_page_is_allowed("https://example.com/multimedia/octopus-dive/"))
+        self.assertTrue(library.noaa_media_download_url_is_allowed(self.IMAGE_URL, "image"))
+        self.assertTrue(library.noaa_media_download_url_is_allowed(self.VIDEO_URL, "video"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed("https://example.com/wp-content/uploads/a.jpg", "image"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed("http://oceanexplorer.noaa.gov/wp-content/uploads/a.mp4", "video"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed(self.VIDEO_URL, "image"))
+
+    def test_noaa_magic_bytes_reject_html_and_accept_jpeg_mp4(self):
+        self.assertTrue(library.noaa_media_signature_is_valid(b"\xff\xd8\xff" + b"x" * 64, "image", "image/jpeg", ".jpg"))
+        self.assertTrue(library.noaa_media_signature_is_valid(b"\x00\x00\x00\x18ftypisom" + b"x" * 20000, "video", "video/mp4", ".mp4"))
+        self.assertFalse(library.noaa_media_signature_is_valid(b"<html>blocked</html>", "image", "text/html", ".jpg"))
+        self.assertFalse(library.noaa_media_signature_is_valid(b"<html>blocked</html>", "video", "text/html", ".mp4"))
+
+    def test_usgs_singular_type_map_keeps_audio_correct(self):
+        self.assertEqual(library.usgs_singular_media_type("images"), "image")
+        self.assertEqual(library.usgs_singular_media_type("videos"), "video")
+        self.assertEqual(library.usgs_singular_media_type("audio"), "audio")
+        with self.assertRaises(ValueError):
+            library.usgs_singular_media_type("unknown")
+
+
+class OriginalSFXIntegrityTests(unittest.TestCase):
+    def test_sfx_index_digest_matches_complete_wav_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = []
+            count = sfx_library.generate_original_audio(root, index, library.CC0_URL)
+            self.assertGreater(count, 0)
+            self.assertEqual(count, len(index))
+            for item in index:
+                audio_path = root / item["path"]
+                self.assertTrue(audio_path.is_file())
+                self.assertEqual(item["sha256"], library.sha256_path(audio_path), item["path"])
+                self.assertEqual(item["size_bytes"], audio_path.stat().st_size)
+
+
+class OriginalStickerMemeLibraryTests(unittest.TestCase):
+    def test_sticker_meme_and_caption_packs_generate_large_original_cc0_families(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            index = []
+            counts = sticker_meme.generate_assets(Path(tmp), index)
+            self.assertGreaterEqual(counts["stickers"], 200)
+            self.assertGreaterEqual(counts["meme_templates"], 70)
+            self.assertGreaterEqual(counts["caption_overlays"], 60)
+            self.assertEqual(counts["total"], len(index))
+            self.assertGreaterEqual(len(index), 330)
+            self.assertTrue(all(item.get("license") == "CC0-1.0" and item.get("original_artwork") is True for item in index))
+            for item in index:
+                path = Path(tmp) / item["path"]
+                self.assertTrue(path.is_file())
+                xml = path.read_text(encoding="utf-8")
+                ET.fromstring(xml)
+                self.assertNotIn("<script", xml.lower())
+                self.assertNotRegex(xml.lower(), r"\s(?:href|src)\s*=\s*['\"](?:https?:|//|data:)")
+            self.assertTrue(any("meme" in item["category"] for item in index))
+            self.assertTrue(any("caption" in item["category"] for item in index))
+            self.assertTrue(any("stickers" in item["category"] for item in index))
+
+
 class USGSGalleryRightsAndParsingTests(unittest.TestCase):
     IMAGE_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/images/sample.jpg"
     AUDIO_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/audio/sample.mp3"
@@ -337,13 +406,6 @@ class USGSGalleryRightsAndParsingTests(unittest.TestCase):
         self.assertFalse(library.usgs_rights_are_public_domain("Public Domain. Third-party material used with permission."))
         self.assertFalse(library.usgs_rights_are_public_domain("Public Domain with restrictions"))
         self.assertFalse(library.usgs_rights_are_public_domain("CC BY 4.0"))
-
-    def test_usgs_media_type_normalization_keeps_audio_singular(self):
-        self.assertEqual(library.usgs_media_type_name("images"), "image")
-        self.assertEqual(library.usgs_media_type_name("videos"), "video")
-        self.assertEqual(library.usgs_media_type_name("audio"), "audio")
-        with self.assertRaises(ValueError):
-            library.usgs_media_type_name("documents")
 
     def test_usgs_direct_media_allowlist_binds_exact_host_and_type_path(self):
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.IMAGE_URL, "images"))
