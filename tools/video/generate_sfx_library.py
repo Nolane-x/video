@@ -334,7 +334,8 @@ def generate_original_audio(root: Path, index: list[dict], cc0_url: str) -> int:
         path=target_dir/(name+".wav")
         with wave.open(str(path),"wb") as wav:
             wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(48000); wav.writeframes(payload)
-        digest=hashlib.sha256(payload).hexdigest()
+        # Hash the complete WAV file, including its RIFF/WAVE header.
+        digest=hashlib.sha256(path.read_bytes()).hexdigest()
         ambience_kinds={"wind","rain","city","forest","ocean","bubbles","fire","thunder","crowd","birds","train","drone","warmdrone","vinyl"}
         interface_kinds={"click","click-sharp","chime","chime-soft","buzz","pulse","scifi","laser","glitch","tapestop","typing","morse","shutter"}
         foley_kinds={"paper","steps","steps-wood","steps-gravel","impact","impact-heavy","metal","glass","glassbreak","heartbeat","heartbeat-fast"}
