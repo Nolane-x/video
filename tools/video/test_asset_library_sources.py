@@ -63,6 +63,15 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.OPENMOJI_MAX_EXTRACTED_BYTES, 100 * 1024 * 1024)
         self.assertGreaterEqual(library.NOAA_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
 
+    def test_poly_pizza_source_catalog_requires_optional_key_and_item_level_cc0(self):
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(row for row in catalog["sources"] if row.get("id") == "poly-pizza-cc0-api")
+        self.assertIn("item-verified", entry["bundling"])
+        self.assertIn("optional POLY_PIZZA_API_KEY", entry["note"])
+        self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
+        self.assertIn("CC0 1.0 only", entry["note"])
+        self.assertEqual(entry["license_url"], "https://creativecommons.org/publicdomain/zero/1.0/")
+
     def test_quaternius_current_qal_is_catalogued_source_only(self):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
         entry = next(
@@ -674,6 +683,8 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-hdris-asset-file", "path": "third-party/lazytextures/hdris/Studio/lighting.exr"}), "3d-textures")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-textures-asset-file", "path": "third-party/lazytextures/textures/Rust/overlay.png"}), "3d-textures")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-other-asset-file", "path": "third-party/lazytextures/other/Brush01/brush.png"}), "miscellaneous")
+        self.assertEqual(bundle_packager.classify_asset({"type": "poly-pizza-cc0-model", "path": "third-party/poly-pizza/models/TreeOne/model.glb"}), "3d-models")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/poly-pizza/models/TreeOne/SOURCE_AND_LICENSE.md"), "3d-models")
         self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/models/SpaceKit/SOURCE_AND_LICENSE.md"), "3d-models")
         self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/materials/Concrete01/SOURCE_AND_LICENSE.md"), "3d-textures")
         self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/other/Brush01/SOURCE_AND_LICENSE.md"), "miscellaneous")
