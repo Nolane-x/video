@@ -19,6 +19,11 @@ MAX_POLY_FILE = 35 * 1024 * 1024
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
 POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+# ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
+# not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
+AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
+AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
 MET_OPEN_ACCESS_IMAGE_CAP = 110
 RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
 WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
@@ -1517,6 +1522,184 @@ def choose_poly_texture_selection(tree):
             selected.append(item)
     return selected[:6]
 
+def ambientcg_download_url_is_allowed(raw_url):
+    """Only follow the documented ambientCG /get endpoint over HTTPS."""
+    try:
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        if parsed.scheme!="https" or (parsed.hostname or "").lower()!="ambientcg.com":
+            return False
+        if parsed.username or parsed.password or parsed.port not in (None,443) or parsed.fragment:
+            return False
+        if parsed.path.rstrip("/")!="/get":
+            return False
+        query=urllib.parse.parse_qs(parsed.query)
+        file_name=(query.get("file") or [""])[0]
+        return bool(file_name and Path(file_name).suffix.lower()==".zip" and "/" not in file_name and "\\" not in file_name)
+    except Exception:
+        return False
+
+
+def ambientcg_download_candidates(asset):
+    """Walk the official full_json downloadData tree, returning ZIP variants only."""
+    candidates=[]
+    def walk(node):
+        if isinstance(node,dict):
+            url=node.get("downloadLink") or node.get("downloadUrl")
+            attribute=node.get("attribute") or node.get("attributes")
+            extension=str(node.get("extension") or "").lower().lstrip(".")
+            if isinstance(url,str) and isinstance(attribute,str) and attribute.strip():
+                parsed=urllib.parse.urlsplit(url)
+                query=urllib.parse.parse_qs(parsed.query)
+                file_name=(query.get("file") or [""])[0]
+                is_zip=(extension=="zip" or Path(file_name or parsed.path).suffix.lower()==".zip")
+                if is_zip and ambientcg_download_url_is_allowed(url):
+                    try:
+                        size=int(node.get("size") or node.get("sizeBytes") or 0)
+                    except (TypeError,ValueError):
+                        size=0
+                    candidates.append({"url":url,"attribute":attribute.strip(),"size_bytes":size})
+            for value in node.values():
+                walk(value)
+        elif isinstance(node,list):
+            for value in node:
+                walk(value)
+    walk((asset or {}).get("downloadFolders") or asset or {})
+    unique={}
+    for item in candidates:
+        unique[(item["url"],item["attribute"])]=item
+    return list(unique.values())
+
+
+def ambientcg_choose_download(asset):
+    candidates=ambientcg_download_candidates(asset)
+    preference=["1K-JPG","1K-PNG","1K-EXR","1K","512-JPG","512-PNG","2K-JPG","2K-PNG","2K","4K-JPG","4K-PNG","4K"]
+    rank={name:i for i,name in enumerate(preference)}
+    candidates.sort(key=lambda x:(rank.get(x["attribute"].upper(),len(rank)+1),x["size_bytes"] or 10**18))
+    for item in candidates:
+        if item["size_bytes"] and item["size_bytes"]>AMBIENTCG_MAX_ARCHIVE_BYTES:
+            continue
+        return item
+    return None
+
+
+def ambientcg_response_assets(payload):
+    if not isinstance(payload,dict):
+        return []
+    rows=payload.get("foundAssets")
+    if not isinstance(rows,list):
+        rows=payload.get("assets")
+    if not isinstance(rows,list):
+        return []
+    return [row for row in rows if isinstance(row,dict)]
+
+
+def download_ambientcg(root,index):
+    """Download a bounded sample from ambientCG's official CC0 API."""
+    report=[]; total_unpacked=0; seen=set()
+    license_url="https://docs.ambientcg.com/license/"
+    api_url="https://ambientcg.com/api/v2/full_json"
+    type_labels={
+        "Material":"PBR materials / tileable surfaces",
+        "HDRI":"HDRI environments",
+        "3DModel":"3D models and scans",
+        "Decal":"decals / transparent overlays",
+        "Atlas":"texture atlases",
+        "PlainTexture":"plain textures",
+        "Brush":"texture brushes",
+        "Substance":"Substance material graphs"
+    }
+    for asset_type,cap in AMBIENTCG_SELECTION_CAPS.items():
+        try:
+            params={"type":asset_type,"sort":"Popular","limit":min(100,max(cap*5,30)),
+                    "include":"downloadData,tagData,displayData","offset":0}
+            payload=request_json(api_url+"?"+urllib.parse.urlencode(params),timeout=25)
+            assets=ambientcg_response_assets(payload)
+            downloaded_for_type=0
+            if not assets:
+                report.append({"id":"ambientcg-"+asset_type.lower(),"status":"no_eligible_asset",
+                               "asset_type":asset_type,"source_page":"https://ambientcg.com/",
+                               "reason":"The official API returned no recognizable asset list."})
+            for asset in assets:
+                if downloaded_for_type>=cap or total_unpacked>=AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES:
+                    break
+                asset_id=str(asset.get("assetId") or asset.get("id") or "").strip()
+                if not asset_id or asset_id in seen:
+                    continue
+                seen.add(asset_id)
+                title=str(asset.get("displayName") or asset.get("title") or asset_id).strip()[:240]
+                source_page="https://ambientcg.com/a/"+urllib.parse.quote(asset_id,safe="-_.~")
+                choice=ambientcg_choose_download(asset)
+                row={"id":"ambientcg-"+slugify(asset_id),"asset_id":asset_id,"title":title,
+                     "provider":"ambientCG","asset_type":asset_type,"category":type_labels.get(asset_type,asset_type),
+                     "source_page":source_page,"api_source":api_url,"license":"CC0-1.0","license_url":license_url}
+                if not choice:
+                    row.update(status="no_eligible_download",reason="No HTTPS official-host ZIP variant within the configured size ceiling.")
+                    report.append(row)
+                    continue
+                try:
+                    blob,ctype=request_bytes(choice["url"],timeout=40,limit=AMBIENTCG_MAX_ARCHIVE_BYTES)
+                    if not blob.startswith(b"PK"):
+                        raise RuntimeError("download endpoint did not return a ZIP archive")
+                    archive_sha=hashlib.sha256(blob).hexdigest()
+                    with zipfile.ZipFile(__import__("io").BytesIO(blob)) as zf:
+                        corrupt=zf.testzip()
+                        if corrupt:
+                            raise RuntimeError("corrupt ZIP member: "+str(corrupt))
+                    target=root/"third-party/ambientcg"/asset_type.lower()/slugify(asset_id)
+                    if target.exists():
+                        shutil.rmtree(target)
+                    extracted,unpacked=safe_extract(blob,target,max_bytes=90*1024*1024)
+                    media_files=[p for p in target.rglob("*") if p.is_file()]
+                    if extracted<=0 or not media_files:
+                        shutil.rmtree(target,ignore_errors=True)
+                        raise RuntimeError("ZIP contained no files allowed by the asset-library media policy")
+                    if total_unpacked+unpacked>AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES:
+                        shutil.rmtree(target,ignore_errors=True)
+                        row.update(status="skipped_total_size_limit",reason="Package would exceed the total ambientCG extraction ceiling.")
+                        report.append(row)
+                        break
+                    tags=asset.get("tags") or asset.get("tagData") or []
+                    if isinstance(tags,dict):
+                        tags=[str(k) for k in tags.keys()]
+                    elif isinstance(tags,str):
+                        tags=[tags]
+                    tags=[str(tag)[:80] for tag in tags[:60] if str(tag).strip()] if isinstance(tags,list) else []
+                    note=(
+                        f"# {title} — ambientCG\n\n"
+                        f"- Asset ID: {asset_id}\n- Type: {asset_type}\n- Official asset page: {source_page}\n"
+                        f"- Download variant: {choice['attribute']}\n- Download archive SHA-256: {archive_sha}\n"
+                        f"- License: CC0 1.0 Universal — {license_url}\n"
+                        "- Original package was validated as a ZIP and extracted using the repository allow-list; executable types and nested ZIPs are not included.\n"
+                    )
+                    write_text(target/"SOURCE_AND_LICENSE.md",note)
+                    for path in sorted(p for p in target.rglob("*") if p.is_file() and p.name!="SOURCE_AND_LICENSE.md"):
+                        index.append({"id":"ambientcg-"+slugify(asset_id)+"-"+slugify(path.relative_to(target).as_posix()),
+                                      "path":path.relative_to(root).as_posix(),"type":"ambientcg-asset-file","provider":"ambientCG",
+                                      "parent_asset_id":"ambientcg-"+slugify(asset_id),"asset_id":asset_id,
+                                      "asset_type":asset_type,"title":title,"category":type_labels.get(asset_type,asset_type),
+                                      "tags":tags,"source_page":source_page,"source_file_url":choice["url"],
+                                      "download_attribute":choice["attribute"],"download_archive_sha256":archive_sha,
+                                      "license":"CC0-1.0","license_url":license_url,
+                                      "license_verified_from_provider_collection_terms":True,
+                                      "size_bytes":path.stat().st_size,"sha256":sha256_path(path),"redistributable":True})
+                    total_unpacked+=unpacked; downloaded_for_type+=1
+                    row.update(status="downloaded",download_attribute=choice["attribute"],
+                               extracted_files=extracted,unpacked_bytes=unpacked,
+                               archive_bytes=len(blob),archive_sha256=archive_sha,
+                               tags=tags,sha256_files=[{"path":p.relative_to(target).as_posix(),"sha256":sha256_path(p)} for p in sorted(target.rglob("*")) if p.is_file()])
+                    report.append(row)
+                    print("[ambientCG] OK:",asset_type,asset_id,choice["attribute"],extracted,"files",unpacked,"bytes")
+                except Exception as item_exc:
+                    row.update(status="failed",reason=str(item_exc)[:400],download_attribute=choice["attribute"])
+                    report.append(row)
+            time.sleep(.45)
+        except Exception as exc:
+            report.append({"id":"ambientcg-"+asset_type.lower(),"status":"failed","asset_type":asset_type,
+                           "source_page":"https://ambientcg.com/","reason":str(exc)[:400]})
+            print("[ambientCG] source request failed:",asset_type,str(exc)[:220])
+    return report
+
+
 def download_polyhaven(root,index):
     report=[]
     counts=POLYHAVEN_SELECTION_LIMITS
@@ -2862,6 +3045,7 @@ def main():
     print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
+    ambientcg_report=download_ambientcg(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
     smithsonian_report=download_smithsonian_open_access(STAGE,index)
     rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
@@ -2878,6 +3062,8 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page','')} — {r.get('reason','')}" for r in kenney_report)+"\n\n"
       "## Poly Haven CC0 assets\nThe build downloads compact HDRIs, Blender models plus listed dependencies, and PBR texture maps from the official API. The API has separate terms asking tools that use the live API to make clear the assets' source. See https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md.\n\n"+
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
+      "\n\n## ambientCG CC0 materials, environments and models\nThe builder uses ambientCG's documented /api/v2/full_json endpoint to discover a bounded sample of materials, HDRIs, 3D models, decals, atlases, plain textures, brushes and Substance materials. ambientCG explicitly publishes its downloadable asset files under CC0 1.0. Every request uses the official HTTPS /get?file=...zip endpoint, prefers small 1K variants, checks ZIP integrity, caps archive and total extraction sizes, extracts only allow-listed media, and records source page, selected variant, archive digest and per-file SHA-256. Sources: https://docs.ambientcg.com/api/v2/full_json/ and https://docs.ambientcg.com/license/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in ambientcg_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
       "\n\n## Smithsonian Open Access CC0 media\nThe builder queries Smithsonian Open Access and only considers records whose top-level metadata_usage.access is exactly CC0. It then checks each candidate media object's usage.access independently and downloads only media explicitly marked CC0. The official IDS image delivery service is requested at a bounded size; source record, unit, title, creator, media URL, exact rights values and SHA-256 are kept. A caller may configure the optional GitHub Actions secret SMITHSONIAN_API_KEY; if absent, the builder makes a low-volume attempt with DEMO_KEY and records any rate-limit/authentication failure rather than claiming success. CC0 does not grant trademark, privacy, publicity or other non-copyright rights. Sources: https://www.si.edu/openaccess/faq and https://www.si.edu/openaccess/devtools.\n\n"+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
@@ -2900,6 +3086,8 @@ def main():
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
+              "ambientcg_packages_downloaded":sum(r.get("status")=="downloaded" for r in ambientcg_report),
+              "ambientcg_files_downloaded":sum(1 for x in index if x.get("type")=="ambientcg-asset-file"),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
               "smithsonian_images_downloaded":sum(r.get("status")=="downloaded" for r in smithsonian_report),
               "rijksmuseum_images_downloaded":sum(r.get("status")=="downloaded" for r in rijksmuseum_report),
@@ -2917,6 +3105,7 @@ def main():
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
+               "ambientcg_downloads":ambientcg_report,
                "met_open_access_downloads":met_report,"smithsonian_open_access_downloads":smithsonian_report,
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
