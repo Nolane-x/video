@@ -7,6 +7,8 @@ on:
       - ".github/workflows/test-video-asset-library-pr.yml"
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
+      - "tools/video/build_asset_library_shard.py"
+      - "tools/video/finalize_asset_library_release.py"
       - "tools/video/generate_original_stickers.py"
       - "tools/video/package_asset_library.py"
       - "tools/video/generate_sfx_library.py"
@@ -41,6 +43,8 @@ jobs:
       - name: Compile all changed Python sources
         run: |
           python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/generate_original_stickers.py
           python -m py_compile tools/video/package_asset_library.py
           python -m py_compile tools/video/generate_sfx_library.py
