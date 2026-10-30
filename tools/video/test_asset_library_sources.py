@@ -181,6 +181,16 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 220)
         self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {"prelinger": 120, "nasa": 120})
 
+    def test_nara_bulk_catalog_is_research_only_until_item_rights_schema_is_verified(self):
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        nara = next(
+            row for row in catalog["sources"]
+            if row.get("id") == "nara-national-archives-catalog-aws-open-data"
+        )
+        self.assertIn("research-only", nara["bundling"])
+        self.assertIn("Unrestricted", nara["note"])
+        self.assertNotIn("nara", shard_builder.SOURCE_LANES)
+
     def test_poly_pizza_source_catalog_requires_optional_key_and_item_level_cc0(self):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
         entry = next(row for row in catalog["sources"] if row.get("id") == "poly-pizza-cc0-api")
