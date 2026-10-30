@@ -298,7 +298,14 @@ def _run_gh_json(args: list[str]) -> dict:
     return json.loads(result.stdout)
 
 
-def verify_release_assets(repository: str, release_tag: str, merged: dict, metadata_paths: list[Path]) -> dict:
+def verify_release_assets(
+    repository: str,
+    release_tag: str,
+    merged: dict,
+    metadata_paths: list[Path],
+    manifest_paths: list[Path],
+) -> dict:
+    """Require exact asset names, byte sizes and GitHub-computed SHA-256 digests."""
     release = _run_gh_json(["gh", "api", f"repos/{repository}/releases/tags/{release_tag}"])
     if not release.get("draft"):
         raise RuntimeError("Release was published before the final validation gate")
@@ -309,24 +316,40 @@ def verify_release_assets(repository: str, release_tag: str, merged: dict, metad
     expected = []
     for bundle in merged["bundles"]:
         expected.append((bundle["name"], int(bundle["archive_bytes"]), bundle["sha256"]))
+    for path in manifest_paths:
+        expected.append((path.name, path.stat().st_size, hashlib.sha256(path.read_bytes()).hexdigest()))
     for path in metadata_paths:
-        if path.name in remote_assets:
-            raise RuntimeError(f"Release metadata name already exists: {path.name}")
         expected.append((path.name, path.stat().st_size, hashlib.sha256(path.read_bytes()).hexdigest()))
 
+    expected_names = [name for name, _, _ in expected]
+    if len(expected_names) != len(set(expected_names)):
+        raise RuntimeError("The final Release manifest contains duplicate asset names")
+
+    remote_names = set(remote_assets)
+    expected_name_set = set(expected_names)
+    missing = sorted(expected_name_set - remote_names)
+    unexpected = sorted(remote_names - expected_name_set)
+    if missing:
+        raise RuntimeError(f"Release is missing uploaded asset(s): {missing[:8]}")
+    if unexpected:
+        raise RuntimeError(f"Release contains unexpected/stale asset(s): {unexpected[:8]}")
+
     for name, size, digest in expected:
-        remote = remote_assets.get(name)
-        if not remote:
-            raise RuntimeError(f"Release is missing uploaded asset: {name}")
+        remote = remote_assets[name]
         if int(remote.get("size") or 0) != size:
             raise RuntimeError(f"Release asset size mismatch: {name}")
         remote_digest = str(remote.get("digest") or "")
-        if remote_digest and remote_digest.lower() != "sha256:" + digest.lower():
-            raise RuntimeError(f"Release asset digest mismatch: {name}")
-    too_large = [name for name, size, _ in expected if size >= MAX_RELEASE_ASSET_BYTES]
-    if too_large:
-        raise RuntimeError(f"Release contains asset(s) that are too large: {too_large[:5]}")
-    return {"release_id": release["id"], "asset_count": len(remote_assets), "verified_assets": len(expected)}
+        if remote_digest.lower() != "sha256:" + digest.lower():
+            raise RuntimeError(f"Release asset SHA-256 digest is missing or mismatched: {name}")
+        if size <= 0 or size >= MAX_RELEASE_ASSET_BYTES:
+            raise RuntimeError(f"Release asset size is outside the safe range: {name}")
+    return {
+        "release_id": release["id"],
+        "asset_count": len(remote_assets),
+        "verified_assets": len(expected),
+        "all_remote_names_exact": True,
+        "github_sha256_verified": True,
+    }
 
 
 def publish_release(repository: str, release_tag: str, release_title: str, notes_path: Path) -> dict:
@@ -366,7 +389,7 @@ def finalize_release(manifest_dir: Path, output_dir: Path, repository: str, rele
         text=True,
         env=os.environ.copy(),
     )
-    verified = verify_release_assets(repository, release_tag, merged, metadata_paths)
+    verified = verify_release_assets(repository, release_tag, merged, metadata_paths, paths)
     summary = merged["summary"]
     actual_gib = summary["indexed_resource_gib"]
     title = f"Nolane Video Asset Library — {summary['indexed_resource_bytes'] / 1_000_000_000:.2f} GB / 50 GB target"
