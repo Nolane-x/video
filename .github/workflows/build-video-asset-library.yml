@@ -8,6 +8,8 @@ on:
       - "tools/video/build_asset_library.py"
       - "tools/video/test_asset_library_sources.py"
       - "tools/video/generate_sfx_library.py"
+      - "tools/video/generate_sticker_meme_library.py"
+      - "tools/video/package_asset_bundles.py"
       - "video-library/assets/sources.json"
   workflow_dispatch:
 
@@ -23,7 +25,7 @@ jobs:
   build:
     name: Build, validate and publish CC0-safe assets
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -40,18 +42,24 @@ jobs:
           ffmpeg -version
           ffprobe -version
 
-      - name: Compile asset builder before any network downloads
-        run: python -m py_compile tools/video/build_asset_library.py
+      - name: Compile every asset pipeline module before network downloads
+        run: python -m py_compile tools/video/build_asset_library.py tools/video/generate_sfx_library.py tools/video/generate_sticker_meme_library.py tools/video/package_asset_bundles.py tools/video/test_asset_library_sources.py
 
       - name: Run offline source-rights and asset-family regression tests
         run: python tools/video/test_asset_library_sources.py
 
-      - name: Build vector originals and download licensed resources
+      - name: Build original assets and download rights-screened resources
         run: python tools/video/build_asset_library.py dist/video-assets
         env:
           SMITHSONIAN_API_KEY: ${{ secrets.SMITHSONIAN_API_KEY }}
 
-      - name: Validate index, checksums, archive and original asset counts
+      - name: Create size-safe single or multi-volume ZIP bundles
+        run: python tools/video/package_asset_bundles.py dist/video-assets
+
+      - name: Verify bundle manifest and every release ZIP
+        run: python tools/video/package_asset_bundles.py dist/video-assets --verify-only
+
+      - name: Validate index, checksums, bundle coverage and original asset counts
         run: |
           python - <<'PY'
           import json
@@ -63,13 +71,22 @@ jobs:
           root = Path("dist/video-assets/video-asset-library")
           index_path = root / "ASSET_INDEX.json"
           sums_path = root / "SHA256SUMS.txt"
-          archive = Path("dist/video-assets/video-asset-library.zip")
+          bundle_manifest_path = Path("dist/video-assets/ASSET_BUNDLES.json")
           summary_path = Path("dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt"
 
           )
           assert root.is_dir(), "Library folder missing"
           assert index_path.is_file() and sums_path.is_file(), "Index or checksum ledger missing"
-          assert archive.is_file() and archive.stat().st_size > 1024, "ZIP is missing/too small"
+          assert bundle_manifest_path.is_file(), "Size-safe bundle manifest is missing"
+          bundle_manifest = json.loads(bundle_manifest_path.read_text(encoding="utf-8"))
+          bundle_rows = bundle_manifest.get("bundles", [])
+          assert bundle_rows and bundle_manifest.get("bundle_count") == len(bundle_rows), "No release ZIP bundles were generated"
+          assert bundle_manifest.get("mode") in {"single-archive", "multi-volume"}
+          for bundle in bundle_rows:
+              bundle_path = Path("dist/video-assets") / bundle["name"]
+              assert bundle_path.is_file() and bundle_path.stat().st_size > 1024, f"Missing or empty release bundle: {bundle['name']}"
+              assert bundle_path.stat().st_size < 1_900_000_000, f"Release asset is too close to GitHub's 2 GiB ceiling: {bundle['name']}"
+              assert hashlib.sha256(bundle_path.read_bytes()).hexdigest() == bundle["sha256"], f"Bundle SHA-256 mismatch: {bundle['name']}"
           catalog_path = root / "ASSET_CATALOG.html"
           assert catalog_path.is_file(), "Offline searchable catalog missing"
           catalog_html = catalog_path.read_text(encoding="utf-8")
@@ -216,6 +233,36 @@ jobs:
               license_bytes = license_path.read_bytes()
               assert hashlib.sha256(license_bytes).hexdigest() == asset.get("license_file_sha256")
               assert b"SIL OPEN FONT LICENSE Version 1.1" in license_bytes
+          assert "noaa_images_downloaded" in expected and "noaa_videos_downloaded" in expected
+          noaa_report = index.get("noaa_ocean_exploration_downloads")
+          assert isinstance(noaa_report, list), "NOAA Ocean Exploration report is missing"
+          noaa_downloaded = [row for row in noaa_report if row.get("status") == "downloaded"]
+          noaa_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("noaa-ocean-exploration-")]
+          assert len(noaa_downloaded) == expected["noaa_images_downloaded"] + expected["noaa_videos_downloaded"]
+          assert len(noaa_assets) == len(noaa_downloaded)
+          assert expected["noaa_images_downloaded"] <= 72 and expected["noaa_videos_downloaded"] <= 36
+          for asset in noaa_assets:
+              media_type = asset.get("type", "").removeprefix("noaa-ocean-exploration-")
+              assert media_type in {"image", "video"}
+              assert asset.get("license_verified_from_provider_policy_and_item_page") is True
+              assert asset.get("item_page_copyright_marker_absent") is True
+              assert asset.get("redistributable") is True
+              assert asset.get("credit", "").lower().find("noaa") >= 0
+              assert asset.get("source_page", "").startswith("https://oceanexplorer.noaa.gov/multimedia/")
+              assert asset.get("source_file_url", "").startswith("https://oceanexplorer.noaa.gov/wp-content/uploads/")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
+              assert asset.get("path", "").startswith("third-party/noaa-ocean-exploration/")
+          assert expected["original_stickers"] >= 200 and expected["original_meme_templates"] >= 70 and expected["original_caption_overlays"] >= 60
+          sticker_assets = [a for a in index["assets"] if a.get("type") == "original-video-sticker"]
+          meme_assets = [a for a in index["assets"] if a.get("type") == "original-meme-layout-template"]
+          caption_assets = [a for a in index["assets"] if a.get("type") == "original-caption-overlay"]
+          assert len(sticker_assets) == expected["original_stickers"]
+          assert len(meme_assets) == expected["original_meme_templates"]
+          assert len(caption_assets) == expected["original_caption_overlays"]
+          for asset in sticker_assets + meme_assets + caption_assets:
+              assert asset.get("license") == "CC0-1.0" and asset.get("original_artwork") is True and asset.get("redistributable") is True
+              assert asset.get("path", "").startswith("originals/")
+              assert len(asset.get("sha256", "")) == 64
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
@@ -225,18 +272,29 @@ jobs:
               h = hashlib.sha256(target.read_bytes()).hexdigest()
               assert h == digest, f"Checksum mismatch: {rel}"
 
-          with zipfile.ZipFile(archive) as zf:
-              assert zf.testzip() is None, "Asset ZIP integrity test failed"
-              names = zf.namelist()
-              assert any(p.endswith("ASSET_INDEX.json") for p in names)
-              assert any(p.endswith("ASSET_CATALOG.html") for p in names), "Offline catalog missing from archive"
-              assert any(p.endswith("SOURCES_AND_LICENSES.md") for p in names)
-              assert any(p.endswith("SHA256SUMS.txt") for p in names)
+          all_bundle_paths = []
+          for bundle in bundle_rows:
+              with zipfile.ZipFile(Path("dist/video-assets") / bundle["name"]) as zf:
+                  assert zf.testzip() is None, f"Bundle integrity test failed: {bundle['name']}"
+                  names = zf.namelist()
+                  all_bundle_paths.extend(bundle["paths"])
+                  if bundle["category"] in {"complete-library", "catalog-and-metadata"}:
+                      assert any(p.endswith("ASSET_INDEX.json") for p in names)
+                      assert any(p.endswith("ASSET_CATALOG.html") for p in names), "Offline catalog missing from metadata bundle"
+                      assert any(p.endswith("SOURCES_AND_LICENSES.md") for p in names)
+                      assert any(p.endswith("SHA256SUMS.txt") for p in names)
+          assert len(all_bundle_paths) == len(set(all_bundle_paths)), "A library file appears in more than one bundle"
+          assert sorted(all_bundle_paths) == sorted(
+              p.relative_to(root).as_posix() for p in root.rglob("*")
+              if p.is_file() and p.name != "ASSET_BUNDLES.json"
+          ), "Bundle set does not cover every library file exactly once"
 
           print(json.dumps({
               "summary": expected,
-              "archive_bytes": archive.stat().st_size,
-              "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+              "bundle_mode": bundle_manifest["mode"],
+              "total_uncompressed_bytes": bundle_manifest["total_uncompressed_bytes"],
+              "bundle_count": len(bundle_rows),
+              "bundle_assets": [{"name": x["name"], "archive_bytes": x["archive_bytes"], "sha256": x["sha256"]} for x in bundle_rows],
               "checksummed_entries": len(sums_path.read_text(encoding="utf-8").splitlines()),
           }, indent=2))
           PY
@@ -248,13 +306,17 @@ jobs:
           name: Video Asset Library Build ${{ github.run_number }}
           fail_on_unmatched_files: true
           files: |
-            dist/video-assets/video-asset-library.zip
+            dist/video-assets/*.zip
+            dist/video-assets/ASSET_BUNDLES.json
+            dist/video-assets/BUNDLE_INSTRUCTIONS.md
             dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
           body: |
             Automated cross-genre video resources for Nolane Video Studio.
 
             The package includes 93+ original CC0 vector backgrounds, 80+ overlays, 140+ icon SVGs, 112 editorial illustrations, 55 infographic templates, 58 tileable textures, 24 ffprobe-verified motion loops and 196 original procedural WAV cues; Poly Haven HDRIs/models/PBR textures; Met Open Access and verified Wikimedia CC0/Public Domain images; NASA-center media screened under NASA Media Usage Guidelines (not CC0); and Library of Congress images only when item-level rights statements explicitly support use. Rijksmuseum and Smithsonian artwork is included only when the exact item/media rights metadata permits it; Smithsonian media requires CC0 at both record and media level. Item-level source, usage notes and SHA-256 data are included.
 
+            Large libraries are automatically split into independently downloadable, SHA-256 verified ZIP volumes. Each release asset stays below a 1.9 GB safety ceiling (GitHub's documented limit is 2 GiB per release asset); there is no fixed total-size cap for one release.
+            
             Some external providers can be unreachable or change their API; the build index records successful, failed and skipped downloads. "Free to use" sources with limits on raw-file redistribution are documented as source-only and are not mirrored into this archive.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -268,5 +330,7 @@ jobs:
             dist/video-assets/video-asset-library/ASSET_INDEX.json
             dist/video-assets/video-asset-library/SOURCES_AND_LICENSES.md
             dist/video-assets/video-asset-library/SHA256SUMS.txt
+            dist/video-assets/ASSET_BUNDLES.json
+            dist/video-assets/BUNDLE_INSTRUCTIONS.md
           if-no-files-found: error
           retention-days: 30
