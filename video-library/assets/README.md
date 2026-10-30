@@ -188,3 +188,13 @@ The build now adds the pinned **OpenMoji 17.0** official npm package's color and
 Suggested attribution: “All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0.”
 
 Official sources: [OpenMoji 17.0 release](https://github.com/hfg-gmuend/openmoji/releases/tag/17.0.0), [official FAQ](https://github.com/hfg-gmuend/openmoji/blob/17.0.0/FAQ.md), [npm package 17.0.0](https://www.npmjs.com/package/openmoji/v/17.0.0), [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
+
+## Build 48: Internet Archive moving-image footage
+
+The new media lane searches the official Internet Archive Advanced Search API within two curated discovery scopes: **Prelinger** historical/educational films and **NASA** moving-image records. A collection filter never grants reuse rights by itself. The exact item metadata must confirm the identifier, `mediatype=movies`, the same collection, and an approved item-level Creative Commons declaration.
+
+The importer currently allows CC0 1.0, CC0 3.0, or the legacy Creative Commons Public Domain item declaration only when that item's own `rights` value explicitly says `Public Domain`. It does not treat Public Domain Mark as CC0. It only selects MP4, WebM or OGV files no larger than 250 MiB whose item metadata contains a valid duration from 5 seconds through 30 minutes; missing, malformed or longer durations are excluded. It verifies the media signature, compares MD5 and SHA-1 to the Internet Archive file record when provided, and computes a separate SHA-256 for the library.
+
+The ceilings are 40 Prelinger items, 40 NASA items, 250 MiB per file and 4 GiB total per build. The actual downloaded count and bytes are recorded in `ASSET_INDEX.json`; search hits and configured ceilings are never reported as downloaded resources.
+
+Official API references: [Internet Archive Advanced Search](https://archive.org/advancedsearch.php), [Metadata API](https://archive.org/developers/metadata.html), and [Internet Archive](https://archive.org/).

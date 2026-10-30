@@ -7,6 +7,7 @@ import sys
 import tempfile
 import tarfile
 import unittest
+import urllib.parse
 from unittest import mock
 import zipfile
 import xml.etree.ElementTree as ET
@@ -375,6 +376,128 @@ class ScalableBundlePackagingTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 bundle_packager.verify_manifest(output, root, manifest)
 
+
+class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
+    def test_internet_archive_identifier_and_item_endpoints_are_pinned(self):
+        self.assertTrue(library.internet_archive_identifier_is_allowed("AboutBan1935"))
+        self.assertFalse(library.internet_archive_identifier_is_allowed("../AboutBan1935"))
+        self.assertFalse(library.internet_archive_identifier_is_allowed("has space"))
+        self.assertTrue(library.internet_archive_item_url_is_allowed(
+            "https://archive.org/details/AboutBan1935", "AboutBan1935"))
+        self.assertTrue(library.internet_archive_metadata_url_is_allowed(
+            "https://archive.org/metadata/AboutBan1935", "AboutBan1935"))
+        self.assertFalse(library.internet_archive_item_url_is_allowed(
+            "https://evil.example/details/AboutBan1935", "AboutBan1935"))
+        self.assertFalse(library.internet_archive_metadata_url_is_allowed(
+            "https://archive.org/metadata/OtherItem", "AboutBan1935"))
+
+    def test_internet_archive_accepts_only_exact_cc0_or_public_domain_item_rights(self):
+        self.assertEqual(
+            library.internet_archive_license_from_item_metadata(
+                "http://creativecommons.org/publicdomain/zero/1.0/", ""),
+            "CC0-1.0")
+        self.assertEqual(
+            library.internet_archive_license_from_item_metadata(
+                "https://creativecommons.org/licenses/cc0/3.0/", ""),
+            "CC0-3.0")
+        self.assertEqual(
+            library.internet_archive_license_from_item_metadata(
+                "http://creativecommons.org/licenses/publicdomain/", "Public Domain"),
+            "Public Domain (item-level Internet Archive rights statement)")
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "http://creativecommons.org/licenses/publicdomain/", ""))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "http://creativecommons.org/licenses/publicdomain/", "Public Domain with restrictions"))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "https://creativecommons.org/licenses/by/4.0/", "Public Domain"))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "http://creativecommons.org/publicdomain/mark/1.0/", "Public Domain"))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "https://user@creativecommons.org/publicdomain/zero/1.0/", ""))
+        self.assertIsNone(library.internet_archive_license_from_item_metadata(
+            "https://creativecommons.org/publicdomain/zero/1.0/?redirect=1", ""))
+
+    def test_internet_archive_metadata_normalizer_and_license_detail(self):
+        payload = {
+            "metadata": {
+                "identifier": "Doctorin1946", "mediatype": "movies",
+                "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+                "rights": "Public Domain", "collection": ["prelinger", "opensource_movies"]
+            },
+            "files": [{"name": "Doctorin1946.mp4", "size": "117249712", "source": "derivative"}]
+        }
+        metadata, files = library.internet_archive_parse_payload(payload)
+        self.assertEqual(metadata["identifier"], "Doctorin1946")
+        self.assertEqual(len(files), 1)
+        detail = library.internet_archive_license_detail(metadata)
+        self.assertTrue(detail["verified"])
+        self.assertIn("Public Domain", detail["license"])
+
+    def test_internet_archive_video_picker_prefers_largest_safe_mp4(self):
+        rows = [
+            {"name": "film.mpeg", "size": 30000000, "length": 120},
+            {"name": "film-512kb.mp4", "size": 20000000, "length": 120, "source": "derivative"},
+            {"name": "film-hd.mp4", "size": 90000000, "length": 120, "source": "original"},
+            {"name": "too-large.mp4", "size": library.INTERNET_ARCHIVE_MAX_VIDEO_BYTES + 1, "length": 120},
+            {"name": "too-long.mp4", "size": 90000000, "length": 7200},
+            {"name": "../unsafe.mp4", "size": 1000000, "length": 30},
+        ]
+        picked = library.internet_archive_choose_video_file(rows)
+        self.assertEqual(picked["file"]["name"], "film-hd.mp4")
+        self.assertEqual(picked["duration_seconds"], 120)
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "unknown-duration.mp4", "size": 90000000, "source": "original"}
+        ]))
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "malformed-duration.mp4", "size": 90000000, "length": "not-a-duration"}
+        ]))
+        self.assertIsNone(library.internet_archive_choose_video_file([
+            {"name": "too-long.mp4", "size": 90000000,
+             "length": library.INTERNET_ARCHIVE_MAX_DURATION_SECONDS + 0.01}
+        ]))
+        self.assertIsNotNone(library.internet_archive_choose_video_file([
+            {"name": "at-limit.mp4", "size": 90000000,
+             "length": library.INTERNET_ARCHIVE_MAX_DURATION_SECONDS}
+        ]))
+
+    def test_internet_archive_direct_download_is_pinned_to_identifier_and_filename(self):
+        self.assertTrue(library.internet_archive_file_url_is_allowed(
+            "https://archive.org/download/AboutBan1935/AboutBan1935.mp4",
+            "AboutBan1935", "AboutBan1935.mp4"))
+        self.assertFalse(library.internet_archive_file_url_is_allowed(
+            "https://archive.org/download/OtherItem/AboutBan1935.mp4",
+            "AboutBan1935", "AboutBan1935.mp4"))
+        self.assertFalse(library.internet_archive_file_url_is_allowed(
+            "https://archive.org/download/AboutBan1935/../escape.mp4",
+            "AboutBan1935", "../escape.mp4"))
+        self.assertFalse(library.internet_archive_file_url_is_allowed(
+            "https://evil.example/download/AboutBan1935/AboutBan1935.mp4",
+            "AboutBan1935", "AboutBan1935.mp4"))
+
+    def test_internet_archive_duration_and_mp4_signature_validation(self):
+        self.assertEqual(library.internet_archive_parse_duration("18:47"), 1127)
+        self.assertEqual(library.internet_archive_parse_duration("664.03"), 664.03)
+        self.assertIsNone(library.internet_archive_parse_duration("unknown"))
+        self.assertTrue(library.internet_archive_media_signature_is_valid(
+            b"\x00\x00\x00\x18ftypisom" + b"x" * 20000, ".mp4", "video/mp4"))
+        self.assertFalse(library.internet_archive_media_signature_is_valid(
+            b"<html>blocked</html>" + b"x" * 20000, ".mp4", "text/html"))
+
+    def test_internet_archive_search_url_uses_bounded_collection_and_start_offset(self):
+        url = library.internet_archive_search_url("prelinger", 100)
+        parsed = urllib.parse.urlsplit(url)
+        query = urllib.parse.parse_qs(parsed.query)
+        self.assertEqual(parsed.scheme, "https")
+        self.assertEqual(parsed.netloc, "archive.org")
+        self.assertIn("collection:prelinger", query["q"][0])
+        self.assertIn("licenseurl:http*publicdomain*", query["q"][0])
+        self.assertIn("licenseurl:http*cc0*", query["q"][0])
+        self.assertEqual(query["start"], ["100"])
+        with self.assertRaises(ValueError):
+            library.internet_archive_search_url("unknown", 0)
+        with self.assertRaises(ValueError):
+            library.internet_archive_search_url("nasa", -1)
+        self.assertEqual(query["rows"], [str(library.INTERNET_ARCHIVE_SEARCH_ROWS)])
 
 class NOAAMultimediaRightsAndParsingTests(unittest.TestCase):
     IMAGE_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-image.jpg"
