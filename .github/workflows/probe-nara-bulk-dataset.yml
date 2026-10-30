@@ -1,0 +1,38 @@
+name: Probe NARA bulk catalog schema (metadata only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/video/probe_nara_bulk_dataset.py"
+      - ".github/workflows/probe-nara-bulk-dataset.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nara-bulk-metadata-probe
+  cancel-in-progress: false
+
+jobs:
+  inspect-public-bulk-records:
+    name: Inspect RG 111, 342 and 428 metadata samples
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Compile the metadata-only probe
+        run: python -m py_compile tools/video/probe_nara_bulk_dataset.py
+
+      - name: Probe the public AWS dataset without downloading media
+        run: |
+          set -euo pipefail
+          python tools/video/probe_nara_bulk_dataset.py | tee -a "$GITHUB_STEP_SUMMARY"
