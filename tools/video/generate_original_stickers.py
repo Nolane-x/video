@@ -199,6 +199,7 @@ def _meme_template_svg(layout: str, title: str, index: int) -> str:
         )
     top_h = int(height * .17)
     bottom_h = int(height * .17)
+    content = ""
     if layout == "classic-top-bottom":
         content = box(pad, top_h + pad, width-2*pad, height-top_h-bottom_h-2*pad, "DROP IMAGE / CLIP HERE")
         content += f'<text x="{width/2}" y="{top_h/2}" font-size="{int(top_h*.28)}" text-anchor="middle" dominant-baseline="middle" font-family="Impact,Arial" fill="{accent}">TOP CAPTION</text>'
