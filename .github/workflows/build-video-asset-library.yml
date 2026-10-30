@@ -171,6 +171,25 @@ jobs:
                   assert direct.startswith("https://usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com/") and "/media/video/" in direct
               else:
                   assert direct.startswith("https://d9-wret.s3.us-west-2.amazonaws.com/") and "/media/" + listing_kind + "/" in direct
+          assert "opengameart_items_downloaded" in expected and "opengameart_files_downloaded" in expected
+          opengameart_report = index.get("opengameart_downloads")
+          assert isinstance(opengameart_report, list), "OpenGameArt report is missing"
+          opengameart_downloaded = [row for row in opengameart_report if row.get("status") == "downloaded"]
+          opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
+          assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
+          assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
+          assert expected["opengameart_items_downloaded"] <= sum([6, 6, 5, 5, 5]), "OpenGameArt search ceilings exceeded"
+          caps = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+          for category, cap in caps.items():
+              assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
+          for asset in opengameart_assets:
+              assert asset.get("license") == "CC0-1.0" and asset.get("redistributable") is True
+              assert asset.get("license_verified_from_item_page") is True
+              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
+              assert asset.get("source_page", "").startswith("https://opengameart.org/content/")
+              assert asset.get("source_file_url", "").startswith("https://opengameart.org/sites/default/files/")
+              assert asset.get("path", "").startswith("third-party/opengameart/")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
