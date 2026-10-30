@@ -6103,7 +6103,9 @@ def make_asset_catalog(root,index,summary):
     cards=[]
     for item in index:
         rel=item.get("path")
-        if not isinstance(rel,str) or not (root/rel).is_file(): continue
+        if not isinstance(rel,str): continue
+        local_path=root/rel
+        if not local_path.is_file() and int(item.get("size_bytes") or 0) <= 0: continue
         path=Path(rel); ext=path.suffix.lower()
         title=str(item.get("title") or item.get("description") or item.get("id") or path.name)
         category=str(item.get("category") or item.get("type") or "asset")
@@ -6119,7 +6121,7 @@ def make_asset_catalog(root,index,summary):
             preview=f'<audio controls preload="none" src="{html.escape(rel,quote=True)}"></audio>'
         else:
             preview=f'<div class="file-preview"><span>{html.escape(ext.upper().lstrip(".") or "FILE")}</span><small>{html.escape(asset_type)}</small></div>'
-        size=(root/rel).stat().st_size
+        size=local_path.stat().st_size if local_path.is_file() else int(item.get("size_bytes") or 0)
         size_text=f"{size/1024:.0f} KB" if size<1024*1024 else f"{size/(1024*1024):.1f} MB"
         links=[f'<a class="file-link" href="{html.escape(rel,quote=True)}" download>Open / download</a>']
         if source: links.append(f'<a href="{html.escape(str(source),quote=True)}" target="_blank" rel="noreferrer">Source</a>')
