@@ -3914,6 +3914,7 @@ def main():
     wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
     usgs_report=download_usgs_gallery(STAGE,index)
     opengameart_report=download_opengameart(STAGE,index)
+    google_fonts_report=download_google_fonts(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -3934,6 +3935,8 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_svg_report)+
       "\n\n## Wikimedia Commons video/audio download results\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
+      "\n\n## Google Fonts — curated type families under SIL Open Font License 1.1\nThe builder queries a fixed list of Google Fonts family directories through the official google/fonts GitHub contents API. A family is eligible only if its own OFL.txt download URL is inside the exact official family folder and the downloaded license text contains the SIL Open Font License Version 1.1 and copyright statement. The build selects at most two TTF faces per family, verifies the sfnt font signature, retains the full OFL.txt, records the exact family/file URL and license-file SHA-256, and enforces per-file and aggregate download caps. These fonts are redistributable under their own OFL 1.1 terms; they are not relabelled CC0. Sources: https://github.com/google/fonts and https://openfontlicense.org/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in google_fonts_report)+
       "\n\n## OpenGameArt — item-level CC0 media packs\nThe builder searches OpenGameArt's official advanced-search page using its CC0 taxonomy filter for 2D art, 3D art, textures, sound effects and music. Search filters are discovery only: each item's own License(s) field must expose exactly one CC0 1.0 license link; mixed or non-CC0 items are skipped. The downloader follows only official item pages and attachments under the site's official HTTPS /sites/default/files/ path. ZIP files are integrity-tested and extracted with the repository's safe path and extension allow-list; individual media files are checked against their extension and file signature. Per-item archive and per-file digests, creator, source page, license basis and actual download outcome are preserved. The category ceilings are search caps, not promised downloads. Sources: https://opengameart.org/art-search-advanced and https://opengameart.org/content/faq.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in opengameart_report)+
       "\n\n## USGS Multimedia Gallery — item-level Public Domain only\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly 'Public Domain.'. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\n\n"+
@@ -3968,7 +3971,9 @@ def main():
               "usgs_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in usgs_report),
               "usgs_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in usgs_report),
               "opengameart_items_downloaded":sum(r.get("status")=="downloaded" for r in opengameart_report),
-              "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-"))}
+              "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
+              "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
+              "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf")}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
@@ -3981,7 +3986,7 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
