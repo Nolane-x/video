@@ -508,6 +508,20 @@
       "note": "The source has large official image, video and audio collections. The builder follows official item pages and only accepts an item's own Sources/Usage block when its complete visible statement is exactly Public Domain. It does not infer rights from the gallery-wide default. Direct media URLs must use the expected official USGS storage hosts and media paths; MIME, magic bytes, type-specific and aggregate byte caps, source page, creator/date metadata and SHA-256 are retained. USGS credit guidance still applies and other rights (including privacy, publicity, and third-party materials) must be considered before publication."
     },
     {
+      "id": "opengameart-cc0-catalog",
+      "title": "OpenGameArt — item-level CC0 2D, 3D, texture, sound and music assets",
+      "provider": "OpenGameArt",
+      "kind": "community game-art and audio asset catalog",
+      "category": "2D sprites and tiles, 3D models, textures and decals, UI, sound effects, music and ambience",
+      "source_page": "https://opengameart.org/art-search-advanced",
+      "api": "https://opengameart.org/art-search-advanced?field_art_licenses_tid%5B0%5D=4",
+      "license": "CC0-1.0 only when the exact item's License(s) field exposes exactly one CC0 1.0 license link",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "automatic-bounded-download-after-item-level-cc0-and-attachment-validation",
+      "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Category limits are ceilings, not promised item counts."
+    },
+    {
       "id": "noaa-multimedia",
       "title": "NOAA multimedia — ocean, weather, atmosphere and climate media",
       "provider": "National Oceanic and Atmospheric Administration",
