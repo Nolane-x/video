@@ -350,6 +350,8 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-sfx", "path": "originals/audio/cue.wav"}), "audio")
         self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-video-loop", "path": "originals/video-loops/loop.mp4"}), "footage")
         self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
+        self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-svg", "path": "third-party/openmoji/color/svg/1F600.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "openmoji-cc-by-sa-png", "path": "third-party/openmoji/color/618x618/1F600.png"}), "original-graphics")
 
     def test_bundle_manifest_detects_missing_or_modified_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
