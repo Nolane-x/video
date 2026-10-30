@@ -192,7 +192,7 @@ def write_release_metadata(merged: dict, output_dir: Path, repository: str, rele
         ),
         "target": {
             "target_bytes": TARGET_BYTES,
-            "target_gib": 50,
+            "target_gb": 50,
             "actual_indexed_resource_bytes": summary["indexed_resource_bytes"],
             "actual_indexed_resource_gib": summary["indexed_resource_gib"],
             "reached": summary["target_reached"],
