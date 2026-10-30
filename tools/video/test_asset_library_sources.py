@@ -2,8 +2,11 @@
 """Fast offline regression tests for source rights gates and generated asset families."""
 from __future__ import annotations
 
+import io
 import sys
+import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -57,6 +60,39 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+class SafeArchiveExtractionTests(unittest.TestCase):
+    def _archive(self, filename, payload=b"not-executable"):
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, "w") as archive:
+            archive.writestr(filename, payload)
+        return stream.getvalue()
+
+    def test_safe_extract_rejects_posix_and_windows_traversal(self):
+        for member in ("../escape.png", "folder\\\\..\\\\escape.png", "C:\\\\Windows\\\\escape.png"):
+            with self.subTest(member=member), tempfile.TemporaryDirectory() as tmp:
+                with self.assertRaises(RuntimeError):
+                    library.safe_extract(self._archive(member), Path(tmp) / "bundle", max_bytes=1024)
+                self.assertFalse((Path(tmp) / "escape.png").exists())
+
+    def test_safe_extract_rejects_symlink_members(self):
+        stream = io.BytesIO()
+        info = zipfile.ZipInfo("linked.png")
+        info.external_attr = (0o120777 << 16)
+        with zipfile.ZipFile(stream, "w") as archive:
+            archive.writestr(info, "../outside.png")
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(RuntimeError):
+                library.safe_extract(stream.getvalue(), Path(tmp) / "bundle", max_bytes=1024)
+
+    def test_safe_extract_keeps_normal_nested_media(self):
+        payload = self._archive("Textures/stone.png", b"safe-image-data" * 10)
+        with tempfile.TemporaryDirectory() as tmp:
+            count, size = library.safe_extract(payload, Path(tmp) / "bundle", max_bytes=1024)
+            self.assertEqual(count, 1)
+            self.assertGreater(size, 0)
+            self.assertTrue((Path(tmp) / "bundle" / "Textures" / "stone.png").is_file())
+
 
 class OpenGameArtRightsAndParsingTests(unittest.TestCase):
     ZIP_URL = "https://opengameart.org/sites/default/files/sample-pack.zip"
