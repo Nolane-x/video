@@ -40,8 +40,11 @@ jobs:
           ffmpeg -version
           ffprobe -version
 
-      - name: Compile asset builder before any network downloads
-        run: python -m py_compile tools/video/build_asset_library.py
+      - name: Compile asset builder and modular pack tools before any network downloads
+        run: |
+          python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/generate_original_stickers.py
+          python -m py_compile tools/video/package_asset_library.py
 
       - name: Run offline source-rights and asset-family regression tests
         run: python tools/video/test_asset_library_sources.py
@@ -50,6 +53,9 @@ jobs:
         run: python tools/video/build_asset_library.py dist/video-assets
         env:
           SMITHSONIAN_API_KEY: ${{ secrets.SMITHSONIAN_API_KEY }}
+
+      - name: Create modular resource packs with per-pack indexes and SHA-256
+        run: python tools/video/package_asset_library.py dist/video-assets
 
       - name: Validate index, checksums, archive and original asset counts
         run: |
@@ -134,7 +140,7 @@ jobs:
           ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
           assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
           assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
-          assert expected["ambientcg_packages_downloaded"] <= 30, "ambientCG search ceiling exceeded"
+          assert expected["ambientcg_packages_downloaded"] <= 60, "ambientCG search ceiling exceeded"
           for row in ambientcg_downloaded:
               assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
               assert row.get("license") == "CC0-1.0"
@@ -156,7 +162,7 @@ jobs:
           usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
           assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
           assert len(usgs_assets) == len(usgs_downloaded)
-          assert expected["usgs_images_downloaded"] <= 24 and expected["usgs_videos_downloaded"] <= 8 and expected["usgs_audio_downloaded"] <= 8
+          assert expected["usgs_images_downloaded"] <= 40 and expected["usgs_videos_downloaded"] <= 18 and expected["usgs_audio_downloaded"] <= 12
           for asset in usgs_assets:
               media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
               assert media_type in {"image", "video", "audio"}
@@ -178,8 +184,8 @@ jobs:
           opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
           assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
           assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
-          assert expected["opengameart_items_downloaded"] <= sum([6, 6, 5, 5, 5]), "OpenGameArt search ceilings exceeded"
-          caps = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+          assert expected["opengameart_items_downloaded"] <= sum([8, 8, 8, 8, 8]), "OpenGameArt search ceilings exceeded"
+          caps = {"2d": 8, "3d": 8, "textures": 8, "sfx": 8, "music": 8}
           for category, cap in caps.items():
               assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
           for asset in opengameart_assets:
@@ -216,6 +222,48 @@ jobs:
               license_bytes = license_path.read_bytes()
               assert hashlib.sha256(license_bytes).hexdigest() == asset.get("license_file_sha256")
               assert b"SIL OPEN FONT LICENSE Version 1.1" in license_bytes
+          assert expected["original_stickers"] >= 200, "Original sticker library is incomplete"
+          assert expected["original_meme_templates"] >= 48, "Editable meme-template library is incomplete"
+          sticker_assets = [a for a in index["assets"] if str(a.get("type", "")).startswith("original-sticker-")]
+          meme_assets = [a for a in index["assets"] if a.get("type") == "original-meme-layout-template"]
+          assert len(sticker_assets) == expected["original_stickers"]
+          assert len(meme_assets) == expected["original_meme_templates"]
+          for item in sticker_assets + meme_assets:
+              assert item.get("license") == "CC0-1.0" and item.get("redistributable") is True
+              assert item.get("editable_vector") is True
+              assert (root / item["path"]).is_file()
+              svg = (root / item["path"]).read_text(encoding="utf-8", errors="replace")
+              assert "<svg " in svg and "<script" not in svg.lower() and "javascript:" not in svg.lower()
+
+          packages_path = Path("dist/video-assets/PACKAGES_INDEX.json")
+          packages = json.loads(packages_path.read_text(encoding="utf-8"))
+          assert packages["pack_count"] >= 8, "Modular pack set is incomplete"
+          assert packages["max_part_zip_bytes"] <= 650 * 1024 * 1024
+          assert packages["total_pack_raw_bytes"] > 0 and packages["total_pack_compressed_bytes"] > 0
+          assert packages["distribution_mode"] in {"full-library-plus-modular-packs", "modular-packs-with-catalog-archive"}
+          pack_ids = {pack["pack_id"].rsplit("-", 1)[0] for pack in packages["packs"]}
+          assert {"stickers-memes", "game-art-2d", "audio-sfx-music", "materials-environments", "science-footage", "typography"}.issubset(pack_ids)
+          for pack in packages["packs"]:
+              pack_file = Path("dist/video-assets") / pack["file"]
+              assert pack_file.is_file() and pack_file.stat().st_size == pack["compressed_bytes"]
+              assert pack_file.stat().st_size <= packages["max_part_zip_bytes"]
+              assert hashlib.sha256(pack_file.read_bytes()).hexdigest() == pack["sha256"]
+              with zipfile.ZipFile(pack_file) as pz:
+                  assert pz.testzip() is None
+                  names = set(pz.namelist())
+                  assert any(name.endswith("PACK_README.md") for name in names)
+                  pack_index_name = next(name for name in names if name.endswith("PACK_ASSET_INDEX.json"))
+                  sums_name = next(name for name in names if name.endswith("PACK_SHA256SUMS.txt"))
+                  part_index = json.loads(pz.read(pack_index_name))
+                  assert part_index["pack_id"] == pack["pack_id"]
+                  assert part_index["file_count"] == pack["file_count"]
+                  for row in pz.read(sums_name).decode("utf-8").splitlines():
+                      if not row.strip():
+                          continue
+                      digest, rel = row.split("  ", 1)
+                      assert rel in names, f"Pack file missing: {rel}"
+                      assert hashlib.sha256(pz.read(rel)).hexdigest() == digest, f"Pack checksum mismatch: {rel}"
+          assert (Path("dist/video-assets") / "PACKAGES_INDEX.md").is_file()
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
@@ -249,11 +297,16 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/video-assets/video-asset-library.zip
+            dist/video-assets/PACKAGES_INDEX.json
+            dist/video-assets/PACKAGES_INDEX.md
+            dist/video-assets/packs/*.zip
             dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
           body: |
-            Automated cross-genre video resources for Nolane Video Studio.
+            Modular, cross-genre video resources for Nolane Video Studio. Download only the packs needed for a project; large families are split into independently checksummed parts.
 
-            The package includes 93+ original CC0 vector backgrounds, 80+ overlays, 140+ icon SVGs, 112 editorial illustrations, 55 infographic templates, 58 tileable textures, 24 ffprobe-verified motion loops and 196 original procedural WAV cues; Poly Haven HDRIs/models/PBR textures; Met Open Access and verified Wikimedia CC0/Public Domain images; NASA-center media screened under NASA Media Usage Guidelines (not CC0); and Library of Congress images only when item-level rights statements explicitly support use. Rijksmuseum and Smithsonian artwork is included only when the exact item/media rights metadata permits it; Smithsonian media requires CC0 at both record and media level. Item-level source, usage notes and SHA-256 data are included.
+            Modular packs include original CC0 backgrounds, overlays, icons, editorial illustrations, infographic templates, tileable textures, 24 ffprobe-verified motion loops, original reaction stickers, 48 editable meme layouts and procedural WAV cues; Poly Haven HDRIs/models/PBR textures; Met Open Access and verified Wikimedia CC0/Public Domain images; NASA-center media screened under NASA Media Usage Guidelines (not CC0); and Library of Congress images only when item-level rights statements explicitly support use. Rijksmuseum and Smithsonian artwork is included only when the exact item/media rights metadata permits it; Smithsonian media requires CC0 at both record and media level. Item-level source, usage notes and SHA-256 data are included.
+
+            PACKAGES_INDEX.json lists each category, split part, compressed/raw size, item count and SHA-256. Each resource ZIP contains a pack-specific index, source and license metadata, and a SHA-256 ledger. Extract multiple packs into the same video-asset-library root. If the full-library compatibility ZIP would exceed the configured legacy limit, video-asset-library.zip becomes the catalog/manifest-only archive and the separate modular resource ZIPs carry the media files.
 
             Some external providers can be unreachable or change their API; the build index records successful, failed and skipped downloads. "Free to use" sources with limits on raw-file redistribution are documented as source-only and are not mirrored into this archive.
         env:
@@ -266,6 +319,9 @@ jobs:
           path: |
             dist/video-assets/VIDEO_ASSET_LIBRARY_BUILD.txt
             dist/video-assets/video-asset-library/ASSET_INDEX.json
+            dist/video-assets/video-asset-library/MODULAR_PACKS_INDEX.json
+            dist/video-assets/PACKAGES_INDEX.json
+            dist/video-assets/PACKAGES_INDEX.md
             dist/video-assets/video-asset-library/SOURCES_AND_LICENSES.md
             dist/video-assets/video-asset-library/SHA256SUMS.txt
           if-no-files-found: error

@@ -125,3 +125,32 @@ Official source: [OpenGameArt advanced search](https://opengameart.org/art-searc
 The typography source lane selects up to 20 curated family directories from the official `google/fonts` repository. Each family's own `OFL.txt` is downloaded and inspected before any font binary is accepted. Only families carrying the SIL Open Font License Version 1.1 marker and a copyright statement proceed. At most two TTF faces are retained per family, each with a TrueType/OpenType sfnt signature check and SHA-256; the exact family `OFL.txt`, its checksum, raw font URL and family page are kept alongside the font. The aggregate font-download ceiling is 90 MiB. These files remain under their individual SIL OFL 1.1 terms rather than being relabelled CC0.
 
 Official repository: [Google Fonts](https://github.com/google/fonts). License: [SIL Open Font License](https://openfontlicense.org/).
+
+## Build 45: expansion for large, modular production libraries
+
+Build 45 adds an original sticker/meme lane and replaces the all-or-nothing distribution model with independently downloadable category packs.
+
+### Original stickers and memes
+
+The build generates **202 original transparent SVG stickers** and **48 editable meme-layout templates**. Sticker families include reaction words, expressive faces, arrows, annotations, bursts, symbols and doodles. Meme layouts include classic top/bottom captions, two-panel comparisons, four-panel stories, vertical reactions, quote cards, timelines, chats, rankings and other generic formats. These are original reusable designs, not copied viral memes or branded character stickers. Insert only media you own or are licensed to use.
+
+### Larger source ceilings
+
+The next build raises discovery/download ceilings while retaining source-level permission checks:
+
+- Poly Haven: up to 30 HDRIs, 40 model packages and 72 texture packages.
+- ambientCG: up to 60 CC0 package candidates across PBR materials, HDRIs, models, decals, atlases, plain textures, brushes and Substance assets, with a 1.2 GiB total extracted-content ceiling.
+- USGS: up to 40 images, 18 videos and 12 audio items, but only when each exact item's Sources/Usage statement is exactly Public Domain.
+- OpenGameArt: up to 8 CC0 items in each of 2D, 3D, textures, SFX and music; each item must still pass its own one-license CC0 check.
+- These are maximums, not guaranteed counts. The generated index and source reports determine what was actually obtained.
+
+### Modular distribution
+
+The release is divided into independently downloadable resource families, such as stickers/memes, original visuals, motion loops, audio/SFX/music, 2D game art, 3D game art, models, materials/HDRIs, science footage, public-domain images and typography. A family larger than the part ceiling is split into numbered parts, each no larger than 650 MiB compressed.
+
+- `PACKAGES_INDEX.json` lists every part, size, file count, license types and SHA-256.
+- Each ZIP contains a pack-specific asset index, source/license notes and a file-level SHA-256 ledger.
+- Extract selected packs into the same `video-asset-library/` root; their folder paths are designed to coexist.
+- The compatibility `video-asset-library.zip` remains a complete library while it stays under the configured legacy size ceiling. Above that threshold it becomes the compact catalog/manifest archive, and the modular ZIPs carry the actual media.
+
+This design lets the library grow toward many gigabytes without requiring users to download every category at once.
