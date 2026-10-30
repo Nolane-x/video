@@ -42,6 +42,15 @@ OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
 OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+GOOGLE_FONTS_FAMILY_SLUGS = [
+    "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
+    "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
+    "lora","sourcecodepro","jetbrainsmono","bebasneue","worksans","nunito","raleway"
+]
+GOOGLE_FONTS_MAX_FAMILIES = 20
+GOOGLE_FONTS_MAX_TTF_PER_FAMILY = 2
+GOOGLE_FONTS_MAX_FONT_BYTES = 8 * 1024 * 1024
+GOOGLE_FONTS_MAX_TOTAL_BYTES = 90 * 1024 * 1024
 # Exclude active-content formats such as SVG and native Blender project files from
 # untrusted community archives; ordinary raster, audio, video and exchange formats remain.
 OPENGAMEART_ALLOWED_MEDIA_EXTS = {
@@ -2397,6 +2406,154 @@ def download_opengameart(root,index):
                                "provider":"OpenGameArt","status":"item_failed","source_page":item_url,
                                "category":category,"reason":str(exc)[:360]})
         print("[OpenGameArt] "+category+":",downloaded_for_category,"items downloaded from",examined,"detail pages")
+    return report
+
+
+def google_fonts_api_url_is_allowed(url,family):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        query=urllib.parse.parse_qs(parsed.query)
+        expected="/repos/google/fonts/contents/ofl/"+str(family)
+        return (parsed.scheme=="https" and parsed.hostname=="api.github.com" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and parsed.path==expected and query.get("ref")==["main"])
+    except Exception:
+        return False
+
+
+def google_fonts_raw_url_is_allowed(url,family,filename=None):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        prefix="/google/fonts/main/ofl/"+str(family)+"/"
+        path=urllib.parse.unquote(parsed.path or "")
+        ext=Path(path).suffix.lower()
+        return (parsed.scheme=="https" and parsed.hostname=="raw.githubusercontent.com" and
+                parsed.port in (None,443) and not parsed.username and not parsed.password and
+                not parsed.fragment and path.startswith(prefix) and
+                (filename is None or Path(path).name==filename) and
+                (ext==".ttf" or Path(path).name=="OFL.txt"))
+    except Exception:
+        return False
+
+
+def google_fonts_ofl_is_valid(text):
+    normalized=str(text or "").replace("\r\n","\n")
+    return ("SIL OPEN FONT LICENSE Version 1.1" in normalized and
+            "Copyright" in normalized and "OFL" in normalized[:300])
+
+
+def google_fonts_ttf_signature_is_valid(blob):
+    return (len(blob)>=4096 and blob.startswith((b"\x00\x01\x00\x00",b"true",b"OTTO")))
+
+
+def download_google_fonts(root,index):
+    """Download a curated, bounded set of TTFs only when the family's own OFL file verifies."""
+    report=[]; total_bytes=0
+    api_base="https://api.github.com/repos/google/fonts/contents/ofl/"
+    license_name="SIL Open Font License 1.1"
+    for family in GOOGLE_FONTS_FAMILY_SLUGS[:GOOGLE_FONTS_MAX_FAMILIES]:
+        api_url=api_base+urllib.parse.quote(family,safe="") +"?ref=main"
+        source_page="https://github.com/google/fonts/tree/main/ofl/"+family
+        row={"id":"google-fonts-"+family,"provider":"Google Fonts / google/fonts",
+             "family_slug":family,"title":family.replace(""," ").title(),
+             "category":"Typography / video titles, captions and editorial text",
+             "source_page":source_page,"api_source":api_url,
+             "license":"SIL Open Font License 1.1 only after the family's OFL.txt is validated",
+             "license_url":"https://openfontlicense.org/"}
+        if not google_fonts_api_url_is_allowed(api_url,family):
+            row.update(status="invalid_api_url",reason="The computed family API URL failed the official endpoint allow-list.")
+            report.append(row); continue
+        try:
+            payload=request_json(api_url,timeout=25)
+            if not isinstance(payload,list):
+                raise RuntimeError("GitHub contents API did not return a family directory listing")
+            entries=[item for item in payload if isinstance(item,dict) and item.get("type")=="file"]
+            license_entry=next((item for item in entries if str(item.get("name","")).lower()=="ofl.txt"),None)
+            if not license_entry:
+                row.update(status="skipped_license",reason="The family directory has no OFL.txt file.")
+                report.append(row); continue
+            license_url=license_entry.get("download_url") or ""
+            if not google_fonts_raw_url_is_allowed(license_url,family,"OFL.txt"):
+                row.update(status="skipped_license",reason="The OFL file URL is not on the official raw.githubusercontent.com family path.")
+                report.append(row); continue
+            license_blob,_=request_bytes(license_url,timeout=25,limit=512*1024)
+            license_text=license_blob.decode("utf-8","replace")
+            if not google_fonts_ofl_is_valid(license_text):
+                row.update(status="skipped_license",reason="The actual OFL.txt does not contain the SIL Open Font License 1.1 marker.")
+                report.append(row); continue
+            font_entries=[]
+            for item in entries:
+                name=str(item.get("name") or "")
+                url=str(item.get("download_url") or "")
+                if Path(name).suffix.lower()!=".ttf":
+                    continue
+                if not google_fonts_raw_url_is_allowed(url,family,name):
+                    continue
+                try:
+                    declared=int(item.get("size") or 0)
+                except (TypeError,ValueError):
+                    declared=0
+                if declared and declared>GOOGLE_FONTS_MAX_FONT_BYTES:
+                    continue
+                font_entries.append({"name":name,"url":url,"declared_size":declared})
+            # Prefer the regular face, then include an italic companion where present.
+            font_entries.sort(key=lambda item:("italic" in item["name"].lower(),item["name"].lower()))
+            selected=font_entries[:GOOGLE_FONTS_MAX_TTF_PER_FAMILY]
+            if not selected:
+                row.update(status="no_ttf_font",reason="No allow-listed TTF file was listed in the family directory.")
+                report.append(row); continue
+            family_dir=root/"third-party/google-fonts"/family
+            family_dir.mkdir(parents=True,exist_ok=True)
+            license_path=family_dir/"OFL.txt"
+            license_path.write_bytes(license_blob)
+            license_sha=sha256_path(license_path)
+            font_rows=[]
+            for font in selected:
+                if total_bytes>=GOOGLE_FONTS_MAX_TOTAL_BYTES:
+                    break
+                try:
+                    blob,ctype=request_bytes(font["url"],timeout=35,limit=GOOGLE_FONTS_MAX_FONT_BYTES)
+                    if not google_fonts_ttf_signature_is_valid(blob):
+                        raise RuntimeError("Downloaded font failed TrueType/OpenType sfnt signature validation.")
+                    target=family_dir/Path(font["name"]).name
+                    target.write_bytes(blob)
+                    digest=sha256_path(target)
+                    index.append({"id":"google-font-"+family+"-"+slugify(target.name),
+                                  "path":target.relative_to(root).as_posix(),
+                                  "type":"google-font-ttf","provider":"Google Fonts",
+                                  "title":family.replace(""," ").title()+" — "+target.name,
+                                  "family_slug":family,"category":"Typography / titles, captions and editorial text",
+                                  "source_page":source_page,"source_file_url":font["url"],
+                                  "license":license_name,"license_url":"https://openfontlicense.org/",
+                                  "license_file":license_path.relative_to(root).as_posix(),
+                                  "license_file_url":license_url,"license_file_sha256":license_sha,
+                                  "license_verified_from_family_ofl":True,
+                                  "size_bytes":len(blob),"sha256":digest,"redistributable":True})
+                    total_bytes+=len(blob)
+                    font_rows.append({"name":font["name"],"path":target.relative_to(root).as_posix(),
+                                      "size_bytes":len(blob),"sha256":digest,"source_file_url":font["url"]})
+                except Exception as font_exc:
+                    row.setdefault("font_failures",[]).append({"name":font["name"],"reason":str(font_exc)[:240]})
+            if not font_rows:
+                shutil.rmtree(family_dir,ignore_errors=True)
+                row.update(status="download_failed",reason="No font file passed download and signature validation.")
+                report.append(row); continue
+            note=(f"# {family.replace('',' ').title()} — Google Fonts\\n\\n"
+                  f"- Official family page: {source_page}\\n- License: SIL Open Font License 1.1\\n"
+                  f"- License source: {license_url}\\n- OFL.txt SHA-256: {license_sha}\\n"
+                  "- Only TTF files with validated sfnt signatures were retained.\\n")
+            write_text(family_dir/"SOURCE_AND_LICENSE.md",note)
+            row.update(status="downloaded",license=license_name,license_file=license_path.relative_to(root).as_posix(),
+                       license_file_sha256=license_sha,font_files_downloaded=len(font_rows),fonts=font_rows)
+            report.append(row)
+            print("[Google Fonts] OK:",family,len(font_rows),"TTFs",sum(x["size_bytes"] for x in font_rows),"bytes")
+            time.sleep(.25)
+        except Exception as exc:
+            row.update(status="failed",reason=str(exc)[:360])
+            report.append(row)
+            print("[Google Fonts] failed:",family,str(exc)[:180])
+        if total_bytes>=GOOGLE_FONTS_MAX_TOTAL_BYTES:
+            break
     return report
 
 
