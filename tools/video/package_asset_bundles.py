@@ -35,6 +35,10 @@ def classify_asset(asset: dict) -> str:
     extension = Path(path).suffix.lower()
     if "font" in asset_type or extension in {".ttf", ".otf", ".woff", ".woff2"}:
         return "typography"
+    if asset_type in {"original-video-sticker", "original-meme-layout-template", "original-caption-overlay"}:
+        return "original-graphics"
+    if "texture" in asset_type or "texture" in category or "surface" in category:
+        return "3d-textures"
     if "video" in asset_type or extension in {".mp4", ".mov", ".m4v", ".webm", ".ogv"}:
         return "footage"
     if "audio" in asset_type or "sfx" in asset_type or "sound" in asset_type or "music" in category or extension in {".wav", ".mp3", ".m4a", ".ogg", ".oga", ".flac"}:
@@ -55,8 +59,6 @@ def classify_asset(asset: dict) -> str:
         return "original-graphics"
     if "svg" in asset_type or extension == ".svg":
         return "vector-graphics"
-    if "texture" in asset_type or "texture" in category or "surface" in category:
-        return "3d-textures"
     if extension in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".tif", ".tiff"}:
         return "photography"
     return "miscellaneous"
