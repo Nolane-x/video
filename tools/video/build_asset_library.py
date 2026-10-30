@@ -5228,6 +5228,7 @@ def main():
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     ambientcg_report=download_ambientcg(STAGE,index)
+    lazytextures_report=download_lazytextures(STAGE,index)
     met_report=download_met_open_access(STAGE,index)
     smithsonian_report=download_smithsonian_open_access(STAGE,index)
     rijksmuseum_report=download_rijksmuseum_open_access(STAGE,index)
@@ -5252,6 +5253,8 @@ def main():
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
       "\n\n## ambientCG CC0 materials, environments and models\nThe builder uses ambientCG's documented /api/v2/full_json endpoint to discover a bounded sample of materials, HDRIs, 3D models, decals, atlases, plain textures, brushes and Substance materials. ambientCG explicitly publishes its downloadable asset files under CC0 1.0. Every request uses the official HTTPS /get?file=...zip endpoint, prefers small 1K variants, checks ZIP integrity, caps archive and total extraction sizes, extracts only allow-listed media, and records source page, selected variant, archive digest and per-file SHA-256. Sources: https://docs.ambientcg.com/api/v2/full_json/ and https://docs.ambientcg.com/license/.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in ambientcg_report)+
+      "\n\n## LazyTextures CC0 3D, materials, HDRIs and textures\nThe builder uses the official public API browse endpoints and exact per-item detail endpoint. The provider's API documentation states that all assets in the library are CC0 1.0 and that no API key is required; any contradictory license field in an item detail is rejected. Each selected detail name/type must match the browse entry, and downloads are restricted to ZIP files on the exact official HTTPS host and /Assets/ path. ZIP size, member count, CRC, safe extraction path/extensions, total compressed/uncompressed budgets and per-file SHA-256 are validated. Requests are paced and capped because downloads are subject to fair-use limits. Sources: "+LAZYTEXTURES_DOCS_URL+" and https://creativecommons.org/publicdomain/zero/1.0/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in lazytextures_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
       "\n\n## Smithsonian Open Access CC0 media\nThe builder queries Smithsonian Open Access and only considers records whose top-level metadata_usage.access is exactly CC0. It then checks each candidate media object's usage.access independently and downloads only media explicitly marked CC0. The official IDS image delivery service is requested at a bounded size; source record, unit, title, creator, media URL, exact rights values and SHA-256 are kept. A caller may configure the optional GitHub Actions secret SMITHSONIAN_API_KEY; if absent, the builder makes a low-volume attempt with DEMO_KEY and records any rate-limit/authentication failure rather than claiming success. CC0 does not grant trademark, privacy, publicity or other non-copyright rights. Sources: https://www.si.edu/openaccess/faq and https://www.si.edu/openaccess/devtools.\n\n"+      "\n\n## Rijksmuseum Open Access collection\nThe builder harvests the official Rijksmuseum OAI-PMH EDM feed without an API key, but downloads only images whose own record exposes an explicit Creative Commons CC0 or Public Domain Mark rights URL. Image requests use the Rijksmuseum's official IIIF endpoint at a bounded size; record identifiers, title, creator, exact rights statement, source URL and SHA-256 are retained. CC BY and ambiguous/missing rights are not bundled by this lane. The museum requests source credit where possible. Sources: https://data.rijksmuseum.nl/docs/oai-pmh, https://data.rijksmuseum.nl/docs/iiif and https://data.rijksmuseum.nl/policy/.\n\n"+      "\n\n## NASA Image and Video Library media\nThe builder searches the official NASA Image and Video Library API for small images, video clips, and audio files. It only accepts records attributed to a NASA center, rejects copyright/third-party-rights markers and NASA insignia/logo assets, skips obvious identifiable-person keyword categories, checks the official NASA media manifest and media container, and preserves the item page, media URL, source credit, rights basis and SHA-256. NASA media is not labelled CC0: NASA says its media is generally not copyrighted in the United States, but third-party marked content, endorsement, logo and privacy/publicity constraints still apply. Review each selection before a commercial or promotional use. Source: https://www.nasa.gov/nasa-brand-center/images-and-media/.\n\n"+
@@ -5286,6 +5289,13 @@ def main():
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "ambientcg_packages_downloaded":sum(r.get("status")=="downloaded" for r in ambientcg_report),
               "ambientcg_files_downloaded":sum(1 for x in index if x.get("type")=="ambientcg-asset-file"),
+              "lazytextures_packages_downloaded":sum(r.get("status")=="downloaded" for r in lazytextures_report),
+              "lazytextures_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("lazytextures-") and x.get("type","").endswith("-asset-file")),
+              "lazytextures_archive_bytes_downloaded":sum(r.get("archive_bytes",0) for r in lazytextures_report if r.get("status")=="downloaded"),
+              "lazytextures_models_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="models" for r in lazytextures_report),
+              "lazytextures_materials_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="materials" for r in lazytextures_report),
+              "lazytextures_hdris_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="hdris" for r in lazytextures_report),
+              "lazytextures_textures_downloaded":sum(r.get("status")=="downloaded" and r.get("asset_type")=="textures" for r in lazytextures_report),
               "met_images_downloaded":sum(r.get("status")=="downloaded" for r in met_report),
               "smithsonian_images_downloaded":sum(r.get("status")=="downloaded" for r in smithsonian_report),
               "rijksmuseum_images_downloaded":sum(r.get("status")=="downloaded" for r in rijksmuseum_report),
@@ -5323,6 +5333,7 @@ def main():
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
                "ambientcg_downloads":ambientcg_report,
+               "lazytextures_downloads":lazytextures_report,
                "met_open_access_downloads":met_report,"smithsonian_open_access_downloads":smithsonian_report,
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
