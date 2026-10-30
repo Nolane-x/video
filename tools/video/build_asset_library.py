@@ -1427,9 +1427,12 @@ def safe_extract(blob,target,max_bytes=350*1024*1024):
         bad=z.testzip()
         if bad: raise RuntimeError("corrupt ZIP member: "+bad)
         for info in z.infolist():
-            name=info.filename.replace("\\\\","/")
+            name=info.filename.replace("\\","/")
             pp=PurePosixPath(name); ext=Path(name).suffix.lower()
-            if pp.is_absolute() or ".." in pp.parts: raise RuntimeError("unsafe ZIP path: "+name)
+            unix_type=(info.external_attr >> 16) & 0o170000
+            if (not name or "\\x00" in name or pp.is_absolute() or ".." in pp.parts or
+                    (pp.parts and ":" in pp.parts[0]) or unix_type==0o120000):
+                raise RuntimeError("unsafe ZIP path or symlink: "+name)
             if info.is_dir() or ext in DENIED or ext not in ALLOWED: continue
             total+=info.file_size
             if total>max_bytes: raise RuntimeError("pack extraction size limit exceeded")
