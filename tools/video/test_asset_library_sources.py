@@ -7,10 +7,12 @@ import sys
 import tempfile
 import unittest
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
+import generate_sticker_meme_library as sticker_meme  # noqa: E402
 
 
 
@@ -205,6 +207,105 @@ class OpenGameArtRightsAndParsingTests(unittest.TestCase):
         self.assertTrue(library.opengameart_file_signature_is_valid(b"\x1a\x45\xdf\xa3" + b"x" * 64, ".webm", "video/webm"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a zip</html>", ".zip", "text/html"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a png</html>", ".png", "text/html"))
+
+class NOAAMultimediaRightsAndParsingTests(unittest.TestCase):
+    IMAGE_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-image.jpg"
+    VIDEO_URL = "https://oceanexplorer.noaa.gov/wp-content/uploads/2025/08/sample-video-1280x720.mp4"
+
+    def test_noaa_listing_parser_reads_only_official_multimedia_card_links(self):
+        page = f"""<html><body>
+        <div class="component-cards-posts__main">
+          <div class="component-cards-posts__initial">
+            <div class="element-card-compact"><a href="https://oceanexplorer.noaa.gov/multimedia/octopus-dive/">Octopus</a></div>
+            <div class="element-card-compact"><a href="/multimedia/deep-sea-coral/">Coral</a></div>
+          </div>
+        </div>
+        <div class="sidebar"><a href="https://oceanexplorer.noaa.gov/multimedia/not-a-card/">Sidebar</a></div>
+        <a href="https://example.com/multimedia/external/">External</a>
+        </body></html>"""
+        self.assertEqual(
+            library.noaa_parse_listing_page(page),
+            [
+                "https://oceanexplorer.noaa.gov/multimedia/octopus-dive/",
+                "https://oceanexplorer.noaa.gov/multimedia/deep-sea-coral/",
+            ],
+        )
+
+    def test_noaa_detail_parser_extracts_title_caption_credit_and_hd_download(self):
+        page = f"""<html><head><meta property="og:title" content="Deep Ocean Discovery"></head><body>
+        <div class="component-multimedia-post__type eyebrow">video</div>
+        <div class="component-multimedia-post__heading h2">Deep Ocean Discovery</div>
+        <div class="component-multimedia-post__content content-formatted">An ROV explores a deep-sea coral habitat.</div>
+        <div class="component-multimedia-post__details"><div class="content-stack">
+          <div class="meta-pair"><div class="eyebrow">Credit</div><p>NOAA Ocean Exploration, Example Expedition</p></div>
+          <div class="meta-pair"><div class="eyebrow">Download</div><p>
+            <a class="text-download" href="{self.VIDEO_URL}">HD version (mp4)</a>
+          </p></div>
+        </div></div></body></html>"""
+        detail = library.noaa_parse_detail_page(page)
+        self.assertEqual(detail["title"], "Deep Ocean Discovery")
+        self.assertEqual(detail["media_type"], "video")
+        self.assertIn("ROV explores", detail["caption"])
+        self.assertEqual(detail["credit"], "NOAA Ocean Exploration, Example Expedition")
+        self.assertEqual(detail["downloads"][0]["url"], self.VIDEO_URL)
+        self.assertFalse(detail["copyright_marker"])
+
+    def test_noaa_copyright_marker_is_case_insensitive_and_blocks_item(self):
+        page = """<html><body>
+        <div class="component-multimedia-post__heading">Partner Footage</div>
+        <div class="component-multimedia-post__type">video</div>
+        <div class="component-multimedia-post__content content-formatted">Copyright © Partner Studio. Used by permission.</div>
+        <div class="component-multimedia-post__details"><div class="meta-pair">
+        <div class="eyebrow">Credit</div><p>NOAA Ocean Exploration</p></div></div>
+        </body></html>"""
+        detail = library.noaa_parse_detail_page(page)
+        self.assertTrue(detail["copyright_marker"])
+
+    def test_noaa_download_allowlist_is_official_and_media_type_specific(self):
+        self.assertTrue(library.noaa_detail_page_is_allowed("https://oceanexplorer.noaa.gov/multimedia/octopus-dive/"))
+        self.assertFalse(library.noaa_detail_page_is_allowed("https://example.com/multimedia/octopus-dive/"))
+        self.assertTrue(library.noaa_media_download_url_is_allowed(self.IMAGE_URL, "image"))
+        self.assertTrue(library.noaa_media_download_url_is_allowed(self.VIDEO_URL, "video"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed("https://example.com/wp-content/uploads/a.jpg", "image"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed("http://oceanexplorer.noaa.gov/wp-content/uploads/a.mp4", "video"))
+        self.assertFalse(library.noaa_media_download_url_is_allowed(self.VIDEO_URL, "image"))
+
+    def test_noaa_magic_bytes_reject_html_and_accept_jpeg_mp4(self):
+        self.assertTrue(library.noaa_media_signature_is_valid(b"\xff\xd8\xff" + b"x" * 64, "image", "image/jpeg", ".jpg"))
+        self.assertTrue(library.noaa_media_signature_is_valid(b"\x00\x00\x00\x18ftypisom" + b"x" * 20000, "video", "video/mp4", ".mp4"))
+        self.assertFalse(library.noaa_media_signature_is_valid(b"<html>blocked</html>", "image", "text/html", ".jpg"))
+        self.assertFalse(library.noaa_media_signature_is_valid(b"<html>blocked</html>", "video", "text/html", ".mp4"))
+
+    def test_usgs_singular_type_map_keeps_audio_correct(self):
+        self.assertEqual(library.usgs_singular_media_type("images"), "image")
+        self.assertEqual(library.usgs_singular_media_type("videos"), "video")
+        self.assertEqual(library.usgs_singular_media_type("audio"), "audio")
+        with self.assertRaises(ValueError):
+            library.usgs_singular_media_type("unknown")
+
+
+class OriginalStickerMemeLibraryTests(unittest.TestCase):
+    def test_sticker_meme_and_caption_packs_generate_large_original_cc0_families(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            index = []
+            counts = sticker_meme.generate_assets(Path(tmp), index)
+            self.assertGreaterEqual(counts["stickers"], 200)
+            self.assertGreaterEqual(counts["meme_templates"], 70)
+            self.assertGreaterEqual(counts["caption_overlays"], 60)
+            self.assertEqual(counts["total"], len(index))
+            self.assertGreaterEqual(len(index), 330)
+            self.assertTrue(all(item.get("license") == "CC0-1.0" and item.get("original_artwork") is True for item in index))
+            for item in index:
+                path = Path(tmp) / item["path"]
+                self.assertTrue(path.is_file())
+                xml = path.read_text(encoding="utf-8")
+                ET.fromstring(xml)
+                self.assertNotIn("<script", xml.lower())
+                self.assertNotRegex(xml.lower(), r"\s(?:href|src)\s*=\s*['\"](?:https?:|//|data:)")
+            self.assertTrue(any("meme" in item["category"] for item in index))
+            self.assertTrue(any("caption" in item["category"] for item in index))
+            self.assertTrue(any("stickers" in item["category"] for item in index))
+
 
 class USGSGalleryRightsAndParsingTests(unittest.TestCase):
     IMAGE_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/images/sample.jpg"
