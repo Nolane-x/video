@@ -44,7 +44,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
             {"attribute": "2K-JPG", "filetype": "zip", "fileName": "Wood096_2K-JPG.zip", "size": 8_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_2K-JPG.zip"},
             {"attribute": "1K-JPG", "filetype": "zip", "fileName": "Wood096_1K-JPG.zip", "size": 2_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_1K-JPG.zip"},
             {"attribute": "1K-JPG", "filetype": "zip", "fileName": "Other_1K-JPG.zip", "size": 1_000_000, "downloadLink": "https://evil.example/get?file=Other_1K-JPG.zip"}
-        ]}}}}
+        ]}}}}}
         choice = library.ambientcg_choose_download(asset)
         self.assertEqual(choice["attribute"], "1K-JPG")
         self.assertTrue(library.ambientcg_download_url_is_allowed(choice["url"]))
