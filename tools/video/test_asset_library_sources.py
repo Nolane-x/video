@@ -148,6 +148,16 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         self.assertTrue(parsed["source_page"].startswith("https://poly.pizza/m/"))
         self.assertEqual(parsed["download_url"], "https://cdn.poly.pizza/models/TreeOne.glb")
 
+        numeric_cc0 = self._model()
+        numeric_cc0["Licence"] = 1
+        self.assertEqual(library.poly_pizza_parse_model(numeric_cc0)[0]["license"], "CC0-1.0")
+        nested_cc0 = self._model()
+        nested_cc0["Licence"] = {"ID": 1, "Name": "CC0"}
+        self.assertEqual(library.poly_pizza_parse_model(nested_cc0)[0]["license"], "CC0-1.0")
+        numeric_by = self._model()
+        numeric_by["Licence"] = 0
+        self.assertEqual(library.poly_pizza_parse_model(numeric_by)[1], "license_not_cc0_or_unrecognized")
+
         by_model = self._model()
         by_model["Licence"] = "CC-BY 4.0"
         self.assertEqual(library.poly_pizza_parse_model(by_model)[1], "license_not_cc0_or_unrecognized")
