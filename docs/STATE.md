@@ -1,5 +1,17 @@
 # Video Studio — current state snapshot
 
+## Asset library pipeline — 2026-10-30
+
+This workstream is independent of the film render candidates recorded below.
+
+- **Build 48:** [GitHub Actions run #48](https://github.com/Nolane-x/video/actions/runs/41037407715), on `main` commit `3d7050f3f0820d4f7daf5c38be449296c3f8b528`. At the latest check it remained in step 7, “Build original assets and download rights-screened resources”; ZIP packaging, release verification, publication and report upload had not started. No Build 48 download count or size is claimed until the workflow completes.
+- **Last confirmed release:** `video-asset-library-build-43`; `video-asset-library.zip` is 1,095,394,051 bytes with SHA-256 `a03f02fcd6915361ed64c5ec1d0158837458ac2988adf300de33515b636bbe36`. This is historical, not Build 48.
+- **Build 49:** [PR #15](https://github.com/Nolane-x/video/pull/15), branch `feat/video-library-build-49-lazytextures-cc0`. LazyTextures is an optional public API lane with bounded five-category CC0 archive discovery, ZIP path/size/CRC checks, safe extraction, file-signature checks and SHA-256. Quaternius current QAL v1.0 is marked source-only, not raw-bundled.
+- Poly Pizza is an optional API-key lane. It accepts only models whose own item-detail record is CC0 1.0, rejects CC-BY/missing/unknown rights, requires an official HTTPS `.glb` URL, validates GLB v2 chunks and rejects external/sidecar URIs. Output folders include an ID-derived hash to avoid case-insensitive Windows collisions. If `POLY_PIZZA_API_KEY` is absent, the report says `skipped_missing_api_key` and the rest of the build continues.
+- The asset workflow concurrency setting is changed in PR #15 to `cancel-in-progress: false`, so a later build should queue rather than cancel a long-running build. Verify this behaviour on the first post-merge run.
+- CI #103 passed on the pre-rebase feature head. The corrected main-based PR tree must pass its new validation run before merge. The earlier branch comparison exposed 195 unrelated deletions; the branch is being rebuilt from the intact `main` tree, and those removals must be zero in the repaired PR.
+- Next: verify the repaired PR diff contains only the intended asset-library files; pass compile, regression and offline smoke checks; merge; verify Build 48 and queued Build 49 individually; inspect the published bundle manifest, per-file hashes and source counts.
+
 Snapshot updated 2026-10-28 after the latest First Hour caption-position correction. Current green candidates: **THE WEIGHT OF YES #31**, **ALMOST READY #34**, and **THE FIRST HOUR #55**. First Hour #55 passed all render, audio-mix, ffprobe, loudness and checksum gates; both contact sheets and targeted 1080p B27 frames are now reviewed. Caption fixes are technically verified and visually clear at sampled times. None is approved for final release yet: full-length video and perceptual audio review remain pending. The canonical ONE MORE SCROLL master remains unchanged.
 
 ## Current active candidate — THE WEIGHT OF YES

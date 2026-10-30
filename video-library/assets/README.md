@@ -198,3 +198,32 @@ The importer currently allows CC0 1.0, CC0 3.0, or the legacy Creative Commons P
 The ceilings are 40 Prelinger items, 40 NASA items, 250 MiB per file and 4 GiB total per build. The actual downloaded count and bytes are recorded in `ASSET_INDEX.json`; search hits and configured ceilings are never reported as downloaded resources.
 
 Official API references: [Internet Archive Advanced Search](https://archive.org/advancedsearch.php), [Metadata API](https://archive.org/developers/metadata.html), and [Internet Archive](https://archive.org/).
+
+
+## Build 49: LazyTextures CC0 3D and surface-resource lane
+
+The build adds a bounded importer for the official LazyTextures public API. Its documentation states that all library assets are CC0 1.0 and that the API does not require an API key. The importer requests the documented model, material, HDRI and texture browse endpoints, then matches each candidate to the exact official item detail response by name and type. If an item detail contains a contradictory license field, that item is rejected.
+
+Only ZIP archives enumerated in an item's `archiveFiles` or `textureFiles` response are eligible; texture-file records that resolve to standalone non-ZIP files are skipped by this archive-only lane. Downloads must remain on the exact official HTTPS host and `/Assets/` path. Every archive is checked for ZIP signature, CRC integrity, a bounded member count and a safe extraction path/extension allow-list. Each extracted file receives SHA-256 and retains the item detail URL, direct archive URL, archive SHA-256 and CC0 evidence URL.
+
+The fair-use-aware ceilings are 10 models, 16 materials, 10 HDRIs, 18 texture archives and 8 miscellaneous/other packages (62 packages maximum); at most 64 MiB per archive and 512 MiB of compressed downloads; at most 128 MiB unpacked per item and 1.5 GiB across the lane. ZIP central-directory paths, member count, declared expansion size, compression ratio and CRC are checked before extraction. Extracted images, 3D files, fonts, audio and documents pass a format-signature check; SVG is sanitized. Unsupported or mismatched files are excluded and counted. Item requests are paced. These are ceilings, not promised download totals. Standalone preview images and undocumented direct files are not imported.
+
+Official references: [LazyTextures Public API](https://lazytextures.com/PublicAPI), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+
+## Source review: Quaternius — do not mirror current-QAL packs as raw assets
+
+Quaternius remains useful as a source for creating finished videos and games, but its current official **Quaternius Asset License (QAL) v1.0**, last updated 28 August 2026, allows use and incorporation into finished Products while prohibiting resale, repackaging or redistribution of the assets themselves as standalone files or asset packs, including inside a bundle with other assets. This repository distributes raw reusable assets, so current-QAL downloads are catalogued as **source-only** and are not imported. Do not rely on older copies of the FAQ that describe the whole catalogue as CC0; inspect the exact dated license for any legacy pack before reconsidering it.
+
+Official license: [Quaternius Asset License v1.0](https://quaternius.com/license.html). Older FAQ: [Quaternius FAQ](https://quaternius.com/faq.html).
+
+
+## Poly Pizza — optional CC0 low-poly model lane
+
+Poly Pizza offers a large low-poly 3D model catalogue, but its Creative Commons licence is attached to each model and is not uniform across the site. The importer therefore uses only its published API, re-fetches each selected model by ID immediately before download, and accepts **CC0 1.0 only**. Models marked CC-BY, missing or unknown licence metadata are skipped in this first implementation. No HTML scraping is performed.
+
+The lane is opt-in: configure the GitHub Actions secret `POLY_PIZZA_API_KEY` using a key from [Poly Pizza API settings](https://poly.pizza/settings/api). The key is sent only to `api.poly.pizza`, never to a model CDN URL. The GLB download must end in `.glb`, come from an HTTPS `poly.pizza` host/subdomain, be no larger than 128 MiB, and pass GLB v2 JSON/BIN chunk validation, external-sidecar rejection and SHA-256. Model directories include an ID-derived hash to avoid collisions on Windows. The ceilings are 48 models and 4 GiB aggregate, with at most two result pages per search term; if the secret is absent, the report records `skipped_missing_api_key` and the rest of the build continues.
+
+**Commercial API note:** Poly Pizza's press page has described hobby API access as free and commercial API usage as pay-as-you-go. Verify the current plan and terms before enabling the secret for commercial workflows. The provider's terms prohibit scraping or automated extraction outside its published interfaces; this lane uses the published API only.
+
+Official references: [Poly Pizza](https://poly.pizza/), [API settings](https://poly.pizza/settings/api), [Terms of Service](https://poly.pizza/docs/tos), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
