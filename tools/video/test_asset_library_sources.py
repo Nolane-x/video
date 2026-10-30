@@ -572,6 +572,9 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-hdris-asset-file", "path": "third-party/lazytextures/hdris/Studio/lighting.exr"}), "3d-textures")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-textures-asset-file", "path": "third-party/lazytextures/textures/Rust/overlay.png"}), "3d-textures")
         self.assertEqual(bundle_packager.classify_asset({"type": "lazytextures-other-asset-file", "path": "third-party/lazytextures/other/Brush01/brush.png"}), "miscellaneous")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/models/SpaceKit/SOURCE_AND_LICENSE.md"), "3d-models")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/materials/Concrete01/SOURCE_AND_LICENSE.md"), "3d-textures")
+        self.assertEqual(bundle_packager.classify_unindexed_path("third-party/lazytextures/other/Brush01/SOURCE_AND_LICENSE.md"), "miscellaneous")
 
     def test_bundle_manifest_detects_missing_or_modified_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
