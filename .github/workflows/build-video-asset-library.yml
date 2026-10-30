@@ -252,6 +252,38 @@ jobs:
               assert asset.get("source_file_url", "").startswith("https://oceanexplorer.noaa.gov/wp-content/uploads/")
               assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
               assert asset.get("path", "").startswith("third-party/noaa-ocean-exploration/")
+          assert "internet_archive_videos_downloaded" in expected
+          assert "internet_archive_video_bytes_downloaded" in expected
+          assert "internet_archive_prelinger_videos_downloaded" in expected and "internet_archive_nasa_videos_downloaded" in expected
+          ia_report = index.get("internet_archive_video_downloads")
+          assert isinstance(ia_report, list), "Internet Archive moving-image report is missing"
+          ia_downloaded = [row for row in ia_report if row.get("status") == "downloaded"]
+          ia_assets = [asset for asset in index["assets"] if asset.get("type") == "internet-archive-public-domain-video"]
+          assert len(ia_downloaded) == expected["internet_archive_videos_downloaded"]
+          assert len(ia_assets) == len(ia_downloaded)
+          assert sum(row.get("size_bytes", 0) for row in ia_downloaded) == expected["internet_archive_video_bytes_downloaded"]
+          assert expected["internet_archive_prelinger_videos_downloaded"] <= 40
+          assert expected["internet_archive_nasa_videos_downloaded"] <= 40
+          assert expected["internet_archive_videos_downloaded"] <= 80
+          for asset in ia_assets:
+              assert asset.get("collection") in {"prelinger", "nasa"}
+              assert asset.get("source_page", "").startswith("https://archive.org/details/")
+              assert asset.get("metadata_url", "").startswith("https://archive.org/metadata/")
+              assert asset.get("source_file_url", "").startswith("https://archive.org/download/")
+              assert asset.get("license_verified_from_item_metadata") is True and asset.get("redistributable") is True
+              assert asset.get("license") in {"CC0-1.0", "CC0-3.0", "Public Domain (item-level Internet Archive rights statement)"}
+              if asset.get("license", "").startswith("Public Domain"):
+                  assert asset.get("rights_statement", "").strip().rstrip(".").casefold() == "public domain"
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 2048
+              assert len(asset.get("archive_file_md5", "")) == 32
+              path = root / asset["path"]
+              assert path.is_file() and path.suffix.lower() in {".mp4", ".ogv", ".webm"}
+              data = path.read_bytes()
+              assert hashlib.sha256(data).hexdigest() == asset["sha256"]
+              assert hashlib.md5(data).hexdigest() == asset["archive_file_md5"]
+              if asset.get("archive_file_sha1"):
+                  assert hashlib.sha1(data).hexdigest() == asset["archive_file_sha1"]
+              assert b"ftyp" in data[:64] or data.startswith(b"\x1a\x45\xdf\xa3") or data.startswith(b"OggS")
           assert expected["original_stickers"] >= 200 and expected["original_meme_templates"] >= 70 and expected["original_caption_overlays"] >= 60
           sticker_assets = [a for a in index["assets"] if a.get("type") == "original-video-sticker"]
           meme_assets = [a for a in index["assets"] if a.get("type") == "original-meme-layout-template"]
