@@ -119,3 +119,9 @@ This source lane uses OpenGameArt's official advanced-search CC0 filter to disco
 The downloader accepts attachments only from the official HTTPS `opengameart.org/sites/default/files/` host path, checks the actual media file signatures, validates ZIP integrity, extracts through the existing safe archive allow-list, and records creator, item URL, direct attachment URL, CC0 basis, archive digest and per-file SHA-256. SVG and native Blender project files are excluded from these third-party archives to avoid bundling active content. The current search ceilings are 6 2D packs, 6 3D packs, 5 texture packs, 5 SFX packs and 5 music packs; these are ceilings, not promised downloads. The generated report is authoritative.
 
 Official source: [OpenGameArt advanced search](https://opengameart.org/art-search-advanced) and [site FAQ](https://opengameart.org/content/faq).
+
+## Build 44: curated Google Fonts with verified OFL licenses
+
+The typography source lane selects up to 20 curated family directories from the official `google/fonts` repository. Each family's own `OFL.txt` is downloaded and inspected before any font binary is accepted. Only families carrying the SIL Open Font License Version 1.1 marker and a copyright statement proceed. At most two TTF faces are retained per family, each with a TrueType/OpenType sfnt signature check and SHA-256; the exact family `OFL.txt`, its checksum, raw font URL and family page are kept alongside the font. The aggregate font-download ceiling is 90 MiB. These files remain under their individual SIL OFL 1.1 terms rather than being relabelled CC0.
+
+Official repository: [Google Fonts](https://github.com/google/fonts). License: [SIL Open Font License](https://openfontlicense.org/).
