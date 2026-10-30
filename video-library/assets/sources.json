@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
-  "checked_on": "2026-10-29",
+  "checked_on": "2026-10-30",
   "bundling_policy": {
     "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
     "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
@@ -496,16 +496,16 @@
     },
     {
       "id": "usgs-multimedia-gallery",
-      "title": "USGS Multimedia Gallery — official science, geology, wildlife, water and hazards",
+      "title": "USGS Multimedia Gallery — image, video and audio items with exact Public Domain label",
       "provider": "U.S. Geological Survey",
       "kind": "government multimedia collection",
       "category": "geology, volcanology, earthquakes, water, wildlife, science and environment",
       "source_page": "https://www.usgs.gov/products/multimedia-gallery",
-      "license": "U.S. public domain unless otherwise noted; each item still requires rights-marker checks",
+      "license": "Public Domain only when that exact item's Sources/Usage section is exactly Public Domain; all other labels or mixed notices are skipped",
       "license_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
       "verified_page_license": true,
-      "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
-      "note": "USGS states gallery items are public domain unless otherwise noted; third-party media and identifiable personnel/publicity rights can still require review. Do not bundle an item merely because it appears on a USGS page."
+      "bundling": "automatic-only-after-exact-item-page-public-domain-label-and-official-media-host-validation",
+      "note": "The source has large official image, video and audio collections. The builder follows official item pages and only accepts an item's own Sources/Usage block when its complete visible statement is exactly Public Domain. It does not infer rights from the gallery-wide default. Direct media URLs must use the expected official USGS storage hosts and media paths; MIME, magic bytes, type-specific and aggregate byte caps, source page, creator/date metadata and SHA-256 are retained. USGS credit guidance still applies and other rights (including privacy, publicity, and third-party materials) must be considered before publication."
     },
     {
       "id": "noaa-multimedia",
