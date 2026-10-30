@@ -70,6 +70,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertIn("POLY_PIZZA_API_KEY", entry["authentication"])
         self.assertIn("optional", entry["authentication"].lower())
         self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
+        self.assertFalse(entry["verified_page_license"])
         self.assertIn("CC0 1.0 only", entry["note"])
         self.assertEqual(entry["license_url"], "https://creativecommons.org/publicdomain/zero/1.0/")
 
