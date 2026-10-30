@@ -1,0 +1,38 @@
+name: Probe NASA Scientific Visualization Studio (metadata only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/video/probe_nasa_svs.py"
+      - ".github/workflows/probe-nasa-svs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nasa-svs-metadata-probe
+  cancel-in-progress: false
+
+jobs:
+  inspect-public-visualizations:
+    name: Inspect NASA SVS search and page metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Compile the metadata-only probe
+        run: python -m py_compile tools/video/probe_nasa_svs.py
+
+      - name: Probe NASA SVS without downloading media
+        run: |
+          set -euo pipefail
+          python tools/video/probe_nasa_svs.py | tee -a "$GITHUB_STEP_SUMMARY"
