@@ -331,7 +331,7 @@
       "license_url": "https://polyhaven.com/license",
       "verified_page_license": true,
       "bundling": "auto-when-live-api-download-is-valid",
-      "note": "The official public API exposes separate asset kinds for hdris, models and textures. The build chooses compact HDRIs, complete Blender model files plus listed dependencies, and PBR channel maps. CC0 applies to the assets; live API use also requires clear source credit."
+      "note": "Build 47 expands the discovery ceilings to 48 HDRIs, 72 models and 160 texture assets. Each asset still uses the official Poly Haven API and CC0 terms; compact single-file and dependency limits remain enforced. These are ceilings, not promised download counts."
     },
     {
       "id": "ambientcg",
@@ -403,7 +403,7 @@
       "license_code_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "verified_page_license": true,
       "bundling": "auto-only-when-isPublicDomain-is-true",
-      "note": "The builder uses the current paginated v1.1 search endpoint and independently checks each object's isPublicDomain flag before downloading an image from images.metmuseum.org. Preserve the exact object page, title, artist and date. The Met notes third-party rights can still apply to some depicted subjects."
+      "note": "Build 47 raises the image discovery/download ceiling to 300. Every image still requires the exact Met object record isPublicDomain flag and an official image host; third-party depicted rights can still need review."
     },
     {
       "id": "wikimedia-commons-public-domain",
@@ -416,7 +416,7 @@
       "license_url": "https://commons.wikimedia.org/wiki/Commons:Licensing",
       "verified_page_license": true,
       "bundling": "auto-only-on-file-level-cc0-or-public-domain",
-      "note": "The build uses Wikimedia Commons file-namespace metadata. Images, SVG, video and audio are considered only when exact LicenseShortName metadata explicitly says CC0 or Public Domain; SVG vectors must be small, use an official upload.wikimedia.org URL and pass sanitization that removes scripts, event handlers and external references. Audio/video also require supported extensions, small file sizes, compatible MIME types and recognizable container signatures. The item page, creator, rights URL and SHA-256 are retained."
+      "note": "Build 47 raises the discovery ceiling to 800 images, 100 sanitized CC0/Public Domain SVG vectors and 100 item-verified CC0/Public Domain audio/video files. Exact item-file license metadata, official upload host, supported media signatures, SVG sanitization and per-file SHA-256 remain required; the ceiling is not the number guaranteed to download."
     },
     {
       "id": "kenney-github-cc0-starter-kits",
@@ -464,7 +464,7 @@
       "license_url": "https://www.loc.gov/rr/print/195_copr.html",
       "verified_page_license": true,
       "bundling": "auto-only-when-item-rights-positive-and-no-conflicts",
-      "note": "Only records whose own rights field explicitly states No Known Restrictions on Publication, Public Domain or No Known Copyright Restrictions are candidates. Records with missing, ambiguous or conflicting rights are skipped. Preserve the exact rights statement, item page and file URL; review context and other rights before publication."
+      "note": "Build 47 raises the successful image ceiling to 160 and increases the number of candidate records inspected per search category. Only item-level positive rights statements remain eligible; missing, ambiguous, conflicting or access-restricted records are skipped."
     },
     {
       "id": "smithsonian-open-access",
@@ -492,7 +492,7 @@
       "license_url": "https://data.rijksmuseum.nl/policy/",
       "verified_page_license": true,
       "bundling": "auto-only-on-item-level-cc0-or-public-domain-mark",
-      "note": "The builder harvests the official OAI-PMH EDM feed without an API key, but only downloads image records whose item metadata explicitly includes a CC0 or Public Domain Mark URL. Images are downloaded from the official IIIF host at bounded size. CC BY, ambiguous, and missing rights are skipped; item title, creator, rights statement, source and SHA-256 are retained. The museum asks for source credit where possible."
+      "note": "Build 47 raises the OAI-PMH crawl ceiling to 50 pages and the successful media cap to 240 images. Each item still needs explicit CC0 or Public Domain Mark rights metadata and an approved official IIIF/media URL."
     },
     {
       "id": "usgs-multimedia-gallery",
@@ -505,7 +505,7 @@
       "license_url": "https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs",
       "verified_page_license": true,
       "bundling": "automatic-only-after-exact-item-page-public-domain-label-and-official-media-host-validation",
-      "note": "The source has large official image, video and audio collections. The builder follows official item pages and only accepts an item's own Sources/Usage block when its complete visible statement is exactly Public Domain. It does not infer rights from the gallery-wide default. Direct media URLs must use the expected official USGS storage hosts and media paths; MIME, magic bytes, type-specific and aggregate byte caps, source page, creator/date metadata and SHA-256 are retained. USGS credit guidance still applies and other rights (including privacy, publicity, and third-party materials) must be considered before publication."
+      "note": "Build 47 raises the crawl ceiling to 18 listing pages and the successful download ceilings to 80 images, 40 videos and 24 audio files, with a 6 GiB total media budget. The exact individual Sources/Usage block must still state Public Domain; missing, mixed or restricted wording is skipped."
     },
     {
       "id": "opengameart-cc0-catalog",
@@ -519,7 +519,7 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "verified_page_license": true,
       "bundling": "automatic-bounded-download-after-item-level-cc0-and-attachment-validation",
-      "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Active SVG and native Blender project files are excluded from community archives. Category limits are ceilings, not promised download counts."
+      "note": "Build 47 raises the search ceilings to 24 2D, 24 3D, 20 texture, 20 SFX and 20 music packs, across five search pages and at most 48 inspected item pages per category; aggregate raw extraction is capped at 4 GiB. Automatic bundling still requires the exact item page's single CC0 1.0 license entry and approved attachment paths. Mixed, missing or other licenses are skipped."
     },
     {
       "id": "google-fonts-curated-ofl",
@@ -546,7 +546,7 @@
       "license_url": "https://oceanexplorer.noaa.gov/faqs/",
       "verified_page_license": true,
       "bundling": "bounded-automatic-after-item-page-caption-credit-and-direct-download-screen",
-      "note": "The official NOAA Ocean Exploration FAQ says website information is public domain unless otherwise noted. The media kit says a limited number of images/videos are copyrighted and identifies those cases when the caption includes the word copyright. The importer crawls the official multimedia listing, requires an explicit item Credit field naming NOAA, screens caption/credit/alt text for copyright markers, skips possible identifiable-person/interview contexts for manual review, downloads only explicit Download links from the official oceanexplorer.noaa.gov/wp-content/uploads path, and preserves caption, exact credit, item/download URL, embedded image metadata, and SHA-256. Credit must be retained, and usage must not imply NOAA endorsement."
+      "note": "Build 47 raises listing discovery to 20 pages and successful downloads to at most 200 images and 120 videos, with an 8 GiB aggregate ceiling. It still requires an explicit NOAA Credit field, skips a copyright marker in caption/credit/alt text, screens possible identifiable-person/interview contexts, downloads only official item Download URLs, and retains caption, credit, source, metadata and SHA-256."
     },
     {
       "id": "ambientcg-cc0",
@@ -561,7 +561,7 @@
       "api_docs": "https://docs.ambientcg.com/api/v2/full_json/",
       "verified_page_license": true,
       "bundling": "automatic-bounded-package-download-with-allow-list-extraction-and-checksums",
-      "note": "The official docs list Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance as supported v2 API types and state all downloadable assets are CC0 1.0. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
+      "note": "Build 47 raises the aggregate downloaded-and-extracted content ceiling to 5 GiB and package discovery limits to 140 across Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance. Downloads remain restricted to official HTTPS /get ZIP endpoints, validated ZIP integrity, allow-listed extraction and source/archive/per-file SHA-256."
     },
     {
       "id": "original-procedural-motion-loops",
