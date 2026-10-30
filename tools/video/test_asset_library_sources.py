@@ -1370,3 +1370,32 @@ class GeneratedAssetFamilyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class ParallelAssetSourceLaneTests(unittest.TestCase):
+    def test_source_lanes_run_concurrently_and_merge_indexes_in_declared_order(self):
+        import threading
+
+        barrier = threading.Barrier(2)
+        shared_index = []
+
+        def make_lane(source_name):
+            def run(_root, local_index):
+                barrier.wait(timeout=5)
+                local_index.append({"id": source_name})
+                return [{"id": source_name, "status": "downloaded"}]
+
+            return run
+
+        lanes = [
+            ("first", make_lane("first")),
+            ("second", make_lane("second")),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            reports = library.run_parallel_source_lanes(
+                Path(tmp), shared_index, lanes, max_workers=2
+            )
+
+        self.assertEqual(reports["first"][0]["status"], "downloaded")
+        self.assertEqual(reports["second"][0]["status"], "downloaded")
+        self.assertEqual([entry["id"] for entry in shared_index], ["first", "second"])
+
