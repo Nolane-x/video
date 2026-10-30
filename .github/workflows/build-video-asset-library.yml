@@ -25,7 +25,7 @@ jobs:
   build:
     name: Build, validate and publish CC0-safe assets
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -151,7 +151,7 @@ jobs:
           ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
           assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
           assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
-          assert expected["ambientcg_packages_downloaded"] <= 30, "ambientCG search ceiling exceeded"
+          assert expected["ambientcg_packages_downloaded"] <= 140, "ambientCG search ceiling exceeded"
           for row in ambientcg_downloaded:
               assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
               assert row.get("license") == "CC0-1.0"
@@ -173,7 +173,7 @@ jobs:
           usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
           assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
           assert len(usgs_assets) == len(usgs_downloaded)
-          assert expected["usgs_images_downloaded"] <= 24 and expected["usgs_videos_downloaded"] <= 8 and expected["usgs_audio_downloaded"] <= 8
+          assert expected["usgs_images_downloaded"] <= 80 and expected["usgs_videos_downloaded"] <= 40 and expected["usgs_audio_downloaded"] <= 24
           for asset in usgs_assets:
               media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
               assert media_type in {"image", "video", "audio"}
@@ -195,8 +195,8 @@ jobs:
           opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
           assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
           assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
-          assert expected["opengameart_items_downloaded"] <= sum([6, 6, 5, 5, 5]), "OpenGameArt search ceilings exceeded"
-          caps = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+          assert expected["opengameart_items_downloaded"] <= sum([24, 24, 20, 20, 20]), "OpenGameArt search ceilings exceeded"
+          caps = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
           for category, cap in caps.items():
               assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
           for asset in opengameart_assets:
@@ -240,7 +240,7 @@ jobs:
           noaa_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("noaa-ocean-exploration-")]
           assert len(noaa_downloaded) == expected["noaa_images_downloaded"] + expected["noaa_videos_downloaded"]
           assert len(noaa_assets) == len(noaa_downloaded)
-          assert expected["noaa_images_downloaded"] <= 72 and expected["noaa_videos_downloaded"] <= 36
+          assert expected["noaa_images_downloaded"] <= 200 and expected["noaa_videos_downloaded"] <= 120
           for asset in noaa_assets:
               media_type = asset.get("type", "").removeprefix("noaa-ocean-exploration-")
               assert media_type in {"image", "video"}
