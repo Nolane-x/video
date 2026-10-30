@@ -3219,11 +3219,12 @@ def download_usgs_gallery(root,index):
                 continue
             seen_item_urls.add(normalized_item_url)
             item_identity=hashlib.sha256(normalized_item_url.encode("utf-8")).hexdigest()[:16]
+            stable_item_id="usgs-"+media_type+"-"+item_identity
             try:
                 page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
                 detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
                 singular_media_type=usgs_singular_media_type(media_type)
-                row={"id":"usgs-"+media_type+"-"+item_identity,
+                row={"id":stable_item_id,
                      "provider":"U.S. Geological Survey","media_type":singular_media_type,
                      "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
                      "date":detail["date"],"rights_statement":detail["rights_statement"],
@@ -3306,7 +3307,7 @@ def download_usgs_gallery(root,index):
                 print("[USGS] OK:",media_type,detail["title"],len(blob),"bytes")
                 time.sleep(.35)
             except Exception as exc:
-                report.append({"id":"usgs-"+media_type+"-"+item_identity,
+                report.append({"id":stable_item_id,
                                "provider":"U.S. Geological Survey","media_type":media_type[:-1],
                                "status":"item_failed","source_page":item_url,"reason":str(exc)[:350]})
         print("[USGS] "+media_type+":",downloaded_for_type,"downloaded; scanned",len(candidates),"item pages")
