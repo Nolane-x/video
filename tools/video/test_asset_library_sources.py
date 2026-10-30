@@ -21,6 +21,7 @@ import generate_sticker_meme_library as sticker_meme  # noqa: E402
 import package_asset_bundles as bundle_packager  # noqa: E402
 import build_asset_library_shard as shard_builder  # noqa: E402
 import finalize_asset_library_release as release_finalizer  # noqa: E402
+import probe_nara_bulk_dataset as nara_probe  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -1749,6 +1750,81 @@ class OriginalAssetNamespaceTests(unittest.TestCase):
             self.assertIn("overlay-map-route", ids)
             self.assertIn("icon-map-route", ids)
             self.assertTrue(all(entry.get("redistributable") is True for entry in entries))
+
+
+
+class NARABulkDatasetProbeTests(unittest.TestCase):
+    def test_restriction_status_reads_only_an_explicit_status(self):
+        self.assertEqual(nara_probe._restriction_status({"status": "Unrestricted"}), "Unrestricted")
+        self.assertEqual(nara_probe._restriction_status({"restrictionStatus": "Unrestricted"}), "Unrestricted")
+        self.assertEqual(nara_probe._restriction_status("Unrestricted"), "Unrestricted")
+        self.assertEqual(nara_probe._restriction_status({"note": "unrestricted in a note"}), "")
+
+    def test_iter_records_reads_record_objects_from_bulk_json_envelopes(self):
+        document = {
+            "body": {
+                "hits": {
+                    "hits": [
+                        {"_source": {"record": {"levelOfDescription": "item", "title": "Test film"}}},
+                        {"record": {"levelOfDescription": "item", "title": "Second film"}},
+                    ]
+                }
+            }
+        }
+        records = list(nara_probe.iter_records(document))
+        self.assertEqual([row["title"] for row in records], ["Test film", "Second film"])
+
+    def test_summary_counts_only_items_with_both_unrestricted_rights_and_digital_objects(self):
+        document = {
+            "body": {
+                "hits": {
+                    "hits": [
+                        {
+                            "_source": {
+                                "record": {
+                                    "levelOfDescription": "item",
+                                    "title": "Public-domain aviation film",
+                                    "useRestriction": {"status": "Unrestricted"},
+                                    "accessRestriction": {"status": "Unrestricted"},
+                                    "audiovisual": "True",
+                                    "generalRecordsTypes": ["Moving Images"],
+                                    "digitalObjects": [{
+                                        "objectFilename": "aviation-film.mp4",
+                                        "objectUrl": "https://catalog.archives.gov/medialz/test/aviation-film.mp4",
+                                        "objectFileSize": 123456789,
+                                    }],
+                                }
+                            }
+                        },
+                        {
+                            "record": {
+                                "levelOfDescription": "item",
+                                "title": "Restricted donor footage",
+                                "useRestriction": {"status": "Restricted - Possibly"},
+                                "accessRestriction": {"status": "Unrestricted"},
+                                "generalRecordsTypes": ["Moving Images"],
+                                "digitalObjects": [{
+                                    "objectFilename": "restricted.mp4",
+                                    "objectUrl": "https://catalog.archives.gov/medialz/test/restricted.mp4",
+                                    "objectFileSize": 1000,
+                                }],
+                            }
+                        },
+                    ]
+                }
+            }
+        }
+        summary = nara_probe.summarize_metadata_file(
+            json.dumps(document).encode("utf-8"), "342", "rg_342-0.json"
+        )
+        self.assertEqual(summary["records_seen"], 2)
+        self.assertEqual(summary["item_records"], 2)
+        self.assertEqual(summary["both_unrestricted"], 1)
+        self.assertEqual(summary["item_records_with_both_rights_and_objects"], 1)
+        self.assertEqual(summary["candidate_media_count"], 2)
+        self.assertEqual(summary["sample_candidate_objects"][0]["object_url_host"], "catalog.archives.gov")
+        self.assertFalse("media_downloaded" in summary)
+
 
 
 if __name__ == "__main__":
