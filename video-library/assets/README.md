@@ -128,7 +128,7 @@ Official repository: [Google Fonts](https://github.com/google/fonts). License: [
 
 ## Build 45: original sticker, meme and caption studio pack
 
-The build now generates a large original CC0 vector library for editing and social-video storytelling:
+The build now generates an original CC0 vector library for editing and social-video storytelling:
 
 - Reaction stickers in several visual styles and palettes, including English and Vietnamese labels.
 - Generic meme-layout templates: top/bottom captions, expectation/reality, split reactions, chat layouts, timeline beats, plot twists, scoreboards and more.
