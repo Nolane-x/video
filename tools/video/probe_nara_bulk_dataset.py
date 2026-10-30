@@ -173,6 +173,12 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
         "access_unrestricted": 0,
         "both_unrestricted": 0,
         "audiovisual_records": 0,
+        "eligible_audiovisual_item_records": 0,
+        "eligible_audiovisual_items_with_objects": 0,
+        "eligible_video_objects": 0,
+        "eligible_video_object_bytes": 0,
+        "eligible_audio_objects": 0,
+        "eligible_audio_object_bytes": 0,
         "records_with_digital_objects": 0,
         "item_records_with_both_rights_and_objects": 0,
         "digital_object_count": 0,
@@ -181,6 +187,8 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
         "digital_object_field_keys": Counter(),
         "general_media_types": Counter(),
         "sample_candidate_objects": [],
+        "sample_eligible_video_objects": [],
+        "sample_eligible_audio_objects": [],
     }
 
     for record in iter_records(document):
@@ -195,6 +203,7 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
         access_status = _restriction_status(record.get("accessRestriction"))
         use_ok = use_status.casefold() == "unrestricted"
         access_ok = access_status.casefold() == "unrestricted"
+        rights_ok = is_item and use_ok and access_ok
         if use_ok:
             summary["use_unrestricted"] += 1
         if access_ok:
@@ -208,46 +217,111 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
         normalized_types = [str(value).strip() for value in general_types if str(value).strip()]
         for value in normalized_types:
             summary["general_media_types"][value] += 1
+
         audiovisual = str(record.get("audiovisual") or "").strip().casefold() in {"true", "1", "yes"}
-        is_av = audiovisual or any(
-            "moving image" in value.casefold()
-            or "motion picture" in value.casefold()
-            or "sound recording" in value.casefold()
-            or "video" in value.casefold()
-            for value in normalized_types
+        normalized_general_types = [value.casefold() for value in normalized_types]
+        record_is_video = audiovisual or any(
+            "moving image" in value or "motion picture" in value or "video" in value
+            for value in normalized_general_types
         )
-        if is_av:
+        record_is_audio = any("sound recording" in value or value == "audio" for value in normalized_general_types)
+        if record_is_video or record_is_audio:
             summary["audiovisual_records"] += 1
+        if rights_ok and (record_is_video or record_is_audio):
+            summary["eligible_audiovisual_item_records"] += 1
 
         objects = _digital_objects(record)
         if objects:
             summary["records_with_digital_objects"] += 1
         summary["digital_object_count"] += len(objects)
-        if is_item and use_ok and access_ok and objects:
+        if rights_ok and objects:
             summary["item_records_with_both_rights_and_objects"] += 1
+        if rights_ok and (record_is_video or record_is_audio) and objects:
+            summary["eligible_audiovisual_items_with_objects"] += 1
 
         for obj in objects:
             summary["digital_object_field_keys"].update(obj.keys())
             url = str(obj.get("objectUrl") or obj.get("url") or "")
             file_name = str(obj.get("objectFilename") or obj.get("filename") or "")
             media_type = str(obj.get("objectType") or obj.get("mediaType") or "")
-            if url.startswith("https://") and (file_name or media_type or is_av):
+            ext = Path(file_name or urllib.parse.urlsplit(url).path).suffix.casefold()
+            media_label = media_type.casefold()
+            is_video_object = (
+                ext in {".mp4", ".m4v", ".mov", ".webm", ".mpg", ".mpeg", ".avi", ".wmv"}
+                or "video" in media_label
+                or "moving image" in media_label
+                or "motion picture" in media_label
+                or "mp4" in media_label
+            )
+            is_audio_object = (
+                ext in {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
+                or "audio" in media_label
+                or "sound recording" in media_label
+                or "mp3" in media_label
+                or "wav" in media_label
+            )
+            try:
+                file_bytes = int(obj.get("objectFileSize") or 0)
+            except (TypeError, ValueError):
+                file_bytes = 0
+
+            valid_https_url = url.startswith("https://")
+            if valid_https_url and (file_name or media_type or record_is_video or record_is_audio):
                 summary["candidate_media_count"] += 1
-                if len(summary["sample_candidate_objects"]) < 3:
+
+            if rights_ok and valid_https_url and is_video_object:
+                summary["eligible_video_objects"] += 1
+                summary["eligible_video_object_bytes"] += file_bytes
+                samples = summary["sample_eligible_video_objects"]
+                if len(samples) < 5:
                     parsed = urllib.parse.urlsplit(url)
-                    summary["sample_candidate_objects"].append({
+                    samples.append({
+                        "record_naid": record.get("naId"),
                         "record_title": str(record.get("title") or "")[:180],
-                        "levelOfDescription": record.get("levelOfDescription"),
-                        "useRestriction": record.get("useRestriction"),
-                        "accessRestriction": record.get("accessRestriction"),
+                        "levelOfDescription": level,
+                        "use_restriction_status": use_status,
+                        "access_restriction_status": access_status,
                         "generalRecordsTypes": normalized_types,
                         "audiovisual": record.get("audiovisual"),
                         "object_filename": file_name,
-                        "object_file_size": obj.get("objectFileSize"),
+                        "object_file_size": file_bytes or None,
+                        "object_type": media_type,
                         "object_url_host": parsed.hostname,
                         "object_url_path_prefix": "/".join(parsed.path.split("/")[:4]),
-                        "object_type": media_type,
+                        "object_url": url,
                     })
+            if rights_ok and valid_https_url and is_audio_object:
+                summary["eligible_audio_objects"] += 1
+                summary["eligible_audio_object_bytes"] += file_bytes
+                samples = summary["sample_eligible_audio_objects"]
+                if len(samples) < 3:
+                    parsed = urllib.parse.urlsplit(url)
+                    samples.append({
+                        "record_naid": record.get("naId"),
+                        "record_title": str(record.get("title") or "")[:180],
+                        "object_filename": file_name,
+                        "object_file_size": file_bytes or None,
+                        "object_type": media_type,
+                        "object_url_host": parsed.hostname,
+                        "object_url_path_prefix": "/".join(parsed.path.split("/")[:4]),
+                        "object_url": url,
+                    })
+
+            if valid_https_url and len(summary["sample_candidate_objects"]) < 3:
+                parsed = urllib.parse.urlsplit(url)
+                summary["sample_candidate_objects"].append({
+                    "record_title": str(record.get("title") or "")[:180],
+                    "levelOfDescription": record.get("levelOfDescription"),
+                    "useRestriction": record.get("useRestriction"),
+                    "accessRestriction": record.get("accessRestriction"),
+                    "generalRecordsTypes": normalized_types,
+                    "audiovisual": record.get("audiovisual"),
+                    "object_filename": file_name,
+                    "object_file_size": file_bytes or None,
+                    "object_url_host": parsed.hostname,
+                    "object_url_path_prefix": "/".join(parsed.path.split("/")[:4]),
+                    "object_type": media_type,
+                })
 
     summary["record_field_keys"] = sorted(summary["record_field_keys"])
     summary["digital_object_field_keys"] = sorted(summary["digital_object_field_keys"])
