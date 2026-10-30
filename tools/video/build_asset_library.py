@@ -135,6 +135,17 @@ KENNEY = [
 ("ui-pack-rpg-expansion","UI Pack RPG Expansion","RPG interface"),("casino-audio","Casino Audio","game SFX")
 ]
 
+KENNEY_GODOT_SPLASHSCREEN_REPO = "KenneyNL/Godot-SplashScreens"
+KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL = "https://api.github.com/repos/KenneyNL/Godot-SplashScreens/zipball/main"
+KENNEY_GODOT_SPLASHSCREEN_MAX_MEMBERS = 1000
+KENNEY_GODOT_SPLASHSCREEN_MAX_FILES = 40
+KENNEY_GODOT_SPLASHSCREEN_MAX_UNPACKED_BYTES = 32 * 1024 * 1024
+KENNEY_GODOT_SPLASHSCREEN_ALLOWED_EXTS = {".png", ".svg"}
+KENNEY_GODOT_SPLASHSCREEN_CC0_EVIDENCE = (
+    "README: derivative reimagined, cog and text logos are made by Kenney and CC0 licensed; "
+    "the original Godot logo is CC-BY-4.0 and is excluded."
+)
+
 KENNEY_GITHUB_REPOS = [
     {"slug":"Starter-Kit-Racing","title":"Starter Kit Racing","category":"vehicles, racing, 3D props","evidence":"README: package assets (2D sprites, 3D models and sound effects) are CC0 licensed."},
     {"slug":"Starter-Kit-3D-Platformer","title":"Starter Kit 3D Platformer","category":"3D props, platforms, VFX, audio","evidence":"README: sprites, 3D models and sound effects are CC0 licensed."},
@@ -1570,6 +1581,175 @@ def download_kenney(root,index):
                    "reason":"The main asset catalog uses a browser-driven download step. Additional packs are listed for future manual acquisition; no guessed direct download URL is used.",
                    "source_page":"https://kenney.nl/assets",
                    "packs_not_yet_mirrored":[x[0] for x in KENNEY]})
+    return report
+
+
+def kenney_godot_splash_path_is_allowed(relative_path):
+    try:
+        raw = str(relative_path or "").replace("\\", "/")
+        path = PurePosixPath(raw)
+        if not raw or "\x00" in raw or path.is_absolute() or ".." in path.parts or (path.parts and ":" in path.parts[0]):
+            return False
+        normalized = path.as_posix().casefold()
+        if Path(normalized).suffix.lower() not in KENNEY_GODOT_SPLASHSCREEN_ALLOWED_EXTS:
+            return False
+        return (
+            normalized.startswith("logo/reimagined")
+            or normalized.startswith("logo/text")
+            or normalized.startswith("screen/cog logo/")
+            or normalized.startswith("screen/reimagined logo/")
+            or normalized.startswith("screen/text logo/")
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def kenney_godot_splash_readme_confirms_cc0(readme_text):
+    value = str(readme_text or "").casefold()
+    required = ("other derivative logos", "reimagined logo", "cog logo", "text logo",
+                "cc0 licensed", "original godot logo", "cc-by-4.0")
+    return all(marker in value for marker in required)
+
+
+def download_kenney_godot_splashscreens(root, index):
+    """Download a filtered CC0 subset from the official Kenney repository."""
+    import io
+    report = []
+    source_page = "https://github.com/KenneyNL/Godot-SplashScreens"
+    row = {
+        "id": "kenney-godot-splashscreens",
+        "provider": "Kenney / GitHub",
+        "source_page": source_page,
+        "archive_url": KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL,
+        "license": CC0,
+        "license_url": CC0_URL,
+        "license_scope": "Only Reimagined, Cog and Text logo folders explicitly identified as CC0",
+        "excluded_license_scope": "Original Godot logo is CC-BY-4.0; Pixel and Pride are excluded",
+    }
+    target = root / "third-party/kenney/godot-splashscreens"
+    try:
+        blob, final_url = request_bytes(KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL, timeout=70, limit=MAX_KENNEY_ZIP)
+        if not blob.startswith(b"PK"):
+            raise RuntimeError("GitHub did not return a ZIP archive")
+        final_host = (urllib.parse.urlsplit(str(final_url)).hostname or "").lower()
+        if final_host not in {"api.github.com", "github.com", "codeload.github.com"}:
+            raise RuntimeError("GitHub archive redirected outside official GitHub hosts")
+        selected, selected_names = [], set()
+        readme_text, declared_total = "", 0
+        with zipfile.ZipFile(io.BytesIO(blob)) as archive:
+            infos = archive.infolist()
+            if not infos or len(infos) > KENNEY_GODOT_SPLASHSCREEN_MAX_MEMBERS:
+                raise RuntimeError("ZIP member count exceeded the Kenney splash-screen ceiling")
+            for info in infos:
+                name = str(info.filename or "").replace("\\", "/")
+                path = PurePosixPath(name)
+                unix_type = (info.external_attr >> 16) & 0o170000
+                if (not name or "\x00" in name or path.is_absolute() or ".." in path.parts
+                    or (path.parts and ":" in path.parts[0]) or unix_type == 0o120000):
+                    raise RuntimeError("ZIP contains an unsafe path or symlink")
+                if info.is_dir():
+                    continue
+                if info.file_size < 0 or info.compress_size < 0:
+                    raise RuntimeError("ZIP has invalid file size metadata")
+                declared_total += info.file_size
+                if declared_total > 256 * 1024 * 1024:
+                    raise RuntimeError("ZIP declared expanded size exceeds safety ceiling")
+                if info.file_size and not info.compress_size:
+                    raise RuntimeError("ZIP member has zero compressed size")
+                if info.compress_size and info.file_size / info.compress_size > 500:
+                    raise RuntimeError("ZIP compression ratio exceeds safety ceiling")
+                parts = path.parts
+                if (len(parts) == 2 and parts[0].casefold().startswith("godot-splashscreens")
+                    and parts[1].casefold() == "readme.md"):
+                    if info.file_size > 2 * 1024 * 1024:
+                        raise RuntimeError("README exceeds safety limit")
+                    readme_text = archive.read(info).decode("utf-8", "replace")
+            corrupt = archive.testzip()
+            if corrupt:
+                raise RuntimeError("Corrupt ZIP member: " + corrupt)
+            if not kenney_godot_splash_readme_confirms_cc0(readme_text):
+                raise RuntimeError("README did not confirm CC0 derivative logos and original Godot CC-BY exclusion")
+            for info in infos:
+                if info.is_dir():
+                    continue
+                parts = PurePosixPath(info.filename.replace("\\", "/")).parts
+                if len(parts) < 2 or not parts[0].casefold().startswith("godot-splashscreens"):
+                    continue
+                relative = PurePosixPath(*parts[1:]).as_posix()
+                if not kenney_godot_splash_path_is_allowed(relative):
+                    continue
+                key = relative.casefold()
+                if key in selected_names:
+                    raise RuntimeError("Case-insensitive destination collision in selected files")
+                selected_names.add(key)
+                if info.file_size <= 0 or info.file_size > MAX_MEDIA_FILE:
+                    raise RuntimeError("Selected file exceeds per-file media size limit")
+                raw = archive.read(info)
+                extension = Path(relative).suffix.lower()
+                if extension == ".svg":
+                    raw = sanitize_cc0_svg(raw)
+                    if b"<svg" not in raw[:1024].lower():
+                        raise RuntimeError("Selected SVG did not pass sanitization")
+                elif extension == ".png" and not raw.startswith(b"\x89PNG\r\n\x1a\n"):
+                    raise RuntimeError("Selected PNG has invalid signature")
+                selected.append((relative, raw))
+                if len(selected) > KENNEY_GODOT_SPLASHSCREEN_MAX_FILES:
+                    raise RuntimeError("Selected file count exceeded the safety ceiling")
+        if not selected:
+            raise RuntimeError("No allow-listed CC0 derivative logos found")
+        unpacked_total = sum(len(content) for _, content in selected)
+        if unpacked_total > KENNEY_GODOT_SPLASHSCREEN_MAX_UNPACKED_BYTES:
+            raise RuntimeError("Selected files exceed aggregate extraction ceiling")
+        filtered = io.BytesIO()
+        with zipfile.ZipFile(filtered, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as output:
+            for relative, content in sorted(selected):
+                output.writestr(relative, content)
+        if target.exists():
+            shutil.rmtree(target)
+        extracted, unpacked = safe_extract(filtered.getvalue(), target, max_bytes=KENNEY_GODOT_SPLASHSCREEN_MAX_UNPACKED_BYTES)
+        if extracted != len(selected) or unpacked != unpacked_total:
+            raise RuntimeError("Extracted file count/size differs from validated selection")
+        archive_sha = hashlib.sha256(blob).hexdigest()
+        write_text(target / "SOURCE_AND_LICENSE.md",
+            "# Kenney Godot SplashScreens — filtered CC0 subset\n\n"
+            f"Official repository: {source_page}\nArchive URL: {KENNEY_GODOT_SPLASHSCREEN_ARCHIVE_URL}\n"
+            f"Archive SHA-256: {archive_sha}\n"
+            "README rights evidence: Reimagined, Cog and Text derivative logos are made by Kenney and CC0 licensed.\n"
+            "Imported paths: Logo/reimagined*, Logo/text*, Screen/Cog logo/, Screen/Reimagined logo/, Screen/Text logo/.\n"
+            "Excluded: Original logo paths (original Godot logo is CC-BY-4.0), Pixel and Pride paths (no explicit CC0 statement).\n"
+            f"License: CC0 1.0 Universal — {CC0_URL}\n")
+        for relative, content in sorted(selected):
+            path = target / Path(*PurePosixPath(relative).parts)
+            item_path = path.relative_to(root).as_posix()
+            index.append({
+                "id": "kenney-godot-splashscreens-" + slugify(relative),
+                "path": item_path,
+                "type": "kenney-godot-splashscreens-cc0-asset-file",
+                "provider": "Kenney / GitHub",
+                "creator": "Kenney",
+                "title": PurePosixPath(relative).name,
+                "category": "splash screen / CC0 derivative logo",
+                "source_page": source_page,
+                "source_file_url": "https://github.com/KenneyNL/Godot-SplashScreens/blob/main/" + urllib.parse.quote(relative, safe="/"),
+                "source_archive_sha256": archive_sha,
+                "license": CC0,
+                "license_url": CC0_URL,
+                "license_verified_from_repository_readme": True,
+                "license_evidence": KENNEY_GODOT_SPLASHSCREEN_CC0_EVIDENCE,
+                "attribution_required": False,
+                "redistributable": True,
+                "size_bytes": len(content),
+                "sha256": hashlib.sha256(content).hexdigest(),
+            })
+        row.update(status="downloaded", file_count=len(selected), unpacked_bytes=unpacked,
+                   archive_bytes=len(blob), archive_sha256=archive_sha,
+                   excluded_license_paths=["Screen/Original logo/", "Screen/Pixel logo/", "Screen/Pride logo/", "Logo/original*"])
+    except Exception as exc:
+        if target.exists():
+            shutil.rmtree(target, ignore_errors=True)
+        row.update(status="failed", reason=str(exc)[:420])
+        print("[Kenney Godot SplashScreens] failed:", str(exc))
+    report.append(row)
     return report
 
 
@@ -5844,6 +6024,7 @@ def main():
     motion_loop_count=generate_original_motion_loops(STAGE,index)
     print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
     kenney_report=download_kenney(STAGE,index)
+    kenney_splash_report=download_kenney_godot_splashscreens(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     ambientcg_report=download_ambientcg(STAGE,index)
     lazytextures_report=download_lazytextures(STAGE,index)
@@ -5906,6 +6087,8 @@ def main():
               "original_motion_loops":len(MOTION_LOOPS),
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
+              "kenney_godot_splash_files_downloaded":sum(r.get("file_count",0) for r in kenney_splash_report if r.get("status")=="downloaded"),
+              "kenney_godot_splash_bytes_downloaded":sum(r.get("unpacked_bytes",0) for r in kenney_splash_report if r.get("status")=="downloaded"),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
               "polyhaven_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("polyhaven-")),
               "ambientcg_packages_downloaded":sum(r.get("status")=="downloaded" for r in ambientcg_report),
@@ -5956,7 +6139,8 @@ def main():
                "repository":"https://github.com/Nolane-x/video",
                "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
-               "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
+               "kenney_downloads":kenney_report,"kenney_godot_splashscreens_downloads":kenney_splash_report,
+               "polyhaven_downloads":polyhaven_report,
                "ambientcg_downloads":ambientcg_report,
                "lazytextures_downloads":lazytextures_report,
                "poly_pizza_downloads":poly_pizza_report,
