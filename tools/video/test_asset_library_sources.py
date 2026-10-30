@@ -71,7 +71,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertIn("optional", entry["authentication"].lower())
         self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
         self.assertFalse(entry["verified_page_license"])
-        self.assertIn("CC0 1.0 only", entry["note"])
+        self.assertIn("CC0 1.0 only", entry["license"])
         self.assertEqual(entry["license_url"], "https://creativecommons.org/publicdomain/zero/1.0/")
 
     def test_quaternius_current_qal_is_catalogued_source_only(self):
