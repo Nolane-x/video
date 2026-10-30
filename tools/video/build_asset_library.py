@@ -27,11 +27,11 @@ SOURCE_DOWNLOAD_WORKERS = 6  # Provider-level parallelism; provider-specific pac
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 72, "models": 120, "textures": 320}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 120, "models": 180, "textures": 480}
 POLYHAVEN_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 64, "HDRI": 24, "3DModel": 24, "Decal": 20, "Atlas": 18, "PlainTexture": 24, "Brush": 12, "Substance": 12}
+AMBIENTCG_SELECTION_CAPS = {"Material": 240, "HDRI": 64, "3DModel": 80, "Decal": 64, "Atlas": 64, "PlainTexture": 120, "Brush": 80, "Substance": 80}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 8 * 1024 * 1024 * 1024
 # LazyTextures documents a provider-wide CC0 1.0 grant and a public API with no key.
