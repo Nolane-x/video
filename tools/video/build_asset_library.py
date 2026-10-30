@@ -1912,10 +1912,13 @@ def lazytextures_archive_candidates(detail):
     if not isinstance(detail, dict):
         return []
     archive_groups = detail.get("archiveFiles")
-    if not isinstance(archive_groups, (dict, list)):
+    texture_groups = detail.get("textureFiles")
+    if not isinstance(archive_groups, (dict, list)) and not isinstance(texture_groups, (dict, list)):
         data = detail.get("data")
-        archive_groups = data.get("archiveFiles") if isinstance(data, dict) else None
-    if not isinstance(archive_groups, (dict, list)):
+        if isinstance(data, dict):
+            archive_groups = data.get("archiveFiles")
+            texture_groups = data.get("textureFiles")
+    if not isinstance(archive_groups, (dict, list)) and not isinstance(texture_groups, (dict, list)):
         return []
     found = []
     seen = set()
@@ -1950,7 +1953,10 @@ def lazytextures_archive_candidates(detail):
             if isinstance(child, (dict, list)):
                 walk(child, str(key) if not hint else hint + " " + str(key))
 
-    walk(archive_groups)
+    # The API exposes resolution archives separately from texture-file download records.
+    # Both must still resolve to an official ZIP path before being eligible for this importer.
+    walk(archive_groups, "archive")
+    walk(texture_groups, "texture")
     return found
 
 
