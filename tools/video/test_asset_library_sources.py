@@ -1754,6 +1754,35 @@ class OriginalAssetNamespaceTests(unittest.TestCase):
 
 
 class NARABulkDatasetProbeTests(unittest.TestCase):
+    def test_nara_video_url_allowlist_requires_exact_s3_bucket_and_mopix_mp4(self):
+        allowed = "https://s3.amazonaws.com/NARAprodstorage/lz/mopix/111/lc/111-lc-53870.mp4"
+        self.assertTrue(nara_probe.nara_video_object_url_is_allowed(allowed))
+        self.assertFalse(nara_probe.nara_video_object_url_is_allowed("https://example.com/NARAprodstorage/lz/mopix/a.mp4"))
+        self.assertFalse(nara_probe.nara_video_object_url_is_allowed("https://s3.amazonaws.com/other-bucket/lz/mopix/a.mp4"))
+        self.assertFalse(nara_probe.nara_video_object_url_is_allowed("https://s3.amazonaws.com/NARAprodstorage/lz/stillpix/a.jpg"))
+        self.assertFalse(nara_probe.nara_video_object_url_is_allowed("http://s3.amazonaws.com/NARAprodstorage/lz/mopix/a.mp4"))
+
+    def test_nara_range_probe_reads_only_a_small_mp4_header(self):
+        url = "https://s3.amazonaws.com/NARAprodstorage/lz/mopix/111/lc/111-lc-53870.mp4"
+        response = mock.MagicMock()
+        response.__enter__.return_value = response
+        response.status = 206
+        response.headers = {
+            "Content-Type": "video/mp4",
+            "Content-Range": "bytes 0-63/292897920",
+            "Content-Length": "64",
+        }
+        response.read.return_value = b"\\x00\\x00\\x00\\x18ftypisom" + b"x" * 52
+        with mock.patch.object(nara_probe.urllib.request, "urlopen", return_value=response):
+            result = nara_probe.probe_nara_mp4_range(url, 292897920)
+        self.assertEqual(result["status"], "range-verified")
+        self.assertEqual(result["http_status"], 206)
+        self.assertTrue(result["mp4_ftyp_signature"])
+        self.assertEqual(result["bytes_read"], 64)
+        self.assertTrue(result["metadata_size_matches_remote"])
+        self.assertEqual(result["remote_size_bytes"], 292897920)
+        response.read.assert_called_once_with(65)
+
     def test_restriction_status_reads_only_an_explicit_status(self):
         self.assertEqual(nara_probe._restriction_status({"status": "Unrestricted"}), "Unrestricted")
         self.assertEqual(nara_probe._restriction_status({"restrictionStatus": "Unrestricted"}), "Unrestricted")
