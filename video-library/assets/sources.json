@@ -519,7 +519,7 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "verified_page_license": true,
       "bundling": "automatic-bounded-download-after-item-level-cc0-and-attachment-validation",
-      "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Category limits are ceilings, not promised item counts."
+      "note": "OpenGameArt's advanced search exposes an official CC0 license filter plus separate 2D, 3D, texture, sound-effect and music categories. The filter is discovery only: the builder verifies the item's own License(s) field and requires exactly one CC0 1.0 link, rejecting mixed or other licenses. Attachments must come from the official HTTPS opengameart.org/sites/default/files path. ZIP integrity, safe extraction, allowed extensions, media signatures, file size, source page, creator, per-file SHA-256 and actual outcome are recorded. Active SVG and native Blender project files are excluded from community archives. Category limits are ceilings, not promised download counts."
     },
     {
       "id": "noaa-multimedia",
