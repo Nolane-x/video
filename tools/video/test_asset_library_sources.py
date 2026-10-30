@@ -99,9 +99,26 @@ class OpenGameArtRightsAndParsingTests(unittest.TestCase):
         self.assertEqual(parsed["files"][0]["url"], self.ZIP_URL)
         self.assertEqual(parsed["files"][0]["declared_size"], 1234)
 
+    def test_opengameart_search_parser_reads_only_result_view_not_sidebar(self):
+        page = """<html><body>
+        <div class="view view-art view-id-art view-display-id-search_art_advanced">
+          <div class="view-content"><div class="views-row">
+            <a href="https://opengameart.org/content/rpg-sound-pack">RPG Sound Pack</a>
+          </div></div>
+          <a href="https://opengameart.org/art-search-advanced?page=1">next page</a>
+        </div>
+        <div class="sidebar"><a href="https://opengameart.org/content/not-a-search-result">sidebar link</a></div>
+        </body></html>"""
+        self.assertEqual(
+            library.opengameart_parse_search_page(page),
+            ["https://opengameart.org/content/rpg-sound-pack"],
+        )
+
     def test_opengameart_file_allowlist_requires_official_file_host_and_path(self):
         self.assertTrue(library.opengameart_file_url_is_allowed(self.ZIP_URL))
         self.assertTrue(library.opengameart_file_url_is_allowed(self.PNG_URL))
+        self.assertFalse(library.opengameart_file_url_is_allowed("https://opengameart.org/sites/default/files/unsafe.svg"))
+        self.assertFalse(library.opengameart_file_url_is_allowed("https://opengameart.org/sites/default/files/project.blend"))
         self.assertFalse(library.opengameart_file_url_is_allowed("https://example.com/sites/default/files/sample.zip"))
         self.assertFalse(library.opengameart_file_url_is_allowed("https://opengameart.org/other/sample.zip"))
         self.assertFalse(library.opengameart_file_url_is_allowed("http://opengameart.org/sites/default/files/sample.zip"))
@@ -111,7 +128,8 @@ class OpenGameArtRightsAndParsingTests(unittest.TestCase):
         self.assertTrue(library.opengameart_file_signature_is_valid(b"PK\x03\x04" + b"x" * 64, ".zip", "application/zip"))
         self.assertTrue(library.opengameart_file_signature_is_valid(b"\x89PNG\r\n\x1a\n" + b"x" * 64, ".png", "image/png"))
         self.assertTrue(library.opengameart_file_signature_is_valid(b"OggS" + b"x" * 64, ".ogg", "audio/ogg"))
-        self.assertTrue(library.opengameart_file_signature_is_valid(b"BLENDER" + b"x" * 64, ".blend", "application/octet-stream"))
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"wOF2" + b"x" * 64, ".woff2", "font/woff2"))
+        self.assertTrue(library.opengameart_file_signature_is_valid(b"\x1a\x45\xdf\xa3" + b"x" * 64, ".webm", "video/webm"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a zip</html>", ".zip", "text/html"))
         self.assertFalse(library.opengameart_file_signature_is_valid(b"<html>not a png</html>", ".png", "text/html"))
 
