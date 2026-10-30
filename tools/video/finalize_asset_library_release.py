@@ -360,7 +360,7 @@ def finalize_release(manifest_dir: Path, output_dir: Path, repository: str, rele
 
     # Upload the aggregate catalog and checksum metadata only after every source job succeeded.
     subprocess.run(
-        ["gh", "release", "upload", release_tag, *[str(path) for path in metadata_paths]],
+        ["gh", "release", "upload", release_tag, *[str(path) for path in metadata_paths], "--clobber"],
         check=True,
         capture_output=True,
         text=True,
