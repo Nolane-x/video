@@ -3080,6 +3080,13 @@ def usgs_singular_media_type(media_type):
     return mapping[media_type]
 
 
+def usgs_asset_item_id(media_type, item_url):
+    """Create a collision-resistant identity from the exact USGS item URL and media family."""
+    normalized = str(item_url or "").split("#", 1)[0].rstrip("/")
+    digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+    return "usgs-" + str(media_type).strip().lower() + "-" + digest
+
+
 def usgs_asset_item_slug(title, item_url):
     """Make stable, collision-resistant folder/file slugs for distinct USGS item pages."""
     base = slugify(str(title or ""))[:84] or slugify(str(item_url or "").rsplit("/", 1)[-1])[:84] or "usgs-item"
@@ -3218,8 +3225,7 @@ def download_usgs_gallery(root,index):
             if normalized_item_url in seen_item_urls:
                 continue
             seen_item_urls.add(normalized_item_url)
-            item_identity=hashlib.sha256(normalized_item_url.encode("utf-8")).hexdigest()[:16]
-            stable_item_id="usgs-"+media_type+"-"+item_identity
+            stable_item_id=usgs_asset_item_id(media_type, normalized_item_url)
             try:
                 page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
                 detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
