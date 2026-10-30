@@ -259,6 +259,14 @@ class ScalableBundlePackagingTests(unittest.TestCase):
                 self.assertTrue((output / "ASSET_BUNDLES.json").is_file())
                 bundle_packager.verify_manifest(output, root, manifest)
 
+    def test_packager_classifies_stickers_textures_audio_footage_and_fonts(self):
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-video-sticker", "path": "originals/stickers/wow.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-meme-layout-template", "path": "originals/meme-templates/two-panel.svg"}), "original-graphics")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-svg-texture", "category": "texture / surface", "path": "originals/textures/grid.svg"}), "3d-textures")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-sfx", "path": "originals/audio/cue.wav"}), "audio")
+        self.assertEqual(bundle_packager.classify_asset({"type": "original-procedural-video-loop", "path": "originals/video-loops/loop.mp4"}), "footage")
+        self.assertEqual(bundle_packager.classify_asset({"type": "google-font-ttf", "path": "third-party/google-fonts/inter/Inter.ttf"}), "typography")
+
     def test_bundle_manifest_detects_missing_or_modified_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)
