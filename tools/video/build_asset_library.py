@@ -3322,7 +3322,8 @@ def internet_archive_choose_video_file(files):
         duration=internet_archive_parse_duration(item.get("length"))
         if size<=0 or size>INTERNET_ARCHIVE_MAX_VIDEO_BYTES:
             continue
-        if duration is not None and (duration<5 or duration>INTERNET_ARCHIVE_MAX_DURATION_SECONDS):
+        # The source lane promises a bounded duration; unknown metadata must not bypass it.
+        if duration is None or duration<5 or duration>INTERNET_ARCHIVE_MAX_DURATION_SECONDS:
             continue
         source=str(item.get("source") or "").casefold()
         extension_rank={".mp4":0,".webm":1,".ogv":2}.get(extension,9)
