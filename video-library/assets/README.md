@@ -111,3 +111,11 @@ The builder scans up to four listing pages per type and caps successful download
 Direct media links are constrained to the official USGS storage hosts and expected per-type paths. The builder verifies MIME and file signatures, caps each file and the aggregate USGS media byte budget, and records the item page, direct media URL, title, creator/date metadata, exact rights statement, source note, and SHA-256. USGS credit guidance and other rights such as privacy/publicity still apply; public-domain status is not a blanket clearance for every possible use.
 
 Official sources: [USGS Multimedia Gallery](https://www.usgs.gov/products/multimedia-gallery), [USGS crediting guidance](https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs).
+
+## Build 44: OpenGameArt item-level CC0 library
+
+This source lane uses OpenGameArt's official advanced-search CC0 filter to discover five different families: 2D sprites and tiles, 3D models, textures, sound effects, and music. A search filter is not treated as a license grant: every candidate's own item page must have exactly one CC0 1.0 entry in its License(s) field. Items with CC-BY, CC-BY-SA, GPL, mixed, missing or ambiguous license fields are skipped.
+
+The downloader accepts attachments only from the official HTTPS `opengameart.org/sites/default/files/` host path, checks the actual media file signatures, validates ZIP integrity, extracts through the existing safe archive allow-list, and records creator, item URL, direct attachment URL, CC0 basis, archive digest and per-file SHA-256. The current search ceilings are 6 2D packs, 6 3D packs, 5 texture packs, 5 SFX packs and 5 music packs; these are ceilings, not promised downloads. The generated report is authoritative.
+
+Official source: [OpenGameArt advanced search](https://opengameart.org/art-search-advanced) and [site FAQ](https://opengameart.org/content/faq).
