@@ -126,31 +126,31 @@ The typography source lane selects up to 20 curated family directories from the 
 
 Official repository: [Google Fonts](https://github.com/google/fonts). License: [SIL Open Font License](https://openfontlicense.org/).
 
-## Build 45: expansion for large, modular production libraries
+## Build 45: original sticker, meme and caption studio pack
 
-Build 45 adds an original sticker/meme lane and replaces the all-or-nothing distribution model with independently downloadable category packs.
+The build now generates an original CC0 vector library for editing and social-video storytelling:
 
-### Original stickers and memes
+- Reaction stickers in several visual styles and palettes, including English and Vietnamese labels.
+- Generic meme-layout templates: top/bottom captions, expectation/reality, split reactions, chat layouts, timeline beats, plot twists, scoreboards and more.
+- Caption and editorial overlays: lower thirds, speaker IDs, chapter cards, source notes, fact callouts, quote panels, statistic cards, warnings, tips, maps and end cards.
 
-The build generates **202 original transparent SVG stickers** and **48 editable meme-layout templates**. Sticker families include reaction words, expressive faces, arrows, annotations, bursts, symbols and doodles. Meme layouts include classic top/bottom captions, two-panel comparisons, four-panel stories, vertical reactions, quote cards, timelines, chats, rankings and other generic formats. These are original reusable designs, not copied viral memes or branded character stickers. Insert only media you own or are licensed to use.
+These are original editable SVG layouts, not reproductions of famous meme photos, copyrighted characters or third-party logos. Replace placeholder text and use only footage/images that you are entitled to publish. The generated pack is indexed item by item as CC0 1.0.
 
-### Larger source ceilings
+## Build 45: NOAA Ocean Exploration media
 
-The next build raises discovery/download ceilings while retaining source-level permission checks:
+The new NOAA lane searches the official multimedia cards, follows each exact item page, and downloads only direct links exposed in the item's Download field from the official oceanexplorer.noaa.gov uploads host. It requires an item Credit field naming NOAA, screens caption, credit and image-alt text for the provider's copyright exception marker, and skips possible identifiable-person/interview contexts for manual review. It records the exact caption, credit, item page, download URL, preserved image metadata and SHA-256.
 
-- Poly Haven: up to 30 HDRIs, 40 model packages and 72 texture packages.
-- ambientCG: up to 60 CC0 package candidates across PBR materials, HDRIs, models, decals, atlases, plain textures, brushes and Substance assets, with a 1.2 GiB total extracted-content ceiling.
-- USGS: up to 40 images, 18 videos and 12 audio items, but only when each exact item's Sources/Usage statement is exactly Public Domain.
-- OpenGameArt: up to 8 CC0 items in each of 2D, 3D, textures, SFX and music; each item must still pass its own one-license CC0 check.
-- These are maximums, not guaranteed counts. The generated index and source reports determine what was actually obtained.
+NOAA Ocean Exploration's [FAQ](https://oceanexplorer.noaa.gov/faqs/) states that site content is public domain unless otherwise noted; its [media kit](https://oceanexplorer.noaa.gov/about/media-kit/) says selected copyrighted material is identified in captions. Keep the provided credit and never imply NOAA endorsement.
 
-### Modular distribution
+The first automated pass is deliberately bounded to six listing pages, up to 72 images and 36 videos, with a combined 3 GiB download ceiling. Those are caps, not promised totals.
 
-The release is divided into independently downloadable resource families, such as stickers/memes, original visuals, motion loops, audio/SFX/music, 2D game art, 3D game art, models, materials/HDRIs, science footage, public-domain images and typography. A family larger than the part ceiling is split into numbered parts, each no larger than 650 MiB compressed.
+## Build 45: multi-volume release packaging
 
-- `PACKAGES_INDEX.json` lists every part, size, file count, license types and SHA-256.
-- Each ZIP contains a pack-specific asset index, source/license notes and a file-level SHA-256 ledger.
-- Extract selected packs into the same `video-asset-library/` root; their folder paths are designed to coexist.
-- The compatibility `video-asset-library.zip` remains a complete library while it stays under the configured legacy size ceiling. Above that threshold it becomes the compact catalog/manifest archive, and the modular ZIPs carry the actual media.
+The library is no longer tied to a single ZIP. The packager estimates the raw resource size:
 
-This design lets the library grow toward many gigabytes without requiring users to download every category at once.
+- Compact builds keep the familiar `video-asset-library.zip` for one-click extraction.
+- Larger builds create a small `video-assets-catalog.zip` plus independently downloadable family volumes for original graphics, photography, footage, audio, 3D/models, textures and typography.
+- Each resource volume targets at most 1.7 GB uncompressed; each uploaded release asset is checked against a 1.9 GB ceiling, below GitHub's documented 2 GiB per-asset limit.
+- `ASSET_BUNDLES.json` records every volume, SHA-256, byte count, file count and the exact paths it contains. The workflow verifies all ZIPs and confirms every library file is included exactly once.
+
+For a multi-volume release, download the catalog bundle and the resource families you need, then extract all selected ZIPs into the same parent folder. Keep the `video-asset-library/` paths intact. This is the foundation for growing toward tens of gigabytes without one unmanageable archive.

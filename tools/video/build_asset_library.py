@@ -5,6 +5,7 @@ import hashlib, html, json, mimetypes, re, shutil, subprocess, sys, time, urllib
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
+from generate_sticker_meme_library import generate_assets as generate_sticker_meme_assets
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -16,33 +17,32 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 3 * 1024 * 1024
 MAX_POLY_FILE = 35 * 1024 * 1024
-MAX_LEGACY_FULL_ZIP_BYTES = 1500 * 1024 * 1024
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 30, "models": 40, "textures": 72}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 24, "HDRI": 10, "3DModel": 8, "Decal": 6, "Atlas": 4, "PlainTexture": 4, "Brush": 2, "Substance": 2}
-AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
-AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 1200 * 1024 * 1024
+AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
+AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 8
-USGS_SELECTION_CAPS = {"images": 40, "videos": 18, "audio": 12}
-USGS_IMAGE_MAX_BYTES = 6 * 1024 * 1024
-USGS_VIDEO_MAX_BYTES = 28 * 1024 * 1024
-USGS_AUDIO_MAX_BYTES = 16 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 900 * 1024 * 1024
+USGS_GALLERY_PAGE_SCAN_LIMIT = 4
+USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
+USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 8, "3d": 8, "textures": 8, "sfx": 8, "music": 8}
+OPENGAMEART_SELECTION_CAPS = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 3
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 24
-OPENGAMEART_MAX_FILE_BYTES = 60 * 1024 * 1024
-OPENGAMEART_MAX_PACKAGE_BYTES = 220 * 1024 * 1024
-OPENGAMEART_MAX_TOTAL_BYTES = 1200 * 1024 * 1024
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 2
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
+OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
+OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
 GOOGLE_FONTS_FAMILY_SLUGS = [
     "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
     "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
@@ -1790,18 +1790,17 @@ class USGSMediaPageParser(HTMLParser):
             self.title_parts.append(value)
 
 
+def usgs_singular_media_type(media_type):
+    mapping = {"images": "image", "videos": "video", "audio": "audio"}
+    if media_type not in mapping:
+        raise ValueError("unsupported USGS media type: " + str(media_type))
+    return mapping[media_type]
+
+
 def usgs_rights_are_public_domain(statement):
     """Require the exact item-level Public Domain label; reject all other notices."""
     normalized=" ".join(str(statement or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
     return normalized=="public domain"
-
-
-def usgs_media_type_name(media_type):
-    """Normalize gallery plural labels without corrupting the already-singular audio label."""
-    names={"images":"image","videos":"video","audio":"audio"}
-    if media_type not in names:
-        raise ValueError("Unsupported USGS media type: "+str(media_type))
-    return names[media_type]
 
 
 def usgs_media_detail_url_is_allowed(raw_url,media_type):
@@ -1927,8 +1926,9 @@ def download_usgs_gallery(root,index):
             try:
                 page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
                 detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
+                singular_media_type=usgs_singular_media_type(media_type)
                 row={"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
-                     "provider":"U.S. Geological Survey","media_type":media_type[:-1] if media_type.endswith("s") else media_type,
+                     "provider":"U.S. Geological Survey","media_type":singular_media_type,
                      "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
                      "date":detail["date"],"rights_statement":detail["rights_statement"],
                      "license":"Public Domain (item-level USGS Sources/Usage label)",
@@ -1993,7 +1993,7 @@ def download_usgs_gallery(root,index):
                     f"- SHA-256: {digest}\\n\\n{detail['description']}\\n"
                 )
                 write_text(item_dir/"SOURCE_AND_LICENSE.md",note)
-                asset_type="usgs-public-domain-"+usgs_media_type_name(media_type)
+                asset_type="usgs-public-domain-"+singular_media_type
                 index.append({"id":row["id"],"path":target.relative_to(root).as_posix(),
                               "type":asset_type,"provider":"U.S. Geological Survey",
                               "title":detail["title"],"description":detail["description"],
@@ -2316,7 +2316,7 @@ def download_opengameart(root,index):
                 package_dir=root/"third-party/opengameart"/category/item_slug
                 package_downloads=[]
                 item_new_bytes=0
-                item_file_limit=3
+                item_file_limit=2
                 for _,__,candidate in file_candidates:
                     if len(package_downloads)>=item_file_limit or total_bytes+item_new_bytes>=OPENGAMEART_MAX_TOTAL_BYTES:
                         break
@@ -2564,6 +2564,377 @@ def download_google_fonts(root,index):
             print("[Google Fonts] failed:",family,str(exc)[:180])
         if total_bytes>=GOOGLE_FONTS_MAX_TOTAL_BYTES:
             break
+    return report
+
+
+# NOAA Ocean Exploration uses a public-domain default for its own media, but
+# item captions/credits can identify selected copyrighted or partner-owned content.
+NOAA_MEDIA_PAGE_SCAN_LIMIT = 6
+NOAA_MEDIA_SELECTION_CAPS = {"image": 72, "video": 36}
+NOAA_IMAGE_MAX_BYTES = 24 * 1024 * 1024
+NOAA_VIDEO_MAX_BYTES = 150 * 1024 * 1024
+NOAA_TOTAL_MAX_BYTES = 3 * 1024 * 1024 * 1024
+
+
+class NOAAMultimediaListingParser(HTMLParser):
+    """Read result links only inside the live NOAA multimedia cards component."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.component_depth = 0
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "div":
+            classes = set((attrs.get("class") or "").split())
+            if self.component_depth:
+                self.component_depth += 1
+            elif "component-cards-posts__main" in classes:
+                self.component_depth = 1
+        if tag == "a" and self.component_depth:
+            href = (attrs.get("href") or "").strip()
+            if href:
+                self.links.append(href)
+
+    def handle_endtag(self, tag):
+        if tag == "div" and self.component_depth:
+            self.component_depth -= 1
+
+
+class NOAAMultimediaDetailParser(HTMLParser):
+    """Extract NOAA page title, item caption, credit and the official download anchors."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.details_depth = 0
+        self.pair_depth = 0
+        self.eyebrow_depth = 0
+        self.heading_depth = 0
+        self.type_depth = 0
+        self.description_depth = 0
+        self.current_pair = None
+        self.pairs = []
+        self.heading_parts = []
+        self.type_parts = []
+        self.description_parts = []
+        self.image_alt = ""
+        self.meta = {}
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = set((attrs.get("class") or "").split()) if tag == "div" else set()
+        if tag == "div":
+            if self.details_depth:
+                self.details_depth += 1
+            elif "component-multimedia-post__details" in classes:
+                self.details_depth = 1
+            if self.pair_depth:
+                self.pair_depth += 1
+            elif self.details_depth and "meta-pair" in classes:
+                self.pair_depth = 1
+                self.current_pair = {"label_parts": [], "text_parts": [], "links": []}
+            if self.eyebrow_depth:
+                self.eyebrow_depth += 1
+            elif self.pair_depth and "eyebrow" in classes:
+                self.eyebrow_depth = 1
+            if "component-multimedia-post__heading" in classes:
+                self.heading_depth = 1
+            elif self.heading_depth:
+                self.heading_depth += 1
+            if "component-multimedia-post__type" in classes:
+                self.type_depth = 1
+            elif self.type_depth:
+                self.type_depth += 1
+            if "content-formatted" in classes:
+                self.description_depth = 1
+            elif self.description_depth:
+                self.description_depth += 1
+        if tag == "meta":
+            key = (attrs.get("property") or attrs.get("name") or "").strip().lower()
+            value = (attrs.get("content") or "").strip()
+            if key and value:
+                self.meta[key] = value
+        if tag == "img" and attrs.get("alt"):
+            self.image_alt = str(attrs["alt"]).strip()
+        if tag == "a" and self.pair_depth and self.current_pair is not None:
+            href = (attrs.get("href") or "").strip()
+            link_classes = set((attrs.get("class") or "").split())
+            if href and "text-download" in link_classes:
+                self.current_pair["links"].append({"url": href, "text": ""})
+
+    def handle_endtag(self, tag):
+        if tag == "div":
+            if self.eyebrow_depth:
+                self.eyebrow_depth -= 1
+            if self.pair_depth and self.current_pair is not None:
+                self.pair_depth -= 1
+                if self.pair_depth == 0:
+                    label = " ".join(" ".join(self.current_pair["label_parts"]).split()).strip()
+                    value = " ".join(" ".join(self.current_pair["text_parts"]).split()).strip()
+                    self.pairs.append({"label": label, "text": value, "links": self.current_pair["links"]})
+                    self.current_pair = None
+            if self.heading_depth:
+                self.heading_depth -= 1
+            if self.type_depth:
+                self.type_depth -= 1
+            if self.description_depth:
+                self.description_depth -= 1
+            if self.details_depth:
+                self.details_depth -= 1
+
+    def handle_data(self, data):
+        value = " ".join(data.split())
+        if not value:
+            return
+        if self.eyebrow_depth and self.current_pair is not None:
+            self.current_pair["label_parts"].append(value)
+        elif self.pair_depth and self.current_pair is not None:
+            self.current_pair["text_parts"].append(value)
+        if self.heading_depth:
+            self.heading_parts.append(value)
+        if self.type_depth:
+            self.type_parts.append(value)
+        if self.description_depth and len(self.description_parts) < 100:
+            self.description_parts.append(value)
+
+    def get_detail(self):
+        credit = next((p["text"] for p in self.pairs if p["label"].casefold() == "credit"), "")
+        download_pairs = [p for p in self.pairs if p["label"].casefold() == "download"]
+        downloads = []
+        for pair in download_pairs:
+            for item in pair["links"]:
+                downloads.append({"url": item["url"], "label": item["text"]})
+        return {
+            "title": (self.meta.get("og:title") or " ".join(self.heading_parts)).strip()[:260],
+            "media_type": " ".join(self.type_parts).strip().lower(),
+            "caption": (self.meta.get("og:description") or " ".join(self.description_parts) or self.image_alt).strip()[:1500],
+            "credit": credit[:500],
+            "downloads": downloads,
+            "image_alt": self.image_alt[:600],
+        }
+
+
+def noaa_detail_page_is_allowed(raw_url):
+    try:
+        parsed = urllib.parse.urlsplit(str(raw_url or ""))
+        return (
+            parsed.scheme == "https" and parsed.hostname == "oceanexplorer.noaa.gov"
+            and parsed.port in (None, 443) and not parsed.username and not parsed.password
+            and not parsed.fragment
+            and re.fullmatch(r"/multimedia/[a-z0-9][a-z0-9-]*/?", parsed.path or "") is not None
+        )
+    except Exception:
+        return False
+
+
+def noaa_listing_page_is_allowed(raw_url):
+    try:
+        parsed = urllib.parse.urlsplit(str(raw_url or ""))
+        if parsed.scheme != "https" or parsed.hostname != "oceanexplorer.noaa.gov" or parsed.port not in (None, 443):
+            return False
+        if parsed.username or parsed.password or parsed.fragment or parsed.path != "/multimedia/":
+            return False
+        query = urllib.parse.parse_qs(parsed.query)
+        return not query or (set(query) == {"pg"} and len(query["pg"]) == 1 and query["pg"][0].isdigit())
+    except Exception:
+        return False
+
+
+def noaa_media_download_url_is_allowed(raw_url, media_type):
+    try:
+        parsed = urllib.parse.urlsplit(str(raw_url or ""))
+        if (
+            parsed.scheme != "https" or parsed.hostname != "oceanexplorer.noaa.gov"
+            or parsed.port not in (None, 443) or parsed.username or parsed.password or parsed.fragment
+            or not (parsed.path or "").startswith("/wp-content/uploads/")
+        ):
+            return False
+        extension = Path(parsed.path).suffix.lower()
+        if media_type == "image":
+            return extension in {".jpg", ".jpeg", ".png", ".webp"}
+        if media_type == "video":
+            return extension in {".mp4", ".mov"}
+        return False
+    except Exception:
+        return False
+
+
+def noaa_parse_listing_page(page_html):
+    parser = NOAAMultimediaListingParser()
+    parser.feed(page_html)
+    items = []
+    for link in parser.links:
+        absolute = urllib.parse.urljoin("https://oceanexplorer.noaa.gov/", link)
+        if noaa_detail_page_is_allowed(absolute):
+            canonical = urllib.parse.urlunsplit(("https", "oceanexplorer.noaa.gov", urllib.parse.urlsplit(absolute).path.rstrip("/") + "/", "", ""))
+            if canonical not in items:
+                items.append(canonical)
+    return items
+
+
+def noaa_parse_detail_page(page_html):
+    parser = NOAAMultimediaDetailParser()
+    parser.feed(page_html)
+    result = parser.get_detail()
+    result["copyright_marker"] = bool(re.search(
+        r"\bcopyright\b", " ".join([result["title"], result["caption"], result["credit"], result["image_alt"]]),
+        re.I
+    ))
+    result["human_context_marker"] = bool(re.search(
+        r"\b(identifiable person|portrait|students?|children|group photo|workshop participants|interviewee)\b",
+        " ".join([result["title"], result["caption"], result["image_alt"]]), re.I
+    ))
+    return result
+
+
+def noaa_media_signature_is_valid(blob, media_type, content_type, extension):
+    mime = str(content_type or "").split(";", 1)[0].strip().lower()
+    ext = str(extension or "").lower()
+    if media_type == "image":
+        signature = (
+            blob.startswith(b"\xff\xd8\xff") or blob.startswith(b"\x89PNG\r\n\x1a\n")
+            or blob.startswith((b"GIF87a", b"GIF89a"))
+            or (len(blob) > 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WEBP")
+        )
+        return signature and (mime.startswith("image/") or mime == "application/octet-stream")
+    if media_type == "video":
+        return len(blob) > 20000 and b"ftyp" in blob[:64] and (
+            mime.startswith("video/") or mime in {"application/mp4", "application/octet-stream"}
+        )
+    return False
+
+
+def download_noaa_ocean_exploration(root, index):
+    """Download official NOAA Ocean Exploration media with caption/credit exception screening."""
+    report = []
+    base = "https://oceanexplorer.noaa.gov/multimedia/"
+    candidates = []
+    for page_number in range(1, NOAA_MEDIA_PAGE_SCAN_LIMIT + 1):
+        listing_url = base if page_number == 1 else base + "?pg=" + str(page_number)
+        if not noaa_listing_page_is_allowed(listing_url):
+            report.append({"id": "noaa-listing-" + str(page_number), "status": "invalid_listing_url", "source_page": listing_url})
+            continue
+        try:
+            raw, _ = request_bytes(listing_url, timeout=30, limit=12 * 1024 * 1024)
+            items = noaa_parse_listing_page(raw.decode("utf-8", "replace"))
+            for item_url in items:
+                if item_url not in candidates:
+                    candidates.append(item_url)
+            print("[NOAA Ocean Exploration] page", page_number, "found", len(items), "media item pages")
+            time.sleep(.3)
+        except Exception as exc:
+            report.append({"id": "noaa-listing-" + str(page_number), "status": "listing_failed",
+                           "source_page": listing_url, "reason": str(exc)[:300]})
+    downloaded_counts = {"image": 0, "video": 0}
+    total_bytes = 0
+    seen = set()
+    for item_url in candidates:
+        try:
+            page, _ = request_bytes(item_url, timeout=25, limit=8 * 1024 * 1024)
+            detail = noaa_parse_detail_page(page.decode("utf-8", "replace"))
+            media_type = detail["media_type"]
+            row = {
+                "id": "noaa-ocean-exploration-" + slugify(item_url.rstrip("/").rsplit("/", 1)[-1]),
+                "provider": "NOAA Ocean Exploration", "media_type": media_type,
+                "title": detail["title"], "source_page": item_url, "credit": detail["credit"],
+                "caption": detail["caption"], "license": "Public Domain (NOAA Ocean Exploration default; item exception screen)",
+                "license_url": "https://oceanexplorer.noaa.gov/faqs/",
+            }
+            if media_type not in NOAA_MEDIA_SELECTION_CAPS:
+                row.update(status="skipped_media_type", reason="Only image and video item pages are bundled.")
+                report.append(row)
+                continue
+            if detail["copyright_marker"]:
+                row.update(status="skipped_copyright", reason="The item caption/credit/alt text contains the provider's copyright exception marker.")
+                report.append(row)
+                continue
+            if not detail["credit"] or not re.search(r"\bNOAA\b", detail["credit"], re.I):
+                row.update(status="skipped_credit", reason="No explicit NOAA credit was found in the item's Credit field.")
+                report.append(row)
+                continue
+            if detail["human_context_marker"]:
+                row.update(status="skipped_personal_context", reason="The item description suggests identifiable people or interview context; manual rights review is required.")
+                report.append(row)
+                continue
+            if downloaded_counts[media_type] >= NOAA_MEDIA_SELECTION_CAPS[media_type]:
+                row.update(status="skipped_category_cap", reason="The bounded category download ceiling has been reached.")
+                report.append(row)
+                continue
+            if not detail["downloads"]:
+                row.update(status="no_download_link", reason="The item has no explicit official Download field.")
+                report.append(row)
+                continue
+            downloads = []
+            for candidate_file in detail["downloads"]:
+                url = candidate_file["url"]
+                if not noaa_media_download_url_is_allowed(url, media_type) or url in seen:
+                    continue
+                downloads.append(candidate_file)
+            if media_type == "video":
+                downloads.sort(key=lambda x: ("HD" not in x["label"].upper(), x["url"]))
+            else:
+                downloads.sort(key=lambda x: ("largest version" not in x["label"].lower(), x["url"]))
+            if not downloads:
+                row.update(status="no_eligible_download", reason="No official media attachment passed the host/path/extension allow-list.")
+                report.append(row)
+                continue
+            max_bytes = NOAA_IMAGE_MAX_BYTES if media_type == "image" else NOAA_VIDEO_MAX_BYTES
+            file_url = downloads[0]["url"]
+            extension = Path(urllib.parse.urlsplit(file_url).path).suffix.lower()
+            try:
+                blob, content_type = request_bytes(file_url, timeout=50, limit=max_bytes)
+                if len(blob) < 2048 or not noaa_media_signature_is_valid(blob, media_type, content_type, extension):
+                    raise RuntimeError("media MIME/signature check failed")
+            except Exception as file_exc:
+                row.update(status="download_failed", reason=str(file_exc)[:280])
+                report.append(row)
+                continue
+            if total_bytes + len(blob) > NOAA_TOTAL_MAX_BYTES:
+                row.update(status="skipped_total_size_limit", reason="The aggregate NOAA media byte ceiling would be exceeded.")
+                report.append(row)
+                break
+            slug = slugify(detail["title"] or item_url.rstrip("/").rsplit("/", 1)[-1])[:90]
+            folder = root / "third-party" / "noaa-ocean-exploration" / (media_type + "s")
+            folder.mkdir(parents=True, exist_ok=True)
+            target = folder / (slug + extension)
+            target.write_bytes(blob)
+            digest = sha256_path(target)
+            note = (
+                f"# {detail['title']}\n\n"
+                f"- Provider: NOAA Ocean Exploration\n- Item page: {item_url}\n"
+                f"- Direct download: {file_url}\n- Media type: {media_type}\n"
+                f"- Caption: {detail['caption']}\n- Credit: {detail['credit']}\n"
+                "- Rights basis: NOAA Ocean Exploration FAQ states site material is public domain unless otherwise noted; this exact item page was screened for the word 'copyright' in its caption, credit and alt text.\n"
+                "- Credit must be retained; do not imply NOAA endorsement; preserve embedded image metadata.\n"
+                f"- SHA-256: {digest}\n"
+            )
+            write_text(folder / (slug + ".SOURCE_AND_LICENSE.md"), note)
+            index.append({
+                "id": row["id"], "path": target.relative_to(root).as_posix(),
+                "type": "noaa-ocean-exploration-" + media_type,
+                "provider": "NOAA Ocean Exploration", "title": detail["title"],
+                "category": "deep-ocean research imagery" if media_type == "image" else "deep-ocean exploration footage",
+                "description": detail["caption"], "credit": detail["credit"],
+                "source_page": item_url, "source_file_url": file_url,
+                "license": row["license"], "license_url": row["license_url"],
+                "license_verified_from_provider_policy_and_item_page": True,
+                "item_page_copyright_marker_absent": True,
+                "redistributable": True, "size_bytes": len(blob), "sha256": digest,
+                "content_type": content_type,
+                "embedded_metadata_preserved": True if media_type == "image" else None,
+            })
+            total_bytes += len(blob)
+            downloaded_counts[media_type] += 1
+            seen.add(file_url)
+            row.update(status="downloaded", file=target.name, source_file_url=file_url,
+                       size_bytes=len(blob), sha256=digest)
+            report.append(row)
+            print("[NOAA Ocean Exploration] OK:", media_type, detail["title"], len(blob), "bytes")
+            time.sleep(.3)
+        except Exception as exc:
+            report.append({"id": "noaa-ocean-exploration-" + slugify(item_url.rstrip("/").rsplit("/", 1)[-1]),
+                           "provider": "NOAA Ocean Exploration", "status": "item_failed",
+                           "source_page": item_url, "reason": str(exc)[:360]})
+    print("[NOAA Ocean Exploration] downloaded", downloaded_counts, "from", len(candidates), "candidate detail pages")
     return report
 
 
@@ -3906,12 +4277,11 @@ def main():
     STAGE.mkdir(parents=True)
     index=[]
     generate_originals(STAGE,index)
+    sticker_meme_counts=generate_sticker_meme_assets(STAGE,index)
     texture_count=generate_original_textures(STAGE,index)
     illustration_count=generate_original_illustrations(STAGE,index)
     motion_loop_count=generate_original_motion_loops(STAGE,index)
-    from generate_original_stickers import generate_original_stickers
-    sticker_count,meme_template_count=generate_original_stickers(STAGE,index,CC0_URL)
-    print("[Originals] generated",len(index),"original assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations,",motion_loop_count,"verified motion loops,",sticker_count,"stickers and",meme_template_count,"meme templates")
+    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     ambientcg_report=download_ambientcg(STAGE,index)
@@ -3924,13 +4294,13 @@ def main():
     wikimedia_svg_report=download_wikimedia_vector_svg(STAGE,index)
     wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
     usgs_report=download_usgs_gallery(STAGE,index)
+    noaa_report=download_noaa_ocean_exploration(STAGE,index)
     opengameart_report=download_opengameart(STAGE,index)
     google_fonts_report=download_google_fonts(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
-      "## Original vector and sound assets\nAll SVG backgrounds, overlays, icons, large-format editorial illustrations, infographic templates, tileable vector textures and procedural WAV sound effects in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"+
-      "## Original CC0 sticker and meme template collection\nThe repository generates original reaction-word stickers, expressive face stickers, annotation doodles, arrows, symbols and editable meme-layout SVG templates. These are generic original designs, not copies of existing viral meme images or trademarked character stickers. Replace placeholders only with media you own or are licensed to use. License: CC0 1.0 — "+CC0_URL+".\n\n"+
+      "## Original vector and sound assets\nAll SVG backgrounds, overlays, icons, editorial illustrations, infographic templates, tileable vector textures, procedural WAV cues, reaction stickers, caption presets and meme-layout templates in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"
       "## Kenney CC0 pack source links\nThe official pages mark these packs CC0, but the current website uses a browser-driven download step. This automated build does not guess direct ZIP URLs; the source links remain in video-library/assets/sources.json. Status:\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page','')} — {r.get('reason','')}" for r in kenney_report)+"\n\n"
       "## Poly Haven CC0 assets\nThe build downloads compact HDRIs, Blender models plus listed dependencies, and PBR texture maps from the official API. The API has separate terms asking tools that use the live API to make clear the assets' source. See https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md.\n\n"+
@@ -3949,6 +4319,8 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
       "\n\n## Google Fonts — curated type families under SIL Open Font License 1.1\nThe builder queries a fixed list of Google Fonts family directories through the official google/fonts GitHub contents API. A family is eligible only if its own OFL.txt download URL is inside the exact official family folder and the downloaded license text contains the SIL Open Font License Version 1.1 and copyright statement. The build selects at most two TTF faces per family, verifies the sfnt font signature, retains the full OFL.txt, records the exact family/file URL and license-file SHA-256, and enforces per-file and aggregate download caps. These fonts are redistributable under their own OFL 1.1 terms; they are not relabelled CC0. Sources: https://github.com/google/fonts and https://openfontlicense.org/.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in google_fonts_report)+
+      "\n\n## NOAA Ocean Exploration images and video\nThe builder searches the official NOAA Ocean Exploration multimedia cards and follows each item's own detail page. It downloads only an explicit Download attachment from the official oceanexplorer.noaa.gov uploads path, requires an NOAA credit field, and excludes items whose caption, credit or alt text contains the provider's 'copyright' exception marker. The NOAA Ocean Exploration FAQ states that material is public domain unless otherwise noted; credit must be retained, image metadata preserved, and no NOAA endorsement may be implied. The importer also skips pages suggesting identifiable-person/interview contexts for manual review. It records the caption, credit, item URL, direct media URL, rights-review basis and SHA-256. These are bounded search/download ceilings, not guaranteed totals. Sources: https://oceanexplorer.noaa.gov/faqs/ and https://oceanexplorer.noaa.gov/about/media-kit/.\n\n"+
+      "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in noaa_report)+
       "\n\n## OpenGameArt — item-level CC0 media packs\nThe builder searches OpenGameArt's official advanced-search page using its CC0 taxonomy filter for 2D art, 3D art, textures, sound effects and music. Search filters are discovery only: each item's own License(s) field must expose exactly one CC0 1.0 license link; mixed or non-CC0 items are skipped. The downloader follows only official item pages and attachments under the site's official HTTPS /sites/default/files/ path. ZIP files are integrity-tested and extracted with the repository's safe path and extension allow-list; individual media files are checked against their extension and file signature. Per-item archive and per-file digests, creator, source page, license basis and actual download outcome are preserved. The category ceilings are search caps, not promised downloads. Sources: https://opengameart.org/art-search-advanced and https://opengameart.org/content/faq.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in opengameart_report)+
       "\n\n## USGS Multimedia Gallery — item-level Public Domain only\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly 'Public Domain.'. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\n\n"+
@@ -3961,8 +4333,6 @@ def main():
               "original_textures":len(TEXTURES),
               "original_illustrations":len(ILLUSTRATIONS),
               "original_motion_loops":len(MOTION_LOOPS),
-              "original_stickers":sticker_count,
-              "original_meme_templates":meme_template_count,
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
@@ -3987,11 +4357,15 @@ def main():
               "opengameart_items_downloaded":sum(r.get("status")=="downloaded" for r in opengameart_report),
               "opengameart_files_downloaded":sum(1 for x in index if str(x.get("type","")).startswith("opengameart-cc0-")),
               "google_font_families_downloaded":sum(r.get("status")=="downloaded" for r in google_fonts_report),
-              "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf")}
+              "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf"),
+              "noaa_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in noaa_report),
+              "noaa_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in noaa_report),
+              "original_stickers":sticker_meme_counts["stickers"],
+              "original_meme_templates":sticker_meme_counts["meme_templates"],
+              "original_caption_overlays":sticker_meme_counts["caption_overlays"]}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "resource_distribution":"Modular category packs are generated by tools/video/package_asset_library.py; download only the packs needed for each project.",
-               "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
+               "policy":"Original assets are CC0; NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
                "ambientcg_downloads":ambientcg_report,
@@ -4001,7 +4375,7 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"opengameart_downloads":opengameart_report,"google_fonts_downloads":google_fonts_report,"noaa_ocean_exploration_downloads":noaa_report,"sticker_meme_library":sticker_meme_counts,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
@@ -4016,33 +4390,18 @@ def main():
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     write_text(STAGE/"SHA256SUMS.txt","\n".join(digest_lines)+"\n")
     assert len(PALETTES)>=90 and len(OVERLAYS)>=75 and len(ICONS)>=125 and len(INFO)>=50 and len(TEXTURES)>=55 and len(ILLUSTRATIONS)>=105 and len(MOTION_LOOPS)==24
-    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)+sticker_count+meme_template_count
+    expected=len(PALETTES)+len(OVERLAYS)+len(ICONS)+len(INFO)+len(TEXTURES)+len(ILLUSTRATIONS)+sticker_meme_counts["total"]
     assert len(list((STAGE/"originals").rglob("*.svg")))==expected
+    assert sticker_meme_counts["stickers"] >= 200 and sticker_meme_counts["meme_templates"] >= 70 and sticker_meme_counts["caption_overlays"] >= 60
     indexed={line.split("  ",1)[1] for line in digest_lines}
     for path in STAGE.rglob("*"):
         if path.is_file() and path.name not in {"SHA256SUMS.txt"}:
             if path.relative_to(STAGE).as_posix() not in indexed and path.name!="ASSET_INDEX.json":
                 raise RuntimeError("checksum missing for "+str(path))
     OUT.mkdir(parents=True,exist_ok=True)
-    archive=OUT/"video-asset-library.zip"
-    staged_files=[p for p in STAGE.rglob("*") if p.is_file()]
-    staged_bytes=sum(p.stat().st_size for p in staged_files)
-    archive_info={"mode":"catalog-only-pending","staged_bytes":staged_bytes}
-    if staged_bytes<=MAX_LEGACY_FULL_ZIP_BYTES:
-        if archive.exists(): archive.unlink()
-        with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=3,allowZip64=True) as z:
-            for path in sorted(staged_files):
-                z.write(path,Path("video-asset-library")/path.relative_to(STAGE))
-        archive_info.update(mode="full-library",zip_sha256=sha256_path(archive),zip_size_bytes=archive.stat().st_size)
-        print(f"[Package] created compatibility full-library ZIP size={archive.stat().st_size}")
-    else:
-        if archive.exists(): archive.unlink()
-        print(f"[Package] skipped monolithic ZIP: staged assets={staged_bytes} bytes; modular packs will be used")
     write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",
-               f"built_at={index_doc['built_at']}\n"
-               f"summary={json.dumps(summary)}\n"
-               f"staged_bytes={staged_bytes}\n"
-               f"full_archive_mode={archive_info['mode']}\n")
-    print("[Package] staged",len(index),"indexed resources; modular packager will create independently downloadable archives")
+               f"built_at={index_doc['built_at']}\nmode=pending-package\nsummary={json.dumps(summary)}\n")
+    print(json.dumps(summary,indent=2))
+    print(f"[Build] resources indexed={len(index)}; packaging delegated to package_asset_bundles.py")
 if __name__=="__main__":
     main()
