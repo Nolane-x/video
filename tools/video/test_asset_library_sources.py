@@ -1657,5 +1657,53 @@ class ReleaseAssetVerificationTests(unittest.TestCase):
                     )
 
 
+
+class ExactDuplicateAssetRecordTests(unittest.TestCase):
+    def test_identical_duplicate_asset_records_are_deduplicated_and_logged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            relative = "originals/icons/map-route.svg"
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"<svg>original map route</svg>")
+            asset = {
+                "id": "map-route",
+                "path": relative,
+                "type": "original-svg-icon",
+                "license": "CC0-1.0",
+                "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                "redistributable": True,
+            }
+
+            with mock.patch.object(library, "sha256_path", wraps=library.sha256_path):
+                validated, checksums, deduplicated = shard_builder._validate_and_hash_assets(
+                    library, root, [dict(asset), dict(asset)]
+                )
+
+            self.assertEqual(len(validated), 1)
+            self.assertEqual(len(checksums), 1)
+            self.assertEqual(deduplicated, 1)
+            self.assertEqual(validated[0]["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
+
+    def test_conflicting_path_reuse_is_still_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            relative = "third-party/source/asset.bin"
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"verified bytes")
+            first = {
+                "id": "asset-one",
+                "path": relative,
+                "type": "source-file",
+                "license": "CC0-1.0",
+                "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                "redistributable": True,
+            }
+            second = {**first, "id": "asset-two"}
+            with self.assertRaisesRegex(RuntimeError, "Conflicting duplicate"):
+                shard_builder._validate_and_hash_assets(library, root, [first, second])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
