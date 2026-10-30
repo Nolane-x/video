@@ -1790,6 +1790,13 @@ class USGSMediaPageParser(HTMLParser):
             self.title_parts.append(value)
 
 
+def usgs_singular_media_type(media_type):
+    mapping = {"images": "image", "videos": "video", "audio": "audio"}
+    if media_type not in mapping:
+        raise ValueError("unsupported USGS media type: " + str(media_type))
+    return mapping[media_type]
+
+
 def usgs_rights_are_public_domain(statement):
     """Require the exact item-level Public Domain label; reject all other notices."""
     normalized=" ".join(str(statement or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
@@ -1919,7 +1926,7 @@ def download_usgs_gallery(root,index):
             try:
                 page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
                 detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
-                singular_media_type={"images":"image","videos":"video","audio":"audio"}[media_type]
+                singular_media_type=usgs_singular_media_type(media_type)
                 row={"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
                      "provider":"U.S. Geological Survey","media_type":singular_media_type,
                      "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
