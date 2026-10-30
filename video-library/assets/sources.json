@@ -522,10 +522,10 @@
     },
     {
       "id": "ambientcg-cc0",
-      "title": "ambientCG — CC0 PBR materials, HDRIs, decals, atlases and 3D models",
+      "title": "ambientCG — CC0 PBR materials, HDRIs, models, decals, atlases and creative tools",
       "provider": "ambientCG",
       "kind": "procedural and photogrammetry asset library",
-      "category": "PBR surfaces, tiling materials, HDRI lighting environments, decals, terrain and 3D models",
+      "category": "PBR surfaces, tileable textures, HDRI lighting environments, 3D models, decals, atlases, plain textures, brushes and Substance materials",
       "source_page": "https://ambientcg.com/",
       "api": "https://ambientcg.com/api/v2/full_json",
       "license": "CC0-1.0 for downloadable ambientCG asset files",
@@ -533,7 +533,7 @@
       "api_docs": "https://docs.ambientcg.com/api/v2/full_json/",
       "verified_page_license": true,
       "bundling": "automatic-bounded-package-download-with-allow-list-extraction-and-checksums",
-      "note": "The official docs state all downloadable ambientCG assets are CC0 1.0 and document the full_json endpoint, ZIP download variants and asset IDs. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
+      "note": "The official docs list Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance as supported v2 API types and state all downloadable assets are CC0 1.0. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
     },
     {
       "id": "original-procedural-motion-loops",
