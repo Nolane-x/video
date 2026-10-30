@@ -91,6 +91,8 @@ class OpenMojiCCBYSAAssetTests(unittest.TestCase):
                 "tarball": "https://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz",
                 "shasum": "ee8094c5c0de0d2126b77ceb074d62b6fe2071d0",
                 "integrity": "sha512-EBnYrNGdcdw+OSXmENeNE1yBNRu6tOraTmoOyUbJkTmvT/+XETp8RZLSJFzD3lrPc5N9CzsyPnRTk0Vp4UaI9w==",
+                "fileCount": 11539,
+                "unpackedSize": 43405090,
             },
         }
         self.assertTrue(library.openmoji_metadata_is_eligible(good))
