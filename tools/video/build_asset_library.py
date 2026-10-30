@@ -2519,7 +2519,7 @@ def poly_pizza_glb_is_valid(blob):
     if json_end > len(blob):
         return False
     try:
-        gltf = json.loads(bytes(blob[20:json_end]).rstrip(b" \\t\\r\\n\\x00").decode("utf-8"))
+        gltf = json.loads(bytes(blob[20:json_end]).rstrip(b" ").decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return False
     if not isinstance(gltf, dict) or not isinstance(gltf.get("asset"), dict):
@@ -2533,9 +2533,9 @@ def poly_pizza_glb_is_valid(blob):
         chunk_length = int.from_bytes(blob[offset:offset + 4], "little")
         chunk_type = bytes(blob[offset + 4:offset + 8])
         offset += 8
-        if chunk_length < 0 or offset + chunk_length > len(blob):
+        if chunk_length % 4 or offset + chunk_length > len(blob):
             return False
-        if chunk_type not in {b"BIN\\x00"} and not chunk_type.isalpha():
+        if chunk_type not in {b"BIN\x00"} and not chunk_type.isalpha():
             return False
         offset += chunk_length
     return offset == len(blob)
