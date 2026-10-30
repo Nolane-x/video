@@ -41,6 +41,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8})
         self.assertEqual(library.LAZYTEXTURES_API_TYPES["other"]["endpoint"], "previewsOther")
         self.assertEqual(library.POLY_PIZZA_MAX_MODELS, 48)
+        self.assertEqual(library.POLY_PIZZA_MAX_PAGES_PER_TERM, 2)
         self.assertEqual(library.POLY_PIZZA_MAX_MODEL_BYTES, 128 * 1024 * 1024)
         self.assertEqual(library.POLY_PIZZA_TOTAL_MAX_BYTES, 4 * 1024 * 1024 * 1024)
         self.assertEqual(library.POLY_PIZZA_API_BASE, "https://api.poly.pizza/v1.1")
@@ -135,6 +136,9 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         self.assertFalse(library.poly_pizza_api_url_is_allowed("http://api.poly.pizza/v1.1/search/tree"))
         self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://cdn.poly.pizza/models/tree.glb"))
         self.assertTrue(library.poly_pizza_asset_url_is_allowed("https://poly.pizza/m/TreeOne"))
+        self.assertTrue(library.poly_pizza_download_url_is_allowed("https://cdn.poly.pizza/models/tree.glb"))
+        self.assertFalse(library.poly_pizza_download_url_is_allowed("https://cdn.poly.pizza/models/tree.zip"))
+        self.assertFalse(library.poly_pizza_download_url_is_allowed("https://evil.example/models/tree.glb"))
         self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://evil.example/models/tree.glb"))
         self.assertFalse(library.poly_pizza_asset_url_is_allowed("http://cdn.poly.pizza/models/tree.glb"))
         self.assertFalse(library.poly_pizza_asset_url_is_allowed("https://user@cdn.poly.pizza/models/tree.glb"))
@@ -166,7 +170,13 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         self.assertEqual(library.poly_pizza_parse_model(unknown)[1], "license_not_cc0_or_unrecognized")
         hostile = self._model()
         hostile["Download"] = "https://evil.example/tree.glb"
-        self.assertEqual(library.poly_pizza_parse_model(hostile, require_download=True)[1], "download_url_not_official")
+        self.assertEqual(library.poly_pizza_parse_model(hostile, require_download=True)[1], "download_url_not_official_glb")
+        wrong_extension = self._model()
+        wrong_extension["Download"] = "https://cdn.poly.pizza/tree.zip"
+        self.assertEqual(library.poly_pizza_parse_model(wrong_extension, require_download=True)[1], "download_url_not_official_glb")
+        wrong_source = self._model()
+        wrong_source["URL"] = "https://poly.pizza/m/AnotherModel"
+        self.assertEqual(library.poly_pizza_parse_model(wrong_source)[1], "source_url_not_official")
 
     def test_glb_validator_checks_magic_version_json_chunk_and_declared_length(self):
         payload = json.dumps({"asset": {"version": "2.0"}}).encode("utf-8")
@@ -184,6 +194,24 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         invalid_json = b"not-json".ljust(8, b" ")
         bad = b"glTF" + (2).to_bytes(4, "little") + (28).to_bytes(4, "little") + (8).to_bytes(4, "little") + b"JSON" + invalid_json
         self.assertFalse(library.poly_pizza_glb_is_valid(bad))
+
+        remote_payload = json.dumps({
+            "asset": {"version": "2.0"},
+            "buffers": [{"byteLength": 4, "uri": "https://evil.example/model.bin"}],
+        }).encode("utf-8")
+        remote_payload += b" " * ((4 - len(remote_payload) % 4) % 4)
+        remote_total = 12 + 8 + len(remote_payload)
+        remote_glb = b"glTF" + (2).to_bytes(4, "little") + remote_total.to_bytes(4, "little") + len(remote_payload).to_bytes(4, "little") + b"JSON" + remote_payload
+        self.assertFalse(library.poly_pizza_glb_is_valid(remote_glb))
+
+        no_bin_payload = json.dumps({
+            "asset": {"version": "2.0"},
+            "buffers": [{"byteLength": 16}],
+        }).encode("utf-8")
+        no_bin_payload += b" " * ((4 - len(no_bin_payload) % 4) % 4)
+        no_bin_total = 12 + 8 + len(no_bin_payload)
+        no_bin_glb = b"glTF" + (2).to_bytes(4, "little") + no_bin_total.to_bytes(4, "little") + len(no_bin_payload).to_bytes(4, "little") + b"JSON" + no_bin_payload
+        self.assertFalse(library.poly_pizza_glb_is_valid(no_bin_glb))
 
     def test_importer_skips_without_secret_and_does_not_attempt_network(self):
         with mock.patch.dict(library.os.environ if hasattr(library, "os") else __import__("os").environ,
@@ -224,6 +252,8 @@ class PolyPizzaCC0APITests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), glb)
             self.assertEqual(asset["sha256"], library.sha256_path(path))
             self.assertTrue((path.parent / "SOURCE_AND_LICENSE.md").is_file())
+            self.assertEqual(path.parent.parent.name, "models")
+            self.assertRegex(path.parent.name, r"^treeone-[0-9a-f]{10}$")
 
 
 class LazyTexturesCC0APITests(unittest.TestCase):

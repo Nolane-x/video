@@ -56,6 +56,7 @@ POLY_PIZZA_SEARCH_TERMS = [
 ]
 POLY_PIZZA_SEARCH_LIMIT = 24
 POLY_PIZZA_MAX_CANDIDATES = 240
+POLY_PIZZA_MAX_PAGES_PER_TERM = 2
 POLY_PIZZA_MAX_MODELS = 48
 POLY_PIZZA_MAX_MODEL_BYTES = 128 * 1024 * 1024
 POLY_PIZZA_TOTAL_MAX_BYTES = 4 * 1024 * 1024 * 1024
@@ -2357,6 +2358,16 @@ def poly_pizza_asset_url_is_allowed(url):
         return False
 
 
+def poly_pizza_download_url_is_allowed(url):
+    if not poly_pizza_asset_url_is_allowed(url):
+        return False
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return parsed.path.lower().endswith(".glb")
+    except (TypeError, ValueError):
+        return False
+
+
 def poly_pizza_model_id_is_allowed(value):
     text = str(value or "").strip()
     return bool(text and len(text) <= 128 and re.fullmatch(r"[A-Za-z0-9_-]+", text))
@@ -2389,13 +2400,23 @@ def poly_pizza_creator_name(model):
 
 
 def poly_pizza_source_url(model, model_id):
+    canonical = "https://poly.pizza/m/" + urllib.parse.quote(model_id, safe="")
     value = model.get("URL") or model.get("Url") or model.get("Permalink") or model.get("url") or model.get("permalink")
-    if value:
-        candidate = str(value).strip()
-        if poly_pizza_asset_url_is_allowed(candidate):
-            return candidate
-        return ""
-    return "https://poly.pizza/m/" + urllib.parse.quote(model_id, safe="")
+    if not value:
+        return canonical
+    try:
+        parsed = urllib.parse.urlsplit(str(value).strip())
+        expected = urllib.parse.urlsplit(canonical)
+        if (
+            parsed.scheme == "https" and parsed.hostname == "poly.pizza"
+            and parsed.port in (None, 443)
+            and parsed.path.rstrip("/") == expected.path
+            and not parsed.username and not parsed.password and not parsed.fragment
+        ):
+            return canonical
+    except (TypeError, ValueError):
+        pass
+    return ""
 
 
 def poly_pizza_parse_model(model, require_download=False):
@@ -2417,8 +2438,8 @@ def poly_pizza_parse_model(model, require_download=False):
     if require_download and not raw_download:
         return None, "download_url_missing"
     download_url = str(raw_download).strip() if raw_download else ""
-    if download_url and not poly_pizza_asset_url_is_allowed(download_url):
-        return None, "download_url_not_official"
+    if download_url and not poly_pizza_download_url_is_allowed(download_url):
+        return None, "download_url_not_official_glb"
     tags = model.get("Tags") or model.get("tags") or []
     if isinstance(tags, str):
         tags = [tags]
@@ -2486,16 +2507,16 @@ def poly_pizza_api_json(path, params, token):
 
 
 def poly_pizza_download_glb(url, max_bytes=POLY_PIZZA_MAX_MODEL_BYTES):
-    if not poly_pizza_asset_url_is_allowed(url):
-        raise RuntimeError("Poly Pizza model download URL failed the official HTTPS host allow-list")
+    if not poly_pizza_download_url_is_allowed(url):
+        raise RuntimeError("Poly Pizza model download URL must be a GLB on an official HTTPS host")
     request = urllib.request.Request(
         url,
         headers={"User-Agent": UA, "Accept": "model/gltf-binary,application/octet-stream"},
     )
     with urllib.request.urlopen(request, timeout=70) as response:
         final_url = response.geturl()
-        if not poly_pizza_asset_url_is_allowed(final_url):
-            raise RuntimeError("Poly Pizza CDN redirected outside the official poly.pizza domain")
+        if not poly_pizza_download_url_is_allowed(final_url):
+            raise RuntimeError("Poly Pizza CDN redirect did not remain on an official GLB URL")
         length = response.headers.get("Content-Length")
         if length:
             try:
@@ -2532,7 +2553,22 @@ def poly_pizza_glb_is_valid(blob):
         return False
     if str(gltf["asset"].get("version", "")) != "2.0":
         return False
+
+    # A standalone GLB must not rely on remote or sidecar files being fetched later.
+    buffers = gltf.get("buffers", [])
+    images = gltf.get("images", [])
+    if not isinstance(buffers, list) or not isinstance(images, list):
+        return False
+    for resource in list(buffers) + list(images):
+        if not isinstance(resource, dict):
+            return False
+        uri = resource.get("uri")
+        if uri is not None and (not isinstance(uri, str) or not uri.startswith("data:")):
+            return False
+
     offset = json_end
+    bin_chunk_seen = False
+    bin_chunk_length = 0
     while offset < len(blob):
         if offset + 8 > len(blob):
             return False
@@ -2541,10 +2577,24 @@ def poly_pizza_glb_is_valid(blob):
         offset += 8
         if chunk_length % 4 or offset + chunk_length > len(blob):
             return False
-        if chunk_type not in {b"BIN\x00"} and not chunk_type.isalpha():
+        if chunk_type == b"BIN\x00":
+            if bin_chunk_seen:
+                return False
+            bin_chunk_seen = True
+            bin_chunk_length = chunk_length
+        elif len(chunk_type) != 4 or not all(65 <= value <= 90 for value in chunk_type):
             return False
         offset += chunk_length
-    return offset == len(blob)
+    if offset != len(blob):
+        return False
+    for buffer in buffers:
+        if buffer.get("uri") is None:
+            byte_length = buffer.get("byteLength")
+            if isinstance(byte_length, bool) or not isinstance(byte_length, int) or byte_length < 0:
+                return False
+            if byte_length > bin_chunk_length or (byte_length > 0 and not bin_chunk_seen):
+                return False
+    return True
 
 
 def download_poly_pizza(root, index):
@@ -2565,37 +2615,41 @@ def download_poly_pizza(root, index):
     seen_ids = set()
     search_failures = []
     for term in POLY_PIZZA_SEARCH_TERMS:
-        try:
-            payload = poly_pizza_api_json(
-                "/search/" + urllib.parse.quote(term, safe=""),
-                {"Limit": POLY_PIZZA_SEARCH_LIMIT, "Page": 0, "License": 1},
-                token,
-            )
-            rows = payload.get("results")
-            if not isinstance(rows, list):
-                data = payload.get("data")
-                rows = data.get("results") if isinstance(data, dict) else None
-            if not isinstance(rows, list):
-                search_failures.append({"term": term, "reason": "results_not_a_list"})
-                continue
-            for model in rows:
-                normalized, reason = poly_pizza_parse_model(model, require_download=True)
-                if not normalized:
-                    continue
-                model_id = normalized["model_id"]
-                if model_id in seen_ids:
-                    continue
-                seen_ids.add(model_id)
-                selected.append(normalized)
-                if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+        for page in range(POLY_PIZZA_MAX_PAGES_PER_TERM):
+            try:
+                payload = poly_pizza_api_json(
+                    "/search/" + urllib.parse.quote(term, safe=""),
+                    {"Limit": POLY_PIZZA_SEARCH_LIMIT, "Page": page, "License": 1},
+                    token,
+                )
+                rows = payload.get("results")
+                if not isinstance(rows, list):
+                    data = payload.get("data")
+                    rows = data.get("results") if isinstance(data, dict) else None
+                if not isinstance(rows, list):
+                    search_failures.append({"term": term, "page": page, "reason": "results_not_a_list"})
                     break
-            print("[Poly Pizza] search", term, "returned", len(rows), "rows; CC0 candidates", len(selected))
-            if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+                for model in rows:
+                    normalized, reason = poly_pizza_parse_model(model, require_download=True)
+                    if not normalized:
+                        continue
+                    model_id = normalized["model_id"]
+                    if model_id in seen_ids:
+                        continue
+                    seen_ids.add(model_id)
+                    selected.append(normalized)
+                    if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+                        break
+                print("[Poly Pizza] search", term, "page", page, "returned", len(rows), "rows; CC0 candidates", len(selected))
+                if len(selected) >= POLY_PIZZA_MAX_CANDIDATES or not rows:
+                    break
+                time.sleep(1)
+            except Exception as exc:
+                search_failures.append({"term": term, "page": page, "reason": str(exc)[:320]})
+                print("[Poly Pizza] search failed for", term, "page", page, str(exc)[:220])
                 break
-            time.sleep(1)
-        except Exception as exc:
-            search_failures.append({"term": term, "reason": str(exc)[:320]})
-            print("[Poly Pizza] search failed for", term, str(exc)[:220])
+        if len(selected) >= POLY_PIZZA_MAX_CANDIDATES:
+            break
 
     total_bytes = 0
     downloaded = 0
@@ -2604,7 +2658,7 @@ def download_poly_pizza(root, index):
             break
         model_id = candidate["model_id"]
         row = {
-            "id": "poly-pizza-" + slugify(model_id),
+            "id": "poly-pizza-" + slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10],
             "provider": "Poly Pizza",
             "model_id": model_id,
             "title": candidate["title"],
@@ -2642,7 +2696,8 @@ def download_poly_pizza(root, index):
                 max_bytes=min(POLY_PIZZA_MAX_MODEL_BYTES, remaining),
             )
             digest = hashlib.sha256(blob).hexdigest()
-            target_dir = root / "third-party/poly-pizza/models" / slugify(model_id)
+            model_folder = slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10]
+            target_dir = root / "third-party/poly-pizza/models" / model_folder
             target_dir.mkdir(parents=True, exist_ok=True)
             target = target_dir / "model.glb"
             target.write_bytes(blob)
@@ -2656,7 +2711,7 @@ def download_poly_pizza(root, index):
             )
             write_text(target_dir / "SOURCE_AND_LICENSE.md", note)
             item = {
-                "id": "poly-pizza-" + slugify(model_id),
+                "id": "poly-pizza-" + slugify(model_id)[:72] + "-" + hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10],
                 "path": target.relative_to(root).as_posix(),
                 "type": "poly-pizza-cc0-model",
                 "provider": "Poly Pizza",
