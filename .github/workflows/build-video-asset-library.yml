@@ -163,13 +163,14 @@ jobs:
               assert asset.get("rights_statement", "").strip().rstrip(".").casefold() == "public domain"
               assert asset.get("license_verified_from_item_page") is True and asset.get("redistributable") is True
               assert asset.get("license") == "Public Domain (item-level USGS Sources/Usage label)"
-              assert asset.get("source_page", "").startswith("https://www.usgs.gov/media/" + media_type + "s/")
+              listing_kind = "audio" if media_type == "audio" else media_type + "s"
+              assert asset.get("source_page", "").startswith("https://www.usgs.gov/media/" + listing_kind + "/")
               assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) >= 2048
               direct = asset.get("source_file_url", "")
               if media_type == "video":
                   assert direct.startswith("https://usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com/") and "/media/video/" in direct
               else:
-                  assert direct.startswith("https://d9-wret.s3.us-west-2.amazonaws.com/") and "/media/" + media_type + "s/" in direct
+                  assert direct.startswith("https://d9-wret.s3.us-west-2.amazonaws.com/") and "/media/" + listing_kind + "/" in direct
           for line in sums_path.read_text(encoding="utf-8").splitlines():
               if not line.strip():
                   continue
