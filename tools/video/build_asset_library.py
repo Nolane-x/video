@@ -2438,8 +2438,9 @@ def google_fonts_raw_url_is_allowed(url,family,filename=None):
 
 def google_fonts_ofl_is_valid(text):
     normalized=str(text or "").replace("\r\n","\n")
-    return ("SIL OPEN FONT LICENSE Version 1.1" in normalized and
-            "Copyright" in normalized and "OFL" in normalized[:300])
+    upper=normalized.upper()
+    return ("SIL OPEN FONT LICENSE VERSION 1.1" in upper and
+            "COPYRIGHT" in upper[:1200])
 
 
 def google_fonts_ttf_signature_is_valid(blob):
@@ -2455,7 +2456,7 @@ def download_google_fonts(root,index):
         api_url=api_base+urllib.parse.quote(family,safe="") +"?ref=main"
         source_page="https://github.com/google/fonts/tree/main/ofl/"+family
         row={"id":"google-fonts-"+family,"provider":"Google Fonts / google/fonts",
-             "family_slug":family,"title":family.replace(""," ").title(),
+             "family_slug":family,"title":family.replace("-", " ").title(),
              "category":"Typography / video titles, captions and editorial text",
              "source_page":source_page,"api_source":api_url,
              "license":"SIL Open Font License 1.1 only after the family's OFL.txt is validated",
@@ -2521,7 +2522,7 @@ def download_google_fonts(root,index):
                     index.append({"id":"google-font-"+family+"-"+slugify(target.name),
                                   "path":target.relative_to(root).as_posix(),
                                   "type":"google-font-ttf","provider":"Google Fonts",
-                                  "title":family.replace(""," ").title()+" — "+target.name,
+                                  "title":family.replace("-", " ").title()+" — "+target.name,
                                   "family_slug":family,"category":"Typography / titles, captions and editorial text",
                                   "source_page":source_page,"source_file_url":font["url"],
                                   "license":license_name,"license_url":"https://openfontlicense.org/",
@@ -2538,7 +2539,7 @@ def download_google_fonts(root,index):
                 shutil.rmtree(family_dir,ignore_errors=True)
                 row.update(status="download_failed",reason="No font file passed download and signature validation.")
                 report.append(row); continue
-            note=(f"# {family.replace('',' ').title()} — Google Fonts\\n\\n"
+            note=(f"# {family.replace('-', ' ').title()} — Google Fonts\\n\\n"
                   f"- Official family page: {source_page}\\n- License: SIL Open Font License 1.1\\n"
                   f"- License source: {license_url}\\n- OFL.txt SHA-256: {license_sha}\\n"
                   "- Only TTF files with validated sfnt signatures were retained.\\n")
