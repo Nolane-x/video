@@ -4030,8 +4030,8 @@ All SVG backgrounds, overlays, icons, large-format editorial illustrations, info
     if archive.exists():
         archive.unlink()
     write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",
-               f"built_at={index_doc['built_at']}\\n"
-               f"summary={json.dumps(summary)}\\n"
+               f"built_at={index_doc['built_at']}\n"
+               f"summary={json.dumps(summary)}\n"
                "distribution_mode=modular-packs-pending\\n")
     print("[Package] staged",len(index),"indexed resources; modular packager will create independently downloadable archives")
 if __name__=="__main__":
