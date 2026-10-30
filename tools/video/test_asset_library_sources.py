@@ -31,6 +31,11 @@ class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
             "are made by Kenney and are CC0 licensed.\n"
         )
 
+    def test_official_github_archive_root_names_are_recognized(self):
+        self.assertTrue(library.kenney_godot_splash_archive_root_is_allowed("KenneyNL-Godot-SplashScreens-deadbeef"))
+        self.assertTrue(library.kenney_godot_splash_archive_root_is_allowed("Godot-SplashScreens-main"))
+        self.assertFalse(library.kenney_godot_splash_archive_root_is_allowed("attacker-Godot-SplashScreens-main"))
+
     def test_scope_requires_explicit_mixed_license_readme(self):
         self.assertTrue(library.kenney_godot_splash_readme_confirms_cc0(self._readme()))
         self.assertFalse(library.kenney_godot_splash_readme_confirms_cc0(
@@ -70,13 +75,13 @@ class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
         svg = b'<svg xmlns="http://www.w3.org/2000/svg"><rect width="8" height="8"/></svg>'
         png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 24
         with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr("Godot-SplashScreens-main/README.md", self._readme())
-            archive.writestr("Godot-SplashScreens-main/Logo/reimagined-horizontal-dark.svg", svg)
-            archive.writestr("Godot-SplashScreens-main/Screen/Cog logo/cog-blue.png", png)
-            archive.writestr("Godot-SplashScreens-main/Screen/Original logo/icon-dark.png", png)
-            archive.writestr("Godot-SplashScreens-main/Screen/Pixel logo/reimagined-large.png", png)
-            archive.writestr("Godot-SplashScreens-main/Screen/Pride logo/pride-light-a.png", png)
-            archive.writestr("Godot-SplashScreens-main/Logo/original-horizontal-dark.svg", svg)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/README.md", self._readme())
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Logo/reimagined-horizontal-dark.svg", svg)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Screen/Cog logo/cog-blue.png", png)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Screen/Original logo/icon-dark.png", png)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Screen/Pixel logo/reimagined-large.png", png)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Screen/Pride logo/pride-light-a.png", png)
+            archive.writestr("KenneyNL-Godot-SplashScreens-deadbeef/Logo/original-horizontal-dark.svg", svg)
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -86,7 +91,7 @@ class KenneyGodotSplashScreenCC0Tests(unittest.TestCase):
                 "request_bytes",
                 return_value=(
                     buffer.getvalue(),
-                    "https://codeload.github.com/KenneyNL/Godot-SplashScreens/legacy.zip/refs/heads/main",
+                    "application/zip",
                 ),
             ):
                 report = library.download_kenney_godot_splashscreens(root, index)
