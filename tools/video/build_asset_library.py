@@ -3059,6 +3059,7 @@ def download_openmoji_assets(root,index):
     """Bundle the OpenMoji 17.0 artwork exports with exact CC BY-SA attribution and provenance."""
     import base64
     report=[]
+    target=root/"third-party"/"openmoji"
     source_page="https://github.com/hfg-gmuend/openmoji/tree/"+OPENMOJI_VERSION
     license_url="https://creativecommons.org/licenses/by-sa/4.0/"
     faq_url="https://github.com/hfg-gmuend/openmoji/blob/"+OPENMOJI_VERSION+"/FAQ.md"
@@ -3084,7 +3085,8 @@ def download_openmoji_assets(root,index):
         actual_integrity="sha512-"+base64.b64encode(hashlib.sha512(archive_blob).digest()).decode("ascii")
         if actual_integrity!=integrity:
             raise RuntimeError("OpenMoji npm tarball SHA-512 integrity does not match registry metadata")
-        target=root/"third-party"/"openmoji"
+        if target.exists():
+            shutil.rmtree(target)
         selected,metadata_rows=openmoji_extract_selected_assets(archive_blob,target)
         if not selected:
             raise RuntimeError("OpenMoji archive contained no approved SVG or PNG exports")
@@ -3158,6 +3160,7 @@ def download_openmoji_assets(root,index):
         report.append(row)
         print("[OpenMoji] OK:",row["extracted_files"],"artwork exports",row["extracted_bytes"],"bytes")
     except Exception as exc:
+        shutil.rmtree(target,ignore_errors=True)
         row.update(status="failed",reason=str(exc)[:500])
         report.append(row)
         print("[OpenMoji] failed:",str(exc)[:300])
