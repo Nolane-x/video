@@ -36,6 +36,7 @@ LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES = 512 * 1024 * 1024
 LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES = 128 * 1024 * 1024
 LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES = 1536 * 1024 * 1024
 LAZYTEXTURES_MAX_ZIP_MEMBERS = 2500
+LAZYTEXTURES_MAX_EXAMINED_PER_TYPE = 80
 LAZYTEXTURES_API_TYPES = {
     "models": {"endpoint": "previewsModels", "list_key": "PreviewModels", "label": "3D models"},
     "materials": {"endpoint": "previewsMaterials", "list_key": "PreviewMaterials", "label": "PBR materials"},
@@ -2000,7 +2001,7 @@ def download_lazytextures(root, index):
             downloaded_for_type = 0
             examined = 0
             for asset in assets:
-                if downloaded_for_type >= cap:
+                if downloaded_for_type >= cap or examined >= LAZYTEXTURES_MAX_EXAMINED_PER_TYPE:
                     break
                 if total_archive_bytes >= LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES or total_unpacked_bytes >= LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
                     break
@@ -2029,6 +2030,7 @@ def download_lazytextures(root, index):
                     continue
                 try:
                     detail = request_json(detail_url, timeout=30)
+                    time.sleep(.35)
                     if not isinstance(detail, dict) or detail.get("success") is not True:
                         row.update(status="missing_item_detail", reason="The official API did not return a successful item detail response.")
                         report.append(row)
@@ -2044,6 +2046,7 @@ def download_lazytextures(root, index):
                         row.update(status="skipped_rights", reason=rights["evidence"])
                         report.append(row)
                         continue
+                    choice = None
                     choice = lazytextures_choose_archive(detail)
                     if not choice:
                         row.update(status="no_eligible_archive", reason="No official, size-bounded ZIP was listed in archiveFiles.")
@@ -2127,7 +2130,7 @@ def download_lazytextures(root, index):
                     report.append(row)
                     print("[LazyTextures] OK:", asset_type, name, len(blob), "archive bytes,", extracted, "files,", unpacked, "unpacked bytes")
                 except Exception as item_exc:
-                    row.update(status="failed", reason=str(item_exc)[:420], file_name=choice.get("name") if "choice" in locals() and choice else None)
+                    row.update(status="failed", reason=str(item_exc)[:420], file_name=choice.get("name") if choice else None)
                     report.append(row)
                 time.sleep(.45)
             print("[LazyTextures]", asset_type, ":", downloaded_for_type, "downloaded from", examined, "API entries")
