@@ -623,7 +623,7 @@
       "terms": "https://poly.pizza/docs/tos",
       "license": "Per-model Creative Commons licence; this importer accepts exact CC0 1.0 only",
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "verified_page_license": true,
+      "verified_page_license": false,
       "authentication": "Optional POLY_PIZZA_API_KEY GitHub Actions secret; key is sent only to api.poly.pizza",
       "bundling": "optional-bounded-published-api-import-only-after-per-model-cc0-verification",
       "note": "Poly Pizza lists 10,700+ models, but licensing is per model and may vary (CC0 and CC-BY are both present). This importer uses the published API only (no HTML scraping), re-fetches each chosen model by ID, and downloads only a model whose own Licence field is exactly recognized as CC0 1.0. CC-BY, unknown and missing licence records are skipped. The direct GLB URL must be HTTPS on poly.pizza or a subdomain; only GLB v2 with a matching declared length is indexed. Limits: 48 models, 128 MiB per GLB and 4 GiB total. The API key is never forwarded to the asset CDN. The provider's Terms prohibit scraping/automated extraction outside published interfaces; this lane uses the published API. Check the current account plan/terms before enabling commercial use: the provider's press page has described API access as free for hobby use and pay-as-you-go for commercial use."
