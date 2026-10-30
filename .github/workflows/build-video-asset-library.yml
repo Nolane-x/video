@@ -52,6 +52,7 @@ jobs:
         run: python tools/video/build_asset_library.py dist/video-assets
         env:
           SMITHSONIAN_API_KEY: ${{ secrets.SMITHSONIAN_API_KEY }}
+          POLY_PIZZA_API_KEY: ${{ secrets.POLY_PIZZA_API_KEY }}
 
       - name: Create size-safe single or multi-volume ZIP bundles
         run: python tools/video/package_asset_bundles.py dist/video-assets
@@ -212,6 +213,45 @@ jobs:
               target = root / lazy_path
               assert target.is_file(), "LazyTextures extracted asset file is missing"
               assert hashlib.sha256(target.read_bytes()).hexdigest() == asset["sha256"], "LazyTextures per-file SHA-256 mismatch"
+          assert "poly_pizza_models_downloaded" in expected and "poly_pizza_model_bytes_downloaded" in expected
+          poly_pizza_report = index.get("poly_pizza_downloads")
+          assert isinstance(poly_pizza_report, list), "Poly Pizza source report is missing"
+          poly_pizza_downloaded = [row for row in poly_pizza_report if row.get("status") == "downloaded"]
+          poly_pizza_assets = [asset for asset in index["assets"] if asset.get("type") == "poly-pizza-cc0-model"]
+          assert len(poly_pizza_downloaded) == expected["poly_pizza_models_downloaded"]
+          assert len(poly_pizza_assets) == expected["poly_pizza_models_downloaded"]
+          assert sum(row.get("size_bytes", 0) for row in poly_pizza_downloaded) == expected["poly_pizza_model_bytes_downloaded"]
+          assert expected["poly_pizza_models_downloaded"] <= 48
+          assert expected["poly_pizza_model_bytes_downloaded"] <= 4 * 1024 * 1024 * 1024
+          successful_poly_ids = set()
+          for row in poly_pizza_downloaded:
+              assert row.get("license") == "CC0-1.0"
+              assert row.get("license_verified_from_item_metadata") is True
+              assert row.get("redistributable") is True
+              assert row.get("source_page", "").startswith("https://poly.pizza/m/")
+              assert 0 < row.get("size_bytes", 0) <= 128 * 1024 * 1024
+              assert len(row.get("sha256", "")) == 64
+              successful_poly_ids.add(row.get("model_id"))
+          for asset in poly_pizza_assets:
+              assert asset.get("license") == "CC0-1.0"
+              assert asset.get("license_url") == "https://creativecommons.org/publicdomain/zero/1.0/"
+              assert asset.get("license_verified_from_item_metadata") is True
+              assert asset.get("redistributable") is True
+              assert asset.get("source_page", "").startswith("https://poly.pizza/m/")
+              assert asset.get("source_file_url", "").startswith("https://")
+              poly_host = urllib.parse.urlsplit(asset["source_file_url"]).hostname or ""
+              assert poly_host == "poly.pizza" or poly_host.endswith(".poly.pizza")
+              assert asset.get("model_id") in successful_poly_ids
+              assert asset.get("path", "").startswith("third-party/poly-pizza/models/")
+              assert asset.get("path", "").endswith(".glb")
+              assert len(asset.get("sha256", "")) == 64 and asset.get("size_bytes", 0) > 0
+              poly_path = root / asset["path"]
+              assert poly_path.is_file(), "Poly Pizza GLB is missing"
+              poly_bytes = poly_path.read_bytes()
+              assert poly_bytes[:4] == b"glTF"
+              assert int.from_bytes(poly_bytes[4:8], "little") == 2
+              assert int.from_bytes(poly_bytes[8:12], "little") == len(poly_bytes)
+              assert hashlib.sha256(poly_bytes).hexdigest() == asset["sha256"]
           assert "usgs_images_downloaded" in expected and "usgs_videos_downloaded" in expected and "usgs_audio_downloaded" in expected
           usgs_report = index.get("usgs_gallery_downloads")
           assert isinstance(usgs_report, list), "USGS Gallery source report is missing"
