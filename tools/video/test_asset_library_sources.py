@@ -22,6 +22,7 @@ import package_asset_bundles as bundle_packager  # noqa: E402
 import build_asset_library_shard as shard_builder  # noqa: E402
 import finalize_asset_library_release as release_finalizer  # noqa: E402
 import probe_nara_bulk_dataset as nara_probe  # noqa: E402
+import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -1858,6 +1859,83 @@ class NARABulkDatasetProbeTests(unittest.TestCase):
         self.assertEqual(summary["sample_eligible_video_objects"][0]["object_url_host"], "catalog.archives.gov")
         self.assertNotIn("restricted.mp4", [x.get("object_filename") for x in summary["sample_eligible_video_objects"]])
         self.assertFalse("media_downloaded" in summary)
+
+
+
+
+class NASASVSPublicDomainProbeTests(unittest.TestCase):
+    def test_svs_movie_url_requires_the_official_vis_path_and_supported_video_type(self):
+        self.assertTrue(
+            nasa_svs_probe.svs_movie_url_is_allowed(
+                "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"
+            )
+        )
+        self.assertTrue(
+            nasa_svs_probe.svs_movie_url_is_allowed(
+                "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.webm"
+            )
+        )
+        self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://example.com/vis/movie.mp4"))
+        self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://svs.gsfc.nasa.gov/api/5101/"))
+        self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("http://svs.gsfc.nasa.gov/vis/movie.mp4"))
+        self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://svs.gsfc.nasa.gov/vis/frame.tif"))
+
+    def test_svs_page_parser_finds_movies_and_detects_explicit_licensed_music_notes(self):
+        page = {
+            "id": 5101,
+            "page_type": "Visualization",
+            "progress": "Complete",
+            "title": "Earth ocean visualization",
+            "description": "An animated view of global ocean temperatures.",
+            "studio": "SVS",
+            "credits": [{"role": "Visualizer", "people": [{"name": "Test Author", "employer": "NASA/GSFC"}]}],
+            "media_groups": [{
+                "widget": "Video player",
+                "description": "The animation shows sea surface temperature.",
+                "items": [{
+                    "instance": {
+                        "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/ocean.mp4",
+                        "filename": "ocean.mp4",
+                        "media_type": "Movie",
+                        "width": 3840,
+                        "height": 2160,
+                    }
+                }],
+            }],
+        }
+        with mock.patch.object(nasa_svs_probe, "fetch_json", return_value=(page, 2048)):
+            result, size = nasa_svs_probe.inspect_page(5101)
+        self.assertEqual(size, 2048)
+        self.assertEqual(result["status"], "inspected")
+        self.assertEqual(result["allowlisted_movie_count"], 1)
+        self.assertFalse(result["exception_flagged"])
+        self.assertEqual(result["movie_samples"][0]["width"], 3840)
+
+        page["media_groups"][0]["description"] = (
+            "The visualization includes music licensed from a third-party rights holder."
+        )
+        with mock.patch.object(nasa_svs_probe, "fetch_json", return_value=(page, 2048)):
+            flagged, _ = nasa_svs_probe.inspect_page(5101)
+        self.assertTrue(flagged["exception_flagged"])
+        self.assertTrue(flagged["public_domain_exception_markers"])
+
+    def test_svs_mp4_range_probe_checks_magic_and_reads_only_header_bytes(self):
+        url = "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/ocean.mp4"
+        response = mock.MagicMock()
+        response.__enter__.return_value = response
+        response.status = 206
+        response.headers = {
+            "Content-Type": "video/mp4",
+            "Content-Range": "bytes 0-63/78000000",
+        }
+        response.read.return_value = bytes.fromhex("000000186674797069736f6d") + b"x" * 52
+        with mock.patch.object(nasa_svs_probe.urllib.request, "urlopen", return_value=response):
+            result = nasa_svs_probe.probe_movie_header(url)
+        self.assertEqual(result["status"], "header-verified")
+        self.assertTrue(result["signature_ok"])
+        self.assertEqual(result["remote_size_bytes"], 78000000)
+        self.assertEqual(result["bytes_read"], 64)
+        response.read.assert_called_once_with(65)
 
 
 
