@@ -151,6 +151,68 @@ def _digital_objects(record: dict[str, Any]) -> list[dict[str, Any]]:
     return [item for item in value if isinstance(item, dict)]
 
 
+def nara_video_object_url_is_allowed(url: str) -> bool:
+    """Allow only public NARA S3 MP4 objects in the official media bucket/prefix."""
+    parsed = urllib.parse.urlsplit(str(url or ""))
+    if parsed.scheme != "https" or parsed.hostname not in {"s3.amazonaws.com", "s3.us-east-1.amazonaws.com"}:
+        return False
+    if parsed.username or parsed.password or parsed.port:
+        return False
+    path = urllib.parse.unquote(parsed.path)
+    return (
+        path.startswith("/NARAprodstorage/")
+        and "/mopix/" in path
+        and path.casefold().endswith(".mp4")
+    )
+
+
+def probe_nara_mp4_range(url: str, expected_size: int | None = None) -> dict[str, Any]:
+    """Read no more than 64 bytes from an allow-listed public NARA object."""
+    if not nara_video_object_url_is_allowed(url):
+        return {"url_allowed": False, "status": "rejected-url"}
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "video/mp4,application/octet-stream,*/*",
+            "Accept-Encoding": "identity",
+            "Range": "bytes=0-63",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=25) as response:
+            sample = response.read(65)
+            content_range = response.headers.get("Content-Range", "")
+            content_length = response.headers.get("Content-Length", "")
+            status = getattr(response, "status", 200)
+            actual_total = None
+            if "/" in content_range:
+                try:
+                    actual_total = int(content_range.rsplit("/", 1)[-1])
+                except ValueError:
+                    actual_total = None
+            if actual_total is None and content_length.isdigit() and status == 206:
+                actual_total = int(content_length)
+            is_mp4 = len(sample) >= 12 and sample[4:8] == b"ftyp"
+            return {
+                "url_allowed": True,
+                "status": "range-verified" if is_mp4 and status in {200, 206} else "range-invalid",
+                "http_status": status,
+                "content_type": response.headers.get("Content-Type", ""),
+                "content_range": content_range,
+                "bytes_read": len(sample),
+                "mp4_ftyp_signature": is_mp4,
+                "expected_size_bytes": expected_size,
+                "remote_size_bytes": actual_total,
+                "metadata_size_matches_remote": (
+                    expected_size is None or actual_total is None or int(expected_size) == actual_total
+                ),
+            }
+    except Exception as exc:
+        return {"url_allowed": True, "status": "range-failed", "reason": str(exc)[:400]}
+
+
 def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> dict[str, Any]:
     decoded = body.decode("utf-8-sig")
     try:
@@ -190,6 +252,7 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
         "sample_candidate_objects": [],
         "sample_eligible_video_objects": [],
         "sample_eligible_audio_objects": [],
+        "sample_range_checks": [],
     }
 
     for record in iter_records(document):
@@ -291,6 +354,11 @@ def summarize_metadata_file(body: bytes, record_group: str, object_key: str) -> 
                         "object_url_path_prefix": "/".join(parsed.path.split("/")[:4]),
                         "object_url": url,
                     })
+                # Do not fetch media: range probes read at most the MP4 header.
+                if len(summary["sample_range_checks"]) < 5:
+                    summary["sample_range_checks"].append(
+                        probe_nara_mp4_range(url, file_bytes or None)
+                    )
             if rights_ok and valid_https_url and is_audio_object:
                 summary["eligible_audio_objects"] += 1
                 summary["eligible_audio_object_bytes"] += file_bytes
