@@ -28,7 +28,7 @@ AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
 # LazyTextures documents a provider-wide CC0 1.0 grant and a public API with no key.
 # Keep the import bounded and polite; API browsing is open but media downloads are fair-use.
-LAZYTEXTURES_ASSET_CAPS = {"models": 10, "materials": 16, "hdris": 10, "textures": 18}
+LAZYTEXTURES_ASSET_CAPS = {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8}
 LAZYTEXTURES_API_BASE = "https://lazytextures.net:3000"
 LAZYTEXTURES_DOCS_URL = "https://lazytextures.com/PublicAPI"
 LAZYTEXTURES_MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
@@ -42,6 +42,7 @@ LAZYTEXTURES_API_TYPES = {
     "materials": {"endpoint": "previewsMaterials", "list_key": "PreviewMaterials", "label": "PBR materials"},
     "hdris": {"endpoint": "previewsHDRIs", "list_key": "PreviewHDRIs", "label": "HDRI lighting environments"},
     "textures": {"endpoint": "previewsTextures", "list_key": "PreviewTextures", "label": "texture maps and decals"},
+    "other": {"endpoint": "previewsOther", "list_key": "PreviewOther", "label": "brushes, presets and miscellaneous assets"},
 }
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
@@ -1776,10 +1777,9 @@ def download_ambientcg(root,index):
 def lazytextures_asset_name_is_allowed(name):
     value = str(name or "").strip()
     return bool(
-        value and len(value) <= 160
-        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ._()+'-]*", value)
-        and ".." not in value and "/" not in value and "\\" not in value
-        and not any(ord(ch) < 32 for ch in value)
+        value and value not in {".", ".."} and len(value) <= 160
+        and "/" not in value and "\\" not in value
+        and not any(ord(ch) < 32 or ord(ch) == 127 for ch in value)
     )
 
 
@@ -1871,7 +1871,22 @@ def lazytextures_response_assets(payload, asset_type):
     rows = payload.get(key)
     if not isinstance(rows, list):
         data = payload.get("data")
-        rows = data.get(key) if isinstance(data, dict) else None
+        if isinstance(data, list):
+            rows = data
+        elif isinstance(data, dict):
+            rows = data.get(key)
+            if not isinstance(rows, list) and asset_type == "other":
+                for fallback_key in ("PreviewOthers", "PreviewOtherAssets", "Other", "Others", "assets"):
+                    candidate = data.get(fallback_key)
+                    if isinstance(candidate, list):
+                        rows = candidate
+                        break
+    if not isinstance(rows, list) and asset_type == "other":
+        for fallback_key in ("PreviewOthers", "PreviewOtherAssets", "Others", "OtherAssets"):
+            candidate = payload.get(fallback_key)
+            if isinstance(candidate, list):
+                rows = candidate
+                break
     if not isinstance(rows, list):
         return []
     return [row for row in rows if isinstance(row, dict)]
@@ -1939,7 +1954,8 @@ def lazytextures_archive_candidates(detail):
             size = 0
         if name and path and size > 0:
             url = lazytextures_download_url(path)
-            if url and Path(name).name == name and Path(name).suffix.lower() == ".zip":
+            if (url and Path(name).name == name and Path(name).suffix.lower() == ".zip"
+                    and PurePosixPath(urllib.parse.unquote(urllib.parse.urlsplit(url).path)).name == name):
                 key = (url, size)
                 if key not in seen and size <= LAZYTEXTURES_MAX_ARCHIVE_BYTES:
                     seen.add(key)
@@ -1973,6 +1989,132 @@ def lazytextures_choose_archive(detail):
         return 20
     candidates.sort(key=lambda row: (rank(row), row["size_bytes"], row["name"].casefold()))
     return candidates[0]
+
+
+def lazytextures_validate_zip_archive(blob):
+    """Validate central-directory sizes and paths before any CRC scan or extraction."""
+    import io
+    try:
+        with zipfile.ZipFile(io.BytesIO(blob)) as archive:
+            infos = archive.infolist()
+            if not infos or len(infos) > LAZYTEXTURES_MAX_ZIP_MEMBERS:
+                raise RuntimeError("ZIP member count is empty or exceeds the safety ceiling")
+            total_unpacked = 0
+            for info in infos:
+                name = str(info.filename or "").replace("\\", "/")
+                path = PurePosixPath(name)
+                unix_type = (info.external_attr >> 16) & 0o170000
+                if (
+                    not name or "\x00" in name or path.is_absolute()
+                    or ".." in path.parts or (path.parts and ":" in path.parts[0])
+                    or unix_type == 0o120000
+                ):
+                    raise RuntimeError("ZIP contains an unsafe path or symbolic link: " + name[:180])
+                if info.flag_bits & 0x1:
+                    raise RuntimeError("Encrypted ZIP members are not accepted")
+                if info.is_dir():
+                    continue
+                if info.file_size < 0 or info.compress_size < 0:
+                    raise RuntimeError("ZIP contains invalid member size metadata")
+                total_unpacked += info.file_size
+                if total_unpacked > LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES:
+                    raise RuntimeError("ZIP declared uncompressed size exceeds the per-item safety ceiling")
+                if info.file_size and not info.compress_size:
+                    raise RuntimeError("ZIP contains a non-empty member with zero compressed size")
+                if info.compress_size and info.file_size / info.compress_size > 500:
+                    raise RuntimeError("ZIP compression ratio exceeds the safety ceiling")
+            bad = archive.testzip()
+            if bad:
+                raise RuntimeError("Corrupt ZIP member: " + str(bad))
+            return len(infos), total_unpacked
+    except zipfile.BadZipFile as exc:
+        raise RuntimeError("Invalid ZIP archive") from exc
+
+
+def lazytextures_media_signature_is_valid(blob, extension):
+    """Conservatively recognize supported assets before they enter the library index."""
+    ext = str(extension or "").lower()
+    if not blob:
+        return False
+    if ext == ".png":
+        return blob.startswith(b"\x89PNG\r\n\x1a\n")
+    if ext in {".jpg", ".jpeg"}:
+        return blob.startswith(b"\xff\xd8\xff")
+    if ext == ".webp":
+        return len(blob) >= 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WEBP"
+    if ext == ".gif":
+        return blob.startswith((b"GIF87a", b"GIF89a"))
+    if ext in {".tif", ".tiff"}:
+        return blob.startswith((b"II*\x00", b"MM\x00*"))
+    if ext == ".exr":
+        return blob.startswith(b"\x76\x2f\x31\x01")
+    if ext == ".hdr":
+        return blob.startswith((b"#?RADIANCE", b"#?RGBE"))
+    if ext == ".fbx":
+        return blob.startswith(b"Kaydara FBX Binary") or blob.lstrip().startswith(b"; FBX")
+    if ext == ".glb":
+        return blob.startswith(b"glTF")
+    if ext == ".gltf":
+        try:
+            data = json.loads(blob.decode("utf-8-sig"))
+            return isinstance(data, dict) and isinstance(data.get("asset"), dict) and bool(data["asset"].get("version"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return False
+    if ext == ".blend":
+        return blob.startswith(b"BLENDER")
+    if ext == ".wav":
+        return len(blob) >= 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WAVE"
+    if ext == ".mp3":
+        return blob.startswith(b"ID3") or (len(blob) > 2 and blob[0] == 0xff and (blob[1] & 0xe0) == 0xe0)
+    if ext in {".ogg", ".oga"}:
+        return blob.startswith(b"OggS")
+    if ext == ".flac":
+        return blob.startswith(b"fLaC")
+    if ext in {".mp4", ".mov", ".m4v"}:
+        return b"ftyp" in blob[:64]
+    if ext == ".webm":
+        return blob.startswith(b"\x1a\x45\xdf\xa3")
+    if ext == ".ttf":
+        return blob.startswith((b"\x00\x01\x00\x00", b"true"))
+    if ext == ".otf":
+        return blob.startswith(b"OTTO")
+    if ext == ".woff":
+        return blob.startswith(b"wOFF")
+    if ext == ".woff2":
+        return blob.startswith(b"wOF2")
+    if ext == ".pdf":
+        return blob.startswith(b"%PDF-")
+    if ext == ".usdz":
+        return blob.startswith(b"PK\x03\x04")
+    if ext == ".stl":
+        if blob.lstrip().lower().startswith(b"solid"):
+            return True
+        if len(blob) >= 84:
+            triangles = int.from_bytes(blob[80:84], "little")
+            return 84 + triangles * 50 == len(blob)
+        return False
+    if ext == ".svg":
+        try:
+            clean = sanitize_cc0_svg(blob)
+            return b"<svg" in clean[:1024].lower()
+        except Exception:
+            return False
+    if ext in {".obj", ".mtl", ".dae", ".abc", ".mtlx", ".xml", ".json", ".txt", ".md", ".csv"}:
+        try:
+            text = blob.decode("utf-8-sig")
+            if "\x00" in text or not text.strip():
+                return False
+            if ext == ".json":
+                return isinstance(json.loads(text), (dict, list))
+            if ext in {".xml", ".dae", ".mtlx"}:
+                import xml.etree.ElementTree as ET
+                ET.fromstring(text)
+            if ext == ".abc" and text[:32].strip() and not text.lstrip().startswith(("<?xml", "<")):
+                return False
+            return True
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+            return False
+    return False
 
 
 def lazytextures_asset_tags(asset, detail):
@@ -2076,20 +2218,32 @@ def download_lazytextures(root, index):
                         raise RuntimeError("Downloaded ZIP byte count did not match the API file metadata.")
                     archive_sha = hashlib.sha256(blob).hexdigest()
                     import io
-                    with zipfile.ZipFile(io.BytesIO(blob)) as archive:
-                        if len(archive.infolist()) > LAZYTEXTURES_MAX_ZIP_MEMBERS:
-                            raise RuntimeError("ZIP member count exceeded the safety ceiling.")
-                        corrupt = archive.testzip()
-                        if corrupt:
-                            raise RuntimeError("Corrupt ZIP member: " + str(corrupt))
+                    archive_members, archive_unpacked = lazytextures_validate_zip_archive(blob)
                     target = root / "third-party/lazytextures" / asset_type / slugify(name)
                     if target.exists():
                         shutil.rmtree(target)
                     extracted, unpacked = safe_extract(blob, target, max_bytes=LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES)
-                    media_files = [path for path in target.rglob("*") if path.is_file()]
+                    media_files = []
+                    rejected_files = []
+                    for path in sorted(p for p in target.rglob("*") if p.is_file()):
+                        raw = path.read_bytes()
+                        extension = path.suffix.lower()
+                        if extension == ".svg":
+                            try:
+                                raw = sanitize_cc0_svg(raw)
+                                path.write_bytes(raw)
+                            except Exception:
+                                path.unlink(missing_ok=True)
+                                rejected_files.append(path.name)
+                                continue
+                        if lazytextures_media_signature_is_valid(raw, extension):
+                            media_files.append(path)
+                        else:
+                            path.unlink(missing_ok=True)
+                            rejected_files.append(path.name)
                     if extracted <= 0 or not media_files:
                         shutil.rmtree(target, ignore_errors=True)
-                        raise RuntimeError("ZIP had no file types allowed by the media-library extraction policy.")
+                        raise RuntimeError("ZIP had no files that passed the media signature and safe-extraction policy.")
                     if total_unpacked_bytes + unpacked > LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
                         shutil.rmtree(target, ignore_errors=True)
                         row.update(status="skipped_total_unpacked_limit", reason="Package would exceed the total uncompressed LazyTextures ceiling.")
@@ -2133,6 +2287,8 @@ def download_lazytextures(root, index):
                         status="downloaded", file_name=choice["name"], resolution=choice["resolution"],
                         archive_bytes=len(blob), archive_sha256=archive_sha,
                         extracted_files=len(package_assets), unpacked_bytes=unpacked,
+                        archive_members=archive_members, declared_unpacked_bytes=archive_unpacked,
+                        rejected_invalid_files=len(rejected_files),
                         tags=tags, files=package_assets,
                     )
                     report.append(row)
