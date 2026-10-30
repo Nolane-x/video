@@ -17,17 +17,21 @@ UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
 MAX_MEDIA_FILE = 12 * 1024 * 1024
 MAX_POLY_FILE = 60 * 1024 * 1024
+NASA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
+NASA_VIDEO_MAX_BYTES = 250 * 1024 * 1024
+NASA_AUDIO_MAX_BYTES = 48 * 1024 * 1024
+NASA_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 SOURCE_DOWNLOAD_WORKERS = 6  # Provider-level parallelism; provider-specific pacing remains enabled.
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 72, "models": 120, "textures": 320}
 POLYHAVEN_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
+AMBIENTCG_SELECTION_CAPS = {"Material": 64, "HDRI": 24, "3DModel": 24, "Decal": 20, "Atlas": 18, "PlainTexture": 24, "Brush": 12, "Substance": 12}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
-AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 8 * 1024 * 1024 * 1024
 # LazyTextures documents a provider-wide CC0 1.0 grant and a public API with no key.
 # Keep the import bounded and polite; API browsing is open but media downloads are fair-use.
 LAZYTEXTURES_ASSET_CAPS = {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8}
@@ -67,29 +71,29 @@ POLY_PIZZA_LICENSE = "CC0-1.0"
 
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 18
-USGS_SELECTION_CAPS = {"images": 80, "videos": 40, "audio": 24}
+USGS_GALLERY_PAGE_SCAN_LIMIT = 32
+USGS_SELECTION_CAPS = {"images": 120, "videos": 64, "audio": 40}
 USGS_IMAGE_MAX_BYTES = 10 * 1024 * 1024
 USGS_VIDEO_MAX_BYTES = 100 * 1024 * 1024
 USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 6 * 1024 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
+OPENGAMEART_SELECTION_CAPS = {"2d": 40, "3d": 40, "textures": 32, "sfx": 28, "music": 28}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 5
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 48
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 8
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 80
 OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
-OPENGAMEART_MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 8 * 1024 * 1024 * 1024
 # Internet Archive public-domain/CC0 moving-image selections. A collection is a
 # discovery scope only: every item must pass its own licenseurl/rights and file checks.
-INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 40, "nasa": 40}
+INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 80, "nasa": 80}
 INTERNET_ARCHIVE_SEARCH_ROWS = 100
-INTERNET_ARCHIVE_SEARCH_PAGES = 2
-INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 80
+INTERNET_ARCHIVE_SEARCH_PAGES = 3
+INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 160
 INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
-INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 4 * 1024 * 1024 * 1024
+INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
 INTERNET_ARCHIVE_VIDEO_EXTENSIONS = {".mp4", ".ogv", ".webm"}
 OPENMOJI_VERSION = "17.0.0"
@@ -116,10 +120,10 @@ OPENGAMEART_ALLOWED_MEDIA_EXTS = {
     ".ttf",".otf",".woff",".woff2"
 }
 MET_OPEN_ACCESS_IMAGE_CAP = 300
-RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 240
-WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 800
-WIKIMEDIA_CC0_SVG_CAP = 100
-WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 100
+RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 360
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 1200
+WIKIMEDIA_CC0_SVG_CAP = 150
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 150
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -3853,11 +3857,11 @@ def download_google_fonts(root,index):
 
 # NOAA Ocean Exploration uses a public-domain default for its own media, but
 # item captions/credits can identify selected copyrighted or partner-owned content.
-NOAA_MEDIA_PAGE_SCAN_LIMIT = 20
-NOAA_MEDIA_SELECTION_CAPS = {"image": 200, "video": 120}
+NOAA_MEDIA_PAGE_SCAN_LIMIT = 40
+NOAA_MEDIA_SELECTION_CAPS = {"image": 300, "video": 180}
 NOAA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
 NOAA_VIDEO_MAX_BYTES = 200 * 1024 * 1024
-NOAA_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+NOAA_TOTAL_MAX_BYTES = 9 * 1024 * 1024 * 1024
 
 
 class NOAAMultimediaListingParser(HTMLParser):
