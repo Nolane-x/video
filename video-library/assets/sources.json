@@ -537,16 +537,16 @@
     },
     {
       "id": "noaa-multimedia",
-      "title": "NOAA multimedia — ocean, weather, atmosphere and climate media",
+      "title": "NOAA Ocean Exploration Multimedia — deep-ocean images and videos with caption/credit screening",
       "provider": "National Oceanic and Atmospheric Administration",
       "kind": "government multimedia collection",
       "category": "ocean, climate, storms, weather, marine science and research vessels",
-      "source_page": "https://www.noaa.gov/multimedia",
-      "license": "Generally public domain unless item credit/caption identifies restrictions; not a blanket CC0 license",
-      "license_url": "https://oceanservice.noaa.gov/about/faq.html",
+      "source_page": "https://oceanexplorer.noaa.gov/multimedia/",
+      "license": "Public Domain by default for NOAA Ocean Exploration site content unless otherwise noted; items with the word copyright in caption/credit/alt or missing NOAA credit are skipped",
+      "license_url": "https://oceanexplorer.noaa.gov/faqs/",
       "verified_page_license": true,
-      "bundling": "source-only-until-stable-item-metadata-and-download-flow-are-implemented",
-      "note": "NOAA describes most agency content as public domain unless specifically noted; third-party footage, logos, identifiable people and endorsement implications need separate handling. Preserve official credit and only bundle after item-level rights checks."
+      "bundling": "bounded-automatic-after-item-page-caption-credit-and-direct-download-screen",
+      "note": "The official NOAA Ocean Exploration FAQ says website information is public domain unless otherwise noted. The media kit says a limited number of images/videos are copyrighted and identifies those cases when the caption includes the word copyright. The importer crawls the official multimedia listing, requires an explicit item Credit field naming NOAA, screens caption/credit/alt text for copyright markers, skips possible identifiable-person/interview contexts for manual review, downloads only explicit Download links from the official oceanexplorer.noaa.gov/wp-content/uploads path, and preserves caption, exact credit, item/download URL, embedded image metadata, and SHA-256. Credit must be retained, and usage must not imply NOAA endorsement."
     },
     {
       "id": "ambientcg-cc0",
@@ -564,19 +564,6 @@
       "note": "The official docs list Material, HDRI, 3DModel, Decal, Atlas, PlainTexture, Brush and Substance as supported v2 API types and state all downloadable assets are CC0 1.0. The builder downloads only from the official HTTPS /get endpoint, prefers small variants, validates ZIP integrity, imposes per-package and total unpacked size caps, excludes disallowed/executable/nested archive files, and preserves source pages, archive digest and per-file SHA-256. Search ceilings are not promised download counts; ASSET_INDEX.json records the real result."
     },
     {
-      "id": "original-stickers-meme-templates",
-      "title": "Nolane Video — original CC0 reaction stickers, annotation doodles and meme layouts",
-      "provider": "Nolane Video repository",
-      "kind": "repository-generated editable vector assets",
-      "category": "Reaction stickers, expressive faces, arrows, annotation doodles, comic bursts, generic meme layouts and caption templates",
-      "source_page": "https://github.com/Nolane-x/video/tree/main/tools/video/generate_original_stickers.py",
-      "license": "CC0-1.0",
-      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "verified_page_license": true,
-      "bundling": "generated-in-build-and-included-directly",
-      "note": "The repository generates 202 original transparent/editable SVG sticker assets and 48 original meme-layout templates. Layouts use generic visual patterns and editable placeholder text; they are not copies of existing viral meme images, protected characters, logos or branded stickers. Users must only place photos/video/audio they own or are otherwise licensed to use into the templates."
-    },
-    {
       "id": "original-procedural-motion-loops",
       "title": "Original in-repository procedural motion loops",
       "provider": "Nolane-x/video",
@@ -588,6 +575,19 @@
       "verified_page_license": true,
       "bundling": "generated-by-build-using-local-ffmpeg-filters",
       "note": "The build generates 12 six-second 1280×720 H.264 loops from FFmpeg filter graphs; no external footage, imagery or audio are embedded. Each output is verified with ffprobe for codec, dimensions and duration, and the file receives a SHA-256 digest in the asset manifest. These are illustrative loops, not factual footage."
+    },
+    {
+      "id": "original-sticker-meme-caption-packs",
+      "title": "Original Nolane sticker, reaction, meme-layout and caption template packs",
+      "provider": "Nolane Video Asset Library",
+      "kind": "repository-generated vector asset families",
+      "category": "reaction stickers, meme layouts, lower thirds, title cards, source notes, subtitles and social CTAs",
+      "source_page": "https://github.com/Nolane-x/video/tree/main/tools/video",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "generated-at-build-time",
+      "note": "All items are original vector layouts generated by this repository. They are generic editable sticker/meme layouts and caption overlays, not copies of copyrighted characters, brand marks or famous meme-image templates. Replace text placeholders and use only footage or photos you have rights to."
     }
   ]
 }
