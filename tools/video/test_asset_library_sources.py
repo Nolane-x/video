@@ -34,10 +34,12 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertFalse(library.ambientcg_download_url_is_allowed("https://ambientcg.com/get?file=../payload.zip"))
 
     def test_ambientcg_download_picker_prefers_small_official_zip(self):
-        asset = {"downloadFolders": {"default": {"downloadFiletypeCategories": {"zip": {"downloads": [
-            {"attribute": "2K-JPG", "extension": "zip", "size": 8_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_2K-JPG.zip"},
-            {"attribute": "1K-JPG", "extension": "zip", "size": 2_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_1K-JPG.zip"},
-            {"attribute": "1K-JPG", "extension": "zip", "size": 1_000_000, "downloadLink": "https://evil.example/get?file=Other_1K-JPG.zip"}
+        # Fixture mirrors the live official v2 full_json schema: filetype, fileName,
+        # downloadLink, size and attribute inside downloadFolders/default/.../downloads.
+        asset = {"assetId": "Wood096", "tags": ["wood", "pbr"], "downloadFolders": {"default": {"downloadFiletypeCategories": {"zip": {"downloads": [
+            {"attribute": "2K-JPG", "filetype": "zip", "fileName": "Wood096_2K-JPG.zip", "size": 8_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_2K-JPG.zip"},
+            {"attribute": "1K-JPG", "filetype": "zip", "fileName": "Wood096_1K-JPG.zip", "size": 2_000_000, "downloadLink": "https://ambientcg.com/get?file=Wood096_1K-JPG.zip"},
+            {"attribute": "1K-JPG", "filetype": "zip", "fileName": "Other_1K-JPG.zip", "size": 1_000_000, "downloadLink": "https://evil.example/get?file=Other_1K-JPG.zip"}
         ]}}}}
         choice = library.ambientcg_choose_download(asset)
         self.assertEqual(choice["attribute"], "1K-JPG")
