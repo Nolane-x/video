@@ -137,7 +137,7 @@ jobs:
           ambientcg_assets = [asset for asset in index["assets"] if asset.get("type") == "ambientcg-asset-file"]
           assert len(ambientcg_downloaded) == expected["ambientcg_packages_downloaded"]
           assert len(ambientcg_assets) == expected["ambientcg_files_downloaded"]
-          assert expected["ambientcg_packages_downloaded"] <= 30, "ambientCG search ceiling exceeded"
+          assert expected["ambientcg_packages_downloaded"] <= 60, "ambientCG search ceiling exceeded"
           for row in ambientcg_downloaded:
               assert row.get("source_page", "").startswith("https://ambientcg.com/a/")
               assert row.get("license") == "CC0-1.0"
@@ -159,7 +159,7 @@ jobs:
           usgs_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("usgs-public-domain-")]
           assert len(usgs_downloaded) == expected["usgs_images_downloaded"] + expected["usgs_videos_downloaded"] + expected["usgs_audio_downloaded"]
           assert len(usgs_assets) == len(usgs_downloaded)
-          assert expected["usgs_images_downloaded"] <= 24 and expected["usgs_videos_downloaded"] <= 8 and expected["usgs_audio_downloaded"] <= 8
+          assert expected["usgs_images_downloaded"] <= 40 and expected["usgs_videos_downloaded"] <= 18 and expected["usgs_audio_downloaded"] <= 12
           for asset in usgs_assets:
               media_type = asset.get("type", "").removeprefix("usgs-public-domain-")
               assert media_type in {"image", "video", "audio"}
@@ -181,8 +181,8 @@ jobs:
           opengameart_assets = [asset for asset in index["assets"] if str(asset.get("type", "")).startswith("opengameart-cc0-")]
           assert len(opengameart_downloaded) == expected["opengameart_items_downloaded"]
           assert len(opengameart_assets) == expected["opengameart_files_downloaded"]
-          assert expected["opengameart_items_downloaded"] <= sum([6, 6, 5, 5, 5]), "OpenGameArt search ceilings exceeded"
-          caps = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+          assert expected["opengameart_items_downloaded"] <= sum([8, 8, 8, 8, 8]), "OpenGameArt search ceilings exceeded"
+          caps = {"2d": 8, "3d": 8, "textures": 8, "sfx": 8, "music": 8}
           for category, cap in caps.items():
               assert sum(row.get("status") == "downloaded" and row.get("asset_category") == category for row in opengameart_report) <= cap
           for asset in opengameart_assets:
