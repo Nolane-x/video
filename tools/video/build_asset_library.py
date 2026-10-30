@@ -15,34 +15,34 @@ CC0 = "CC0-1.0"
 CC0_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 UA = "NolaneVideoAssetLibrary/1.0 (+https://github.com/Nolane-x/video)"
 MAX_KENNEY_ZIP = 110 * 1024 * 1024
-MAX_MEDIA_FILE = 3 * 1024 * 1024
-MAX_POLY_FILE = 35 * 1024 * 1024
+MAX_MEDIA_FILE = 12 * 1024 * 1024
+MAX_POLY_FILE = 60 * 1024 * 1024
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
-AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
-AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
+AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
+AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 4
-USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
-USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
-USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
-USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
+USGS_GALLERY_PAGE_SCAN_LIMIT = 18
+USGS_SELECTION_CAPS = {"images": 80, "videos": 40, "audio": 24}
+USGS_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 100 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 6 * 1024 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+OPENGAMEART_SELECTION_CAPS = {"2d": 24, "3d": 24, "textures": 20, "sfx": 20, "music": 20}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 2
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
-OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
-OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
-OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 5
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 48
+OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
+OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
 GOOGLE_FONTS_FAMILY_SLUGS = [
     "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
     "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
@@ -60,11 +60,11 @@ OPENGAMEART_ALLOWED_MEDIA_EXTS = {
     ".obj",".mtl",".glb",".gltf",".fbx",".abc",".dae",".stl",
     ".ttf",".otf",".woff",".woff2"
 }
-MET_OPEN_ACCESS_IMAGE_CAP = 110
-RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
-WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
-WIKIMEDIA_CC0_SVG_CAP = 60
-WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 36
+MET_OPEN_ACCESS_IMAGE_CAP = 300
+RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 240
+WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 800
+WIKIMEDIA_CC0_SVG_CAP = 100
+WIKIMEDIA_CC0_AUDIO_VIDEO_CAP = 100
 ALLOWED = {".png",".jpg",".jpeg",".webp",".svg",".tif",".tiff",".exr",".hdr",".obj",".mtl",".glb",".gltf",".fbx",".blend",".wav",".ogg",".mp3",".flac",".ttf",".otf",".woff",".woff2",".mp4",".mov",".m4v",".webm",".ogv",".oga",".json",".txt",".md",".pdf",".csv",".xml",".mtlx",".usdz",".abc",".dae",".stl"}
 DENIED = {".exe",".dll",".so",".dylib",".bat",".cmd",".ps1",".msi",".apk",".app",".dmg",".jar",".com"}
 
@@ -2569,11 +2569,11 @@ def download_google_fonts(root,index):
 
 # NOAA Ocean Exploration uses a public-domain default for its own media, but
 # item captions/credits can identify selected copyrighted or partner-owned content.
-NOAA_MEDIA_PAGE_SCAN_LIMIT = 6
-NOAA_MEDIA_SELECTION_CAPS = {"image": 72, "video": 36}
-NOAA_IMAGE_MAX_BYTES = 24 * 1024 * 1024
-NOAA_VIDEO_MAX_BYTES = 150 * 1024 * 1024
-NOAA_TOTAL_MAX_BYTES = 3 * 1024 * 1024 * 1024
+NOAA_MEDIA_PAGE_SCAN_LIMIT = 20
+NOAA_MEDIA_SELECTION_CAPS = {"image": 200, "video": 120}
+NOAA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
+NOAA_VIDEO_MAX_BYTES = 200 * 1024 * 1024
+NOAA_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
 
 
 class NOAAMultimediaListingParser(HTMLParser):
@@ -3059,7 +3059,7 @@ def download_met_open_access(root,index):
         try:
             response=request_json(search_url,timeout=20)
             for object_id in response.get("objectIDs") or []:
-                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=7: break
+                if total>=cap or sum(1 for r in report if r.get("category")==category and r.get("status")=="downloaded")>=12: break
                 if object_id in seen: continue
                 seen.add(object_id)
                 try:
@@ -3355,7 +3355,7 @@ def download_loc_public_domain(root,index):
         try:
             response=request_json(url,timeout=12)
             for item in response.get("results") or []:
-                if total>=cap or successes>=3 or checked>=6: break
+                if total>=cap or successes>=6 or checked>=12: break
                 item_url=str(item.get("url") or item.get("id") or "")
                 if not item_url: continue
                 identity=item_url.rstrip("/").split("/")[-1]
@@ -3510,7 +3510,7 @@ def download_wikimedia_public_domain(root,index):
             response=request_json(url,timeout=16)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=8: break
+                if total>=cap or successes>=16: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 meta=imageinfo.get("extmetadata") or {}
                 short=str((meta.get("LicenseShortName") or {}).get("value") or "").strip()
@@ -3764,7 +3764,7 @@ def download_rijksmuseum_open_access(root,index):
     dcterms_ns="http://purl.org/dc/terms/"
     rdf_resource="{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"
     token=None; page_num=0; iiif_resolutions=0; iiif_resolution_limit=18
-    while total<cap and page_num<16:
+    while total<cap and page_num<50:
         page_num+=1
         if token:
             params={"verb":"ListRecords","resumptionToken":token}
@@ -4082,7 +4082,7 @@ def download_wikimedia_video_audio(root,index):
             response=request_json(url,timeout=18)
             pages=(response.get("query") or {}).get("pages") or {}
             for page in pages.values():
-                if total>=cap or successes>=3 or checked>=18: break
+                if total>=cap or successes>=5 or checked>=18: break
                 imageinfo=(page.get("imageinfo") or [{}])[0]
                 if not isinstance(imageinfo,dict): continue
                 meta=imageinfo.get("extmetadata") or {}
