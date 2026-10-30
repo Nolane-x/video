@@ -67,6 +67,7 @@ jobs:
           import hashlib
           import re
           import zipfile
+          import urllib.parse
           from pathlib import Path
 
           root = Path("dist/video-assets/video-asset-library")
