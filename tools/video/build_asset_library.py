@@ -3,6 +3,7 @@
 from __future__ import annotations
 import hashlib, html, json, mimetypes, re, shutil, subprocess, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 
 REPO = Path(__file__).resolve().parents[2]
@@ -24,6 +25,14 @@ POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
 AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
+# USGS media is bundled only when its individual detail page's Sources/Usage block
+# contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
+USGS_GALLERY_PAGE_SCAN_LIMIT = 4
+USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
+USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
 MET_OPEN_ACCESS_IMAGE_CAP = 110
 RIJKSMUSEUM_OPEN_ACCESS_IMAGE_CAP = 90
 WIKIMEDIA_PUBLIC_DOMAIN_IMAGE_CAP = 240
@@ -1697,6 +1706,276 @@ def download_ambientcg(root,index):
             report.append({"id":"ambientcg-"+asset_type.lower(),"status":"failed","asset_type":asset_type,
                            "source_page":"https://ambientcg.com/","reason":str(exc)[:400]})
             print("[ambientCG] source request failed:",asset_type,str(exc)[:220])
+    return report
+
+
+class USGSMediaPageParser(HTMLParser):
+    """Extract only explicit USGS item-level rights and source links from public HTML."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.source_depth=0
+        self.h1_depth=0
+        self.title_parts=[]
+        self.source_parts=[]
+        self.all_text=[]
+        self.links=[]
+        self.meta={}
+        self.dates=[]
+
+    def handle_starttag(self,tag,attrs):
+        attrs=dict(attrs)
+        if tag=="section" and "source" in (attrs.get("class") or "").split():
+            self.source_depth+=1
+        if tag=="h1":
+            self.h1_depth+=1
+        if tag in {"a","source","video","audio"}:
+            for attr in ("href","src"):
+                value=attrs.get(attr)
+                if value:
+                    self.links.append(value.strip())
+        if tag=="meta":
+            key=(attrs.get("property") or attrs.get("name") or "").strip().lower()
+            value=(attrs.get("content") or "").strip()
+            if key and value:
+                self.meta[key]=value
+        if tag=="time":
+            value=(attrs.get("datetime") or "").strip()
+            if value:
+                self.dates.append(value)
+
+    def handle_endtag(self,tag):
+        if tag=="h1" and self.h1_depth:
+            self.h1_depth-=1
+        if tag=="section" and self.source_depth:
+            self.source_depth-=1
+
+    def handle_data(self,data):
+        value=" ".join(data.split())
+        if not value:
+            return
+        self.all_text.append(value)
+        if self.source_depth:
+            self.source_parts.append(value)
+        if self.h1_depth:
+            self.title_parts.append(value)
+
+
+def usgs_rights_are_public_domain(statement):
+    """Require the exact item-level Public Domain label; reject all other notices."""
+    normalized=" ".join(str(statement or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
+    return normalized=="public domain"
+
+
+def usgs_media_detail_url_is_allowed(raw_url,media_type):
+    try:
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        if parsed.scheme!="https" or parsed.username or parsed.password or parsed.port not in (None,443) or parsed.fragment:
+            return False
+        host=(parsed.hostname or "").lower()
+        suffix=Path(parsed.path).suffix.lower()
+        if media_type=="images":
+            return (host=="d9-wret.s3.us-west-2.amazonaws.com"
+                    and "/media/images/" in parsed.path
+                    and "/styles/" not in parsed.path
+                    and suffix in {".jpg",".jpeg",".png",".gif",".tif",".tiff",".webp"})
+        if media_type=="videos":
+            return (host=="usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com"
+                    and "/media/video/" in parsed.path
+                    and suffix in {".mp4",".mov"})
+        if media_type=="audio":
+            return (host=="d9-wret.s3.us-west-2.amazonaws.com"
+                    and "/media/audio/" in parsed.path
+                    and suffix in {".mp3",".wav",".ogg",".flac"})
+        return False
+    except Exception:
+        return False
+
+
+def usgs_media_signature_is_valid(blob,media_type,content_type,extension):
+    mime=str(content_type or "").split(";",1)[0].strip().lower()
+    if media_type=="images":
+        valid_mime=mime.startswith("image/")
+        valid_sig=(
+            blob.startswith(b"\xff\xd8\xff") or
+            blob.startswith(b"\x89PNG\r\n\x1a\n") or
+            blob.startswith((b"GIF87a",b"GIF89a")) or
+            blob.startswith((b"II*\x00",b"MM\x00*")) or
+            (len(blob)>=12 and blob[:4]==b"RIFF" and blob[8:12]==b"WEBP")
+        )
+        return valid_mime and valid_sig
+    if media_type=="videos":
+        return (mime.startswith("video/") and len(blob)>20000 and
+                (b"ftyp" in blob[:64] or blob.startswith(b"\x1aE\xdf\xa3")))
+    if media_type=="audio":
+        valid_mime=mime.startswith("audio/") or mime in {"application/ogg","application/octet-stream"}
+        valid_sig=(
+            blob.startswith((b"ID3",b"RIFF",b"OggS",b"fLaC")) or
+            (len(blob)>2 and blob[0]==0xff and (blob[1]&0xe0)==0xe0)
+        )
+        return valid_mime and valid_sig
+    return False
+
+
+def usgs_page_detail_candidates(page_html,media_type):
+    parser=USGSMediaPageParser()
+    parser.feed(page_html)
+    prefix={"images":"/media/images/","videos":"/media/videos/","audio":"/media/audio/"}[media_type]
+    result=[]
+    for link in parser.links:
+        absolute=urllib.parse.urljoin("https://www.usgs.gov/",link)
+        parsed=urllib.parse.urlsplit(absolute)
+        if parsed.scheme=="https" and parsed.hostname=="www.usgs.gov" and parsed.path.startswith(prefix):
+            canonical=urllib.parse.urlunsplit(("https","www.usgs.gov",parsed.path,"",""))
+            if canonical not in result:
+                result.append(canonical)
+    return result
+
+
+def usgs_parse_media_detail(page_html,media_type):
+    parser=USGSMediaPageParser()
+    parser.feed(page_html)
+    rights=" ".join(parser.source_parts).strip()
+    title=(parser.meta.get("og:title") or parser.meta.get("twitter:title") or
+           " ".join(parser.title_parts) or "USGS media").strip()
+    description=(parser.meta.get("og:description") or parser.meta.get("description") or "").strip()
+    creator=(parser.meta.get("author") or parser.meta.get("dcterms.creator") or
+             parser.meta.get("article:author") or "").strip()
+    direct=[]
+    for link in parser.links:
+        absolute=urllib.parse.urljoin("https://www.usgs.gov/",link)
+        if usgs_media_detail_url_is_allowed(absolute,media_type) and absolute not in direct:
+            direct.append(absolute)
+    page_date=(parser.meta.get("article:published_time") or parser.meta.get("dcterms.date") or
+               parser.meta.get("date") or (parser.dates[0] if parser.dates else ""))
+    return {
+        "title":title[:300],"description":description[:1200],"creator":creator[:240],
+        "rights_statement":rights,"date":page_date[:80],"direct_media_urls":direct
+    }
+
+
+def download_usgs_gallery(root,index):
+    """Download a bounded USGS gallery sample only after exact item-level Public Domain checks."""
+    report=[]
+    gallery_roots={
+        "images":"https://www.usgs.gov/products/multimedia-gallery/images",
+        "videos":"https://www.usgs.gov/products/multimedia-gallery/videos",
+        "audio":"https://www.usgs.gov/products/multimedia-gallery/audio"
+    }
+    type_labels={"images":"Official USGS photography and satellite imagery",
+                 "videos":"USGS science videos, field footage and animations",
+                 "audio":"USGS natural sounds, interviews and science podcasts"}
+    total_bytes=0
+    for media_type,cap in USGS_SELECTION_CAPS.items():
+        candidates=[]
+        for page_number in range(USGS_GALLERY_PAGE_SCAN_LIMIT):
+            list_url=gallery_roots[media_type]+"?page="+str(page_number)
+            try:
+                page,_=request_bytes(list_url,timeout=22,limit=8*1024*1024)
+                page_candidates=usgs_page_detail_candidates(page.decode("utf-8","replace"),media_type)
+                for item_url in page_candidates:
+                    if item_url not in candidates:
+                        candidates.append(item_url)
+                if len(candidates)>=cap*5:
+                    break
+                time.sleep(.25)
+            except Exception as exc:
+                report.append({"id":"usgs-"+media_type+"-page-"+str(page_number),
+                               "status":"page_failed","media_type":media_type,"source_page":list_url,
+                               "reason":str(exc)[:300]})
+        downloaded_for_type=0
+        for item_url in candidates:
+            if downloaded_for_type>=cap or total_bytes>=USGS_TOTAL_MAX_BYTES:
+                break
+            try:
+                page,_=request_bytes(item_url,timeout=22,limit=8*1024*1024)
+                detail=usgs_parse_media_detail(page.decode("utf-8","replace"),media_type)
+                row={"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                     "provider":"U.S. Geological Survey","media_type":media_type[:-1] if media_type.endswith("s") else media_type,
+                     "title":detail["title"],"source_page":item_url,"creator":detail["creator"],
+                     "date":detail["date"],"rights_statement":detail["rights_statement"],
+                     "license":"Public Domain (item-level USGS Sources/Usage label)",
+                     "license_url":"https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs",
+                     "category":type_labels[media_type]}
+                if not usgs_rights_are_public_domain(detail["rights_statement"]):
+                    row.update(status="skipped_rights",reason="The item's own Sources/Usage section is not exactly Public Domain.")
+                    report.append(row)
+                    continue
+                if not detail["direct_media_urls"]:
+                    row.update(status="no_eligible_download",reason="No direct original media URL on an approved official USGS media host.")
+                    report.append(row)
+                    continue
+                if media_type=="images":
+                    allowed_ext={".jpg",".jpeg",".png",".gif",".tif",".tiff",".webp"}
+                    max_bytes=USGS_IMAGE_MAX_BYTES
+                elif media_type=="videos":
+                    allowed_ext={".mp4",".mov"}
+                    max_bytes=USGS_VIDEO_MAX_BYTES
+                else:
+                    allowed_ext={".mp3",".wav",".ogg",".flac"}
+                    max_bytes=USGS_AUDIO_MAX_BYTES
+                downloaded=None; failures=[]
+                for media_url in detail["direct_media_urls"]:
+                    ext=Path(urllib.parse.urlsplit(media_url).path).suffix.lower()
+                    if ext not in allowed_ext:
+                        continue
+                    try:
+                        blob,content_type=request_bytes(media_url,timeout=40,limit=max_bytes)
+                        if len(blob)<2048:
+                            raise RuntimeError("media response was too small to be a usable asset")
+                        if not usgs_media_signature_is_valid(blob,media_type,content_type,ext):
+                            raise RuntimeError("media MIME/signature does not match the permitted media family")
+                        downloaded=(media_url,ext,blob,content_type)
+                        break
+                    except Exception as file_exc:
+                        failures.append(str(file_exc)[:180])
+                if not downloaded:
+                    row.update(status="download_failed",reason="No eligible media candidate could be fetched and validated.",
+                               failures=failures[:3])
+                    report.append(row)
+                    continue
+                media_url,ext,blob,content_type=downloaded
+                if total_bytes+len(blob)>USGS_TOTAL_MAX_BYTES:
+                    row.update(status="skipped_total_size_limit",reason="The media item would exceed the aggregate USGS extraction ceiling.")
+                    report.append(row)
+                    break
+                item_slug=slugify(detail["title"])[:100] or slugify(item_url.rsplit("/",1)[-1])
+                item_dir=root/"third-party/usgs"/media_type/item_slug
+                item_dir.mkdir(parents=True,exist_ok=True)
+                filename=item_slug+ext
+                target=item_dir/filename
+                target.write_bytes(blob)
+                digest=sha256_path(target)
+                note=(
+                    f"# {detail['title']}\\n\\n"
+                    f"- Provider: U.S. Geological Survey\\n- Media type: {media_type}\\n"
+                    f"- Item page: {item_url}\\n- Direct media URL: {media_url}\\n"
+                    f"- Sources/Usage: {detail['rights_statement']}\\n- Rights basis: public-domain label on this exact item page\\n"
+                    f"- Creator / credit metadata: {detail['creator'] or 'Not separately exposed in the item metadata'}\\n"
+                    f"- Date: {detail['date'] or 'Not separately exposed'}\\n- MIME: {content_type}\\n"
+                    f"- SHA-256: {digest}\\n\\n{detail['description']}\\n"
+                )
+                write_text(item_dir/"SOURCE_AND_LICENSE.md",note)
+                asset_type="usgs-public-domain-"+media_type[:-1]
+                index.append({"id":row["id"],"path":target.relative_to(root).as_posix(),
+                              "type":asset_type,"provider":"U.S. Geological Survey",
+                              "title":detail["title"],"description":detail["description"],
+                              "creator":detail["creator"],"date":detail["date"],
+                              "category":type_labels[media_type],"source_page":item_url,
+                              "source_file_url":media_url,"rights_statement":detail["rights_statement"],
+                              "license":"Public Domain (item-level USGS Sources/Usage label)",
+                              "license_verified_from_item_page":True,
+                              "size_bytes":len(blob),"sha256":digest,"redistributable":True})
+                total_bytes+=len(blob); downloaded_for_type+=1
+                row.update(status="downloaded",file=filename,source_file_url=media_url,
+                           content_type=content_type,size_bytes=len(blob),sha256=digest)
+                report.append(row)
+                print("[USGS] OK:",media_type,detail["title"],len(blob),"bytes")
+                time.sleep(.35)
+            except Exception as exc:
+                report.append({"id":"usgs-"+media_type+"-"+slugify(item_url.rsplit("/",1)[-1]),
+                               "provider":"U.S. Geological Survey","media_type":media_type[:-1],
+                               "status":"item_failed","source_page":item_url,"reason":str(exc)[:350]})
+        print("[USGS] "+media_type+":",downloaded_for_type,"downloaded; scanned",len(candidates),"item pages")
     return report
 
 
