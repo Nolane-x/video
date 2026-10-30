@@ -4399,14 +4399,9 @@ def main():
             if path.relative_to(STAGE).as_posix() not in indexed and path.name!="ASSET_INDEX.json":
                 raise RuntimeError("checksum missing for "+str(path))
     OUT.mkdir(parents=True,exist_ok=True)
-    archive=OUT/"video-asset-library.zip"
-    if archive.exists(): archive.unlink()
-    with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as z:
-        for path in sorted(STAGE.rglob("*")):
-            if path.is_file(): z.write(path,Path("video-asset-library")/path.relative_to(STAGE))
-    archive_sha=sha256_path(archive)
-    write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",f"built_at={index_doc['built_at']}\nzip={archive.name}\nzip_sha256={archive_sha}\nzip_size_bytes={archive.stat().st_size}\nsummary={json.dumps(summary)}\n")
+    write_text(OUT/"VIDEO_ASSET_LIBRARY_BUILD.txt",
+               f"built_at={index_doc['built_at']}\\nmode=pending-package\\nsummary={json.dumps(summary)}\\n")
     print(json.dumps(summary,indent=2))
-    print(f"[Package] {archive} size={archive.stat().st_size} SHA256={archive_sha}")
+    print(f"[Build] resources indexed={len(index)}; packaging delegated to package_asset_bundles.py")
 if __name__=="__main__":
     main()
