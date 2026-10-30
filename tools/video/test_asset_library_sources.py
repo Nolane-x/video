@@ -6,6 +6,7 @@ import io
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -247,7 +248,7 @@ class ScalableBundlePackagingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)
             root = self._create_library(output, [35_000, 35_000, 35_000])
-            with unittest.mock.patch.object(bundle_packager, "MAX_BUNDLE_UNCOMPRESSED_BYTES", 50_000):
+            with mock.patch.object(bundle_packager, "MAX_BUNDLE_UNCOMPRESSED_BYTES", 50_000):
                 manifest = bundle_packager.package_library(output)
                 self.assertEqual(manifest["mode"], "multi-volume")
                 self.assertGreaterEqual(manifest["bundle_count"], 3)
