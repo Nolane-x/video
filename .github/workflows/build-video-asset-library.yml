@@ -261,7 +261,9 @@ jobs:
           assert len(caption_assets) == expected["original_caption_overlays"]
           for asset in sticker_assets + meme_assets + caption_assets:
               assert asset.get("license") == "CC0-1.0" and asset.get("original_artwork") is True and asset.get("redistributable") is True
-              assert asset.get("path", "").startswith("originals/")
+              sticker_path = Path(asset.get("path", ""))
+              assert not sticker_path.is_absolute() and sticker_path.parts and ".." not in sticker_path.parts
+              assert (root / sticker_path).is_file(), "Original sticker/meme/caption source file is missing"
               assert len(asset.get("sha256", "")) == 64
           assert "openmoji_files_downloaded" in expected
           openmoji_report = index.get("openmoji_downloads")
