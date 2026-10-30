@@ -101,3 +101,13 @@ The search ceiling is 30 packages across these types, not a promised download co
 
 Official documentation: [ambientCG API v2](https://docs.ambientcg.com/api/v2/full_json/) and [ambientCG license](https://docs.ambientcg.com/license/). All downloadable ambientCG assets are published under CC0 1.0 according to the provider's license documentation.
 
+
+## Build 44: USGS Multimedia Gallery with exact item-level rights
+
+The next source lane adds a bounded sample from the official USGS image, video and audio galleries. At the latest source inspection, those gallery pages displayed 21,392 image items, 2,905 video items and 629 audio items. These are discovery-catalog totals, not promised downloads.
+
+The builder scans up to four listing pages per type and caps successful downloads at 24 images, 8 videos and 8 audio items. Crucially, the gallery-wide "public domain unless otherwise noted" notice is **not** treated as proof for an individual asset: the exact detail page must have a complete `Sources/Usage` statement equal to `Public Domain.`. Mixed wording, missing labels and any other rights statement are skipped.
+
+Direct media links are constrained to the official USGS storage hosts and expected per-type paths. The builder verifies MIME and file signatures, caps each file and the aggregate USGS media byte budget, and records the item page, direct media URL, title, creator/date metadata, exact rights statement, source note, and SHA-256. USGS credit guidance and other rights such as privacy/publicity still apply; public-domain status is not a blanket clearance for every possible use.
+
+Official sources: [USGS Multimedia Gallery](https://www.usgs.gov/products/multimedia-gallery), [USGS crediting guidance](https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs).
