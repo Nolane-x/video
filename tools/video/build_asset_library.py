@@ -26,6 +26,22 @@ POLYHAVEN_SELECTION_LIMITS = {"hdris": 48, "models": 72, "textures": 160}
 AMBIENTCG_SELECTION_CAPS = {"Material": 48, "HDRI": 16, "3DModel": 16, "Decal": 16, "Atlas": 12, "PlainTexture": 16, "Brush": 8, "Substance": 8}
 AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 5 * 1024 * 1024 * 1024
+# LazyTextures documents a provider-wide CC0 1.0 grant and a public API with no key.
+# Keep the import bounded and polite; API browsing is open but media downloads are fair-use.
+LAZYTEXTURES_ASSET_CAPS = {"models": 10, "materials": 16, "hdris": 10, "textures": 18}
+LAZYTEXTURES_API_BASE = "https://lazytextures.net:3000"
+LAZYTEXTURES_DOCS_URL = "https://lazytextures.com/PublicAPI"
+LAZYTEXTURES_MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
+LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES = 512 * 1024 * 1024
+LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES = 128 * 1024 * 1024
+LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES = 1536 * 1024 * 1024
+LAZYTEXTURES_MAX_ZIP_MEMBERS = 2500
+LAZYTEXTURES_API_TYPES = {
+    "models": {"endpoint": "previewsModels", "list_key": "PreviewModels", "label": "3D models"},
+    "materials": {"endpoint": "previewsMaterials", "list_key": "PreviewMaterials", "label": "PBR materials"},
+    "hdris": {"endpoint": "previewsHDRIs", "list_key": "PreviewHDRIs", "label": "HDRI lighting environments"},
+    "textures": {"endpoint": "previewsTextures", "list_key": "PreviewTextures", "label": "texture maps and decals"},
+}
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
 USGS_GALLERY_PAGE_SCAN_LIMIT = 18
@@ -1754,6 +1770,375 @@ def download_ambientcg(root,index):
             print("[ambientCG] source request failed:",asset_type,str(exc)[:220])
     return report
 
+
+
+def lazytextures_asset_name_is_allowed(name):
+    value = str(name or "").strip()
+    return bool(
+        value and len(value) <= 160
+        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ._()+'-]*", value)
+        and ".." not in value and "/" not in value and "\\" not in value
+        and not any(ord(ch) < 32 for ch in value)
+    )
+
+
+def lazytextures_api_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            parsed.scheme == "https" and parsed.hostname == "lazytextures.net"
+            and parsed.port == 3000 and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and parsed.path.startswith("/") and ".." not in urllib.parse.unquote(parsed.path).split("/")
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_detail_url(asset_type, asset_name):
+    if asset_type not in LAZYTEXTURES_API_TYPES or not lazytextures_asset_name_is_allowed(asset_name):
+        raise ValueError("LazyTextures asset type or name is not allowed")
+    url = LAZYTEXTURES_API_BASE + "/Asset/" + asset_type + "/" + urllib.parse.quote(asset_name, safe="")
+    if not lazytextures_api_url_is_allowed(url):
+        raise ValueError("LazyTextures detail URL failed the official-host allow-list")
+    return url
+
+
+def lazytextures_detail_url_is_allowed(url, asset_type, asset_name):
+    try:
+        expected = "/Asset/" + str(asset_type) + "/" + urllib.parse.quote(str(asset_name), safe="")
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        return (
+            asset_type in LAZYTEXTURES_API_TYPES and lazytextures_asset_name_is_allowed(asset_name)
+            and lazytextures_api_url_is_allowed(url) and parsed.path == expected
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_download_url(raw_path):
+    value = str(raw_path or "").strip()
+    if not value or "\\" in value or "\x00" in value:
+        return ""
+    decoded = urllib.parse.unquote(value)
+    parts = PurePosixPath(decoded).parts
+    if ".." in parts or "." in parts:
+        return ""
+    url = urllib.parse.urljoin(LAZYTEXTURES_API_BASE + "/", value)
+    return url if lazytextures_download_url_is_allowed(url) else ""
+
+
+def lazytextures_download_url_is_allowed(url):
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+        decoded_path = urllib.parse.unquote(parsed.path)
+        parts = PurePosixPath(decoded_path).parts
+        return (
+            parsed.scheme == "https" and parsed.hostname == "lazytextures.net"
+            and parsed.port == 3000 and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and decoded_path.startswith("/Assets/")
+            and ".." not in parts and "." not in parts
+            and Path(decoded_path).suffix.lower() == ".zip"
+            and not any(ord(ch) < 32 for ch in decoded_path)
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def lazytextures_download_bytes(url, timeout=65, limit=LAZYTEXTURES_MAX_ARCHIVE_BYTES):
+    """Fetch only an allow-listed LazyTextures ZIP and reject redirects off its official file host."""
+    if not lazytextures_download_url_is_allowed(url):
+        raise RuntimeError("LazyTextures download URL failed the official HTTPS /Assets ZIP allow-list")
+    request = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/zip,application/octet-stream"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        final_url = response.geturl()
+        if not lazytextures_download_url_is_allowed(final_url):
+            raise RuntimeError("LazyTextures download redirected outside its official ZIP path")
+        data = response.read(limit + 1)
+        if len(data) > limit:
+            raise RuntimeError("LazyTextures ZIP exceeded the configured archive byte limit")
+        return data, response.headers.get("Content-Type", "application/octet-stream")
+
+
+def lazytextures_response_assets(payload, asset_type):
+    if not isinstance(payload, dict) or asset_type not in LAZYTEXTURES_API_TYPES:
+        return []
+    if payload.get("success") is not True:
+        return []
+    key = LAZYTEXTURES_API_TYPES[asset_type]["list_key"]
+    rows = payload.get(key)
+    if not isinstance(rows, list):
+        data = payload.get("data")
+        rows = data.get(key) if isinstance(data, dict) else None
+    if not isinstance(rows, list):
+        return []
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def lazytextures_license_detail(detail):
+    """Use LazyTextures' official provider-wide CC0 grant, rejecting contradictory item metadata."""
+    if not isinstance(detail, dict):
+        return {"verified": False, "license": None, "evidence": "missing item detail"}
+    explicit = []
+    for key in ("license", "licenseName", "license_name", "licenseUrl", "license_url"):
+        value = detail.get(key)
+        if isinstance(value, str) and value.strip():
+            explicit.append(value.strip())
+    if not explicit:
+        return {
+            "verified": True, "license": "CC0-1.0",
+            "evidence": "Official LazyTextures Public API documentation states all library assets are CC0 1.0.",
+            "provider_wide_policy": True,
+        }
+    accepted = {
+        "cc0", "cc0-1.0", "cc0 1.0", "cc0 1.0 universal",
+        "https://creativecommons.org/publicdomain/zero/1.0/",
+        "http://creativecommons.org/publicdomain/zero/1.0/",
+    }
+    normalized = {value.strip().rstrip("/").casefold() for value in explicit}
+    if not normalized.issubset({x.rstrip("/").casefold() for x in accepted}):
+        return {"verified": False, "license": None, "evidence": "conflicting item-level license metadata"}
+    return {
+        "verified": True, "license": "CC0-1.0",
+        "evidence": "Official provider-wide CC0 declaration and consistent item detail metadata.",
+        "provider_wide_policy": True,
+    }
+
+
+def lazytextures_archive_candidates(detail):
+    """Read documented archiveFiles groups and return bounded, official ZIP candidates."""
+    if not isinstance(detail, dict):
+        return []
+    archive_groups = detail.get("archiveFiles")
+    if not isinstance(archive_groups, (dict, list)):
+        data = detail.get("data")
+        archive_groups = data.get("archiveFiles") if isinstance(data, dict) else None
+    if not isinstance(archive_groups, (dict, list)):
+        return []
+    found = []
+    seen = set()
+
+    def walk(value, hint=""):
+        if isinstance(value, list):
+            for item in value:
+                walk(item, hint)
+            return
+        if not isinstance(value, dict):
+            return
+        name = str(value.get("name") or "").strip()
+        path = str(value.get("path") or "").strip()
+        size_raw = value.get("size") or value.get("sizeBytes") or value.get("size_bytes") or 0
+        try:
+            size = int(size_raw)
+        except (TypeError, ValueError):
+            size = 0
+        if name and path and size > 0:
+            url = lazytextures_download_url(path)
+            if url and Path(name).name == name and Path(name).suffix.lower() == ".zip":
+                key = (url, size)
+                if key not in seen and size <= LAZYTEXTURES_MAX_ARCHIVE_BYTES:
+                    seen.add(key)
+                    resolution = str(value.get("resolution") or hint or name).casefold()
+                    found.append({
+                        "name": name, "path": path, "url": url, "size_bytes": size,
+                        "resolution": resolution,
+                        "contains_all_assets": value.get("containsAllAssets") is True,
+                    })
+        for key, child in value.items():
+            if isinstance(child, (dict, list)):
+                walk(child, str(key) if not hint else hint + " " + str(key))
+
+    walk(archive_groups)
+    return found
+
+
+def lazytextures_choose_archive(detail):
+    candidates = lazytextures_archive_candidates(detail)
+    if not candidates:
+        return None
+    def rank(candidate):
+        label = (candidate.get("resolution") or "") + " " + candidate.get("name", "")
+        for position, token in enumerate(("1k", "2k", "4k", "8k", "16k")):
+            if re.search(r"(?<![a-z0-9])" + token + r"(?![a-z0-9])", label):
+                return position
+        # If no resolution is labelled, prefer the smallest validated archive.
+        return 20
+    candidates.sort(key=lambda row: (rank(row), row["size_bytes"], row["name"].casefold()))
+    return candidates[0]
+
+
+def lazytextures_asset_tags(asset, detail):
+    values = (detail.get("tags") if isinstance(detail, dict) else None) or asset.get("tags") or []
+    if isinstance(values, str):
+        values = [values]
+    if not isinstance(values, list):
+        return []
+    return [str(tag)[:80] for tag in values[:50] if str(tag).strip()]
+
+
+def download_lazytextures(root, index):
+    """Import bounded CC0 model/material/HDRI/texture archives from the official LazyTextures API."""
+    report = []
+    total_archive_bytes = 0
+    total_unpacked_bytes = 0
+    seen_names = set()
+    seen_urls = set()
+    for asset_type, cap in LAZYTEXTURES_ASSET_CAPS.items():
+        spec = LAZYTEXTURES_API_TYPES[asset_type]
+        endpoint = LAZYTEXTURES_API_BASE + "/" + spec["endpoint"]
+        try:
+            payload = request_json(endpoint, timeout=35)
+            assets = lazytextures_response_assets(payload, asset_type)
+            if not assets:
+                report.append({
+                    "id": "lazytextures-" + asset_type, "status": "no_eligible_assets",
+                    "asset_type": asset_type, "source_page": LAZYTEXTURES_DOCS_URL,
+                    "reason": "The official browse endpoint returned no recognized asset list.",
+                })
+                continue
+            downloaded_for_type = 0
+            examined = 0
+            for asset in assets:
+                if downloaded_for_type >= cap:
+                    break
+                if total_archive_bytes >= LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES or total_unpacked_bytes >= LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
+                    break
+                if not isinstance(asset, dict):
+                    continue
+                name = str(asset.get("name") or asset.get("assetName") or "").strip()
+                if not lazytextures_asset_name_is_allowed(name):
+                    continue
+                identity = (asset_type, name.casefold())
+                if identity in seen_names:
+                    continue
+                seen_names.add(identity)
+                examined += 1
+                detail_url = lazytextures_detail_url(asset_type, name)
+                row = {
+                    "id": "lazytextures-" + asset_type + "-" + slugify(name),
+                    "provider": "LazyTextures", "asset_type": asset_type,
+                    "title": name[:240], "category": spec["label"],
+                    "source_page": detail_url, "api_source": endpoint,
+                    "license": "CC0-1.0", "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "license_evidence_url": LAZYTEXTURES_DOCS_URL,
+                }
+                if not lazytextures_detail_url_is_allowed(detail_url, asset_type, name):
+                    row.update(status="invalid_item_url", reason="The computed item detail URL failed the official-host allow-list.")
+                    report.append(row)
+                    continue
+                try:
+                    detail = request_json(detail_url, timeout=30)
+                    if not isinstance(detail, dict) or detail.get("success") is not True:
+                        row.update(status="missing_item_detail", reason="The official API did not return a successful item detail response.")
+                        report.append(row)
+                        continue
+                    detail_name = str(detail.get("name") or detail.get("assetName") or "").strip()
+                    detail_type = str(detail.get("assetType") or detail.get("type") or "").strip().lower()
+                    if detail_name.casefold() != name.casefold() or detail_type != asset_type:
+                        row.update(status="skipped_item_identity", reason="The item detail name/type did not match the browse result.")
+                        report.append(row)
+                        continue
+                    rights = lazytextures_license_detail(detail)
+                    if not rights["verified"]:
+                        row.update(status="skipped_rights", reason=rights["evidence"])
+                        report.append(row)
+                        continue
+                    choice = lazytextures_choose_archive(detail)
+                    if not choice:
+                        row.update(status="no_eligible_archive", reason="No official, size-bounded ZIP was listed in archiveFiles.")
+                        report.append(row)
+                        continue
+                    if choice["url"] in seen_urls:
+                        row.update(status="duplicate_file_url", reason="This archive URL was already selected for another item.")
+                        report.append(row)
+                        continue
+                    seen_urls.add(choice["url"])
+                    if total_archive_bytes + choice["size_bytes"] > LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES:
+                        row.update(status="skipped_total_archive_limit", reason="The archive would exceed the total LazyTextures download ceiling.")
+                        report.append(row)
+                        break
+                    blob, content_type = lazytextures_download_bytes(choice["url"], timeout=70, limit=LAZYTEXTURES_MAX_ARCHIVE_BYTES)
+                    if len(blob) < 22 or not blob.startswith(b"PK"):
+                        raise RuntimeError("The selected media endpoint did not return a ZIP archive.")
+                    if len(blob) != choice["size_bytes"]:
+                        raise RuntimeError("Downloaded ZIP byte count did not match the API file metadata.")
+                    archive_sha = hashlib.sha256(blob).hexdigest()
+                    import io
+                    with zipfile.ZipFile(io.BytesIO(blob)) as archive:
+                        if len(archive.infolist()) > LAZYTEXTURES_MAX_ZIP_MEMBERS:
+                            raise RuntimeError("ZIP member count exceeded the safety ceiling.")
+                        corrupt = archive.testzip()
+                        if corrupt:
+                            raise RuntimeError("Corrupt ZIP member: " + str(corrupt))
+                    target = root / "third-party/lazytextures" / asset_type / slugify(name)
+                    if target.exists():
+                        shutil.rmtree(target)
+                    extracted, unpacked = safe_extract(blob, target, max_bytes=LAZYTEXTURES_MAX_ITEM_EXTRACTED_BYTES)
+                    media_files = [path for path in target.rglob("*") if path.is_file()]
+                    if extracted <= 0 or not media_files:
+                        shutil.rmtree(target, ignore_errors=True)
+                        raise RuntimeError("ZIP had no file types allowed by the media-library extraction policy.")
+                    if total_unpacked_bytes + unpacked > LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES:
+                        shutil.rmtree(target, ignore_errors=True)
+                        row.update(status="skipped_total_unpacked_limit", reason="Package would exceed the total uncompressed LazyTextures ceiling.")
+                        report.append(row)
+                        break
+                    tags = lazytextures_asset_tags(asset, detail)
+                    license_note = (
+                        f"# {name} — LazyTextures\n\n"
+                        f"- Asset type: {asset_type}\n- Official item detail API: {detail_url}\n"
+                        f"- Download file: {choice['name']}\n- Resolution metadata: {choice['resolution']}\n"
+                        f"- Archive size: {len(blob)} bytes\n- Archive SHA-256: {archive_sha}\n"
+                        f"- License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/\n"
+                        f"- License evidence: {LAZYTEXTURES_DOCS_URL}\n"
+                        "- Provider documentation states all library assets are CC0 1.0. This item was matched by exact name/type against the official API detail response.\n"
+                        "- The original ZIP was integrity-tested and extracted with the repository media allow-list; executable files, nested ZIPs and unsafe paths are not included.\n"
+                    )
+                    write_text(target / "SOURCE_AND_LICENSE.md", license_note)
+                    package_assets = []
+                    for path in sorted(p for p in target.rglob("*") if p.is_file() and p.name != "SOURCE_AND_LICENSE.md"):
+                        entry = {
+                            "id": "lazytextures-" + asset_type + "-" + slugify(name) + "-" + slugify(path.relative_to(target).as_posix()),
+                            "path": path.relative_to(root).as_posix(),
+                            "type": "lazytextures-" + asset_type + "-asset-file",
+                            "provider": "LazyTextures", "parent_asset_id": row["id"],
+                            "asset_name": name, "asset_type": asset_type, "title": name[:240],
+                            "category": spec["label"], "tags": tags,
+                            "source_page": detail_url, "source_file_url": choice["url"],
+                            "download_archive_sha256": archive_sha,
+                            "license": "CC0-1.0", "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                            "license_verified_from_provider_api_policy": True,
+                            "license_evidence_url": LAZYTEXTURES_DOCS_URL,
+                            "size_bytes": path.stat().st_size, "sha256": sha256_path(path),
+                            "redistributable": True,
+                        }
+                        index.append(entry)
+                        package_assets.append({"path": entry["path"], "sha256": entry["sha256"], "size_bytes": entry["size_bytes"]})
+                    total_archive_bytes += len(blob)
+                    total_unpacked_bytes += unpacked
+                    downloaded_for_type += 1
+                    row.update(
+                        status="downloaded", file_name=choice["name"], resolution=choice["resolution"],
+                        archive_bytes=len(blob), archive_sha256=archive_sha,
+                        extracted_files=len(package_assets), unpacked_bytes=unpacked,
+                        tags=tags, files=package_assets,
+                    )
+                    report.append(row)
+                    print("[LazyTextures] OK:", asset_type, name, len(blob), "archive bytes,", extracted, "files,", unpacked, "unpacked bytes")
+                except Exception as item_exc:
+                    row.update(status="failed", reason=str(item_exc)[:420], file_name=choice.get("name") if "choice" in locals() and choice else None)
+                    report.append(row)
+                time.sleep(.45)
+            print("[LazyTextures]", asset_type, ":", downloaded_for_type, "downloaded from", examined, "API entries")
+        except Exception as exc:
+            report.append({
+                "id": "lazytextures-" + asset_type, "provider": "LazyTextures",
+                "asset_type": asset_type, "status": "failed",
+                "source_page": LAZYTEXTURES_DOCS_URL, "reason": str(exc)[:420],
+            })
+            print("[LazyTextures] source request failed:", asset_type, str(exc)[:220])
+    return report
 
 class USGSMediaPageParser(HTMLParser):
     """Extract only explicit USGS item-level rights and source links from public HTML."""
