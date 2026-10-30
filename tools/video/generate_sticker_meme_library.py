@@ -255,16 +255,18 @@ def generate_assets(root: Path, index: list[dict]) -> dict[str, int]:
     caption_dir.mkdir(parents=True, exist_ok=True)
     sticker_count = 0
     for slug, label, category, preferred_style in STICKERS:
-        for variant, palette in enumerate(PALETTES[:3]):
+        for variant, palette_row in enumerate(PALETTES[:3]):
+            palette_name, accent, paper, ink = palette_row
+            palette = (accent, paper, ink)
             style = preferred_style if variant == 0 else ("bubble" if variant == 1 else "badge")
-            filename = f"{slug}-{palette[0]}.svg"
+            filename = f"{slug}-{palette_name}.svg"
             path = sticker_dir / filename
             path.write_text(_sticker_svg(slug, label, palette, style, variant), encoding="utf-8")
             index.append({
-                "id": f"sticker-{slug}-{palette[0]}",
+                "id": f"sticker-{slug}-{palette_name}",
                 "path": path.relative_to(root).as_posix(),
                 "type": "original-video-sticker",
-                "title": f"{label} — {palette[0].title()} sticker",
+                "title": f"{label} — {palette_name.title()} sticker",
                 "category": f"stickers / {category}",
                 "keywords": [slug, label.lower(), category, "reaction", "transparent-background"],
                 "license": CC0, "license_url": CC0_URL, "redistributable": True,
@@ -275,15 +277,17 @@ def generate_assets(root: Path, index: list[dict]) -> dict[str, int]:
 
     meme_count = 0
     for layout_index, (slug, title, description) in enumerate(MEME_LAYOUTS):
-        for palette_index, palette in enumerate(PALETTES[:4]):
-            filename = f"{slug}-{palette[0]}.svg"
+        for palette_index, palette_row in enumerate(PALETTES[:4]):
+            palette_name, accent, paper, ink = palette_row
+            palette = (accent, paper, ink)
+            filename = f"{slug}-{palette_name}.svg"
             path = meme_dir / filename
             path.write_text(_meme_svg(slug, title, description, palette, slug, palette_index), encoding="utf-8")
             index.append({
-                "id": f"meme-layout-{slug}-{palette[0]}",
+                "id": f"meme-layout-{slug}-{palette_name}",
                 "path": path.relative_to(root).as_posix(),
                 "type": "original-meme-layout-template",
-                "title": f"{title} — {palette[0].title()}",
+                "title": f"{title} — {palette_name.title()}",
                 "category": "meme templates / editable reaction layout",
                 "keywords": [slug, title.lower(), "meme", "reaction", "caption placeholder", "editable"],
                 "license": CC0, "license_url": CC0_URL, "redistributable": True,
@@ -295,15 +299,17 @@ def generate_assets(root: Path, index: list[dict]) -> dict[str, int]:
 
     caption_count = 0
     for layout_index, (slug, title, description) in enumerate(CAPTION_LAYOUTS):
-        for palette_index, palette in enumerate(PALETTES[:4]):
-            filename = f"{slug}-{palette[0]}.svg"
+        for palette_index, palette_row in enumerate(PALETTES[:4]):
+            palette_name, accent, paper, ink = palette_row
+            palette = (accent, paper, ink)
+            filename = f"{slug}-{palette_name}.svg"
             path = caption_dir / filename
             path.write_text(_caption_svg(slug, title, description, palette, slug, palette_index), encoding="utf-8")
             index.append({
-                "id": f"caption-preset-{slug}-{palette[0]}",
+                "id": f"caption-preset-{slug}-{palette_name}",
                 "path": path.relative_to(root).as_posix(),
                 "type": "original-caption-overlay",
-                "title": f"{title} — {palette[0].title()}",
+                "title": f"{title} — {palette_name.title()}",
                 "category": "caption presets / lower thirds / editorial graphics",
                 "keywords": [slug, title.lower(), "caption", "subtitle", "lower third", "overlay", "title card"],
                 "license": CC0, "license_url": CC0_URL, "redistributable": True,
