@@ -80,6 +80,8 @@ def classify_unindexed_path(relative_path: str) -> str:
         return "miscellaneous"
     if "/lazytextures/" in path:
         return "3d-textures"
+    if "/poly-pizza/" in path:
+        return "3d-models"
     if "google-fonts" in path:
         return "typography"
     if "ambientcg" in path or "polyhaven" in path:
