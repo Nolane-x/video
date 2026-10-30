@@ -167,14 +167,20 @@ class LazyTexturesCC0APITests(unittest.TestCase):
                 "huge": [{"name": "huge.zip", "path": "/Assets/Materials/huge.zip",
                           "size": library.LAZYTEXTURES_MAX_ARCHIVE_BYTES + 1}],
                 "wrong": [{"name": "not-a-zip.exe", "path": "/Assets/Materials/not-a-zip.exe", "size": 1000}],
+            },
+            "textureFiles": {
+                "1k": [{"name": "Texture_Rust_1k.zip",
+                        "path": "/Assets/Textures/Rust/1k/Texture_Rust_1k.zip",
+                        "size": 3_500_000}],
             }
         }
         candidates = library.lazytextures_archive_candidates(detail)
-        self.assertEqual(len(candidates), 2)
+        self.assertEqual(len(candidates), 3)
+        self.assertTrue(any(row["name"] == "Texture_Rust_1k.zip" for row in candidates))
         choice = library.lazytextures_choose_archive(detail)
         self.assertEqual(choice["name"], "Concrete01_1k.zip")
         self.assertEqual(choice["size_bytes"], 2_000_000)
-        self.assertEqual(library.lazytextures_archive_candidates({"archiveFiles": []}), [])
+        self.assertEqual(library.lazytextures_archive_candidates({"archiveFiles": [], "textureFiles": []}), [])
 
     def test_download_helper_rejects_redirects_outside_the_official_host(self):
         response = mock.MagicMock()
