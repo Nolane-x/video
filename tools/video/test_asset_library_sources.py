@@ -161,8 +161,9 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         total = 12 + 8 + len(payload)
         valid = b"glTF" + (2).to_bytes(4, "little") + total.to_bytes(4, "little") + len(payload).to_bytes(4, "little") + b"JSON" + payload
         self.assertTrue(library.poly_pizza_glb_is_valid(valid))
-        bin_chunk = b"BIN\x00" + b"1234"
-        with_bin = b"glTF" + (2).to_bytes(4, "little") + (len(valid) + 8 + len(bin_chunk) - 4).to_bytes(4, "little") + valid[12:] + bin_chunk
+        bin_data = b"1234"
+        bin_chunk = len(bin_data).to_bytes(4, "little") + b"BIN\x00" + bin_data
+        with_bin = b"glTF" + (2).to_bytes(4, "little") + (len(valid) + len(bin_chunk)).to_bytes(4, "little") + valid[12:] + bin_chunk
         self.assertTrue(library.poly_pizza_glb_is_valid(with_bin))
         self.assertFalse(library.poly_pizza_glb_is_valid(b"<html>blocked</html>"))
         self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (1).to_bytes(4, "little") + total.to_bytes(4, "little") + valid[12:]))
