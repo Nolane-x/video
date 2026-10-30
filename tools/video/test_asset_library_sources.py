@@ -19,6 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_asset_library as library  # noqa: E402
 import generate_sticker_meme_library as sticker_meme  # noqa: E402
 import package_asset_bundles as bundle_packager  # noqa: E402
+import build_asset_library_shard as shard_builder  # noqa: E402
+import finalize_asset_library_release as release_finalizer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 
@@ -1396,6 +1398,166 @@ class ParallelAssetSourceLaneTests(unittest.TestCase):
         self.assertEqual(reports["second"][0]["status"], "downloaded")
         self.assertEqual([entry["id"] for entry in shared_index], ["first", "second"])
 
+
+
+
+class DistributedAssetLibraryTests(unittest.TestCase):
+    def _asset(self, root, relative, asset_id):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((asset_id + "-verified-content").encode("utf-8"))
+        return {
+            "id": asset_id,
+            "path": relative,
+            "type": "nasa-video",
+            "title": asset_id,
+            "license": "Public Domain",
+            "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+            "redistributable": True,
+            "size_bytes": path.stat().st_size,
+            "sha256": library.sha256_path(path),
+        }
+
+    def test_volume_is_uploaded_before_source_files_are_removed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            assets = [
+                self._asset(root, "third-party/nasa/video/one.mp4", "nasa-one"),
+                self._asset(root, "third-party/nasa/video/two.mp4", "nasa-two"),
+            ]
+            volume_dir = Path(tmp) / "volumes"
+            with mock.patch.object(shard_builder, "upload_release_asset") as upload:
+                rows = shard_builder.create_source_volumes(
+                    root, volume_dir, "nasa", assets, bundle_packager, release_tag="test-release"
+                )
+
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["source_lane"], "nasa")
+            self.assertEqual(rows[0]["category"], "footage")
+            self.assertTrue(rows[0]["uploaded_to_release"])
+            self.assertEqual(len(rows[0]["sha256"]), 64)
+            upload.assert_called_once()
+            self.assertFalse((root / assets[0]["path"]).exists())
+            self.assertFalse((root / assets[1]["path"]).exists())
+            self.assertFalse((volume_dir / rows[0]["name"]).exists())
+
+    def test_failed_volume_upload_keeps_original_source_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            asset = self._asset(root, "third-party/nasa/video/one.mp4", "nasa-one")
+            volume_dir = Path(tmp) / "volumes"
+            with mock.patch.object(
+                shard_builder, "upload_release_asset", side_effect=RuntimeError("upload rejected")
+            ):
+                with self.assertRaisesRegex(RuntimeError, "upload rejected"):
+                    shard_builder.create_source_volumes(
+                        root, volume_dir, "nasa", [asset], bundle_packager, release_tag="test-release"
+                    )
+            self.assertTrue((root / asset["path"]).is_file())
+
+    def test_global_catalog_renders_metadata_for_volumes_already_uploaded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "video-asset-library"
+            root.mkdir()
+            asset = {
+                "id": "mars-rover-shot",
+                "path": "third-party/nasa/video/mars-rover.mp4",
+                "type": "nasa-video",
+                "title": "Mars rover exploration footage",
+                "license": "Public Domain",
+                "source_page": "https://images.nasa.gov/",
+                "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+                "size_bytes": 123456,
+                "sha256": "a" * 64,
+                "redistributable": True,
+            }
+            library.make_asset_catalog(root, [asset], {"indexed_asset_count": 1})
+            catalog = (root / "ASSET_CATALOG.html").read_text(encoding="utf-8")
+            self.assertIn("Mars rover exploration footage", catalog)
+            self.assertIn("third-party/nasa/video/mars-rover.mp4", catalog)
+            self.assertIn("123456", catalog)
+
+    def test_shard_merge_verifies_volume_coverage_and_exact_license_metadata(self):
+        def make_shard(lane, asset_id, relative, payload):
+            digest = hashlib.sha256(payload).hexdigest()
+            asset = {
+                "id": asset_id,
+                "path": relative,
+                "type": "original-svg-background",
+                "license": "CC0-1.0",
+                "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+                "redistributable": True,
+                "size_bytes": len(payload),
+                "sha256": digest,
+            }
+            return {
+                "lane": lane,
+                "summary": {"indexed_asset_count": 1},
+                "source_report": [],
+                "assets": [asset],
+                "file_checksums": [{"path": relative, "size_bytes": len(payload), "sha256": digest}],
+                "bundles": [{
+                    "name": f"video-assets-{lane}-original-graphics-001.zip",
+                    "sha256": "b" * 64,
+                    "archive_bytes": 1024,
+                    "uncompressed_bytes": len(payload),
+                    "file_count": 1,
+                    "paths": [relative],
+                    "source_lane": lane,
+                }],
+            }
+
+        merged = release_finalizer.merge_shard_manifests(
+            [
+                make_shard("one", "asset-one", "originals/one.svg", b"one"),
+                make_shard("two", "asset-two", "originals/two.svg", b"two"),
+            ],
+            expected_lanes={"one", "two"},
+        )
+        self.assertEqual(merged["summary"]["indexed_asset_count"], 2)
+        self.assertEqual(merged["summary"]["indexed_resource_bytes"], 6)
+        self.assertEqual(len(merged["bundles"]), 2)
+        self.assertEqual(merged["assets"][0]["license"], "CC0-1.0")
+
+    def test_shard_merge_rejects_duplicate_resource_paths(self):
+        digest = "a" * 64
+        asset = {
+            "id": "same-asset",
+            "path": "third-party/shared/asset.bin",
+            "license": "CC0-1.0",
+            "redistributable": True,
+            "size_bytes": 3,
+            "sha256": digest,
+        }
+        shard = {
+            "lane": "one",
+            "summary": {},
+            "source_report": [],
+            "assets": [asset],
+            "file_checksums": [{"path": asset["path"], "size_bytes": 3, "sha256": digest}],
+            "bundles": [{
+                "name": "video-assets-one-misc-001.zip",
+                "sha256": "b" * 64,
+                "archive_bytes": 1024,
+                "uncompressed_bytes": 3,
+                "file_count": 1,
+                "paths": [asset["path"]],
+            }],
+        }
+        with self.assertRaisesRegex(RuntimeError, "Duplicate asset path"):
+            release_finalizer.merge_shard_manifests(
+                [shard, {**shard, "lane": "two", "bundles": [{
+                    "name": "video-assets-two-misc-001.zip",
+                    "sha256": "c" * 64,
+                    "archive_bytes": 1024,
+                    "uncompressed_bytes": 3,
+                    "file_count": 1,
+                    "paths": [asset["path"]],
+                }]}],
+                expected_lanes={"one", "two"},
+            )
 
 
 if __name__ == "__main__":
