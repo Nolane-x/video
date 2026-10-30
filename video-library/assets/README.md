@@ -74,15 +74,30 @@ The next release raises the reusable, repository-generated core rather than only
 
 The counts above describe generated families and are enforced by the build workflow. Third-party downloads remain conditional on the specific asset's rights metadata, valid file signature, size limits and SHA-256 ledger; a source listed in the catalog is not treated as successfully downloaded unless the build report says so.
 
-## Build 42 external-source expansion (in preparation)
+## Build 42: completed external-source expansion
 
-The next source pass broadens discovery without relaxing the file-level gates:
+Build 42 was published on 2026-10-29. The generated report records **1,791 checksummed files** and the following successful external downloads:
 
-- Poly Haven official CC0 selection: up to 20 HDRIs, 28 models and 48 PBR texture packages, with the actual downloaded files/dependencies recorded.
-- The Met: up to 110 images, only when the record's `isPublicDomain` flag and image endpoint pass.
-- Rijksmuseum: up to 90 images from the OAI-PMH/IIIF feed, only when each record carries CC0 or Public Domain Mark rights.
-- Wikimedia Commons: up to 240 images, 60 SVGs, and 36 short audio/video files, subject to exact file-level CC0/Public Domain metadata. SVGs are sanitized; media file signatures, MIME, size and SHA-256 are validated.
-- Broader Library of Congress and NASA search themes aim to improve the chance of finding more archival, science, engineering, nature, transport, heritage and field-recording resources. LOC's positive, non-conflicting item-rights statement gate remains; NASA is still treated under its own usage guidance, not CC0.
+- Poly Haven: 54 packages and 338 files (models, dependencies, HDRIs and PBR maps).
+- The Met: 58 Open Access images; Rijksmuseum: 90 item-level CC0/Public Domain Mark images.
+- NASA: 24 images and 17 videos, with NASA-specific usage guidance rather than an incorrect CC0 label.
+- Library of Congress: 39 images with positive, non-conflicting item-level rights statements.
+- Wikimedia Commons: 240 images, 20 sanitized CC0/Public Domain SVGs and 22 videos.
+- Kenney: 6 downloaded packs; the original vector/audio bank remains 759 repository-generated assets.
 
-These are search ceilings, not promised download counts. The generated build report and `ASSET_INDEX.json` remain authoritative for how many eligible files actually arrived and passed validation.
+Build 42 release: [video-asset-library-build-42](https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-42). Its ZIP, index, rights report and SHA-256 are the authoritative output. The counts above are observed downloads, not search ceilings.
+
+## Build 43: ambientCG CC0 asset packages
+
+The next source lane adds ambientCG's official v2 API for a broader range of production-ready 3D and visual materials:
+
+- PBR materials and tileable surface maps.
+- HDRI environment lighting.
+- 3D models and scans.
+- Decals and texture atlases.
+- Plain textures, brushes and Substance materials where the official API provides eligible ZIP packages.
+
+The search ceiling is 30 packages across these types, not a promised download count. The downloader uses only the documented HTTPS `ambientcg.com/get` ZIP endpoint, prefers compact 1K variants, validates ZIP signatures and integrity, limits each archive to 35 MiB and the aggregate extracted package content to 500 MiB, and extracts only allow-listed media. Each file retains the ambientCG asset page, selected variant, archive digest, CC0 source and per-file SHA-256. A source package is not counted as downloaded unless extraction and indexing succeed.
+
+Official documentation: [ambientCG API v2](https://docs.ambientcg.com/api/v2/full_json/) and [ambientCG license](https://docs.ambientcg.com/license/). All downloadable ambientCG assets are published under CC0 1.0 according to the provider's license documentation.
 
