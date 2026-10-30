@@ -44,7 +44,7 @@ METADATA_NAMES = {"ASSET_INDEX.json", "ASSET_CATALOG.html", "SOURCES_AND_LICENSE
 def upload_release_asset(release_tag: str, asset_path: Path) -> None:
     """Upload one completed volume. The caller deletes source files only after this succeeds."""
     result = subprocess.run(
-        ["gh", "release", "upload", release_tag, str(asset_path)],
+        ["gh", "release", "upload", release_tag, str(asset_path), "--clobber"],
         check=False,
         capture_output=True,
         text=True,
