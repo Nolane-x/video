@@ -44,6 +44,24 @@ LAZYTEXTURES_API_TYPES = {
     "textures": {"endpoint": "previewsTextures", "list_key": "PreviewTextures", "label": "texture maps and decals"},
     "other": {"endpoint": "previewsOther", "list_key": "PreviewOther", "label": "brushes, presets and miscellaneous assets"},
 }
+# Poly Pizza is an optional API-key source. Its licence is per model; only exact
+# CC0 records are imported by this lane. CC-BY, missing and unknown licences fail closed.
+POLY_PIZZA_API_BASE = "https://api.poly.pizza/v1.1"
+POLY_PIZZA_API_HOST = "api.poly.pizza"
+POLY_PIZZA_API_KEY_ENV = "POLY_PIZZA_API_KEY"
+POLY_PIZZA_SEARCH_TERMS = [
+    "tree", "plant", "rock", "building", "house", "vehicle",
+    "character", "animal", "furniture", "food", "tool", "medieval",
+    "sci-fi", "nature", "street", "industrial", "interior", "prop",
+]
+POLY_PIZZA_SEARCH_LIMIT = 24
+POLY_PIZZA_MAX_CANDIDATES = 240
+POLY_PIZZA_MAX_MODELS = 48
+POLY_PIZZA_MAX_MODEL_BYTES = 128 * 1024 * 1024
+POLY_PIZZA_TOTAL_MAX_BYTES = 4 * 1024 * 1024 * 1024
+POLY_PIZZA_MAX_JSON_BYTES = 4 * 1024 * 1024
+POLY_PIZZA_LICENSE = "CC0-1.0"
+
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
 USGS_GALLERY_PAGE_SCAN_LIMIT = 18
