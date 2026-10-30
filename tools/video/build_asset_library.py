@@ -2965,9 +2965,16 @@ def openmoji_metadata_is_eligible(payload):
     if "github.com/hfg-gmuend/openmoji" not in repo_url:
         return False
     dist=payload.get("dist") or {}
+    try:
+        file_count=int(dist.get("fileCount") or 0)
+        unpacked_size=int(dist.get("unpackedSize") or 0)
+    except (TypeError,ValueError):
+        return False
     return (openmoji_tarball_url_is_allowed(dist.get("tarball")) and
             bool(re.fullmatch(r"[0-9a-f]{40}",str(dist.get("shasum") or ""))) and
-            str(dist.get("integrity") or "").startswith("sha512-"))
+            str(dist.get("integrity") or "").startswith("sha512-") and
+            file_count==OPENMOJI_EXPECTED_FILE_COUNT and
+            0<unpacked_size<=OPENMOJI_MAX_EXTRACTED_BYTES)
 
 
 def openmoji_selected_archive_path(raw_name):
