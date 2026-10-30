@@ -2500,13 +2500,17 @@ def poly_pizza_download_glb(url, max_bytes=POLY_PIZZA_MAX_MODEL_BYTES):
         blob = response.read(max_bytes + 1)
     if len(blob) > max_bytes:
         raise RuntimeError("Poly Pizza GLB exceeded the per-model download ceiling")
-    if len(blob) < 20 or blob[:4] != b"glTF":
-        raise RuntimeError("Poly Pizza download is not a valid GLB (missing glTF magic)")
+    if not poly_pizza_glb_is_valid(blob):
+        raise RuntimeError("Poly Pizza download is not a valid GLB v2 with a matching declared length")
+    return blob, final_url
+
+
+def poly_pizza_glb_is_valid(blob):
+    if not isinstance(blob, (bytes, bytearray)) or len(blob) < 20 or bytes(blob[:4]) != b"glTF":
+        return False
     version = int.from_bytes(blob[4:8], "little")
     declared_length = int.from_bytes(blob[8:12], "little")
-    if version != 2 or declared_length != len(blob):
-        raise RuntimeError("Poly Pizza GLB version or declared length does not match the downloaded bytes")
-    return blob, final_url
+    return version == 2 and declared_length == len(blob)
 
 
 def download_poly_pizza(root, index):
