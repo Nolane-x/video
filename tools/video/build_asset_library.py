@@ -1528,6 +1528,8 @@ def ambientcg_download_url_is_allowed(raw_url):
         parsed=urllib.parse.urlsplit(str(raw_url or ""))
         if parsed.scheme!="https" or (parsed.hostname or "").lower()!="ambientcg.com":
             return False
+        if parsed.username or parsed.password or parsed.port not in (None,443) or parsed.fragment:
+            return False
         if parsed.path.rstrip("/")!="/get":
             return False
         query=urllib.parse.parse_qs(parsed.query)
@@ -1602,7 +1604,9 @@ def download_ambientcg(root,index):
         "3DModel":"3D models and scans",
         "Decal":"decals / transparent overlays",
         "Atlas":"texture atlases",
-        "Terrain":"terrain surfaces"
+        "PlainTexture":"plain textures",
+        "Brush":"texture brushes",
+        "Substance":"Substance material graphs"
     }
     for asset_type,cap in AMBIENTCG_SELECTION_CAPS.items():
         try:
@@ -3058,7 +3062,7 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page','')} — {r.get('reason','')}" for r in kenney_report)+"\n\n"
       "## Poly Haven CC0 assets\nThe build downloads compact HDRIs, Blender models plus listed dependencies, and PBR texture maps from the official API. The API has separate terms asking tools that use the live API to make clear the assets' source. See https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md.\n\n"+
       "\n".join(f"- {r.get('title',r.get('id'))}: {r.get('status')} — {r.get('source_page','')}" + (f" — {r.get('reason')}" if r.get('reason') else "") for r in polyhaven_report)+
-      "\n\n## ambientCG CC0 materials, environments and models\nThe builder uses ambientCG's documented /api/v2/full_json endpoint to discover a bounded sample of materials, HDRIs, 3D models, decals, atlases and terrain assets. ambientCG explicitly publishes its downloadable asset files under CC0 1.0. Every request uses the official HTTPS /get?file=...zip endpoint, prefers small 1K variants, checks ZIP integrity, caps archive and total extraction sizes, extracts only allow-listed media, and records source page, selected variant, archive digest and per-file SHA-256. Sources: https://docs.ambientcg.com/api/v2/full_json/ and https://docs.ambientcg.com/license/.\n\n"+
+      "\n\n## ambientCG CC0 materials, environments and models\nThe builder uses ambientCG's documented /api/v2/full_json endpoint to discover a bounded sample of materials, HDRIs, 3D models, decals, atlases, plain textures, brushes and Substance materials. ambientCG explicitly publishes its downloadable asset files under CC0 1.0. Every request uses the official HTTPS /get?file=...zip endpoint, prefers small 1K variants, checks ZIP integrity, caps archive and total extraction sizes, extracts only allow-listed media, and records source page, selected variant, archive digest and per-file SHA-256. Sources: https://docs.ambientcg.com/api/v2/full_json/ and https://docs.ambientcg.com/license/.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in ambientcg_report)+
       "\n\n## The Met Open Access images\nThe build uses the current paginated v1.1 search API, then independently checks isPublicDomain on every object detail before fetching the actual image from an official Met image host. The Met's Open Access artworks are CC0; object page, title, artist and date are preserved per image. Source: https://www.metmuseum.org/hubs/open-access.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in met_report)+
