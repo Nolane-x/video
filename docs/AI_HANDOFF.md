@@ -88,3 +88,17 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Master SHA-256: `67f0f483bf87c2cab16b333e8427e30a8445edf5120d9b08b1832dfba54806d2`; 1920×1080/24 fps H.264, AAC 48 kHz stereo, −14.0 LUFS, −1.9 dBFS true peak.
 - B19 motion sample passed the targeted limb-coherence check. Contact sheets and complete 172-second audio/video review remain pending; artifact expires 2026-11-26T01:05:34Z.
 - Do not mark artistically approved until full review. Keep it separate from THE FIRST HOUR, THE WEIGHT OF YES and canonical ONE MORE SCROLL.
+
+
+## Asset library — distributed 50 GB target (2026-10-30)
+- PR [#18](https://github.com/Nolane-x/video/pull/18) is merged to main at `6a44c974ba4be413a5b5006a720a5db5ee8e1b69`.
+- The new workflow fans out 22 independent source lanes with `max-parallel: 16`; it streams each validated ZIP volume (<1.7 GB uncompressed) straight into a unique draft Release rather than staging the full collection or relying on Actions Artifact storage.
+- Source worker: `tools/video/build_asset_library_shard.py`. Final merge/publish gate: `tools/video/finalize_asset_library_release.py`. Each lane manifest records provider report, asset license/provenance, byte size, SHA-256, per-file ledger and volume coverage.
+- The finalizer requires all 22 manifests; unique asset IDs/paths; every packaged file in exactly one volume; exact remote Release asset names/sizes; and GitHub's SHA-256 digest for every volume, manifest and metadata file. It only publishes after every check passes.
+- `gh release upload --clobber` supports reruns; raw files are removed only after a successful volume upload. Upload errors leave the original source files intact.
+- Poly Haven has an 8 GiB aggregate lane cap to remain within a standard runner's 14 GB SSD. Provider-specific CC0/Public Domain and exact item-rights gates remain mandatory.
+- Target is decimal **50,000,000,000 indexed resource bytes**, not a configured cap or a file-count proxy. Read actual finalizer output; never claim target reached before the published Release verifies.
+- PR validation [run #131](https://github.com/Nolane-x/video/actions/runs/41066218856) passed all offline rights tests and generated-asset smoke tests.
+- Current first distributed build [Build #52](https://github.com/Nolane-x/video/actions/runs/41066528335) was created after merge and is queued at this snapshot; no 50 GB output has yet been established. Old serial Build 49 remained in progress, Build 50 was cancelled, and Build 51 was pending; these are not evidence of completion.
+- Existing last confirmed public library release remains Build 43 (1,095,394,051 bytes). Continue by inspecting every Build 52 source lane and improve source selection using measured bytes, not hypothetical caps.
+
