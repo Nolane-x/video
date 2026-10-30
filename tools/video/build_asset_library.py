@@ -1622,7 +1622,7 @@ def download_kenney(root,index):
             write_text(dest/"SOURCE_AND_LICENSE.md",
                        f"# {source['title']} — Kenney\n\nOfficial repository: {page}\nArchive SHA-256: {hashlib.sha256(blob).hexdigest()}\nVerified documentation evidence: {source['evidence']}\nLicense: CC0 1.0 Universal — {CC0_URL}\nOnly approved media/document file types were extracted; executable and game logic files are intentionally omitted.\n")
             for path in sorted(p for p in dest.rglob("*") if p.is_file()):
-                index.append({"id":f"kenney-{slugify(slug)}-{slugify(path.relative_to(dest).as_posix())}",
+                index.append({"id":f"kenney-{slugify(slug)}-{hashlib.sha256(path.relative_to(dest).as_posix().encode('utf-8')).hexdigest()[:12]}",
                               "path":path.relative_to(root).as_posix(),"type":"kenney-cc0-asset-file",
                               "provider":"Kenney / GitHub","parent_asset_id":"kenney-github-"+slugify(slug),
                               "category":source["category"],"source_page":page,"license":"CC0-1.0",
@@ -3596,7 +3596,7 @@ def download_opengameart(root,index):
                     row.update(status="no_eligible_file",reason="The item page exposes no allowed direct attachment under OpenGameArt's official files directory.")
                     report.append(row)
                     continue
-                item_slug=slugify(detail["title"])[:90] or slugify(item_url.rsplit("/",1)[-1])
+                item_slug=(slugify(detail["title"])[:64] or "asset")+"-"+hashlib.sha256(item_url.encode("utf-8")).hexdigest()[:12]
                 package_dir=root/"third-party/opengameart"/category/item_slug
                 package_downloads=[]
                 item_new_bytes=0
@@ -3673,7 +3673,7 @@ def download_opengameart(root,index):
                             continue
                         digest=sha256_path(media_path)
                         rel=media_path.relative_to(root).as_posix()
-                        index.append({"id":"opengameart-"+category+"-"+slugify(item_slug+"-"+rel),
+                        index.append({"id":"opengameart-"+category+"-"+hashlib.sha256(rel.encode("utf-8")).hexdigest()[:16],
                                       "path":rel,"type":"opengameart-cc0-"+category,
                                       "provider":"OpenGameArt","title":detail["title"],
                                       "creator":detail["creator"],"category":category_labels[category],
