@@ -43,6 +43,16 @@ OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 48
 OPENGAMEART_MAX_FILE_BYTES = 80 * 1024 * 1024
 OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+# Internet Archive public-domain/CC0 moving-image selections. A collection is a
+# discovery scope only: every item must pass its own licenseurl/rights and file checks.
+INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 40, "nasa": 40}
+INTERNET_ARCHIVE_SEARCH_ROWS = 100
+INTERNET_ARCHIVE_SEARCH_PAGES = 2
+INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 80
+INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
+INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 4 * 1024 * 1024 * 1024
+INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
+INTERNET_ARCHIVE_VIDEO_EXTENSIONS = {".mp4", ".ogv", ".webm"}
 OPENMOJI_VERSION = "17.0.0"
 OPENMOJI_PACKAGE_METADATA_URL = "https://registry.npmjs.org/openmoji/17.0.0"
 OPENMOJI_EXPECTED_FILE_COUNT = 11539
@@ -3164,6 +3174,317 @@ def download_openmoji_assets(root,index):
         row.update(status="failed",reason=str(exc)[:500])
         report.append(row)
         print("[OpenMoji] failed:",str(exc)[:300])
+    return report
+
+
+INTERNET_ARCHIVE_LICENSE_PATHS = {
+    "/publicdomain/zero/1.0/": "CC0-1.0",
+    "/licenses/cc0/3.0/": "CC0-3.0",
+    "/licenses/publicdomain/": "Public Domain (item-level Internet Archive rights statement)",
+}
+
+
+def internet_archive_identifier_is_allowed(identifier):
+    value=str(identifier or "")
+    return bool(value and len(value)<=180 and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*",value))
+
+
+def internet_archive_item_url_is_allowed(url,identifier):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (
+            internet_archive_identifier_is_allowed(identifier)
+            and parsed.scheme=="https" and parsed.hostname=="archive.org"
+            and parsed.port in (None,443) and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and parsed.path=="/details/"+identifier
+        )
+    except Exception:
+        return False
+
+
+def internet_archive_metadata_url_is_allowed(url,identifier):
+    try:
+        parsed=urllib.parse.urlsplit(str(url or ""))
+        return (
+            internet_archive_identifier_is_allowed(identifier)
+            and parsed.scheme=="https" and parsed.hostname=="archive.org"
+            and parsed.port in (None,443) and not parsed.username and not parsed.password
+            and not parsed.query and not parsed.fragment
+            and parsed.path=="/metadata/"+identifier
+        )
+    except Exception:
+        return False
+
+
+def internet_archive_license_from_item_metadata(license_url,rights):
+    try:
+        parsed=urllib.parse.urlsplit(str(license_url or ""))
+        if parsed.scheme not in {"http","https"} or parsed.hostname!="creativecommons.org":
+            return None
+        path=parsed.path.rstrip("/")+"/"
+        license_name=INTERNET_ARCHIVE_LICENSE_PATHS.get(path)
+        if not license_name:
+            return None
+        normalized_rights=" ".join(str(rights or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
+        if license_name.startswith("Public Domain") and normalized_rights!="public domain":
+            return None
+        return license_name
+    except Exception:
+        return None
+
+
+def internet_archive_file_url_is_allowed(raw_url,identifier,filename):
+    try:
+        parsed=urllib.parse.urlsplit(str(raw_url or ""))
+        expected="/download/"+str(identifier)+"/"+urllib.parse.quote(str(filename or ""),safe="")
+        extension=Path(str(filename or "")).suffix.lower()
+        return (
+            internet_archive_identifier_is_allowed(identifier)
+            and parsed.scheme=="https" and parsed.hostname=="archive.org"
+            and parsed.port in (None,443) and not parsed.username and not parsed.password
+            and not parsed.fragment and parsed.path==expected
+            and not parsed.query and extension in INTERNET_ARCHIVE_VIDEO_EXTENSIONS
+            and "/" not in str(filename or "") and "\\" not in str(filename or "")
+        )
+    except Exception:
+        return False
+
+
+def internet_archive_media_signature_is_valid(blob,extension,content_type):
+    ext=str(extension or "").lower()
+    mime=str(content_type or "").split(";",1)[0].strip().lower()
+    if ext==".mp4":
+        return len(blob)>20000 and b"ftyp" in blob[:64] and (mime.startswith("video/") or mime in {"application/mp4","application/octet-stream"})
+    if ext==".webm":
+        return len(blob)>20000 and blob.startswith(b"\x1a\x45\xdf\xa3") and (mime.startswith("video/") or mime=="application/octet-stream")
+    if ext==".ogv":
+        return len(blob)>20000 and blob.startswith(b"OggS") and (mime.startswith("video/") or mime in {"application/ogg","application/octet-stream"})
+    return False
+
+
+def internet_archive_parse_payload(payload):
+    """Normalize both advanced-search and item-metadata API response envelopes."""
+    if not isinstance(payload,dict):
+        return {},[]
+    metadata=payload.get("metadata")
+    if not isinstance(metadata,dict):
+        metadata={}
+    files=payload.get("files")
+    if not isinstance(files,list):
+        files=[]
+    return metadata,[item for item in files if isinstance(item,dict)]
+
+
+def internet_archive_license_detail(metadata):
+    """Return the original license URL and validated redistributable status."""
+    license_url=str(metadata.get("licenseurl") or metadata.get("license_url") or "").strip()
+    rights=str(metadata.get("rights") or "").strip()
+    license_name=internet_archive_license_from_item_metadata(license_url,rights)
+    return {
+        "license_url":license_url,
+        "rights_statement":rights,
+        "license":license_name,
+        "verified":bool(license_name),
+    }
+
+
+def internet_archive_parse_duration(value):
+    raw=str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        if ":" in raw:
+            parts=[float(part) for part in raw.split(":")]
+            total=0.0
+            for part in parts:
+                total=total*60.0+part
+            return total
+        result=float(raw)
+        return result if result>=0 else None
+    except (TypeError,ValueError):
+        return None
+
+
+def internet_archive_choose_video_file(files):
+    candidates=[]
+    for item in files:
+        name=str(item.get("name") or "")
+        extension=Path(name).suffix.lower()
+        if extension not in INTERNET_ARCHIVE_VIDEO_EXTENSIONS or "/" in name or "\\" in name:
+            continue
+        try:
+            size=int(item.get("size") or 0)
+        except (TypeError,ValueError):
+            size=0
+        duration=internet_archive_parse_duration(item.get("length"))
+        if size<=0 or size>INTERNET_ARCHIVE_MAX_VIDEO_BYTES:
+            continue
+        if duration is not None and (duration<5 or duration>INTERNET_ARCHIVE_MAX_DURATION_SECONDS):
+            continue
+        source=str(item.get("source") or "").casefold()
+        extension_rank={".mp4":0,".webm":1,".ogv":2}.get(extension,9)
+        candidates.append((extension_rank,-size,source!="derivative",name,item,duration))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda row:(row[0],row[1],row[2],row[3].casefold()))
+    row=candidates[0]
+    return {"file":row[4],"duration_seconds":row[5]}
+
+
+def internet_archive_search_url(collection,start):
+    query=f"collection:{collection} AND mediatype:movies AND licenseurl:http*publicdomain*"
+    params=[
+        ("q",query),("fl[]","identifier"),("fl[]","title"),("fl[]","licenseurl"),
+        ("fl[]","creator"),("fl[]","year"),("rows",str(INTERNET_ARCHIVE_SEARCH_ROWS)),
+        ("start",str(start)),("output","json"),("sort[]","downloads desc")
+    ]
+    return "https://archive.org/advancedsearch.php?"+urllib.parse.urlencode(params)
+
+
+def download_internet_archive_videos(root,index):
+    """Download bounded historical/NASA footage only after strict item-level rights review."""
+    report=[]
+    total_bytes=0
+    seen=set()
+    collection_labels={
+        "prelinger":"Prelinger Archive historical and educational films",
+        "nasa":"NASA public-domain and CC0 moving images"
+    }
+    for collection,cap in INTERNET_ARCHIVE_COLLECTION_CAPS.items():
+        candidates=[]
+        for page_no in range(INTERNET_ARCHIVE_SEARCH_PAGES):
+            start=page_no*INTERNET_ARCHIVE_SEARCH_ROWS
+            search_url=internet_archive_search_url(collection,start)
+            try:
+                payload=request_json(search_url,timeout=35)
+                response=payload.get("response",{}) if isinstance(payload,dict) else {}
+                docs=response.get("docs",[]) if isinstance(response,dict) else []
+                for search_row in docs if isinstance(docs,list) else []:
+                    if not isinstance(search_row,dict):
+                        continue
+                    identifier=str(search_row.get("identifier") or "").strip()
+                    if internet_archive_identifier_is_allowed(identifier) and identifier not in seen and identifier not in candidates:
+                        candidates.append(identifier)
+                print("[Internet Archive] search",collection,"page",page_no+1,"returned",len(docs) if isinstance(docs,list) else 0,"records")
+                time.sleep(.4)
+            except Exception as exc:
+                report.append({"id":"internet-archive-"+collection+"-search-"+str(page_no),
+                               "status":"search_failed","collection":collection,"source_page":search_url,
+                               "reason":str(exc)[:350]})
+        downloaded_for_collection=0
+        examined=0
+        for identifier in candidates:
+            if downloaded_for_collection>=cap or examined>=INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION or total_bytes>=INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+                break
+            examined+=1
+            seen.add(identifier)
+            metadata_url="https://archive.org/metadata/"+identifier
+            item_url="https://archive.org/details/"+identifier
+            row={"id":"internet-archive-"+collection+"-"+slugify(identifier),
+                 "provider":"Internet Archive","collection":collection,"title":identifier,
+                 "source_page":item_url,"metadata_url":metadata_url,
+                 "category":collection_labels[collection]}
+            if not internet_archive_metadata_url_is_allowed(metadata_url,identifier) or not internet_archive_item_url_is_allowed(item_url,identifier):
+                row.update(status="invalid_item_url",reason="The computed metadata/item URL failed the official-host allow-list.")
+                report.append(row)
+                continue
+            try:
+                payload=request_json(metadata_url,timeout=35)
+                metadata,files=internet_archive_parse_payload(payload)
+                if not metadata:
+                    row.update(status="missing_item_metadata",reason="The official item metadata endpoint did not return a metadata object.")
+                    report.append(row); continue
+                actual_identifier=str(metadata.get("identifier") or "").strip()
+                if actual_identifier!=identifier or str(metadata.get("mediatype") or "").casefold()!="movies":
+                    row.update(status="skipped_item_identity",reason="The item's exact identifier or mediatype did not match the discovery result.")
+                    report.append(row); continue
+                collection_values=metadata.get("collection") or []
+                if isinstance(collection_values,str):
+                    collection_values=[collection_values]
+                if not isinstance(collection_values,list) or collection not in {str(v) for v in collection_values}:
+                    row.update(status="skipped_collection",reason="The exact item metadata does not list the requested source collection.")
+                    report.append(row); continue
+                rights=internet_archive_license_detail(metadata)
+                row.update(title=str(metadata.get("title") or identifier)[:260],
+                           creator=str(metadata.get("creator") or "")[:260],
+                           year=str(metadata.get("year") or "")[:24],
+                           license=rights["license"] or "not eligible",
+                           license_url=rights["license_url"],
+                           rights_statement=rights["rights_statement"])
+                if not rights["verified"]:
+                    row.update(status="skipped_rights",reason="The exact item's licenseurl/rights fields are not in the approved CC0/Public Domain allow-list.")
+                    report.append(row); continue
+                chosen=internet_archive_choose_video_file(files)
+                if not chosen:
+                    row.update(status="no_eligible_video",reason="No MP4/WebM/OGV file is within the bounded per-file size and duration limits.")
+                    report.append(row); continue
+                file_record=chosen["file"]
+                filename=str(file_record.get("name") or "")
+                file_url="https://archive.org/download/"+identifier+"/"+urllib.parse.quote(filename,safe="")
+                if not internet_archive_file_url_is_allowed(file_url,identifier,filename):
+                    row.update(status="invalid_file_url",reason="The selected media file URL failed the official host/path allow-list.")
+                    report.append(row); continue
+                expected_md5=str(file_record.get("md5") or "").strip().lower()
+                expected_sha1=str(file_record.get("sha1") or "").strip().lower()
+                try:
+                    blob,content_type=request_bytes(file_url,timeout=75,limit=INTERNET_ARCHIVE_MAX_VIDEO_BYTES)
+                    if not internet_archive_media_signature_is_valid(blob,Path(filename).suffix.lower(),content_type):
+                        raise RuntimeError("downloaded media MIME/magic signature did not match its extension")
+                    actual_md5=hashlib.md5(blob).hexdigest()
+                    if expected_md5 and actual_md5!=expected_md5:
+                        raise RuntimeError("downloaded media MD5 did not match the Internet Archive item file record")
+                    if expected_sha1 and hashlib.sha1(blob).hexdigest()!=expected_sha1:
+                        raise RuntimeError("downloaded media SHA-1 did not match the Internet Archive item file record")
+                except Exception as file_exc:
+                    row.update(status="download_failed",reason=str(file_exc)[:420])
+                    report.append(row); continue
+                if total_bytes+len(blob)>INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+                    row.update(status="skipped_total_size_limit",reason="The video would exceed the aggregate Internet Archive download ceiling.")
+                    report.append(row); break
+                slug=slugify(str(metadata.get("title") or identifier))[:90] or slugify(identifier)
+                folder=root/"third-party/internet-archive"/collection
+                folder.mkdir(parents=True,exist_ok=True)
+                target=folder/(slug+"-"+slugify(identifier)+Path(filename).suffix.lower())
+                target.write_bytes(blob)
+                digest=sha256_path(target)
+                note=(
+                    f"# {metadata.get('title') or identifier} — Internet Archive\n\n"
+                    f"- Identifier: {identifier}\n- Collection: {collection}\n- Item page: {item_url}\n"
+                    f"- Media file: {filename}\n- Direct download: {file_url}\n"
+                    f"- Creator: {metadata.get('creator') or 'Not supplied'}\n- Year: {metadata.get('year') or 'Not supplied'}\n"
+                    f"- Item license URL: {rights['license_url']}\n- Item rights statement: {rights['rights_statement'] or 'CC0 declaration in item metadata'}\n"
+                    f"- Exact license classification: {rights['license']}\n- File MD5: {actual_md5}\n- File SHA-1: {expected_sha1 or 'Not supplied'}\n"
+                    f"- SHA-256: {digest}\n\n{str(metadata.get('description') or '')[:1800]}\n"
+                )
+                write_text(folder/(target.stem+".SOURCE_AND_LICENSE.md"),note)
+                index.append({
+                    "id":row["id"],"path":target.relative_to(root).as_posix(),
+                    "type":"internet-archive-public-domain-video",
+                    "provider":"Internet Archive","title":str(metadata.get("title") or identifier),
+                    "creator":str(metadata.get("creator") or ""),"year":str(metadata.get("year") or ""),
+                    "description":str(metadata.get("description") or "")[:1800],
+                    "collection":collection,"category":collection_labels[collection],
+                    "source_page":item_url,"metadata_url":metadata_url,"source_file_url":file_url,
+                    "license":rights["license"],"license_url":rights["license_url"],
+                    "rights_statement":rights["rights_statement"],
+                    "license_verified_from_item_metadata":True,"redistributable":True,
+                    "duration_seconds":chosen["duration_seconds"],
+                    "archive_file_md5":actual_md5,"archive_file_sha1":expected_sha1,
+                    "size_bytes":len(blob),"sha256":digest
+                })
+                total_bytes+=len(blob)
+                downloaded_for_collection+=1
+                row.update(status="downloaded",file=target.name,source_file_url=file_url,
+                           filename=filename,size_bytes=len(blob),duration_seconds=chosen["duration_seconds"],
+                           md5=actual_md5,sha1=expected_sha1,sha256=digest)
+                report.append(row)
+                print("[Internet Archive] OK:",collection,metadata.get("title"),len(blob),"bytes")
+                time.sleep(.35)
+            except Exception as exc:
+                row.update(status="item_failed",reason=str(exc)[:420])
+                report.append(row)
+        print("[Internet Archive]",collection,":",downloaded_for_collection,"downloaded from",examined,"item metadata records")
     return report
 
 
