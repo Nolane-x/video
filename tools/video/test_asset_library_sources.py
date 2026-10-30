@@ -55,6 +55,60 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
 
+class USGSGalleryRightsAndParsingTests(unittest.TestCase):
+    IMAGE_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/images/sample.jpg"
+    AUDIO_URL = "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/audio/sample.mp3"
+    VIDEO_URL = "https://usgs-ocapsv2-public-input-media.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/video/sample.mp4"
+
+    def test_usgs_rights_gate_requires_exact_item_level_public_domain_label(self):
+        self.assertTrue(library.usgs_rights_are_public_domain("Public Domain."))
+        self.assertTrue(library.usgs_rights_are_public_domain(" public domain "))
+        self.assertFalse(library.usgs_rights_are_public_domain(""))
+        self.assertFalse(library.usgs_rights_are_public_domain("Copyrighted"))
+        self.assertFalse(library.usgs_rights_are_public_domain("Public Domain. Third-party material used with permission."))
+        self.assertFalse(library.usgs_rights_are_public_domain("Public Domain with restrictions"))
+        self.assertFalse(library.usgs_rights_are_public_domain("CC BY 4.0"))
+
+    def test_usgs_direct_media_allowlist_binds_exact_host_and_type_path(self):
+        self.assertTrue(library.usgs_media_detail_url_is_allowed(self.IMAGE_URL, "images"))
+        self.assertTrue(library.usgs_media_detail_url_is_allowed(self.AUDIO_URL, "audio"))
+        self.assertTrue(library.usgs_media_detail_url_is_allowed(self.VIDEO_URL, "videos"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed("https://example.com/media/images/sample.jpg", "images"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed("https://d9-wret.s3.us-west-2.amazonaws.com/styles/large/media/images/sample.jpg", "images"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed("http://d9-wret.s3.us-west-2.amazonaws.com/assets/media/images/sample.jpg", "images"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed(self.AUDIO_URL, "images"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed(self.VIDEO_URL, "audio"))
+        self.assertFalse(library.usgs_media_detail_url_is_allowed("https://user@d9-wret.s3.us-west-2.amazonaws.com/media/images/sample.jpg", "images"))
+
+    def test_usgs_detail_parser_requires_section_label_and_extracts_original_media(self):
+        page = f"""<html><head><meta property="og:title" content="USGS sample item"><meta name="description" content="A sample science image"></head>
+        <body><h1>USGS sample item</h1><section class="source"><h3>Sources/Usage</h3><p>Public Domain.</p></section>
+        <a href="{self.IMAGE_URL}">Original</a></body></html>"""
+        detail = library.usgs_parse_media_detail(page, "images")
+        self.assertEqual(detail["title"], "USGS sample item")
+        self.assertEqual(detail["rights_statement"], "Public Domain.")
+        self.assertTrue(library.usgs_rights_are_public_domain(detail["rights_statement"]))
+        self.assertEqual(detail["direct_media_urls"], [self.IMAGE_URL])
+
+    def test_usgs_gallery_parser_only_accepts_official_media_item_paths(self):
+        page = """<html><a href="/media/images/volcano-image">image</a>
+        <a href="/media/videos/volcano-video">video</a>
+        <a href="https://example.com/media/images/nope">external</a></html>"""
+        image_candidates = library.usgs_page_detail_candidates(page, "images")
+        video_candidates = library.usgs_page_detail_candidates(page, "videos")
+        audio_candidates = library.usgs_page_detail_candidates(page, "audio")
+        self.assertEqual(image_candidates, ["https://www.usgs.gov/media/images/volcano-image"])
+        self.assertEqual(video_candidates, ["https://www.usgs.gov/media/videos/volcano-video"])
+        self.assertEqual(audio_candidates, [])
+
+    def test_usgs_media_signatures_reject_html_and_accept_expected_magic(self):
+        self.assertTrue(library.usgs_media_signature_is_valid(b"\xff\xd8\xff" + b"x" * 64, "images", "image/jpeg", ".jpg"))
+        self.assertTrue(library.usgs_media_signature_is_valid(b"RIFF" + b"x" * 4 + b"WAVE" + b"x" * 32, "audio", "audio/wav", ".wav"))
+        self.assertTrue(library.usgs_media_signature_is_valid(b"\x00\x00\x00\x18ftypisom" + b"x" * 20000, "videos", "video/mp4", ".mp4"))
+        self.assertFalse(library.usgs_media_signature_is_valid(b"<html>blocked</html>", "images", "text/html", ".jpg"))
+        self.assertFalse(library.usgs_media_signature_is_valid(b"<html>blocked</html>", "videos", "text/html", ".mp4"))
+
+
 class RightsGateTests(unittest.TestCase):
     def test_smithsonian_requires_cc0_for_record_and_exact_media(self):
         self.assertTrue(library.smithsonian_rights_are_cc0("CC0", "CC0"))
