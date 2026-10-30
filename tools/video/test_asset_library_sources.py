@@ -46,6 +46,10 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.OPENGAMEART_MAX_TOTAL_BYTES, 4 * 1024 * 1024 * 1024)
         self.assertEqual(library.NOAA_MEDIA_PAGE_SCAN_LIMIT, 20)
         self.assertEqual(library.NOAA_MEDIA_SELECTION_CAPS, {"image": 200, "video": 120})
+        self.assertEqual(library.OPENMOJI_VERSION, "17.0.0")
+        self.assertEqual(library.OPENMOJI_EXPECTED_FILE_COUNT, 11539)
+        self.assertGreaterEqual(library.OPENMOJI_MAX_ARCHIVE_BYTES, 80 * 1024 * 1024)
+        self.assertGreaterEqual(library.OPENMOJI_MAX_EXTRACTED_BYTES, 100 * 1024 * 1024)
         self.assertGreaterEqual(library.NOAA_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
 
     def test_ambientcg_download_url_rejects_untrusted_hosts_and_paths(self):
