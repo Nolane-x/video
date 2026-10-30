@@ -566,6 +566,21 @@
       "note": "Build 47 raises listing discovery to 20 pages and successful downloads to at most 200 images and 120 videos, with an 8 GiB aggregate ceiling. It still requires an explicit NOAA Credit field, skips a copyright marker in caption/credit/alt text, screens possible identifiable-person/interview contexts, downloads only official item Download URLs, and retains caption, credit, source, metadata and SHA-256."
     },
     {
+      "id": "internet-archive-prelinger-nasa-moving-images",
+      "title": "Internet Archive — Prelinger and NASA public-domain/CC0 moving images",
+      "provider": "Internet Archive",
+      "kind": "moving-image archive and preservation repository",
+      "category": "Historical educational films, industrial/science footage, NASA mission and spaceflight moving images",
+      "source_page": "https://archive.org/",
+      "search_api": "https://archive.org/advancedsearch.php",
+      "metadata_api": "https://archive.org/metadata/",
+      "license": "CC0-1.0 or CC0-3.0 only from exact item licenseurl; legacy Creative Commons Public Domain licenseurl only when the same item rights field explicitly equals Public Domain",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "bounded-mp4-webm-ogv-download-after-exact-item-metadata-rights-validation",
+      "note": "Search is restricted to the Prelinger and NASA collections and mediatype=movies. The collection is discovery scope only: each item metadata record must repeat the exact identifier, mediatype, requested collection and an allowed Creative Commons licenseurl. The legacy Public Domain URL is accepted only with an exact Public Domain rights field; Public Domain Mark is not treated as a license. Only bounded MP4/WebM/OGV media files are downloaded. File MD5 and SHA-1 values are checked against the item file record when supplied; actual SHA-256 is stored. Maximum 40 videos per collection, 250 MiB per file and 4 GiB aggregate per build; all ceilings are caps, not promised download totals."
+    },
+    {
       "id": "ambientcg-cc0",
       "title": "ambientCG — CC0 PBR materials, HDRIs, models, decals, atlases and creative tools",
       "provider": "ambientCG",
