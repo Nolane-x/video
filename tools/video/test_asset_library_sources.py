@@ -1109,6 +1109,17 @@ class USGSGalleryRightsAndParsingTests(unittest.TestCase):
         self.assertFalse(library.usgs_rights_are_public_domain("Public Domain with restrictions"))
         self.assertFalse(library.usgs_rights_are_public_domain("CC BY 4.0"))
 
+    def test_usgs_same_title_items_get_stable_distinct_output_slugs(self):
+        title = "Aerial Image of the Southwest Rift Zone Eruption of Kilauea"
+        item_a = "https://www.usgs.gov/media/images/southwest-rift-zone-01"
+        item_b = "https://www.usgs.gov/media/images/southwest-rift-zone-02"
+        slug_a = library.usgs_asset_item_slug(title, item_a)
+        slug_a_again = library.usgs_asset_item_slug(title, item_a)
+        slug_b = library.usgs_asset_item_slug(title, item_b)
+        self.assertEqual(slug_a, slug_a_again)
+        self.assertNotEqual(slug_a, slug_b)
+        self.assertRegex(slug_a, r"^aerial-image-of-the-southwest-rift-zone-eruption-of-kilauea-[0-9a-f]{12}$")
+
     def test_usgs_direct_media_allowlist_binds_exact_host_and_type_path(self):
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.IMAGE_URL, "images"))
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.AUDIO_URL, "audio"))

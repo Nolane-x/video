@@ -3014,6 +3014,13 @@ def usgs_singular_media_type(media_type):
     return mapping[media_type]
 
 
+def usgs_asset_item_slug(title, item_url):
+    """Make stable, collision-resistant folder/file slugs for distinct USGS item pages."""
+    base = slugify(str(title or ""))[:84] or slugify(str(item_url or "").rsplit("/", 1)[-1])[:84] or "usgs-item"
+    identity = hashlib.sha256(str(item_url or "").encode("utf-8")).hexdigest()[:12]
+    return base.rstrip("-") + "-" + identity
+
+
 def usgs_rights_are_public_domain(statement):
     """Require the exact item-level Public Domain label; reject all other notices."""
     normalized=" ".join(str(statement or "").replace("\u00a0"," ").split()).strip().rstrip(".").casefold()
@@ -3193,7 +3200,7 @@ def download_usgs_gallery(root,index):
                     row.update(status="skipped_total_size_limit",reason="The media item would exceed the aggregate USGS extraction ceiling.")
                     report.append(row)
                     break
-                item_slug=slugify(detail["title"])[:100] or slugify(item_url.rsplit("/",1)[-1])
+                item_slug=usgs_asset_item_slug(detail["title"], item_url)
                 item_dir=root/"third-party/usgs"/media_type/item_slug
                 item_dir.mkdir(parents=True,exist_ok=True)
                 filename=item_slug+ext
