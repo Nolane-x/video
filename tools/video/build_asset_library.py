@@ -3326,7 +3326,7 @@ def loc_rights_from_item(detail):
 
 def download_loc_public_domain(root,index):
     """Only bundle LOC photos after verifying a positive rights statement on the exact item record."""
-    report=[]; total=0; cap=48
+    report=[]; total=0; cap=160
     queries=[
         ("aviation","aircraft aviation"),("maps","historical map"),("industry","industrial machinery"),
         ("agriculture","farm harvest"),("city","historic city street"),("nature","national park landscape"),
