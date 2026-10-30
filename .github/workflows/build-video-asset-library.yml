@@ -40,8 +40,11 @@ jobs:
           ffmpeg -version
           ffprobe -version
 
-      - name: Compile asset builder before any network downloads
-        run: python -m py_compile tools/video/build_asset_library.py
+      - name: Compile asset builder and modular pack tools before any network downloads
+        run: |
+          python -m py_compile tools/video/build_asset_library.py
+          python -m py_compile tools/video/generate_original_stickers.py
+          python -m py_compile tools/video/package_asset_library.py
 
       - name: Run offline source-rights and asset-family regression tests
         run: python tools/video/test_asset_library_sources.py
