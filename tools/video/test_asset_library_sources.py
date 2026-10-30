@@ -67,7 +67,8 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
         entry = next(row for row in catalog["sources"] if row.get("id") == "poly-pizza-cc0-api")
         self.assertIn("per-model-cc0", entry["bundling"])
-        self.assertIn("optional POLY_PIZZA_API_KEY", entry["note"])
+        self.assertIn("POLY_PIZZA_API_KEY", entry["authentication"])
+        self.assertIn("optional", entry["authentication"].lower())
         self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
         self.assertIn("CC0 1.0 only", entry["note"])
         self.assertEqual(entry["license_url"], "https://creativecommons.org/publicdomain/zero/1.0/")
@@ -78,7 +79,8 @@ class ExternalSourceExpansionTests(unittest.TestCase):
             row for row in catalog["sources"]
             if row.get("id") == "quaternius-current-qal-source-only"
         )
-        self.assertIn("QAL v1.0", entry["license"])
+        self.assertIn("QAL", entry["license"])
+        self.assertIn("v1.0", entry["license"])
         self.assertIn("source-only", entry["bundling"])
         self.assertIn("redistributing the assets themselves", entry["note"])
         self.assertEqual(entry["license_url"], "https://quaternius.com/license.html")
