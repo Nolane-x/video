@@ -16,6 +16,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from collections import Counter
 from typing import Any
+from pathlib import Path
 
 BUCKET_URL = "https://nara-national-archives-catalog.s3.amazonaws.com/"
 RECORD_GROUPS = ("111", "342", "428")
