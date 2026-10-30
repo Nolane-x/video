@@ -8,6 +8,7 @@ verify the real bulk-export schema before a rights-gated importer is implemented
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 import urllib.error
