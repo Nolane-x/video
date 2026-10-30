@@ -66,7 +66,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
     def test_poly_pizza_source_catalog_requires_optional_key_and_item_level_cc0(self):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
         entry = next(row for row in catalog["sources"] if row.get("id") == "poly-pizza-cc0-api")
-        self.assertIn("item-verified", entry["bundling"])
+        self.assertIn("per-model-cc0", entry["bundling"])
         self.assertIn("optional POLY_PIZZA_API_KEY", entry["note"])
         self.assertEqual(entry["api"], "https://api.poly.pizza/v1.1")
         self.assertIn("CC0 1.0 only", entry["note"])
@@ -155,12 +155,18 @@ class PolyPizzaCC0APITests(unittest.TestCase):
         hostile["Download"] = "https://evil.example/tree.glb"
         self.assertEqual(library.poly_pizza_parse_model(hostile, require_download=True)[1], "download_url_not_official")
 
-    def test_glb_validator_checks_magic_version_and_declared_length(self):
-        valid = b"glTF" + (2).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"
+    def test_glb_validator_checks_magic_version_json_chunk_and_declared_length(self):
+        payload = json.dumps({"asset": {"version": "2.0"}}).encode("utf-8")
+        payload += b" " * ((4 - len(payload) % 4) % 4)
+        total = 12 + 8 + len(payload)
+        valid = b"glTF" + (2).to_bytes(4, "little") + total.to_bytes(4, "little") + len(payload).to_bytes(4, "little") + b"JSON" + payload
         self.assertTrue(library.poly_pizza_glb_is_valid(valid))
         self.assertFalse(library.poly_pizza_glb_is_valid(b"<html>blocked</html>"))
-        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (1).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"))
-        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (2).to_bytes(4, "little") + (21).to_bytes(4, "little") + b"12345678"))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (1).to_bytes(4, "little") + total.to_bytes(4, "little") + valid[12:]))
+        self.assertFalse(library.poly_pizza_glb_is_valid(b"glTF" + (2).to_bytes(4, "little") + (total + 4).to_bytes(4, "little") + valid[12:]))
+        invalid_json = b"not-json".ljust(8, b" ")
+        bad = b"glTF" + (2).to_bytes(4, "little") + (28).to_bytes(4, "little") + (8).to_bytes(4, "little") + b"JSON" + invalid_json
+        self.assertFalse(library.poly_pizza_glb_is_valid(bad))
 
     def test_importer_skips_without_secret_and_does_not_attempt_network(self):
         with mock.patch.dict(library.os.environ if hasattr(library, "os") else __import__("os").environ,
@@ -172,7 +178,10 @@ class PolyPizzaCC0APITests(unittest.TestCase):
 
     def test_importer_rechecks_detail_and_records_glb_receipt(self):
         model = self._model()
-        glb = b"glTF" + (2).to_bytes(4, "little") + (20).to_bytes(4, "little") + b"12345678"
+        gltf_json = json.dumps({"asset": {"version": "2.0"}}).encode("utf-8")
+        gltf_json += b" " * ((4 - len(gltf_json) % 4) % 4)
+        glb_length = 12 + 8 + len(gltf_json)
+        glb = b"glTF" + (2).to_bytes(4, "little") + glb_length.to_bytes(4, "little") + len(gltf_json).to_bytes(4, "little") + b"JSON" + gltf_json
         def fake_api(path, params, token):
             if path == "/model/TreeOne":
                 return model
