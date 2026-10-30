@@ -338,6 +338,13 @@ class USGSGalleryRightsAndParsingTests(unittest.TestCase):
         self.assertFalse(library.usgs_rights_are_public_domain("Public Domain with restrictions"))
         self.assertFalse(library.usgs_rights_are_public_domain("CC BY 4.0"))
 
+    def test_usgs_media_type_normalization_keeps_audio_singular(self):
+        self.assertEqual(library.usgs_media_type_name("images"), "image")
+        self.assertEqual(library.usgs_media_type_name("videos"), "video")
+        self.assertEqual(library.usgs_media_type_name("audio"), "audio")
+        with self.assertRaises(ValueError):
+            library.usgs_media_type_name("documents")
+
     def test_usgs_direct_media_allowlist_binds_exact_host_and_type_path(self):
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.IMAGE_URL, "images"))
         self.assertTrue(library.usgs_media_detail_url_is_allowed(self.AUDIO_URL, "audio"))
