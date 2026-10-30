@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import sys
 import tempfile
+import tarfile
 import unittest
 from unittest import mock
 import zipfile
@@ -75,6 +76,79 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.ambientcg_response_assets({"foundAssets": [{"assetId": "Wood096"}]}), [{"assetId": "Wood096"}])
         self.assertEqual(library.ambientcg_response_assets({"assets": [{"id": "Concrete001"}]}), [{"id": "Concrete001"}])
         self.assertEqual(library.ambientcg_response_assets({"other": []}), [])
+
+class OpenMojiCCBYSAAssetTests(unittest.TestCase):
+    def test_openmoji_npm_metadata_requires_pinned_version_and_sharealike_license(self):
+        good = {
+            "version": "17.0.0",
+            "license": "CC-BY-SA-4.0",
+            "repository": {"url": "git+https://github.com/hfg-gmuend/openmoji.git"},
+            "dist": {
+                "tarball": "https://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz",
+                "shasum": "ee8094c5c0de0d2126b77ceb074d62b6fe2071d0",
+                "integrity": "sha512-EBnYrNGdcdw+OSXmENeNE1yBNRu6tOraTmoOyUbJkTmvT/+XETp8RZLSJFzD3lrPc5N9CzsyPnRTk0Vp4UaI9w==",
+            },
+        }
+        self.assertTrue(library.openmoji_metadata_is_eligible(good))
+        bad = json.loads(json.dumps(good))
+        bad["license"] = "CC0-1.0"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["version"] = "latest"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+        bad = json.loads(json.dumps(good))
+        bad["dist"]["tarball"] = "https://evil.example/openmoji-17.0.0.tgz"
+        self.assertFalse(library.openmoji_metadata_is_eligible(bad))
+
+    def test_openmoji_tarball_and_asset_path_allowlists_are_strict(self):
+        self.assertTrue(library.openmoji_tarball_url_is_allowed(
+            "https://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "http://registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "https://registry.npmjs.org/openmoji/-/openmoji-16.0.0.tgz"))
+        self.assertFalse(library.openmoji_tarball_url_is_allowed(
+            "https://user@registry.npmjs.org/openmoji/-/openmoji-17.0.0.tgz"))
+        self.assertEqual(library.openmoji_selected_archive_path("package/color/svg/1F600.svg"), "color/svg/1F600.svg")
+        self.assertEqual(library.openmoji_selected_archive_path("package/black/618x618/1F600.png"), "black/618x618/1F600.png")
+        self.assertEqual(library.openmoji_selected_archive_path("package/data/openmoji.json"), "data/openmoji.json")
+        self.assertIsNone(library.openmoji_selected_archive_path("package/helpers/install.js"))
+        self.assertIsNone(library.openmoji_selected_archive_path("package/src/generator.py"))
+        self.assertIsNone(library.openmoji_selected_archive_path("package/color/svg/../../outside.svg"))
+
+    def test_openmoji_extractor_keeps_only_safe_svg_png_and_central_metadata(self):
+        stream = io.BytesIO()
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><rect width="10" height="10"/></svg>'
+        png = b"\x89PNG\r\n\x1a\n" + b"valid-png-fixture"
+        metadata = json.dumps([{"hexcode": "1F600", "annotation": "grinning face"}]).encode()
+        with tarfile.open(fileobj=stream, mode="w:gz") as archive:
+            def add_file(name, payload):
+                info = tarfile.TarInfo(name)
+                info.size = len(payload)
+                archive.addfile(info, io.BytesIO(payload))
+            add_file("package/color/svg/1F600.svg", svg)
+            add_file("package/black/618x618/1F600.png", png)
+            add_file("package/data/openmoji.json", metadata)
+            add_file("package/helpers/install.js", b"console.log('do not extract')")
+            add_file("package/color/svg/unsafe.png", b"<html>not a png</html>")
+            link = tarfile.TarInfo("package/color/svg/symlink.svg")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../outside.svg"
+            archive.addfile(link)
+            add_file("package/../outside.svg", svg)
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "openmoji"
+            selected, rows = library.openmoji_extract_selected_assets(stream.getvalue(), target)
+            self.assertEqual(len(selected), 2)
+            self.assertEqual(len(rows), 1)
+            self.assertTrue((target / "color/svg/1F600.svg").is_file())
+            self.assertTrue((target / "black/618x618/1F600.png").is_file())
+            self.assertFalse((target / "helpers/install.js").exists())
+            self.assertFalse((Path(tmp) / "outside.svg").exists())
+            cleaned = (target / "color/svg/1F600.svg").read_text(encoding="utf-8")
+            self.assertNotIn("<script", cleaned.lower())
+            self.assertNotIn("onload=", cleaned.lower())
+
 
 class GoogleFontsOFLTests(unittest.TestCase):
     def test_google_fonts_api_endpoint_is_pinned_to_official_family_directory(self):
