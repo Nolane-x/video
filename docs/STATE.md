@@ -1,5 +1,18 @@
 # Video Studio — current state snapshot
 
+## Asset library pipeline — 2026-10-30
+
+This status is separate from the H2/Remotion film candidates above.
+
+- Build 48: PR #14 is merged to main at commit 3d7050f3f0820d4f7daf5c38be449296c3f8b528. The live asset-library workflow is [run #48](https://github.com/Nolane-x/video/actions/runs/41037407715). At the latest check it remains in progress in step 7, “Build original assets and download rights-screened resources”; ZIP packaging, bundle verification, release publication and index/license-report upload have not started. Do not claim a Build 48 size or successful external download count yet.
+- Build 47 run #47 was cancelled when the merged Build 48 commit started the new workflow; this was the workflow's cancel-in-progress concurrency policy, not an offline test failure.
+- Latest durable asset-library release still found in GitHub Releases: video-asset-library-build-43, with video-asset-library.zip size 1,095,394,051 bytes (1.095 GB decimal). This is historical; no newer release has been confirmed yet.
+- Build 49 is isolated in [PR #15](https://github.com/Nolane-x/video/pull/15), branch feat/video-library-build-49-lazytextures-cc0. It adds a LazyTextures importer based on the provider's official [Public API documentation](https://lazytextures.com/PublicAPI), which states the library assets are CC0 1.0 and exposes models, materials, HDRIs, textures and other assets. The downloader checks exact item detail identity, the provider-wide CC0 policy, official HTTPS download host/path, bounded ZIP metadata/CRC, safe extraction, media signatures/SVG sanitization, and per-file SHA-256.
+- Build 49 ceilings: 10 models, 16 materials, 10 HDRIs, 18 texture archives and 8 other packages; 64 MiB per archive, 512 MiB total compressed, 128 MiB unpacked per item and 1.5 GiB total unpacked. These are ceilings, not delivered counts.
+- Packaging classification maps LazyTextures models to 3d-models, materials/HDRIs/textures to 3d-textures, and other files to miscellaneous.
+- Latest PR head at this snapshot: 2311dd8008d4bd0596e860ffb98dce43bfd1e8b3; [latest validation run #72](https://github.com/Nolane-x/video/actions/runs/41041611452) was still in progress. Earlier CI on the preceding source/validator revisions passed; re-check the latest head before merging.
+- Do not merge PR #15 while Build 48 is still active: a push to main would cancel the current asset-library workflow because the workflow uses cancel-in-progress: true. Merge after Build 48 has finished and its release/report have been verified, then inspect the new Build 49 run.
+
 Snapshot updated 2026-10-28 after the latest First Hour caption-position correction. Current green candidates: **THE WEIGHT OF YES #31**, **ALMOST READY #34**, and **THE FIRST HOUR #55**. First Hour #55 passed all render, audio-mix, ffprobe, loudness and checksum gates; both contact sheets and targeted 1080p B27 frames are now reviewed. Caption fixes are technically verified and visually clear at sampled times. None is approved for final release yet: full-length video and perceptual audio review remain pending. The canonical ONE MORE SCROLL master remains unchanged.
 
 ## Current active candidate — THE WEIGHT OF YES
