@@ -1430,7 +1430,7 @@ def safe_extract(blob,target,max_bytes=350*1024*1024):
             name=info.filename.replace("\\","/")
             pp=PurePosixPath(name); ext=Path(name).suffix.lower()
             unix_type=(info.external_attr >> 16) & 0o170000
-            if (not name or "\\x00" in name or pp.is_absolute() or ".." in pp.parts or
+            if (not name or "\x00" in name or pp.is_absolute() or ".." in pp.parts or
                     (pp.parts and ":" in pp.parts[0]) or unix_type==0o120000):
                 raise RuntimeError("unsafe ZIP path or symlink: "+name)
             if info.is_dir() or ext in DENIED or ext not in ALLOWED: continue
