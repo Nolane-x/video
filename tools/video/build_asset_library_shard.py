@@ -168,10 +168,17 @@ def _run_originals(library, root: Path, index: list[dict]) -> list[dict]:
     }]
 
 
-def _validate_and_hash_assets(library, root: Path, assets: list[dict]) -> tuple[list[dict], list[dict]]:
-    seen_ids = set()
-    seen_paths = set()
+def _validate_and_hash_assets(
+    library, root: Path, assets: list[dict]
+) -> tuple[list[dict], list[dict], int]:
+    seen_ids = {}
+    seen_paths = {}
     validated = []
+    deduplicated_exact_records = 0
+    identity_fields = (
+        "id", "path", "sha256", "size_bytes", "license", "license_url",
+        "redistributable", "provider", "source_page", "type",
+    )
     for asset in assets:
         if not isinstance(asset, dict):
             raise RuntimeError("A source importer returned a non-object asset record")
@@ -180,10 +187,6 @@ def _validate_and_hash_assets(library, root: Path, assets: list[dict]) -> tuple[
         path_value = PurePosixPath(relative)
         if not asset_id or not relative or path_value.is_absolute() or ".." in path_value.parts or "\\" in relative:
             raise RuntimeError(f"Source importer returned an unsafe asset record: {asset!r}")
-        if asset_id in seen_ids or relative in seen_paths:
-            raise RuntimeError(f"Duplicate asset id or path in shard: {asset_id} / {relative}")
-        seen_ids.add(asset_id)
-        seen_paths.add(relative)
         path = root / relative
         if not path.is_file() or path.stat().st_size <= 0:
             raise FileNotFoundError(f"Indexed source asset is missing or empty: {relative}")
@@ -199,6 +202,28 @@ def _validate_and_hash_assets(library, root: Path, assets: list[dict]) -> tuple[
             raise RuntimeError(f"Source importer byte count mismatch: {relative}")
         asset["sha256"] = digest
         asset["size_bytes"] = actual_size
+        identity = json.dumps(
+            {key: asset.get(key) for key in identity_fields},
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+        )
+
+        previous_id = seen_ids.get(asset_id)
+        previous_path = seen_paths.get(relative)
+        if previous_id is not None or previous_path is not None:
+            # Some source manifests and original-asset generators can emit the exact
+            # same file record more than once. Deduplicate only a byte-identical,
+            # provenance-identical record. Any conflicting ID/path reuse remains fatal.
+            if previous_id == identity and previous_path == identity:
+                deduplicated_exact_records += 1
+                continue
+            raise RuntimeError(
+                f"Conflicting duplicate asset id or path in shard: {asset_id} / {relative}"
+            )
+
+        seen_ids[asset_id] = identity
+        seen_paths[relative] = identity
         validated.append(asset)
 
     file_checksums = []
@@ -209,7 +234,11 @@ def _validate_and_hash_assets(library, root: Path, assets: list[dict]) -> tuple[
                 "size_bytes": path.stat().st_size,
                 "sha256": library.sha256_path(path),
             })
-    return validated, file_checksums
+    print(
+        f"[Shard validation] {len(validated)} unique indexed assets; "
+        f"deduplicated {deduplicated_exact_records} exact duplicate records"
+    )
+    return validated, file_checksums, deduplicated_exact_records
 
 
 def build_shard(lane: str, output_dir: Path, release_tag: str | None = None) -> dict:
@@ -231,7 +260,7 @@ def build_shard(lane: str, output_dir: Path, release_tag: str | None = None) -> 
         downloader = getattr(library, SOURCE_LANES[lane])
         report = downloader(root, assets)
 
-    assets, file_checksums = _validate_and_hash_assets(library, root, assets)
+    assets, file_checksums, deduplicated_records = _validate_and_hash_assets(library, root, assets)
     rows = create_source_volumes(
         root=root,
         output_dir=output_dir / "volumes",
@@ -244,6 +273,7 @@ def build_shard(lane: str, output_dir: Path, release_tag: str | None = None) -> 
     summary = {
         "lane": lane,
         "indexed_asset_count": len(assets),
+        "deduplicated_exact_asset_records": deduplicated_records,
         "indexed_resource_bytes": sum(int(asset["size_bytes"]) for asset in assets),
         "file_count_in_volumes": sum(int(row["file_count"]) for row in rows),
         "volume_count": len(rows),
