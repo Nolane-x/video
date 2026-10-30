@@ -19,29 +19,29 @@ MAX_POLY_FILE = 35 * 1024 * 1024
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
 # item-level rights and file validation remain mandatory for every downloaded asset.
-POLYHAVEN_SELECTION_LIMITS = {"hdris": 20, "models": 28, "textures": 48}
+POLYHAVEN_SELECTION_LIMITS = {"hdris": 30, "models": 40, "textures": 72}
 # ambientCG publishes its downloadable asset files under CC0 1.0. These are ceilings,
 # not promised counts; every package still has to pass URL, ZIP, size and checksum checks.
-AMBIENTCG_SELECTION_CAPS = {"Material": 12, "HDRI": 5, "3DModel": 4, "Decal": 3, "Atlas": 2, "PlainTexture": 2, "Brush": 1, "Substance": 1}
-AMBIENTCG_MAX_ARCHIVE_BYTES = 35 * 1024 * 1024
-AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 500 * 1024 * 1024
+AMBIENTCG_SELECTION_CAPS = {"Material": 24, "HDRI": 10, "3DModel": 8, "Decal": 6, "Atlas": 4, "PlainTexture": 4, "Brush": 2, "Substance": 2}
+AMBIENTCG_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
+AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES = 1200 * 1024 * 1024
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 4
-USGS_SELECTION_CAPS = {"images": 24, "videos": 8, "audio": 8}
-USGS_IMAGE_MAX_BYTES = 4 * 1024 * 1024
-USGS_VIDEO_MAX_BYTES = 16 * 1024 * 1024
-USGS_AUDIO_MAX_BYTES = 12 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 220 * 1024 * 1024
+USGS_GALLERY_PAGE_SCAN_LIMIT = 8
+USGS_SELECTION_CAPS = {"images": 40, "videos": 18, "audio": 12}
+USGS_IMAGE_MAX_BYTES = 6 * 1024 * 1024
+USGS_VIDEO_MAX_BYTES = 28 * 1024 * 1024
+USGS_AUDIO_MAX_BYTES = 16 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 900 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
-OPENGAMEART_SELECTION_CAPS = {"2d": 6, "3d": 6, "textures": 5, "sfx": 5, "music": 5}
+OPENGAMEART_SELECTION_CAPS = {"2d": 8, "3d": 8, "textures": 8, "sfx": 8, "music": 8}
 OPENGAMEART_TYPE_IDS = {"2d": 9, "3d": 10, "textures": 14, "sfx": 13, "music": 12}
-OPENGAMEART_SEARCH_PAGES_PER_TYPE = 2
-OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 18
-OPENGAMEART_MAX_FILE_BYTES = 35 * 1024 * 1024
-OPENGAMEART_MAX_PACKAGE_BYTES = 100 * 1024 * 1024
-OPENGAMEART_MAX_TOTAL_BYTES = 420 * 1024 * 1024
+OPENGAMEART_SEARCH_PAGES_PER_TYPE = 3
+OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE = 24
+OPENGAMEART_MAX_FILE_BYTES = 60 * 1024 * 1024
+OPENGAMEART_MAX_PACKAGE_BYTES = 220 * 1024 * 1024
+OPENGAMEART_MAX_TOTAL_BYTES = 1200 * 1024 * 1024
 GOOGLE_FONTS_FAMILY_SLUGS = [
     "inter","roboto","montserrat","oswald","playfairdisplay","lato","poppins",
     "notosans","dmsans","spacegrotesk","manrope","ibmplexsans","merriweather",
@@ -1984,7 +1984,7 @@ def download_usgs_gallery(root,index):
                     f"- SHA-256: {digest}\\n\\n{detail['description']}\\n"
                 )
                 write_text(item_dir/"SOURCE_AND_LICENSE.md",note)
-                asset_type="usgs-public-domain-"+media_type[:-1]
+                asset_type="usgs-public-domain-"+{"images":"image","videos":"video","audio":"audio"}[media_type]
                 index.append({"id":row["id"],"path":target.relative_to(root).as_posix(),
                               "type":asset_type,"provider":"U.S. Geological Survey",
                               "title":detail["title"],"description":detail["description"],
@@ -2307,7 +2307,7 @@ def download_opengameart(root,index):
                 package_dir=root/"third-party/opengameart"/category/item_slug
                 package_downloads=[]
                 item_new_bytes=0
-                item_file_limit=2
+                item_file_limit=3
                 for _,__,candidate in file_candidates:
                     if len(package_downloads)>=item_file_limit or total_bytes+item_new_bytes>=OPENGAMEART_MAX_TOTAL_BYTES:
                         break
@@ -3900,7 +3900,9 @@ def main():
     texture_count=generate_original_textures(STAGE,index)
     illustration_count=generate_original_illustrations(STAGE,index)
     motion_loop_count=generate_original_motion_loops(STAGE,index)
-    print("[Originals] generated",len(index),"original vector/audio assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations and",motion_loop_count,"verified motion loops")
+    from generate_original_stickers import generate_original_stickers
+    sticker_count,meme_template_count=generate_original_stickers(STAGE,index,CC0_URL)
+    print("[Originals] generated",len(index),"original assets plus",texture_count,"tileable textures,",illustration_count,"editorial illustrations,",motion_loop_count,"verified motion loops,",sticker_count,"stickers and",meme_template_count,"meme templates")
     kenney_report=download_kenney(STAGE,index)
     polyhaven_report=download_polyhaven(STAGE,index)
     ambientcg_report=download_ambientcg(STAGE,index)
@@ -3918,7 +3920,9 @@ def main():
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
-      "## Original vector and sound assets\nAll SVG backgrounds, overlays, icons, large-format editorial illustrations, infographic templates, tileable vector textures and procedural WAV sound effects in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"
+      "## Original vector and sound assets\nAll SVG backgrounds, overlays, icons, large-format editorial illustrations, infographic templates, tileable vector textures and procedural WAV sound effects in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"+
+      "## Original CC0 sticker and meme template collection\nThe repository generates original reaction-word stickers, expressive face stickers, annotation doodles, arrows, symbols and editable meme-layout SVG templates. These are generic original designs, not copies of existing viral meme images or trademarked character stickers. Replace placeholders only with media you own or are licensed to use. License: CC0 1.0 — "+CC0_URL+".\n\n"+
+All SVG backgrounds, overlays, icons, large-format editorial illustrations, infographic templates, tileable vector textures and procedural WAV sound effects in originals/ were generated by this repository and are dedicated to CC0 1.0: "+CC0_URL+"\n\n"
       "## Kenney CC0 pack source links\nThe official pages mark these packs CC0, but the current website uses a browser-driven download step. This automated build does not guess direct ZIP URLs; the source links remain in video-library/assets/sources.json. Status:\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page','')} — {r.get('reason','')}" for r in kenney_report)+"\n\n"
       "## Poly Haven CC0 assets\nThe build downloads compact HDRIs, Blender models plus listed dependencies, and PBR texture maps from the official API. The API has separate terms asking tools that use the live API to make clear the assets' source. See https://polyhaven.com/license and https://github.com/Poly-Haven/Public-API/blob/master/ToS.md.\n\n"+
@@ -3949,6 +3953,8 @@ def main():
               "original_textures":len(TEXTURES),
               "original_illustrations":len(ILLUSTRATIONS),
               "original_motion_loops":len(MOTION_LOOPS),
+              "original_stickers":sticker_count,
+              "original_meme_templates":meme_template_count,
               "original_infographics":len(INFO),"original_sfx":len([x for x in index if x.get("type")=="original-procedural-sfx"]),
               "kenney_packs_attempted":len(kenney_report),"kenney_packs_downloaded":sum(r.get("status")=="downloaded" for r in kenney_report),
               "polyhaven_packages_downloaded":sum(r.get("status")=="downloaded" for r in polyhaven_report),
@@ -3976,6 +3982,7 @@ def main():
               "google_font_files_downloaded":sum(1 for x in index if x.get("type")=="google-font-ttf")}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
+               "resource_distribution":"Modular category packs are generated by tools/video/package_asset_library.py; download only the packs needed for each project.",
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"polyhaven_downloads":polyhaven_report,
