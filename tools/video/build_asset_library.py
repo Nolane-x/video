@@ -1834,7 +1834,7 @@ def usgs_page_detail_candidates(page_html,media_type):
 def usgs_parse_media_detail(page_html,media_type):
     parser=USGSMediaPageParser()
     parser.feed(page_html)
-    rights=" ".join(parser.source_parts).strip()
+    rights=" ".join(part for part in parser.source_parts if part.strip().casefold()!="sources/usage").strip()
     title=(parser.meta.get("og:title") or parser.meta.get("twitter:title") or
            " ".join(parser.title_parts) or "USGS media").strip()
     description=(parser.meta.get("og:description") or parser.meta.get("description") or "").strip()
@@ -3333,6 +3333,7 @@ def main():
     wikimedia_report=download_wikimedia_public_domain(STAGE,index)
     wikimedia_svg_report=download_wikimedia_vector_svg(STAGE,index)
     wikimedia_av_report=download_wikimedia_video_audio(STAGE,index)
+    usgs_report=download_usgs_gallery(STAGE,index)
     openverse_report=download_openverse(STAGE,index)
     write_text(STAGE/"SOURCES_AND_LICENSES.md",
       "# Sources and licenses\n\n"
@@ -3353,6 +3354,8 @@ def main():
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_svg_report)+
       "\n\n## Wikimedia Commons video/audio download results\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in wikimedia_av_report)+
+      "\n\n## USGS Multimedia Gallery — item-level Public Domain only\\nThe builder searches the official USGS image, video and audio galleries, follows official usgs.gov item pages, and downloads only when that exact item's Sources/Usage section is exactly \`Public Domain.\`. Gallery-wide default wording is not sufficient. Direct media URLs are allow-listed to the official USGS media hosts and expected media paths; content MIME, file signatures, size ceilings and SHA-256 are checked. Original item page, direct media URL, title, creator/date fields, exact rights statement, credit note and digest remain in the index and package-level source note. Content with different, mixed or missing wording is skipped. Sources: https://www.usgs.gov/products/multimedia-gallery and https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs.\\n\\n"+
+      "\\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in usgs_report)+
       "\n\n## Openverse CC0 fallback\nThe builder makes only short requests to Openverse and bundles exact-CC0 results only. Any timeout or unsupported file is explicitly recorded. It does not relabel CC-BY, NC, or unknown-license material as CC0.\n\n"+
       "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('reason','')}" for r in openverse_report if r.get("status")!="downloaded")+
       "\n\n## Source-only libraries\n- [Pexels License](https://www.pexels.com/license/) — use suitable footage in composed videos under its terms; do not bundle raw content as a standalone stock collection.\n- [Mixkit licenses](https://mixkit.co/license/) — check each item type and item-specific license; restricted stock items must not be treated as freely redistributable.\n- [ambientCG](https://ambientcg.com/) — its materials are published as CC0; the full site is not mirrored by this build.\n- [Kenney](https://kenney.nl/assets) — official CC0 pack catalog; source links remain available even though the current download interaction is not automated.\n- [Google Fonts](https://fonts.google.com/) — inspect the selected family's exact license and preserve its license file if redistributing font binaries.\n\n## Review gate\nThe asset bundle is a source pool, not an automatically approved finished video. Review visual suitability, audio levels, model dependencies, content, metadata and exact license provenance before publication."
@@ -3378,7 +3381,10 @@ def main():
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
               "wikimedia_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in wikimedia_av_report),
               "wikimedia_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in wikimedia_av_report),
-              "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report)}
+              "openverse_items_downloaded":sum(r.get("status")=="downloaded" for r in openverse_report),
+              "usgs_images_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="image" for r in usgs_report),
+              "usgs_videos_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="video" for r in usgs_report),
+              "usgs_audio_downloaded":sum(r.get("status")=="downloaded" and r.get("media_type")=="audio" for r in usgs_report)}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
                "policy":"Original assets are CC0; third-party bundles require explicit item-level CC0/Public Domain rights statements. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; its policy is not CC0. Source-only libraries are not raw-bundled.",
@@ -3391,7 +3397,7 @@ def main():
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
-               "openverse_downloads":openverse_report,"assets":index}
+               "openverse_downloads":openverse_report,"usgs_gallery_downloads":usgs_report,"assets":index}
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
