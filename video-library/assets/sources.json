@@ -439,6 +439,21 @@
       "note": "The build reads the official README/LICENSE content from each downloaded GitHub archive and requires asset-related CC0 language before extracting approved media formats. Game scripts, executable/binary code and unrelated files are excluded. Each extracted file records the repository source, the evidence line and SHA-256. The main Kenney website packs not mirrored by these starter-kit repositories remain source-only because its downloader is browser-driven."
     },
     {
+      "id": "kenney-godot-splashscreens-cc0",
+      "title": "Godot SplashScreens — Kenney-created CC0 derivative logos only",
+      "provider": "Kenney / GitHub",
+      "kind": "splash screens and derivative logos",
+      "category": "4K splash screens, reimagined Godot branding, cog logos, text logos",
+      "source_page": "https://github.com/KenneyNL/Godot-SplashScreens",
+      "api": "https://api.github.com/repos/KenneyNL/Godot-SplashScreens/zipball/main",
+      "license": "Scoped mixed-license repository: only Kenney-created Reimagined, Cog and Text logo paths are CC0-1.0; original Godot logo is CC-BY-4.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": false,
+      "authentication": "None; public official GitHub repository archive",
+      "bundling": "official-repository-readme-verified-exact-cc0-subpath-allowlist",
+      "note": "The repository README says the original Godot logo is CC-BY-4.0, while other derivative logos (reimagined logo, cog logo, text logo) made by Kenney are CC0 licensed. This importer includes only Logo/reimagined*, Logo/text*, Screen/Cog logo/, Screen/Reimagined logo/ and Screen/Text logo/. It excludes Screen/Original logo/ and Logo/original* (CC-BY-4.0), plus Pixel and Pride folders whose rights are not explicitly marked CC0. The repo-level MIT LICENSE covers code, not artwork; the README's explicit per-folder statement is used as the media-rights evidence."
+    },
+    {
       "id": "nasa-image-video-library",
       "title": "NASA Image and Video Library — screened images, video and audio",
       "provider": "NASA",

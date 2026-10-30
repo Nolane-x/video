@@ -227,3 +227,14 @@ The lane is opt-in: configure the GitHub Actions secret `POLY_PIZZA_API_KEY` usi
 **Commercial API note:** Poly Pizza's press page has described hobby API access as free and commercial API usage as pay-as-you-go. Verify the current plan and terms before enabling the secret for commercial workflows. The provider's terms prohibit scraping or automated extraction outside its published interfaces; this lane uses the published API only.
 
 Official references: [Poly Pizza](https://poly.pizza/), [API settings](https://poly.pizza/settings/api), [Terms of Service](https://poly.pizza/docs/tos), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+
+## Kenney Godot SplashScreens — verified CC0 derivative subset
+
+The official KenneyNL/Godot-SplashScreens repository README distinguishes the original Godot logo (CC-BY-4.0) from Kenney-made derivative Reimagined, Cog and Text logos (CC0). The importer only accepts these exact path groups:
+
+- Logo/reimagined* and Logo/text* (SVG)
+- Screen/Cog logo/, Screen/Reimagined logo/ and Screen/Text logo/ (PNG)
+
+It explicitly excludes Screen/Original logo/ because the original Godot logo is CC-BY-4.0; it also excludes Pixel and Pride paths because the README does not explicitly grant those folders CC0. The archive README must contain both sides of the mixed-license notice before any files are extracted. Only PNG/SVG media is imported, with ZIP traversal/member/size/compression checks, SVG sanitization, PNG signature validation and per-file SHA-256. Current allow-list ceiling: 40 files.
+
