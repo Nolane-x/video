@@ -38,7 +38,9 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(set(library.AMBIENTCG_SELECTION_CAPS), {"Material", "HDRI", "3DModel", "Decal", "Atlas", "PlainTexture", "Brush", "Substance"})
         self.assertGreaterEqual(library.AMBIENTCG_MAX_ARCHIVE_BYTES, 50 * 1024 * 1024)
         self.assertGreaterEqual(library.AMBIENTCG_MAX_TOTAL_UNPACKED_BYTES, 5 * 1024 * 1024 * 1024)
-        self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18})
+        self.assertEqual(library.LAZYTEXTURES_ASSET_CAPS, {"models": 10, "materials": 16, "hdris": 10, "textures": 18, "other": 8})
+        self.assertEqual(library.LAZYTEXTURES_API_TYPES["other"]["endpoint"], "previewsOther")
+        self.assertEqual(library.LAZYTEXTURES_MAX_ZIP_MEMBERS, 2500)
         self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
         self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
         self.assertGreaterEqual(library.LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
@@ -91,6 +93,7 @@ class LazyTexturesCC0APITests(unittest.TestCase):
     def test_asset_names_and_detail_urls_are_pinned(self):
         self.assertTrue(library.lazytextures_asset_name_is_allowed("Concrete01"))
         self.assertTrue(library.lazytextures_asset_name_is_allowed("Oak Wood 02"))
+        self.assertTrue(library.lazytextures_asset_name_is_allowed("Árbol de Navidad"))
         self.assertFalse(library.lazytextures_asset_name_is_allowed("../payload"))
         self.assertFalse(library.lazytextures_asset_name_is_allowed("folder/model"))
         self.assertFalse(library.lazytextures_asset_name_is_allowed("bad\\name"))
@@ -140,6 +143,8 @@ class LazyTexturesCC0APITests(unittest.TestCase):
             library.lazytextures_response_assets({"success": True, "data": {"PreviewModels": [{"name": "SpaceKit"}]}}, "models"),
             [{"name": "SpaceKit"}],
         )
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "data": [{"name": "Brush01"}]}, "other"), [{"name": "Brush01"}])
+        self.assertEqual(library.lazytextures_response_assets({"success": True, "PreviewOthers": [{"name": "Preset01"}]}, "other"), [{"name": "Preset01"}])
         self.assertEqual(library.lazytextures_response_assets({"success": False, "PreviewMaterials": expected}, "materials"), [])
         self.assertEqual(library.lazytextures_response_assets({"success": True, "PreviewMaterials": expected}, "models"), [])
 
@@ -181,6 +186,36 @@ class LazyTexturesCC0APITests(unittest.TestCase):
         self.assertEqual(choice["name"], "Concrete01_1k.zip")
         self.assertEqual(choice["size_bytes"], 2_000_000)
         self.assertEqual(library.lazytextures_archive_candidates({"archiveFiles": [], "textureFiles": []}), [])
+
+    def test_zip_preflight_bounds_paths_members_expansion_and_compression_ratio(self):
+        safe = io.BytesIO()
+        with zipfile.ZipFile(safe, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("model/scene.obj", "o Example\nv 0 0 0\n")
+            archive.writestr("model/material.mtl", "newmtl Example\nKd 1 1 1\n")
+        count, unpacked = library.lazytextures_validate_zip_archive(safe.getvalue())
+        self.assertEqual(count, 2)
+        self.assertGreater(unpacked, 0)
+
+        traversal = io.BytesIO()
+        with zipfile.ZipFile(traversal, "w") as archive:
+            archive.writestr("../escape.obj", "v 0 0 0\n")
+        with self.assertRaises(RuntimeError):
+            library.lazytextures_validate_zip_archive(traversal.getvalue())
+
+        too_many = io.BytesIO()
+        with zipfile.ZipFile(too_many, "w") as archive:
+            for i in range(library.LAZYTEXTURES_MAX_ZIP_MEMBERS + 1):
+                archive.writestr(f"item-{i}.txt", "x")
+        with self.assertRaises(RuntimeError):
+            library.lazytextures_validate_zip_archive(too_many.getvalue())
+
+    def test_lazytextures_file_signatures_accept_supported_assets_and_reject_mislabeled_files(self):
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"\x89PNG\r\n\x1a\n" + b"x" * 32, ".png"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"Kaydara FBX Binary  \x00\x1a\x00", ".fbx"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"BLENDER-v300", ".blend"))
+        self.assertTrue(library.lazytextures_media_signature_is_valid(b"RIFF" + b"\x00" * 4 + b"WAVE" + b"\x00" * 8, ".wav"))
+        self.assertFalse(library.lazytextures_media_signature_is_valid(b"<html>blocked</html>", ".png"))
+        self.assertFalse(library.lazytextures_media_signature_is_valid(b"PK\x03\x04", ".fbx"))
 
     def test_download_helper_rejects_redirects_outside_the_official_host(self):
         response = mock.MagicMock()
