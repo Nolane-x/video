@@ -73,7 +73,13 @@ def classify_asset(asset: dict) -> str:
 
 
 def classify_unindexed_path(relative_path: str) -> str:
-    path = relative_path.lower()
+    path = relative_path.lower().replace("\\", "/")
+    if "/lazytextures/models/" in path:
+        return "3d-models"
+    if "/lazytextures/other/" in path:
+        return "miscellaneous"
+    if "/lazytextures/" in path:
+        return "3d-textures"
     if "google-fonts" in path:
         return "typography"
     if "ambientcg" in path or "polyhaven" in path:
