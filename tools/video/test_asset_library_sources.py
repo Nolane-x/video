@@ -1772,7 +1772,7 @@ class NARABulkDatasetProbeTests(unittest.TestCase):
             "Content-Range": "bytes 0-63/292897920",
             "Content-Length": "64",
         }
-        response.read.return_value = b"\\x00\\x00\\x00\\x18ftypisom" + b"x" * 52
+        response.read.return_value = bytes.fromhex("000000186674797069736f6d") + b"x" * 52
         with mock.patch.object(nara_probe.urllib.request, "urlopen", return_value=response):
             result = nara_probe.probe_nara_mp4_range(url, 292897920)
         self.assertEqual(result["status"], "range-verified")
