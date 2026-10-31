@@ -211,6 +211,8 @@ jobs:
               "integrations/voice-studio/generate_voiceover.py",
               "integrations/voice-studio/provider_voice_benchmark.py",
               "integrations/voice-studio/analyze_voice_benchmark.py",
+              "integrations/voice-studio/actions_voice_lab.py",
+              "integrations/voice-studio/examples/actions-benchmark-suite.json",
               "integrations/voice-studio/voice_quality.py",
               "integrations/voice-studio/VOICE_STUDIO_LOCK.json",
               "README.md",
