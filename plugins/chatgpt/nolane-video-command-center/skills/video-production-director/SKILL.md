@@ -93,6 +93,13 @@ Every section must advance story or comprehension. Vary shot scale and motion de
 ### Gate 3.5 — Editorial plan preflight (blocking)
 Before rendering, run `python tools/video/evaluate_editorial_plan.py <shot-plan.json> --output <report.json> --strict`. The preflight checks that the brief names its audience/promise/hook/payoff/platform/language/narration policy, each shot has a story function and camera/visual language, physical actions have motion proof, text is readable at the planned duration, audio coverage is intentional, and pacing/template reuse is justified. A `BLOCKED` result means revise the brief/storyboard; do not render around it. A `PLAN_READY_FOR_RENDER` result only permits blocking/animatic and a low-cost preview. It is not a creative sign-off and does not authorize publication.
 
+### Gate 3.75 — Blocking preview and explicit approval (before full render)
+A `PLAN_READY_FOR_RENDER` result does **not** authorise the 155-second master. Render the selected motion-proof clips first:
+`python tools/video/render_blocking_preview.py <shot-plan.json> --project-root video-projects/remotion --output video-projects/remotion/out/blocking-preview`
+Share the uploaded preview artifact and inspect the hook, physical contacts, prop handling, emotional reactions, listening/two-shot and ending. The owner/reviewer records `blockingPreviewApproval` in the creative brief with reviewer ID, UTC timestamp, exact `previewSpecSha256`, exact `previewArtifactSha256`, every reviewed segment ID and concrete review notes. The full render step must remain blocked until:
+`python tools/video/validate_preview_approval.py <shot-plan.json> --project-root video-projects/remotion --manifest video-projects/remotion/out/blocking-preview/manifest.json`
+passes. A renderer/source/shot-timing/preview-clip change invalidates the approval. Never mark the preview approved on behalf of the user without actually reviewing the exact artifact and evidence.
+
 ### Gate 4 — Visual direction and asset planning
 Lock a visual system: type scale, typography, grid, spacing, color palette, material, lighting, camera rules, recurring motifs, character/prop bible and safe areas. Reuse the product's own visual tokens when showing the product. Generate or acquire only assets that are needed; keep source prompts, model/version, seed, license and attribution where applicable.
 
