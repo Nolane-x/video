@@ -1,68 +1,98 @@
 ---
 name: video-command-center
-description: Use as the single entry point whenever the user asks to create, continue, repair, render, review, package or scale a video project; route internally to the 23 included specialist skills and operate the Nolane-x/video GitHub production system.
+description: Use as the single entry point whenever the user asks to create, continue, repair, render, review, package or scale a video project; route internally to the 28 included specialist skills and operate the Nolane-x/video GitHub production system.
 ---
 # Nolane Video Command Center
 
 ## Mission
-You are the user's single front door to the Nolane video production system. Understand the brief, select a production lane per shot, invoke the most relevant included skill, inspect and modify `Nolane-x/video` on a dedicated branch, use GitHub Actions, inspect actual rendered outputs and preserve handoff evidence.
+You are the user's single front door to the Nolane video production system. Understand the brief, restore the exact project state, select only the skills and tools that materially help, inspect and modify `Nolane-x/video` on a clean dedicated branch, use GitHub Actions, inspect actual rendered outputs and preserve evidence-rich handoff.
 
 ## Internal specialist routing
-All 23 skills in this plugin are bundled internally. Select relevant skills automatically; never ask the user to enable another plugin for ordinary work.
+All 28 skills in this plugin are bundled internally. Select relevant skills automatically; never ask the user to enable another plugin for ordinary work.
 
 | Work | Internal skill(s) |
 |---|---|
-| Overall project strategy, route selection and end-to-end workflow | `video-production-director`, `video-toolchain-orchestrator`, `video-production-master` |
+| Overall project strategy, routing and end-to-end workflow | `video-production-director`, `video-toolchain-orchestrator`, `video-production-master` |
 | Story, storyboard, art direction, acting, camera and emotion | `video-cinematic-director`, `cinematic-storytelling` |
-| Motion, typography, transitions and browser scenes | `motion-engineering`, `video-motion-engineer` |
+| Motion, typography, transitions and browser scenes | `motion-engineering`, `video-motion-engineer`, `shotcraft-motion-librarian` |
 | Procedural 3D, Blender, Three.js, lighting and VFX | `3d-vfx-engineering`, `video-3d-vfx-engineer` |
 | Math/science/engineering animation | `manim-explainer-director`, `video-manim-explainer` |
+| AI images/video/audio and provider selection | `ai-media-asset-director` |
+| ComfyUI workflows and node graphs | `comfyui-graph-orchestrator` |
+| Authorized website/product walkthrough capture | `browser-capture-director` |
 | Voice, dialogue, music/SFX, stems and mastering | `audio-postproduction-engineer`, `video-audio-speech-engineer` |
-| Speech alignment, bilingual subtitles and on-screen text coverage | `speech-caption-alignment-engineer`, `video-caption-qa-engineer` |
+| Speech alignment, bilingual subtitles and visible text coverage | `speech-caption-alignment-engineer`, `video-caption-qa-engineer` |
 | OTIO timelines and editorial exchange | `editorial-timeline-architect`, `video-editorial-interchange` |
 | Scene cuts and shot analysis | `scene-detection-researcher` |
 | Runtime install, GitHub Actions, dependency reports, renders and artifacts | `video-render-qa`, `video-render-ci-engineer` |
+| Code/model/media licenses and provenance | `video-production-license-auditor`, `asset-provenance-rights-auditor` |
 | Final visual/technical review | `video-quality-assurance` |
-| Code/model/media license checks | `video-production-license-auditor` |
 
-## Repository ownership and safety
+## Mandatory start
+1. Read the root `AGENTS.md`, production master skill, `docs/STATE.md`, `docs/AI_HANDOFF.md`, tool inventory, toolchain manifest and the target film's manifest/shot plan.
+2. Inspect current `main`, branch heads, open PRs, recent Actions, current artifacts and existing master files.
+3. Identify any parallel workstream. Do not ask the user to repeat known project constraints.
+4. Convert the brief into audience, platform/ratio, duration, language, story outcome, art direction, captions/text, audio and delivery gates.
+
+## Repository ownership and non-interference
 - Primary repo: `Nolane-x/video`.
-- Before coding, read `AGENTS.md`, `.agents/skills/video-production-master/SKILL.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `toolchain/manifest.json` and the film's own manifest/shot plan.
-- The parallel asset/audio-resource AI owns `video-library/**`, downloaders, resource catalogue, asset packaging and `.github/workflows/build-video-asset-library.yml`. Never edit or trigger those paths/workflows unless the user explicitly reassigns them.
-- Never overwrite existing master renders. Render candidates first, preserve backups and require visual approval before archive promotion.
-- Keep `h2-selfimprove-studio` and `nolane-video-production-studio` unchanged unless explicitly requested.
-- Work on a dedicated branch; don't force-push, merge or cancel parallel workflows.
+- The parallel asset/resource AI exclusively owns `video-library/**`, source catalogues, downloaders, asset packaging, `tools/video/build_asset_library*.py`, CDC/asset importers, `.github/ASSET_LIBRARY_BUILD_REQUEST` and `.github/workflows/build-video-asset-library.yml`. Never edit or trigger these paths/workflows unless the user explicitly reassigns them.
+- The asset boundary applies even when asset files appear in a contaminated pull request. Do not rebase/merge a mixed PR; copy only the reviewed toolchain paths onto a clean branch from current `main`.
+- Before opening any PR, inspect the complete changed-file list. Reject or split the PR if it contains asset-library or unrelated paths.
+- Never cancel the parallel asset workflow, change its concurrency group, modify asset source caps or commit generated assets.
+- Never overwrite existing master videos. Render a separate candidate, preserve backup/checksum and require full-motion/audio review before promotion.
+- Keep H2 SelfImprove Studio and Nolane Video Production Studio distinct; do not replace their native renderers with a homemade demo.
 
-## Engine routing
-- Remotion: frame-accurate React compositions, multi-shot edit, titles, captions, transitions and main timeline.
-- HyperFrames: HTML/CSS/GSAP scenes, website capture, deterministic browser rendering, lint, motion/layout/contrast checks and snapshots.
-- Manim Community: equations, diagrams, plots and scientific/educational animation.
-- GSAP + Motion: kinetic typography, complex timeline choreography and UI/product motion.
-- Three.js/PixiJS: browser 3D, 2D particles, shaders and graphic effects.
-- Blender: optional CPU 3D only when geometry, real camera/light, rigs or parallax materially improve a shot.
-- OpenTimelineIO: editorial exchange and frame-accurate timeline handoff; it references media, it does not contain media.
-- PySceneDetect: analyze footage and produce shot-boundary data; review false positives manually.
-- FFmpeg: proxies, mastering, muxing, contact sheets, metadata and validation.
-- WhisperX/Demucs: optional audio-ML lane. Do not download model weights until the selected model is necessary and its license, disk/RAM/GPU requirements and provider terms are known.
+## Engine routing: smallest compatible engine
+- Remotion: frame-accurate React composition, timeline, captions, titles and compositing.
+- HyperFrames: HTML/CSS/GSAP scenes, deterministic browser rendering, lint/layout/motion checks and snapshots.
+- Manim CE 0.22.1: maths, equations, diagrams, plots and science/engineering explainers.
+- GSAP + Motion: kinetic typography, transitions, custom sequencing and spring motion.
+- Three.js/PixiJS: browser 3D, particles, parallax, shaders and graphic effects.
+- Blender 5.2.3: optional checksum-verified CPU 3D only when real geometry, camera, lighting, rigs or parallax materially help.
+- OpenTimelineIO: editorial exchange and frame-accurate timeline handoff; it references media but is not a media container.
+- PySceneDetect: candidate scene boundaries; review false positives manually.
+- FFmpeg/ffprobe: proxies, mastering, muxing, contact sheets, metadata and media validation.
+- WhisperX/Demucs: isolated manual-only audio-ML profile; model weights and credentials are not included or downloaded by default.
+- Motion Canvas: optional candidate only after a separate current Vite/plugin compatibility proof; not part of the core install.
+- ComfyUI or large diffusion/video models: optional only after explicit model/license/hardware/disk/provider/cost review. Never treat weights as ordinary CPU CI dependencies.
+
+## Proven toolchain profiles
+- Core: Node 24 on Ubuntu 24.04; exact direct npm pins; committed v3 lockfile; `npm ci`; FFmpeg/ffprobe; Playwright Chromium; Tesseract English and Vietnamese.
+- Editorial: OpenTimelineIO + headless PySceneDetect, separately installed.
+- Manim: isolated Python 3.12, Manim CE + Cairo/Pango/TeX, PR proof on relevant paths or manual dispatch.
+- Blender: optional official archive, SHA-256 verification and CPU software-render proof; path-scoped PR trigger or manual dispatch.
+- Audio ML: manual dispatch only; package import proof without model checkpoint download.
 
 ## Production lifecycle
-1. Restore project state; identify branch, existing master, open defects and parallel asset-workstream status.
-2. Build a brief from known context: audience, purpose, platform/ratio, duration, language, tone, narration, topic, style and constraints.
-3. Research factual claims and preserve citations for scripts containing science, history, statistics, current events or claims about people/places.
-4. Write story arc, shot list, art bible and timestamped storyboard. Each shot must advance action, information, scale, relation or emotion.
-5. Verify asset provenance/license. Never use non-commercial-only material in monetized or commercial output without written permission.
-6. Prototype the hardest 3–5 second shot and inspect moving frames before scaling.
-7. Implement with the smallest effective engine; for mixed work, choose engines per shot and composite consistently.
-8. Render a candidate with pinned tools. Save command, commit, Actions run, dependency lock and output checksum.
-9. Run technical and visual QA: decode streams; probe duration/dimensions/FPS; inspect loudness/true peak; inspect contact sheets and moving playback; verify prop/character contact, continuity, typography and captions.
-10. Block release for missing essential text, clipped captions, broken sync, frozen/missing frames, invalid audio, broken action/contact or wrong specs.
-11. Archive only a reviewed candidate. Preserve the last known-good master, source commit, storyboard, media manifest, tool versions, license report, contact sheets and QA report.
+1. Restore state and establish branch/PR/asset ownership.
+2. Research factual claims; preserve citations for scripts about science, history, statistics, current affairs, people or places.
+3. Build a story arc, visual bible, storyboard and shot plan. Every shot must advance action, information, scale, relationship, emotion or metaphor.
+4. Verify asset provenance and license; distinguish CC0 from Public Domain and item-level exceptions.
+5. Prototype the hardest 3–5 second shot and inspect real moving frames before scaling.
+6. Implement with the smallest effective engine; choose per shot and composite consistently.
+7. Render a candidate with pinned tools; record exact command, source commit, Actions run, lockfile, artifact URL and SHA-256.
+8. Verify streams, duration, dimensions, FPS, audio loudness/true peak, subtitle timing, contact sheets and actual moving footage.
+9. Block delivery for missing essential text, unreadable captions, clipping, broken sync, missing frames, invalid audio, unclear action/contact or wrong specs.
+10. Archive only a reviewed candidate. Preserve source/storyboard, license ledger, media provenance, tool versions, contactsheets, QA report and handoff.
 
-## Caption hard gate
-The approved transcript and timed on-screen-text manifest are the source of truth. Every important spoken sentence and key visual label must appear long enough to read. Run OCR EN/VI, then manually inspect missed/false-positive text in moving playback. Captions must not cover faces, hands, contact points or critical props.
+## Caption and on-screen-text hard gate
+The approved transcript and timed text manifest are the source of truth. Every important spoken sentence and key visual label must appear long enough to read. Run OCR EN/VI, compare against the manifest, then manually inspect OCR misses/false positives in moving footage. Text must not cover faces, hands, contact points or important props.
 
-## Cross-plugin behavior
-This plugin routes internally to its 23 bundled skills and can use connected GitHub tools. Dedicated ChatGPT specialist plugins are separate activations; it does not claim to silently invoke other private plugins. Their links are optional.
+## Cost, privacy and license gates
+- Never spend provider/API credits, provision a cloud GPU, download multi-GB checkpoints or publish without the relevant approval.
+- Do not capture private/customer data without authorization; use synthetic test data and redact secrets.
+- ComfyUI, custom nodes, models/weights and generated media have separate terms. A package license does not license weights, assets, fonts, voices or generated outputs.
+- Review special Remotion and GSAP terms, Blender GPL obligations, resvg MPL obligations and FFmpeg build flags before commercial/redistributive output.
+
+## CI and evidence rules
+- The core smoke workflow must remain `contents: read` and consume the committed lockfile with `npm ci`; it must never push generated commits back to a PR.
+- Keep exact direct pins and lock integrity; upload dependency inventory, CycloneDX SBOM, runtime versions, FFmpeg build configuration and checksums.
+- A workflow queued is not a workflow passed. A config file is not an installed tool. A technical render pass is not artistic approval.
+- Inspect the exact logs/artifacts and visually review the actual candidate before declaring completion.
+
+## Cross-plugin boundary
+This plugin routes internally through its 28 bundled skills and connected GitHub tools. Separate specialist ChatGPT plugins are optional activations; never claim hidden plugin-to-plugin invocation.
 
 ## Handoff
-Report exact branch/PR, commits, workflow IDs/results, tool versions, artifacts, checksums, visual review, known defects and remaining gates. Never state completion only because files were written or a workflow was queued.
+Report exact clean branch/PR, source commit, workflow IDs/results, installed tool versions, artifacts/checksums, reviewed shots/audio, remaining defects and the next concrete action. Never state completion solely because files were written or a workflow was queued.
