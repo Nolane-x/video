@@ -4507,6 +4507,119 @@ def internet_archive_metadata_url_is_allowed(url,identifier):
         return False
 
 
+class _InternetArchiveUsageParser(HTMLParser):
+    """Read the exact Usage definition-list entry from an Internet Archive item page."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.dt_parts=[]
+        self.in_dt=False
+        self.current_term=""
+        self.in_usage_dd=False
+        self.usage_rows=[]
+        self.usage_text=[]
+        self.links=[]
+        self.anchor=None
+
+    def handle_starttag(self,tag,attrs):
+        attr={key.casefold():value or "" for key,value in attrs}
+        if tag=="dt":
+            self.dt_parts=[]
+            self.in_dt=True
+        elif tag=="dd":
+            self.in_dt=False
+            term=" ".join("".join(self.dt_parts).split()).casefold()
+            self.in_usage_dd=(term=="usage")
+            if self.in_usage_dd:
+                self.usage_text=[]
+                self.links=[]
+        elif tag=="a" and self.in_usage_dd:
+            self.anchor={
+                "href":attr.get("href",""),
+                "title":attr.get("title",""),
+                "rel":attr.get("rel",""),
+                "text":[]
+            }
+
+    def handle_startendtag(self,tag,attrs):
+        self.handle_starttag(tag,attrs)
+        self.handle_endtag(tag)
+
+    def handle_data(self,data):
+        if self.in_dt:
+            self.dt_parts.append(data)
+        if self.in_usage_dd:
+            self.usage_text.append(data)
+        if self.anchor is not None:
+            self.anchor["text"].append(data)
+
+    def handle_endtag(self,tag):
+        if tag=="dt":
+            self.current_term=" ".join("".join(self.dt_parts).split())
+            self.in_dt=False
+        elif tag=="a" and self.anchor is not None:
+            self.anchor["text"]=" ".join("".join(self.anchor["text"]).split())
+            self.links.append(self.anchor)
+            self.anchor=None
+        elif tag=="dd" and self.in_usage_dd:
+            self.usage_rows.append({
+                "text":" ".join("".join(self.usage_text).split()),
+                "links":list(self.links),
+            })
+            self.in_usage_dd=False
+
+
+def internet_archive_public_domain_usage_is_verified(page_html,identifier):
+    """Accept only an exact item-page Usage: Public Domain label for Prelinger records."""
+    if not internet_archive_identifier_is_allowed(identifier):
+        return False
+    if not isinstance(page_html,str) or len(page_html.encode("utf-8"))>6*1024*1024:
+        return False
+    parser=_InternetArchiveUsageParser()
+    try:
+        parser.feed(page_html)
+        parser.close()
+    except Exception:
+        return False
+    if len(parser.usage_rows)!=1:
+        return False
+    usage=parser.usage_rows[0]
+    if usage["text"].casefold()!="public domain" or len(usage["links"])!=1:
+        return False
+    link=usage["links"][0]
+    if str(link.get("title") or "").strip().casefold()!="public domain":
+        return False
+    if "license" not in str(link.get("rel") or "").casefold().split():
+        return False
+    if str(link.get("text") or "").strip().casefold()!="public domain":
+        return False
+    return internet_archive_license_from_item_metadata(
+        link.get("href"),"Public Domain"
+    )=="Public Domain (item-level Internet Archive rights statement)"
+
+
+def internet_archive_fetch_item_page(identifier,timeout=35):
+    """Fetch one canonical IA detail page and reject redirects away from that exact item."""
+    url="https://archive.org/details/"+str(identifier)
+    if not internet_archive_item_url_is_allowed(url,identifier):
+        raise RuntimeError("Internet Archive item page URL failed the exact-host allow-list")
+    request=urllib.request.Request(
+        url,
+        headers={"User-Agent":UA,"Accept":"text/html,application/xhtml+xml"},
+    )
+    with urllib.request.urlopen(request,timeout=timeout) as response:
+        final_url=response.geturl()
+        if not internet_archive_item_url_is_allowed(final_url,identifier):
+            raise RuntimeError("Internet Archive item page redirected outside its exact canonical URL")
+        content_type=response.headers.get("Content-Type","").split(";",1)[0].strip().casefold()
+        if content_type not in {"text/html","application/xhtml+xml"}:
+            raise RuntimeError("Internet Archive item detail response is not HTML")
+        body=response.read(6*1024*1024+1)
+    if len(body)>6*1024*1024:
+        raise RuntimeError("Internet Archive item detail page exceeded its byte ceiling")
+    return body.decode("utf-8","replace")
+
+
 def internet_archive_license_from_item_metadata(license_url,rights):
     try:
         parsed=urllib.parse.urlsplit(str(license_url or ""))
