@@ -2609,7 +2609,7 @@ class NPSBrollImporterTests(unittest.TestCase):
         endorsement. The NPS arrowhead is protected.
         Please credit "Courtesy of the National Park Service."
       </div>
-      <a href="{self.DETAIL_URL}">Aerial of Grand Canyon Cliffs and Temples</a>
+      <a href="{DETAIL_URL}">Aerial of Grand Canyon Cliffs and Temples</a>
       <a href="https://evil.example/grca/learn/photosmultimedia/b-roll_hd99.htm">Bad host</a>
       <a href="https://www.nps.gov/grca/learn/photosmultimedia/not-a-video.htm">Unrelated page</a>
     </body></html>
@@ -2637,9 +2637,9 @@ class NPSBrollImporterTests(unittest.TestCase):
         )
         self.assertEqual(
             nps_broll_importer.normalize_nps_page_url(
-                "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper()
+                "https://www.nps.gov/media/video/view.htm?id=" + VIDEO_ID.upper()
             ),
-            "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper(),
+            "https://www.nps.gov/media/video/view.htm?id=" + VIDEO_ID.upper(),
         )
         for url in (
             "http://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
@@ -2653,25 +2653,25 @@ class NPSBrollImporterTests(unittest.TestCase):
             self.assertIsNone(nps_broll_importer.normalize_nps_page_url(url), url)
 
         self.assertEqual(
-            nps_broll_importer.normalize_nps_media_url(self.URL_1080), self.URL_1080
+            nps_broll_importer.normalize_nps_media_url(URL_1080), URL_1080
         )
         for url in (
-            "http://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
-            "https://www.nps.gov.evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
-            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4?download=1",
-            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mov",
-            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "9999p.mp4",
-            "https://evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+            "http://www.nps.gov/nps-audiovideo/audiovideo/" + VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov.evil.example/nps-audiovideo/audiovideo/" + VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + VIDEO_ID + "1080p.mp4?download=1",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + VIDEO_ID + "1080p.mov",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + VIDEO_ID + "9999p.mp4",
+            "https://evil.example/nps-audiovideo/audiovideo/" + VIDEO_ID + "1080p.mp4",
         ):
             self.assertIsNone(nps_broll_importer.normalize_nps_media_url(url), url)
         self.assertTrue(
             nps_broll_importer.nps_media_response_url_is_allowed(
-                self.URL_1080, self.URL_1080
+                URL_1080, URL_1080
             )
         )
         self.assertFalse(
             nps_broll_importer.nps_media_response_url_is_allowed(
-                self.URL_1080, "https://cdn.example.net/video.mp4"
+                URL_1080, "https://cdn.example.net/video.mp4"
             )
         )
 
@@ -2679,7 +2679,7 @@ class NPSBrollImporterTests(unittest.TestCase):
         parsed = nps_broll_importer.parse_nps_index_page(
             self.INDEX_HTML, "grca", self.INDEX_URL
         )
-        self.assertEqual(parsed["child_pages"], [self.DETAIL_URL])
+        self.assertEqual(parsed["child_pages"], [DETAIL_URL])
         self.assertEqual(parsed["media_pages"], [])
         self.assertTrue(parsed["credit_required_visible"])
         self.assertEqual(
@@ -2700,7 +2700,7 @@ class NPSBrollImporterTests(unittest.TestCase):
         self.assertIn("Slow aerial footage", group["description"])
         options = nps_broll_importer._media_candidates_from_group(group)
         self.assertEqual([row["resolution"] for row in options], [1080, 720])
-        self.assertEqual(options[0]["url"], self.URL_1080)
+        self.assertEqual(options[0]["url"], URL_1080)
 
     def test_item_level_rights_exceptions_are_rejected(self):
         for description in (
@@ -2779,12 +2779,12 @@ class NPSBrollImporterTests(unittest.TestCase):
         def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
             if url == self.INDEX_URL:
                 return index_html.encode()
-            if url == self.DETAIL_URL:
+            if url == DETAIL_URL:
                 return detail_html.encode()
             raise AssertionError("unexpected NPS page fetch: " + url)
 
         def fake_download(url, destination):
-            self.assertEqual(url, self.URL_1080)
+            self.assertEqual(url, URL_1080)
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(source_bytes)
             return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
