@@ -80,10 +80,7 @@ jobs:
 
       - name: Block rendering when editorial plan is not ready
         run: |
-          python ../../tools/video/evaluate_editorial_plan.py \\
-            public/story/shots.json \\
-            --output out/editorial-plan-report.json \\
-            --strict
+          python ../../tools/video/evaluate_editorial_plan.py public/story/shots.json --output out/editorial-plan-report.json --strict
 
       - name: Typecheck
         run: npm run typecheck
@@ -119,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: remotion-full-video-caption-qa-${{ github.run_id }}
-          path: video-projects/remotion/out/caption-coverage/report.json
+          path: out/caption-coverage/report.json
           if-no-files-found: warn
           retention-days: 30
 
@@ -168,11 +165,11 @@ jobs:
         with:
           name: one-more-scroll-remotion-mp4
           path: |
-            video-projects/remotion/out/one-more-scroll.mp4
-            video-projects/remotion/out/contact-sheet-shots.jpg
-            video-projects/remotion/out/contact-sheet-overview.jpg
-            video-projects/remotion/out/metadata.json
-            video-projects/remotion/out/editorial-plan-report.json
-            video-projects/remotion/out/audio-loudness.txt
+            out/one-more-scroll.mp4
+            out/contact-sheet-shots.jpg
+            out/contact-sheet-overview.jpg
+            out/metadata.json
+            out/editorial-plan-report.json
+            out/audio-loudness.txt
           if-no-files-found: warn
           retention-days: 90
