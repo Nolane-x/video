@@ -29,15 +29,15 @@ def list_voices(language: str = "vi") -> list[dict[str, Any]]:
     return [dict(v, provider="korva", type="preset") for v in VOICES]
 
 
-@lru_cache(maxsize=1)
-def _engine():
+@lru_cache(maxsize=2)
+def _engine(num_threads: int = 4):
     try:
         from korvatts import TTS
     except ImportError as exc:
         raise RuntimeError(
             "KorvaTTS is optional. Install it with: python -m pip install korvatts"
         ) from exc
-    return TTS()
+    return TTS(device="cpu", num_threads=num_threads)
 
 
 def synthesize(
@@ -48,6 +48,7 @@ def synthesize(
     language: str = "vi",
     speed: float = 1.0,
     settings: dict[str, Any] | None = None,
+    seed: int | None = None,
 ) -> Path:
     if language.lower().split("-")[0] != "vi":
         raise ValueError("KorvaTTS is configured here for Vietnamese (vi) only")
@@ -56,13 +57,18 @@ def synthesize(
     if not 0.5 <= speed <= 2.0:
         raise ValueError("speed must be between 0.5 and 2.0")
     options = settings or {}
-    engine = _engine()
+    engine = _engine(int(options.get("num_threads", 4)))
+    total_steps = int(options.get("total_steps", 32))
+    if not 1 <= total_steps <= 32:
+        raise ValueError("KorvaTTS total_steps must be between 1 and 32")
     audio, _duration = engine.synthesize(
         text,
         voice=voice,
         lang="vi",
-        total_steps=int(options.get("total_steps", 32)),
+        total_steps=total_steps,
         speed=speed,
+        silence_between_chunks=float(options.get("silence_between_chunks", 0.3)),
+        seed=seed,
     )
     destination = Path(output_path)
     destination.parent.mkdir(parents=True, exist_ok=True)
