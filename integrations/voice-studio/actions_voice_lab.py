@@ -184,6 +184,8 @@ def write_summary(output_dir: Path, report: dict[str, Any]) -> None:
         f"- Output sample rate target: {EXPECTED_SAMPLE_RATE} Hz",
         "- Device: CPU; 4 ONNX threads; 32 inference steps.",
         "- Every rendered sample is loudness-normalized to -20 LUFS with a -2.5 dBTP true-peak ceiling before blind listening and QA.",
+        f"- Successfully mastered samples: {report.get('mastering_summary', {}).get('mastered_count', 0)}/{report.get('candidate_render_count', 0)}",
+        f"- Maximum measured post-mastering true peak: {report.get('mastering_summary', {}).get('maximum_output_true_peak_dbtp', '—')} dBTP",
         "- Same text and seed are used for every voice within a test case.",
         "- Blind listening is required; no automatic ElevenLabs-equivalence claim.", "",
         "| Test | Ready | Technical pass | Warnings | Errors |",
@@ -195,15 +197,18 @@ def write_summary(output_dir: Path, report: dict[str, Any]) -> None:
             f"{case['technical_pass']} | {case['technical_warning']} | {case['technical_error']} |"
         )
     lines.extend(["", "## Per-candidate audio measurements", "",
-                  "| Case | Candidate | Voice ID | Duration | RMS dBFS | Peak dBFS | QA |",
-                  "|---|---|---|---:|---:|---:|---|"])
+                  "| Case | Candidate | Voice ID | Input LUFS | Output LUFS | Output TP dBTP | Duration | QA |",
+                  "|---|---|---|---:|---:|---:|---:|---|"])
     for case in report["cases"]:
         for row in case["candidates"]:
             metrics = row.get("audio_metrics") or {}
+            mastering = row.get("mastering") or {}
             lines.append(
                 f"| {case['id']} | {row.get('blind_label', '')} | {row.get('id', '')} | "
-                f"{metrics.get('duration_s', '—')} | {metrics.get('rms_dbfs', '—')} | "
-                f"{metrics.get('peak_dbfs', '—')} | {row.get('technical_status', 'error')} |"
+                f"{mastering.get('input_integrated_loudness_lufs', '—')} | "
+                f"{mastering.get('output_integrated_loudness_lufs', '—')} | "
+                f"{mastering.get('output_true_peak_dbtp', '—')} | "
+                f"{metrics.get('duration_s', '—')} | {row.get('technical_status', 'error')} |"
             )
     lines.extend([
         "", "## Listening", "",
@@ -301,6 +306,22 @@ def run_lab(
         if ready != 10 or benchmark["status"] != "complete" or errored:
             incomplete = True
 
+    mastering_rows = [
+        row.get("mastering") or {}
+        for case in case_results
+        for row in case["candidates"]
+        if isinstance(row.get("mastering"), dict)
+    ]
+    mastering_peaks = [
+        float(row["output_true_peak_dbtp"])
+        for row in mastering_rows
+        if isinstance(row.get("output_true_peak_dbtp"), (int, float))
+    ]
+    mastering_loudness = [
+        float(row["output_integrated_loudness_lufs"])
+        for row in mastering_rows
+        if isinstance(row.get("output_integrated_loudness_lufs"), (int, float))
+    ]
     report = {
         "schema_version": 1, "status": "partial" if incomplete else "complete",
         "provider": "korva", "language": "vi",
@@ -329,6 +350,24 @@ def run_lab(
         "technical_pass_count": sum(c["technical_pass"] for c in case_results),
         "technical_warning_count": sum(c["technical_warning"] for c in case_results),
         "technical_error_count": sum(c["technical_error"] for c in case_results),
+        "mastering_summary": {
+            "filter": "ffmpeg-loudnorm",
+            "target_integrated_loudness_lufs": -20.0,
+            "true_peak_ceiling_dbtp": -2.5,
+            "loudness_range_target_lu": 7.0,
+            "mastered_count": len(mastering_rows),
+            "mean_output_integrated_loudness_lufs": (
+                round(sum(mastering_loudness) / len(mastering_loudness), 2)
+                if mastering_loudness else None
+            ),
+            "minimum_output_integrated_loudness_lufs": min(mastering_loudness) if mastering_loudness else None,
+            "maximum_output_integrated_loudness_lufs": max(mastering_loudness) if mastering_loudness else None,
+            "maximum_output_true_peak_dbtp": max(mastering_peaks) if mastering_peaks else None,
+            "all_within_true_peak_ceiling": (
+                len(mastering_peaks) == len(mastering_rows)
+                and all(value <= -2.2 for value in mastering_peaks)
+            ),
+        },
         "cases": case_results, "human_review_required": True,
         "naturalness_score": None, "elevenlabs_equivalence": None,
     }
