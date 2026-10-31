@@ -170,3 +170,12 @@ Rebuild the actual creative brief and the shot plan, not just the validator:
 - prototype the hardest moments with a low-cost blocking/animatic preview before a full render.
 
 Do not call the previous 155-second candidate fixed or approved. Do not create another full MP4 until the plan passes and the blocking preview is accepted. The final reviewer still has to watch/listen to the entire resulting film and record evidence. PR #26 is open/unmerged; do not merge unless the user explicitly asks.
+
+
+## Remotion variable timeline and narration support — 2026-10-31
+
+The renderer previously ignored storyboard `start/end` and forced `SHOT_FRAMES = 120` (5 seconds per shot). That was a genuine engine limitation behind the pacing problem. It has now been replaced with per-shot `startFrame/endFrame` derived from each shot's seconds, duration-aware progress and fades. `musicArc` is now consumed dynamically. New plans may add `audioPlan.soundCues` and `audioPlan.narration`; narration clips are read from `public/audio/narration/<file>`, and SFX from `public/audio/<file>.wav`. Existing manual SFX positions remain only as a legacy fallback when no soundCues array exists.
+
+The preflight now checks the shot timeline is continuous (starts at 0, has no gaps/overlaps, ends at composition duration), and checks timed file references for any voiceover/dialogue plan. Regression tests verify the renderer no longer contains `SHOT_FRAMES` and reads the dynamic timing/audio plan. Core smoke PR path filters were extended so Remotion source changes invoke the repo's pinned dependency installation and typecheck even though the render job is blocked before dependencies for an unready storyboard.
+
+Latest typecheck evidence to verify: [Core smoke run 41204537911](https://github.com/Nolane-x/video/actions/runs/41204537911). It was pending/in progress at the last poll; do not claim success until it completes. The actual current creative plan is still blocked; no new video has been approved or rendered. Keep the gate strict.
