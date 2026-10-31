@@ -19,6 +19,7 @@ SOURCE_LANES = {
     "kenney-splash": "download_kenney_godot_splashscreens",
     "polyhaven": "download_polyhaven",
     "ambientcg": "download_ambientcg",
+    "blender-demo-cc0": "download_blender_demo_assets",
     "lazytextures": "download_lazytextures",
     "poly-pizza": "download_poly_pizza",
     "met": "download_met_open_access",
