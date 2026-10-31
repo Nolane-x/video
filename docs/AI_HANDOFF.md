@@ -114,3 +114,13 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - DVIDS is a future option only after a user API key is added and item-level media rights / privacy / publicity / DoD non-endorsement checks are designed; it is not currently bundled.
 - The target remains exactly 50,000,000,000 indexed resource bytes. 50 GB is **not** yet achieved or published. Continue from Build 62's USGS lane, then inspect the newest distributed build's lane summaries, update caps based on actual yield and re-verify every Release asset SHA-256 before publication.
 
+## Asset-library recovery — published Build 62 (2026-10-31)
+- Published release: https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41078978167
+- Recovery workflow [41149796885](https://github.com/Nolane-x/video/actions/runs/41149796885) succeeded after patching the finalizer to find draft releases through the release collection endpoint, not /releases/tags/{tag}.
+- The release contains 73 assets: 44 ZIP volumes, 22 source manifests and 7 global metadata/catalog/license/checksum files. Every remote name, size and GitHub SHA-256 digest was verified.
+- Final actual indexed resource total: **12,303,303,941 bytes = 12.303 GB (decimal) = 11.458 GiB**; 55,700 indexed assets. Compressed ZIP volume total 11,677,924,120 bytes. 50 GB target not yet reached (24.606%).
+- USGS contributed 3,612,237,266 bytes / 196 assets; NASA 2,030,638,116 / 47; NOAA 1,962,159,985 / 340; OpenGameArt 1,434,785,584 / 42,030; Internet Archive 1,092,253,646 / 11; ambientCG 869,348,271 / 1,241; Wikimedia 517,246,544 / 660; Poly Haven 384,999,485 / 338. Exact aggregate is authoritative in ASSET_INDEX.json.
+- Build workflow is manual + one explicit push sentinel .github/ASSET_LIBRARY_BUILD_REQUEST; do not restore a broad push trigger, because code edits otherwise restart costly full downloads. Matrix uses max-parallel 18, explicit contents: write at job level and a dedicated concurrency group.
+- Recovery workflow .github/workflows/recover-video-asset-library-release.yml reuses existing 22 shard manifests and remote assets. For another draft, update .github/ASSET_LIBRARY_RECOVERY_REQUEST to the exact draft tag; finalizer rebuilds the metadata, verifies every remote asset, and publishes.
+- Next step: run the next full build using expanded caps. Then create a cumulative cross-release index with SHA-256 deduplication so repeat source items aren't counted twice toward the 50 GB total.
+
