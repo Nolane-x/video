@@ -6,6 +6,8 @@ on:
     paths:
       - "toolchain/**"
       - "tools/video/validate_toolchain.py"
+      - "tools/video/validate_genre_routing.py"
+      - "tools/video/genre-routing.json"
       - "tools/video/test_toolchain.py"
       - "tools/video/build_npm_sbom.py"
       - "toolchain/scripts/smoke-toolchain.mjs"
@@ -77,6 +79,7 @@ jobs:
       - name: Validate manifests, plugin packages and repo skills
         run: |
           python tools/video/validate_toolchain.py
+          python tools/video/validate_genre_routing.py
           python -m unittest discover -s tools/video -p 'test_toolchain.py' -v
           python tools/video/validate_plugin_packages.py
 
