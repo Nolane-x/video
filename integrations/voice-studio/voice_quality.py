@@ -66,6 +66,43 @@ def compare_text(reference: str, hypothesis: str) -> dict[str, Any]:
     }
 
 
+
+
+def audit_speaker_identities(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Check that every generated segment kept its speaker's pinned voice ID."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for segment in segments:
+        speaker_id = segment.get("speaker_id")
+        if speaker_id:
+            grouped.setdefault(str(speaker_id), []).append(segment)
+    result = []
+    for speaker_id, rows in sorted(grouped.items()):
+        fingerprints = {
+            str(row["voice_identity_fingerprint"])
+            for row in rows if row.get("voice_identity_fingerprint")
+        }
+        voice_ids = {
+            (row.get("provider"), row.get("engine"), row.get("voice"))
+            for row in rows
+        }
+        missing = sum(not row.get("voice_identity_fingerprint") for row in rows)
+        if len(fingerprints) > 1 or len(voice_ids) > 1:
+            status = "drift"
+        elif missing:
+            status = "not_recorded"
+        else:
+            status = "consistent"
+        result.append({
+            "speaker_id": speaker_id,
+            "segment_count": len(rows),
+            "distinct_identity_fingerprints": len(fingerprints),
+            "distinct_provider_engine_voice": len(voice_ids),
+            "missing_fingerprint_segments": missing,
+            "status": status,
+        })
+    return result
+
+
 def _probe_audio(path: Path) -> dict[str, Any]:
     ffprobe = shutil.which("ffprobe")
     ffmpeg = shutil.which("ffmpeg")
@@ -257,6 +294,9 @@ def audit_report(
         rows.append(row)
 
     statuses = [row.get("technical_status") for row in rows]
+    speaker_identity_audit = audit_speaker_identities(
+        generation_report.get("segments", [])
+    )
     output = {
         "schema_version": 1,
         "source_report": str(report_path),
@@ -264,6 +304,10 @@ def audit_report(
         "technical_pass": statuses.count("pass"),
         "technical_warning": statuses.count("warning"),
         "technical_error": statuses.count("error"),
+        "speaker_identity_audit": speaker_identity_audit,
+        "speaker_identity_drift": sum(
+            item["status"] == "drift" for item in speaker_identity_audit
+        ),
         "segments": rows,
         "human_review": {
             "status": "required",
