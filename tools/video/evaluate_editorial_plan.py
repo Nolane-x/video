@@ -102,8 +102,9 @@ def evaluate_plan(plan: dict[str, Any]) -> dict[str, Any]:
                 {"field": key},
             ))
 
-    policy = brief.get("narrationPolicy")
-    if _nonempty(policy) and policy not in NARRATION_POLICIES:
+    policy_value = brief.get("narrationPolicy")
+    policy = policy_value if isinstance(policy_value, str) else ""
+    if policy and policy not in NARRATION_POLICIES:
         findings.append(_finding(
             "audio.invalid-narration-policy", "P1",
             f"narrationPolicy must be one of {sorted(NARRATION_POLICIES)}.",
