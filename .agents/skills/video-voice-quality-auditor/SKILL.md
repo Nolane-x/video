@@ -9,6 +9,17 @@ description: Audit TTS samples and production voice-over for intelligibility, Vi
 
 Separate measurable defects from subjective vocal quality. A technically valid WAV is not automatically a good performance, and an ASR score is not a naturalness score. Evaluate pronunciation, stability, intelligibility, emotional fit and audio engineering without inventing an ElevenLabs-equivalence percentage.
 
+## Execution policy: GitHub Actions is the render worker
+
+For production benchmarks and audio generation, use the repository's
+GitHub Actions workflow
+`.github/workflows/voice-studio-actions-lab.yml`. Inspect the resulting
+artifact and workflow summary; do not redirect model inference to a developer
+PC just because an Actions lane is missing or underpowered. The current CPU
+lane renders the ten KorvaTTS presets across four Vietnamese scripts and
+performs FFprobe/FFmpeg QA. It does not exercise a custom VoiceStudio voice
+design engine. Record that scope explicitly.
+
 ## Three distinct evidence layers
 
 ### A. Audio engineering signals
