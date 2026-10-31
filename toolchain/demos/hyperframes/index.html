@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>Nolane Video Toolchain — HyperFrames proof</title>
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      :root {
+        --paper: #f2eadb;
+        --ink: #202a27;
+        --forest: #245047;
+        --ochre: #d9a34c;
+        --clay: #bd5a42;
+        --muted: #5d6e67;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      #main-composition {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        isolation: isolate;
+        background:
+          radial-gradient(ellipse at 79% 18%, rgba(217,163,76,.22), transparent 30%),
+          radial-gradient(ellipse at 10% 89%, rgba(36,80,71,.11), transparent 32%),
+          linear-gradient(132deg, #f8f2e7 0%, #eee5d4 54%, #e7decd 100%);
+      }
+      #main-composition::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: .22;
+        z-index: 20;
+        background-image:
+          repeating-linear-gradient(0deg, rgba(32,42,39,.035) 0 1px, transparent 1px 5px),
+          repeating-linear-gradient(90deg, rgba(32,42,39,.025) 0 1px, transparent 1px 7px);
+        mix-blend-mode: multiply;
+      }
+      .topline {
+        position: absolute;
+        left: 112px;
+        right: 112px;
+        top: 72px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 30;
+        color: #42554d;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .brand-mark {
+        display: inline-flex;
+        gap: 13px;
+        align-items: center;
+      }
+      .brand-dot {
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        background: var(--clay);
+        box-shadow: 0 0 0 7px rgba(189,90,66,.13);
+      }
+      .topline-note {
+        color: #68776f;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: .12em;
+      }
+      .progress-track {
+        position: absolute;
+        left: 112px;
+        right: 112px;
+        bottom: 76px;
+        height: 5px;
+        border-radius: 99px;
+        background: rgba(32,42,39,.14);
+        overflow: hidden;
+        z-index: 30;
+      }
+      .progress-fill {
+        height: 100%;
+        width: 100%;
+        transform: scaleX(0);
+        transform-origin: left center;
+        background: var(--clay);
+      }
+      .corner-index {
+        position: absolute;
+        bottom: 104px;
+        right: 112px;
+        color: #68776f;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        z-index: 30;
+      }
+      .comp-layer {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        pointer-events: none;
+      }
+      .grain {
+        position: absolute;
+        inset: -50%;
+        z-index: 25;
+        pointer-events: none;
+        opacity: .11;
+        background-image:
+          repeating-radial-gradient(circle at 23% 31%, rgba(32,42,39,.13) 0 1px, transparent 1px 3px);
+        background-size: 9px 9px;
+        animation: grain-shift .42s steps(2, end) infinite;
+      }
+      @keyframes grain-shift {
+        0% { transform: translate(0,0); }
+        25% { transform: translate(-1.2%,.7%); }
+        50% { transform: translate(.9%,-.8%); }
+        75% { transform: translate(1.1%,.6%); }
+        100% { transform: translate(0,0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .grain { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main-composition" data-composition-id="main-video" data-width="1920" data-height="1080" data-start="0" data-duration="17">
+      <header class="topline">
+        <div class="brand-mark"><span class="brand-dot"></span><span>Nolane Video</span></div>
+        <div class="topline-note">Production system / 01</div>
+      </header>
+
+      <div id="intro-layer" class="comp-layer" data-composition-id="intro" data-composition-src="compositions/intro.html" data-start="0" data-duration="2.55" data-track-index="1"></div>
+      <div id="graphics-layer" class="comp-layer" data-composition-id="graphics" data-composition-src="compositions/graphics.html" data-start="0" data-duration="17" data-track-index="2"></div>
+      <div id="captions-layer" class="comp-layer" data-track-kind="captions" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="17" data-track-index="3"></div>
+
+      <div class="corner-index">Story → Motion → Finish</div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <div class="grain" aria-hidden="true"></div>
+
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo(".progress-fill", { scaleX: 0 }, { scaleX: 1, duration: 17, ease: "none" }, 0);
+          window.__timelines = window.__timelines || {};
+          window.__timelines["main-video"] = tl;
+        })();
+      </script>
+    </main>
+  </body>
+</html>
