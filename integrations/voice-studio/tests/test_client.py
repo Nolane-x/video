@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -80,6 +81,38 @@ class VoiceStudioClientTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 VoiceStudioClient().synthesize("x" * 4097, "unused.wav")
             open_url.assert_not_called()
+
+    def test_download_audio_preserves_mp3_content_type(self):
+        response = FakeResponse(b"ID3" + b"\\0" * 64, "audio/mpeg")
+        with patch("urllib.request.urlopen", return_value=response):
+            with tempfile.TemporaryDirectory() as tmp:
+                path = VoiceStudioClient().download_audio(
+                    "/archetypes/sample/preview", Path(tmp) / "sample.audio"
+                )
+                self.assertEqual(path.suffix, ".mp3")
+                self.assertTrue(path.read_bytes().startswith(b"ID3"))
+
+    def test_transcribe_posts_multipart_audio_and_returns_text(self):
+        response = FakeResponse(b'{"text":"Xin chao Viet Nam"}', "application/json")
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "sample.wav"
+            source.write_bytes(b"RIFF" + b"\\0" * 64)
+            with patch("urllib.request.urlopen", return_value=response) as open_url:
+                transcript = VoiceStudioClient().transcribe(source, language="vi")
+            request = open_url.call_args.args[0]
+            self.assertEqual(transcript, "Xin chao Viet Nam")
+            self.assertIn("multipart/form-data; boundary=", request.get_header("Content-type"))
+            self.assertIn(b'name="file"', request.data)
+            self.assertIn(b'name="language"', request.data)
+            self.assertIn(b'name="model"', request.data)
+
+    def test_list_archetypes_passes_featured_filter_and_language(self):
+        client = VoiceStudioClient()
+        with patch.object(client, "_json", return_value={"items": []}) as request:
+            result = client.list_archetypes(language="Vietnamese", featured=True, limit=20)
+        self.assertEqual(result, [])
+        self.assertEqual(request.call_args.kwargs["query"]["lang"], "Vietnamese")
+        self.assertEqual(request.call_args.kwargs["query"]["featured"], "true")
 
     def test_json_error_is_not_written_as_audio(self):
         response = FakeResponse(b'{"detail":"engine unavailable"}', "application/json")
