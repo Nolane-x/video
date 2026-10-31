@@ -73,3 +73,10 @@ The canonical H2 source ZIPs are already published at https://github.com/Nolane-
 
 
 - provider_voice_benchmark.py: identical-script comparison across VoiceStudio, KorvaTTS, Google Cloud TTS and ElevenLabs, with cloud cost gate, blind HTML listening and human-rating export. This produces comparable audition evidence, not a model-independent objective quality score.
+
+
+## Reusable voice-production agent skills
+
+- `.agents/skills/video-voice-design-director/SKILL.md`: original synthetic voice design, model/language selection, profile creation, audition and rights gates.
+- `.agents/skills/video-character-voice-casting-engineer/SKILL.md`: stable `speaker_id` cast, line segmentation, batch synthesis, resumable cache and H2 timing handoff.
+- `.agents/skills/video-voice-quality-auditor/SKILL.md`: technical audio diagnostics, Vietnamese ASR WER/CER proxy, blind human audition and post-render identity drift audit.
