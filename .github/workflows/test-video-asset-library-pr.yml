@@ -9,6 +9,7 @@ on:
       - "tools/video/build_asset_library.py"
       - "tools/video/build_asset_library_shard.py"
       - "tools/video/finalize_asset_library_release.py"
+      - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/generate_sfx_library.py"
       - "tools/video/test_asset_library_sources.py"
       - "video-library/assets/sources.json"
@@ -20,6 +21,7 @@ on:
       - "tools/video/build_asset_library.py"
       - "tools/video/build_asset_library_shard.py"
       - "tools/video/finalize_asset_library_release.py"
+      - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/generate_original_stickers.py"
       - "tools/video/package_asset_library.py"
       - "tools/video/generate_sfx_library.py"
@@ -56,6 +58,7 @@ jobs:
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
           python -m py_compile tools/video/finalize_asset_library_release.py
+          python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/generate_original_stickers.py
           python -m py_compile tools/video/package_asset_library.py
           python -m py_compile tools/video/generate_sfx_library.py
