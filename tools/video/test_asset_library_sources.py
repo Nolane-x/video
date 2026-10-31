@@ -2167,6 +2167,10 @@ class ESOVideoImporterTests(unittest.TestCase):
         restricted = eso_video_importer.parse_eso_video_page(
             self.VIDEO_ID, self._page_html("<p>Creative Commons Attribution-NoDerivatives applies.</p>")
         )
+        restricted_nc = eso_video_importer.parse_eso_video_page(
+            self.VIDEO_ID, self._page_html("<p>This item is licensed CC BY-NC 4.0.</p>")
+        )
+        self.assertTrue(restricted_nc["rights_exception_markers"])
         self.assertTrue(restricted["rights_exception_markers"])
         self.assertFalse(restricted["rights_exception_markers"] == [])
 
