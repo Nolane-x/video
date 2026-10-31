@@ -27,6 +27,8 @@ import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import nasa_svs_importer as nasa_svs_importer  # noqa: E402
 import eso_video_importer as eso_video_importer  # noqa: E402
 import cdc_broll_importer as cdc_broll_importer  # noqa: E402
+import nps_broll_importer as nps_broll_importer  # noqa: E402
+import nps_gallery_image_importer as nps_gallery_image_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -377,7 +379,7 @@ class PolyPizzaCC0APITests(unittest.TestCase):
                  mock.patch.object(library.time, "sleep", return_value=None):
                 report = library.download_poly_pizza(root, index)
             downloaded = [row for row in report if row.get("status") == "downloaded"]
-            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(len(downloaded), 1, report)
             self.assertEqual(len(index), 1)
             asset = index[0]
             self.assertEqual(asset["license"], "CC0-1.0")
@@ -2764,6 +2766,834 @@ class SourceCapacityExpansionTests(unittest.TestCase):
             "https://cdn.eso.org.evil.example/videos/ultra_hd/eso1234a.mp4", "eso1234a"
         ))
 
+
+
+class NPSNPGalleryImageImporterTests(unittest.TestCase):
+    ASSET_ID = "c8527b66-4f06-4661-bfab-ef2af37323cf"
+    SEARCH_ASSET = {
+        "AssetBaseType": "File",
+        "AssetID": ASSET_ID,
+        "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Full"},
+        "Description": "Two cave crickets hanging on the cave wall.",
+        "AltText": "Two cave crickets hanging on the cave wall.",
+        "PhotoCredit": "NPS/Andrew Shirey",
+        "PrimaryType": "image",
+        "ResourceFormat": "jpg",
+        "ResourceType": "Image",
+        "Title": "Cave Crickets",
+    }
+    SEARCH_HTML = "<script>var search = " + json.dumps({
+        "Page": 1,
+        "PageSize": 60,
+        "ResultCount": 3,
+        "Results": [
+            {"Asset": SEARCH_ASSET},
+            {"Asset": {
+                **SEARCH_ASSET,
+                "AssetID": "57acfe20-26e5-4769-bd37-4e193cbbaa8b",
+                "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Unknown"},
+            }},
+            {"Asset": {
+                **SEARCH_ASSET,
+                "AssetID": "18b5d0ca-6a2c-4f1f-83e9-271148f84b4e",
+                "PhotoCredit": "Independent Film Studio",
+            }},
+        ],
+    }) + ";</script>"
+    DETAIL_HTML = f"""
+    <html><body>
+      <label class="col-md-3 col-sm-3 text-right">Asset ID:</label><div class="col-md-7 col-sm-7 text-left">{ASSET_ID}</div>
+      <label class="col-md-3 col-sm-3 text-right">Title:</label><div class="col-md-7 col-sm-7 text-left">Cave Crickets</div>
+      <label class="col-md-3 col-sm-3 text-right">AltText:</label><div class="col-md-7 col-sm-7 text-left">Two cave crickets hanging on the cave wall.</div>
+      <label class="col-md-3 col-sm-3 text-right">Description:</label><div class="col-md-7 col-sm-7 text-left">Two cave crickets hanging on the cave wall.</div>
+      <label class="col-md-3 col-sm-3 text-right">Copyright:</label><div class="col-md-7 col-sm-7 text-left">NPS/Andrew Shirey</div>
+      <label class="col-md-3 col-sm-3 text-right">PhotoCredit:</label><div class="col-md-7 col-sm-7 text-left">NPS/Andrew Shirey</div>
+      <label class="col-md-3 col-sm-3 text-right">Constraints Information:</label><div class="col-md-7 col-sm-7 text-left">Public domain:Full Granting Rights</div>
+      <label class="col-md-3 col-sm-3 text-right">Resource Type:</label><div class="col-md-7 col-sm-7 text-left">Image</div>
+      <label class="col-md-3 col-sm-3 text-right">Resource Format:</label><div class="col-md-7 col-sm-7 text-left">jpg</div>
+      <label class="col-md-3 col-sm-3 text-right">Access Constraints:</label><div class="col-md-7 col-sm-7 text-left">Public Can View</div>
+      <label class="col-md-3 col-sm-3 text-right">Original File Name:</label><div class="col-md-7 col-sm-7 text-left">_K9A3907.jpg</div>
+      <label class="col-md-3 col-sm-3 text-right">File Size (bytes):</label><div class="col-md-7 col-sm-7 text-left">12.1 MB</div>
+      <label class="col-md-3 col-sm-3 text-right">NPS Units:</label><div class="col-md-7 col-sm-7 text-left">Timpanogos Cave National Monument, Code: TICA</div>
+    </body></html>
+    """
+
+    @staticmethod
+    def _jpeg_fixture() -> bytes:
+        # JPEG SOF0 header: 48 x 32 pixels, followed by deterministic payload bytes.
+        return (
+            b"\xff\xd8\xff\xc0\x00\x11\x08\x00\x20\x00\x30\x03"
+            b"\x01\x11\x00\x02\x11\x00\x03\x11\x00"
+            + b"nps-image-fixture" * 900
+        )
+
+    def test_search_parser_requires_full_public_domain_nps_credited_image_files(self):
+        url = nps_gallery_image_importer.SEARCH_URLS["wildlife"]
+        candidates = nps_gallery_image_importer.parse_npgallery_image_search_results(
+            self.SEARCH_HTML, url
+        )
+        self.assertEqual([row["AssetID"] for row in candidates], [self.ASSET_ID])
+        self.assertEqual(candidates[0]["ResourceFormat"], "jpg")
+        with self.assertRaisesRegex(RuntimeError, "allow-list"):
+            nps_gallery_image_importer.parse_npgallery_image_search_results(
+                self.SEARCH_HTML,
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=landscape",
+            )
+
+    def test_exact_search_detail_and_original_image_url_allowlists(self):
+        expected_search = nps_gallery_image_importer.SEARCH_URLS["night sky"]
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_page_url(expected_search),
+            expected_search,
+        )
+        detail_url = f"https://npgallery.nps.gov/AssetDetail/{self.ASSET_ID}"
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_page_url(detail_url),
+            detail_url,
+        )
+        original = f"https://npgallery.nps.gov/GetAsset/{self.ASSET_ID}/original.jpg"
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_original_url(
+                original + "?", self.ASSET_ID, "jpg"
+            ),
+            original,
+        )
+        for bad in (
+            "http://npgallery.nps.gov/AssetDetail/" + self.ASSET_ID,
+            "https://npgallery.nps.gov.evil.example/AssetDetail/" + self.ASSET_ID,
+            "https://user@npgallery.nps.gov/AssetDetail/" + self.ASSET_ID,
+            "https://npgallery.nps.gov/GetAsset/" + self.ASSET_ID + "/proxyhires.jpg",
+            "https://evil.example/GetAsset/" + self.ASSET_ID + "/original.jpg",
+        ):
+            if "/AssetDetail/" in bad:
+                self.assertIsNone(nps_gallery_image_importer.normalize_npgallery_page_url(bad))
+            else:
+                self.assertIsNone(
+                    nps_gallery_image_importer.normalize_npgallery_original_url(
+                        bad, self.ASSET_ID, "jpg"
+                    )
+                )
+
+    def test_detail_page_revalidates_full_rights_photo_credit_access_and_exceptions(self):
+        detail = nps_broll_importer.parse_npgallery_asset_detail(self.DETAIL_HTML)
+        self.assertEqual(detail["Asset ID"], self.ASSET_ID)
+        self.assertEqual(detail["PhotoCredit"], "NPS/Andrew Shirey")
+        self.assertEqual(detail["Constraints Information"], "Public domain:Full Granting Rights")
+        self.assertEqual(detail["Resource Type"], "Image")
+        self.assertEqual(detail["Access Constraints"], "Public Can View")
+        self.assertTrue(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, detail, self.ASSET_ID
+            )
+        )
+        restricted = dict(detail)
+        restricted["Copyright"] = "Copyrighted photograph used with permission."
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, restricted, self.ASSET_ID
+            )
+        )
+        not_public = dict(detail)
+        not_public["Constraints Information"] = "Public domain:Unknown Granting Rights"
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, not_public, self.ASSET_ID
+            )
+        )
+        not_viewable = dict(detail)
+        not_viewable["Access Constraints"] = "Permission required"
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, not_viewable, self.ASSET_ID
+            )
+        )
+
+    def test_jpeg_and_png_signatures_and_dimensions_are_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            jpeg = root / "image.jpg"
+            jpeg.write_bytes(self._jpeg_fixture())
+            self.assertTrue(nps_gallery_image_importer._image_signature_is_valid(jpeg, "jpg"))
+            self.assertEqual(
+                nps_gallery_image_importer._image_dimensions(jpeg, "jpg"),
+                (48, 32),
+            )
+            png = root / "image.png"
+            png_bytes = (
+                b"\x89PNG\r\n\x1a\n"
+                + (13).to_bytes(4, "big")
+                + b"IHDR"
+                + (1920).to_bytes(4, "big")
+                + (1080).to_bytes(4, "big")
+                + b"\x08\x02\x00\x00\x00"
+                + b"fixture-data" * 1000
+            )
+            png.write_bytes(png_bytes)
+            self.assertTrue(nps_gallery_image_importer._image_signature_is_valid(png, "png"))
+            self.assertEqual(
+                nps_gallery_image_importer._image_dimensions(png, "png"),
+                (1920, 1080),
+            )
+            self.assertFalse(nps_gallery_image_importer._image_signature_is_valid(png, "jpg"))
+
+    def test_full_image_import_rechecks_detail_downloads_original_and_records_provenance(self):
+        source_bytes = self._jpeg_fixture()
+        expected_detail = f"https://npgallery.nps.gov/AssetDetail/{self.ASSET_ID}"
+        expected_original = f"https://npgallery.nps.gov/GetAsset/{self.ASSET_ID}/original.jpg"
+        fetched = []
+        limits = []
+
+        def fake_fetch(url, limit=nps_gallery_image_importer.MAX_PAGE_BYTES, timeout=35):
+            fetched.append(url)
+            if url in nps_gallery_image_importer.SEARCH_URLS.values():
+                return self.SEARCH_HTML.encode()
+            if url == expected_detail:
+                return self.DETAIL_HTML.encode()
+            raise AssertionError("unexpected NPGallery image URL: " + url)
+
+        def fake_download(url, asset_id, fmt, destination, *, max_bytes=nps_gallery_image_importer.MAX_IMAGE_BYTES):
+            self.assertEqual(url, expected_original)
+            self.assertEqual(asset_id, self.ASSET_ID)
+            self.assertEqual(fmt, "jpg")
+            limits.append(max_bytes)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(nps_gallery_image_importer, "_fetch_npgallery_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_gallery_image_importer, "_download_npgallery_image", side_effect=fake_download), \
+             mock.patch.object(nps_gallery_image_importer.time, "sleep"):
+            index = []
+            report = nps_gallery_image_importer.download_nps_npgallery_images(Path(tmp), index)
+
+        for url in nps_gallery_image_importer.SEARCH_URLS.values():
+            self.assertIn(url, fetched)
+        self.assertIn(expected_detail, fetched)
+        self.assertEqual(len(index), 1)
+        self.assertEqual(index[0]["type"], "nps-photograph")
+        self.assertEqual(index[0]["path"].split(".")[-1], "jpg")
+        self.assertEqual(index[0]["source_file_url"], expected_original)
+        self.assertEqual(index[0]["collection_page"], nps_gallery_image_importer.SEARCH_URLS["wildlife"])
+        self.assertEqual(index[0]["license"], "Public Domain (NPGallery item-level Public domain: Full Granting Rights; not CC0)")
+        self.assertEqual(index[0]["credit_text"], "NPS/Andrew Shirey")
+        self.assertEqual(index[0]["copyright_text"], "NPS/Andrew Shirey")
+        self.assertEqual(index[0]["source_sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(index[0]["sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(index[0]["width"], 48)
+        self.assertEqual(index[0]["height"], 32)
+        self.assertEqual(limits, [nps_gallery_image_importer.MAX_IMAGE_BYTES])
+        self.assertEqual(
+            len([row for row in report if row.get("status") == "downloaded"]),
+            1,
+        )
+
+    def test_nps_people_privacy_review_flags_volunteers_speakers_and_interpreters(self):
+        for description in (
+            "Volunteers build a bridge at Greenbelt Park.",
+            "A keynote speaker talks with park visitors.",
+            "An interpreter assists visitors during a ceremony.",
+            "Performers and audience gather at a historic site.",
+            "A park ranger and workers restore a trail.",
+        ):
+            self.assertRegex(
+                description,
+                nps_broll_importer.NPS_REVIEW_PEOPLE_RE,
+                description,
+            )
+        self.assertIsNone(
+            nps_broll_importer.NPS_REVIEW_PEOPLE_RE.search(
+                "Ancient bristlecone pine beneath a clear night sky."
+            )
+        )
+
+    def test_image_lane_is_registered_and_classified_as_photography(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["nps-gallery-images"],
+            "download_nps_npgallery_images",
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "nps-photograph",
+                "path": "third-party/nps/npgallery/images/cave-crickets.jpg",
+            }),
+            "photography",
+        )
+
+
+class NPSBrollImporterTests(unittest.TestCase):
+    INDEX_URL = "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm"
+    DETAIL_URL = "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd10.htm"
+    VIDEO_ID = "44ce0b69-81e4-491c-896f-d10a744bc5db"
+    URL_720 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}720p.mp4"
+    URL_1080 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}1080p.mp4"
+    EMBED_ID = "B6D01994-155D-451F-679C4406F71D1006"
+    EMBED_URL = "https://www.nps.gov/media/video/embed.htm?id=" + EMBED_ID
+    VIEW_URL = "https://www.nps.gov/media/video/view.htm?id=" + EMBED_ID
+    MEDIA_VIEW_HTML = f"""
+    <html><head>
+      <meta property="og:title" content="Desert View Rim Country - B-Roll Video">
+      <meta property="og:description" content="Aerial footage over the Grand Canyon.">
+      <meta property="og:video" content="{URL_720}">
+      <meta property="og:video:secure_url" content="{URL_720}">
+    </head><body><h2>Credit</h2><p>NPS Video: Richard Burton</p></body></html>
+    """
+    INDEX_HTML = f"""
+    <html><body>
+      <h1>Grand Canyon National Park B-Roll archive</h1>
+      <div class="TextWrapped">
+        Grand Canyon National Park's B-Roll archive provides free, public domain,
+        downloadable video clips. All video files in this archive are "public domain"
+        clips. You are free to use these videos without a release from the National
+        Park Service. The videos must not be used to imply National Park Service
+        endorsement. The NPS arrowhead is protected.
+        Please credit "Courtesy of the National Park Service."
+      </div>
+      <a href="{DETAIL_URL}">Aerial of Grand Canyon Cliffs and Temples</a>
+      <a href="https://evil.example/grca/learn/photosmultimedia/b-roll_hd99.htm">Bad host</a>
+      <a href="https://www.nps.gov/grca/learn/photosmultimedia/contact.htm">Unrelated page</a>
+    </body></html>
+    """
+    DETAIL_HTML = f"""
+    <html><head><meta name="description" content="Aerial footage of Grand Canyon cliffs and temples."></head>
+    <body><h1>B-roll Video: Aerial of Cliffs and Temples</h1>
+      <div class="VideoHero">
+        <video src="{URL_720}">
+          <source src="{URL_720}" type="video/mp4" res="720" label="720p">
+          <source src="{URL_1080}" type="video/mp4" res="1080" label="1080p">
+        </video>
+        <div class="vjs-dock-text">
+          <div class="vjs-dock-title">Aerial of Grand Canyon Cliffs and Temples</div>
+          <div class="vjs-dock-description">Slow aerial footage over the canyon.</div>
+        </div>
+      </div>
+      <iframe title="Video Embed" src="{EMBED_URL}"></iframe>
+    </body></html>
+    """
+
+    def test_official_page_and_media_allowlists_reject_spoofed_hosts_and_bad_paths(self):
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(self.INDEX_URL),
+            self.INDEX_URL,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(
+                "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper()
+            ),
+            "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper(),
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(self.EMBED_URL),
+            self.VIEW_URL,
+        )
+        legacy_id = "BEB855EF-9E28-4D45-3077A632DA293D46"
+        legacy_view_url = "https://www.nps.gov/media/video/view.htm?id=" + legacy_id
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(legacy_view_url), legacy_view_url
+        )
+        for url in (
+            "http://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov.evil.example/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://user@www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov:444/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov/yose/learn/photosmultimedia/b-roll_hd_index.htm?x=1",
+            "https://www.nps.gov/media/video/view.htm?id=not-a-guid",
+            "https://www.nps.gov/grca/other/b-roll_hd_index.htm",
+        ):
+            self.assertIsNone(nps_broll_importer.normalize_nps_page_url(url), url)
+
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_media_url(self.URL_1080), self.URL_1080
+        )
+        legacy_media_url = (
+            "https://www.nps.gov/nps-audiovideo/legacy/deva/"
+            "BEB855EF-9E28-4D45-3077A632DA293D46/deva-MosaicCanyon_1280x720.mp4"
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_media_url(legacy_media_url),
+            legacy_media_url,
+        )
+        for url in (
+            "http://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov.evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4?download=1",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mov",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "9999p.mp4",
+            "https://evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+        ):
+            self.assertIsNone(nps_broll_importer.normalize_nps_media_url(url), url)
+        self.assertTrue(
+            nps_broll_importer.nps_media_response_url_is_allowed(
+                self.URL_1080, self.URL_1080
+            )
+        )
+        self.assertFalse(
+            nps_broll_importer.nps_media_response_url_is_allowed(
+                self.URL_1080, "https://cdn.example.net/video.mp4"
+            )
+        )
+
+    def test_index_requires_explicit_public_domain_and_only_follows_approved_same_park_links(self):
+        parsed = nps_broll_importer.parse_nps_index_page(
+            self.INDEX_HTML, "grca", self.INDEX_URL
+        )
+        self.assertEqual(parsed["child_pages"], [self.DETAIL_URL])
+        self.assertEqual(parsed["media_pages"], [])
+        self.assertTrue(parsed["credit_required_visible"])
+        self.assertEqual(
+            parsed["credit_text"], "Courtesy of the National Park Service."
+        )
+        with self.assertRaisesRegex(RuntimeError, "explicit Public Domain"):
+            nps_broll_importer.parse_nps_index_page(
+                '<html><body><a href="/grca/learn/photosmultimedia/b-roll_hd10.htm">Clip</a></body></html>',
+                "grca",
+                self.INDEX_URL,
+            )
+
+    def test_video_group_parser_preserves_title_caption_and_prefers_best_rendition(self):
+        parsed = nps_broll_importer.parse_nps_page(self.DETAIL_HTML)
+        self.assertEqual(len(parsed["video_groups"]), 1)
+        group = parsed["video_groups"][0]
+        self.assertEqual(group["title"], "Aerial of Grand Canyon Cliffs and Temples")
+        self.assertIn("Slow aerial footage", group["description"])
+        self.assertEqual(nps_broll_importer.normalize_nps_media_url(self.URL_720), self.URL_720)
+        self.assertEqual(len(group["sources"]), 3)
+        options = nps_broll_importer._media_candidates_from_group(group)
+        self.assertEqual([row["resolution"] for row in options], [1080, 720])
+        self.assertEqual(options[0]["url"], self.URL_1080)
+
+    def _npgallery_fixture(self):
+        asset_id = "6fc09aec-7fc2-47ed-b8cc-e1b10861dd3e"
+        asset = {
+            "AssetBaseType": "File",
+            "AssetID": asset_id,
+            "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Full"},
+            "Description": "Footage of Acadia's scenic coastline.",
+            "NPSUnits": [{"Name": "Acadia National Park", "Code": "ACAD"}],
+            "PhotoCredit": "NPS Video",
+            "PrimaryType": "video",
+            "ResourceFormat": "mp4",
+            "ResourceType": "Video",
+            "Title": "Acadia B-Roll: Coastal Scenery",
+        }
+        search_html = "<script>var search = " + json.dumps({
+            "Page": 1,
+            "PageSize": 60,
+            "ResultCount": 3,
+            "Results": [
+                {"Asset": asset},
+                {"Asset": {
+                    **asset,
+                    "AssetID": "09020b83-5e2f-4855-ada1-53782e2665e1",
+                    "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Unknown"},
+                }},
+                {"Asset": {
+                    **asset,
+                    "AssetID": "a84245c3-7109-46a0-bf28-0165a464c515",
+                    "PhotoCredit": "Independent Film Studio",
+                }},
+            ],
+        }) + ";</script>"
+        detail_html = f"""
+        <html><body>
+          <label class="col-md-3 col-sm-3 text-right">Asset ID:</label><div class="col-md-7 col-sm-7 text-left">{asset_id}</div>
+          <label class="col-md-3 col-sm-3 text-right">Title:</label><div class="col-md-7 col-sm-7 text-left">Acadia B-Roll: Coastal Scenery</div>
+          <label class="col-md-3 col-sm-3 text-right">AltText:</label><div class="col-md-7 col-sm-7 text-left">Waves crashing against rocky shores.</div>
+          <label class="col-md-3 col-sm-3 text-right">Description:</label><div class="col-md-7 col-sm-7 text-left">Footage of Acadia's scenic coastline.</div>
+          <label class="col-md-3 col-sm-3 text-right">Copyright:</label><div class="col-md-7 col-sm-7 text-left">Digital assets without copyright restrictions are public domain.</div>
+          <label class="col-md-3 col-sm-3 text-right">PhotoCredit:</label><div class="col-md-7 col-sm-7 text-left">NPS Video</div>
+          <label class="col-md-3 col-sm-3 text-right">Constraints Information:</label><div class="col-md-7 col-sm-7 text-left">Public domain:Full Granting Rights</div>
+          <label class="col-md-3 col-sm-3 text-right">Resource Type:</label><div class="col-md-7 col-sm-7 text-left">Video</div>
+          <label class="col-md-3 col-sm-3 text-right">Resource Format:</label><div class="col-md-7 col-sm-7 text-left">mp4</div>
+          <label class="col-md-3 col-sm-3 text-right">Access Constraints:</label><div class="col-md-7 col-sm-7 text-left">Public Can View</div>
+          <label class="col-md-3 col-sm-3 text-right">Original File Name:</label><div class="col-md-7 col-sm-7 text-left">broll_coastalscenery.mp4</div>
+          <label class="col-md-3 col-sm-3 text-right">File Size (bytes):</label><div class="col-md-7 col-sm-7 text-left">67400000</div>
+          <label class="col-md-3 col-sm-3 text-right">NPS Units:</label><div class="col-md-7 col-sm-7 text-left">Acadia National Park, Code: ACAD</div>
+        </body></html>
+        """
+        return asset_id, asset, search_html, detail_html
+
+    def test_npgallery_search_candidates_require_full_pd_video_mp4_and_nps_credit(self):
+        asset_id, asset, search_html, _ = self._npgallery_fixture()
+        candidates = nps_broll_importer.parse_npgallery_search_results(search_html)
+        self.assertEqual([row["AssetID"] for row in candidates], [asset_id])
+        self.assertEqual(candidates[0]["ConstraintsInformation"]["GrantingRights"], "Full")
+
+        with self.assertRaisesRegex(RuntimeError, "payload"):
+            nps_broll_importer.parse_npgallery_search_results("<html>no search json</html>")
+
+    def test_npgallery_exact_host_path_rights_and_credit_checks(self):
+        asset_id, asset, _, detail_html = self._npgallery_fixture()
+        expected_detail = f"https://npgallery.nps.gov/AssetDetail/{asset_id}"
+        expected_original = f"https://npgallery.nps.gov/GetAsset/{asset_id}/original"
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=b-roll"
+            ),
+            nps_broll_importer.NPGALLERY_SEARCH_URL,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=video"
+            ),
+            nps_broll_importer.NPGALLERY_SEARCH_URLS["video"],
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=footage"
+            ),
+            nps_broll_importer.NPGALLERY_SEARCH_URLS["footage"],
+        )
+        self.assertIsNone(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=landscape"
+            )
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(expected_detail),
+            expected_detail,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_original_url(expected_original, asset_id),
+            expected_original,
+        )
+        # The live Asset Detail page appends an empty query marker to its original-file link.
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_original_url(expected_original + "?", asset_id),
+            expected_original,
+        )
+        for url in (
+            "http://npgallery.nps.gov/AssetDetail/" + asset_id,
+            "https://npgallery.nps.gov.evil.example/AssetDetail/" + asset_id,
+            "https://user@npgallery.nps.gov/AssetDetail/" + asset_id,
+            "https://npgallery.nps.gov/AssetDetail/" + asset_id + "?download=1",
+            "https://npgallery.nps.gov/GetAsset/" + asset_id + "/proxyhires",
+            "https://evil.example/GetAsset/" + asset_id + "/original",
+        ):
+            self.assertIsNone(
+                nps_broll_importer.normalize_npgallery_page_url(url)
+                if "/AssetDetail/" in url or "/SearchResults" in url
+                else nps_broll_importer.normalize_npgallery_original_url(url, asset_id),
+                url,
+            )
+        detail = nps_broll_importer.parse_npgallery_asset_detail(detail_html)
+        self.assertEqual(detail["PhotoCredit"], "NPS Video")
+        self.assertTrue(nps_broll_importer._npgallery_rights_verified(asset, detail, asset_id))
+
+        restricted = dict(detail)
+        restricted["Constraints Information"] = "Public domain:Unknown Granting Rights"
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, restricted, asset_id))
+        third_party = dict(detail)
+        third_party["PhotoCredit"] = "Independent Film Studio"
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, third_party, asset_id))
+        restricted = dict(detail)
+        restricted["Description"] = "Video contains licensed third-party footage."
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, restricted, asset_id))
+        restricted_access = dict(detail)
+        restricted_access["Access Constraints"] = "Permission required"
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, restricted_access, asset_id))
+
+    def test_full_npgallery_import_revalidates_detail_downloads_original_and_records_provenance(self):
+        asset_id, asset, search_html, detail_html = self._npgallery_fixture()
+        source_bytes = b"verified NPGallery original video" * 12000
+        silent_bytes = b"silent NPGallery video output" * 12000
+        expected_detail = f"https://npgallery.nps.gov/AssetDetail/{asset_id}"
+        expected_original = f"https://npgallery.nps.gov/GetAsset/{asset_id}/original"
+        fetched = []
+        limits = []
+
+        def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            fetched.append(url)
+            if url in nps_broll_importer.NPGALLERY_SEARCH_URLS.values():
+                return search_html.encode()
+            if url == expected_detail:
+                return detail_html.encode()
+            raise AssertionError("unexpected NPGallery URL: " + url)
+
+        def fake_download(url, requested_id, destination, max_bytes=nps_broll_importer.MAX_VIDEO_BYTES):
+            self.assertEqual(url, expected_original)
+            self.assertEqual(requested_id, asset_id)
+            limits.append(max_bytes)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        def fake_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(silent_bytes)
+            return {
+                "width": 1920, "height": 1080,
+                "video_codec": "h264", "duration_seconds": 37.0,
+            }
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(nps_broll_importer, "_fetch_npgallery_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_broll_importer, "_download_npgallery_source", side_effect=fake_download), \
+             mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux):
+            index = []
+            report, stats = nps_broll_importer.download_npgallery_broll_media(
+                Path(tmp), index,
+                max_downloads=1,
+                max_total_source_bytes=1024 * 1024,
+                max_metadata_bytes=1024 * 1024,
+            )
+            self.assertEqual(len(index), 1)
+            self.assertTrue((Path(tmp) / index[0]["path"]).is_file())
+
+        for search_url in nps_broll_importer.NPGALLERY_SEARCH_URLS.values():
+            self.assertIn(search_url, fetched)
+        self.assertIn(expected_detail, fetched)
+        self.assertEqual(index[0]["type"], "nps-broll-video")
+        self.assertEqual(index[0]["license"], "Public Domain (NPGallery item-level Public domain: Full Granting Rights; not CC0)")
+        self.assertEqual(index[0]["credit_text"], "NPS Video")
+        self.assertEqual(index[0]["source_file_url"], expected_original)
+        self.assertEqual(index[0]["source_sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(index[0]["sha256"], hashlib.sha256(silent_bytes).hexdigest())
+        self.assertTrue(index[0]["audio_stripped"])
+        self.assertEqual(stats["videos_downloaded"], 1)
+        self.assertEqual(stats["source_bytes_downloaded"], len(source_bytes))
+        self.assertEqual(stats["indexed_resource_bytes"], len(silent_bytes))
+        self.assertEqual(limits, [1024 * 1024])
+
+    def test_nps_embed_iframe_resolves_to_view_og_video_and_credit_gate(self):
+        detail = nps_broll_importer.parse_nps_page(
+            f'<html><body><iframe src="{self.EMBED_URL}" title="Video Embed"></iframe></body></html>'
+        )
+        self.assertEqual(
+            detail["links"][0]["href"],
+            self.EMBED_URL,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(detail["links"][0]["href"]),
+            self.VIEW_URL,
+        )
+
+        media_page = nps_broll_importer.parse_nps_page(self.MEDIA_VIEW_HTML)
+        self.assertEqual(
+            media_page["page_title"],
+            "Desert View Rim Country - B-Roll Video",
+        )
+        groups = nps_broll_importer._groups_for_page(media_page, self.VIEW_URL)
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["media_candidates"][0]["url"], self.URL_720)
+        self.assertEqual(groups[0]["media_candidates"][0]["resolution"], 720)
+
+        credit, allowed = nps_broll_importer.parse_nps_media_page_credit(self.MEDIA_VIEW_HTML)
+        self.assertEqual(credit, "NPS Video: Richard Burton")
+        self.assertTrue(allowed)
+        _, allowed = nps_broll_importer.parse_nps_media_page_credit(
+            "<html><body><h2>Credit</h2><p>Independent Film Studio</p></body></html>"
+        )
+        self.assertFalse(allowed)
+        _, allowed = nps_broll_importer.parse_nps_media_page_credit(
+            "<html><body><h2>Credit</h2><p>© 2020 NPS Video</p></body></html>"
+        )
+        self.assertFalse(allowed)
+
+    def test_full_downloader_follows_embed_iframe_to_official_mp4_metadata(self):
+        source_bytes = b"verified NPS player source fixture" * 12000
+        silent_bytes = b"silent NPS player fixture" * 12000
+        detail_html = f"""
+        <html><body><h1>Grand Canyon B-roll clips</h1>
+          <iframe title="Video Embed" src="{self.EMBED_URL}"></iframe>
+        </body></html>
+        """
+        fetched_pages = []
+
+        def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            fetched_pages.append(url)
+            if url == self.INDEX_URL:
+                return self.INDEX_HTML.encode()
+            if url == self.DETAIL_URL:
+                return detail_html.encode()
+            if url == self.VIEW_URL:
+                return self.MEDIA_VIEW_HTML.encode()
+            raise AssertionError("unexpected NPS page fetch: " + url)
+
+        def fake_download(url, destination):
+            self.assertEqual(url, self.URL_720)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        def fake_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(silent_bytes)
+            return {
+                "width": 1920, "height": 720,
+                "video_codec": "h264", "duration_seconds": 40.582,
+            }
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(
+                 nps_broll_importer, "INDEXES",
+                 ({
+                     "id": "grand-canyon", "park": "grca",
+                     "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
+                 },),
+             ), \
+             mock.patch.object(nps_broll_importer, "_fetch_npgallery_page", side_effect=RuntimeError("network disabled in offline importer test")), \
+             mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
+             mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux), \
+             mock.patch.object(nps_broll_importer.time, "sleep"):
+            index = []
+            report = nps_broll_importer.download_nps_broll_media(Path(tmp), index)
+
+        self.assertIn(self.VIEW_URL, fetched_pages)
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        self.assertEqual(index[0]["source_file_url"], self.URL_720)
+        self.assertEqual(index[0]["credit_text"], "NPS Video: Richard Burton")
+        self.assertEqual(index[0]["source_resolution_rank"], 720)
+        self.assertTrue(index[0]["credit_required_visible"])
+
+    def test_item_level_rights_exceptions_are_rejected(self):
+        for description in (
+            "Copyrighted footage used with permission.",
+            "Third-party partner footage supplied under license.",
+            "Licensed music must not be redistributed.",
+            "Commercial use is not cleared.",
+        ):
+            self.assertTrue(
+                nps_broll_importer.nps_item_page_rights_exception(
+                    "NPS clip", description
+                ),
+                description,
+            )
+        self.assertFalse(
+            nps_broll_importer.nps_item_page_rights_exception(
+                "Grand Canyon aerial", "Slow silent aerial footage over the canyon."
+            )
+        )
+
+    def test_credit_parser_preserves_park_specific_credit_wording_verbatim(self):
+        credit, required = nps_broll_importer.parse_nps_credit(
+            '<p>Please credit "Courtsey of the National Park Service."</p>'
+        )
+        self.assertTrue(required)
+        self.assertEqual(credit, "Courtsey of the National Park Service.")
+        fallback, required = nps_broll_importer.parse_nps_credit("<p>No credit line</p>")
+        self.assertFalse(required)
+        self.assertEqual(fallback, "National Park Service")
+
+    def test_audio_remux_uses_video_only_mapping_and_ffprobe_confirms_zero_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "input.mp4"
+            output = Path(tmp) / "silent.mp4"
+            source.write_bytes(b"source")
+            output.parent.mkdir(parents=True, exist_ok=True)
+            calls = []
+
+            def fake_run(args, **kwargs):
+                calls.append(args)
+                if args[0] == "/usr/bin/ffmpeg":
+                    Path(args[-1]).write_bytes(b"silent-video-fixture" * 20000)
+                    return mock.Mock(returncode=0, stdout="", stderr="")
+                return mock.Mock(
+                    returncode=0,
+                    stdout=json.dumps({
+                        "streams": [{
+                            "codec_type": "video", "codec_name": "h264",
+                            "width": 1920, "height": 1080,
+                        }],
+                        "format": {"duration": "123.5"},
+                    }),
+                    stderr="",
+                )
+
+            with mock.patch.object(nps_broll_importer.shutil, "which",
+                                   side_effect=lambda name: "/usr/bin/" + name), \
+                 mock.patch.object(nps_broll_importer.subprocess, "run",
+                                   side_effect=fake_run):
+                info = nps_broll_importer._strip_nps_audio_with_ffmpeg(source, output)
+
+            self.assertEqual(info["width"], 1920)
+            self.assertEqual(info["height"], 1080)
+            self.assertEqual(info["duration_seconds"], 123.5)
+            self.assertIn("-map", calls[0])
+            self.assertIn("0:v:0", calls[0])
+            self.assertIn("-an", calls[0])
+            self.assertEqual(calls[1][0], "/usr/bin/ffprobe")
+
+    def test_full_downloader_indexes_silent_public_domain_clip_with_provenance(self):
+        source_bytes = b"verified NPS source fixture"
+        silent_bytes = b"silent nps video output" * 20000
+        index_html = self.INDEX_HTML
+        detail_html = self.DETAIL_HTML
+
+        def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            if url == self.INDEX_URL:
+                return index_html.encode()
+            if url == self.DETAIL_URL:
+                return detail_html.encode()
+            raise AssertionError("unexpected NPS page fetch: " + url)
+
+        def fake_download(url, destination):
+            self.assertEqual(url, self.URL_1080)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        def fake_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(silent_bytes)
+            return {
+                "width": 1920, "height": 1080,
+                "video_codec": "h264", "duration_seconds": 123.5,
+            }
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(
+                 nps_broll_importer, "INDEXES",
+                 ({
+                     "id": "grand-canyon", "park": "grca",
+                     "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
+                 },),
+             ), \
+             mock.patch.object(nps_broll_importer, "_fetch_npgallery_page", side_effect=RuntimeError("network disabled in offline importer test")), \
+             mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
+             mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux):
+            index = []
+            report = nps_broll_importer.download_nps_broll_media(Path(tmp), index)
+
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        entry = index[0]
+        self.assertEqual(entry["type"], "nps-broll-video")
+        self.assertEqual(entry["license"], "Public Domain (explicit National Park Service B-roll collection statement; not CC0)")
+        self.assertTrue(entry["public_domain_verified"])
+        self.assertTrue(entry["audio_stripped"])
+        self.assertEqual(entry["credit_text"], "Courtesy of the National Park Service.")
+        self.assertEqual(entry["source_sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(entry["sha256"], hashlib.sha256(silent_bytes).hexdigest())
+        self.assertEqual(entry["size_bytes"], len(silent_bytes))
+        self.assertEqual(entry["source_resolution_rank"], 1080)
+
+    def test_nps_download_budget_reserves_slots_for_npgallery(self):
+        self.assertEqual(nps_broll_importer.MAX_DOWNLOADS, 36)
+        self.assertEqual(nps_broll_importer.MAX_PARK_ARCHIVE_DOWNLOADS_PER_INDEX, 3)
+        self.assertEqual(nps_broll_importer.MAX_VIDEO_BYTES, 350 * 1024 * 1024)
+        self.assertEqual(nps_broll_importer.MAX_TOTAL_SOURCE_BYTES, 4 * 1024 * 1024 * 1024)
+
+    def test_nps_lane_is_registered_catalogued_and_classified_as_footage(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["nps-broll"], "download_nps_broll_media"
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "nps-broll-video",
+                "path": "third-party/nps/broll/grand-canyon.mp4",
+            }),
+            "footage",
+        )
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(row for row in catalog["sources"] if row["id"] == "nps-park-broll-archive")
+        self.assertIn("Public Domain", entry["license"])
+        self.assertIn("not CC0", entry["license"])
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
