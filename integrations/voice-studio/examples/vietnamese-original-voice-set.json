@@ -27,6 +27,31 @@
       "name": "Nolane VI — Gentle Companion",
       "description": "An original fictional Vietnamese female companion voice, adult, medium-low register, soft rounded timbre, reassuring warmth, natural pauses, relaxed conversational rhythm, emotionally empathetic but not whispery, clear Vietnamese pronunciation.",
       "seed": 4205
+    },
+    {
+      "name": "Nolane VI — Energetic Young Host",
+      "description": "An original fictional Vietnamese male presenter, young adult, medium-high register, agile bright resonance, quick but controlled conversational pace, crisp word boundaries, upbeat curiosity, clear Northern Vietnamese articulation, lively transitions without shouting.",
+      "seed": 4206
+    },
+    {
+      "name": "Nolane VI — Thoughtful Interviewer",
+      "description": "An original fictional Vietnamese female interviewer, mature adult, medium register with a slightly textured warm timbre, attentive measured phrasing, gentle downward sentence endings, precise questions, composed confidence and natural Northern Vietnamese diction.",
+      "seed": 4207
+    },
+    {
+      "name": "Nolane VI — Reflective Elder",
+      "description": "An original fictional Vietnamese male elder narrator, older adult, medium-low register with a soft airy edge, unhurried pacing, grounded gentle resonance, clear consonants, thoughtful pauses, kind reflective delivery and natural Vietnamese tones.",
+      "seed": 4208
+    },
+    {
+      "name": "Nolane VI — Science Explainer",
+      "description": "An original fictional Vietnamese female science educator, adult, medium register, clean focused resonance, exceptionally clear syllable separation, steady explanatory rhythm, confident but approachable tone, accurate reading of symbols, units and English technical terms.",
+      "seed": 4209
+    },
+    {
+      "name": "Nolane VI — Deep Film Narrator",
+      "description": "An original fictional Vietnamese male film narrator, adult, low register, full controlled resonance, deliberate spacious pacing, clean consonants and stable tone contours, understated dramatic weight, smooth transitions and a grounded cinematic presence without imitation of any real performer.",
+      "seed": 4210
     }
   ]
 }
