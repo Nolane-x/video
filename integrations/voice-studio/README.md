@@ -42,10 +42,21 @@ For a complete project with multiple characters, use the separate
 It reads a committed project manifest, synthesizes every dialogue block with a
 stable speaker cast, audits the WAV files, then invokes the repository's actual
 H2 `prep_voice.py` to create `voice.wav`, `blocks.json`, `lines.json`,
-`words.json` and `transcript.txt`. All files are uploaded as a GitHub Actions
-artifact. The included example manifest has four character voices and ten
-dialogue segments. The workflow rejects non-Korva providers rather than
-silently routing to local VoiceStudio or a cloud API.
+`words.json` and `transcript.txt`. It also creates word-timed `captions.srt`,
+`captions.vtt` and styled `captions.ass`, plus sentence-level and speaker-
+labelled caption variants. `voice-cast-report.json` maps each stable character
+to its voice ID and audio statistics; `artifact-manifest.json` contains SHA-256
+hashes for every file actually delivered (internal hidden caches are excluded).
+All files are uploaded as a GitHub Actions artifact. The included example
+manifest has four character voices and ten dialogue segments. The workflow
+rejects non-Korva providers rather than silently routing to local VoiceStudio
+or a cloud API.
+
+Caption times are derived from H2's proportional speech/word timing heuristic,
+not ASR forced alignment. Treat them as an editing draft and review them before
+publication. The word-level track is shorter and more readable than displaying
+a complete long sentence for several seconds; the sentence-level track remains
+available for workflows that prefer one cue per sentence.
 
 ## 1. VoiceStudio application
 
