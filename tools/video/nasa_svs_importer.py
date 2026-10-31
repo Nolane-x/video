@@ -94,9 +94,21 @@ def page_rights_exception_markers(page: dict[str, Any]) -> list[str]:
         value = page.get(key)
         if isinstance(value, str) and value.strip():
             fields.append(value)
+    main_video = page.get("main_video")
+    if isinstance(main_video, dict):
+        fields.extend(str(main_video.get(k) or "") for k in ("alt_text", "caption", "notes", "copyright"))
     for group in page.get("media_groups") or []:
-        if isinstance(group, dict):
-            fields.extend(str(group.get(k) or "") for k in ("title", "caption", "description", "notes"))
+        if not isinstance(group, dict):
+            continue
+        fields.extend(str(group.get(k) or "") for k in ("title", "caption", "description", "notes"))
+        for item in group.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            fields.extend(str(item.get(k) or "") for k in ("title", "caption"))
+            for key in ("media", "instance"):
+                media = item.get(key)
+                if isinstance(media, dict):
+                    fields.extend(str(media.get(k) or "") for k in ("alt_text", "caption", "notes", "copyright"))
     for credit in page.get("credits") or []:
         if isinstance(credit, dict) and any(x in str(credit.get("role") or "").casefold() for x in ("music", "soundtrack")):
             fields.append("music credit role: " + str(credit.get("role") or ""))
