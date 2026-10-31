@@ -27,6 +27,7 @@ import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import nasa_svs_importer as nasa_svs_importer  # noqa: E402
 import eso_video_importer as eso_video_importer  # noqa: E402
 import cdc_broll_importer as cdc_broll_importer  # noqa: E402
+import nps_broll_importer as nps_broll_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
