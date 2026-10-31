@@ -77,6 +77,10 @@ class VoiceDesignLibraryTests(unittest.TestCase):
             self.assertEqual(first["failed"], 0)
             self.assertEqual(len(client.created), 2)
             self.assertEqual(len(client.previews), 2)
+            cast_path = Path(tmp) / "voice-cast.json"
+            cast = __import__("json").loads(cast_path.read_text(encoding="utf-8"))
+            self.assertEqual(cast["cast"]["narrator_a"]["voice"], "profile-4201")
+            self.assertEqual(cast["cast"]["expert_b"]["engine"], "voxcpm2")
 
             second = create_library(
                 sample_set(), Path(tmp), create=True, render_previews=True,
@@ -86,6 +90,7 @@ class VoiceDesignLibraryTests(unittest.TestCase):
             self.assertEqual(len(client.created), 2)
             self.assertEqual(len(client.previews), 4)
             self.assertTrue((Path(tmp) / "voice-design-library.json").is_file())
+            self.assertTrue(cast_path.is_file())
 
 
 if __name__ == "__main__":
