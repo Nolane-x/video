@@ -45,6 +45,7 @@ jobs:
           grep -q 'cp -R .agents/skills/video-character-voice-casting-engineer bundle/.agents/skills/' .github/workflows/package-video-skill.yml
           grep -q 'cp -R .agents/skills/video-voice-quality-auditor bundle/.agents/skills/' .github/workflows/package-video-skill.yml
           grep -q 'cp -R integrations/voice-studio bundle/integrations/' .github/workflows/package-video-skill.yml
+          grep -q '"integrations/voice-studio/analyze_voice_benchmark.py"' .github/workflows/package-video-skill.yml
       - name: Compile adapter
         run: python -m compileall -q integrations/voice-studio
       - name: Run offline adapter tests
