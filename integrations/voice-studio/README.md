@@ -157,35 +157,37 @@ names and English terms embedded in Vietnamese. Use the *same text* when
 comparing models or voice profiles; otherwise the A/B result is confounded by
 different scripts.
 
-Compare a whole provider's catalogue on that same benchmark script:
+Compare local and cloud providers in one run with the same script:
 
-```bash
-python integrations/voice-studio/provider_voice_benchmark.py \
-  --provider korva --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
-  --language vi --limit 10 --output out/benchmark-korva
+\`\`\`bash
+python integrations/voice-studio/provider_voice_benchmark.py \\
+  --provider all --engine voxcpm2 \\
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
+  --language vi --limit 20 --output out/benchmark-all
+\`\`\`
 
-python integrations/voice-studio/provider_voice_benchmark.py \
-  --provider voicestudio --engine voxcpm2 \
-  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
-  --language vi --limit 20 --output out/benchmark-voicestudio
+By default \`--provider all\` compares VoiceStudio saved profiles and KorvaTTS
+local presets only. To include Google and ElevenLabs as well:
 
-python integrations/voice-studio/provider_voice_benchmark.py \
-  --provider google --allow-cloud \
-  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
-  --language vi-VN --limit 20 --output out/benchmark-google
+\`\`\`bash
+python integrations/voice-studio/provider_voice_benchmark.py \\
+  --provider all --engine voxcpm2 --allow-cloud \\
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
+  --language vi --limit 20 --output out/benchmark-all-cloud
+\`\`\`
 
-python integrations/voice-studio/provider_voice_benchmark.py \
-  --provider elevenlabs --allow-cloud \
-  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
-  --language vi --limit 20 --output out/benchmark-elevenlabs
-```
+Here \`--limit\` is the maximum number of candidates **per provider**. A
+VoiceStudio engine ID is required so the selected profile family uses the
+same engine. Saved VoiceStudio profiles retain their own design seed;
+KorvaTTS uses the same supplied benchmark seed for every preset. Google and
+ElevenLabs calls can incur charges; the explicit \`--allow-cloud\` flag is
+mandatory whenever either cloud provider is included.
 
-Google and ElevenLabs calls can incur charges; the explicit `--allow-cloud`
-flag is mandatory. Each run exports an identity-mapped JSON report and a
-blind listening page. Rate naturalness, Vietnamese clarity/tones, identity,
-expressiveness and character fit from 1–5, then click **Export human ratings
-JSON**. The ratings are subjective review evidence, not a validated
-ElevenLabs-equivalence percentage.
+A run exports one blind HTML listening page and an identity-mapped JSON report.
+Rate naturalness, Vietnamese clarity/tones, identity, expressiveness and
+character fit from 1–5, then click **Export human ratings JSON**. The ratings
+are subjective review evidence, not a validated ElevenLabs-equivalence
+percentage.
 
 ## 5. Lock a cast and generate the voice-over
 
