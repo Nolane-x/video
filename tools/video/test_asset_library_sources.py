@@ -2979,6 +2979,23 @@ class NPSBrollImporterTests(unittest.TestCase):
             nps_broll_importer.NPGALLERY_SEARCH_URL,
         )
         self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=video"
+            ),
+            nps_broll_importer.NPGALLERY_SEARCH_URLS["video"],
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=footage"
+            ),
+            nps_broll_importer.NPGALLERY_SEARCH_URLS["footage"],
+        )
+        self.assertIsNone(
+            nps_broll_importer.normalize_npgallery_page_url(
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=landscape"
+            )
+        )
+        self.assertEqual(
             nps_broll_importer.normalize_npgallery_page_url(expected_detail),
             expected_detail,
         )
@@ -3028,7 +3045,7 @@ class NPSBrollImporterTests(unittest.TestCase):
 
         def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
             fetched.append(url)
-            if url == nps_broll_importer.NPGALLERY_SEARCH_URL:
+            if url in nps_broll_importer.NPGALLERY_SEARCH_URLS.values():
                 return search_html.encode()
             if url == expected_detail:
                 return detail_html.encode()
@@ -3064,7 +3081,8 @@ class NPSBrollImporterTests(unittest.TestCase):
             self.assertEqual(len(index), 1)
             self.assertTrue((Path(tmp) / index[0]["path"]).is_file())
 
-        self.assertIn(nps_broll_importer.NPGALLERY_SEARCH_URL, fetched)
+        for search_url in nps_broll_importer.NPGALLERY_SEARCH_URLS.values():
+            self.assertIn(search_url, fetched)
         self.assertIn(expected_detail, fetched)
         self.assertEqual(index[0]["type"], "nps-broll-video")
         self.assertEqual(index[0]["license"], "Public Domain (NPGallery item-level Public domain: Full Granting Rights; not CC0)")
