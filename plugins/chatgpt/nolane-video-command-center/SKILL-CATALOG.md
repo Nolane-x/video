@@ -1,39 +1,46 @@
-# Nolane Video Command Center — skill catalog v0.4.0
+# Nolane Video Command Center — skill catalog v0.6.0
 
-The Command Center includes 23 internal skills. Use the one plugin as the normal entry point; the specialist plugins listed in `references/PLUGIN-REGISTRY.md` are optional focused entry points.
+The Command Center contains 28 internal skills. Use it as the normal single entry point; the specialist plugins in `references/PLUGIN-REGISTRY.md` are optional direct entry points.
 
-## Direction and story
-- `video-command-center` — primary entry and route selection.
-- `video-production-director` — end-to-end production direction and release lifecycle.
+## Direction and storytelling
+- `video-command-center` — single entry point, state restoration and safe execution.
+- `video-production-director` — end-to-end production planning and release lifecycle.
 - `video-cinematic-director` — story, visual language, acting, camera and storyboard.
-- `cinematic-storytelling` — story architecture and emotional progression.
-- `video-production-master` — persistent repo workflow, H2/Remotion/Blender/Krita production gates and handoff.
+- `cinematic-storytelling` — emotional arc and narrative progression.
+- `video-production-master` — persistent repo memory, engine selection and handoff.
 
-## Motion, 2D/3D and explainers
+## Motion, design and explainers
 - `motion-engineering` — Remotion, GSAP, Motion, Three.js and PixiJS.
-- `video-motion-engineer` — engine selection, motion grammar and motion QA.
-- `3d-vfx-engineering` — procedural 3D/VFX and compositing.
-- `video-3d-vfx-engineer` — Blender/Three.js CPU-first 3D workflow.
-- `manim-explainer-director` — mathematical/scientific explainer animation.
+- `video-motion-engineer` — motion grammar, timing and browser scenes.
+- `manim-explainer-director` — mathematical/scientific explainer direction.
 - `video-manim-explainer` — Manim implementation and validation.
 
-## Audio, speech, text and accessibility
-- `audio-postproduction-engineer` — voice, music/SFX and mastering.
+## 3D, VFX and media planning
+- `3d-vfx-engineering` — procedural 3D, lighting and compositing.
+- `video-3d-vfx-engineer` — Blender/Three.js CPU-first 3D workflow.
+- `ai-media-asset-director` — choose AI media tools and plan generated inserts.
+- `comfyui-graph-orchestrator` — inspect and orchestrate ComfyUI graphs without silently downloading weights.
+- `browser-capture-director` — authorized product/site capture with Playwright.
+- `shotcraft-motion-librarian` — research reusable motion patterns and recipe provenance.
+- `asset-provenance-rights-auditor` — verify licenses, attribution and source records without owning acquisition.
+
+## Audio, captions and accessibility
+- `audio-postproduction-engineer` — dialogue, music/SFX and mastering.
 - `video-audio-speech-engineer` — optional WhisperX/Demucs and stem workflows.
-- `speech-caption-alignment-engineer` — speech alignment and captions.
-- `video-caption-qa-engineer` — timed text manifest, bilingual OCR and caption legibility.
+- `speech-caption-alignment-engineer` — speech alignment and subtitle timing.
+- `video-caption-qa-engineer` — timed text manifests, EN/VI OCR and readability checks.
 
-## Editorial, scene analysis and production QA
-- `editorial-timeline-architect` — OTIO timeline interchange.
-- `video-editorial-interchange` — frame-accurate OTIO and PySceneDetect handoff.
+## Editorial and final quality
+- `editorial-timeline-architect` — OTIO interchange and exact frame ranges.
+- `video-editorial-interchange` — frame-accurate OTIO/PySceneDetect handoff.
 - `scene-detection-researcher` — scene boundaries, shot logs and contact sheets.
-- `video-quality-assurance` — final technical/editorial release gate.
-- `video-render-qa` — render runtime, dependencies and CI evidence.
-- `video-render-ci-engineer` — reproducible Actions installs, caches, artifacts and SBOM.
+- `video-quality-assurance` — final technical/editorial gate.
+- `video-render-qa` — runtime, dependencies and CI evidence.
+- `video-render-ci-engineer` — reproducible Actions installs, caches, SBOM and artifacts.
 
-## Toolchain, safety and licensing
-- `video-toolchain-orchestrator` — route engines and profiles per shot/project.
-- `video-production-license-auditor` — code/model/media license and provenance gates.
-- `video-production-director` — overall coordination and project handoff.
+## Toolchain and licensing
+- `video-toolchain-orchestrator` — route engines/profiles per shot and job.
+- `video-production-license-auditor` — code/model/media license checks.
+- `video-production-director` — coordination, state and handoff.
 
-All bundled skills remain distinct. Avoid duplicate work: route only the few skills that add value for the current job.
+Keep each skill distinct. Invoke only the specialists required by the current task; do not multiply work or heavy tool installation without a reason.
