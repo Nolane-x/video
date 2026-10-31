@@ -1,6 +1,6 @@
-# Nolane Video Command Center — specialist registry v0.4.0
+# Nolane Video Command Center — specialist registry v0.6.0
 
-The command center bundles 23 internal skills and is the normal single entry point. Specialist plugins are independent private entry points for focused work; they are optional, not required for ordinary production.
+The Command Center bundles 28 internal skills and is the normal single entry point. Specialist plugins are independent private entry points for focused work; they are optional, not prerequisites.
 
 | Specialist plugin | Plugin ID | Link | Main capabilities |
 |---|---|---|---|
@@ -9,12 +9,13 @@ The command center bundles 23 internal skills and is the normal single entry poi
 | Nolane 3D & VFX | `plugins_6ae55ef184748191beda13ca683156ac` | https://chatgpt.com/plugins/plugins_6ae55ef184748191beda13ca683156ac | Blender, Three.js, camera, lights, materials and VFX |
 | Nolane Render & QA | `plugins_6ae55efbf7b08191af89450a747370cd` | https://chatgpt.com/plugins/plugins_6ae55efbf7b08191af89450a747370cd | Actions, FFmpeg, captions/OCR and release QA |
 | Nolane Manim Explainer Studio | `plugins_6ae56882d1408191bbbb2a2d53a9ba7e` | https://chatgpt.com/plugins/plugins_6ae56882d1408191bbbb2a2d53a9ba7e | Math, science and engineering animation |
-| Nolane Audio & Speech Studio | `plugins_6ae5688dc41081919a3251586f71d0e2` | https://chatgpt.com/plugins/plugins_6ae5688dc41081919a3251586f71d0e2 | Voice, speech recognition/alignment, stems and mastering |
+| Nolane Audio & Speech Studio | `plugins_6ae5688dc41081919a3251586f71d0e2` | https://chatgpt.com/plugins/plugins_6ae5688dc41081919a3251586f71d0e2 | Voice, speech alignment, stems and mastering |
 | Nolane Editorial Interchange Studio | `plugins_6ae5689896388191bae1cb45fcc257e1` | https://chatgpt.com/plugins/plugins_6ae5689896388191bae1cb45fcc257e1 | OTIO, PySceneDetect, proxies and timeline exchange |
+| Nolane AI Media & Capture Studio | `plugins_6ae5750828608191b46685dd61a7621c` | https://chatgpt.com/plugins/plugins_6ae5750828608191b46685dd61a7621c | AI media planning, ComfyUI graphs, browser capture and provenance |
 
-## Existing private plugins kept unchanged
+## Existing private plugins kept distinct
 - Nolane Video Production Studio v0.4.0 (32 skills): https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd
 - H2 SelfImprove Studio v1.1.0: https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0
 
 ## Activation boundary
-The Command Center uses its bundled skills and connected GitHub tools. It does not claim to invisibly activate other private plugins. Extra specialist links are optional direct entry points.
+The Command Center routes internally through its 28 bundled skills and connected GitHub tools. It does not claim to invisibly activate other private ChatGPT plugins. Specialist links are optional entry points.
