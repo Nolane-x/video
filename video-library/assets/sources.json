@@ -501,7 +501,7 @@
       "license": "CC BY 4.0 default for ESO public videos unless the individual page states otherwise; music excluded unless separately covered",
       "license_url": "https://www.eso.org/public/copyright/",
       "verified_page_license": true,
-      "bundling": "bounded-official-rss-video-import-after-page-specific-rights-screen-source-sha256-verification-and-audio-removal",
+      "bundling": "bounded-official-rss-silent-footage-import-after-page-specific-rights-screen-source-sha256-verification-and-audio-removal",
       "note": "Discover pages only through six verified official ESO RSS category feeds (ESOcast, cosmology, exoplanets, fulldome, stars and galaxies). Each individual page must contain a full credit block and a direct checksum-published H.264 4K or 1080p preview. Only exact cdn.eso.org preview URLs are allowed; verify the source SHA-256 published on the item page, MIME/container signature, redirects and byte ceilings. FFmpeg remuxes only the video stream and ffprobe verifies zero audio streams because ESO music is not automatically covered by the general CC BY grant. Preserve the complete credit wording (HTML formatting/whitespace may be normalized in metadata) and require it visibly and unaltered in the finished video; a description-only credit is insufficient. Fail closed on NoDerivatives, non-commercial, permission-required or other restrictive page-specific terms. ESO branding/logo and endorsement restrictions still apply. Disclose that audio was removed when adapting the footage. ESO states commercial use is not permitted if identifiable people appear, so this restriction is surfaced as a mandatory human review flag. Files are CC BY 4.0 default, not CC0."
     },
     {
