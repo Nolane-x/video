@@ -26,6 +26,16 @@ on:
   pull_request:
     paths:
       - "toolchain/**"
+      - "video-projects/remotion/src/**"
+      - "video-projects/remotion/package.json"
+      - "video-projects/remotion/tsconfig.json"
+      - "tools/video/validate_genre_routing.py"
+      - "tools/video/genre-routing.json"
+      - "tools/video/evaluate_editorial_plan.py"
+      - "tools/video/test_editorial_plan.py"
+      - "tools/video/validate_editorial_review.py"
+      - "tools/video/test_editorial_review.py"
+      - "tools/video/editorial-review.template.json"
       - "tools/video/validate_toolchain.py"
       - "tools/video/test_toolchain.py"
       - "tools/video/build_npm_sbom.py"
