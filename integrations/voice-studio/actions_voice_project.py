@@ -119,6 +119,40 @@ def _download_model(revision: str) -> Path:
     return assets
 
 
+def _apply_headroom(audio_path: Path, attenuation_db: float = 3.0) -> dict[str, Any]:
+    """Apply deterministic pre-H2 headroom so concatenation cannot peak at 0 dBFS."""
+    temporary = audio_path.with_name(audio_path.stem + ".headroom.tmp.wav")
+    command = [
+        "ffmpeg", "-nostdin", "-v", "error", "-y", "-i", str(audio_path),
+        "-af", f"volume=-{attenuation_db:g}dB",
+        "-c:a", "pcm_s16le", str(temporary),
+    ]
+    completed = subprocess.run(
+        command, check=False, capture_output=True, text=True, timeout=120,
+    )
+    if completed.returncode or not temporary.is_file() or temporary.stat().st_size <= 44:
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError(
+            "FFmpeg headroom pass failed: "
+            + (completed.stderr[-2000:] or completed.stdout[-2000:] or str(completed.returncode))
+        )
+    metrics = _probe_audio(temporary)
+    if metrics["sample_rate_hz"] != EXPECTED_SAMPLE_RATE:
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError("Headroom pass unexpectedly changed the source sample rate")
+    if metrics["peak_dbfs"] > -2.5:
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"Headroom pass did not leave sufficient peak margin: {metrics['peak_dbfs']} dBFS"
+        )
+    temporary.replace(audio_path)
+    return {
+        "attenuation_db": attenuation_db,
+        "post_peak_dbfs": metrics["peak_dbfs"],
+        "post_rms_dbfs": metrics["rms_dbfs"],
+    }
+
+
 def _run_h2_timing(output_dir: Path, voice_txt: Path, audio_dir: Path) -> dict[str, Any]:
     if not H2_PREP_VOICE.is_file():
         raise FileNotFoundError(f"The pinned H2 prep_voice.py tool is missing: {H2_PREP_VOICE}")
@@ -197,6 +231,23 @@ def run_project(
     quality_path = output_dir / "voice-quality-report.json"
     generation = json.loads(generation_path.read_text(encoding="utf-8"))
 
+    # KorvaTTS samples can peak close to full scale. Apply -3 dB before the
+    # H2 concatenation stage, then refresh the report hashes so every output
+    # remains auditable after mastering.
+    for item in generation.get("segments", []):
+        relative = item.get("file")
+        audio_path = (output_dir / relative).resolve() if relative else None
+        if not audio_path or not audio_path.is_file():
+            continue
+        try:
+            audio_path.relative_to(output_dir.resolve())
+        except ValueError:
+            raise ValueError(f"Generation report audio path escapes output: {relative}") from None
+        item["headroom"] = _apply_headroom(audio_path, attenuation_db=3.0)
+        item["sha256"] = _sha256(audio_path)
+        item["bytes"] = audio_path.stat().st_size
+    _write_json(generation_path, generation)
+
     segment_evidence: list[dict[str, Any]] = []
     for item in generation.get("segments", []):
         row = {
@@ -255,6 +306,15 @@ def run_project(
             master_path = output_dir / h2["timeline_dir"] / "voice.wav"
             h2["master_audio"] = _probe_audio(master_path)
             h2["master_technical_findings"] = _technical_findings(h2["master_audio"])
+            # H2's timeline builder intentionally appends 1.5 s of silence at
+            # the end of the master. Do not report that designed pad as a defect
+            # when the measured tail stays within a small decoder tolerance.
+            if 1.5 <= h2["master_audio"]["trailing_silence_s"] <= 1.65:
+                h2["master_technical_findings"] = [
+                    finding for finding in h2["master_technical_findings"]
+                    if not finding.startswith("Long trailing silence")
+                ]
+            h2["intentional_trailing_pad_s"] = 1.5
             blocks_path = output_dir / h2["timeline_dir"] / "blocks.json"
             lines_path = output_dir / h2["timeline_dir"] / "lines.json"
             words_path = output_dir / h2["timeline_dir"] / "words.json"
@@ -310,6 +370,7 @@ def run_project(
             "steps": QUALITY_STEPS,
             "threads": CPU_THREADS,
             "seed_policy": "Per speaker: fixed manifest seed",
+            "pre_h2_mastering": {"attenuation_db": 3.0, "peak_headroom": True},
         },
         "segment_count": len(segments),
         "generated_segments": int(generation.get("generated_segments", 0)),
