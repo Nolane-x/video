@@ -61,6 +61,12 @@ const audioPlan = (shotPlan as unknown as { audioPlan?: AudioPlan }).audioPlan;
 const clampInterp = (v: number, input: number[], output: number[]) =>
   interpolate(v, input, output, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
+const audioEnvelope = (frame: number, duration: number, maxFadeFrames = 18) => {
+  const edge = Math.min(maxFadeFrames, Math.floor(duration / 3));
+  if (edge < 1) return 1;
+  return clampInterp(frame, [0, edge, duration - edge, duration], [0, 1, 1, 0]);
+};
+
 const Window: React.FC<{ x: number; y: number; w?: number; h?: number; warm?: boolean }> = ({
   x, y, w = 80, h = 110, warm = false,
 }) => (
@@ -835,7 +841,7 @@ const MusicSlice: React.FC<{ file: string; from: number; duration: number; volum
   <Sequence from={from} durationInFrames={duration}>
     <Audio
       src={staticFile("audio/" + file + ".wav")}
-      volume={(f) => volume * clampInterp(f, [0, 18, Math.max(19, duration - 18), duration], [0, 1, 1, 0])}
+      volume={(f) => volume * audioEnvelope(f, duration, 18)}
     />
   </Sequence>
 );
@@ -844,7 +850,7 @@ const SoundCue: React.FC<{ file: string; from: number; duration: number; volume:
   <Sequence from={from} durationInFrames={duration}>
     <Audio
       src={staticFile("audio/" + file + ".wav")}
-      volume={(f) => volume * clampInterp(f, [0, Math.min(3, duration - 1), Math.max(4, duration - 3), duration], [0, 1, 1, 0])}
+      volume={(f) => volume * audioEnvelope(f, duration, 3)}
     />
   </Sequence>
 );
@@ -853,13 +859,13 @@ const NarrationSlice: React.FC<{ file: string; from: number; duration: number; v
   <Sequence from={from} durationInFrames={duration}>
     <Audio
       src={staticFile("audio/narration/" + file)}
-      volume={(f) => volume * clampInterp(f, [0, Math.min(8, duration - 1), Math.max(9, duration - 8), duration], [0, 1, 1, 0])}
+      volume={(f) => volume * audioEnvelope(f, duration, 8)}
     />
   </Sequence>
 );
 
 const AudioDesign: React.FC = () => {
-  const musicSegments = (shotPlan.musicArc || []).filter((segment) => segment.track !== "intentional-silence");
+  const musicSegments = (shotPlan.musicArc as { start: number; end: number; track: string; volume?: number }[]).filter((segment) => segment.track !== "intentional-silence");
   const plannedSoundCues = audioPlan?.soundCues;
   const narration = audioPlan?.narration || [];
 
