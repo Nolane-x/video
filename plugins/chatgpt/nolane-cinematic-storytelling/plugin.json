@@ -1,0 +1,30 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-cinematic-storytelling",
+  "version": "0.1.0",
+  "description": "Story, storyboard, cinematography and visual direction for cinematic explainers, documentary, education, emotional shorts and multi-genre AI video. Keeps narrative clarity, shot variety, action/contact, visual identity and text readability at the center.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "storytelling",
+    "storyboard",
+    "cinematography",
+    "creative-direction"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Story Studio",
+        "shortDescription": "Cinematic video direction",
+        "longDescription": "Story, storyboard, cinematography and visual direction for cinematic explainers, documentary, education, emotional shorts and multi-genre AI video. Keeps narrative clarity, shot variety, action/contact, visual identity and text readability at the center.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to help me create professional video in Nolane-x/video through GitHub Actions."
+      }
+    }
+  }
+}

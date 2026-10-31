@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-video-command-center",
+  "version": "0.1.0",
+  "description": "Single entry point for AI-first video production. Turns the creative brief into a workflow, selects the correct engine and skills, routes to specialist private plugins, uses the Nolane-x/video repository and GitHub Actions, then requires evidence-based visual/audio/caption QA before handoff.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "orchestration",
+    "ai-agent",
+    "github",
+    "motion",
+    "production"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Video Command Center",
+        "shortDescription": "Route all video production",
+        "longDescription": "Single entry point for AI-first video production. Turns the creative brief into a workflow, selects the correct engine and skills, routes to specialist private plugins, uses the Nolane-x/video repository and GitHub Actions, then requires evidence-based visual/audio/caption QA before handoff.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to help me create professional video in Nolane-x/video through GitHub Actions."
+      }
+    }
+  }
+}
