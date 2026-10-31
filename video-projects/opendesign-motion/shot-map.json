@@ -1,0 +1,273 @@
+{
+  "id": "opendesign-motion-rebuild-v3",
+  "reference": {
+    "filename": "preview.mp4",
+    "durationSeconds": 37.312,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "note": "User-supplied reference. Source video, source frames and soundtrack are not committed to the public repository."
+  },
+  "output": {
+    "durationFrames": 1119,
+    "durationSeconds": 37.3,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H.264",
+    "audio": "AAC stereo 48 kHz",
+    "visualIntent": "Reference-led reconstruction of original scene order, shot timing and visual language, with newly authored poster artwork, a detailed Launch Kit interface, variable typography, textured 3D and an original 115 BPM score."
+  },
+  "shots": [
+    {
+      "id": "S01",
+      "startFrame": 0,
+      "endFrame": 90,
+      "startSeconds": 0,
+      "endSeconds": 3,
+      "label": "Cloud prompt / first phrase",
+      "visuals": [
+        "layered blue-pink cloud horizon",
+        "editorial serif headline",
+        "translucent prompt input",
+        "typed Introducing OpenDesign Motion line",
+        "cursor and send affordance"
+      ],
+      "motion": [
+        "slow cloud parallax",
+        "input-card rise",
+        "character-by-character type-on",
+        "cursor movement and send press"
+      ],
+      "transitionOut": "prompt sends into oversized title"
+    },
+    {
+      "id": "S02",
+      "startFrame": 90,
+      "endFrame": 135,
+      "startSeconds": 3,
+      "endSeconds": 4.5,
+      "label": "Oversized OpenDesign MOTION title",
+      "visuals": [
+        "white Space Grotesk display lettering",
+        "soft atmospheric cloud backdrop",
+        "large compressed two-line hierarchy"
+      ],
+      "motion": [
+        "heavy type rises and scales",
+        "short camera push",
+        "title clears frame with accelerated exit"
+      ],
+      "transitionOut": "white wordmark collapses into radial mark"
+    },
+    {
+      "id": "S03",
+      "startFrame": 135,
+      "endFrame": 165,
+      "startSeconds": 4.5,
+      "endSeconds": 5.5,
+      "label": "Claude Motion brand reveal",
+      "visuals": [
+        "coral radial starburst mark",
+        "clean off-white editorial ground",
+        "Claude Motion wordmark"
+      ],
+      "motion": [
+        "radial mark rotates and scales in",
+        "wordmark reveals on a short stagger"
+      ],
+      "transitionOut": "cut to the positioning statement"
+    },
+    {
+      "id": "S04",
+      "startFrame": 165,
+      "endFrame": 225,
+      "startSeconds": 5.5,
+      "endSeconds": 7.5,
+      "label": "Open-source positioning statement",
+      "visuals": [
+        "white paper-like background",
+        "bold The open-source alternative headline",
+        "lime marker highlight",
+        "brand mark and Claude Motion name"
+      ],
+      "motion": [
+        "headline rises",
+        "lime highlight wipes beneath the key phrase",
+        "brand lockup resolves below"
+      ],
+      "transitionOut": "editorial paper surface opens into a deep poster wall"
+    },
+    {
+      "id": "S05",
+      "startFrame": 225,
+      "endFrame": 315,
+      "startSeconds": 7.5,
+      "endSeconds": 10.5,
+      "label": "Perspective poster gallery",
+      "visuals": [
+        "12 individually authored poster thumbnails",
+        "poster art across comic, clock, type, collage and geometric styles",
+        "four-column deep gallery wall"
+      ],
+      "motion": [
+        "gallery enters on a perspective camera move",
+        "posters drift independently",
+        "camera pans through the wall"
+      ],
+      "transitionOut": "a selected poster expands into the kinetic sequence"
+    },
+    {
+      "id": "S06",
+      "startFrame": 315,
+      "endFrame": 585,
+      "startSeconds": 10.5,
+      "endSeconds": 19.5,
+      "label": "Rapid 17-beat kinetic poster sequence",
+      "visuals": [
+        "1965 infinity-dots comic panel",
+        "poster-gallery rapid cuts: glitch eye, WORLD WIDE, MIND portal and concentric circular typography",
+        "MORRO editorial type, OUT. green poster and EASE kinetic graphic",
+        "NEVER / LINEAR typography",
+        "1889 antique clock illustration",
+        "motion films chalkboard/sketch scene",
+        "minimal toggle graphic",
+        "3.7 percent eye / iris artwork",
+        "1952 cut-out comic panel and extruded FUTURE type"
+      ],
+      "motion": [
+        "17 fast poster cuts at approximately 0.57 seconds each",
+        "type slams and mask-like reveals",
+        "eye, clock-hand and chalk-line motion",
+        "rotating ring typography",
+        "graphic push-ins with distinct visual grammar per poster"
+      ],
+      "transitionOut": "hard cut to a black negative-space statement"
+    },
+    {
+      "id": "S07",
+      "startFrame": 585,
+      "endFrame": 630,
+      "startSeconds": 19.5,
+      "endSeconds": 21,
+      "label": "Not just Opus 5.5",
+      "visuals": [
+        "near-black background",
+        "large cream Not just lettering",
+        "salmon Opus 5.5 highlight panel"
+      ],
+      "motion": [
+        "headline enters laterally",
+        "highlight chip settles with a small overshoot"
+      ],
+      "transitionOut": "colour transition into model / agent claim"
+    },
+    {
+      "id": "S08",
+      "startFrame": 630,
+      "endFrame": 765,
+      "startSeconds": 21,
+      "endSeconds": 25.5,
+      "label": "Any model / Any agent",
+      "visuals": [
+        "large editorial statement",
+        "distinct pastel colour fields",
+        "model and agent mark chips"
+      ],
+      "motion": [
+        "Any model resolves first",
+        "marks stagger in reading order",
+        "second statement changes to Any agent"
+      ],
+      "transitionOut": "last logo chip becomes the Launch Kit preview window"
+    },
+    {
+      "id": "S09",
+      "startFrame": 765,
+      "endFrame": 915,
+      "startSeconds": 25.5,
+      "endSeconds": 30.5,
+      "label": "Launch Kit interface and generated previews",
+      "visuals": [
+        "browser-like application frame",
+        "left prompt and direction form",
+        "model selector and send control",
+        "right preview viewport",
+        "antique clock, world typography, illustrated course character and mint website previews"
+      ],
+      "motion": [
+        "interface window scales into frame",
+        "prompt and model controls remain readable",
+        "four generated preview scenes change inside the same viewport"
+      ],
+      "transitionOut": "preview becomes the 3-2-1 countdown"
+    },
+    {
+      "id": "S10",
+      "startFrame": 915,
+      "endFrame": 975,
+      "startSeconds": 30.5,
+      "endSeconds": 32.5,
+      "label": "Launch Kit countdown 3 / 2 / 1",
+      "visuals": [
+        "same Launch Kit application chrome",
+        "dark navy / cobalt generated preview",
+        "three-dimensional beveled countdown numerals"
+      ],
+      "motion": [
+        "3, 2 and 1 swap at fixed intervals",
+        "numeric forms scale forward with perspective"
+      ],
+      "transitionOut": "countdown screen fractures into cube geometry"
+    },
+    {
+      "id": "S11",
+      "startFrame": 975,
+      "endFrame": 1059,
+      "startSeconds": 32.5,
+      "endSeconds": 35.3,
+      "label": "Textured rotating cube",
+      "visuals": [
+        "large rounded six-face 3D cube",
+        "individual poster-art textures on each face",
+        "play glyphs and dimensional bevels"
+      ],
+      "motion": [
+        "cube rotates across X and Y axes",
+        "gloss and shadow reveal each face",
+        "camera holds the cube as the hero"
+      ],
+      "transitionOut": "cube move resolves into the final brand lockup"
+    },
+    {
+      "id": "S12",
+      "startFrame": 1059,
+      "endFrame": 1119,
+      "startSeconds": 35.3,
+      "endSeconds": 37.3,
+      "label": "OpenDesign Motion end lockup",
+      "visuals": [
+        "compact app tile and play mark",
+        "OpenDesign Motion wordmark",
+        "short final tagline"
+      ],
+      "motion": [
+        "mark and wordmark assemble",
+        "camera push eases out",
+        "clean end-card hold"
+      ],
+      "transitionOut": "final lockup holds through the last frame"
+    }
+  ],
+  "qualityGates": [
+    "Full render must pass ffprobe at 1920x1080 and 30fps with duration 37.3s ±0.12s.",
+    "The opening title, prompt text, positioning line and model names must be legible at native resolution.",
+    "All 12 kinetic poster beats must appear in the correct order and stay within their shot windows.",
+    "The gallery wall must read as individual designed art rather than flat placeholder cards.",
+    "The Launch Kit is a coherent interface: prompt panel, model choice, preview viewport and consistent frame across preview changes.",
+    "Countdown numerals remain centered and do not collide with the UI frame.",
+    "The 3D cube has a stable silhouette, visible face depth, coherent perspective and no face flicker.",
+    "Audio beat grid and scene transitions align to the 115 BPM composition; loudness and true peak are measured.",
+    "Review the complete moving MP4 plus 1fps/2fps contact sheets; a green workflow is only a technical gate."
+  ]
+}

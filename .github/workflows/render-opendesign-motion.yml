@@ -1,0 +1,115 @@
+name: Render OpenDesign Motion reconstruction
+
+on:
+  push:
+    branches:
+      - feature/opendesign-motion-rebuild
+    paths:
+      - "video-projects/remotion/**"
+      - "video-projects/opendesign-motion/**"
+      - ".agents/skills/motion-graphics-production/**"
+      - "tools/video/generate_opendesign_score.py"
+      - ".github/workflows/render-opendesign-motion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opendesign-motion-rebuild
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: video-projects/remotion
+    steps:
+      - name: Check out exact source commit
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Remotion dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate original beat-led soundtrack
+        run: python ../../tools/video/generate_opendesign_score.py --out public/audio/opendesign-motion-score.wav
+
+      - name: Typecheck project
+        run: npm run typecheck
+
+      - name: Render 1080p 30fps motion design
+        run: npx remotion render src/index.ts OpenDesignMotion out/opendesign-motion-raw.mp4 --codec=h264 --crf=16 --concurrency=2
+
+      - name: Install FFmpeg and master audio
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -hide_banner -loglevel error -y -i out/opendesign-motion-raw.mp4 \
+            -af "loudnorm=I=-14:TP=-1.5:LRA=9" -c:v copy -c:a aac -b:a 256k -ar 48000 -ac 2 \
+            -movflags +faststart out/opendesign-motion.mp4
+
+      - name: Validate master and create review sheets
+        run: |
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json out/opendesign-motion.mp4 | tee out/metadata.json
+          python - <<'PY'
+          import json
+          with open("out/metadata.json", encoding="utf-8") as f:
+              meta = json.load(f)
+          video = next((s for s in meta["streams"] if s.get("codec_type") == "video"), None)
+          audio = next((s for s in meta["streams"] if s.get("codec_type") == "audio"), None)
+          duration = float(meta["format"]["duration"])
+          assert video is not None and audio is not None, "missing audio/video stream"
+          assert (video.get("width"), video.get("height")) == (1920, 1080), f"wrong size: {video}"
+          assert video.get("r_frame_rate") == "30/1", f"wrong frame rate: {video.get('r_frame_rate')}"
+          assert audio.get("codec_name") == "aac", f"wrong audio codec: {audio.get('codec_name')}"
+          assert audio.get("sample_rate") == "48000" and audio.get("channels") == 2, "wrong audio format"
+          assert abs(duration - 37.3) < 0.12, f"wrong duration: {duration:.3f}s"
+          print(f"Validated {duration:.3f}s | 1920x1080 | 30fps | AAC stereo 48kHz")
+          PY
+          ffmpeg -hide_banner -loglevel error -y -i out/opendesign-motion.mp4 -vf "fps=1,scale=480:-1,tile=5x8:padding=12:margin=12" -frames:v 1 out/contact-sheet-1fps.jpg
+          ffmpeg -hide_banner -loglevel error -y -i out/opendesign-motion.mp4 -vf "fps=2,scale=360:-1,tile=5x15:padding=10:margin=10" -frames:v 1 out/contact-sheet-2fps.jpg
+          ffmpeg -hide_banner -loglevel info -i out/opendesign-motion.mp4 -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
+          sha256sum out/opendesign-motion.mp4 | tee out/SHA256SUMS.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          report = Path("out/audio-loudness.txt").read_text(encoding="utf-8", errors="replace")
+          integrated = re.search(r"Integrated loudness:\s*I:\s*(-?\d+(?:\.\d+)?) LUFS", report, re.S)
+          peak = re.search(r"True peak:\s*Peak:\s*(-?\d+(?:\.\d+)?) dBFS", report, re.S)
+          if not integrated or not peak:
+              raise SystemExit("Could not parse EBU R128 integrated loudness / true peak")
+          lufs, true_peak = float(integrated.group(1)), float(peak.group(1))
+          print(f"Audio: {lufs:.1f} LUFS integrated; {true_peak:.1f} dBFS true peak")
+          if not -15.2 <= lufs <= -12.8:
+              raise SystemExit(f"Loudness outside -14 ±1.2 LUFS: {lufs:.1f}")
+          if true_peak > -1.0:
+              raise SystemExit(f"True peak exceeds -1.0 dBTP: {true_peak:.1f}")
+          PY
+
+      - name: Upload master and QA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: opendesign-motion-reconstruction
+          path: |
+            video-projects/remotion/out/opendesign-motion.mp4
+            video-projects/remotion/out/contact-sheet-1fps.jpg
+            video-projects/remotion/out/contact-sheet-2fps.jpg
+            video-projects/remotion/out/metadata.json
+            video-projects/remotion/out/audio-loudness.txt
+            video-projects/remotion/out/SHA256SUMS.txt
+            video-projects/opendesign-motion/shot-map.json
+          if-no-files-found: error
+          retention-days: 90
