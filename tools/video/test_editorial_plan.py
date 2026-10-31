@@ -142,6 +142,36 @@ class EditorialPlanTests(unittest.TestCase):
         report = evaluate_plan(plan)
         self.assertIn("audio.music-arc-invalid", {x["code"] for x in report["findings"]})
 
+    def test_shot_timeline_gap_is_a_hard_blocker(self):
+        plan = valid_plan()
+        plan["shots"][1]["start"] = 3
+        plan["shots"][1]["end"] = 8
+        plan["shots"][2]["start"] = 8
+        report = evaluate_plan(plan)
+        codes = {x["code"] for x in report["findings"]}
+        self.assertIn("timeline.gap", codes)
+        self.assertEqual(report["status"], "BLOCKED")
+
+    def test_voiceover_requires_timed_audio_assets(self):
+        plan = valid_plan()
+        plan["creativeBrief"]["narrationPolicy"] = "voiceover"
+        plan["creativeBrief"]["speechPlan"] = "Vietnamese narration, one phrase for each story beat"
+        report = evaluate_plan(plan)
+        self.assertIn("audio.missing-timed-narration", {x["code"] for x in report["findings"]})
+
+
+    def test_remotion_renderer_uses_shot_plan_time_ranges_not_fixed_five_seconds(self):
+        source = (
+            ROOT / "video-projects/remotion/src/OneMoreScroll.tsx"
+        ).read_text(encoding="utf-8")
+        self.assertIn("startFrame: Math.round(entry.start * FPS)", source)
+        self.assertIn("endFrame: Math.round(entry.end * FPS)", source)
+        self.assertIn("candidate.endFrame", source)
+        self.assertNotIn("SHOT_FRAMES", source)
+        self.assertIn("shotPlan.musicArc", source)
+        self.assertIn("audioPlan?.narration", source)
+        self.assertIn("plannedSoundCues", source)
+
     def test_real_one_more_scroll_plan_is_flagged_not_misrepresented_as_approved(self):
         path = ROOT / "video-projects/remotion/public/story/shots.json"
         plan = json.loads(path.read_text(encoding="utf-8"))
