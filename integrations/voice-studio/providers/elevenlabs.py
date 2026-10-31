@@ -49,10 +49,14 @@ def _language_aliases(language: str) -> set[str]:
     aliases = {
         "vi": {"vi", "vietnamese"},
         "vi-vn": {"vi", "vietnamese"},
+        "vietnamese": {"vi", "vietnamese"},
         "en": {"en", "english"},
         "en-us": {"en", "english"},
+        "english": {"en", "english"},
         "ja": {"ja", "japanese"},
+        "japanese": {"ja", "japanese"},
         "zh": {"zh", "chinese"},
+        "chinese": {"zh", "chinese"},
     }
     return aliases.get(value, {value.split("-")[0], value})
 
