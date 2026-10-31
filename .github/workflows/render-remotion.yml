@@ -45,6 +45,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Editorial preflight — block unready creative plans before dependency installs
+        run: |
+          python ../../tools/video/evaluate_editorial_plan.py public/story/shots.json --output out/editorial-plan-report.json --strict
+
       - name: Install Remotion dependencies
         run: npm install --no-audit --no-fund
 
@@ -77,10 +81,6 @@ jobs:
 
       - name: Validate storyboard schema and timing
         run: python ../../tools/video/validate_story.py public/story/shots.json
-
-      - name: Block rendering when editorial plan is not ready
-        run: |
-          python ../../tools/video/evaluate_editorial_plan.py public/story/shots.json --output out/editorial-plan-report.json --strict
 
       - name: Typecheck
         run: npm run typecheck
