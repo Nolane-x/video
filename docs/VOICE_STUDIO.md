@@ -15,9 +15,20 @@ It renders ten KorvaTTS Vietnamese presets across four scripts, performs
 FFprobe/FFmpeg checks, and uploads WAVs, blind audition pages and reports as a
 GitHub Actions artifact. No local workstation is required for this baseline.
 
-This CPU lane is explicitly a preset-voice baseline, not the full VoiceStudio
-voice-design service. Custom VoiceStudio engines need a separate Actions lane
-with compute/storage matching their actual model requirements.
+For actual video narration, the separate
+[Voice Studio Actions production renderer](../.github/workflows/voice-studio-actions-project.yml)
+takes a committed multi-character manifest, creates per-line audio, checks the
+audio files, and runs the real H2 `prep_voice.py` timing stage to export
+`voice.wav`, `blocks.json`, `lines.json`, `words.json` and
+`transcript.txt`. The example project includes four stable characters and
+ten dialogue segments. Audio and timeline files are uploaded as a workflow
+artifact.
+
+These Actions CPU lanes intentionally use KorvaTTS's released Vietnamese
+presets; they are not the full VoiceStudio custom voice-design service. A
+custom VoiceStudio engine still needs its own Actions lane with compute and
+storage matched to its model requirements. It must not silently fall back to a
+developer's workstation.
 
 ## Core workflows
 
