@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import Any
 
 BASE = "https://www.eso.org"
-FEED_CATEGORIES = ("esocast", "cosmology", "exoplanets", "milky-way", "black-holes")
-MAX_FEEDS = 5
+FEED_CATEGORIES = ("esocast", "cosmology", "exoplanets", "fulldome", "stars", "galaxies")
+MAX_FEEDS = 6
 MAX_ITEMS_PER_FEED = 40
 MAX_PAGE_REQUESTS = 72
 MAX_FEED_BYTES = 2 * 1024 * 1024
