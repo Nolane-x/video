@@ -11,6 +11,7 @@ on:
       - ".github/workflows/voice-studio-headless-smoke.yml"
       - ".github/workflows/voice-studio-actions-lab.yml"
       - ".github/workflows/voice-studio-actions-project.yml"
+      - ".github/workflows/voice-studio-supertonic-cpu.yml"
       - ".github/workflows/voice-studio-headless-smoke.yml"
   push:
     branches: [main]
@@ -49,6 +50,12 @@ jobs:
           test -f integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py
           test -f integrations/voice-studio/tests/test_prepare_voicestudio_cpu_dockerfile.py
           test -f .github/workflows/voice-studio-headless-smoke.yml
+          test -f .github/workflows/voice-studio-supertonic-cpu.yml
+          test -f integrations/voice-studio/voicestudio_engine_actions_benchmark.py
+          test -f integrations/voice-studio/tests/test_voicestudio_engine_actions_benchmark.py
+          grep -q 'accept_openrail_m' .github/workflows/voice-studio-supertonic-cpu.yml
+          grep -q -- '--accept-model-license' .github/workflows/voice-studio-supertonic-cpu.yml
+          grep -q -- '--install-supertonic' .github/workflows/voice-studio-supertonic-cpu.yml
           grep -q 'submodules: true' .github/workflows/voice-studio-headless-smoke.yml
           grep -q 'GPU_FLAVOR=cpu' .github/workflows/voice-studio-headless-smoke.yml
           grep -q 'faa5294359f23c911972ffe6d27785c50c67097b' .github/workflows/voice-studio-headless-smoke.yml
