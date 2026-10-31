@@ -12,13 +12,18 @@ Separate measurable defects from subjective vocal quality. A technically valid W
 ## Execution policy: GitHub Actions is the render worker
 
 For production benchmarks and audio generation, use the repository's
-GitHub Actions workflow
-`.github/workflows/voice-studio-actions-lab.yml`. Inspect the resulting
-artifact and workflow summary; do not redirect model inference to a developer
-PC just because an Actions lane is missing or underpowered. The current CPU
-lane renders the ten KorvaTTS presets across four Vietnamese scripts and
-performs FFprobe/FFmpeg QA. It does not exercise a custom VoiceStudio voice
-design engine. Record that scope explicitly.
+GitHub Actions workflows:
+
+- `.github/workflows/voice-studio-actions-lab.yml` renders the ten KorvaTTS
+  presets against four fixed Vietnamese scripts and performs FFprobe/FFmpeg QA.
+- `.github/workflows/voice-studio-actions-project.yml` synthesizes a full
+  multi-character project, audits individual WAVs, and runs the real H2
+  `prep_voice.py` timing stage to produce the voice master and timestamps.
+
+Inspect the resulting artifacts and workflow summaries; do not redirect model
+inference to a developer PC just because an Actions lane is missing or
+underpowered. The current CPU lanes use KorvaTTS's preset voices; they do not
+exercise VoiceStudio custom voice design. Record that scope explicitly.
 
 ## Three distinct evidence layers
 
