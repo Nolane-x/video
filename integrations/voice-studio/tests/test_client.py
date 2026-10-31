@@ -131,9 +131,8 @@ class VoiceStudioClientTests(unittest.TestCase):
                       b'name="design_recipe"', b'name="engine"', b'name="seed"'):
             self.assertIn(field, body)
         import re
-        import ast
         match = re.search(
-            rb'name="vd_states"\\r\\n\\r\\n(.*?)\\r\\n', body, re.S
+            rb'name="vd_states"\r\n\r\n(.*?)\r\n', body, re.S
         )
         self.assertIsNotNone(match)
         picks = json.loads(match.group(1).decode("utf-8"))
