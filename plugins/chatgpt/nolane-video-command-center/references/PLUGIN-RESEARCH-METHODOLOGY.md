@@ -1,6 +1,6 @@
-# Specialist source and verification policy v0.7.6
+# Specialist source and verification policy v0.7.8
 
-The registry contains 32 separate specialist plugins with recorded source or official documentation foundations. Source categories and runtime licenses are not interchangeable:
+The registry contains **37 separate specialist plugins** with recorded source or official documentation foundations. Source categories and runtime licenses are not interchangeable:
 - **First-party or project-maintained skill packs** should be aligned to the exact release/commit recorded in that plugin.
 - **Community skill packs** can use MIT, CC0, CC BY or other terms. Preserve author, source commit, selected files, exact license and attribution/change notice. Do not call CC BY skill text MIT because source code in the same repo has MIT license.
 - **Official technical documentation** is not itself an agent skill. When a plugin relies on docs rather than a community SKILL.md, label it documentation-derived.
