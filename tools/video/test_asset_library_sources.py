@@ -163,9 +163,9 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.LAZYTEXTURES_MAX_ARCHIVE_BYTES, 64 * 1024 * 1024)
         self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
         self.assertGreaterEqual(library.LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
-        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 32)
-        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 120, "videos": 64, "audio": 40})
-        self.assertGreaterEqual(library.USGS_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
+        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 40)
+        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 120, "videos": 96, "audio": 60})
+        self.assertEqual(library.USGS_TOTAL_MAX_BYTES, 13 * 1024 * 1024 * 1024)
         self.assertEqual(library.OPENGAMEART_SELECTION_CAPS, {"2d": 60, "3d": 60, "textures": 48, "sfx": 36, "music": 36})
         self.assertEqual(library.OPENGAMEART_SEARCH_PAGES_PER_TYPE, 10)
         self.assertEqual(library.OPENGAMEART_MAX_ITEM_PAGES_PER_TYPE, 120)
@@ -1165,8 +1165,8 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         self.assertIn("licenseurl:http*cc0*", query["q"][0])
         self.assertEqual(query["start"], ["100"])
         self.assertEqual(query["sort[]"], ["identifier asc"])
-        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["prelinger"], 4 * 1024 * 1024 * 1024)
-        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["nasa"], 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["prelinger"], 6 * 1024 * 1024 * 1024)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["nasa"], 6 * 1024 * 1024 * 1024)
         with self.assertRaises(ValueError):
             library.internet_archive_search_url("unknown", 0)
         with self.assertRaises(ValueError):
