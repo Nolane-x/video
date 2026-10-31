@@ -354,7 +354,7 @@ def parse_nps_media_page_credit(page_html: str) -> tuple[str, bool]:
         return "", False
     credit_html = re.sub(r"<[^>]+>", " ", match.group(1))
     credit = _clean_text(credit_html, 300)
-    if not credit or NPS_COPYRIGHT_MARK_RE.search(raw):
+    if not credit or NPS_COPYRIGHT_MARK_RE.search(credit_html):
         return credit, False
     return credit, "nps" in credit.casefold()
 
