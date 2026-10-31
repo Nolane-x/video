@@ -654,7 +654,7 @@
       "license_url": "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
       "verified_page_license": true,
       "bundling": "bounded-five-park-nps-public-domain-broll-import-after-collection-notice-verification-direct-media-path-allowlist-and-video-only-remux",
-      "note": "The importer begins only from five named NPS park B-roll indexes whose content explicitly states Public Domain use. It follows same-park B-roll/clip pages and NPS media-view pages linked from those indexes; direct media downloads are restricted to exact HTTPS www.nps.gov/nps-audiovideo/audiovideo or park-scoped legacy MP4 paths. Select the highest available 1080p/720p rendition. Validate redirects, MIME, ISO-BMFF MP4 signature, file/aggregate size ceilings and calculate a SHA-256 after download. NPS does not publish a source checksum in these pages, so the computed hash is not misrepresented as a source-provided checksum. All audio streams are stripped to avoid redistributing an uncertain soundtrack, and ffprobe confirms zero audio streams. Preserve any explicit park credit verbatim (Death Valley's notice currently spells 'Courtsey' that way); otherwise NPS attribution is recommended. Do not imply NPS endorsement or use the protected arrowhead. Review identifiable people, private property and third-party marks before commercial/promotional use. Public Domain is not labelled CC0. Supplemental NPGallery discovery is candidate-only; each item detail page must reconfirm Full Public Domain rights, MP4 video type, NPS credit and matching asset ID before the exact original MP4 endpoint is downloaded. Audio is stripped and source hashes are deduplicated.",
+      "note": "The importer begins only from five named NPS park B-roll indexes whose content explicitly states Public Domain use. It follows same-park B-roll/clip pages and NPS media-view pages linked from those indexes; direct media downloads are restricted to exact HTTPS www.nps.gov/nps-audiovideo/audiovideo or park-scoped legacy MP4 paths. Select the highest available 1080p/720p rendition. Validate redirects, MIME, ISO-BMFF MP4 signature, file/aggregate size ceilings and calculate a SHA-256 after download. NPS does not publish a source checksum in these pages, so the computed hash is not misrepresented as a source-provided checksum. All audio streams are stripped to avoid redistributing an uncertain soundtrack, and ffprobe confirms zero audio streams. Preserve any explicit park credit verbatim (Death Valley's notice currently spells 'Courtsey' that way); otherwise NPS attribution is recommended. Do not imply NPS endorsement or use the protected arrowhead. Review identifiable people, private property and third-party marks before commercial/promotional use. Public Domain is not labelled CC0. Supplemental NPGallery discovery is candidate-only; each item detail page must reconfirm Full Public Domain rights, MP4 video type, NPS credit and matching asset ID before the exact original MP4 endpoint is downloaded. Audio is stripped and source hashes are deduplicated. Search discovery now runs three bounded curated terms (b-roll, video and footage), interleaves candidates by relevance and deduplicates by AssetID before individual detail-page rights revalidation.",
       "supplemental_npgallery_search": "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=b-roll",
       "item_rights_filter": {
         "resource_type": "Video",
@@ -674,7 +674,18 @@
         "max_source_file_bytes": 367001600,
         "max_aggregate_source_bytes": 4294967296,
         "allocation": "five park indexes are capped at three clips each; NPGallery may fill remaining video slots"
-      }
+      },
+      "supplemental_npgallery_searches": [
+        "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=b-roll",
+        "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=video",
+        "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=footage"
+      ],
+      "npgallery_discovery_terms": [
+        "b-roll",
+        "video",
+        "footage"
+      ],
+      "preliminary_unique_candidate_count": 39
     },
     {
       "id": "internet-archive-prelinger-nasa-moving-images",
