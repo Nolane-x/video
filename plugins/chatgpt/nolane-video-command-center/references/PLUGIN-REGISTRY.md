@@ -1,4 +1,4 @@
-# Nolane Video Command Center — Specialist Plugin Registry v0.7.8
+# Nolane Video Command Center — Specialist Plugin Registry v0.7.9
 
 The Command Center includes 29 internal skills and is the normal single entry point. The 37 specialist plugins below are separate private ChatGPT plugins. They are source-backed specialist packages; each records its source basis and relevant license/provenance. **The Command Center cannot invisibly activate another private plugin.** Open the relevant link / switch to that plugin for specialist execution, or keep the work inside the internal skills when they are sufficient.
 
