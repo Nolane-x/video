@@ -113,7 +113,7 @@ def _rating_html(rows: list[dict[str, Any]], *, blind: bool, provider: str) -> s
         label = row.get("blind_label") if blind else row.get("name", "Voice")
         safe_label = html.escape(str(label or row.get("id", "Voice")))
         metadata = "Blind listening candidate" if blind else html.escape(
-            f"{row.get('type', provider)} · {row.get('language') or ''}"
+            f"{row.get('provider', provider)} · {row.get('type', provider)} · {row.get('language') or ''}"
         )
         if row.get("audio_file"):
             audio = f'<audio controls preload="none" src="{html.escape(row["audio_file"], quote=True)}"></audio>'
@@ -191,10 +191,11 @@ def run_benchmark(
     delay: float = 0.5,
     client: VoiceStudioClient | None = None,
 ) -> dict[str, Any]:
-    if provider in {"google", "elevenlabs"} and not allow_cloud:
-        raise ValueError(
-            f"{provider} synthesis can incur charges; pass --allow-cloud to confirm the calls"
-        )
+    valid_providers = {"voicestudio", "korva", "google", "elevenlabs", "all"}
+    if provider not in valid_providers:
+        raise ValueError(f"Unsupported provider selection: {provider}")
+    if provider == "all" and not engine:
+        raise ValueError("Provider-wide benchmark needs the exact VoiceStudio --engine ID")
     if provider == "voicestudio" and not engine:
         raise ValueError("VoiceStudio benchmark needs the exact installed --engine ID")
     if not text.strip() or len(text) > 4096:
@@ -207,15 +208,39 @@ def run_benchmark(
     output_dir.mkdir(parents=True, exist_ok=True)
     audio_dir = output_dir / "audio"
     audio_dir.mkdir(parents=True, exist_ok=True)
-    candidates = _candidates(provider, language, client)[:limit]
+    requested_providers = (
+        ["voicestudio", "korva", "google", "elevenlabs"]
+        if provider == "all" and allow_cloud
+        else ["voicestudio", "korva"]
+        if provider == "all"
+        else [provider]
+    )
+    candidates: list[dict[str, Any]] = []
+    catalogue_errors: list[dict[str, str]] = []
+    for provider_name in requested_providers:
+        try:
+            provider_candidates = _candidates(provider_name, language, client)[:limit]
+            for candidate in provider_candidates:
+                tagged = dict(candidate)
+                tagged["_provider"] = provider_name
+                candidates.append(tagged)
+        except Exception as exc:
+            catalogue_errors.append({
+                "provider": provider_name,
+                "error": f"{type(exc).__name__}: {exc}",
+            })
     if not candidates:
-        raise RuntimeError(f"No {provider} voices were found for language {language}")
+        details = "; ".join(f"{row['provider']}: {row['error']}" for row in catalogue_errors)
+        raise RuntimeError(
+            f"No voices were found for language {language}" + (f" ({details})" if details else "")
+        )
     rows: list[dict[str, Any]] = []
     for index, candidate in enumerate(candidates, 1):
+        candidate_provider = str(candidate.get("_provider") or provider)
         voice_id = str(candidate.get("id") or "")
         name = str(candidate.get("name") or voice_id)
         blind_label = f"Candidate {index:02d}"
-        extension = ".mp3" if provider == "elevenlabs" else ".wav"
+        extension = ".mp3" if candidate_provider == "elevenlabs" else ".wav"
         filename = (
             f"{index:03d}-{blind_label.replace(' ', '-')}{extension}"
             if blind else f"{index:03d}-{_slug(voice_id)}{extension}"
@@ -226,14 +251,14 @@ def run_benchmark(
             "id": voice_id,
             "name": name,
             "blind_label": blind_label,
-            "provider": provider,
-            "engine": engine,
+            "provider": candidate_provider,
+            "engine": engine if candidate_provider == "voicestudio" else None,
             "language": language,
             "status": "pending",
         }
         try:
             path = _synthesize(
-                provider, candidate, text, destination,
+                candidate_provider, candidate, text, destination,
                 engine=engine, language=language, seed=seed, client=client,
             )
             if not path.is_file() or path.stat().st_size <= 44:
@@ -256,6 +281,9 @@ def run_benchmark(
     report = {
         "schema_version": 1,
         "provider": provider,
+        "providers_included": requested_providers,
+        "cloud_enabled": allow_cloud,
+        "catalogue_errors": catalogue_errors,
         "engine": engine,
         "language": language,
         "blind": blind,
@@ -280,11 +308,12 @@ def run_benchmark(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provider", required=True,
-                        choices=("voicestudio", "korva", "google", "elevenlabs"))
+                        choices=("voicestudio", "korva", "google", "elevenlabs", "all"))
     parser.add_argument("--text-file", required=True, type=Path)
     parser.add_argument("--language", default="vi")
     parser.add_argument("--engine", help="Exact VoiceStudio engine ID (provider=voicestudio)")
-    parser.add_argument("--limit", type=int, default=20)
+    parser.add_argument("--limit", type=int, default=20,
+                        help="Maximum candidates per provider when --provider all is used")
     parser.add_argument("--seed", type=int, default=4200)
     parser.add_argument("--output", type=Path, default=Path("out/provider-voice-benchmark"))
     parser.add_argument("--no-blind", action="store_true")
