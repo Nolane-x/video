@@ -89,9 +89,11 @@ jobs:
               assert data.get('$schema') == 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json', manifest
               assert data.get('name') == manifest.parent.name, manifest
           for skill in root.glob('.agents/skills/video-*/SKILL.md'):
-              text = skill.read_text(encoding='utf-8')
-              assert text.startswith('---\\nname: '), skill
-              assert '\\ndescription: ' in text.split('---', 2)[1], skill
+              lines = skill.read_text(encoding='utf-8').splitlines()
+              assert len(lines) >= 4 and lines[0] == '---', skill
+              assert lines[1].startswith('name: '), skill
+              assert lines[2].startswith('description: '), skill
+              assert lines[3] == '---', skill
           print('Plugin manifests and repo video skills validated.')
           PY
 
