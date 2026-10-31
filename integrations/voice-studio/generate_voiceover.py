@@ -94,7 +94,8 @@ def validate_manifest(data: dict[str, Any]) -> list[dict[str, Any]]:
         item["voice"] = str(item.get("voice") or "default")
         item["text"] = text.strip()
         item["language"] = str(item.get("language") or data.get("language") or "vi")
-        item["engine"] = str(item.get("engine") or data.get("engine") or "omnivoice")
+        default_engine = "korva-onnx" if item["provider"] == "korva" else "omnivoice"
+        item["engine"] = str(item.get("engine") or data.get("engine") or default_engine)
         item["speed"] = float(item.get("speed", data.get("speed", 1.0)))
         speed_min, speed_max = (0.5, 2.0) if item["provider"] == "korva" else (0.7, 1.2) if item["provider"] == "elevenlabs" else (0.25, 4.0)
         if not speed_min <= item["speed"] <= speed_max:
