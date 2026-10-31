@@ -278,7 +278,10 @@ def _write_delivery_readme(output_dir: Path, report: dict[str, Any]) -> None:
         f"- Dialogue segments: {report.get('generated_segments')}/{report.get('segment_count')}",
         "- Master audio: h2-project/timeline/voice.wav",
         "- H2 timeline: h2-project/timeline/blocks.json, lines.json, words.json",
-        f"- Caption file count: {len(report.get('captions', {}).get('outputs', {}))}",
+        f"- Caption file count: {len(report.get('captions', {}).get('outputs', {})) + len(report.get('captions', {}).get('word_timed', {}).get('files', {}))}",
+        f"- Subtitle cues: {report.get('captions', {}).get('word_timed_cue_count', 0)} word-timed / {report.get('captions', {}).get('sentence_cue_count', 0)} sentence-level",
+        f"- Speaker cast report: {report.get('voice_cast_report', {}).get('path', 'missing')}",
+        "- Integrity manifest: artifact-manifest.json (SHA-256 for every other delivered file)",
         "",
         "## Handoff",
         "",
@@ -685,12 +688,18 @@ def run_project(
             "A human must listen to the WAVs and H2 voice.wav before approving the cast.",
         ],
     }
-    _write_json(output_dir / "actions-voice-project-report.json", result)
     if status == "complete":
         _write_delivery_readme(output_dir, result)
-    artifact_manifest = _write_artifact_manifest(output_dir, result)
-    result["artifact_manifest_summary"] = artifact_manifest
+    file_count = sum(
+        path.is_file() and path.name != "artifact-manifest.json"
+        for path in output_dir.rglob("*")
+    )
+    result["artifact_manifest_summary"] = {
+        "path": "artifact-manifest.json",
+        "file_count": file_count,
+    }
     _write_json(output_dir / "actions-voice-project-report.json", result)
+    _write_artifact_manifest(output_dir, result)
     return result
 
 
