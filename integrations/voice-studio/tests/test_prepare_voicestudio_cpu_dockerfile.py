@@ -10,17 +10,22 @@ from prepare_voicestudio_cpu_dockerfile import transform_dockerfile
 
 class PrepareVoiceStudioCpuDockerfileTests(unittest.TestCase):
     def source(self):
-        return """ARG BASE_IMAGE=pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
-FROM ${BASE_IMAGE} AS runtime
-COPY deploy/torch-constraints.txt ./deploy/torch-constraints.txt
-COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt
-RUN uv pip install --python \"$(command -v python3)\" --no-cache .
-ARG GPU_FLAVOR=cuda
-RUN python3 -c \"import os, torch, torchaudio, torchvision; \
-    flavor = os.environ['GPU_FLAVOR']; \
-    accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda; \
-    assert accel\"
-"""
+        # Keep real Dockerfile continuation characters. A backslash at the
+        # end of a normal Python triple-quoted line would escape the newline.
+        lines = [
+            "ARG BASE_IMAGE=pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime",
+            "FROM \${BASE_IMAGE} AS runtime",
+            "COPY deploy/torch-constraints.txt ./deploy/torch-constraints.txt",
+            "COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt",
+            'RUN uv pip install --python "$(command -v python3)" --no-cache .',
+            "ARG GPU_FLAVOR=cuda",
+            'RUN python3 -c "import os, torch, torchaudio, torchvision; ' + chr(92),
+            "    flavor = os.environ['GPU_FLAVOR']; " + chr(92),
+            "    accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda; " + chr(92),
+            "    assert accel, 'GPU runtime expected'",
+            '"',
+        ]
+        return "\n".join(lines) + "\n"
 
     def test_adds_official_cpu_wheels_and_cpu_hardware_guard(self):
         transformed = transform_dockerfile(self.source())
