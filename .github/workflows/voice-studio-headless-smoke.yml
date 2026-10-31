@@ -32,7 +32,7 @@ jobs:
       - name: Checkout video repo and pinned VoiceStudio submodule
         uses: actions/checkout@v7
         with:
-          submodules: recursive
+          submodules: true
           persist-credentials: false
 
       - name: Verify exact VoiceStudio fork revision
