@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from evaluate_editorial_plan import evaluate_plan
+from evaluate_editorial_plan import evaluate_plan, requires_motion_proof
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -177,16 +177,24 @@ class EditorialPlanTests(unittest.TestCase):
         self.assertIn("audioPlan?.narration", source)
         self.assertIn("plannedSoundCues", source)
 
-    def test_real_one_more_scroll_plan_is_flagged_not_misrepresented_as_approved(self):
+    def test_revised_one_more_scroll_plan_is_ready_for_preview_not_release(self):
         path = ROOT / "video-projects/remotion/public/story/shots.json"
         plan = json.loads(path.read_text(encoding="utf-8"))
         report = evaluate_plan(plan)
-        codes = {item["code"] for item in report["findings"]}
-        self.assertEqual(report["status"], "BLOCKED")
-        self.assertIn("pacing.uniform-grid", codes)
-        self.assertIn("visual.template-dominance", codes)
-        self.assertIn("visual.shot-language-incomplete", codes)
-        self.assertIn("brief.audience", codes)
+        self.assertEqual(report["status"], "PLAN_READY_FOR_RENDER")
+        self.assertEqual(report["severityCounts"]["P0"], 0)
+        self.assertEqual(report["severityCounts"]["P1"], 0)
+        self.assertEqual(report["metrics"]["shotCount"], 31)
+        self.assertEqual(report["metrics"]["durationSeconds"], 155)
+        self.assertFalse(report["metrics"]["uniformDurationGrid"])
+        self.assertGreaterEqual(report["metrics"]["cameraLanguageCoverage"], 0.80)
+        self.assertTrue(any("never a production release" in item for item in report["limitations"]))
+
+    def test_message_state_word_open_is_not_a_physical_action(self):
+        self.assertFalse(requires_motion_proof("The last message remains open on the phone; no reply appears."))
+
+    def test_opening_a_door_is_a_contact_action(self):
+        self.assertTrue(requires_motion_proof("The protagonist opens the café door and steps inside."))
 
 
 if __name__ == "__main__":
