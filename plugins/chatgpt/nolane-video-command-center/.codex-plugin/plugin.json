@@ -9,7 +9,7 @@
     "shortDescription": "29 core skills + 37 specialists"
   },
   "name": "nolane-video-command-center",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "description": "The single AI-first front door for Nolane video production. Includes 29 internal skills and an explicit routing map for 37 separately activated specialist plugins.",
   "author": {
     "name": "Nolane Studio"
