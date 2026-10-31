@@ -389,10 +389,10 @@ def run_benchmark(
                             "sha256": digest,
                             "cache_hit": True,
                         })
-                        if previous.get("asr_intelligibility_proxy"):
+                        if asr and (previous.get("asr_intelligibility_proxy") or {}).get("status") == "available":
                             row["asr_intelligibility_proxy"] = previous["asr_intelligibility_proxy"]
                         reused = True
-                        if asr and not row.get("asr_intelligibility_proxy"):
+                        if asr and (row.get("asr_intelligibility_proxy") or {}).get("status") != "available":
                             try:
                                 transcript = client.transcribe(destination, language=language)
                                 row["asr_intelligibility_proxy"] = compare_text(text, transcript)
