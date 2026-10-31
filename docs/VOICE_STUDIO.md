@@ -17,6 +17,9 @@ Start with the full integration guide:
   stage: integrations/voice-studio/generate_voiceover.py
 - Inspect audio engineering signals and optionally ASR WER/CER:
   integrations/voice-studio/voice_quality.py
+- Resume provider benchmarks and aggregate blind listener ratings:
+  integrations/voice-studio/provider_voice_benchmark.py and
+  integrations/voice-studio/analyze_voice_benchmark.py
 
 ## Agent skills
 
