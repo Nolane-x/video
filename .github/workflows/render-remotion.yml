@@ -90,6 +90,13 @@ jobs:
           sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie
           tesseract --list-langs
 
+      - name: Normalize final audio
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 \
+            -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
+            -movflags +faststart out/master.mp4
+          mv out/master.mp4 out/one-more-scroll.mp4
+
       - name: Audit full rendered video text on pull requests
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -108,13 +115,6 @@ jobs:
           path: out/caption-coverage/report.json
           if-no-files-found: warn
           retention-days: 30
-
-      - name: Normalize final audio
-        run: |
-          ffmpeg -hide_banner -loglevel error -y -i out/one-more-scroll.mp4 \
-            -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
-            -movflags +faststart out/master.mp4
-          mv out/master.mp4 out/one-more-scroll.mp4
 
       - name: Validate MP4 and generate contact sheet
         run: |
@@ -156,6 +156,7 @@ jobs:
           PY
 
       - name: Upload render and QA outputs
+        if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
@@ -165,5 +166,5 @@ jobs:
             video-projects/remotion/out/contact-sheet-overview.jpg
             video-projects/remotion/out/metadata.json
             video-projects/remotion/out/audio-loudness.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
