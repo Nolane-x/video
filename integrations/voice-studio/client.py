@@ -215,6 +215,83 @@ class VoiceStudioClient:
         safe_id = urllib.parse.quote(profile_id, safe="")
         return self.download_audio(f"/profiles/{safe_id}/audio", output_path)
 
+
+    def create_design_profile(
+        self,
+        name: str,
+        description: str,
+        *,
+        engine: str,
+        language: str = "vi",
+        seed: int | None = 42,
+        sample_text: str = "",
+    ) -> Any:
+        """Save a free-form Voice Design recipe as a reusable VoiceStudio profile.
+
+        This creates a synthetic design profile, not a clone of a real speaker.
+        The backend validates the recipe and stores the design with its engine
+        and seed; the first profile-audio request lazily renders its preview.
+        """
+        name = name.strip()
+        description = description.strip()
+        engine = engine.strip()
+        if not name:
+            raise ValueError("A designed voice needs a non-empty profile name")
+        if not description or len(description) > 2000:
+            raise ValueError("Voice description must contain 1–2000 characters")
+        if not engine:
+            raise ValueError("Pass the exact installed VoiceStudio engine ID")
+        if seed is not None and not isinstance(seed, int):
+            raise ValueError("Voice design seed must be an integer")
+        picks = {
+            "Gender": "Auto",
+            "Age": "Auto",
+            "Pitch": "Auto",
+            "Style": "Auto",
+            "EnglishAccent": "Auto",
+            "ChineseDialect": "Auto",
+        }
+        fields = {
+            "name": name,
+            "ref_text": sample_text[:4096],
+            "instruct": "",
+            "language": language,
+            "personality": "Nolane synthetic voice design",
+            "kind": "design",
+            "vd_states": json.dumps(picks, ensure_ascii=False),
+            "design_recipe": json.dumps(
+                {"description": description, "picks": picks},
+                ensure_ascii=False,
+            ),
+            "engine": engine,
+        }
+        if seed is not None:
+            fields["seed"] = str(seed)
+        boundary = "----NolaneVoiceDesign" + uuid.uuid4().hex
+        chunks: list[bytes] = []
+        for field_name, value in fields.items():
+            chunks.append(
+                f"--{boundary}\r\n"
+                f'Content-Disposition: form-data; name="{field_name}"\r\n\r\n'
+                f"{value}\r\n".encode("utf-8")
+            )
+        chunks.append(f"--{boundary}--\r\n".encode("ascii"))
+        body, content_type = self._request(
+            "POST",
+            "/profiles",
+            raw_data=b"".join(chunks),
+            raw_content_type=f"multipart/form-data; boundary={boundary}",
+        )
+        try:
+            result = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise VoiceStudioError("VoiceStudio returned an invalid design-profile response") from exc
+        if not isinstance(result, dict) or not result.get("id"):
+            raise VoiceStudioError(
+                "VoiceStudio did not return a saved profile ID for the designed voice"
+            )
+        return result
+
     def use_archetype(self, archetype_id: str, name: str | None = None) -> Any:
         safe_id = urllib.parse.quote(archetype_id, safe="")
         return self._json(
