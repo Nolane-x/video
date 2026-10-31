@@ -184,10 +184,12 @@ ElevenLabs calls can incur charges; the explicit \`--allow-cloud\` flag is
 mandatory whenever either cloud provider is included.
 
 A run exports one blind HTML listening page and an identity-mapped JSON report.
-Rate naturalness, Vietnamese clarity/tones, identity, expressiveness and
-character fit from 1–5, then click **Export human ratings JSON**. The ratings
-are subjective review evidence, not a validated ElevenLabs-equivalence
-percentage.
+Add `--asr` to send each generated sample through the same VoiceStudio ASR
+backend and attach WER/CER pronunciation/intelligibility proxies. This requires
+a configured local ASR engine in VoiceStudio. Rate naturalness, Vietnamese
+clarity/tones, identity, expressiveness and character fit from 1–5, then click
+**Export human ratings JSON**. ASR WER/CER and subjective ratings are not a
+validated ElevenLabs-equivalence percentage.
 
 ## 5. Lock a cast and generate the voice-over
 
