@@ -185,6 +185,8 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.INTERNET_ARCHIVE_SEARCH_PAGES, 5)
         self.assertGreaterEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 220)
         self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {"prelinger": 120, "nasa": 120})
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES, {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024})
+        self.assertEqual(sum(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES.values()), library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES)
 
     def test_nara_bulk_catalog_is_research_only_until_item_rights_schema_is_verified(self):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
@@ -1155,6 +1157,8 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         self.assertIn("licenseurl:http*cc0*", query["q"][0])
         self.assertEqual(query["start"], ["100"])
         self.assertEqual(query["sort[]"], ["identifier asc"])
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["prelinger"], 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["nasa"], 4 * 1024 * 1024 * 1024)
         with self.assertRaises(ValueError):
             library.internet_archive_search_url("unknown", 0)
         with self.assertRaises(ValueError):
