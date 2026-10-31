@@ -56,6 +56,20 @@ def normalize_svs_media_url(raw_url: str) -> str | None:
         return None
 
 
+def svs_response_url_is_allowed(requested_url: str, response_url: str) -> bool:
+    """Reject redirects unless they remain HTTPS at the exact same official media URL."""
+    requested = normalize_svs_media_url(requested_url)
+    try:
+        response = urllib.parse.urlsplit(str(response_url or "").strip())
+    except ValueError:
+        return False
+    return bool(
+        requested
+        and response.scheme.casefold() == "https"
+        and normalize_svs_media_url(response_url) == requested
+    )
+
+
 def iter_video_candidates(page: dict[str, Any]) -> list[dict[str, Any]]:
     rows, seen = [], set()
     main = page.get("main_video")
@@ -206,8 +220,8 @@ def _download(url: str) -> tuple[bytes, str, str]:
         "Accept-Encoding": "identity",
     })
     with urllib.request.urlopen(req, timeout=75) as response:
-        if normalize_svs_media_url(response.geturl()) != normalized:
-            raise RuntimeError("media redirect left exact allow-listed URL")
+        if not svs_response_url_is_allowed(normalized, response.geturl()):
+            raise RuntimeError("media redirect left exact HTTPS allow-listed URL")
         length = response.headers.get("Content-Length")
         if length and int(length) > MAX_VIDEO_BYTES:
             raise RuntimeError("video exceeds per-file ceiling")
