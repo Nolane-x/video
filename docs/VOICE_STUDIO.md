@@ -43,6 +43,20 @@ OpenAI-compatible API routes. It does not download an engine's model weights,
 accept engine licence terms or render audio. That separation keeps a successful
 API smoke from being mistaken for a completed Vietnamese TTS acceptance test.
 
+For a native Vietnamese preset-engine audition, the separate
+[VoiceStudio Supertonic-3 Actions workflow](../.github/workflows/voice-studio-supertonic-cpu.yml)
+builds the pinned CPU app and verifies its licence gate. Normal push runs stop
+before weight download and audio generation. Actual synthesis requires a manual
+workflow dispatch and explicit `accept_openrail_m` confirmation after reading
+OpenRAIL-M. The pinned 1.3.1 SDK is installed in the image; the ~400 MB model
+weights are downloaded only into the temporary Actions runner, never the
+Actions cache or uploaded artifact. When enabled, it renders seven preset
+voices across four Vietnamese scripts through VoiceStudio's own speech API,
+normalizes loudness, runs FFprobe/FFmpeg QA, and uploads blind audition WAVs
+and evidence. OpenRAIL-M model terms remain separate from the app's AGPL-3.0
+and SDK's MIT licence, and do not automatically establish commercial-output
+rights.
+
 ## Core workflows
 
 - Create a reusable original Vietnamese voice set:
