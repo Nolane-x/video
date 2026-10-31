@@ -3288,6 +3288,12 @@ class NPSBrollImporterTests(unittest.TestCase):
         self.assertEqual(entry["size_bytes"], len(silent_bytes))
         self.assertEqual(entry["source_resolution_rank"], 1080)
 
+    def test_nps_download_budget_reserves_slots_for_npgallery(self):
+        self.assertEqual(nps_broll_importer.MAX_DOWNLOADS, 36)
+        self.assertEqual(nps_broll_importer.MAX_PARK_ARCHIVE_DOWNLOADS_PER_INDEX, 3)
+        self.assertEqual(nps_broll_importer.MAX_VIDEO_BYTES, 350 * 1024 * 1024)
+        self.assertEqual(nps_broll_importer.MAX_TOTAL_SOURCE_BYTES, 4 * 1024 * 1024 * 1024)
+
     def test_nps_lane_is_registered_catalogued_and_classified_as_footage(self):
         self.assertEqual(
             shard_builder.SOURCE_LANES["nps-broll"], "download_nps_broll_media"
