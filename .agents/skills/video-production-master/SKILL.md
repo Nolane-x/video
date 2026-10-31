@@ -1,11 +1,17 @@
 ---
 name: video-production-master
-description: End-to-end workflow for cinematic code-driven YouTube animation: story, references, H2 Canvas, Remotion, Blender, Krita, sound design, rendering, quality gates, archival and AI handoff.
+description: Genre-aware end-to-end video production across story, documentary research, explainers, cinematography, animation, editing, audio, rendering, QA, archival and AI handoff.
 ---
 
 # Video Production Master
 
 Persistent production memory for AI sessions in `Nolane-x/video`. This is a gated workflow, not a promise of automatic quality.
+
+## Active multi-engine command center
+
+The active private [Nolane Video Command Center](https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc) is **v0.7.9**, release `pluginrel_6ae5b448d6948191a011fc39d2ec282d`. It contains 29 internal skills and routes to a registry of 37 separately activated specialist plugins. Read `plugins/chatgpt/nolane-video-command-center/SKILL-CATALOG.md` and `references/PLUGIN-REGISTRY.md` for the exact responsibilities and links.
+
+The separate [Nolane Video Production Studio](https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd) v0.4.0 contains a broader 32-skill production library. [H2 SelfImprove Studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) v1.1.0 is a specialised H2 renderer/workflow. They are independent private plugins; the host/user controls activation. Never claim hidden cross-plugin invocation.
 
 ## ChatGPT Plugin Creator integration
 
@@ -18,8 +24,31 @@ The active private `h2-selfimprove-studio` ChatGPT plugin is available at https:
 ## Read before acting
 Read `AGENTS.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md`, `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, `video-library/README.md`, `video-library/previous-works-catalog.json`, `video-library/reference-clips.json`, the per-film manifest/QA, Remotion README, character bible and live shot plan. Inspect current HEAD, recent commits, Actions, logs and artifacts. The canonical H2 master MP4 is archived at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`; the original source and source-v2 scene-fixes ZIPs are published at the [h2-production-assets-v1 GitHub Release](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1). Source-v2 has passed technical rendering, but remains non-canonical until full-motion review. Source-v3 is the focused shoe-tying correction: inspect `video-library/one-more-scroll/h2-source-v3-render-request.json`, `tools/video/patch_h2_shoelace_scene.py`, preview workflow `.github/workflows/preview-h2-source-v3-shoelace.yml`, and full-render workflow `.github/workflows/verify-h2-source-v3.yml`; current run/status is recorded in `docs/STATE.md` and `video-library/one-more-scroll/h2-source-release.json`. Require the full render's technical/audio gates and a complete moving-picture review before any promotion. Then read these references: [visual language](references/visual-language.md), [engine selection](references/engine-selection.md), [production workflow](references/production-workflow.md), [animation QA](references/animation-qa.md), [audio/delivery](references/audio-delivery.md), [state restoration](references/state-restoration.md), [reusable prompts](references/reusable-prompts.md).
 
-## Product target
-Make a short film, not a motion-graphics slideshow. Use a simple symbolic stick figure (near-black round head, pale rim, readable face, colored shirt, slim dark limbs and shoes) inside a richly staged world. Distinct locations, architectural detail, warm practical light, plum/charcoal shadows, foreground/background depth, purposeful camera movement, visible acting and prop contact are central to the look.
+## Genre-aware production routing
+
+Choose the genre, delivery format and production grammar before choosing an engine. Do not assume every request is a short cinematic animation or inherits the visual style of an earlier project.
+
+At the start of each task, resolve from the brief and existing project state:
+- Genre and purpose: documentary, science/math explainer, narrative animation, product demo, tutorial/screen recording, interview, music video, short-form social, advertisement or hybrid.
+- Audience, platform, runtime, aspect ratio, language, narration policy, caption/subtitle requirements and call to action.
+- The information contract: factual claims and citations, exact product/UI behavior, equations/data, scripted dialogue, or emotional story beats.
+- Visual grammar: live-action, documentary footage, authored 2D, 3D, motion graphics, screen capture, mixed media or the user's established series style.
+- Asset provenance, licenses, privacy, model/API costs, hardware and delivery constraints.
+
+Route only the needed stages:
+- Documentary/science: research and fact-check claims first; keep a claim/source ledger; use Manim or data-visualization skills when mathematical or quantitative accuracy benefits.
+- Product/software demos: use authorized browser capture and real UI state; never fabricate product behavior or imply a mockup is a live product.
+- Narration/interview: separate script decisions, transcript observations, timing, subtitle generation, audio cleanup and mastering. Verify exact text and speech coverage.
+- Narrative/2D/3D animation: storyboard, art bible, blocking, acting, contact/motion proofs and engine-specific QA.
+- Short-form/social: front-load the hook and enforce mobile-safe typography, pacing and platform-specific cutdowns.
+- Hybrid/AI media: select media tools per shot, preserve editable text and deterministic finishing, and independently audit generated-asset provenance/rights.
+
+Use the Command Center's internal skills first. Switch explicitly to an independently activated specialist plugin only when its tool-specific depth materially helps. Do not install every engine, download model weights, or invoke paid services by default.
+
+The established cinematic stick-figure/H2 style below is a **conditional project profile**, not a universal style rule. Preserve it when continuing that series or when the user explicitly requests it; otherwise follow the new brief's visual grammar.
+
+## Established cinematic/H2 visual profile (conditional)
+When this profile applies, make a short film rather than a motion-graphics slideshow. Use a simple symbolic stick figure (near-black round head, pale rim, readable face, colored shirt, slim dark limbs and shoes) inside a richly staged world. Distinct locations, architectural detail, warm practical light, plum/charcoal shadows, foreground/background depth, purposeful camera movement, visible acting and prop contact are central to this particular series. Do not impose these character, palette, duration or voice-over choices on unrelated genres.
 
 User references:
 - Ifverse Tales: https://www.youtube.com/@IfverseTales
@@ -55,4 +84,4 @@ Open the source and actually watch it before recording timestamped observations;
 - **Python audio:** existing generators under `video-projects/remotion/h2-audio` must be run to create WAVs; source files are not final audio assets.
 
 ## Acceptance
-Accept only when the narrative progresses visually, backgrounds/shot sizes vary, actions read in silhouette, hand/foot contacts are believable, type supports action, sound aligns with beats, silence is intentional, contact sheets and moving proofs are reviewed, metadata matches the brief, and a new AI can reproduce the pipeline without relying on old chat history.
+Accept only when the deliverable fulfills its brief: information is complete and accurate, visual grammar is coherent, pacing serves the audience, text/captions are readable and complete where required, audio is intelligible and measured, asset rights are documented, technical metadata matches the target, and the actual moving picture/audio has been reviewed. For the established stick-figure profile, additionally verify readable silhouettes, believable hand/foot contact and actor/prop follow-through. A new AI must be able to reproduce the pipeline from the repository state without relying on old chat history.
