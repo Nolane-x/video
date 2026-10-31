@@ -68,6 +68,7 @@ jobs:
           - nasa-svs
           - eso
           - cdc-broll
+          - nps-broll
           - loc
           - wikimedia
           - wikimedia-svg
@@ -88,8 +89,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install FFmpeg for generated loops and ESO silent footage
-        if: matrix.lane == 'originals' || matrix.lane == 'eso'
+      - name: Install FFmpeg for generated loops and silent footage lanes
+        if: matrix.lane == 'originals' || matrix.lane == 'eso' || matrix.lane == 'nps-broll'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
@@ -103,6 +104,7 @@ jobs:
           python -m py_compile tools/video/nasa_svs_importer.py
           python -m py_compile tools/video/eso_video_importer.py
           python -m py_compile tools/video/cdc_broll_importer.py
+          python -m py_compile tools/video/nps_broll_importer.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/package_asset_bundles.py
 
