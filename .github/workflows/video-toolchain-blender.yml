@@ -44,14 +44,14 @@ jobs:
       - name: Install FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libglx-mesa0 libgbm1 libxrender1 libxkbcommon0
 
       - name: Render headless five-second proof
         env:
           BLENDER_OUTPUT: ${{ github.workspace }}/out/blender/h2-style-study.mp4
         run: |
           mkdir -p out/blender
-          blender --background --python tools/blender/render_h2_stage.py
+          LIBGL_ALWAYS_SOFTWARE=1 blender --background --python tools/blender/render_h2_stage.py
           test -s "$BLENDER_OUTPUT"
           ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$BLENDER_OUTPUT" | tee out/blender/metadata.json
 
