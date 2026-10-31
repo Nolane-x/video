@@ -17,12 +17,17 @@ GitHub Actions artifact. No local workstation is required for this baseline.
 
 For actual video narration, the separate
 [Voice Studio Actions production renderer](../.github/workflows/voice-studio-actions-project.yml)
-takes a committed multi-character manifest, creates per-line audio, checks the
-audio files, and runs the real H2 `prep_voice.py` timing stage to export
-`voice.wav`, `blocks.json`, `lines.json`, `words.json` and
-`transcript.txt`. The example project includes four stable characters and
-ten dialogue segments. Audio and timeline files are uploaded as a workflow
-artifact.
+takes a committed multi-character manifest, creates per-line audio, checks and
+loudness-normalizes the files, and runs the real H2 `prep_voice.py` timing
+stage to export `voice.wav`, `blocks.json`, `lines.json`, `words.json`
+and `transcript.txt`. It also exports word-timed SRT/VTT/ASS captions,
+sentence-level and speaker-labelled variants, a per-character voice-cast
+report, and an artifact SHA-256 manifest. The example project includes four
+stable characters and ten dialogue segments. Audio and timeline files are
+uploaded as a workflow artifact.
+
+Caption times use H2's estimated word/sentence boundaries rather than ASR
+forced alignment. Review subtitles against the audio before publishing.
 
 These Actions CPU lanes intentionally use KorvaTTS's released Vietnamese
 presets; they are not the full VoiceStudio custom voice-design service. A
