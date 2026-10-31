@@ -4833,7 +4833,7 @@ def download_internet_archive_videos(root,index):
                                 rights_statement="Public Domain (verified from exact item-page Usage block; API rights field absent)",
                                 verified=True,
                             )
-                            rights_verification_method="item-page-usage"
+                            rights_verification_method="prelinger-item-page-usage-public-domain-mark"
                     except Exception as rights_exc:
                         row["item_page_rights_verification_error"]=str(rights_exc)[:300]
                 row.update(title=str(metadata.get("title") or identifier)[:260],
@@ -4900,9 +4900,9 @@ def download_internet_archive_videos(root,index):
                     "license":rights["license"],"license_url":rights["license_url"],
                     "rights_statement":rights["rights_statement"],
                     "license_verified_from_item_metadata":rights_verification_method=="item-metadata",
-                    "license_verified_from_item_page":rights_verification_method=="item-page-usage",
+                    "public_domain_status_verified_from_item_page":rights_verification_method=="prelinger-item-page-usage-public-domain-mark",
                     "rights_verification_method":rights_verification_method,
-                    "rights_basis":"The exact item metadata identifies CC0/Public Domain; Prelinger records with an absent API rights field are accepted only when the canonical item page has exactly one Usage row labelled Public Domain with the expected Creative Commons Public Domain URL. Public Domain Mark is not relabelled CC0. Embedded third-party footage, music, personality and other non-copyright rights require human review before commercial use.",
+                    "rights_basis":"The exact item metadata identifies CC0/Public Domain; Prelinger records with an absent API rights field are accepted only when the canonical item page has exactly one Usage row labelled Public Domain with the expected IA Public Domain URL. This page-level Public Domain Mark is treated as a public-domain status statement, not a CC0 license. Embedded third-party footage, music, personality and other non-copyright rights require human review before commercial use.",
                     "embedded_third_party_rights_review_required":True,
                     "redistributable":True,
                     "duration_seconds":chosen["duration_seconds"],
