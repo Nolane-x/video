@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -86,6 +87,27 @@ class CaptionCoverageTests(unittest.TestCase):
         self.assertEqual(one_hit["readable_samples"], 1)
         self.assertTrue(two_hits["passed"])
         self.assertEqual(two_hits["readable_samples"], 2)
+
+    def test_current_remotion_manifest_has_complete_text_contracts(self):
+        from caption_coverage import resolve_text_contract
+        repository_root = Path(__file__).resolve().parents[2]
+        manifest_path = repository_root / "video-projects/remotion/public/story/shots.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        shots = manifest["shots"]
+        self.assertGreater(len(shots), 0)
+
+        counts = {}
+        for index, shot in enumerate(shots):
+            items, status, reason = resolve_text_contract(shot, index, len(shots))
+            self.assertEqual(status, "tracked", f"{shot.get('id')}: {reason}")
+            self.assertTrue(items, shot.get("id"))
+            for item in items:
+                counts[item["kind"]] = counts.get(item["kind"], 0) + 1
+
+        self.assertEqual(counts.get("subtitle", 0), len(shots))
+        self.assertGreater(counts.get("day-counter", 0), 0)
+        self.assertGreater(counts.get("red-word", 0), 0)
+        self.assertGreater(counts.get("scene-label", 0), 0)
 
 
 if __name__ == "__main__":
