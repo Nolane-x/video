@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from audio_mastering import normalize_voice_file
+from caption_delivery import write_subtitles
 from generate_voiceover import generate, validate_manifest
 from providers import korva
 from voice_quality import _probe_audio, _technical_findings, audit_report
@@ -228,8 +229,8 @@ def _write_caption_assets(output_dir: Path, timeline_dir: Path) -> dict[str, Any
         return "\n".join(rows)
 
     files = {
-        "captions.srt": render_srt(plain),
-        "captions.vtt": render_vtt(plain),
+        "captions-sentence.srt": render_srt(plain),
+        "captions-sentence.vtt": render_vtt(plain),
         "captions-speaker-labelled.srt": render_srt(labelled),
         "captions-speaker-labelled.vtt": render_vtt(labelled),
     }
@@ -241,18 +242,27 @@ def _write_caption_assets(output_dir: Path, timeline_dir: Path) -> dict[str, Any
             "bytes": destination.stat().st_size,
             "sha256": _sha256(destination),
         }
+    word_timed = write_subtitles(timeline_dir, output_dir)
     metadata = {
         "status": "generated",
         "line_count": len(lines),
-        "speaker_labels": "available in speaker-labelled variants",
-        "alignment_type": "estimated_sentence_timestamps",
-        "alignment_source": "H2 prep_voice.py proportional sentence-boundary heuristic",
+        "sentence_cue_count": len(lines),
+        "word_timed_cue_count": word_timed["cue_count"],
+        "speaker_labels": "available in sentence-level speaker-labelled variants",
+        "alignment_type": "estimated_word_and_sentence_timestamps",
+        "alignment_source": "H2 prep_voice.py proportional word/sentence timing heuristic",
         "not_forced_aligned": True,
         "master_duration_s": round(master_duration, 3),
         "outputs": outputs,
+        "word_timed": {
+            "cue_count": word_timed["cue_count"],
+            "files": word_timed["files"],
+            "timing_method": word_timed["timing_method"],
+        },
         "note": (
-            "Sentence boundaries are estimated from H2 audio-duration and text-length "
-            "heuristics. They are editing captions, not ASR forced-alignment ground truth."
+            "captions.srt/vtt/ass are grouped from H2 estimated word timings; "
+            "captions-sentence.srt/vtt retain sentence-level cues; speaker-labelled "
+            "variants are for review. None are ASR forced-alignment ground truth."
         ),
     }
     _write_json(output_dir / "caption-export-report.json", metadata)
@@ -274,9 +284,11 @@ def _write_delivery_readme(output_dir: Path, report: dict[str, Any]) -> None:
         "",
         "1. Use the H2 voice.wav file as the assembled voice track.",
         "2. Use voice/V001.wav … voice/V010.wav for per-line edits or replacement.",
-        "3. Import captions.srt or captions.vtt as sentence-level captions.",
-        "4. Use speaker-labelled caption variants for review and speaker attribution.",
-        "5. Use H2 blocks.json, lines.json and words.json to drive the edit timeline.",
+        "3. Import captions.srt or captions.vtt for shorter word-timed caption cues.",
+        "4. Use captions-sentence.srt/vtt for sentence-level captions.",
+        "5. Use speaker-labelled caption variants for review and speaker attribution.",
+        "6. Use captions.ass when you need a styled subtitle track.",
+        "7. Use H2 blocks.json, lines.json and words.json to drive the edit timeline.",
         "",
         "## Timing limitation",
         "",
