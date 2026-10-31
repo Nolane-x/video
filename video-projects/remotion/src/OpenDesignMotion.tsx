@@ -785,23 +785,25 @@ const EasePoster = () => (
 
 const MotionFilmsPoster = () => {
   const f=useCurrentFrame();
+  const planeX=Math.sin(f/7)*15;
   return (
-    <AbsoluteFill style={{ ...full, background: "#273f92", color: "#fff" }}>
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(145deg,#2d4c9e,#14265d)" }} />
-      <svg viewBox="0 0 1920 1080" width="100%" height="100%">
-        <path d="M260 185 Q700 150 1660 185 L1660 730 Q960 790 260 730Z" fill="none" stroke="#fff" strokeWidth="13" strokeDasharray="30 7 4 8" opacity=".92" />
-        <path d={"M430 500 Q670 "+(275+Math.sin(f/8)*17)+" 960 470 T1510 475"} fill="none" stroke="#fff" strokeWidth="7" strokeLinecap="round" opacity=".8" />
-        <path d="M640 405 L800 300 L745 420 L700 390Z" fill="#fff" transform={"translate("+(Math.sin(f/6)*16)+","+(Math.cos(f/7)*12)+")"} />
-        <path d="M780 290 Q820 250 850 285 Q880 318 842 335 Q804 350 780 290Z" fill="#161b2c" stroke="#fff" strokeWidth="5" />
-        <circle cx="817" cy="292" r="11" fill="#fff" />
-        <path d="M1070 780 Q1000 680 930 775" fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
+    <AbsoluteFill style={{ ...full, background: "#263d8e", color: "#fff" }}>
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#314f9d,#15245c)"}}/>
+      <div style={{position:"absolute",left:230,top:160,width:1460,height:560,border:"12px dashed #f4f0df",borderRadius:5,transform:"rotate(-1deg)",boxShadow:"0 0 0 6px rgba(255,255,255,.08)"}}/>
+      <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+        <path d="M330 690 Q500 600 710 680 T1100 670 T1600 655" fill="none" stroke="#fff5df" strokeWidth="8" strokeLinecap="round" opacity=".9"/>
+        <path d={"M500 400 L"+(690+planeX)+" 265 L615 427 L575 387Z"} fill="#f9f7eb" stroke="#fff" strokeWidth="5"/>
+        <path d="M570 385 L690 265 L655 438 L615 427Z" fill="#d4e0f1"/>
+        <path d="M1050 345 Q1120 290 1200 345 Q1230 402 1170 435 Q1100 452 1050 345Z" fill="#111a31" stroke="#fff" strokeWidth="7"/>
+        <circle cx="1114" cy="354" r="16" fill="#fff"/><circle cx="1176" cy="354" r="16" fill="#fff"/>
+        <path d="M1110 404 Q1145 430 1180 400" fill="none" stroke="#f0a088" strokeWidth="9" strokeLinecap="round"/>
+        <path d="M1260 545 Q1350 495 1420 548" fill="none" stroke="#f4f0df" strokeWidth="7" strokeDasharray="15 18"/>
       </svg>
-      <div style={{ position: "absolute", bottom: 68, left: 0, right: 0, textAlign: "center", fontSize: 80, fontFamily: displayFont, fontWeight: 650, letterSpacing: "-.045em", color: "#f9f8ed" }}>motion films</div>
-      <Noise opacity={.07}/>
+      <div style={{position:"absolute",left:250,top:735,color:"#f9f7eb",fontSize:80,fontFamily:displayFont,fontWeight:650,letterSpacing:"-.04em"}}>motion films</div>
+      <div style={{position:"absolute",right:240,top:95,fontSize:17,fontWeight:900,letterSpacing:".2em",color:"#d7e0f1"}}>SKETCH / FRAME / MOTION</div>
     </AbsoluteFill>
   );
 };
-
 const PosterSequence = () => (
   <AbsoluteFill style={full}>
     <Sequence from={0} durationInFrames={17}><Comic1965 /></Sequence>
@@ -864,21 +866,20 @@ const LogoChip = ({ index, frame }: { index: number; frame: number }) => {
 };
 
 const ModelAgentScene = () => {
-  const f = useCurrentFrame();
-  const InlinePhrase = ({ agent }: { agent:boolean }) => (
-    <div style={{ position: "absolute", left: 0, right: 0, top: 330, display: "flex", justifyContent: "center", alignItems: "baseline", color: "#111315", fontFamily: displayFont, fontSize: 158, fontWeight: 900, letterSpacing: "-.09em", whiteSpace: "nowrap" }}>
-      <span>Any m</span><span style={{ position:"relative", display:"inline-block" }}>o
-        <div style={{ position:"absolute", left:"49%", top:-22, transform:"translateX(-50%)", display:"flex", alignItems:"center" }}>
-          {Array.from({length:5},(_,i)=><div key={i} style={{ width:47, height:47, marginLeft:i?-13:0, borderRadius:"50%", border:"3px solid #fff", background:["#fff","#e8f0ff","#fff","#f6f2e9","#fff"][i], boxShadow:"0 5px 15px rgba(0,0,0,.13)", display:"grid", placeItems:"center", fontSize:21, fontWeight:950, color:["#263b75","#e66b52","#303239","#5375bf","#d39d53"][i] }}>{["✦","◈","M","∞","A"][i]}</div>)}
-        </div>
-      </span><span>{agent?"agent.":"del."}</span>
-    </div>
-  );
-  const chips=(seed:number)=>(
-    <div style={{ position:"absolute", left:0, right:0, bottom:170, display:"flex", justifyContent:"center", gap:18 }}>
-      {Array.from({length:7},(_,i)=><LogoChip key={i} index={(i+seed)%10} frame={f+i*3}/>)}
-    </div>
-  );
+  const InlinePhrase = ({ agent }: { agent:boolean }) => {
+    const prefix=agent?"Any ":"Any m";
+    const centerLetter=agent?"a":"o";
+    const suffix=agent?"gent.":"del.";
+    return (
+      <div style={{ position: "absolute", left: 0, right: 0, top: 330, display: "flex", justifyContent: "center", alignItems: "baseline", color: "#111315", fontFamily: displayFont, fontSize: 158, fontWeight: 900, letterSpacing: "-.09em", whiteSpace: "nowrap" }}>
+        <span>{prefix}</span><span style={{ position:"relative", display:"inline-block" }}>{centerLetter}
+          <div style={{position:"absolute",left:"49%",top:-22,transform:"translateX(-50%)",display:"flex",alignItems:"center"}}>
+            {Array.from({length:5},(_,i)=><div key={i} style={{width:47,height:47,marginLeft:i?-13:0,borderRadius:"50%",border:"3px solid #fff",background:["#fff","#e8f0ff","#fff","#f6f2e9","#fff"][i],boxShadow:"0 5px 15px rgba(0,0,0,.13)",display:"grid",placeItems:"center",fontSize:21,fontWeight:950,color:["#263b75","#e66b52","#303239","#5375bf","#d39d53"][i]}}>{["✦","◈","M","∞","A"][i]}</div>)}
+          </div>
+        </span><span>{suffix}</span>
+      </div>
+    );
+  };
   return (
     <AbsoluteFill style={full}>
       <Sequence from={0} durationInFrames={34}>
@@ -894,7 +895,6 @@ const ModelAgentScene = () => {
         <AbsoluteFill style={{background:"#d1dfe0"}}>
           <div style={{position:"absolute",left:0,right:0,top:350,textAlign:"center",fontFamily:displayFont,fontSize:157,fontWeight:950,letterSpacing:"-.09em",color:"#111315"}}>Any agent.</div>
           <div style={{position:"absolute",left:0,right:0,top:535,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color:"#647679"}}>THE MODEL IS YOURS / THE TOOLS ARE YOURS</div>
-          {chips(3)}
         </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
@@ -1086,49 +1086,79 @@ const CubeFaceArtwork = ({ kind }: { kind: number }) => {
   return <div style={{ position: "absolute", inset: 0, background: "#111416", display: "grid", placeItems: "center" }}><div style={{ width: 150, height: 150, border: "9px solid #fff", borderRadius: "50%", display: "grid", placeItems: "center" }}><PlayGlyph size={80} /></div></div>;
 };
 
-const TexturedCube = () => {
-  const f = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = pop(f, fps, 0, 58, 19);
-  const rotY = -35 + f * 0.62;
-  const rotX = 19 + Math.sin(f / 16) * 4;
-  const size = 570;
-  const half = size / 2;
-  const faces = [
-    { kind: 0, transform: "translateZ(" + half + "px)" },
-    { kind: 5, transform: "rotateY(180deg) translateZ(" + half + "px)" },
-    { kind: 1, transform: "rotateY(90deg) translateZ(" + half + "px)" },
-    { kind: 2, transform: "rotateY(-90deg) translateZ(" + half + "px)" },
-    { kind: 3, transform: "rotateX(90deg) translateZ(" + half + "px)" },
-    { kind: 4, transform: "rotateX(-90deg) translateZ(" + half + "px)" },
+const SvgCube3D = ({ frame, size, x, y, seed=0 }: { frame:number; size:number; x:number; y:number; seed?:number }) => {
+  const rx=0.62+Math.sin(frame/19+seed)*0.06;
+  const ry=-0.86+frame*0.006+seed*0.18;
+  const rz=0.08*Math.sin(frame/27+seed);
+  const base=[
+    [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
+    [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1],
   ];
+  const transformed=base.map(([px,py,pz])=>{
+    const y1=py*Math.cos(rx)-pz*Math.sin(rx);
+    const z1=py*Math.sin(rx)+pz*Math.cos(rx);
+    const x2=px*Math.cos(ry)+z1*Math.sin(ry);
+    const z2=-px*Math.sin(ry)+z1*Math.cos(ry);
+    const x3=x2*Math.cos(rz)-y1*Math.sin(rz);
+    const y3=x2*Math.sin(rz)+y1*Math.cos(rz);
+    return {x:x3,y:y3,z:z2};
+  });
+  const projected=transformed.map(p=>{
+    const perspective=4.2/(4.2-p.z*.48);
+    return {x:x+p.x*size*.5*perspective,y:y+p.y*size*.5*perspective,z:p.z};
+  });
+  const faces=[
+    {ids:[4,5,6,7],color:"#e58d78",label:"MOTION",kind:0},
+    {ids:[5,1,2,6],color:"#1c2da6",label:"WORLD",kind:1},
+    {ids:[0,4,7,3],color:"#f4ead5",label:"FUTURE",kind:2},
+    {ids:[0,1,5,4],color:"#e5c24a",label:"EASE",kind:3},
+    {ids:[3,2,6,7],color:"#a5de75",label:"CREATE",kind:4},
+    {ids:[0,1,2,3],color:"#17202b",label:"PLAY",kind:5},
+  ].map(face=>{
+    const pts=face.ids.map(i=>projected[i]);
+    return {...face,pts,depth:pts.reduce((a,p)=>a+p.z,0)/pts.length,
+      cx:pts.reduce((a,p)=>a+p.x,0)/pts.length,
+      cy:pts.reduce((a,p)=>a+p.y,0)/pts.length};
+  }).sort((a,b)=>a.depth-b.depth);
+  const colors=["#fff","#d5eeff","#1b2531","#fff","#1e2c1e","#fff"];
   return (
-    <AbsoluteFill style={{ ...full, background: "radial-gradient(ellipse at 50% 42%,#f3f4f3 0%,#d4dadb 65%,#b6c1c4 100%)" }}>
-      <div style={{ position: "absolute", left: "50%", top: "47%", width: size, height: size, marginLeft: -half, marginTop: -half, perspective: 1450, transform: "scale(" + (0.82 + 0.18 * p) + ")" }}>
-        <div style={{
-          position: "absolute", inset: 0, transformStyle: "preserve-3d",
-          transform: "translateZ(-" + half + "px) rotateX(" + rotX + "deg) rotateY(" + rotY + "deg)",
-          filter: "drop-shadow(0 45px 36px rgba(24,33,47,.28))",
-        }}>
-          {faces.map((face, i) => <div key={i} style={{
-            position: "absolute", inset: 0, borderRadius: 54, overflow: "hidden",
-            border: "5px solid rgba(255,255,255,.72)", background: "#23377f",
-            transform: face.transform, backfaceVisibility: "hidden",
-            boxShadow: "inset 0 2px 0 rgba(255,255,255,.55),inset 0 -12px 24px rgba(0,0,0,.22)",
-          }}>
-            <CubeFaceArtwork kind={face.kind} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(145deg,rgba(255,255,255,.32),transparent 35%,rgba(0,0,0,.2))" }} />
-            <div style={{ position: "absolute", left: "50%", top: "50%", width: 146, height: 146, marginLeft: -73, marginTop: -73, borderRadius: "50%", background: "rgba(12,15,19,.35)", border: "4px solid rgba(255,255,255,.8)", display: "grid", placeItems: "center", boxShadow: "0 12px 26px rgba(0,0,0,.25)" }}>
-              <PlayGlyph size={82} />
-            </div>
-          </div>)}
-        </div>
-      </div>
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 70, textAlign: "center", color: "#6c7a82", fontSize: 17, fontWeight: 900, letterSpacing: ".21em" }}>ROTATE / REVEAL / REPEAT</div>
-    </AbsoluteFill>
+    <g filter="url(#cube-shadow)">
+      {faces.map((face,i)=>{
+        const points=face.pts.map(p=>p.x+","+p.y).join(" ");
+        const r=size*.075;
+        return (
+          <g key={face.kind}>
+            <polygon points={points} fill={face.color} stroke="#fff" strokeWidth={Math.max(4,size*.009)} strokeLinejoin="round"/>
+            <polygon points={points} fill="url(#cube-gloss)" opacity=".32"/>
+            <circle cx={face.cx} cy={face.cy} r={r} fill="rgba(12,16,23,.35)" stroke="rgba(255,255,255,.86)" strokeWidth={Math.max(3,size*.007)}/>
+            <path d={"M"+(face.cx-r*.34)+" "+(face.cy-r*.54)+" L"+(face.cx+r*.57)+" "+face.cy+" L"+(face.cx-r*.34)+" "+(face.cy+r*.54)+"Z"} fill={colors[face.kind]}/>
+            <text x={face.cx} y={face.cy+r*1.72} textAnchor="middle" fontSize={size*.045} fontFamily="Arial,sans-serif" fontWeight="900" letterSpacing="3" fill={face.kind===2?"#253041":"#fff"}>{face.label}</text>
+            <polyline points={face.pts.map(p=>p.x+","+p.y).join(" ")} fill="none" stroke="rgba(255,255,255,.22)" strokeWidth={2}/>
+          </g>
+        );
+      })}
+    </g>
   );
 };
 
+const TexturedCube = () => {
+  const f=useCurrentFrame();
+  return (
+    <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 43%,#f3f4f3 0%,#d4dadb 65%,#b6c1c4 100%)"}}>
+      <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+        <defs>
+          <linearGradient id="cube-gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fff" stopOpacity=".55"/><stop offset="42%" stopColor="#fff" stopOpacity="0"/><stop offset="100%" stopColor="#06101f" stopOpacity=".2"/></linearGradient>
+          <filter id="cube-shadow" x="-40%" y="-40%" width="180%" height="190%"><feGaussianBlur in="SourceAlpha" stdDeviation="24"/><feOffset dy="34"/><feComponentTransfer><feFuncA type="linear" slope=".34"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <ellipse cx="960" cy="850" rx="420" ry="80" fill="rgba(28,38,52,.15)" filter="url(#cube-shadow)"/>
+        <SvgCube3D frame={f} size={610} x={960} y={510}/>
+        <SvgCube3D frame={f+17} size={270} x={430} y={675} seed={1}/>
+        <SvgCube3D frame={f+34} size={235} x={1500} y={350} seed={2}/>
+      </svg>
+      <div style={{position:"absolute",left:0,right:0,bottom:70,textAlign:"center",color:"#6c7a82",fontSize:17,fontWeight:900,letterSpacing:".21em"}}>ROTATE / REVEAL / REPEAT</div>
+    </AbsoluteFill>
+  );
+};
 const FinalLockup = () => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
