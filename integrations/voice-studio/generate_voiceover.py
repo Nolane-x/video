@@ -64,7 +64,7 @@ def validate_manifest(data: dict[str, Any]) -> list[dict[str, Any]]:
         item["character"] = (
             str(item.get("character") or "")
             .replace("|", "/").replace("·", "-").replace("=", "-")
-            .replace("\\r", " ").replace("\\n", " ").strip()[:64]
+            .replace("\r", " ").replace("\n", " ").strip()[:64]
         )
         item["provider"] = str(item.get("provider") or "voicestudio").lower()
         item["voice"] = str(item.get("voice") or "default")
@@ -146,8 +146,8 @@ def generate(data: dict[str, Any], output_dir: Path, *, plan_only: bool = False)
         target = audio_dir / f"{item['id']}{ext}"
         safe_text = re.sub(r"(?m)^===", " ===", item["text"])
         script_blocks.append(
-            f"=== {item['id']} | {item['slot']} · {item['character']} ===\\n"
-            f"{safe_text}\\n"
+            f"=== {item['id']} | {item['slot']} · {item['character']} ===\n"
+            f"{safe_text}\n"
         )
         row = {
             "id": item["id"], "provider": item["provider"], "engine": item["engine"],
