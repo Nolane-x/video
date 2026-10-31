@@ -303,6 +303,7 @@ def main() -> int:
         "status": report["status"],
         "created_or_reused": report["created_or_reused"],
         "failed": report["failed"],
+        "preview_failed": report.get("preview_failed", 0),
     }, ensure_ascii=False, indent=2))
     return 1 if report["status"] == "partial" else 0
 
