@@ -1,0 +1,67 @@
+name: Remotion caption coverage audit
+
+on:
+  workflow_run:
+    workflows: ["Render Remotion video"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: remotion-caption-audit-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  caption-audit:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout the exact rendered source commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg and Tesseract EN/VI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie
+          tesseract --list-langs
+
+      - name: Download the MP4 artifact from the completed render run
+        uses: actions/download-artifact@v4
+        with:
+          name: one-more-scroll-remotion-mp4
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          path: artifacts
+
+      - name: Locate video and audit required subtitles
+        run: |
+          VIDEO="$(find artifacts -type f -name 'one-more-scroll.mp4' -print -quit)"
+          test -n "$VIDEO"
+          mkdir -p out/caption-coverage
+          python tools/video/caption_coverage.py \
+            --video "$VIDEO" \
+            --shots video-projects/remotion/public/story/shots.json \
+            --output out/caption-coverage/report.json \
+            --languages vie+eng \
+            --threshold 0.67
+
+      - name: Upload caption coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: remotion-caption-coverage-${{ github.event.workflow_run.id }}
+          path: out/caption-coverage/report.json
+          if-no-files-found: warn
+          retention-days: 30

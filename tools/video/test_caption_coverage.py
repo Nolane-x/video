@@ -1,0 +1,41 @@
+import sys
+import unittest
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from caption_coverage import expected_text_for_shot, normalize_text, text_coverage
+
+
+class CaptionCoverageTests(unittest.TestCase):
+    def test_vietnamese_accent_normalization(self):
+        self.assertEqual(normalize_text("Đừng bỏ cuộc!"), "dung bo cuoc")
+
+    def test_text_coverage_is_case_and_punctuation_tolerant(self):
+        self.assertGreaterEqual(text_coverage("The feed can wait.", "THE FEED can wait"), 0.99)
+
+    def test_ocr_single_word_error_is_reported_as_partial_not_zero(self):
+        score = text_coverage("The feed always has one more thing", "The feed always has one more think")
+        self.assertGreaterEqual(score, 0.8)
+        self.assertLess(score, 1.0)
+
+    def test_coverage_fails_when_subtitle_is_not_detected(self):
+        self.assertLess(text_coverage("Bạn có thể bắt đầu lại", "background only"), 0.67)
+
+    def test_default_manifest_contract_is_subtitle_plus_final_title(self):
+        first = {"line": "First subtitle", "args": {"title": "Scene title", "subtitle": "First subtitle"}}
+        final = {"line": "Final subtitle", "args": {"title": "Final card", "subtitle": "Final subtitle"}}
+        self.assertEqual(expected_text_for_shot(first, 0, 2), [{"kind": "subtitle", "text": "First subtitle"}])
+        self.assertEqual(expected_text_for_shot(final, 1, 2), [
+            {"kind": "subtitle", "text": "Final subtitle"},
+            {"kind": "end-card-title", "text": "Final card"}
+        ])
+
+    def test_explicit_on_screen_text_contract_wins(self):
+        shot = {"args": {"title": "Not used"}, "requiredOnScreenText": ["Visible heading", "Required label"]}
+        self.assertEqual(expected_text_for_shot(shot, 0, 1), [
+            {"kind": "required", "text": "Visible heading"},
+            {"kind": "required", "text": "Required label"}
+        ])
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
