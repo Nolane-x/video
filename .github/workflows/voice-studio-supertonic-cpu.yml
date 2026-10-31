@@ -128,6 +128,10 @@ jobs:
               raise SystemExit("Fresh CI data directory unexpectedly has an accepted model licence")
           if engine.get("license_required") is not True:
               raise SystemExit("VoiceStudio did not expose Supertonic-3's licence gate")
+          if engine.get("available") is not False or engine.get("license_accepted") is not False:
+              raise SystemExit("Supertonic-3 is not in the expected unaccepted/disabled state")
+          if "license not accepted" not in str(engine.get("reason") or "").lower():
+              raise SystemExit("Supertonic-3 is disabled for a reason other than the expected licence gate")
           report={
               "schema_version":1,
               "source_commit":"faa5294359f23c911972ffe6d27785c50c67097b",
