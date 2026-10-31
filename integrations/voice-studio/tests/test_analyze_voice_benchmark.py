@@ -37,6 +37,7 @@ class AnalyzeVoiceBenchmarkTests(unittest.TestCase):
                         "naturalness": 5, "vietnamese": 4, "identity": 4,
                         "expression": 5, "character_fit": 4,
                     },
+                    "notes": "Clear tones and confident documentary delivery.",
                 },
                 {
                     "candidate": "Candidate 02",
@@ -49,6 +50,10 @@ class AnalyzeVoiceBenchmarkTests(unittest.TestCase):
         report = analyze_benchmark(benchmark, ratings, min_ratings=3)
         self.assertEqual(report["eligible_candidate_count"], 2)
         self.assertEqual(report["human_rating_winner"]["id"], "korva-a")
+        self.assertEqual(
+            report["candidates"][0]["listener_notes"],
+            "Clear tones and confident documentary delivery.",
+        )
         korva = next(row for row in report["providers"] if row["provider"] == "korva")
         self.assertEqual(korva["mean_candidate_rating"], 4.4)
         self.assertEqual(korva["mean_wer"], 0.1)
