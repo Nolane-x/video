@@ -72,7 +72,8 @@ jobs:
           import os
           import shutil
           from pathlib import Path
-          report = json.loads(Path("$GITHUB_WORKSPACE/out/hyperframes-check.json").read_text(encoding="utf-8"))
+          report_path = Path(os.environ["GITHUB_WORKSPACE"]) / "out" / "hyperframes-check.json"
+report = json.loads(report_path.read_text(encoding="utf-8"))
           files = report.get("snapshots", {}).get("files", [])
           assert len(files) >= 5, f"Expected at least five frame snapshots, got {len(files)}"
           destination = Path(os.environ["GITHUB_WORKSPACE"]) / "out" / "hyperframes-snapshots"
