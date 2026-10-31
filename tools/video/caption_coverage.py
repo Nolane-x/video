@@ -12,6 +12,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
+MIN_READABLE_SAMPLES = 2
+
 
 def normalize_text(value: str) -> str:
     value = value.replace("Đ", "D").replace("đ", "d")
@@ -41,27 +43,92 @@ def text_coverage(expected: str, observed: str) -> float:
 
 
 def expected_text_for_shot(shot: dict[str, Any], index: int, total: int) -> list[dict[str, str]]:
-    """Resolve explicit text contract, or default to subtitle plus final end-card title."""
-    explicit = shot.get("requiredOnScreenText") or shot.get("required_on_screen_text")
-    if isinstance(explicit, list):
+    """Resolve explicit text requirements or infer text rendered by the current Remotion scene."""
+    explicit_key = next((key for key in ("requiredOnScreenText", "required_on_screen_text") if key in shot), None)
+    if explicit_key is not None:
+        explicit = shot[explicit_key]
+        if not isinstance(explicit, list):
+            raise ValueError(f"{explicit_key} must be a list of exact visible strings")
         return [
-            {"kind": "required", "text": str(item).strip()}
+            {"kind": "required", "text": item.strip()}
             for item in explicit
             if isinstance(item, str) and item.strip()
         ]
 
     args = shot.get("args") or {}
+    if not isinstance(args, dict):
+        raise ValueError("Shot args must be a JSON object")
     subtitle = args.get("subtitle") or shot.get("line")
     items: list[dict[str, str]] = []
     if isinstance(subtitle, str) and subtitle.strip():
         items.append({"kind": "subtitle", "text": subtitle.strip()})
 
-    # The current Remotion composition switches to its title/subtitle end card
-    # on the final shot. Normal shots show the timed subtitle, not args.title.
+    # Dynamic overlays in the current OneMoreScroll Remotion composition.
+    day = args.get("day")
+    if isinstance(day, str) and day.strip():
+        items.append({"kind": "day-counter", "text": day.strip()})
+
+    setting = args.get("setting") or shot.get("setting")
+    red_words = args.get("redWords") or args.get("red_words") or []
+    if setting in {"phone", "mirror", "void"} and isinstance(red_words, list):
+        items.extend(
+            {"kind": "red-word", "text": word.strip()}
+            for word in red_words
+            if isinstance(word, str) and word.strip()
+        )
+
+    # Fixed labels painted by the current scene backdrops.
+    fixed_labels = {
+        "calendar": ("THIS MONTH",),
+        "classroom": ("PAY ATTENTION",),
+        "bus": ("BUS",),
+        "busStop": ("BUS",),
+    }
+    items.extend(
+        {"kind": "scene-label", "text": label}
+        for label in fixed_labels.get(setting, ())
+    )
+
+    # The current composition switches to its title/subtitle end card only on
+    # the final shot. Normal shots show the timed subtitle, not args.title.
     title = args.get("title")
     if index == total - 1 and isinstance(title, str) and title.strip():
         items.append({"kind": "end-card-title", "text": title.strip()})
     return items
+
+
+def resolve_text_contract(shot: dict[str, Any], index: int, total: int) -> tuple[list[dict[str, str]], str, str]:
+    """Require visible text or a reasoned, explicit per-shot no-text exemption."""
+    items = expected_text_for_shot(shot, index, total)
+    no_text_required = bool(shot.get("noTextRequired", shot.get("no_text_required", False)))
+    reason_value = shot.get("noTextReason") or shot.get("no_text_reason") or ""
+    reason = reason_value.strip() if isinstance(reason_value, str) else ""
+
+    if no_text_required:
+        if items:
+            raise ValueError(
+                f"{shot.get('id', f'shot-{index + 1:03d}')}: noTextRequired conflicts with required visible text"
+            )
+        return ([], "approved-no-text" if reason else "missing-text-contract", reason)
+
+    if not items:
+        return [], "missing-text-contract", ""
+    return items, "tracked", ""
+
+
+def evaluate_text_samples(expected: str, observed_samples: list[str], threshold: float = 0.67) -> dict[str, Any]:
+    """Require readable text in at least two of three sampled frames, not a single lucky OCR hit."""
+    scores = [text_coverage(expected, observed) for observed in observed_samples]
+    readable_samples = sum(score >= threshold for score in scores)
+    minimum_readable_samples = min(MIN_READABLE_SAMPLES, len(scores))
+    return {
+        "coverage": round(sum(scores) / len(scores), 4) if scores else 0.0,
+        "best_sample_coverage": max(scores, default=0.0),
+        "readable_samples": readable_samples,
+        "sample_count": len(scores),
+        "minimum_readable_samples": minimum_readable_samples,
+        "passed": bool(scores) and readable_samples >= minimum_readable_samples,
+    }
 
 
 def run_checked(command: list[str]) -> str:
@@ -104,6 +171,8 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
     results = []
     total_items = 0
     passed_items = 0
+    shots_without_text_contract = 0
+    shots_approved_without_text = 0
 
     with tempfile.TemporaryDirectory(prefix="nolane-caption-qa-") as temp:
         work_dir = Path(temp)
@@ -113,9 +182,21 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
             end = float(shot.get("end", -1))
             if start < 0 or end <= start or end > duration + 0.25:
                 raise ValueError(f"{shot_id}: invalid time range {start}–{end} for {duration:.3f}s video")
-            expected_items = expected_text_for_shot(shot, index, len(shots))
-            if not expected_items:
-                results.append({"shot_id": shot_id, "start": start, "end": end, "status": "no-text-contract"})
+            expected_items, contract_status, no_text_reason = resolve_text_contract(shot, index, len(shots))
+            if contract_status == "approved-no-text":
+                shots_approved_without_text += 1
+                results.append({
+                    "shot_id": shot_id, "start": start, "end": end,
+                    "status": "approved-no-text", "no_text_reason": no_text_reason
+                })
+                continue
+            if contract_status == "missing-text-contract":
+                shots_without_text_contract += 1
+                results.append({
+                    "shot_id": shot_id, "start": start, "end": end,
+                    "status": "missing-text-contract",
+                    "error": "Declare requiredOnScreenText, provide an inferable subtitle, or add noTextRequired with noTextReason."
+                })
                 continue
 
             sample_records = []
@@ -126,14 +207,15 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
 
             shot_items = []
             for item in expected_items:
-                scores = [text_coverage(item["text"], sample["text"]) for sample in sample_records]
-                score = max(scores, default=0.0)
-                passed = score >= threshold
+                evaluation = evaluate_text_samples(
+                    item["text"], [sample["text"] for sample in sample_records], threshold
+                )
+                passed = evaluation["passed"]
                 total_items += 1
                 passed_items += int(passed)
                 shot_items.append({
                     **item,
-                    "coverage": score,
+                    **evaluation,
                     "threshold": threshold,
                     "status": "pass" if passed else "missing-or-illegible"
                 })
@@ -151,18 +233,21 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
 
     failed = total_items - passed_items
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "video": str(video),
         "shot_manifest": str(shots_path),
         "video_duration_seconds": round(duration, 3),
         "ocr_languages": languages,
         "coverage_threshold": threshold,
+        "minimum_readable_samples_per_text_item": MIN_READABLE_SAMPLES,
         "shots_checked": len(shots),
+        "shots_without_text_contract": shots_without_text_contract,
+        "shots_approved_without_text": shots_approved_without_text,
         "text_items_checked": total_items,
         "text_items_passed": passed_items,
         "text_items_failed": failed,
         "coverage": round(passed_items / total_items, 4) if total_items else 1.0,
-        "status": "pass" if failed == 0 else "fail",
+        "status": "pass" if failed == 0 and shots_without_text_contract == 0 else "fail",
         "shots": results
     }
 
@@ -181,9 +266,14 @@ def main() -> int:
     print(json.dumps({k: v for k, v in report.items() if k != "shots"}, ensure_ascii=False, indent=2))
     if report["status"] != "pass":
         for shot in report["shots"]:
+            if shot["status"] == "missing-text-contract":
+                print(f"CAPTION CONTRACT BLOCKER [{shot['shot_id']}]: {shot['error']}")
             for item in shot.get("required_text", []):
                 if item["status"] != "pass":
-                    print(f"CAPTION BLOCKER [{shot['shot_id']}]: {item['text']!r} coverage={item['coverage']}")
+                    print(
+                        f"CAPTION BLOCKER [{shot['shot_id']}]: {item['text']!r} "
+                        f"coverage={item['coverage']} readable_samples={item['readable_samples']}/{item['sample_count']}"
+                    )
         return 1
     return 0
 

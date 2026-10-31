@@ -54,7 +54,7 @@ Do not install or invoke every engine for every deliverable. Route by requiremen
 2. **Information/story completeness:** no missing script sections, required steps, essential claims, dialogue, captions or on-screen information.
 3. **Truth and provenance:** factual claims cite sources; product behavior is real; source media, generated media, fonts, music, voices and models have recorded permissions/terms.
 4. **Visual craft:** deliberate hierarchy, composition, visual grammar, typography, contrast, shot variety and continuity. Do not substitute generic templates or random zooms for direction.
-5. **Text/caption coverage:** exact approved wording; complete speech/step coverage where required; readable dwell time; safe-area placement; no overlap with important faces/product UI.
+5. **Text/caption coverage:** a per-shot contract for subtitles and meaningful visible headings, labels, counters, kinetic words and end cards; explicit reason for shots intentionally containing no text; OCR detection in multiple samples (not a single hit); readable dwell time; safe-area placement; no overlap with important faces/product UI.
 6. **Motion/editing:** action reads; camera movement has purpose; transitions, shot timing and beat alignment serve comprehension/story.
 7. **Audio:** dialogue/narration is intelligible; music/SFX are licensed and synchronized; measure actual integrated loudness and true peak for the target platform.
 8. **Technical:** verify stream count, codec, resolution, aspect ratio, FPS, duration, sample rate, channels, metadata and SHA-256.

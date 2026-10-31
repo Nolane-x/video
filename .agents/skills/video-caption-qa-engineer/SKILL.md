@@ -7,9 +7,11 @@ description: Use when creating captions, aligning narration to text, localizing 
 ## Coverage before style
 1. Treat final approved transcript/shot copy as source of truth.
 2. Create a timed caption/on-screen-text manifest with stable IDs, exact text, language, start/end frames, safe-area bounds and visual priority.
-3. Check each spoken sentence and important visual label against the manifest. Do not assume ASR alone is correct.
-4. Render representative frames, OCR actual output with Tesseract EN/VI, and compare detected text to required text. OCR is a secondary detector, not final authority.
-5. Inspect contact sheets and moving playback. Check text size, contrast, line breaks, minimum display duration, reading speed, cropping, occlusion and subtitle overlap with acting.
+3. Every shot must have a text contract: include subtitles plus every meaningful visible heading, label, counter, kinetic word or end-card title. For Remotion shots, the auditor infers known subtitle, day-counter, red-word and fixed scene-label fields; use `requiredOnScreenText` for additional or genre-specific overlays.
+4. A shot intentionally containing no text must declare `noTextRequired: true` and a specific `noTextReason`. An unexplained empty shot is a missing-contract blocker, not an automatic pass.
+5. Check each spoken sentence and important visual label against the manifest. Do not assume ASR alone is correct.
+6. Render representative frames, OCR actual output with Tesseract EN/VI, and compare detected text to required text. The current audit samples three points per shot and requires readable detection in at least two; a single lucky OCR hit is not enough. OCR is a secondary detector, not final authority.
+7. Inspect contact sheets and moving playback. Check text size, contrast, line breaks, minimum display duration, reading speed, cropping, occlusion and subtitle overlap with acting.
 
 ## Timing and accessibility
 Synchronize word/phrase segments with actual speech; manually correct Vietnamese names, punctuation, numbers and technical terms. Include speaker labels/sound descriptions when needed. Localize typography rather than translating line-by-line when line length or context requires it. Captions must not cover hands, faces, contact points or important props.

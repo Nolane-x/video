@@ -36,6 +36,57 @@ class CaptionCoverageTests(unittest.TestCase):
             {"kind": "required", "text": "Required label"}
         ])
 
+    def test_dynamic_day_and_red_word_overlays_are_included(self):
+        shot = {
+            "line": "The voice starts sounding like your own.",
+            "args": {
+                "subtitle": "The voice starts sounding like your own.",
+                "setting": "mirror",
+                "day": "DAY 03",
+                "redWords": ["TOMORROW", "LATER"]
+            }
+        }
+        self.assertEqual(expected_text_for_shot(shot, 0, 1), [
+            {"kind": "subtitle", "text": "The voice starts sounding like your own."},
+            {"kind": "day-counter", "text": "DAY 03"},
+            {"kind": "red-word", "text": "TOMORROW"},
+            {"kind": "red-word", "text": "LATER"}
+        ])
+
+    def test_fixed_scene_labels_are_included(self):
+        shot = {"line": "One day becomes a habit.", "args": {"setting": "calendar", "subtitle": "One day becomes a habit."}}
+        self.assertEqual(expected_text_for_shot(shot, 0, 1)[-1], {"kind": "scene-label", "text": "THIS MONTH"})
+
+    def test_untracked_no_text_shot_fails_closed(self):
+        from caption_coverage import resolve_text_contract
+        items, status, reason = resolve_text_contract({"id": "blank-shot", "args": {"setting": "park"}}, 0, 1)
+        self.assertEqual(items, [])
+        self.assertEqual(status, "missing-text-contract")
+        self.assertEqual(reason, "")
+
+    def test_explicit_no_text_exemption_requires_a_reason(self):
+        from caption_coverage import resolve_text_contract
+        _, status_without_reason, _ = resolve_text_contract({"noTextRequired": True}, 0, 1)
+        _, status_with_reason, reason = resolve_text_contract({
+            "id": "visual-pause", "noTextRequired": True, "noTextReason": "Intentional silent visual hold"
+        }, 0, 1)
+        self.assertEqual(status_without_reason, "missing-text-contract")
+        self.assertEqual(status_with_reason, "approved-no-text")
+        self.assertEqual(reason, "Intentional silent visual hold")
+
+    def test_text_must_be_readable_in_two_of_three_samples(self):
+        from caption_coverage import evaluate_text_samples
+        one_hit = evaluate_text_samples("Choose where it goes", [
+            "Choose where it goes", "", ""
+        ])
+        two_hits = evaluate_text_samples("Choose where it goes", [
+            "Choose where it goes", "Choose where it goes", ""
+        ])
+        self.assertFalse(one_hit["passed"])
+        self.assertEqual(one_hit["readable_samples"], 1)
+        self.assertTrue(two_hits["passed"])
+        self.assertEqual(two_hits["readable_samples"], 2)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
