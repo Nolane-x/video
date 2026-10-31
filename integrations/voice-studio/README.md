@@ -1,6 +1,6 @@
 # Nolane Voice Studio Integration
 
-This is the voice-production layer for \`Nolane-x/video\`. It reuses the user's
+This is the voice-production layer for `Nolane-x/video`. It reuses the user's
 pinned VoiceStudio application as the voice-management and synthesis core; it
 does not rebuild another desktop studio or duplicate the upstream backend.
 
@@ -10,21 +10,21 @@ The application is pinned as an independent Git submodule:
 
 - Repository: https://github.com/Nolane-x/VoiceStudio
 - Parent: https://github.com/debpalash/VoiceStudio
-- Commit: \`faa5294359f23c911972ffe6d27785c50c67097b\`
+- Commit: `faa5294359f23c911972ffe6d27785c50c67097b`
 - Application license: AGPL-3.0
 - Model weights and local voice assets are not committed to this repository.
 
 Initialize the submodule:
 
-\`\`\`bash
+```bash
 git submodule update --init vendor/VoiceStudio
-\`\`\`
+```
 
 Start VoiceStudio locally (desktop app or its documented Docker service).
-The adapter defaults to \`http://127.0.0.1:3900\`.
+The adapter defaults to `http://127.0.0.1:3900`.
 
-- \`VOICESTUDIO_BASE_URL\` — optional service URL.
-- \`VOICESTUDIO_API_KEY\` — optional on loopback; required if the remote
+- `VOICESTUDIO_BASE_URL` — optional service URL.
+- `VOICESTUDIO_API_KEY` — optional on loopback; required if the remote
   service is configured for API-key access. Remote API keys require HTTPS.
   Never commit the value.
 
@@ -55,63 +55,63 @@ profile.
 
 KorvaTTS is installed only when selected:
 
-\`\`\`bash
+```bash
 python -m pip install "korvatts==0.1.3"
-\`\`\`
+```
 
 Its official API loads one CPU model, exposes the ten bundled IDs through
-\`list_voices()\`, and supports a fixed seed, 1–32 inference steps and speed
+`list_voices()`, and supports a fixed seed, 1–32 inference steps and speed
 from 0.5 to 2.0. The adapter pins CPU inference and caches the model object for
 the batch, rather than reloading it for every utterance.
 
 Other optional provider installs:
 
-\`\`\`bash
+```bash
 python -m pip install google-cloud-texttospeech
-\`\`\`
+```
 
 Google credentials use Application Default Credentials. ElevenLabs reads
-\`ELEVENLABS_API_KEY\`. Keep all credentials in local secret stores, never in
+`ELEVENLABS_API_KEY`. Keep all credentials in local secret stores, never in
 manifests or Git.
 
 ## 3. Create a reusable Nolane voice set
 
 The repository includes an original Vietnamese voice-design set:
-\`examples/vietnamese-original-voice-set.json\`. It defines five fictional
+`examples/vietnamese-original-voice-set.json`. It defines five fictional
 speaker identities with different timbre, delivery, and seed settings. It uses
-the exact engine ID \`voxcpm2\`; change that only to an installed engine that
+the exact engine ID `voxcpm2`; change that only to an installed engine that
 declares native voice-design support.
 
 First create a plan. This makes no API calls and changes nothing in VoiceStudio:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/design_voice_library.py \\
   --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
   --output out/nolane-vietnamese-voices
-\`\`\`
+```
 
 After reviewing the plan, create the profiles and render their sample clips:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/design_voice_library.py \\
   --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
   --output out/nolane-vietnamese-voices --create
-\`\`\`
+```
 
-This calls VoiceStudio's native \`POST /profiles\` design path with a validated
+This calls VoiceStudio's native `POST /profiles` design path with a validated
 recipe, exact engine ID, language and seed. The service stores a reusable
 profile ID. The first profile-audio request lazily renders the identity sample.
-The local \`voice-design-library.json\` records names, profile IDs, description
+The local `voice-design-library.json` records names, profile IDs, description
 fingerprints, preview status and failures. Rerunning against the same output
 directory reuses profiles already recorded there; it does not recreate them.
 
 To create the profiles but defer expensive preview/model loading:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/design_voice_library.py \\
   --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
   --output out/nolane-vietnamese-voices --create --no-preview
-\`\`\`
+```
 
 The profile IDs from the report are the values to put in the cast. A seed
 provides reproducible sampling; it does not by itself guarantee perfect
@@ -121,33 +121,33 @@ speaker identity, naturalness or identical prosody on every long passage.
 
 List the current VoiceStudio engines, saved profiles and archetypes:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/voice_catalog.py --provider voicestudio --language vi
 python integrations/voice-studio/voice_catalog.py --provider korva --language vi
 python integrations/voice-studio/voice_catalog.py --provider google --language vi-VN
 python integrations/voice-studio/voice_catalog.py --provider elevenlabs --language vi
-\`\`\`
+```
 
 Build a local gallery from saved profiles and previews:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/voice_audition.py \\
   --source profiles --language vi --limit 40 \\
   --output out/voice-auditions
-\`\`\`
+```
 
 For an A/B comparison, use the exact same script and engine across saved
 profiles, and hide their names while listening:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/voice_audition.py \\
   --source profiles --language vi \\
   --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
   --engine voxcpm2 --blind \\
   --output out/voice-a-b
-\`\`\`
+```
 
-Open \`out/voice-a-b/index.html\` locally. The blind page labels candidates
+Open `out/voice-a-b/index.html` locally. The blind page labels candidates
 rather than revealing profile names/IDs. The JSON report retains the mapping
 so the listener can reveal the selected voice after the comparison. A blind
 listening test is a selection aid, not an automatic quality score.
@@ -159,28 +159,28 @@ different scripts.
 
 Compare local and cloud providers in one run with the same script:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/provider_voice_benchmark.py \\
   --provider all --engine voxcpm2 \\
   --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
   --language vi --limit 20 --output out/benchmark-all
-\`\`\`
+```
 
-By default \`--provider all\` compares VoiceStudio saved profiles and KorvaTTS
+By default `--provider all` compares VoiceStudio saved profiles and KorvaTTS
 local presets only. To include Google and ElevenLabs as well:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/provider_voice_benchmark.py \\
   --provider all --engine voxcpm2 --allow-cloud \\
   --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
   --language vi --limit 20 --output out/benchmark-all-cloud
-\`\`\`
+```
 
-Here \`--limit\` is the maximum number of candidates **per provider**. A
+Here `--limit` is the maximum number of candidates **per provider**. A
 VoiceStudio engine ID is required so the selected profile family uses the
 same engine. Saved VoiceStudio profiles retain their own design seed;
 KorvaTTS uses the same supplied benchmark seed for every preset. Google and
-ElevenLabs calls can incur charges; the explicit \`--allow-cloud\` flag is
+ElevenLabs calls can incur charges; the explicit `--allow-cloud` flag is
 mandatory whenever either cloud provider is included.
 
 A run exports one blind HTML listening page and an identity-mapped JSON report.
@@ -193,15 +193,15 @@ validated ElevenLabs-equivalence percentage.
 
 ## 5. Lock a cast and generate the voice-over
 
-Use a top-level \`cast\` object to declare each character's voice once. Every
-line references a \`speaker_id\`. The generator fingerprints provider, engine,
+Use a top-level `cast` object to declare each character's voice once. Every
+line references a `speaker_id`. The generator fingerprints provider, engine,
 voice/profile ID, language, description/instruct, seed and settings; it stops
 if the same speaker ID silently changes voice identity.
 
-\`examples/voice-casting-template.json\` shows the structure. A shortened
+`examples/voice-casting-template.json` shows the structure. A shortened
 example:
 
-\`\`\`json
+```json
 {
   "language": "vi",
   "cast": {
@@ -225,23 +225,23 @@ example:
     {"id": "V003", "speaker_id": "narrator", "slot": "NARRATOR", "text": "Lời dẫn tiếp..."}
   ]
 }
-\`\`\`
+```
 
 Plan without calling a provider:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/generate_voiceover.py \\
   --manifest integrations/voice-studio/examples/vietnamese-documentary.json \\
   --output out/voiceover --plan-only
-\`\`\`
+```
 
 Generate:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/generate_voiceover.py \\
   --manifest integrations/voice-studio/examples/vietnamese-documentary.json \\
   --output out/voiceover
-\`\`\`
+```
 
 The batch:
 
@@ -249,29 +249,29 @@ The batch:
 - Caches by text + provider + model + voice + seed + synthesis settings.
 - Writes progress after each segment; on one failed segment it records the
   error and continues with the rest. Re-running reuses successful cache items.
-- Writes \`voice-generation-report.json\` with profile identity, expected text,
+- Writes `voice-generation-report.json` with profile identity, expected text,
   audio path, byte count and SHA-256.
-- Writes \`02-VOICE-<project>-TTS.txt\` in the exact block format read by the
-  existing H2 \`prep_voice.py\`. That tool remains responsible for creating
-  \`voice.wav\`, \`blocks.json\`, \`lines.json\`, \`words.json\` and
-  \`transcript.txt\`.
+- Writes `02-VOICE-<project>-TTS.txt` in the exact block format read by the
+  existing H2 `prep_voice.py`. That tool remains responsible for creating
+  `voice.wav`, `blocks.json`, `lines.json`, `words.json` and
+  `transcript.txt`.
 
 ## 6. Audio and intelligibility QA
 
 Run technical analysis on the generated report:
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/voice_quality.py \\
   --report out/voiceover/voice-generation-report.json
-\`\`\`
+```
 
 For an ASR round-trip (requires a working ASR engine already configured in
 VoiceStudio):
 
-\`\`\`bash
+```bash
 python integrations/voice-studio/voice_quality.py \\
   --report out/voiceover/voice-generation-report.json --asr --language vi
-\`\`\`
+```
 
 The quality report measures technical signals such as duration, sample rate,
 peak/RMS, clipping and near-silence. Optional WER/CER compares the generated
@@ -290,7 +290,7 @@ The generator outputs a ready-to-use H2 voice block file and individual
 segment audio. Run the existing H2 timing stage with the actual tool path
 recorded in the report:
 
-\`integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py\`.
+`integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py`.
 
 The video renderer still owns the final timing, subtitle alignment, sound mix
 and master. TTS generation is not the final audio master.
