@@ -104,17 +104,22 @@ jobs:
 
       - name: Expose pinned modules to the existing Remotion workspace
         run: |
+          NODE_MODULES_DIR="$GITHUB_WORKSPACE/toolchain/node/node_modules"
+          test -s "$NODE_MODULES_DIR/react/package.json"
+          test -s "$NODE_MODULES_DIR/remotion/package.json"
           mkdir -p video-projects/remotion
           if [ -e video-projects/remotion/node_modules ]; then
             echo "Unexpected node_modules exists in checkout; refusing to replace it." >&2
             exit 1
           fi
-          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" video-projects/remotion/node_modules
+          ln -s "$NODE_MODULES_DIR" video-projects/remotion/node_modules
           if [ -e node_modules ]; then
             echo "Unexpected root node_modules exists; refusing to replace it." >&2
             exit 1
           fi
-          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" node_modules
+          ln -s "$NODE_MODULES_DIR" node_modules
+          test -s video-projects/remotion/node_modules/react/package.json
+          test -s video-projects/remotion/node_modules/remotion/package.json
 
       - name: Typecheck the existing Remotion project
         working-directory: video-projects/remotion
