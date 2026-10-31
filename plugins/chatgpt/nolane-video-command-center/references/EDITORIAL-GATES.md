@@ -51,3 +51,9 @@ The validator checks the record and the media identity. It cannot prove that the
 | Independent full review attestation | A reviewer records full audiovisual inspection and evidence | The validator itself cannot verify the reviewer's honesty |
 
 Never report "production-ready", "approved", "published" or "archived" from a render/checksum/OCR pass alone.
+
+## Renderer contract
+
+The Remotion timeline now consumes each shot's explicit `start` and `end` seconds, rather than assigning every scene a fixed five-second frame budget. The preflight requires a continuous timeline from 0 to the declared duration, with no gaps/overlaps. It also reads the music arc and checks that voiceover/dialogue plans include timed audio-file references. The renderer can read optional `audioPlan.narration` clips from `public/audio/narration/` and `audioPlan.soundCues` from `public/audio/`; a file must actually be generated/staged before a full render can succeed.
+
+A dynamic renderer only enables meaningful timing; it does not design the story or guarantee that varied durations are artistically correct. Those decisions still need to be made in the storyboard and checked in an animatic.
