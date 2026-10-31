@@ -5,6 +5,7 @@ not advertised here because it is a separate upstream roadmap capability.
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,17 @@ def list_voices(language: str = "vi") -> list[dict[str, Any]]:
     return [dict(v, provider="korva", type="preset") for v in VOICES]
 
 
+@lru_cache(maxsize=1)
+def _engine():
+    try:
+        from korvatts import TTS
+    except ImportError as exc:
+        raise RuntimeError(
+            "KorvaTTS is optional. Install it with: python -m pip install korvatts"
+        ) from exc
+    return TTS()
+
+
 def synthesize(
     text: str,
     voice: str,
@@ -43,14 +55,8 @@ def synthesize(
         raise ValueError(f"Unknown KorvaTTS voice: {voice}")
     if not 0.5 <= speed <= 2.0:
         raise ValueError("speed must be between 0.5 and 2.0")
-    try:
-        from korvatts import TTS
-    except ImportError as exc:
-        raise RuntimeError(
-            "KorvaTTS is optional. Install it with: python -m pip install korvatts"
-        ) from exc
     options = settings or {}
-    engine = TTS()
+    engine = _engine()
     audio, _duration = engine.synthesize(
         text,
         voice=voice,
