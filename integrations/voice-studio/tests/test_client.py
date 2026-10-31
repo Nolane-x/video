@@ -130,6 +130,18 @@ class VoiceStudioClientTests(unittest.TestCase):
         for field in (b'name="name"', b'name="kind"', b'name="vd_states"',
                       b'name="design_recipe"', b'name="engine"', b'name="seed"'):
             self.assertIn(field, body)
+        import re
+        import ast
+        match = re.search(
+            rb'name="vd_states"\\r\\n\\r\\n(.*?)\\r\\n', body, re.S
+        )
+        self.assertIsNotNone(match)
+        picks = json.loads(match.group(1).decode("utf-8"))
+        self.assertEqual(
+            set(picks),
+            {"Gender", "Age", "Pitch", "Style", "EnglishAccent", "ChineseDialect"},
+        )
+        self.assertTrue(all(value == "Auto" for value in picks.values()))
         self.assertIn(b"Original fictional Vietnamese narrator", body)
         self.assertIn(b"voxcpm2", body)
         self.assertIn(b"4201", body)
