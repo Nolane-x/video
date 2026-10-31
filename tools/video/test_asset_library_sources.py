@@ -2988,6 +2988,25 @@ class NPSNPGalleryImageImporterTests(unittest.TestCase):
             1,
         )
 
+    def test_nps_people_privacy_review_flags_volunteers_speakers_and_interpreters(self):
+        for description in (
+            "Volunteers build a bridge at Greenbelt Park.",
+            "A keynote speaker talks with park visitors.",
+            "An interpreter assists visitors during a ceremony.",
+            "Performers and audience gather at a historic site.",
+            "A park ranger and workers restore a trail.",
+        ):
+            self.assertRegex(
+                description,
+                nps_broll_importer.NPS_REVIEW_PEOPLE_RE,
+                description,
+            )
+        self.assertIsNone(
+            nps_broll_importer.NPS_REVIEW_PEOPLE_RE.search(
+                "Ancient bristlecone pine beneath a clear night sky."
+            )
+        )
+
     def test_image_lane_is_registered_and_classified_as_photography(self):
         self.assertEqual(
             shard_builder.SOURCE_LANES["nps-gallery-images"],
