@@ -112,7 +112,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: remotion-full-video-caption-qa-${{ github.run_id }}
-          path: out/caption-coverage/report.json
+          path: video-projects/remotion/out/caption-coverage/report.json
           if-no-files-found: warn
           retention-days: 30
 
