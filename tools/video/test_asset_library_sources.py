@@ -1995,7 +1995,7 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         self.assertIsNotNone(chosen)
         self.assertTrue(chosen["url"].endswith("/4k.mp4"))
         self.assertIn("no page-level", reason)
-        page["media_groups"][0]["caption"] = "Music credit: licensed soundtrack."
+        page["media_groups"][0]["items"][0]["caption"] = "Music credit: licensed soundtrack."
         chosen, reason = nasa_svs_importer.choose_video_candidate(page)
         self.assertIsNone(chosen)
         self.assertIn("third-party-music", reason)
