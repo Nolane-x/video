@@ -638,6 +638,25 @@
       "note": "The importer first verifies that the official CDC B-roll index states that CDC B-roll is produced by the U.S. Government and is in the public domain. It follows only the exact category pages linked by that index and imports direct MP4/MOV anchors from individual DFE item sections. It selects the highest available quality variant per section (preferring 4K, 1080p and full-size files), rejects item sections containing copyright, third-party, licensed-material or permission exception wording, and restricts downloads to exact HTTPS www.cdc.gov/media/video/b-roll/ or /media/video/fullvideo/ paths. MIME type, ISO-BMFF signature, redirect target, per-file and total byte ceilings and SHA-256 are checked. CDC asks users to cite CDC as the source; do not imply CDC endorsement. People and healthcare footage is flagged for privacy/publicity review before commercial or promotional use. Public Domain status under the CDC B-roll notice is not represented as CC0. Limits: 60 downloads, 300 MiB per file and 4 GiB total."
     },
     {
+      "id": "nps-park-broll-archive",
+      "title": "National Park Service — official park B-roll archives",
+      "provider": "National Park Service (U.S. Department of the Interior)",
+      "kind": "official park multimedia B-roll collections",
+      "category": "landscapes, national parks, geology, deserts, canyons, wildlife, visitors, park operations and heritage sites",
+      "source_indexes": [
+        "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+        "https://www.nps.gov/jotr/learn/photosmultimedia/broll.htm",
+        "https://www.nps.gov/deva/learn/photosmultimedia/b-roll-footage.htm",
+        "https://www.nps.gov/yose/learn/photosmultimedia/b-roll.htm",
+        "https://www.nps.gov/saan/learn/photosmultimedia/videos.htm"
+      ],
+      "license": "Public Domain under each named NPS archive's explicit collection notice; not CC0",
+      "license_url": "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+      "verified_page_license": true,
+      "bundling": "bounded-five-park-nps-public-domain-broll-import-after-collection-notice-verification-direct-media-path-allowlist-and-video-only-remux",
+      "note": "The importer begins only from five named NPS park B-roll indexes whose content explicitly states Public Domain use. It follows same-park B-roll/clip pages and NPS media-view pages linked from those indexes; direct media downloads are restricted to exact HTTPS www.nps.gov/nps-audiovideo/audiovideo or park-scoped legacy MP4 paths. Select the highest available 1080p/720p rendition. Validate redirects, MIME, ISO-BMFF MP4 signature, file/aggregate size ceilings and calculate a SHA-256 after download. NPS does not publish a source checksum in these pages, so the computed hash is not misrepresented as a source-provided checksum. All audio streams are stripped to avoid redistributing an uncertain soundtrack, and ffprobe confirms zero audio streams. Preserve any explicit park credit verbatim (Death Valley's notice currently spells 'Courtsey' that way); otherwise NPS attribution is recommended. Do not imply NPS endorsement or use the protected arrowhead. Review identifiable people, private property and third-party marks before commercial/promotional use. Public Domain is not labelled CC0."
+    },
+    {
       "id": "internet-archive-prelinger-nasa-moving-images",
       "title": "Internet Archive — Prelinger and NASA public-domain/CC0 moving images",
       "provider": "Internet Archive",
