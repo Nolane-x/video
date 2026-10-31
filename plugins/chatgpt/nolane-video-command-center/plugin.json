@@ -13,7 +13,7 @@
         "developerName": "Nolane Studio",
         "displayName": "Nolane Video Command Center",
         "longDescription": "One private entry point with 29 internal skills plus an indexed handoff map for 37 source-backed specialist plugins across engines, storytelling, data visualization, vector/SVG tooling, media/speech, OCR/audio analysis, editorial, 3D/VFX, post-processing, interactive vector, browser, CI security and QA. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the separate resource-library workstream.",
-        "shortDescription": "29 core skills + 37 specialists"
+        "shortDescription": "29 skills, 37 plugins"
       }
     }
   },
@@ -40,5 +40,5 @@
   ],
   "name": "nolane-video-command-center",
   "repository": "https://github.com/Nolane-x/video",
-  "version": "0.7.8"
+  "version": "0.7.9"
 }
