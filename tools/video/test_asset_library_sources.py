@@ -2009,6 +2009,15 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
                 nasa_svs_importer._json("https://svs.gsfc.nasa.gov/api/search/", 10)
         response.read.assert_not_called()
 
+    def test_nasa_svs_downloader_obeys_declared_metadata_budget(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(nasa_svs_importer, "MAX_METADATA_BYTES", 1), \
+                 mock.patch.object(nasa_svs_importer, "_search_pages", return_value=[(5687, "Earth")]), \
+                 mock.patch.object(nasa_svs_importer, "_json", return_value=({"page_type": "Visualization"}, 2)):
+                report = nasa_svs_importer.download_nasa_svs_media(Path(tmp), [])
+        skipped = next(row for row in report if row.get("status") == "metadata-budget-exhausted")
+        self.assertEqual(skipped["id"], "nasa-svs-5687")
+
     def test_nasa_svs_shard_lane_is_registered_and_packaged_as_footage(self):
         self.assertEqual(shard_builder.SOURCE_LANES["nasa-svs"], "download_nasa_svs_media")
         self.assertEqual(bundle_packager.classify_asset({
