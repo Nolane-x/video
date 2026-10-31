@@ -1,4 +1,4 @@
-# Nolane Video Command Center — Specialist Plugin Registry v0.7.7
+# Nolane Video Command Center — Specialist Plugin Registry v0.7.8
 
 The Command Center includes 29 internal skills and is the normal single entry point. The 37 specialist plugins below are separate private ChatGPT plugins. They are source-backed specialist packages; each records its source basis and relevant license/provenance. **The Command Center cannot invisibly activate another private plugin.** Open the relevant link / switch to that plugin for specialist execution, or keep the work inside the internal skills when they are sufficient.
 
@@ -47,7 +47,7 @@ The Command Center includes 29 internal skills and is the normal single entry po
 | Specialist | Version | Entry | Best fit |
 |---|---:|---|---|
 | FFmpeg Studio | 0.2.0 | https://chatgpt.com/plugins/plugins_6ae58d490c5c8191a78da9ac70414d45 | Probe-first editing, lossless-first processing, filters, encoding and delivery checks. |
-| FFprobe Studio | 0.2.0 | https://chatgpt.com/plugins/plugins_6ae58e74aca88191a4d3c2d6e13cf8a6 | Structured metadata, stream/timing/silence/loudness/integrity observations. |
+| FFprobe Studio | 0.2.0 | https://chatgpt.com/plugins/plugins_6ae58e74aca88191b51394626403575e | Structured metadata, stream/timing/silence/loudness/integrity observations. |
 | Audio & Speech Studio | 0.3.0 | https://chatgpt.com/plugins/plugins_6ae5688dc4108191a3251586f71d0e2 | Local transcription, subtitle validation, typed audio processing, VO/SFX/mix/mastering. |
 | Aubio Studio | 0.2.0 | https://chatgpt.com/plugins/plugins_6ae58e1dcdcc8191bc531529c16a8887 | Onset novelty, beat candidates, pitch/note analysis and audio-event to video-frame mapping; GPL engine not bundled. |
 | whisper.cpp Studio | 0.2.1 | https://chatgpt.com/plugins/plugins_6ae58e28240881919d77b3cb9adf467a | Offline-first local ASR, multilingual model/quantization selection, transcript provenance and SRT QA. |
@@ -73,6 +73,7 @@ The Command Center includes 29 internal skills and is the normal single entry po
 6. Keep user approval gates for merges, paid APIs, model downloads, asset workstream changes and production writes.
 
 ## Activation boundary
+
 This is a static registry and handoff guide. Plugin switching/activation is controlled by the ChatGPT host and the user. No claim is made that the currently selected plugin can invoke another private plugin's tools or skills in the background.
 
 ## Existing distinct plugins
