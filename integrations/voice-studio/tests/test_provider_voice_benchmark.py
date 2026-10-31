@@ -200,6 +200,47 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
             self.assertEqual(saved["status"], "complete")
             self.assertEqual(saved["pending"], 0)
 
+    def test_resume_retries_asr_when_the_previous_attempt_was_unavailable(self):
+        synthesis_calls = []
+        class FlakyAsrClient:
+            def __init__(self):
+                self.calls = 0
+            def transcribe(self, audio_path, language=None):
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("ASR service temporarily unavailable")
+                return "Xin chào Việt Nam."
+
+        client = FlakyAsrClient()
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            synthesis_calls.append(candidate["id"])
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", return_value=[
+                {"id": "voice-a", "name": "Voice A", "language": "vi"}
+            ]):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    first = benchmark.run_benchmark(
+                        "korva", "Xin chào Việt Nam.", Path(tmp),
+                        language="vi", asr=True, client=client, delay=0,
+                    )
+                    self.assertEqual(
+                        first["candidates"][0]["asr_intelligibility_proxy"]["status"],
+                        "unavailable",
+                    )
+                    second = benchmark.run_benchmark(
+                        "korva", "Xin chào Việt Nam.", Path(tmp),
+                        language="vi", asr=True, client=client, delay=0,
+                    )
+            row = second["candidates"][0]
+            self.assertEqual(row["asr_intelligibility_proxy"]["status"], "available")
+            self.assertEqual(row["asr_intelligibility_proxy"]["wer"], 0)
+            self.assertEqual(second["cache_hits"], 1)
+            self.assertEqual(synthesis_calls, ["voice-a"])
+
     def test_report_audio_path_cannot_escape_benchmark_output_directory(self):
         with tempfile.TemporaryDirectory() as output_tmp:
             with tempfile.TemporaryDirectory() as outside_tmp:
