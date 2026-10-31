@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "language": "vi",
+  "cases": [
+    {
+      "id": "tones-phonemes",
+      "title": "Thanh điệu và phụ âm",
+      "purpose": "Kiểm tra sáu thanh điệu, phụ âm đầu/cuối, âm tiết gần nhau và dấu tiếng Việt.",
+      "text": "Xin chào. Đây là bài thử giọng nói tiếng Việt của Nolane. Má, mà, mả, mã, mạ; ba, bá, bà, bả, bã, bạ. Trời trở lạnh, trăng sáng trên những tán cây. Chú Trường chèo thuyền qua con suối nhỏ, trong khi chị Sương sửa soạn chiếc chăn mới. Hãy đọc rõ âm đầu, âm cuối và dấu thanh, nhưng vẫn giữ nhịp nói tự nhiên."
+    },
+    {
+      "id": "code-switch",
+      "title": "Tiếng Việt xen tiếng Anh",
+      "purpose": "Kiểm tra code-switching, thuật ngữ kỹ thuật, cách đọc từ viết tắt và nhịp nói hội thoại.",
+      "text": "Trong sprint này, team sẽ hoàn thiện dashboard, kiểm tra API, tối ưu cache và chạy regression test. Khi deploy lên production, hệ thống cần log đầy đủ, rollback an toàn và hiển thị trạng thái real-time. Đừng đọc từng từ tiếng Anh như một danh sách rời rạc; hãy nối chúng vào câu tiếng Việt một cách tự nhiên, rõ ràng và dễ nghe."
+    },
+    {
+      "id": "numbers-and-proper-nouns",
+      "title": "Số liệu, ngày tháng và tên riêng",
+      "purpose": "Kiểm tra con số, đơn vị, tên riêng, chữ viết tắt và ngữ điệu đọc thông tin.",
+      "text": "Ngày 31 tháng 10 năm 2026, lúc 7 giờ 05 phút, nhóm nghiên cứu công bố 1.024 mẫu thử với tỷ lệ 98,6 phần trăm. Máy chủ có 16 GB RAM, 4 CPU và ổ SSD 14 GB. Dự án Nolane Video tích hợp VoiceStudio, KorvaTTS, ONNX Runtime và các công cụ kiểm tra âm thanh. Hãy đọc số liệu rành mạch, không nuốt đơn vị và không biến câu thông báo thành giọng đọc máy móc."
+    },
+    {
+      "id": "documentary-longform",
+      "title": "Lời dẫn phim tài liệu dài",
+      "purpose": "Kiểm tra độ liền mạch ở đoạn dài, nhịp nghỉ, câu chuyển ý và độ ổn định giọng.",
+      "text": "Buổi sáng bắt đầu rất chậm ở vùng cửa biển. Khi mặt trời vừa vượt qua đường chân trời, những con thuyền nhỏ lần lượt rời bến, để lại phía sau một dải sóng bạc. Người dân nơi đây đã sống cùng thủy triều qua nhiều thế hệ. Họ quan sát màu nước, hướng gió và những thay đổi rất nhỏ trên mặt biển để quyết định thời điểm ra khơi. Nhưng cuộc sống ven biển đang thay đổi. Công nghệ dự báo giúp ngư dân tiếp cận thông tin nhanh hơn, trong khi các thiết bị định vị và liên lạc giúp chuyến đi an toàn hơn. Dù vậy, kinh nghiệm của con người vẫn giữ vai trò quan trọng. Một bản tin chính xác chỉ có ý nghĩa khi người nghe hiểu được điều gì đang diễn ra, vì sao nó quan trọng và họ cần chuẩn bị cho điều gì tiếp theo. Đó cũng là yêu cầu đối với một giọng dẫn chuyện tốt: không chỉ phát âm đúng, mà còn phải truyền tải ý nghĩa, giữ nhịp kể ổn định và biết dành khoảng lặng cho người xem suy nghĩ."
+    }
+  ]
+}
