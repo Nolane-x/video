@@ -121,6 +121,37 @@ def evaluate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             "Voiceover/dialogue is selected but no narration/dialogue plan is supplied.",
         ))
 
+    audio_plan = plan.get("audioPlan")
+    if policy in {"voiceover", "dialogue"}:
+        narration_segments = audio_plan.get("narration") if isinstance(audio_plan, dict) else None
+        if not isinstance(narration_segments, list) or not narration_segments:
+            findings.append(_finding(
+                "audio.missing-timed-narration", "P1",
+                "Voiceover/dialogue requires timed narration segments and real audio file paths in audioPlan.narration.",
+            ))
+        else:
+            for index, segment in enumerate(narration_segments):
+                if not isinstance(segment, dict):
+                    findings.append(_finding("audio.invalid-narration-segment", "P1", f"audioPlan.narration[{index}] must be an object."))
+                    continue
+                if not _nonempty(segment.get("file")):
+                    findings.append(_finding("audio.narration-file-missing", "P1", f"audioPlan.narration[{index}] needs a generated/approved audio filename."))
+                if not isinstance(segment.get("start"), (int, float)) or not isinstance(segment.get("end"), (int, float)) or segment["end"] <= segment["start"]:
+                    findings.append(_finding("audio.narration-timing-invalid", "P1", f"audioPlan.narration[{index}] has invalid start/end timing."))
+    if isinstance(audio_plan, dict) and "soundCues" in audio_plan:
+        cues = audio_plan.get("soundCues")
+        if not isinstance(cues, list):
+            findings.append(_finding("audio.sound-cues-invalid", "P1", "audioPlan.soundCues must be an array."))
+        else:
+            for index, cue in enumerate(cues):
+                if not isinstance(cue, dict) or not _nonempty(cue.get("file")):
+                    findings.append(_finding("audio.sound-cue-file-missing", "P1", f"audioPlan.soundCues[{index}] needs a file."))
+                    continue
+                if not isinstance(cue.get("start"), (int, float)) or not isinstance(cue.get("duration"), (int, float)) or cue["duration"] <= 0:
+                    findings.append(_finding("audio.sound-cue-timing-invalid", "P1", f"audioPlan.soundCues[{index}] needs valid start/duration."))
+                elif cue["start"] < 0 or cue["start"] + cue["duration"] > duration + 0.05:
+                    findings.append(_finding("audio.sound-cue-out-of-range", "P1", f"audioPlan.soundCues[{index}] falls outside the composition."))
+
     story_arc = brief.get("storyArc")
     if not isinstance(story_arc, list) or len(story_arc) < 3:
         findings.append(_finding(
@@ -214,6 +245,43 @@ def evaluate_plan(plan: dict[str, Any]) -> dict[str, Any]:
 
     if len(ids) != len(set(ids)):
         findings.append(_finding("shot.duplicate-ids", "P0", "Shot IDs must be unique."))
+
+    ordered_shots = sorted(
+        (
+            float(shot["start"]), float(shot["end"]), str(shot.get("id") or "unknown")
+        )
+        for shot in shots
+        if isinstance(shot, dict)
+        and isinstance(shot.get("start"), (int, float))
+        and isinstance(shot.get("end"), (int, float))
+        and shot.get("end") > shot.get("start")
+    )
+    if ordered_shots:
+        if abs(ordered_shots[0][0]) > 0.05:
+            findings.append(_finding(
+                "timeline.start-gap", "P0",
+                f"Timeline starts at {ordered_shots[0][0]:.3f}s instead of 0s.",
+            ))
+        cursor = 0.0
+        for start, end, shot_id in ordered_shots:
+            if start > cursor + 0.05:
+                findings.append(_finding(
+                    "timeline.gap", "P0",
+                    f"Timeline has an uncovered gap from {cursor:.3f}s to {start:.3f}s.",
+                    {"shotId": shot_id},
+                ))
+            elif start < cursor - 0.05:
+                findings.append(_finding(
+                    "timeline.overlap", "P0",
+                    f"Shot {shot_id} overlaps the preceding shot near {start:.3f}s.",
+                    {"shotId": shot_id},
+                ))
+            cursor = max(cursor, end)
+        if duration > 0 and abs(cursor - duration) > 0.05:
+            findings.append(_finding(
+                "timeline.duration-mismatch", "P0",
+                f"Last shot ends at {cursor:.3f}s, but composition duration is {duration:.3f}s.",
+            ))
     if durations:
         mean_duration = statistics.mean(durations)
         duration_cv = statistics.pstdev(durations) / mean_duration if mean_duration else 0.0
