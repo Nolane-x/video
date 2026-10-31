@@ -1,4 +1,4 @@
-# Specialist source and verification policy v0.7.9
+# Specialist source and verification policy v0.8.0
 
 The registry contains **37 separate specialist plugins** with recorded source or official documentation foundations. Source categories and runtime licenses are not interchangeable:
 - **First-party or project-maintained skill packs** should be aligned to the exact release/commit recorded in that plugin.
@@ -17,3 +17,8 @@ Every source-backed update should keep: source repository URL, immutable commit 
 ## Current source audit
 
 The pinned upstream repositories, exact commits, license terms, intended use and adaptation boundaries are tracked in `docs/EXPERT_SKILL_SOURCE_AUDIT.md`. Treat that register as the source of truth for source-backed changes; refresh it whenever a source revision changes. A source may be useful for research while still being prohibited from direct bundling or commercial reuse.
+
+
+## Editorial gate provenance
+
+The creative-plan and full-audiovisual review requirements are documented in `references/EDITORIAL-GATES.md` and implemented in the repository by `tools/video/evaluate_editorial_plan.py` and `tools/video/validate_editorial_review.py`. These are local Nolane validators; they are not copied upstream binaries or claims that automated code can prove a person watched a video.
