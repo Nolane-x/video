@@ -9,7 +9,7 @@ Persistent production memory for AI sessions in `Nolane-x/video`. This is a gate
 
 ## Active multi-engine command center
 
-The active private [Nolane Video Command Center](https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc) is **v0.7.9**, release `pluginrel_6ae5b448d6948191a011fc39d2ec282d`. It contains 29 internal skills and routes to a registry of 37 separately activated specialist plugins. Read `plugins/chatgpt/nolane-video-command-center/SKILL-CATALOG.md` and `references/PLUGIN-REGISTRY.md` for the exact responsibilities and links.
+The active private [Nolane Video Command Center](https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc) is **v0.7.9**, release `pluginrel_6ae5b448d6948191a011fc39d2ec282d`. It contains 29 internal skills and routes to a registry of 37 separately activated specialist plugins. Read `plugins/chatgpt/nolane-video-command-center/SKILL-CATALOG.md` and `plugins/chatgpt/nolane-video-command-center/references/PLUGIN-REGISTRY.md` for the exact responsibilities and links.
 
 The separate [Nolane Video Production Studio](https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd) v0.4.0 contains a broader 32-skill production library. [H2 SelfImprove Studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) v1.1.0 is a specialised H2 renderer/workflow. They are independent private plugins; the host/user controls activation. Never claim hidden cross-plugin invocation.
 
@@ -79,8 +79,15 @@ Open the source and actually watch it before recording timestamped observations;
 - **H2 Studio / Canvas rig / pack dem:** primary for established H2 work when the full source and packaged skill are available. Inspect engine entrypoint, `packs/dem`, templates, shot schema and required sheet/audio workflow.
 - **Remotion:** frame-based timeline, sequences, type, 2D layers, compositing and CI render. Source lives at `video-projects/remotion`; it is not the H2 renderer.
 - **Blender:** selected 2.5D/3D shots needing depth, camera, rigging or lighting. Start with proxies/Eevee.
-- **Krita:** authored character/expression sheets, props, textures and paintovers.
-- **FFmpeg/ffprobe:** mastering, frame extraction, contact sheets and validation.
+- **HyperFrames:** HTML/CSS/GSAP scenes, beat-based motion, deterministic browser capture and snapshot QA.
+- **Manim:** equations, geometry, graphs and mathematically precise science explainers; verify the underlying facts/formulas before rendering.
+- **Three.js / PixiJS:** browser-based 3D, 2D graphics, particles, shaders and lightweight effects where they add value.
+- **Krita:** authored 2D character sheets, props, textures and paintovers.
+- **OpenTimelineIO:** editorial timeline interchange, not a video container; media remains externally referenced.
+- **PySceneDetect:** candidate cut boundaries and logs; a human/editor decides the final cut.
+- **Playwright / OCR:** authorized browser capture and timed on-screen-text/caption checks; OCR is evidence, not a substitute for visual review.
+- **FFmpeg/ffprobe:** mastering, frame extraction, contact sheets and technical validation.
+- **WhisperX / Demucs:** optional manual-only speech alignment and source separation; validate language/model terms and do not download weights by default.
 - **Python audio:** existing generators under `video-projects/remotion/h2-audio` must be run to create WAVs; source files are not final audio assets.
 
 ## Acceptance
