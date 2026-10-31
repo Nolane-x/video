@@ -37,7 +37,7 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - name: Restore npm cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node24-hyperframes-${{ hashFiles('toolchain/node/package-lock.json') }}
@@ -94,7 +94,7 @@ jobs:
           ffmpeg -y -i "$GITHUB_WORKSPACE/out/hyperframes-video-only.mp4" -i assets/music-bed.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 160k -ar 48000 -t 17 -movflags +faststart "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4"
           test -s "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4"
           ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" | tee "$GITHUB_WORKSPACE/out/hyperframes-metadata.json"
-          ffmpeg -y -i "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" -vf "fps=1/3,scale=640:-1,tile=2x3:padding=8:margin=8" -frames:v 1 "$GITHUB_WORKSPACE/out/hyperframes-contact-sheet.png"
+          ffmpeg -y -i "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" -vf "fps=1/3,scale=640:-1,tile=2x3:padding=8:margin=8" -frames:v 1 -update 1 "$GITHUB_WORKSPACE/out/hyperframes-contact-sheet.png"
           test -s "$GITHUB_WORKSPACE/out/hyperframes-contact-sheet.png"
           python - <<'PY'
           import json

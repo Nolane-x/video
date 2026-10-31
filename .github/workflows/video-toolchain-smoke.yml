@@ -53,7 +53,7 @@ jobs:
           python-version: "3.12"
 
       - name: Restore npm package cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node24-video-toolchain-${{ hashFiles('toolchain/node/package.json') }}
@@ -61,7 +61,7 @@ jobs:
             ${{ runner.os }}-node24-video-toolchain-
 
       - name: Restore Playwright Chromium
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-1.64.1-chromium
