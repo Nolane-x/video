@@ -1070,7 +1070,7 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
     def test_prelinger_downloader_uses_page_label_only_when_api_rights_field_is_absent(self):
         identifier = "TillItHe1959"
         page = self._prelinger_usage_page()
-        blob = b"\\x00\\x00\\x00\\x18ftypisom" + b"x" * 20000
+        blob = b"\x00\x00\x00\x18ftypisom" + b"x" * 20000
         file_md5 = hashlib.md5(blob).hexdigest()
         file_sha1 = hashlib.sha1(blob).hexdigest()
         item_metadata = {
