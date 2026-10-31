@@ -3,9 +3,14 @@
 ## Mandatory start sequence
 Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
 
+## Genre and format selection
+- Determine the requested genre, audience, platform, runtime, aspect ratio, language, narration/caption needs and factual/product accuracy requirements before choosing a production style.
+- Preserve the established stick-figure/H2 visual language only for that continuing series or an explicit request. Do not let a past film's look override a new documentary, explainer, product demo, tutorial, interview, music video or short-form brief.
+- The active Nolane Video Command Center is v0.7.9 (29 internal skills, 37 separately activated specialist plugins). Use its internal router first; external private-plugin activation is explicit and host-controlled, never assumed.
+
 ## Non-negotiable requirements
-- Preferred look: cinematic, story-led stick-figure animation. Character simple and reusable; environments, light, camera, props and action carry richness.
-- Do not regress to flat slides, generic gradients, repeated sets, excessive HUDs, pseudo-real AI humans, or zoom-only “motion.”
+- For the established self-improvement short-film series only, the preferred look is cinematic, story-led stick-figure animation. Keep the character simple/reusable; environments, light, camera, props and action carry richness. Do not impose this profile on other genres unless the brief requests it.
+- For every genre, avoid generic templated visuals, unexplained repetition and camera-only fake motion. Choose live action, documentary imagery, UI capture, 2D/3D, data graphics or mixed media when the brief calls for it; use real people only when the format warrants them and rights/privacy are covered.
 - Do not replace H2 Studio with a homemade SVG renderer without explicit approval. Remotion is a separate timeline/compositing pipeline; never call it the H2 renderer.
 - Choose per shot: H2 Canvas/rig, Remotion, Blender, Krita and FFmpeg each have distinct roles.
 - Never claim a program ran unless its command/workflow log proves it. Distinguish code written, build passed, render succeeded, and visual QA passed.
