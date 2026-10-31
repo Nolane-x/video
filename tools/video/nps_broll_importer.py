@@ -601,6 +601,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     "video_groups": parsed_index["video_groups"],
                     "global_media": parsed_index["global_media"],
                     "links": [],
+                    "page_text": parsed_index["page_text"],
                 }
             groups = _groups_for_page(parsed, page_url)
             for group_number, group in enumerate(groups, 1):
