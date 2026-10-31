@@ -9,10 +9,10 @@
       "interface": {
         "capabilities": [],
         "category": "Productivity",
-        "defaultPrompt": "Use Nolane Video Command Center as the front door. First restore repo/project state and use its internal skills. When deeper tool-specific expertise is needed, consult the specialist registry and explicitly hand off to that plugin; do not claim hidden cross-plugin calls. Preserve the parallel asset-library boundary, research provenance, render candidates and verify actual visual/audio output.",
+        "defaultPrompt": "Use Nolane Video Command Center as the front door. Restore repo/project state, route by genre, run the blocking editorial plan preflight before rendering, and require independent full audiovisual review before release. Use internal skills first; specialist plugin handoff is explicit and host-controlled. Preserve the parallel asset-library boundary.",
         "developerName": "Nolane Studio",
         "displayName": "Nolane Video Command Center",
-        "longDescription": "One private entry point with 29 internal skills plus an indexed handoff map for 37 source-backed specialist plugins across engines, storytelling, data visualization, vector/SVG tooling, media/speech, OCR/audio analysis, editorial, 3D/VFX, post-processing, interactive vector, browser, CI security and QA. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the separate resource-library workstream.",
+        "longDescription": "One private entry point with 29 internal skills plus an indexed handoff map for 37 source-backed specialist plugins. Adds a blocking creative-plan preflight and evidence-backed independent audiovisual release gate. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the separate resource-library workstream.",
         "shortDescription": "29 skills, 37 plugins"
       }
     }
@@ -40,5 +40,5 @@
   ],
   "name": "nolane-video-command-center",
   "repository": "https://github.com/Nolane-x/video",
-  "version": "0.7.9"
+  "version": "0.8.0"
 }
