@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "name": "nolane-video-actions-toolchain",
+  "description": "Pinned CPU-first Node/browser video runtime plus optional headless Blender profile for GitHub Actions.",
+  "platform": {
+    "runner": "ubuntu-24.04",
+    "node": "24",
+    "python": "3.12",
+    "gpuRequired": false
+  },
+  "profiles": {
+    "core": {
+      "required": true,
+      "install": "npm install from toolchain/node/package.json; apt FFmpeg/Tesseract; Playwright Chromium",
+      "packages": [
+        "ffmpeg",
+        "tesseract-ocr",
+        "tesseract-ocr-eng",
+        "tesseract-ocr-vie"
+      ],
+      "npmDependencies": [
+        "@remotion/cli",
+        "@resvg/resvg-js",
+        "@svgdotjs/svg.js",
+        "@theatre/core",
+        "@types/react",
+        "d3",
+        "gsap",
+        "hyperframes",
+        "motion",
+        "pixi.js",
+        "playwright",
+        "postprocessing",
+        "react",
+        "react-dom",
+        "remotion",
+        "roughjs",
+        "sharp",
+        "three",
+        "typescript"
+      ],
+      "qualityTools": [
+        "license-checker-rseidelsohn@5.0.1"
+      ]
+    },
+    "blender": {
+      "required": false,
+      "manualOnly": false,
+      "version": "5.2.3",
+      "url": "https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz",
+      "checksumUrl": "https://download.blender.org/release/Blender5.2/blender-5.2.3.sha256",
+      "archiveBytes": 385331224,
+      "renderer": "CPU headless",
+      "whyOptional": "Official binary ~385 MB; skip ordinary 2D jobs and cache for explicit 3D work.",
+      "workflow": ".github/workflows/video-toolchain-blender.yml",
+      "triggers": [
+        "pull_request paths: tools/blender/**, toolchain/scripts/install-blender.sh, toolchain/manifest.json, .github/workflows/video-toolchain-blender.yml",
+        "workflow_dispatch"
+      ]
+    },
+    "editorialPython": {
+      "required": false,
+      "manualOnly": false,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/editorial/requirements.txt",
+      "packages": [
+        "opentimelineio==0.18.1",
+        "scenedetect-headless==0.7.2"
+      ],
+      "purpose": "OTIO timeline interchange plus headless PySceneDetect cut detection; no media copied to or from the asset library.",
+      "workflow": ".github/workflows/video-toolchain-editorial.yml"
+    },
+    "manim": {
+      "required": false,
+      "manualOnly": false,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/manim/requirements.txt",
+      "packages": [
+        "manim==0.22.1"
+      ],
+      "purpose": "Math/science animation; isolated profile with Cairo/Pango/TeX dependencies.",
+      "workflow": ".github/workflows/video-toolchain-manim-proof.yml",
+      "triggers": [
+        "pull_request paths: toolchain/python/manim/**, tools/video/manim_smoke.py, .agents/skills/video-manim-explainer/**, .github/workflows/video-toolchain-manim-proof.yml",
+        "workflow_dispatch"
+      ]
+    },
+    "audioML": {
+      "required": false,
+      "manualOnly": true,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/audio-ml/requirements.txt",
+      "packages": [
+        "whisperx==3.8.6",
+        "demucs==4.1.0"
+      ],
+      "purpose": "Optional speech alignment and source separation; installs no model weights.",
+      "workflow": ".github/workflows/video-toolchain-audio-ml.yml",
+      "triggers": [
+        "workflow_dispatch"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "Remotion",
+      "package": "remotion",
+      "version": "4.0.538",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "role": "React/frame-based composition and deterministic render",
+      "source": "https://github.com/remotion-dev/remotion",
+      "default": true,
+      "notes": "Check tiered license before commercial/org use."
+    },
+    {
+      "name": "React",
+      "package": "react",
+      "version": "19.2.3",
+      "license": "MIT",
+      "role": "Composition UI/runtime",
+      "source": "https://github.com/facebook/react",
+      "default": true
+    },
+    {
+      "name": "React DOM",
+      "package": "react-dom",
+      "version": "19.2.3",
+      "license": "MIT",
+      "role": "Browser composition rendering",
+      "source": "https://github.com/facebook/react",
+      "default": true
+    },
+    {
+      "name": "Remotion CLI",
+      "package": "@remotion/cli",
+      "version": "4.0.538",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "role": "CLI rendering and still frames",
+      "source": "https://github.com/remotion-dev/remotion",
+      "default": true
+    },
+    {
+      "name": "HyperFrames",
+      "package": "hyperframes",
+      "version": "0.8.222",
+      "license": "Apache-2.0",
+      "role": "HTML/CSS/GSAP timeline and CLI rendering",
+      "source": "https://github.com/heygen-com/hyperframes",
+      "default": true
+    },
+    {
+      "name": "GSAP",
+      "package": "gsap",
+      "version": "3.15.0",
+      "license": "GreenSock standard license",
+      "role": "Timeline choreography, easing and text motion",
+      "source": "https://github.com/greensock/GSAP",
+      "default": true
+    },
+    {
+      "name": "Motion",
+      "package": "motion",
+      "version": "14.9.0",
+      "license": "MIT",
+      "role": "React/browser animation and layout transitions",
+      "source": "https://github.com/motiondivision/motion",
+      "default": true,
+      "notes": "Latest stable checked 2026-10-31."
+    },
+    {
+      "name": "Three.js",
+      "package": "three",
+      "version": "0.186.1",
+      "license": "MIT",
+      "role": "Procedural 3D, camera, geometry and shaders",
+      "source": "https://github.com/mrdoob/three.js",
+      "default": true
+    },
+    {
+      "name": "PixiJS",
+      "package": "pixi.js",
+      "version": "8.22.0",
+      "license": "MIT",
+      "role": "2D sprites, particles, filters and effects",
+      "source": "https://github.com/pixijs/pixijs",
+      "default": true
+    },
+    {
+      "name": "Theatre.js Core",
+      "package": "@theatre/core",
+      "version": "0.7.2",
+      "license": "Apache-2.0",
+      "role": "Keyframe choreography; core runtime only",
+      "source": "https://github.com/theatre-js/theatre",
+      "default": true,
+      "notes": "Do not bundle AGPL @theatre/studio by default."
+    },
+    {
+      "name": "SVG.js",
+      "package": "@svgdotjs/svg.js",
+      "version": "3.2.8",
+      "license": "MIT",
+      "role": "Programmatic SVG and vector animation",
+      "source": "https://github.com/svgdotjs/svg.js",
+      "default": true
+    },
+    {
+      "name": "Rough.js",
+      "package": "roughjs",
+      "version": "4.6.6",
+      "license": "MIT",
+      "role": "Hand-drawn/illustrative vector style",
+      "source": "https://github.com/rough-stuff/rough",
+      "default": true
+    },
+    {
+      "name": "D3",
+      "package": "d3",
+      "version": "7.9.0",
+      "license": "ISC",
+      "role": "Data-driven charts and diagrams",
+      "source": "https://github.com/d3/d3",
+      "default": true
+    },
+    {
+      "name": "Postprocessing",
+      "package": "postprocessing",
+      "version": "6.39.5",
+      "license": "MIT",
+      "role": "Three.js post-processing effects",
+      "source": "https://github.com/pmndrs/postprocessing",
+      "default": true
+    },
+    {
+      "name": "resvg-js",
+      "package": "@resvg/resvg-js",
+      "version": "2.6.2",
+      "license": "MPL-2.0",
+      "role": "SVG rasterization",
+      "source": "https://github.com/thx/resvg-js",
+      "default": true,
+      "notes": "Retain MPL notice and modified-file source obligations."
+    },
+    {
+      "name": "Sharp",
+      "package": "sharp",
+      "version": "0.35.4",
+      "license": "Apache-2.0",
+      "role": "Image transforms and thumbnails",
+      "source": "https://github.com/lovell/sharp",
+      "default": true
+    },
+    {
+      "name": "Playwright",
+      "package": "playwright",
+      "version": "1.64.1",
+      "license": "Apache-2.0",
+      "role": "Headless browser rendering and QA",
+      "source": "https://github.com/microsoft/playwright",
+      "default": true
+    },
+    {
+      "name": "React TypeScript declarations",
+      "package": "@types/react",
+      "version": "19.2.7",
+      "license": "MIT",
+      "role": "React typechecking",
+      "source": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "default": true
+    },
+    {
+      "name": "TypeScript",
+      "package": "typescript",
+      "version": "5.9.3",
+      "license": "Apache-2.0",
+      "role": "Static typechecking",
+      "source": "https://github.com/microsoft/TypeScript",
+      "default": true
+    },
+    {
+      "name": "FFmpeg",
+      "package": null,
+      "version": "Ubuntu 24.04 apt package",
+      "license": "LGPL/GPL depends on build flags",
+      "role": "Encoding, filters, probes and mastering",
+      "source": "https://github.com/FFmpeg/FFmpeg",
+      "default": true
+    },
+    {
+      "name": "Tesseract OCR",
+      "package": null,
+      "version": "Ubuntu 24.04 apt package",
+      "license": "Apache-2.0",
+      "role": "OCR for caption coverage and visible text QA",
+      "source": "https://github.com/tesseract-ocr/tesseract",
+      "default": true
+    },
+    {
+      "name": "Blender",
+      "package": null,
+      "version": "5.2.3",
+      "license": "GPL-3.0-or-later",
+      "role": "Optional headless 3D shots and lighting",
+      "source": "https://github.com/blender/blender",
+      "default": false,
+      "notes": "Optional on-demand profile; path-scoped PR proof or workflow_dispatch only. The official archive is ~385 MB and is never part of the core 2D install."
+    },
+    {
+      "name": "npm License Checker",
+      "package": null,
+      "version": "5.0.1",
+      "license": "BSD-3-Clause",
+      "role": "Transitive npm license report",
+      "source": "https://github.com/RSeidelsohn/license-checker-rseidelsohn",
+      "default": true
+    },
+    {
+      "name": "OpenTimelineIO",
+      "pythonPackage": "opentimelineio",
+      "version": "0.18.1",
+      "license": "Apache-2.0",
+      "role": "Editorial timeline interchange",
+      "source": "https://github.com/AcademySoftwareFoundation/OpenTimelineIO",
+      "default": false,
+      "profile": "editorialPython"
+    },
+    {
+      "name": "PySceneDetect headless",
+      "pythonPackage": "scenedetect-headless",
+      "version": "0.7.2",
+      "license": "BSD-3-Clause",
+      "role": "Scene boundary detection",
+      "source": "https://github.com/Breakthrough/PySceneDetect",
+      "default": false,
+      "profile": "editorialPython"
+    },
+    {
+      "name": "Manim CE",
+      "pythonPackage": "manim",
+      "version": "0.22.1",
+      "license": "MIT",
+      "role": "Math/science animation",
+      "source": "https://github.com/ManimCommunity/manim",
+      "default": false,
+      "profile": "manim"
+    },
+    {
+      "name": "WhisperX",
+      "pythonPackage": "whisperx",
+      "version": "3.8.6",
+      "license": "BSD-2-Clause",
+      "role": "Speech recognition and alignment",
+      "source": "https://github.com/m-bain/whisperX",
+      "default": false,
+      "profile": "audioML"
+    },
+    {
+      "name": "Demucs",
+      "pythonPackage": "demucs",
+      "version": "4.1.0",
+      "license": "MIT",
+      "role": "Optional music source separation",
+      "source": "https://github.com/facebookresearch/demucs",
+      "default": false,
+      "profile": "audioML"
+    }
+  ],
+  "excludedFromDefault": [
+    {
+      "name": "Krita application",
+      "reason": "Desktop painting application; not a headless rendering dependency."
+    },
+    {
+      "name": "ComfyUI and large diffusion/video weights",
+      "reason": "Large GPU/model stacks do not fit the CPU-first hosted runner."
+    },
+    {
+      "name": "Wan, HunyuanVideo, LTX and FramePack weights",
+      "reason": "Large checkpoints and GPU inference; procedural motion tools cover the CPU-first scope."
+    },
+    {
+      "name": "Natron, OpenUSD full toolchain, OpenVDB, OpenFX native SDK builds",
+      "reason": "Large native builds and separate licensing/runtime burden."
+    },
+    {
+      "name": "OpenColorIO full native build",
+      "reason": "Defer until multi-engine ACES/EXR interchange is needed."
+    }
+  ],
+  "optionalLanes": {
+    "motionCanvas": {
+      "packageVersion": "3.17.2",
+      "lastStableRelease": "2024-12-14",
+      "defaultInstalled": false,
+      "reason": "Old Vite integration must be revalidated against current supported Vite before enabling in core CI."
+    }
+  },
+  "provenance": "Direct versions checked 2026-10-31. Review first resolved transitive lockfile/SBOM after CI installation."
+}

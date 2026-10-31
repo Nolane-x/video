@@ -1,0 +1,2 @@
+opentimelineio==0.18.1
+scenedetect-headless==0.7.2

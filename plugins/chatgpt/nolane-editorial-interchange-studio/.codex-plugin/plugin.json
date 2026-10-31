@@ -1,0 +1,28 @@
+{
+  "interface": {
+    "capabilities": [],
+    "category": "Productivity",
+    "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve provenance, license constraints and evidence-based QA.",
+    "developerName": "Sio Ca",
+    "displayName": "Nolane Editorial Interchange Studio",
+    "longDescription": "Build interoperable edit timelines and analyze source footage using OpenTimelineIO, PySceneDetect and FFmpeg. Handles editorial cuts, source timing, clip references, proxies, scene-boundary detection and review-ready timelines without duplicating or owning the user asset library.",
+    "shortDescription": "Timeline and media analysis"
+  },
+  "name": "nolane-editorial-interchange-studio",
+  "version": "0.1.0",
+  "description": "Build interoperable edit timelines and analyze source footage using OpenTimelineIO, PySceneDetect and FFmpeg. Handles editorial cuts, source timing, clip references, proxies, scene-boundary detection and review-ready timelines without duplicating or owning the user asset library.",
+  "author": {
+    "name": "Sio Ca",
+    "email": "casioreview20@gmail.com"
+  },
+  "keywords": [
+    "video-editing",
+    "opentimelineio",
+    "scene-detection",
+    "timeline",
+    "ffmpeg",
+    "media-analysis"
+  ],
+  "repository": "https://github.com/Nolane-x/video",
+  "skills": "./skills"
+}

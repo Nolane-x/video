@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-motion-engineering",
+  "version": "0.1.0",
+  "description": "Specialist workflows for Remotion, HyperFrames, GSAP, Motion, Three.js, PixiJS, Theatre Core and vector motion. Motion Canvas remains optional pending current Vite compatibility validation.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "motion-graphics",
+    "remotion",
+    "gsap",
+    "threejs",
+    "hyperframes"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Motion Lab",
+        "shortDescription": "Procedural motion skills",
+        "longDescription": "Specialist workflows for Remotion, HyperFrames, GSAP, Motion, Three.js, PixiJS, Theatre Core and vector motion. Motion Canvas remains optional pending current Vite compatibility validation.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to help me create professional video in Nolane-x/video through GitHub Actions."
+      }
+    }
+  }
+}

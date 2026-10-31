@@ -1,0 +1,51 @@
+name: Caption coverage OCR proof
+
+on:
+  pull_request:
+    paths:
+      - "tools/video/caption_coverage.py"
+      - "tools/video/build_caption_qa_fixture.py"
+      - "tools/video/test_caption_coverage.py"
+      - ".github/workflows/video-caption-qa-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caption-qa-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  caption-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install FFmpeg, Tesseract EN/VI and DejaVu font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie fonts-dejavu-core
+          tesseract --list-langs
+      - name: Test OCR scoring and shot text contract
+        run: python -m unittest discover -s tools/video -p 'test_caption_coverage.py' -v
+      - name: Build bilingual caption fixture
+        run: python tools/video/build_caption_qa_fixture.py --output out/caption-qa
+      - name: Run visual text coverage audit
+        run: |
+          python tools/video/caption_coverage.py \
+            --video out/caption-qa/caption-qa-fixture.mp4 \
+            --shots out/caption-qa/shots.json \
+            --output out/caption-qa/report.json \
+            --languages vie+eng \
+            --threshold 0.67
+      - name: Upload caption QA evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: video-caption-qa-proof-${{ github.run_id }}
+          path: out/caption-qa/
+          if-no-files-found: error
+          retention-days: 14

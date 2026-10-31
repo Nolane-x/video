@@ -1,0 +1,38 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-video-command-center",
+  "version": "0.4.0",
+  "description": "The single AI-first front door for Nolane video production. Bundles 23 integrated skills for storytelling, shot design, motion, 3D/VFX, Manim, AI media, audio/speech, captions, editorial interchange, toolchain automation, licensing and evidence-based QA.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "orchestration",
+    "ai-agent",
+    "github",
+    "remotion",
+    "hyperframes",
+    "manim",
+    "blender",
+    "audio",
+    "captions",
+    "toolchain",
+    "production",
+    "licensing"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Video Command Center",
+        "shortDescription": "23 integrated video skills",
+        "longDescription": "Use one private plugin to route internally across 23 bundled expert skills: direction, story, shot design, motion, Manim, 3D/VFX, AI media, voice/audio, speech alignment, captions, editorial timelines, scene analysis, tool installation, license checks and production QA. Works with Nolane-x/video and connected GitHub tools.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Create, continue or improve my video using the Nolane video production system. Select the best included skills and tools, respect the separate asset-library workstream, work safely on GitHub, render a candidate and verify it before handoff."
+      }
+    }
+  }
+}
