@@ -162,7 +162,7 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             self.assertEqual(report["technical_pass"], 1)
             self.assertEqual(report["h2_timing"]["block_count"], 1)
             self.assertEqual(report["h2_timing"]["line_count"], 1)
-            self.assertEqual(report["h2_timing"]["word_count"], 1)
+            self.assertEqual(report["h2_timing"]["word_count"], 4)
             self.assertTrue((out / "project-manifest.json").is_file())
             self.assertTrue((out / "captions.srt").is_file())
             self.assertTrue((out / "captions.vtt").is_file())
