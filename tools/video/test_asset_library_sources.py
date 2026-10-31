@@ -184,9 +184,9 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertGreaterEqual(library.SMITHSONIAN_MAX_RETRIES, 1)
         self.assertGreaterEqual(library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES, 8 * 1024 * 1024 * 1024)
         self.assertEqual(library.INTERNET_ARCHIVE_SEARCH_PAGES, 5)
-        self.assertGreaterEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 220)
-        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {"prelinger": 120, "nasa": 120})
-        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES, {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024})
+        self.assertEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 320)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {"prelinger": 160, "nasa": 160})
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES, {"prelinger": 6 * 1024 * 1024 * 1024, "nasa": 6 * 1024 * 1024 * 1024})
         self.assertEqual(sum(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES.values()), library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES)
 
     def test_nara_bulk_catalog_is_research_only_until_item_rights_schema_is_verified(self):
