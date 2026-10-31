@@ -78,7 +78,7 @@ POLY_PIZZA_LICENSE = "CC0-1.0"
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
 # The per-item Public Domain. rights gate remains mandatory; increased ceilings only widen discovery.
 USGS_GALLERY_PAGE_SCAN_LIMIT = 40
-USGS_SELECTION_CAPS = {"images": 120, "videos": 96, "audio": 60}
+USGS_SELECTION_CAPS = {"images": 160, "videos": 96, "audio": 60}
 USGS_IMAGE_MAX_BYTES = 10 * 1024 * 1024
 USGS_VIDEO_MAX_BYTES = 100 * 1024 * 1024
 USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
@@ -6709,7 +6709,7 @@ def main():
       "\n\n## Build 74 source capacity ceilings — limits, not promised downloads\n"
       "NASA SVS: up to 60 videos, 300 MiB each, 6 GiB aggregate and 240 topic-search page IDs; the exact official /vis/ host/path, page-level rights/music exclusions and file SHA-256 remain mandatory.\n"
       "ESO: up to 120 official pages inspected, 30 silent H.264 previews, 300 MiB per source and 6 GiB aggregate; exact official page/CDN URLs, page-published SHA-256, full visible credit, item-rights exclusions, audio removal and adaptation disclosure remain mandatory.\n"
-      "USGS: up to 120 images, 96 videos and 60 audio assets, with 10/100/30 MiB type-specific file ceilings and 13 GiB aggregate; each item's Sources/Usage section must still say exactly Public Domain.\n"
+      "USGS: up to 160 images, 96 videos and 60 audio assets, with 10/100/30 MiB type-specific file ceilings and 13 GiB aggregate; each item's Sources/Usage section must still say exactly Public Domain.\n"
       "Internet Archive: up to 160 items per Prelinger/NASA collection, 320 item records inspected per collection, 250 MiB per video, 6 GiB per collection and 12 GiB aggregate. Only exact item-level CC0/Public Domain evidence is accepted; Prelinger Public Domain fallback requires the matching exact item-page Usage row and is never labelled CC0. Third-party footage/music still requires human review.\n"
       "The final asset index records only successfully downloaded files; changing these ceilings does not change source licences or turn a source-wide default into item-level permission.\n"
     )
