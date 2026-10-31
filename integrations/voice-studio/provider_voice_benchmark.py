@@ -116,6 +116,11 @@ def _rating_html(rows: list[dict[str, Any]], *, blind: bool, provider: str) -> s
         metadata = "Blind listening candidate" if blind else html.escape(
             f"{row.get('provider', provider)} · {row.get('type', provider)} · {row.get('language') or ''}"
         )
+        proxy = row.get("asr_intelligibility_proxy") or {}
+        if proxy.get("status") == "available":
+            metadata += html.escape(
+                f" · ASR proxy WER {proxy['wer']:.1%} / CER {proxy['cer']:.1%}"
+            )
         if row.get("audio_file"):
             audio = f'<audio controls preload="none" src="{html.escape(row["audio_file"], quote=True)}"></audio>'
         else:
