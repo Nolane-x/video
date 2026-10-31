@@ -1,4 +1,4 @@
-# Specialist source and verification policy v0.7.8
+# Specialist source and verification policy v0.7.9
 
 The registry contains **37 separate specialist plugins** with recorded source or official documentation foundations. Source categories and runtime licenses are not interchangeable:
 - **First-party or project-maintained skill packs** should be aligned to the exact release/commit recorded in that plugin.
