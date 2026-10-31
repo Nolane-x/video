@@ -86,6 +86,9 @@ NPS_MEDIA_PATH_RE = re.compile(
     re.IGNORECASE,
 )
 NPS_VIEW_PATH = "/media/video/view.htm"
+NPS_EMBED_PATH = "/media/video/embed.htm"
+NPS_MEDIA_PAGE_PATHS = {NPS_VIEW_PATH, NPS_EMBED_PATH}
+NPS_COPYRIGHT_MARK_RE = re.compile(r"(?:©|\\(c\\)|copyright\\s+(?:19|20)\\d{2})", re.IGNORECASE)
 NPS_DETAIL_PAGE_RE = re.compile(
     r"(?:b[-]?roll|clip|sunclips)",
     re.IGNORECASE,
@@ -118,10 +121,12 @@ def normalize_nps_page_url(raw_url: str) -> str | None:
     parsed = _is_official_url(raw_url)
     if not parsed:
         return None
-    if parsed.path == NPS_VIEW_PATH:
+    if parsed.path in NPS_MEDIA_PAGE_PATHS:
         query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
         if set(query) != {"id"} or len(query["id"]) != 1 or not re.fullmatch(NPS_ARCHIVE_ID_RE, query["id"][0]):
             return None
+        # The embed endpoint is only a player shell. Canonicalize its exact NPS media ID
+        # to view.htm, whose Open Graph metadata exposes the official MP4 rendition.
         return f"{BASE}{NPS_VIEW_PATH}?id={query['id'][0].upper()}"
     if parsed.query:
         return None
@@ -209,6 +214,12 @@ class _NPSHTMLParser(HTMLParser):
             value = attr.get("content") or ""
             if key and value:
                 self.meta[key] = value.strip()
+                if key in {"og:video", "og:video:secure_url", "twitter:player:stream"}:
+                    self.global_media.append({
+                        "url": value.strip(),
+                        "label": "NPS Open Graph video",
+                        "resolution": "",
+                    })
         if tag == "h1":
             self.h1_depth += 1
         if tag == "title":
@@ -234,6 +245,14 @@ class _NPSHTMLParser(HTMLParser):
                 "title": attr.get("title", ""),
                 "text": "",
             }
+        if tag == "iframe":
+            src = attr.get("src", "")
+            if src:
+                self.links.append({
+                    "href": urllib.parse.urljoin(BASE, src),
+                    "title": attr.get("title", ""),
+                    "text": "",
+                })
         if tag in {"source", "video"}:
             src = attr.get("src", "")
             if src:
@@ -287,7 +306,10 @@ class _NPSHTMLParser(HTMLParser):
                 "sources": row["sources"],
             })
         return {
-            "page_title": _clean_text("".join(self.h1_parts) or "".join(self.title_parts), 300),
+            "page_title": _clean_text(
+                "".join(self.h1_parts) or self.meta.get("og:title") or "".join(self.title_parts),
+                300,
+            ),
             "description": _clean_text(
                 self.meta.get("description")
                 or self.meta.get("og:description")
@@ -318,6 +340,23 @@ def parse_nps_credit(page_html: str) -> tuple[str, bool]:
     if match:
         return _clean_text(match.group(1), 300), True
     return "National Park Service", False
+
+
+def parse_nps_media_page_credit(page_html: str) -> tuple[str, bool]:
+    """Accept the item media page only when its visible credit is NPS-owned and unmarked."""
+    raw = html_lib.unescape(page_html or "")
+    match = re.search(
+        r"<h[1-6]\\b[^>]*>\\s*credit\\s*</h[1-6]\\s*>(.*?)(?=<h[1-6]\\b|$)",
+        raw,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return "", False
+    credit_html = re.sub(r"<[^>]+>", " ", match.group(1))
+    credit = _clean_text(credit_html, 300)
+    if not credit or NPS_COPYRIGHT_MARK_RE.search(raw):
+        return credit, False
+    return credit, "nps" in credit.casefold()
 
 
 def parse_nps_index_page(page_html: str, park: str, index_url: str) -> dict[str, Any]:
@@ -577,7 +616,11 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
         page_tasks.extend((url, "detail", source) for url in parsed_index["child_pages"])
         page_tasks.extend((row["url"], "media", {**source, "media_hint": row.get("title", "")}) for row in parsed_index["media_pages"])
 
-        for page_url, page_kind, source_info in page_tasks[:MAX_ITEM_PAGES]:
+        queued_pages = {row[0] for row in page_tasks}
+    task_cursor = 0
+    while task_cursor < len(page_tasks) and task_cursor < MAX_ITEM_PAGES:
+        page_url, page_kind, source_info = page_tasks[task_cursor]
+        task_cursor += 1
             if downloads >= MAX_DOWNLOADS or source_bytes >= MAX_TOTAL_SOURCE_BYTES or metadata_bytes >= MAX_METADATA_BYTES:
                 break
             if page_url in seen_pages:
@@ -609,7 +652,36 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     "links": [],
                     "page_text": parsed_index["page_text"],
                 }
+            media_page_credit = ""
+            if page_kind == "media":
+                media_page_credit, media_credit_is_pd = parse_nps_media_page_credit(page_html)
+                if not media_credit_is_pd:
+                    report.append({
+                        "id": "nps-rights-" + hashlib.sha256(page_url.encode("utf-8")).hexdigest()[:12],
+                        "status": "skipped_rights_exception",
+                        "reason": "NPS media detail page lacks an unmarked NPS credit",
+                        "source_page": page_url,
+                        "credit_text": media_page_credit,
+                    })
+                    continue
+
             groups = _groups_for_page(parsed, page_url)
+            if page_kind == "detail" and not groups:
+                # Archive detail pages often contain only an NPS embed iframe. Follow
+                # only its exact NPS media ID, then read view.htm Open Graph MP4 metadata.
+                for link in parsed.get("links", []):
+                    media_page = normalize_nps_page_url(link.get("href", ""))
+                    if not media_page or urllib.parse.urlsplit(media_page).path != NPS_VIEW_PATH:
+                        continue
+                    if media_page in queued_pages or len(page_tasks) >= MAX_ITEM_PAGES:
+                        continue
+                    page_tasks.append((
+                        media_page,
+                        "media",
+                        {**source_info, "media_hint": link.get("title") or parsed.get("page_title", "")},
+                    ))
+                    queued_pages.add(media_page)
+
             for group_number, group in enumerate(groups, 1):
                 if downloads >= MAX_DOWNLOADS or source_bytes >= MAX_TOTAL_SOURCE_BYTES:
                     break
@@ -675,7 +747,8 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                 output_hash = hashlib.sha256(output_path.read_bytes()).hexdigest()
                 output_size = output_path.stat().st_size
                 people_review = bool(NPS_REVIEW_PEOPLE_RE.search(title + " " + description))
-                exact_credit = collection_credit or "National Park Service"
+                exact_credit = media_page_credit or collection_credit or "National Park Service"
+                item_credit_required = credit_required or bool(media_page_credit)
                 source_page = page_url
                 item_id = hashlib.sha256(selected["source_url"].encode("utf-8")).hexdigest()[:16]
                 entry = {
@@ -705,8 +778,8 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     "public_domain_verified": True,
                     "rights_basis": "The official NPS collection page explicitly states that the listed B-roll videos are public domain and may be used without an NPS release. Item captions containing third-party, copyrighted, licensed or permission-required material are rejected. Do not imply NPS endorsement or reproduce the protected NPS arrowhead.",
                     "credit_text": exact_credit,
-                    "credit_required_visible": credit_required,
-                    "credit_note": "Preserve the official collection credit verbatim when the index specifies one. Otherwise, NPS attribution is recommended.",
+                    "credit_required_visible": item_credit_required,
+                    "credit_note": "Preserve the exact NPS item-level credit when present; otherwise preserve any explicit collection credit. Do not imply NPS endorsement.",
                     "audio_stripped": True,
                     "modifications_disclosed": "Audio streams removed; the original video stream was copied without re-encoding.",
                     "privacy_publicity_review_required": people_review,
@@ -735,7 +808,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     "resolution": f"{entry['width']}x{entry['height']}",
                     "audio_stripped": True,
                     "credit_text": exact_credit,
-                    "credit_required_visible": credit_required,
+                    "credit_required_visible": item_credit_required,
                     "people_privacy_review_required": people_review,
                     "license": entry["license"],
                 })
