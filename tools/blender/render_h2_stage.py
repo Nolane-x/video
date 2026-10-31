@@ -35,7 +35,7 @@ if not scene.render.engine:
 print("Selected Blender render engine:", scene.render.engine)
 scene.render.resolution_x = 1280
 scene.render.resolution_y = 720
-scene.render.resolution_percentage = 100
+scene.render.resolution_percentage = int(os.environ.get('BLENDER_RESOLUTION_PERCENTAGE', '100'))
 scene.render.fps = 24
 scene.frame_start = 1
 scene.frame_end = 120
@@ -64,7 +64,7 @@ scene.render.ffmpeg.constant_rate_factor = "MEDIUM"
 scene.render.ffmpeg.ffmpeg_preset = "GOOD"
 scene.render.filepath = os.environ.get("BLENDER_OUTPUT", os.path.join("out", "blender", "h2-style-study.mp4"))
 os.makedirs(os.path.dirname(os.path.abspath(scene.render.filepath)), exist_ok=True)
-scene.render.resolution_percentage = 100
+scene.render.resolution_percentage = int(os.environ.get('BLENDER_RESOLUTION_PERCENTAGE', '100'))
 scene.render.image_settings.color_mode = "RGB"
 scene.render.film_transparent = False
 

@@ -45,13 +45,18 @@
     },
     "blender": {
       "required": false,
-      "manualOnly": true,
+      "manualOnly": false,
       "version": "5.2.3",
       "url": "https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz",
       "checksumUrl": "https://download.blender.org/release/Blender5.2/blender-5.2.3.sha256",
       "archiveBytes": 385331224,
       "renderer": "CPU headless",
-      "whyOptional": "Official binary ~385 MB; skip ordinary 2D jobs and cache for explicit 3D work."
+      "whyOptional": "Official binary ~385 MB; skip ordinary 2D jobs and cache for explicit 3D work.",
+      "workflow": ".github/workflows/video-toolchain-blender.yml",
+      "triggers": [
+        "pull_request paths: tools/blender/**, toolchain/scripts/install-blender.sh, toolchain/manifest.json, .github/workflows/video-toolchain-blender.yml",
+        "workflow_dispatch"
+      ]
     },
     "editorialPython": {
       "required": false,
@@ -67,14 +72,18 @@
     },
     "manim": {
       "required": false,
-      "manualOnly": true,
+      "manualOnly": false,
       "python": "3.12",
       "requirementsFile": "toolchain/python/manim/requirements.txt",
       "packages": [
         "manim==0.22.1"
       ],
       "purpose": "Math/science animation; isolated profile with Cairo/Pango/TeX dependencies.",
-      "workflow": ".github/workflows/video-toolchain-manim-proof.yml"
+      "workflow": ".github/workflows/video-toolchain-manim-proof.yml",
+      "triggers": [
+        "pull_request paths: toolchain/python/manim/**, tools/video/manim_smoke.py, .agents/skills/video-manim-explainer/**, .github/workflows/video-toolchain-manim-proof.yml",
+        "workflow_dispatch"
+      ]
     },
     "audioML": {
       "required": false,
