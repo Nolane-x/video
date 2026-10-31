@@ -172,10 +172,15 @@ def _rating_html(rows: list[dict[str, Any]], *, blind: bool, provider: str) -> s
                 f'<label>{html.escape(title)}<select data-dimension="{key}">'
                 f'<option value="">Unrated</option>{options}</select></label>'
             )
+        notes = (
+            '<label class="notes-label">Listener notes'
+            '<textarea data-notes rows="3" placeholder="Why does this voice work or fail?"></textarea>'
+            '</label>'
+        )
         cards.append(
             f'<article data-label="{html.escape(str(row.get("blind_label") or row.get("id", "")), quote=True)}">'
             f'<h2>{safe_label}</h2><p class="meta">{metadata}</p>{audio}'
-            f'<div class="ratings">{"".join(controls)}</div></article>'
+            f'<div class="ratings">{"".join(controls)}</div>{notes}</article>'
         )
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -191,6 +196,7 @@ h2{font-size:17px;margin:0 0 6px}.meta,.notice{color:#aeb5c5;font-size:13px}
 audio{width:100%;margin:14px 0}.ratings{display:grid;gap:8px}
 label{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}
 select{background:#303544;color:white;border:1px solid #555d70;border-radius:6px;padding:5px}
+.notes-label{display:grid;gap:7px;margin-top:14px}.notes-label textarea{width:100%;box-sizing:border-box;min-height:72px;background:#303544;color:white;border:1px solid #555d70;border-radius:7px;padding:8px;font:inherit;resize:vertical}
 button{margin:20px 0;background:#e8eaf1;color:#151821;border:0;border-radius:8px;padding:10px 16px;font-weight:650;cursor:pointer}
 .error{color:#ffadad;overflow-wrap:anywhere}
 </style></head><body>
@@ -209,7 +215,8 @@ document.getElementById("export").addEventListener("click",()=>{
     }
     const values=Object.values(ratings).filter(v=>v!==null);
     const mean=values.length?values.reduce((a,b)=>a+b,0)/values.length:null;
-    return {candidate:card.dataset.label,ratings,mean};
+    const notes=card.querySelector("[data-notes]").value.trim();
+    return {candidate:card.dataset.label,ratings,mean,notes};
   });
   const data={schema_version:1,provider:"BENCHMARK_PROVIDER",ratings:rows,
     note:"Subjective human ratings; not a validated naturalness metric."};
