@@ -4,7 +4,11 @@ on:
   pull_request:
     paths:
       - "toolchain/node/package.json"
+      - "toolchain/node/package-lock.json"
       - "toolchain/scripts/install-core.sh"
+      - "toolchain/demos/hyperframes/**"
+      - "tools/video/validate_hyperframes_report.py"
+      - "tools/video/test_hyperframes_report.py"
       - ".github/workflows/video-toolchain-hyperframes-proof.yml"
   workflow_dispatch:
 
@@ -36,7 +40,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node24-hyperframes-${{ hashFiles('toolchain/node/package.json') }}
+          key: ${{ runner.os }}-node24-hyperframes-${{ hashFiles('toolchain/node/package-lock.json') }}
 
       - name: Install FFmpeg and core runtime
         run: |
@@ -44,20 +48,28 @@ jobs:
           sudo apt-get install -y ffmpeg
           bash toolchain/scripts/install-core.sh
 
-      - name: Scaffold warm-grain proof composition
+      - name: Prepare repository-owned HyperFrames proof
         run: |
-          mkdir -p out
-          toolchain/node/node_modules/.bin/hyperframes init out/hyperframes-demo --example warm-grain --non-interactive
-          test -s out/hyperframes-demo/index.html
+          test -s toolchain/demos/hyperframes/index.html
+          test -s toolchain/demos/hyperframes/index.motion.json
+          rm -rf out/hyperframes-demo
+          mkdir -p out/hyperframes-demo/vendor
+          cp -R toolchain/demos/hyperframes/. out/hyperframes-demo/
+          cp toolchain/node/node_modules/gsap/dist/gsap.min.js out/hyperframes-demo/vendor/gsap.min.js
+          test -s out/hyperframes-demo/vendor/gsap.min.js
+          test -s out/hyperframes-demo/index.motion.json
+          python -m unittest discover -s tools/video -p 'test_hyperframes_report.py' -v
 
       - name: Check installed HyperFrames runtime
-        run: toolchain/node/node_modules/.bin/hyperframes doctor --json
+        run: |
+          toolchain/node/node_modules/.bin/hyperframes doctor --json | tee out/hyperframes-doctor.json
 
-      - name: Lint and audit browser/layout/motion/contrast
+      - name: Run strict browser, layout, motion and contrast checks
         working-directory: out/hyperframes-demo
         run: |
-          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" lint --json | tee "$GITHUB_WORKSPACE/out/hyperframes-lint.json"
-          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" check --json --snapshots | tee "$GITHUB_WORKSPACE/out/hyperframes-check.json"
+          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" check --json --snapshots --strict --samples 12 --at-transitions | tee "$GITHUB_WORKSPACE/out/hyperframes-check.json"
+          python "$GITHUB_WORKSPACE/tools/video/validate_hyperframes_report.py" "$GITHUB_WORKSPACE/out/hyperframes-check.json"
+          test -s "$GITHUB_WORKSPACE/out/hyperframes-check.json"
           find . -type f -name '*.png' -print -quit | grep -q .
 
       - name: Render MP4 proof
@@ -66,15 +78,27 @@ jobs:
           "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" render --output "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" --fps 24 --quality draft
           test -s "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4"
           ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" | tee "$GITHUB_WORKSPACE/out/hyperframes-metadata.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          metadata = json.loads(Path("out/hyperframes-metadata.json").read_text(encoding="utf-8"))
+          video = next(stream for stream in metadata["streams"] if stream.get("codec_type") == "video")
+          duration = float(metadata["format"]["duration"])
+          assert video.get("codec_name") == "h264", video
+          assert (video.get("width"), video.get("height")) == (1920, 1080), video
+          assert video.get("r_frame_rate") == "24/1", video
+          assert 16.8 <= duration <= 17.2, f"Expected 17-second proof, got {duration:.3f}s"
+          print(f"Validated HyperFrames proof: {duration:.3f}s, 1920x1080, 24fps, H.264")
+          PY
 
-      - name: Upload HyperFrames proof
+      - name: Upload HyperFrames proof and QA evidence
         uses: actions/upload-artifact@v7
         with:
           name: hyperframes-render-proof-${{ github.run_id }}
           path: |
             out/hyperframes-demo.mp4
-            out/hyperframes-lint.json
             out/hyperframes-check.json
+            out/hyperframes-doctor.json
             out/hyperframes-metadata.json
             out/hyperframes-demo/
           if-no-files-found: error
