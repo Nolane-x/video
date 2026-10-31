@@ -31,16 +31,16 @@ MAX_TOTAL_SOURCE_BYTES = 4 * 1024 * 1024 * 1024
 MIN_VIDEO_BYTES = 512 * 1024
 UA = "NolaneVideoAssetLibrary-ESO/1.0 (+https://github.com/Nolane-x/video)"
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$")
-SHA256_RE = re.compile(r"(?i)(?:^|\\s)([0-9a-f]{64})(?:\\s|$)")
+SHA256_RE = re.compile(r"(?i)(?:^|\s)([0-9a-f]{64})(?:\s|$)")
 RIGHTS_EXCEPTION_RE = re.compile(
-    r"creative\\s+commons\\s+attribution[-\\s]?no.?derivatives|"
-    r"\\bCC\\s*BY\\s*[-–]?\\s*ND\\b|\\bno.?derivatives\\b|"
-    r"\\bnon[- ]commercial\\b|\\bnoncommercial\\b|"
-    r"not\\s+licensed\\s+for\\s+other\\s+uses|"
-    r"all\\s+rights\\s+reserved|permission\\s+required|"
-    r"not\\s+released\\s+under\\s+(?:the\\s+)?(?:usual|standard)?\\s*"
-    r"(?:creative\\s+commons|CC\\s*BY)|"
-    r"commercial\\s+use\\s+is\\s+not\\s+permitted",
+    r"creative\s+commons\s+attribution[-\s]?no.?derivatives|"
+    r"\bCC\s*BY\s*[-–]?\s*ND\b|\bno.?derivatives\b|"
+    r"\bnon[- ]commercial\b|\bnoncommercial\b|"
+    r"not\s+licensed\s+for\s+other\s+uses|"
+    r"all\s+rights\s+reserved|permission\s+required|"
+    r"not\s+released\s+under\s+(?:the\s+)?(?:usual|standard)?\s*"
+    r"(?:creative\s+commons|CC\s*BY)|"
+    r"commercial\s+use\s+is\s+not\s+permitted",
     re.IGNORECASE,
 )
 VIDEO_MIME = {"video/mp4", "application/mp4", "application/octet-stream", "binary/octet-stream"}
@@ -71,7 +71,7 @@ def normalize_eso_media_url(raw_url: str, video_id: str) -> str | None:
         if parsed.username or parsed.password or parsed.port or parsed.query or parsed.fragment:
             return None
         match = re.fullmatch(
-            r"/videos/(ultra_hd|hd_1080p25_screen)/([A-Za-z0-9][A-Za-z0-9_-]{1,63})\\.mp4",
+            r"/videos/(ultra_hd|hd_1080p25_screen)/([A-Za-z0-9][A-Za-z0-9_-]{1,63})\.mp4",
             urllib.parse.unquote(parsed.path),
         )
         if not match or match.group(2).casefold() != str(video_id).casefold():
@@ -139,7 +139,7 @@ class _ESOPageParser(HTMLParser):
                 "text": [],
             }
         if tag in {"br", "p", "li"} and self.credit_depth is not None:
-            self.credit_parts.append("\\n")
+            self.credit_parts.append("\n")
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         self.handle_starttag(tag, attrs)
@@ -172,26 +172,26 @@ class _ESOPageParser(HTMLParser):
                 self.current_row = None
             if self.credit_depth == self.div_depth:
                 self.credit_depth = None
-                self.credit_parts.append("\\n")
+                self.credit_parts.append("\n")
             if self.content_depth == self.div_depth:
                 self.content_depth = None
             self.div_depth = max(0, self.div_depth - 1)
         if tag == "p" and self.credit_depth is not None:
-            self.credit_parts.append("\\n")
+            self.credit_parts.append("\n")
 
 
 def _clean_multiline(parts: list[str]) -> str:
-    raw = html_lib.unescape("".join(parts)).replace("\\xa0", " ")
+    raw = html_lib.unescape("".join(parts)).replace("\xa0", " ")
     lines = []
     for line in raw.splitlines():
-        cleaned = re.sub(r"[ \\t]+", " ", line).strip()
+        cleaned = re.sub(r"[ \t]+", " ", line).strip()
         if cleaned:
             lines.append(cleaned)
-    return "\\n".join(lines)
+    return "\n".join(lines)
 
 
 def _parse_size_bytes(row_text: str) -> int | None:
-    match = re.search(r"([0-9]+(?:\\.[0-9]+)?)\\s*(B|KB|MB|GB)", row_text, re.IGNORECASE)
+    match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*(B|KB|MB|GB)", row_text, re.IGNORECASE)
     if not match:
         return None
     scale = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}[match.group(2).upper()]
@@ -210,7 +210,7 @@ def parse_eso_video_page(video_id: str, page_html: str) -> dict[str, Any]:
         checksum = None
         for anchor in row["anchors"]:
             if "sha256" in str(anchor.get("data_title") or "").casefold():
-                match = SHA256_RE.search(str(anchor.get("data_content") or "").replace("\\xa0", " "))
+                match = SHA256_RE.search(str(anchor.get("data_content") or "").replace("\xa0", " "))
                 if match:
                     checksum = match.group(1).lower()
         for anchor in row["anchors"]:
@@ -234,7 +234,7 @@ def parse_eso_video_page(video_id: str, page_html: str) -> dict[str, Any]:
     page_text = _clean_multiline(parser.page_parts)
     title = str(parser.meta.get("og:title") or _clean_multiline(parser.title_parts)).strip()
     description = str(parser.meta.get("description") or "").strip()
-    markers = sorted({m.group(0).casefold() for m in RIGHTS_EXCEPTION_RE.finditer(page_text + "\\n" + credit)})
+    markers = sorted({m.group(0).casefold() for m in RIGHTS_EXCEPTION_RE.finditer(page_text + "\n" + credit)})
     return {
         "title": title[:300],
         "description": description[:3000],
@@ -263,7 +263,7 @@ def parse_eso_feed(feed_xml: bytes, category: str) -> list[dict[str, str]]:
         items.append({
             "id": video_id,
             "title": (item.findtext("title") or "").strip()[:300],
-            "description": re.sub(r"\\s+", " ", re.sub(r"<[^>]+>", " ", item.findtext("description") or "")).strip()[:2000],
+            "description": re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", item.findtext("description") or "")).strip()[:2000],
             "published": (item.findtext("pubDate") or "").strip()[:80],
             "source_page": page_url,
             "category": category,
