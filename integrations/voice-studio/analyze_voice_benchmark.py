@@ -82,6 +82,9 @@ def analyze_benchmark(
             scores[dimension] = numeric
             observed.append(numeric)
 
+        listener_notes = entry.get("notes", "")
+        if not isinstance(listener_notes, str):
+            raise ValueError(f"{label}.notes must be text")
         proxy = candidate.get("asr_intelligibility_proxy") or {}
         asr_available = proxy.get("status") == "available"
         wer = proxy.get("wer") if asr_available else None
@@ -96,6 +99,7 @@ def analyze_benchmark(
             "rating_count": len(observed),
             "dimension_ratings": scores,
             "mean_human_rating": _mean(observed),
+            "listener_notes": listener_notes.strip() or None,
             "eligible_for_human_comparison": len(observed) >= min_ratings,
             "asr_status": "available" if asr_available else "not_available",
             "wer": wer,
