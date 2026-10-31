@@ -1,7 +1,12 @@
 # Instructions for AI agents in this repository
 
 ## Mandatory start sequence
-Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
+1. Read `.agents/skills/video-production-master/SKILL.md`.
+2. Read `docs/STATE.md`, `docs/AI_HANDOFF.md` and `docs/TOOL_INVENTORY.md`.
+3. Read `docs/CHATGPT_VIDEO_PLUGIN_REGISTRY.md`, the Command Center's `SKILL-CATALOG.md` and `references/PLUGIN-REGISTRY.md`, and `toolchain/manifest.json` when the toolchain branch is present.
+4. Identify the actual target project from the user's request and current state. Read that project's README, brief, manifest, story/shot plan, QA ledger and relevant asset-provenance records.
+5. Read `video-library/README.md` and `previous-works-catalog.json` only as relevant references. For continuation of ONE MORE SCROLL/H2, inspect its manifest, QA and source-release records. For a Remotion project, inspect its README, character/story bible and live shot plan. Do not load an unrelated film's manifest as the default for a new genre.
+6. Inspect current HEAD, the changed-file list, relevant Actions/logs/artifacts and the actual files before editing.
 
 ## Genre and format selection
 - Determine the requested genre, audience, platform, runtime, aspect ratio, language, narration/caption needs and factual/product accuracy requirements before choosing a production style.
