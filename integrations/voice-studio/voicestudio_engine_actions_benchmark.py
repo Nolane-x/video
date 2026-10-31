@@ -205,10 +205,28 @@ def verify_or_accept_license(api: VoiceStudioApi, *, accept_model_license: bool)
         already_accepted = state.get("accepted") is True
     if not already_accepted:
         raise VoiceStudioApiError("Supertonic-3 license acceptance did not persist")
+
+    # A saved licence bit alone is not enough: verify that the actual runtime
+    # now resolves the optional SDK and exposes the engine as available before
+    # downloading model weights or starting synthesis.
+    engines = api.get_json("/engines/tts")
+    rows = engines.get("backends")
+    if not isinstance(rows, list):
+        raise VoiceStudioApiError("VoiceStudio /engines/tts response has no backends array")
+    engine = next((row for row in rows if isinstance(row, dict) and row.get("id") == ENGINE_ID), None)
+    if engine is None:
+        raise VoiceStudioApiError("VoiceStudio does not expose the Supertonic-3 engine")
+    if engine.get("available") is not True:
+        reason = str(engine.get("reason") or "no availability reason reported")
+        raise VoiceStudioApiError(f"Supertonic-3 is still unavailable after licence verification: {reason}")
+    if engine.get("license_accepted") is not True:
+        raise VoiceStudioApiError("VoiceStudio does not report the Supertonic-3 licence as accepted")
     return {
         "engine_id": ENGINE_ID,
         "accepted": True,
         "accepted_in_this_run": not was_accepted_before_run,
+        "engine_available": True,
+        "engine_reason": engine.get("reason"),
         "model_license": MODEL_LICENSE,
         "sdk_license": SDK_LICENSE,
         "model_repository": MODEL_REPOSITORY,
