@@ -696,9 +696,17 @@ def _npgallery_rights_verified(asset: dict[str, Any], detail: dict[str, str], as
         and detail.get("Resource Type", "").casefold() == "video"
         and str(asset.get("ResourceFormat") or "").casefold() == "mp4"
         and detail.get("Resource Format", "").casefold() == "mp4"
+        and detail.get("Access Constraints", "").casefold() == "public can view"
         and "nps" in search_credit.casefold()
         and "nps" in detail_credit.casefold()
         and not NPS_COPYRIGHT_MARK_RE.search(detail_credit)
+        and not NPS_ITEM_RIGHTS_EXCEPTION_RE.search(" ".join(
+            str(value or "") for value in (
+                asset.get("Title"), asset.get("Description"), asset.get("AltText"),
+                detail.get("Title"), detail.get("Description"), detail.get("AltText"),
+                detail.get("Copyright"),
+            )
+        ))
         and bool(detail.get("Title"))
     )
 
