@@ -1,0 +1,55 @@
+name: Video toolchain Blender CPU proof
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: video-toolchain-blender-proof
+  cancel-in-progress: false
+
+jobs:
+  blender-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Restore Blender 5.2.3 runtime
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/nolane-video-toolchain/blender-5.2.3-linux-x64
+          key: blender-linux-x64-5.2.3-official-sha256
+
+      - name: Install Blender if cache missed
+        run: |
+          bash toolchain/scripts/install-blender.sh | tee blender-install.txt
+          blender --background --version
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Render headless five-second proof
+        env:
+          BLENDER_OUTPUT: ${{ github.workspace }}/out/blender/h2-style-study.mp4
+        run: |
+          mkdir -p out/blender
+          blender --background --python tools/blender/render_h2_stage.py
+          test -s "$BLENDER_OUTPUT"
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$BLENDER_OUTPUT" | tee out/blender/metadata.json
+
+      - name: Upload Blender proof
+        uses: actions/upload-artifact@v7
+        with:
+          name: video-toolchain-blender-proof-${{ github.run_id }}
+          path: |
+            out/blender/h2-style-study.mp4
+            out/blender/metadata.json
+            blender-install.txt
+          if-no-files-found: error
+          retention-days: 14

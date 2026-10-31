@@ -1,0 +1,182 @@
+name: Video toolchain smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "toolchain/**"
+      - "tools/video/validate_toolchain.py"
+      - "tools/video/test_toolchain.py"
+      - "tools/video/build_npm_sbom.py"
+      - "toolchain/scripts/smoke-toolchain.mjs"
+      - ".agents/skills/video-*/**"
+      - "plugins/chatgpt/**"
+      - "docs/CHATGPT_VIDEO_PLUGIN_REGISTRY.md"
+      - ".github/workflows/video-toolchain-smoke.yml"
+  pull_request:
+    paths:
+      - "toolchain/**"
+      - "tools/video/validate_toolchain.py"
+      - "tools/video/test_toolchain.py"
+      - "tools/video/build_npm_sbom.py"
+      - "toolchain/scripts/smoke-toolchain.mjs"
+      - ".agents/skills/video-*/**"
+      - "plugins/chatgpt/**"
+      - "docs/CHATGPT_VIDEO_PLUGIN_REGISTRY.md"
+      - ".github/workflows/video-toolchain-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-toolchain-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Restore npm package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node24-video-toolchain-${{ hashFiles('toolchain/node/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node24-video-toolchain-
+
+      - name: Restore Playwright Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-1.64.1-chromium
+
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie
+          ffmpeg -version
+          ffprobe -version
+          tesseract --list-langs
+
+      - name: Validate manifests, plugin packages and repo skills
+        run: |
+          python tools/video/validate_toolchain.py
+          python -m unittest discover -s tools/video -p 'test_toolchain.py' -v
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.')
+          for manifest in root.glob('plugins/chatgpt/*/plugin.json'):
+              data = json.loads(manifest.read_text(encoding='utf-8'))
+              assert data.get('$schema') == 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json', manifest
+              assert data.get('name') == manifest.parent.name, manifest
+          for skill in root.glob('.agents/skills/video-*/SKILL.md'):
+              lines = skill.read_text(encoding='utf-8').splitlines()
+              assert len(lines) >= 4 and lines[0] == '---', skill
+              assert lines[1].startswith('name: '), skill
+              assert lines[2].startswith('description: '), skill
+              assert lines[3] == '---', skill
+          print('Plugin manifests and repo video skills validated.')
+          PY
+
+      - name: Install pinned runtime dependencies
+        run: |
+          bash toolchain/scripts/install-core.sh
+          echo "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Persist first resolved package lock on same-repository PRs
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add toolchain/node/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build: lock resolved video toolchain dependencies"
+            git push origin "HEAD:$HEAD_REF"
+          else
+            echo "Resolved package lock is already committed."
+          fi
+
+      - name: Expose pinned modules to the existing Remotion workspace
+        run: |
+          mkdir -p video-projects/remotion
+          if [ -e video-projects/remotion/node_modules ]; then
+            echo "Unexpected node_modules exists in checkout; refusing to replace it." >&2
+            exit 1
+          fi
+          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" video-projects/remotion/node_modules
+          if [ -e node_modules ]; then
+            echo "Unexpected root node_modules exists; refusing to replace it." >&2
+            exit 1
+          fi
+          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" node_modules
+
+      - name: Typecheck the existing Remotion project
+        working-directory: video-projects/remotion
+        run: npm run typecheck
+
+      - name: Run CLI and module smoke tests
+        run: |
+          node toolchain/scripts/smoke-toolchain.mjs | tee toolchain-smoke.log
+          npm --prefix toolchain/node ls --all --json > toolchain-dependency-tree.json
+          ffmpeg -buildconf > ffmpeg-buildconf.txt 2>&1
+          npx --yes license-checker-rseidelsohn@5.0.1 --production --json --start toolchain/node > toolchain-licenses.json
+          python tools/video/build_npm_sbom.py --input toolchain/node/package-lock.json --output toolchain-sbom.cdx.json
+
+      - name: Create checksums and installed version report
+        run: |
+          cd toolchain/node
+          test -s package-lock.json
+          sha256sum package.json package-lock.json > ../../toolchain-runtime.sha256
+          cd ../..
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          data = {
+            'node': subprocess.check_output(['node','--version'], text=True).strip(),
+            'npm': subprocess.check_output(['npm','--version'], text=True).strip(),
+            'ffmpeg': subprocess.check_output(['ffmpeg','-version'], text=True).splitlines()[0],
+            'ffprobe': subprocess.check_output(['ffprobe','-version'], text=True).splitlines()[0],
+            'remotion': subprocess.check_output(['remotion','versions'], text=True).strip(),
+            'hyperframes': subprocess.check_output(['hyperframes','--version'], text=True).strip(),
+            'typescript': subprocess.check_output(['tsc','--version'], text=True).strip(),
+            'tesseract_languages': subprocess.check_output(['tesseract','--list-langs'], text=True).splitlines()[1:]
+          }
+          Path('toolchain-installed-versions.json').write_text(json.dumps(data, indent=2)+'\\n', encoding='utf-8')
+          PY
+
+      - name: Upload runtime evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: video-toolchain-${{ github.run_id }}
+          path: |
+            toolchain/node/package-lock.json
+            toolchain-runtime.sha256
+            toolchain-smoke.log
+            toolchain-dependency-tree.json
+            toolchain-licenses.json
+            toolchain-sbom.cdx.json
+            toolchain-installed-versions.json
+            ffmpeg-buildconf.txt
+          if-no-files-found: error
+          retention-days: 30
