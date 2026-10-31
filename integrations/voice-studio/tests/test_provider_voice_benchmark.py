@@ -64,7 +64,7 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
     def test_voice_studio_requires_exact_engine_id(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
-                with self.assertRaisesRegex(ValueError, "exact --engine"):
+                with self.assertRaisesRegex(ValueError, "exact installed --engine ID"):
                     benchmark.run_benchmark(
                         "voicestudio", "Xin chào", Path(tmp), engine=None
                     )
