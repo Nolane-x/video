@@ -24,6 +24,13 @@ class FakeVoiceStudio:
             }
         ]
 
+    def synthesize(self, text, output_path, **kwargs):
+        path = Path(output_path).with_suffix(".wav")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"RIFF" + b"\\0" * 64)
+        self.last_synthesis = {"text": text, **kwargs}
+        return path
+
     def profile_audio(self, profile_id, output_path):
         path = Path(output_path).with_suffix(".wav")
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -54,6 +61,20 @@ class VoiceAuditionTests(unittest.TestCase):
             self.assertNotIn("<script>alert(1)</script>", page)
             self.assertIn("&lt;script&gt;", page)
             self.assertTrue((Path(tmp) / "audio").is_dir())
+
+    def test_blind_audition_hides_identity_and_uses_same_script(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            client = FakeVoiceStudio()
+            result = collect_auditions(
+                client, Path(tmp), source="profiles", language="vi", limit=5,
+                delay=0, benchmark_text="Cùng một câu thử.", engine="voxcpm2", blind=True,
+            )
+            self.assertEqual(result["ready"], 1)
+            self.assertEqual(client.last_synthesis["input"] if "input" in client.last_synthesis else client.last_synthesis["text"], "Cùng một câu thử.")
+            page = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+            self.assertIn("Candidate 01", page)
+            self.assertNotIn("<script>alert(1)</script>", page)
+            self.assertNotIn("profile-1", page)
 
     def test_language_filter_includes_auto_profile_for_cross_language_voice(self):
         self.assertTrue(
