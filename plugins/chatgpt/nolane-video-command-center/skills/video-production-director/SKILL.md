@@ -66,7 +66,7 @@ The engine decision must be documented per sequence or shot in the storyboard/ma
 - Identify existing engines, package versions, render scripts, assets, templates and QA tools. Reuse working infrastructure; do not rebuild what is already good.
 
 ### Gate 1 — Creative brief
-Capture or infer from prior context: purpose, audience, platform, aspect ratio, duration, language, narration style, emotional arc, style references, CTA, constraints, accessibility, and asset rights. Do not ask for information already given. When the user authorizes full autonomy, make sensible decisions, write them down and continue; pause only for genuinely irreversible or rights-sensitive choices.
+Capture or infer from prior context: purpose, audience, platform, aspect ratio, duration, language, narration policy, emotional arc, visual grammar, style references, CTA, constraints, accessibility, and asset rights. Record a clear audience promise, opening hook, story payoff, language, platform and aspect ratio. A no-voiceover choice is valid, but must be explicit and explain how the film will carry meaning through action, text, dialogue or sound. Do not ask for information already given. When the user authorizes full autonomy, make sensible decisions, write them down and continue; pause only for genuinely irreversible or rights-sensitive choices.
 
 ### Gate 2 — Research and reference breakdown
 Study full reference videos or representative sections—not thumbnails alone. Record the visual grammar: shot size, angle, lens/camera motion, composition, subject/action, environment, lighting, color, typography, on-screen text, transitions, sound events and pacing. Learn techniques; do not copy scripts, footage, branding, or a creator's distinctive sequence wholesale.
@@ -75,16 +75,23 @@ For product videos, inspect the actual product and design system where authorize
 
 ### Gate 3 — Script, storyboard and shot map
 Create a production brief and a shot-level storyboard before implementation. Each shot must record:
-- shot ID and narrative purpose;
-- in/out time, frame range, FPS and transition overlap;
-- framing, camera path, subject action, environment, props and lighting;
-- exact on-screen copy and subtitle/transcript coverage;
+- shot ID, story function and the exact change it creates for the viewer;
+- in/out time, frame range, FPS and transition overlap, with shot duration chosen by story/action/word/beat rather than a default fixed grid;
+- shot size, camera angle, camera move, composition and visual purpose;
+- key pose/action, anticipation, contact/change, follow-through and recovery where physical action is involved;
+- environment, props, lighting, continuity state and visual contrast against adjacent shots;
+- exact on-screen copy and subtitle/transcript coverage, plus a reading-time check;
 - visual asset path, source/provenance and rights status;
 - chosen engine and relevant Shotcraft recipe card/demo;
-- voice/music/SFX cues and beat/word timing;
-- render/QA notes and dependencies.
+- narration policy, voice/music/SFX cues and beat/word timing;
+- render/QA notes, motion-proof needs and dependencies.
+
+A 5-second shot grid is not a default. When a large proportion of shots use the same duration or one template dominates the plan, document a specific artistic reason and demonstrate meaningful variation in framing, action, composition and narrative purpose. Never use an excuse field to rubber-stamp repetition; the preview/reviewer must verify that the result works.
 
 Every section must advance story or comprehension. Vary shot scale and motion deliberately. Do not use generic gradients, arbitrary glowing UI, random zooms, or a succession of unrelated stock clips as a substitute for art direction.
+
+### Gate 3.5 — Editorial plan preflight (blocking)
+Before rendering, run `python tools/video/evaluate_editorial_plan.py <shot-plan.json> --output <report.json> --strict`. The preflight checks that the brief names its audience/promise/hook/payoff/platform/language/narration policy, each shot has a story function and camera/visual language, physical actions have motion proof, text is readable at the planned duration, audio coverage is intentional, and pacing/template reuse is justified. A `BLOCKED` result means revise the brief/storyboard; do not render around it. A `PLAN_READY_FOR_RENDER` result only permits blocking/animatic and a low-cost preview. It is not a creative sign-off and does not authorize publication.
 
 ### Gate 4 — Visual direction and asset planning
 Lock a visual system: type scale, typography, grid, spacing, color palette, material, lighting, camera rules, recurring motifs, character/prop bible and safe areas. Reuse the product's own visual tokens when showing the product. Generate or acquire only assets that are needed; keep source prompts, model/version, seed, license and attribution where applicable.
@@ -124,7 +131,7 @@ Render to a temporary output path first. Use FFmpeg/ffprobe or the project's act
 Do not overwrite the last known-good master until the candidate passes technical and visual gates.
 
 ### Gate 9 — Independent visual/editorial review
-A fresh reviewer/context should compare the finished video against the brief, script, storyboard, design system, reference decisions and shot recipes. Review all scenes and the full viewing experience, not only a few highlight frames. Produce a defect list with timecode/frame evidence and severity:
+A reviewer context that did not create or edit the candidate must watch the complete rendered video with audio at normal speed, then inspect difficult actions/transitions frame-by-frame. The first pass is open-ended and must happen before the checklist or producer's rationale is shown. A contact sheet, frame OCR, metadata, waveform or passing preflight is not a substitute for full audiovisual review. Compare the result against the creative brief, story promise, shot functions, design system, reference analysis and sound plan. Produce a defect list with timecode/frame evidence, severity and the responsible production layer:
 - **P0:** corrupt/unplayable output, missing track, wrong deliverable or rights/privacy breach — blocks release.
 - **P1:** missing/incorrect content, unreadable/omitted captions, broken motion/contact, major continuity or story failure — blocks release unless user explicitly accepts the documented exception.
 - **P2:** smaller spacing, easing, color, audio balance or transition polish issue — fix if perceptible and material.
