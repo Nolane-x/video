@@ -25,6 +25,18 @@ inference to a developer PC just because an Actions lane is missing or
 underpowered. The current CPU lanes use KorvaTTS's preset voices; they do not
 exercise VoiceStudio custom voice design. Record that scope explicitly.
 
+For the project renderer, inspect the full delivery package, not just its
+green job status: confirm each WAV hash, per-speaker identity fingerprint,
+H2 block/line/word coverage, master audio peak/loudness, `captions.srt`,
+`captions.vtt`, `captions.ass`, sentence-level caption alternatives,
+`voice-cast-report.json`, and `artifact-manifest.json`. The artifact manifest
+must exclude hidden internal caches that are not uploaded by Actions.
+
+Caption timestamps produced by H2's proportional word/sentence heuristic are
+estimated editing guides, not forced-alignment ground truth. Check every cue
+against the spoken audio, especially sentence boundaries, numbers, code-
+switching and short phrases, before publishing.
+
 ## Three distinct evidence layers
 
 ### A. Audio engineering signals
