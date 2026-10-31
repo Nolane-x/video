@@ -164,7 +164,7 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.LAZYTEXTURES_MAX_TOTAL_ARCHIVE_BYTES, 512 * 1024 * 1024)
         self.assertGreaterEqual(library.LAZYTEXTURES_MAX_TOTAL_UNPACKED_BYTES, 1024 * 1024 * 1024)
         self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 40)
-        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 120, "videos": 96, "audio": 60})
+        self.assertEqual(library.USGS_SELECTION_CAPS, {"images": 160, "videos": 96, "audio": 60})
         self.assertEqual(library.USGS_TOTAL_MAX_BYTES, 13 * 1024 * 1024 * 1024)
         self.assertEqual(library.OPENGAMEART_SELECTION_CAPS, {"2d": 60, "3d": 60, "textures": 48, "sfx": 36, "music": 36})
         self.assertEqual(library.OPENGAMEART_SEARCH_PAGES_PER_TYPE, 10)
