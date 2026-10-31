@@ -61,13 +61,21 @@ def validate_manifest(data: dict[str, Any]) -> list[dict[str, Any]]:
         seen.add(segment_id)
         item["id"] = segment_id
         item["slot"] = _safe_token(str(item.get("slot") or "NARRATOR"), "NARRATOR")
-        item["character"] = str(item.get("character") or "")
+        item["character"] = (
+            str(item.get("character") or "")
+            .replace("|", "/").replace("·", "-").replace("=", "-")
+            .replace("\\r", " ").replace("\\n", " ").strip()[:64]
+        )
         item["provider"] = str(item.get("provider") or "voicestudio").lower()
         item["voice"] = str(item.get("voice") or "default")
         item["text"] = text.strip()
         item["language"] = str(item.get("language") or data.get("language") or "vi")
         item["engine"] = str(item.get("engine") or data.get("engine") or "omnivoice")
         item["speed"] = float(item.get("speed", data.get("speed", 1.0)))
+        if not 0.25 <= item["speed"] <= 4.0:
+            raise ValueError(f"segments[{index - 1}].speed must be between 0.25 and 4.0")
+        if not isinstance(item.get("settings", {}), dict):
+            raise ValueError(f"segments[{index - 1}].settings must be an object")
         if item["provider"] not in {"voicestudio", "korva", "google", "elevenlabs"}:
             raise ValueError(f"Unsupported provider: {item['provider']}")
         normalized.append(item)
@@ -136,9 +144,10 @@ def generate(data: dict[str, Any], output_dir: Path, *, plan_only: bool = False)
         cache_key = _cache_key(item)
         cached = cache_dir / f"{cache_key}{ext}"
         target = audio_dir / f"{item['id']}{ext}"
+        safe_text = re.sub(r"(?m)^===", " ===", item["text"])
         script_blocks.append(
-            f"=== {item['id']} | {item['slot']} · {item['character']} ===\n"
-            f"{item['text']}\n"
+            f"=== {item['id']} | {item['slot']} · {item['character']} ===\\n"
+            f"{safe_text}\\n"
         )
         row = {
             "id": item["id"], "provider": item["provider"], "engine": item["engine"],
