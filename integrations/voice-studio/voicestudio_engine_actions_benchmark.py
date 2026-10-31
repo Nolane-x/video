@@ -187,7 +187,8 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 def verify_or_accept_license(api: VoiceStudioApi, *, accept_model_license: bool) -> dict[str, Any]:
     state = api.get_json(f"/api/settings/license/{ENGINE_ID}")
-    already_accepted = state.get("accepted") is True
+    was_accepted_before_run = state.get("accepted") is True
+    already_accepted = was_accepted_before_run
     if not already_accepted:
         if not accept_model_license:
             raise PermissionError(
@@ -207,7 +208,7 @@ def verify_or_accept_license(api: VoiceStudioApi, *, accept_model_license: bool)
     return {
         "engine_id": ENGINE_ID,
         "accepted": True,
-        "accepted_in_this_run": not state.get("was_previously_accepted", False),
+        "accepted_in_this_run": not was_accepted_before_run,
         "model_license": MODEL_LICENSE,
         "sdk_license": SDK_LICENSE,
         "model_repository": MODEL_REPOSITORY,
