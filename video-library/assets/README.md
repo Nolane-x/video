@@ -50,6 +50,10 @@ The importer begins at the [official CDC B-roll index](https://www.cdc.gov/media
 
 Credit CDC as the source and do not imply CDC endorsement. CDC B-roll may show identifiable people, patients or healthcare interactions; review privacy/publicity releases and the intended commercial/promotional use before publication. The source is Public Domain under the CDC B-roll government-production notice, **not CC0**. CDC's broader materials policy notes that contractor/grantee/third-party media can have separate restrictions; the item exception screen is fail-closed.
 
+## National Park Service B-roll — official Public Domain footage
+
+The NPS lane only starts from five park archive indexes that explicitly state the listed B-roll is Public Domain: Grand Canyon, Joshua Tree, Death Valley, Yosemite and San Antonio Missions. It follows same-park clip pages and NPS media-view pages linked by those indexes, then downloads direct NPS-hosted MP4 files (preferring 1080p/720p). Audio streams are removed to avoid redistributing an uncertain soundtrack; each file keeps the collection page, exact media URL, computed SHA-256, selected rendition and ffprobe video metadata. NPS does not publish checksums on these pages, so the computed hash is not represented as source-provided. Preserve any explicit collection credit exactly, do not imply NPS endorsement or use the protected arrowhead, and review identifiable people, private property and third-party marks before commercial/promotional use. The archive notices grant Public Domain status, not CC0.
+
 ## New source and rights rules
 
 - **Smithsonian:** only images that are explicitly CC0 both at the collection record and at the selected media object are bundled. The API may require a registered key for reliable usage; API failures are recorded, not represented as zero uncertainty.
