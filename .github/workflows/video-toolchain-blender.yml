@@ -43,11 +43,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libglx-mesa0 libgbm1 libxrender1 libxkbcommon0
 
-      - name: Render headless five-second proof
+      - name: Render headless two-second EEVEE CPU preview
         env:
           BLENDER_OUTPUT: ${{ github.workspace }}/out/blender/h2-style-study.mp4
-          BLENDER_RESOLUTION_PERCENTAGE: "50"
-          BLENDER_RENDER_ENGINE: "BLENDER_WORKBENCH"
+          BLENDER_RESOLUTION_PERCENTAGE: "25"
+          BLENDER_RENDER_ENGINE: "BLENDER_EEVEE"
+          BLENDER_CPU_PROOF: "1"
+          BLENDER_EEVEE_SAMPLES: "8"
+          BLENDER_PROOF_FRAMES: "48"
         run: |
           mkdir -p out/blender
           LIBGL_ALWAYS_SOFTWARE=1 blender --background --python tools/blender/render_h2_stage.py
@@ -60,10 +63,10 @@ jobs:
           video = next(stream for stream in metadata["streams"] if stream.get("codec_type") == "video")
           duration = float(metadata["format"]["duration"])
           assert video["codec_name"] == "h264", video
-          assert (video["width"], video["height"]) == (640, 360), video
+          assert (video["width"], video["height"]) == (320, 180), video
           assert video["r_frame_rate"] == "24/1", video
-          assert 4.9 <= duration <= 5.1, f"Expected five-second proof, got {duration:.3f}s"
-          print(f"Validated Blender MP4: {duration:.3f}s, 640x360, 24fps, H.264")
+          assert 1.95 <= duration <= 2.05, f"Expected two-second CPU preview, got {duration:.3f}s"
+          print(f"Validated Blender EEVEE CPU preview: {duration:.3f}s, 320x180, 24fps, H.264")
           PY
 
       - name: Upload Blender proof

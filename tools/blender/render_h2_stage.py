@@ -1,5 +1,5 @@
 """
-Render a five-second, 24 fps H2 minimalist mascot style study in headless Blender. CI can explicitly request a fast Workbench proof.
+Render a short, 24 fps H2 minimalist mascot style study in headless Blender. CPU CI can request a reduced deterministic preview. CI can explicitly request a fast Workbench proof.
 Usage:
   BLENDER_OUTPUT=out/blender/h2-style-study.mp4 blender -b --python tools/blender/render_h2_stage.py
 """
@@ -42,19 +42,23 @@ else:
 if not scene.render.engine:
     raise RuntimeError("Blender runtime did not expose any supported render engines.")
 
-if scene.render.engine == "BLENDER_WORKBENCH":
-    # A fast, deterministic preview profile for ordinary CPU CI.
-    # Production shots can use Eevee/Cycles through their project render profile.
-    shading = scene.display.shading
-    shading.light = "STUDIO"
-    shading.color_type = "MATERIAL"
-    shading.background_type = "WORLD"
-    shading.show_shadows = True
-    shading.show_cavity = True
-    shading.cavity_type = "BOTH"
-    shading.cavity_ridge_factor = 1.2
-    shading.cavity_valley_factor = 1.0
-    print("Workbench preview profile: studio light, material colors, shadows and cavity")
+if os.environ.get("BLENDER_CPU_PROOF") == "1" and scene.render.engine.startswith("BLENDER_EEVEE"):
+    # Small, fast CPU-only validation preset; this does not change normal renders.
+    eevee_settings = getattr(scene, "eevee", None)
+    if eevee_settings is not None:
+        if hasattr(eevee_settings, "taa_render_samples"):
+            eevee_settings.taa_render_samples = int(os.environ.get("BLENDER_EEVEE_SAMPLES", "8"))
+        if hasattr(eevee_settings, "taa_samples"):
+            eevee_settings.taa_samples = int(os.environ.get("BLENDER_EEVEE_SAMPLES", "8"))
+        if hasattr(eevee_settings, "use_raytracing"):
+            eevee_settings.use_raytracing = False
+    for obj in scene.objects:
+        if obj.type == "LIGHT" and hasattr(obj.data, "use_shadow"):
+            obj.data.use_shadow = False
+    print(
+        "Eevee CPU proof preset: low temporal samples, no ray tracing, "
+        "area-light shadows disabled"
+    )
 
 print("Selected Blender render engine:", scene.render.engine)
 scene.render.resolution_x = 1280
@@ -62,7 +66,10 @@ scene.render.resolution_y = 720
 scene.render.resolution_percentage = int(os.environ.get('BLENDER_RESOLUTION_PERCENTAGE', '100'))
 scene.render.fps = 24
 scene.frame_start = 1
-scene.frame_end = 120
+proof_frames = int(os.environ.get("BLENDER_PROOF_FRAMES", "120"))
+if proof_frames < 2 or proof_frames > 120:
+    raise ValueError(f"BLENDER_PROOF_FRAMES must be between 2 and 120; got {proof_frames}")
+scene.frame_end = proof_frames
 # Blender 5.0+ separates image/video media types from the file format.
 image_settings = scene.render.image_settings
 if hasattr(image_settings, "media_type"):
@@ -304,7 +311,7 @@ scene.camera.data.lens = 50
 scene.render.filepath = os.environ.get("BLENDER_OUTPUT", os.path.join("out", "blender", "h2-style-study.mp4"))
 scene.frame_set(1)
 
-print("H2 Blender style study: rendering frames 1-120 at 1280x720/24fps")
+print(f"H2 Blender style study: rendering frames 1-{scene.frame_end} at {scene.render.resolution_x * scene.render.resolution_percentage // 100}x{scene.render.resolution_y * scene.render.resolution_percentage // 100}/24fps")
 print("Output:", scene.render.filepath)
 bpy.ops.render.render(animation=True)
 print("H2 Blender style study render finished.")
