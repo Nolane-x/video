@@ -1,13 +1,18 @@
 name: HyperFrames render proof
 
 on:
+  pull_request:
+    paths:
+      - "toolchain/node/package.json"
+      - "toolchain/scripts/install-core.sh"
+      - ".github/workflows/video-toolchain-hyperframes-proof.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: hyperframes-render-proof
+  group: hyperframes-render-proof-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -16,7 +21,7 @@ jobs:
     timeout-minutes: 45
     env:
       HYPERFRAMES_SKIP_SKILLS: "1"
-      HYPERFRAMES_NO_TELEMETRY: "1"
+      HYPERFRAMES_NO_UPDATE_CHECK: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -33,28 +38,29 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-node24-hyperframes-${{ hashFiles('toolchain/node/package.json') }}
 
-      - name: Install core video runtime and browser
+      - name: Install FFmpeg and core runtime
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           bash toolchain/scripts/install-core.sh
 
-      - name: Scaffold clean HyperFrames example
+      - name: Scaffold warm-grain proof composition
         run: |
           mkdir -p out
           toolchain/node/node_modules/.bin/hyperframes init out/hyperframes-demo --example warm-grain --non-interactive
           test -s out/hyperframes-demo/index.html
 
-      - name: Diagnose HyperFrames environment
+      - name: Check installed HyperFrames runtime
         run: toolchain/node/node_modules/.bin/hyperframes doctor --json
 
-      - name: Lint and run browser/layout/motion checks
+      - name: Lint and audit browser/layout/motion/contrast
         working-directory: out/hyperframes-demo
         run: |
           "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" lint --json | tee "$GITHUB_WORKSPACE/out/hyperframes-lint.json"
           "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" check --json --snapshots | tee "$GITHUB_WORKSPACE/out/hyperframes-check.json"
+          find . -type f -name '*.png' -print -quit | grep -q .
 
-      - name: Render proof MP4 and inspect streams
+      - name: Render MP4 proof
         working-directory: out/hyperframes-demo
         run: |
           "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" render --output "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" --fps 24 --quality draft
@@ -70,6 +76,6 @@ jobs:
             out/hyperframes-lint.json
             out/hyperframes-check.json
             out/hyperframes-metadata.json
-            out/hyperframes-demo/.hyperframes/artifacts/snapshots/
+            out/hyperframes-demo/
           if-no-files-found: error
           retention-days: 14

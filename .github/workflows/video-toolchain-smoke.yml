@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: video-toolchain-smoke-${{ github.ref }}
@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup Node 24
         uses: actions/setup-node@v7
@@ -88,8 +90,8 @@ jobs:
               assert data.get('name') == manifest.parent.name, manifest
           for skill in root.glob('.agents/skills/video-*/SKILL.md'):
               text = skill.read_text(encoding='utf-8')
-              assert text.startswith('---\nname: '), skill
-              assert '\ndescription: ' in text.split('---', 2)[1], skill
+              assert text.startswith('---\\nname: '), skill
+              assert '\\ndescription: ' in text.split('---', 2)[1], skill
           print('Plugin manifests and repo video skills validated.')
           PY
 
@@ -98,6 +100,21 @@ jobs:
           bash toolchain/scripts/install-core.sh
           echo "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin" >> "$GITHUB_PATH"
 
+      - name: Persist first resolved package lock on same-repository PRs
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add toolchain/node/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build: lock resolved video toolchain dependencies"
+            git push origin "HEAD:$HEAD_REF"
+          else
+            echo "Resolved package lock is already committed."
+          fi
+
       - name: Expose pinned modules to the existing Remotion workspace
         run: |
           mkdir -p video-projects/remotion
@@ -105,12 +122,12 @@ jobs:
             echo "Unexpected node_modules exists in checkout; refusing to replace it." >&2
             exit 1
           fi
-          ln -s "$GITHUB_WORKSPACE/toolchain/node/node_modules" video-projects/remotion/node_modules
+          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" video-projects/remotion/node_modules
           if [ -e node_modules ]; then
             echo "Unexpected root node_modules exists; refusing to replace it." >&2
             exit 1
           fi
-          ln -s "$GITHUB_WORKSPACE/toolchain/node/node_modules" node_modules
+          ln -s "$GITHUB_WORKSPACE/toolchain/node_modules" node_modules
 
       - name: Typecheck the existing Remotion project
         working-directory: video-projects/remotion
@@ -143,7 +160,7 @@ jobs:
             'typescript': subprocess.check_output(['tsc','--version'], text=True).strip(),
             'tesseract_languages': subprocess.check_output(['tesseract','--list-langs'], text=True).splitlines()[1:]
           }
-          Path('toolchain-installed-versions.json').write_text(json.dumps(data, indent=2)+'\n', encoding='utf-8')
+          Path('toolchain-installed-versions.json').write_text(json.dumps(data, indent=2)+'\\n', encoding='utf-8')
           PY
 
       - name: Upload runtime evidence

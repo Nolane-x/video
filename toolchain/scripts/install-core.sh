@@ -15,7 +15,13 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
   echo "FFmpeg and ffprobe must be installed by the runner package manager." >&2
   exit 2
 fi
-npm install --prefix "$NODE_DIR" --include=dev --no-audit --no-fund
+if [[ -s "$NODE_DIR/package-lock.json" ]]; then
+  echo "Using committed lockfile with npm ci."
+  npm ci --prefix "$NODE_DIR" --include=dev --no-audit --no-fund
+else
+  echo "First install: resolving exact direct dependencies and generating lockfile."
+  npm install --prefix "$NODE_DIR" --include=dev --no-audit --no-fund
+fi
 mkdir -p "$HOME/.cache/ms-playwright"
 "$NODE_DIR/node_modules/.bin/playwright" install --with-deps chromium
 printf 'NODE_TOOLCHAIN_DIR=%s\n' "$NODE_DIR"
