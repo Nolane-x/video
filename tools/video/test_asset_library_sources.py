@@ -26,6 +26,7 @@ import probe_nara_bulk_dataset as nara_probe  # noqa: E402
 import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import nasa_svs_importer as nasa_svs_importer  # noqa: E402
 import eso_video_importer as eso_video_importer  # noqa: E402
+import cdc_broll_importer as cdc_broll_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -2446,6 +2447,148 @@ class ESOVideoImporterTests(unittest.TestCase):
         entry = next(row for row in catalog["sources"] if row["id"] == "eso-public-video-archive")
         self.assertIn("CC BY 4.0", entry["license"])
         self.assertIn("silent", entry["bundling"])
+
+
+class CDCBrollImporterTests(unittest.TestCase):
+    INDEX_HTML = """
+    <html><body>
+      <p>CDC B-roll is produced by the United States Government and is in the public domain.</p>
+      <p>Permission is not required for use of public domain items. However, we do ask that you cite CDC as the source.</p>
+      <a href="/media/media/b-roll/cdc-in-the-field.html">CDC in the Field</a>
+      <a href="https://www.cdc.gov/media/media/b-roll/Mosquitoes-and-Ticks.html">Mosquitoes and Ticks</a>
+      <a href="https://www.cdc.gov.evil.example/media/media/b-roll/outbreaks-and-diseases.html">Bad host</a>
+      <a href="https://www.cdc.gov/media/media/b-roll/not-a-real-page.html">Bad category</a>
+    </body></html>
+    """
+    CATEGORY_HTML = """
+    <html><body>
+      <div class="cdc-dfe-body__center">
+        <div class="dfe-section" data-section="cdc_broll_1">
+          <a class="onThisPageAnchor"></a>
+          <h2>CDC Staff Prepare for Field Investigation</h2>
+          <figure>
+            <figcaption>April 28, 2020 - CDC staff making preparation for a sero survey in parts of the Atlanta area.</figcaption>
+          </figure>
+          <div class="dfe-links-layout--list">
+            <a class="cdc-block-link" href="https://www.cdc.gov/media/video/b-roll/Packing-Serosurvey-kits-B-roll-low-res.mp4">B-Roll Video Preview</a>
+            <a class="cdc-block-link" href="https://www.cdc.gov/media/video/b-roll/Packing-Serosurvey-kits-B-roll-hi-res.mp4">Full Size B-Roll</a>
+            <a class="cdc-block-link" href="https://www.cdc.gov/media/video/pdf/B-roll-description.pdf">B-Roll Video Description</a>
+          </div>
+        </div>
+        <div class="dfe-section">
+          <h2>Third Party Partner Footage</h2>
+          <figcaption>Copyrighted footage supplied by a third-party partner.</figcaption>
+          <a href="https://www.cdc.gov/media/video/b-roll/partner-footage.mp4">Full Size B-Roll</a>
+        </div>
+      </div>
+    </body></html>
+    """
+
+    def test_cdc_index_requires_the_public_domain_notice_and_exact_official_category_links(self):
+        categories = cdc_broll_importer.parse_cdc_index_page(self.INDEX_HTML)
+        self.assertEqual(
+            categories,
+            [
+                "https://www.cdc.gov/media/media/b-roll/cdc-in-the-field.html",
+                "https://www.cdc.gov/media/media/b-roll/Mosquitoes-and-Ticks.html",
+            ],
+        )
+        with self.assertRaisesRegex(RuntimeError, "Public Domain notice"):
+            cdc_broll_importer.parse_cdc_index_page(
+                '<html><body><a href="/media/media/b-roll/cdc-in-the-field.html">Field</a></body></html>'
+            )
+
+    def test_cdc_media_url_allowlist_rejects_non_cdc_hosts_and_non_video_paths(self):
+        valid = "https://www.cdc.gov/media/video/b-roll/Ft.Collins-Tick%20B-RL.mp4"
+        self.assertEqual(cdc_broll_importer.normalize_cdc_media_url(valid), valid)
+        self.assertEqual(
+            cdc_broll_importer.normalize_cdc_category_url(
+                "https://www.cdc.gov/media/media/b-roll/cdc-in-the-field.html"
+            ),
+            "https://www.cdc.gov/media/media/b-roll/cdc-in-the-field.html",
+        )
+        for url in (
+            "http://www.cdc.gov/media/video/b-roll/clip.mp4",
+            "https://www.cdc.gov.evil.example/media/video/b-roll/clip.mp4",
+            "https://user@www.cdc.gov/media/video/b-roll/clip.mp4",
+            "https://www.cdc.gov:444/media/video/b-roll/clip.mp4",
+            "https://www.cdc.gov/media/video/b-roll/clip.mp4?download=1",
+            "https://www.cdc.gov/media/video/pdf/clip.mp4",
+            "https://example.com/media/media/b-roll/cdc-in-the-field.html",
+        ):
+            self.assertIsNone(
+                cdc_broll_importer.normalize_cdc_media_url(url)
+                if ".mp4" in url else cdc_broll_importer.normalize_cdc_category_url(url),
+                url,
+            )
+        self.assertTrue(cdc_broll_importer.cdc_media_response_url_is_allowed(valid, valid))
+        self.assertFalse(
+            cdc_broll_importer.cdc_media_response_url_is_allowed(
+                valid, "https://cdn.example.net/clip.mp4"
+            )
+        )
+
+    def test_cdc_parser_binds_heading_caption_and_prefers_high_resolution_media(self):
+        sections = cdc_broll_importer.cdc_parse_category_page(self.CATEGORY_HTML)
+        self.assertEqual(len(sections), 2)
+        item = sections[0]
+        self.assertEqual(item["title"], "CDC Staff Prepare for Field Investigation")
+        self.assertIn("April 28, 2020", item["caption"])
+        self.assertEqual(len(item["media_links"]), 2)
+        chosen = cdc_broll_importer.cdc_choose_video_candidate(item)
+        self.assertTrue(chosen["url"].endswith("-hi-res.mp4"))
+        self.assertEqual(chosen["label"], "Full Size B-Roll")
+        self.assertTrue(cdc_broll_importer.cdc_section_rights_exception(sections[1]))
+        self.assertFalse(cdc_broll_importer.cdc_section_rights_exception(sections[0]))
+
+    def test_cdc_downloader_records_attribution_rights_and_context_review(self):
+        media_bytes = b"\x00\x00\x00\x18ftypisom" + b"m" * 25000
+        def fake_fetch(url, limit=cdc_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            if url == cdc_broll_importer.INDEX_URL:
+                return self.INDEX_HTML.encode()
+            if url.endswith("cdc-in-the-field.html"):
+                return self.CATEGORY_HTML.encode()
+            if url.endswith("Mosquitoes-and-Ticks.html"):
+                return b"<html><body><div class='dfe-section'><h2>Empty</h2></div></body></html>"
+            raise AssertionError("Unexpected CDC page URL: " + url)
+
+        def fake_download(url, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(media_bytes)
+            return len(media_bytes), hashlib.sha256(media_bytes).hexdigest(), "video/mp4"
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(cdc_broll_importer, "_fetch_cdc_page", side_effect=fake_fetch), \
+             mock.patch.object(cdc_broll_importer, "_download_cdc_video", side_effect=fake_download), \
+             mock.patch.object(cdc_broll_importer.time, "sleep"):
+            index = []
+            report = cdc_broll_importer.download_cdc_broll_videos(Path(tmp), index)
+
+        downloads = [row for row in report if row.get("status") == "downloaded"]
+        skipped = [row for row in report if row.get("status") == "skipped_rights_exception"]
+        self.assertEqual(len(downloads), 1)
+        self.assertEqual(len(skipped), 1)
+        self.assertEqual(len(index), 1)
+        entry = index[0]
+        self.assertEqual(entry["type"], "cdc-broll-video")
+        self.assertTrue(entry["license_verified_from_official_cdc_broll_index"])
+        self.assertTrue(entry["item_rights_exception_screen_passed"])
+        self.assertEqual(entry["credit_text"], "Centers for Disease Control and Prevention (CDC)")
+        self.assertTrue(entry["privacy_publicity_review_required"])
+        self.assertEqual(entry["sha256"], hashlib.sha256(media_bytes).hexdigest())
+        self.assertEqual(entry["size_bytes"], len(media_bytes))
+
+    def test_cdc_lane_is_registered_and_classified_as_footage(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["cdc-broll"], "download_cdc_broll_videos"
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "cdc-broll-video",
+                "path": "third-party/cdc/video/example.mp4",
+            }),
+            "footage",
+        )
 
 
 class CumulativeAssetLibraryIndexTests(unittest.TestCase):
