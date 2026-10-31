@@ -484,6 +484,26 @@
       "note": "Uses official NASA SVS Search/Page APIs across topic queries. Preserves title, description, dimensions, dates, creator/employer credits, datasets, science categories, missions, keywords, source page and exact video URL. Only complete studio=SVS pages are considered. HTTP media links are upgraded to HTTPS only on the exact svs.gsfc.nasa.gov /vis/ path; redirects, MIME/container signatures, byte ceilings and SHA-256 are verified. Pages with explicit licensed-music/copyright/permission notes or non-empty audio_track metadata are skipped pending a safe silent variant. NASA SVS says visualizations are public domain unless otherwise noted and that visuals with licensed music may be used without their associated audio tracks. Credit NASA SVS; do not imply endorsement or use insignia as a logo; review privacy/publicity and third-party data before commercial/promotional use."
     },
     {
+      "id": "eso-public-video-archive",
+      "title": "European Southern Observatory — public astronomy and science videos",
+      "provider": "European Southern Observatory (ESO)",
+      "kind": "official video archive and RSS feeds",
+      "category": "astronomy, exoplanets, galaxies, observatories, telescopes, space science and ESO research",
+      "source_page": "https://www.eso.org/public/videos/",
+      "rss_feeds": [
+        "https://www.eso.org/public/videos/feed/category/esocast/",
+        "https://www.eso.org/public/videos/feed/category/cosmology/",
+        "https://www.eso.org/public/videos/feed/category/exoplanets/",
+        "https://www.eso.org/public/videos/feed/category/milky-way/",
+        "https://www.eso.org/public/videos/feed/category/black-holes/"
+      ],
+      "license": "CC BY 4.0 default for ESO public videos unless the individual page states otherwise; music excluded unless separately covered",
+      "license_url": "https://www.eso.org/public/copyright/",
+      "verified_page_license": true,
+      "bundling": "bounded-official-rss-video-import-after-page-specific-rights-screen-source-sha256-verification-and-audio-removal",
+      "note": "Discover pages only through official ESO RSS feeds. Each individual page must contain a full credit block and a direct checksum-published H.264 4K or 1080p preview. Only exact cdn.eso.org preview URLs are allowed; verify the source SHA-256 published on the item page, MIME/container signature, redirects and byte ceilings. FFmpeg remuxes only the video stream and ffprobe verifies zero audio streams because ESO music is not automatically covered by the general CC BY grant. Preserve the complete credit text and require it visibly and unaltered in the finished video; a description-only credit is insufficient. Fail closed on NoDerivatives, non-commercial, permission-required or other restrictive page-specific terms. ESO branding/logo and endorsement restrictions still apply. Files are CC BY 4.0 default, not CC0."
+    },
+    {
       "id": "library-of-congress-rights-verified-photos",
       "title": "Library of Congress — photographs with explicit item-level rights statements",
       "provider": "Library of Congress",
