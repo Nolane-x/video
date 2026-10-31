@@ -80,6 +80,11 @@ python integrations/voice-studio/provider_voice_benchmark.py \
 
 The resulting benchmark is evidence about the selected engines, voices, script, settings and current revisions, not a universal ranking.
 
+Before treating an `all` run as comparative evidence, inspect
+`provider_catalogue` in the JSON report. Every selected provider must report
+`available`; an empty or failed catalogue makes the run `partial` even if
+other providers rendered audio.
+
 The provider benchmark is restartable. In blind mode it shuffles candidates reproducibly with `--blind-seed`, checkpoints after every candidate and resumes only when the saved audio file still matches its SHA-256 and remains inside the benchmark output directory. Failed candidates are retried. After changing a remote service/model revision or any synthesis setting not represented in the cache key, use `--no-resume` to force a fresh comparison.
 
 After listening, export the ratings JSON from the HTML page and join it to the benchmark's private identity map:
