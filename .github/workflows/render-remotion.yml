@@ -7,6 +7,9 @@ on:
       - "video-projects/remotion/**"
       - "tools/video/caption_coverage.py"
       - "tools/video/test_caption_coverage.py"
+      - "tools/video/render_blocking_preview.py"
+      - "tools/video/validate_preview_approval.py"
+      - "tools/video/test_blocking_preview.py"
       - ".github/workflows/render-remotion.yml"
   pull_request:
     paths:
@@ -84,6 +87,23 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Render blocking motion previews
+        run: |
+          python ../../tools/video/render_blocking_preview.py public/story/shots.json --project-root . --output out/blocking-preview
+
+      - name: Upload blocking preview for independent review
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: one-more-scroll-blocking-preview-${{ github.run_id }}
+          path: video-projects/remotion/out/blocking-preview/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Require explicit review of the exact blocking preview
+        run: |
+          python ../../tools/video/validate_preview_approval.py public/story/shots.json --project-root . --manifest out/blocking-preview/manifest.json
 
       - name: Render MP4
         run: npm run render
