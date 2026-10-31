@@ -1048,6 +1048,13 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
                 "TillItHe1959",
             )
         )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(),
+                "TillItHe1959",
+                "http://creativecommons.org/publicdomain/mark/1.0/",
+            )
+        )
         duplicate = page.replace(
             "</dl>",
             '<dt>Usage</dt><dd><a rel="license" title="Public Domain" href="http://creativecommons.org/licenses/publicdomain/">Public Domain</a></dd></dl>',
