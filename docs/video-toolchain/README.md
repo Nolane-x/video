@@ -16,7 +16,7 @@ The existing Remotion film remains pinned at 4.0.538. Optional Python profiles h
 
 ## Workflows
 
-1. **Video toolchain smoke** validates manifests/skill contracts, installs pinned Node packages and Chromium, typechecks the existing Remotion app, tests imports and uploads lockfile/license/SBOM/version evidence.
+1. **Video toolchain smoke** validates manifests, plugin/skill contracts and the committed npm lockfile; installs exactly from that lockfile with `npm ci`, typechecks the existing Remotion app, tests CLIs/modules and uploads checksums, license inventory, SBOM and runtime-version evidence.
 2. **HyperFrames render proof** scaffolds a sample, runs doctor/lint/browser/layout/motion/contrast checks, renders an MP4 and uploads snapshots.
 3. **Editorial interchange proof** generates synthetic two-scene media, detects the hard cut and round-trips a frame-accurate OTIO timeline. It never reads the separate asset library.
 4. **Manim proof** runs for PR changes to the Manim profile, smoke scene or skill; installs Cairo/Pango/TeX and renders a short equations/graph scene.
@@ -39,8 +39,9 @@ The existing Remotion film remains pinned at 4.0.538. Optional Python profiles h
 
 ## Reproducibility and boundaries
 
-- Node direct dependencies are exact-pinned. CI commits the first generated package-lock to the same-repository PR branch, then subsequent installs use npm ci.
+- Node direct dependencies and the v3 package-lock are committed and validated together. CI uses `npm ci` only; it never writes commits back to a pull-request branch.
 - Python profiles pin direct dependencies. Their workflows upload resolved pip-freeze evidence for review.
+- Core smoke workflow has `contents: read` permission; the runtime install is reproducible without a CI write token.
 - Cache npm, pip and Playwright downloads by OS and manifest hash.
 - Blender is fetched only for the explicit Blender proof workflow; never commit the ~385 MB binary.
 - GPU model weights are never part of default CI. The audio ML workflow installs packages only, not model checkpoints.
