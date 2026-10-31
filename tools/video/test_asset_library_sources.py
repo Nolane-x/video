@@ -2713,7 +2713,7 @@ class SourceCapacityExpansionTests(unittest.TestCase):
             + library.USGS_SELECTION_CAPS["audio"] * library.USGS_AUDIO_MAX_BYTES
         )
         self.assertLessEqual(declared_max, library.USGS_TOTAL_MAX_BYTES)
-        self.assertEqual(library.USGS_TOTAL_MAX_BYTES, 12 * 1024**3)
+        self.assertEqual(library.USGS_TOTAL_MAX_BYTES, 13 * 1024**3)
 
     def test_internet_archive_expansion_keeps_independent_rights_scopes_and_byte_budgets(self):
         self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {
