@@ -87,6 +87,7 @@ def collect_auditions(
             if search and search.casefold() not in name.casefold():
                 continue
             tasks.append(("profile", profile))
+        tasks = tasks[:limit]
 
     if source in {"archetypes", "both"}:
         archetypes = client.list_archetypes(
@@ -96,12 +97,10 @@ def collect_auditions(
         )
         tasks.extend(("archetype", item) for item in archetypes)
 
-    if source == "profiles":
+    if source == "archetypes":
         tasks = tasks[:limit]
-    elif source == "both":
-        tasks = tasks[:limit]
-    else:
-        tasks = tasks[:limit]
+    # For source=both, each source contributes up to --limit entries so a large
+    # saved-profile library cannot crowd archetypes out of the comparison.
 
     audio_dir = output_dir / "audio"
     audio_dir.mkdir(parents=True, exist_ok=True)
