@@ -4,6 +4,8 @@ This is a decision aid for the Command Center and Video Production Master skill.
 
 The machine-readable routing contract lives in `tools/video/genre-routing.json`. It is the canonical source for route IDs, owners, primary/conditional tools, required evidence, guardrails and QA checks. Run `python tools/video/validate_genre_routing.py` (also included in the core unit-test suite) to verify all 10 profiles against this human-readable matrix. Update both in the same change when a genre route changes.
 
+Two quality gates sit around rendering: `python tools/video/evaluate_editorial_plan.py <shot-plan.json> --output <report.json> --strict` blocks incomplete creative briefs/storyboards before rendering; after rendering, `python tools/video/validate_editorial_review.py <review.json> --video <candidate.mp4>` verifies the independent full-audiovisual review attestation, MP4 identity and continuous review coverage. A plan-ready report permits only blocking/preview, not release.
+
 ## 1. Brief contract — required before tool selection
 
 Record or resolve:
