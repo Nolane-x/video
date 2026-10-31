@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: video-toolchain-blender-proof
+  group: video-toolchain-blender-proof-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -47,6 +47,7 @@ jobs:
         env:
           BLENDER_OUTPUT: ${{ github.workspace }}/out/blender/h2-style-study.mp4
           BLENDER_RESOLUTION_PERCENTAGE: "50"
+          BLENDER_RENDER_ENGINE: "BLENDER_WORKBENCH"
         run: |
           mkdir -p out/blender
           LIBGL_ALWAYS_SOFTWARE=1 blender --background --python tools/blender/render_h2_stage.py

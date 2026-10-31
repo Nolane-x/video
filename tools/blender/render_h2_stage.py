@@ -1,5 +1,5 @@
 """
-Render a five-second, 24 fps H2 minimalist mascot style study in headless Blender.
+Render a five-second, 24 fps H2 minimalist mascot style study in headless Blender. CI can explicitly request a fast Workbench proof.
 Usage:
   BLENDER_OUTPUT=out/blender/h2-style-study.mp4 blender -b --python tools/blender/render_h2_stage.py
 """
@@ -26,12 +26,36 @@ preferred_engines = (
     "BLENDER_WORKBENCH",
     "CYCLES",
 )
-scene.render.engine = next(
-    (engine for engine in preferred_engines if engine in available_engines),
-    None,
-) or next(iter(available_engines), "")
+requested_engine = os.environ.get("BLENDER_RENDER_ENGINE", "").strip()
+if requested_engine:
+    if requested_engine not in available_engines:
+        raise RuntimeError(
+            f"Requested Blender engine {requested_engine!r} is unavailable; "
+            f"available engines: {sorted(available_engines)}"
+        )
+    scene.render.engine = requested_engine
+else:
+    scene.render.engine = next(
+        (engine for engine in preferred_engines if engine in available_engines),
+        None,
+    ) or next(iter(available_engines), "")
 if not scene.render.engine:
     raise RuntimeError("Blender runtime did not expose any supported render engines.")
+
+if scene.render.engine == "BLENDER_WORKBENCH":
+    # A fast, deterministic preview profile for ordinary CPU CI.
+    # Production shots can use Eevee/Cycles through their project render profile.
+    shading = scene.display.shading
+    shading.light = "STUDIO"
+    shading.color_type = "MATERIAL"
+    shading.background_type = "WORLD"
+    shading.show_shadows = True
+    shading.show_cavity = True
+    shading.cavity_type = "BOTH"
+    shading.cavity_ridge_factor = 1.2
+    shading.cavity_valley_factor = 1.0
+    print("Workbench preview profile: studio light, material colors, shadows and cavity")
+
 print("Selected Blender render engine:", scene.render.engine)
 scene.render.resolution_x = 1280
 scene.render.resolution_y = 720
