@@ -159,12 +159,16 @@ const SkyIntro = () => {
             <span>STUDIO</span><span>WORKFLOW</span><span>01 / 09</span>
           </div>
         </div>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 240, textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 88, letterSpacing: "-.045em", color: "#fff", textShadow: "0 3px 24px rgba(55,76,102,.24)", opacity: ease(frame, 4, 30) }}>
-            Let’s create Motion design
+        <div style={{ position: "absolute", left: 0, right: 0, top: 240, textAlign: "center", opacity: ease(frame, 4, 30) }}>
+          <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 88, letterSpacing: "-.045em", color: "#202d3b", textShadow: "0 2px 10px rgba(255,255,255,.25)" }}>
+            <span>Let’s create </span>
+            <span style={{ position: "relative", display: "inline-block" }}>
+              <span style={{ position: "absolute", left: -9, right: -9, top: "54%", height: 44, background: "#c5ed61", transform: "rotate(-1.5deg)", zIndex: 0 }} />
+              <span style={{ position: "relative", zIndex: 1 }}>Motion design</span>
+            </span>
           </div>
-          <div style={{ marginTop: 24, color: "#f7fbff", fontSize: 22, letterSpacing: ".19em", fontWeight: 600, opacity: ease(frame, 22, 42) }}>
-            A NEW WAY TO MAKE IDEAS MOVE
+          <div style={{ marginTop: 18, color: "#465766", fontSize: 19, letterSpacing: ".08em", fontWeight: 600, opacity: ease(frame, 22, 42) }}>
+            Good work starts here
           </div>
         </div>
         <div
@@ -279,11 +283,19 @@ const ClaimScene = () => {
         <RadialMark frame={frame} size={156} />
         <Word size={118} color="#222326" tracking={-0.055} weight={800}>Claude Motion.</Word>
       </div>
-      <div style={{ position: "absolute", top: 590, left: 180, right: 180, textAlign: "center", opacity: reveal }}>
-        <Word size={78} weight={850} tracking={-0.06}>The open-source alternative</Word>
-        <div style={{ display: "inline-block", position: "relative", marginTop: 22 }}>
-          <div style={{ position: "absolute", left: -14, right: -14, top: 13, height: 78, background: "#b9e64e", transform: `scaleX(${wipe}) rotate(-1deg)`, transformOrigin: "left center" }} />
-          <Word size={82} weight={900} color="#242a23" style={{ position: "relative" }}>to Claude Motion.</Word>
+      <div style={{ position: "absolute", top: 590, left: 90, right: 90, textAlign: "center", opacity: reveal }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 20, color: "#222326", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 88, fontWeight: 900, letterSpacing: "-.065em" }}>The</span>
+          <span style={{ position: "relative", display: "inline-block" }}>
+            <span style={{ position: "absolute", left: -10, right: -10, top: "54%", height: 57, background: "#b9e64e", transform: `scaleX(${wipe}) rotate(-1deg)`, transformOrigin: "left center" }} />
+            <span style={{ position: "relative", fontSize: 94, fontWeight: 950, letterSpacing: "-.075em" }}>open-source</span>
+          </span>
+          <span style={{ fontSize: 88, fontWeight: 900, letterSpacing: "-.065em" }}>alternative</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 28, color: "#77716b" }}>
+          <span style={{ fontSize: 38, fontWeight: 600, letterSpacing: "-.03em" }}>to</span>
+          <RadialMark frame={frame} size={42} />
+          <span style={{ fontSize: 40, fontWeight: 850, letterSpacing: "-.04em", color: "#29282a" }}>Claude Motion.</span>
         </div>
       </div>
       <div style={{ position: "absolute", bottom: 85, left: 0, right: 0, textAlign: "center", fontSize: 17, color: "#aaa49a", letterSpacing: ".19em", opacity: fadeIn(frame, 45) }}>OPEN SOURCE · FRAME BY FRAME · YOUR WORKFLOW</div>
@@ -391,17 +403,33 @@ const PosterFuture = () => {
 
 const CirclePoster = () => {
   const f = useCurrentFrame();
+  const rotation = f * 1.15;
   return (
     <AbsoluteFill style={{ ...full, background: "#f0b7a9", color: "#252126" }}>
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(120deg,#f1c3b5,#e4a9ac)" }} />
       <div style={{ position: "absolute", top: 70, left: 90, fontSize: 18, letterSpacing: ".2em", fontWeight: 800 }}>MOTION / STUDY 02</div>
-      <div style={{ position: "absolute", left: "50%", top: "50%", width: 820, height: 820, transform: `translate(-50%,-50%) rotate(${f * 1.9}deg)` }}>
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} style={{ position: "absolute", left: i * 66, top: i * 66, right: i * 66, bottom: i * 66, border: `${i === 0 ? 18 : 5}px solid rgba(32,28,35,${0.85 - i * 0.15})`, borderRadius: "50%", display: "grid", placeItems: "center" }}>
-            <div style={{ position: "absolute", fontWeight: 950, fontSize: 42 - i * 4, letterSpacing: ".24em", transform: `rotate(${i % 2 ? -20 : 20}deg)` }}>THE FUTURE · THE FUTURE</div>
-          </div>
-        ))}
-      </div>
+      <svg viewBox="0 0 900 900" width="900" height="900" style={{ position: "absolute", left: "50%", top: "50%", marginLeft: -450, marginTop: -450, transform: `rotate(${rotation}deg)` }}>
+        <defs>
+          <path id="future-ring-outer" d="M450 450 m-355 0 a355 355 0 1 1 710 0 a355 355 0 1 1 -710 0" />
+          <path id="future-ring-middle" d="M450 450 m-270 0 a270 270 0 1 1 540 0 a270 270 0 1 1 -540 0" />
+          <path id="future-ring-inner" d="M450 450 m-183 0 a183 183 0 1 1 366 0 a183 183 0 1 1 -366 0" />
+        </defs>
+        <circle cx="450" cy="450" r="355" fill="none" stroke="#252126" strokeWidth="3" />
+        <circle cx="450" cy="450" r="270" fill="none" stroke="#252126" strokeWidth="3" />
+        <circle cx="450" cy="450" r="183" fill="none" stroke="#252126" strokeWidth="3" />
+        <text fill="#252126" fontSize="31" fontWeight="900" letterSpacing="5">
+          <textPath href="#future-ring-outer">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath>
+        </text>
+        <text fill="#252126" fontSize="25" fontWeight="850" letterSpacing="4">
+          <textPath href="#future-ring-middle">THE FUTURE · THE FUTURE · THE FUTURE · THE FUTURE · THE FUTURE ·</textPath>
+        </text>
+        <text fill="#252126" fontSize="19" fontWeight="800" letterSpacing="3">
+          <textPath href="#future-ring-inner">ALREADY HERE · ALREADY HERE · ALREADY HERE · ALREADY HERE ·</textPath>
+        </text>
+        <circle cx="450" cy="450" r="116" fill="#252126" />
+        <text x="450" y="435" fill="#f4c1b3" fontSize="33" textAnchor="middle" fontWeight="900">FUTURE</text>
+        <text x="450" y="478" fill="#f4c1b3" fontSize="25" textAnchor="middle" fontWeight="700">IS NOW</text>
+      </svg>
       <div style={{ position: "absolute", right: 100, bottom: 95, fontSize: 18, letterSpacing: ".18em", fontWeight: 800 }}>ORBITAL TYPE / 02</div>
     </AbsoluteFill>
   );
@@ -661,8 +689,8 @@ const Cube = ({
   symbol: "play" | "window" | "spark";
 }) => {
   const local = Math.max(0, frame - delay);
-  const rotY = local * 1.1 + delay * 0.8;
-  const rotX = local * 0.65 + delay * 0.35;
+  const rotY = local * 0.62 + delay * 0.38;
+  const rotX = local * 0.38 + delay * 0.24;
   const faceStyle: React.CSSProperties = {
     position: "absolute",
     inset: 0,
@@ -681,7 +709,7 @@ const Cube = ({
       : <svg viewBox="0 0 100 100" width="50%" height="50%"><path d="M50 4 L61 38 L96 50 L61 62 L50 96 L39 62 L4 50 L39 38Z" fill="#fff"/></svg>;
   const half = size / 2;
   return (
-    <div style={{ position: "absolute", left: x, top: y, width: size, height: size, perspective: 1200, transform: `translateY(${Math.sin((frame + delay) / 20) * 22}px)` }}>
+    <div style={{ position: "absolute", left: x, top: y, width: size, height: size, perspective: 1200, opacity: 1 - ease(frame, 72, 92), transform: `translateY(${Math.sin((frame + delay) / 20) * 22}px)` }}>
       <div style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", transform: `translateZ(-${half}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`, filter: "drop-shadow(0 35px 24px rgba(14,22,54,.28))" }}>
         <div style={{ ...faceStyle, transform: `translateZ(${half}px)` }}>{glyph(symbol)}</div>
         <div style={{ ...faceStyle, transform: `rotateY(180deg) translateZ(${half}px)`, filter: "brightness(.68)" }}>{glyph("spark")}</div>
@@ -703,17 +731,17 @@ const CubeEnding = () => {
   return (
     <AbsoluteFill style={{ ...full, background: "radial-gradient(ellipse at 50% 42%,#e7ecff 0%,#b8c7ec 42%,#7c91ca 100%)" }}>
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(130deg,rgba(255,255,255,.38),transparent 44%,rgba(34,53,120,.2))" }} />
-      <Cube size={248} x={320} y={220} delay={0} frame={frame} colour="#5a79d7" symbol="play" />
-      <Cube size={300} x={810} y={135} delay={7} frame={frame} colour="#4560c2" symbol="window" />
-      <Cube size={220} x={1330} y={265} delay={13} frame={frame} colour="#7b8de1" symbol="spark" />
-      <Cube size={180} x={570} y={650} delay={18} frame={frame} colour="#344ea7" symbol="window" />
-      <Cube size={260} x={1120} y={650} delay={22} frame={frame} colour="#6883dd" symbol="play" />
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 90, display: "flex", alignItems: "center", justifyContent: "center", gap: 28, opacity: alpha, transform: `translateY(${y}px)` }}>
-        <div style={{ width: 108, height: 108, borderRadius: 32, background: "linear-gradient(145deg,#2446b9,#5878e8)", display: "grid", placeItems: "center", boxShadow: "0 20px 40px rgba(28,43,112,.25)", transform: `scale(${logo})` }}>
-          <svg viewBox="0 0 100 100" width="62" height="62"><path d="M32 17 Q24 13 24 28 V72 Q24 86 37 78 L81 54 Q92 48 81 42Z" fill="#fff"/></svg>
+      <Cube size={248} x={300} y={140} delay={0} frame={frame} colour="#5a79d7" symbol="play" />
+      <Cube size={300} x={790} y={110} delay={7} frame={frame} colour="#4560c2" symbol="window" />
+      <Cube size={220} x={1330} y={185} delay={13} frame={frame} colour="#7b8de1" symbol="spark" />
+      <Cube size={180} x={520} y={520} delay={18} frame={frame} colour="#344ea7" symbol="window" />
+      <Cube size={260} x={1120} y={495} delay={22} frame={frame} colour="#6883dd" symbol="play" />
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 140, display: "flex", alignItems: "center", justifyContent: "center", gap: 32, opacity: alpha, transform: `translateY(${y}px)` }}>
+        <div style={{ width: 124, height: 124, borderRadius: 36, background: "linear-gradient(145deg,#2446b9,#5878e8)", display: "grid", placeItems: "center", boxShadow: "0 20px 40px rgba(28,43,112,.25)", transform: `scale(${logo})` }}>
+          <svg viewBox="0 0 100 100" width="72" height="72"><path d="M32 17 Q24 13 24 28 V72 Q24 86 37 78 L81 54 Q92 48 81 42Z" fill="#fff"/></svg>
         </div>
         <div>
-          <div style={{ fontSize: 76, fontWeight: 950, color: "#1c2f68", letterSpacing: "-.07em", lineHeight: .9 }}>OpenDesign <span style={{ color: "#fff" }}>Motion</span></div>
+          <div style={{ fontSize: 84, fontWeight: 950, color: "#1c2f68", letterSpacing: "-.07em", lineHeight: .9 }}>OpenDesign <span style={{ color: "#4565c0" }}>Motion</span></div>
           <div style={{ fontSize: 18, marginTop: 18, color: "#3d5285", fontWeight: 800, letterSpacing: ".22em" }}>MAKE EVERY FRAME MOVE</div>
         </div>
       </div>
