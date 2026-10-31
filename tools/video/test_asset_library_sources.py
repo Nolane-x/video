@@ -21,6 +21,7 @@ import generate_sticker_meme_library as sticker_meme  # noqa: E402
 import package_asset_bundles as bundle_packager  # noqa: E402
 import build_asset_library_shard as shard_builder  # noqa: E402
 import finalize_asset_library_release as release_finalizer  # noqa: E402
+import build_cumulative_asset_library_index as cumulative_index  # noqa: E402
 import probe_nara_bulk_dataset as nara_probe  # noqa: E402
 import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
@@ -1960,6 +1961,115 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         self.assertEqual(result["bytes_read"], 64)
         response.read.assert_called_once_with(65)
 
+
+
+
+class CumulativeAssetLibraryIndexTests(unittest.TestCase):
+    def _release(self, tag, repository, assets, bundle_name):
+        bundle_paths = [asset["path"] for asset in assets]
+        bundle = {
+            "name": bundle_name,
+            "sha256": hashlib.sha256((tag + bundle_name).encode("utf-8")).hexdigest(),
+            "archive_bytes": 1024,
+            "uncompressed_bytes": sum(asset["size_bytes"] for asset in assets),
+            "file_count": len(bundle_paths),
+            "paths": bundle_paths,
+        }
+        return {
+            "release_tag": tag,
+            "repository": repository,
+            "summary": {"indexed_resource_bytes": sum(asset["size_bytes"] for asset in assets)},
+            "assets": assets,
+            "bundles": [bundle],
+        }
+
+    def _asset(self, asset_id, path, payload, license_name="CC0-1.0"):
+        return {
+            "id": asset_id,
+            "path": path,
+            "type": "test-image",
+            "provider": "Test Provider",
+            "title": asset_id,
+            "license": license_name,
+            "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "source_page": "https://example.test/item/" + asset_id,
+            "redistributable": True,
+            "size_bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        }
+
+    def test_identical_bytes_count_once_but_preserve_each_origin_and_license(self):
+        payload_shared = b"same image content"
+        payload_new = b"new unique footage payload"
+        release_a = self._release(
+            "video-asset-library-build-A",
+            "Nolane-x/video",
+            [
+                self._asset("same-a", "third-party/a/shared.jpg", payload_shared, "CC0-1.0"),
+                self._asset("old-only", "third-party/a/old.mp4", payload_new, "Public Domain"),
+            ],
+            "video-assets-a-media-001.zip",
+        )
+        release_b = self._release(
+            "video-asset-library-build-B",
+            "Nolane-x/video",
+            [
+                self._asset("same-b", "third-party/b/copy.jpg", payload_shared, "CC-BY-4.0"),
+            ],
+            "video-assets-b-media-001.zip",
+        )
+
+        merged = cumulative_index.merge_published_release_indexes([release_a, release_b])
+        shared_digest = hashlib.sha256(payload_shared).hexdigest()
+        shared = next(row for row in merged["assets"] if row["sha256"] == shared_digest)
+
+        self.assertEqual(merged["summary"]["unique_resource_bytes"], len(payload_shared) + len(payload_new))
+        self.assertEqual(merged["summary"]["unique_asset_count"], 2)
+        self.assertEqual(merged["summary"]["release_asset_occurrences"], 3)
+        self.assertEqual(merged["summary"]["duplicate_resource_occurrences"], 1)
+        self.assertEqual(len(shared["origins"]), 2)
+        self.assertEqual({origin["license"] for origin in shared["origins"]}, {"CC0-1.0", "CC-BY-4.0"})
+        self.assertTrue(all(origin["download_url"].startswith("https://github.com/Nolane-x/video/releases/download/") for origin in shared["origins"]))
+        self.assertEqual(merged["summary"]["source_release_count"], 2)
+
+    def test_cumulative_index_rejects_same_sha_with_inconsistent_sizes(self):
+        digest = hashlib.sha256(b"abc").hexdigest()
+        first = {
+            "id": "a", "path": "one/a.bin", "license": "CC0-1.0",
+            "redistributable": True, "size_bytes": 3, "sha256": digest,
+        }
+        second = {
+            "id": "b", "path": "two/b.bin", "license": "CC0-1.0",
+            "redistributable": True, "size_bytes": 4, "sha256": digest,
+        }
+        a = self._release("release-a", "Nolane-x/video", [first], "bundle-a.zip")
+        b = self._release("release-b", "Nolane-x/video", [second], "bundle-b.zip")
+        with self.assertRaisesRegex(RuntimeError, "inconsistent byte sizes"):
+            cumulative_index.merge_published_release_indexes([a, b])
+
+    def test_cumulative_index_rejects_asset_not_covered_by_any_volume(self):
+        asset = self._asset("a", "orphan/file.jpg", b"orphan")
+        release = self._release("release-a", "Nolane-x/video", [asset], "bundle-a.zip")
+        release["bundles"][0]["paths"] = ["different/file.jpg"]
+        with self.assertRaisesRegex(RuntimeError, "does not package indexed asset"):
+            cumulative_index.merge_published_release_indexes([release])
+
+    def test_cumulative_index_rejects_duplicate_release_tags(self):
+        asset = self._asset("a", "one/file.jpg", b"one")
+        release = self._release("release-a", "Nolane-x/video", [asset], "bundle-a.zip")
+        with self.assertRaisesRegex(RuntimeError, "Duplicate source release index"):
+            cumulative_index.merge_published_release_indexes([release, release])
+
+    def test_cumulative_index_writer_emits_index_and_download_map(self):
+        asset = self._asset("a", "one/file.jpg", b"one")
+        release = self._release("video-asset-library-build-A", "Nolane-x/video", [asset], "bundle-a.zip")
+        merged = cumulative_index.merge_published_release_indexes([release])
+        with tempfile.TemporaryDirectory() as tmp:
+            index_path, downloads_path = cumulative_index.write_cumulative_index(merged, Path(tmp))
+            index_doc = json.loads(index_path.read_text(encoding="utf-8"))
+            downloads_doc = json.loads(downloads_path.read_text(encoding="utf-8"))
+        self.assertEqual(index_doc["summary"]["unique_resource_bytes"], 3)
+        self.assertEqual(downloads_doc["bundles"][0]["download_url"], "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-A/bundle-a.zip")
 
 
 if __name__ == "__main__":
