@@ -263,7 +263,7 @@ def parse_eso_feed(feed_xml: bytes, category: str) -> list[dict[str, str]]:
         items.append({
             "id": video_id,
             "title": (item.findtext("title") or "").strip()[:300],
-            "description": re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", item.findtext("description") or "")).strip()[:2000],
+            "description": re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html_lib.unescape(item.findtext("description") or ""))).strip()[:2000],
             "published": (item.findtext("pubDate") or "").strip()[:80],
             "source_page": page_url,
             "category": category,
