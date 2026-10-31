@@ -77,7 +77,7 @@ def _synthesize(
             raise ValueError("VoiceStudio benchmark requires an exact --engine ID")
         return client.synthesize(
             text, destination, engine=engine, voice=voice_id,
-            language=language, speed=1.0, seed=seed,
+            language=language, speed=1.0,
         )
     if provider == "korva":
         return korva.synthesize(
