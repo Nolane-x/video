@@ -60,6 +60,8 @@ MAX_TOTAL_SOURCE_BYTES = 4 * 1024 * 1024 * 1024
 MIN_VIDEO_BYTES = 256 * 1024
 UA = "NolaneVideoAssetLibrary-NPS-Broll/1.0 (+https://github.com/Nolane-x/video)"
 UUID_RE = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+NPS_LEGACY_ID_RE = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{16}"
+NPS_ARCHIVE_ID_RE = rf"(?:{UUID_RE}|{NPS_LEGACY_ID_RE})"
 NPS_PUBLIC_DOMAIN_RE = re.compile(
     r"public\s+domain.{0,180}(?:free|use|download|any\s+purpose)|"
     r"(?:free|downloadable).{0,100}public\s+domain|"
@@ -80,7 +82,7 @@ NPS_ITEM_RIGHTS_EXCEPTION_RE = re.compile(
 )
 NPS_MEDIA_PATH_RE = re.compile(
     rf"^/nps-audiovideo/(?:audiovideo/{UUID_RE}(?:240|360|426|480|640|720|854|1080|1280|1440|1920|2160)p\.mp4|"
-    rf"legacy/(?:grca|jotr|deva|yose|saan)/{UUID_RE}/[A-Za-z0-9._-]+\.mp4)$",
+    rf"legacy/(?:grca|jotr|deva|yose|saan)/{NPS_ARCHIVE_ID_RE}/[A-Za-z0-9._-]+\.mp4)$",
     re.IGNORECASE,
 )
 NPS_VIEW_PATH = "/media/video/view.htm"
@@ -118,7 +120,7 @@ def normalize_nps_page_url(raw_url: str) -> str | None:
         return None
     if parsed.path == NPS_VIEW_PATH:
         query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
-        if set(query) != {"id"} or len(query["id"]) != 1 or not re.fullmatch(UUID_RE, query["id"][0]):
+        if set(query) != {"id"} or len(query["id"]) != 1 or not re.fullmatch(NPS_ARCHIVE_ID_RE, query["id"][0]):
             return None
         return f"{BASE}{NPS_VIEW_PATH}?id={query['id'][0].upper()}"
     if parsed.query:
