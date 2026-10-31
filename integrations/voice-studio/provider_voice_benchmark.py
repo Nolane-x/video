@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from client import VoiceStudioClient
+from voice_quality import compare_text
 from providers import google_cloud, korva, elevenlabs
 from voice_audition import _language_matches
 
@@ -189,6 +190,7 @@ def run_benchmark(
     blind: bool = True,
     allow_cloud: bool = False,
     delay: float = 0.5,
+    asr: bool = False,
     client: VoiceStudioClient | None = None,
 ) -> dict[str, Any]:
     valid_providers = {"voicestudio", "korva", "google", "elevenlabs", "all"}
@@ -274,6 +276,16 @@ def run_benchmark(
                 "bytes": path.stat().st_size,
                 "sha256": digest,
             })
+            if asr:
+                try:
+                    transcript = client.transcribe(path, language=language)
+                    row["asr_intelligibility_proxy"] = compare_text(text, transcript)
+                    row["asr_intelligibility_proxy"]["status"] = "available"
+                except Exception as asr_exc:
+                    row["asr_intelligibility_proxy"] = {
+                        "status": "unavailable",
+                        "reason": f"{type(asr_exc).__name__}: {asr_exc}",
+                    }
         except Exception as exc:
             row["status"] = "failed"
             row["error"] = f"{type(exc).__name__}: {exc}"
@@ -287,6 +299,7 @@ def run_benchmark(
         "provider": provider,
         "providers_included": requested_providers,
         "cloud_enabled": any(name in {"google", "elevenlabs"} for name in requested_providers),
+        "asr_enabled": asr,
         "catalogue_errors": catalogue_errors,
         "engine": engine,
         "language": language,
@@ -323,6 +336,8 @@ def main() -> int:
     parser.add_argument("--no-blind", action="store_true")
     parser.add_argument("--allow-cloud", action="store_true",
                         help="Confirm Google/ElevenLabs synthesis API calls may be billed")
+    parser.add_argument("--asr", action="store_true",
+                        help="Round-trip every generated candidate through VoiceStudio ASR (WER/CER proxy)")
     parser.add_argument("--delay", type=float, default=0.5)
     args = parser.parse_args()
     try:
@@ -331,7 +346,7 @@ def main() -> int:
             args.provider, text, args.output,
             language=args.language, engine=args.engine,
             limit=args.limit, seed=args.seed, blind=not args.no_blind,
-            allow_cloud=args.allow_cloud, delay=args.delay,
+            allow_cloud=args.allow_cloud, delay=args.delay, asr=args.asr,
         )
     except Exception as exc:
         print(f"Provider voice benchmark failed: {exc}", file=sys.stderr)
@@ -343,6 +358,7 @@ def main() -> int:
         "failed": report["failed"],
         "blind": report["blind"],
         "human_review_required": True,
+        "asr_enabled": report.get("asr_enabled", False),
     }, ensure_ascii=False, indent=2))
     return 1 if report["failed"] else 0
 
