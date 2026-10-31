@@ -122,6 +122,7 @@ profile ID is the stable identifier to keep in a video cast.
 | VoxCPM2 through VoiceStudio | Native text-description voice design and zero-shot reference cloning; supports Vietnamese | Model and component licence review is still required; design descriptions do not guarantee the same identity quality as ElevenLabs |
 | OmniVoice through VoiceStudio | Very broad language coverage and reference cloning/design | The current default weights are in a CC-BY-NC family with extra component terms; do not assume commercial use |
 | KorvaTTS | 10 Vietnamese preset voices (5 female, 5 male), 44.1 kHz ONNX/CPU, code-switching | Preset voices only today; voice cloning/training is still on the upstream roadmap |
+| VoiceStudio Supertonic-3 | 7 native preset voices, 31 languages including Vietnamese, 44.1 kHz ONNX/CPU | SDK MIT; weights OpenRAIL-M and licence-gated; Actions audition requires explicit manual confirmation; no custom voice design/cloning |
 | Google Cloud TTS | Live provider voice catalogue | Cloud account/billing/service terms apply |
 | ElevenLabs | Account library, verified-language metadata and TTS | API key, account plan, voice-specific rights and language support apply |
 
