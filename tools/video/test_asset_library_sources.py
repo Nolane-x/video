@@ -3003,6 +3003,11 @@ class NPSBrollImporterTests(unittest.TestCase):
             nps_broll_importer.normalize_npgallery_original_url(expected_original, asset_id),
             expected_original,
         )
+        # The live Asset Detail page appends an empty query marker to its original-file link.
+        self.assertEqual(
+            nps_broll_importer.normalize_npgallery_original_url(expected_original + "?", asset_id),
+            expected_original,
+        )
         for url in (
             "http://npgallery.nps.gov/AssetDetail/" + asset_id,
             "https://npgallery.nps.gov.evil.example/AssetDetail/" + asset_id,
