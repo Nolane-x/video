@@ -155,6 +155,62 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
             page = (Path(tmp) / "index.html").read_text(encoding="utf-8")
             self.assertIn("ASR proxy WER 0.0%", page)
 
+    def test_interrupted_benchmark_resumes_valid_audio_without_rerendering(self):
+        calls = {"voice-a": 0, "voice-b": 0}
+
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            voice_id = candidate["id"]
+            calls[voice_id] += 1
+            if voice_id == "voice-b" and calls[voice_id] == 1:
+                raise RuntimeError("simulated interrupted provider call")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+
+        candidates = [
+            {"id": "voice-b", "name": "Voice B", "language": "vi"},
+            {"id": "voice-a", "name": "Voice A", "language": "vi"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", return_value=candidates):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    first = benchmark.run_benchmark(
+                        "korva", "Cùng một kịch bản.", Path(tmp),
+                        language="vi", seed=4200, blind=True, blind_seed=71,
+                        client=FakeClient(), delay=0,
+                    )
+                    self.assertEqual(first["status"], "partial")
+                    self.assertEqual(first["ready"], 1)
+                    self.assertEqual(first["failed"], 1)
+
+                    second = benchmark.run_benchmark(
+                        "korva", "Cùng một kịch bản.", Path(tmp),
+                        language="vi", seed=4200, blind=True, blind_seed=71,
+                        client=FakeClient(), delay=0,
+                    )
+
+            self.assertEqual(second["status"], "complete")
+            self.assertEqual(second["ready"], 2)
+            self.assertEqual(second["failed"], 0)
+            self.assertEqual(second["cache_hits"], 1)
+            self.assertEqual(calls, {"voice-a": 1, "voice-b": 2})
+            saved = json.loads(
+                (Path(tmp) / "provider-voice-benchmark.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(saved["status"], "complete")
+            self.assertEqual(saved["pending"], 0)
+
+    def test_report_audio_path_cannot_escape_benchmark_output_directory(self):
+        with tempfile.TemporaryDirectory() as output_tmp:
+            with tempfile.TemporaryDirectory() as outside_tmp:
+                outside_audio = Path(outside_tmp) / "outside.wav"
+                outside_audio.write_bytes(b"audio")
+                self.assertIsNone(
+                    benchmark._safe_report_audio_path(
+                        Path(output_tmp), str(outside_audio)
+                    )
+                )
+
     def test_all_requires_voice_studio_engine_for_fair_comparison(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
