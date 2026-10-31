@@ -2641,6 +2641,11 @@ class NPSBrollImporterTests(unittest.TestCase):
             ),
             "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper(),
         )
+        legacy_id = "BEB855EF-9E28-4D45-3077A632DA293D46"
+        legacy_view_url = "https://www.nps.gov/media/video/view.htm?id=" + legacy_id
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(legacy_view_url), legacy_view_url
+        )
         for url in (
             "http://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
             "https://www.nps.gov.evil.example/grca/learn/photosmultimedia/b-roll_hd_index.htm",
@@ -2654,6 +2659,14 @@ class NPSBrollImporterTests(unittest.TestCase):
 
         self.assertEqual(
             nps_broll_importer.normalize_nps_media_url(self.URL_1080), self.URL_1080
+        )
+        legacy_media_url = (
+            "https://www.nps.gov/nps-audiovideo/legacy/deva/"
+            "BEB855EF-9E28-4D45-3077A632DA293D46/deva-MosaicCanyon_1280x720.mp4"
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_media_url(legacy_media_url),
+            legacy_media_url,
         )
         for url in (
             "http://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
