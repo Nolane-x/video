@@ -1,8 +1,9 @@
-Build from latest main source caps after PR #20 (ESO silent-footage source lane).
-Previous published baseline: video-asset-library-build-41149972764 (Build 69; 15,825,356,549 indexed resource bytes before cumulative SHA-256 deduplication).
+Build from latest main after PR #21 (verified Prelinger item-page Public Domain status fallback).
+Previous published baseline: Build 70 Release video-asset-library-build-41155773940, 19,956,470,461 indexed resource bytes before cross-release unique SHA-256 deduplication.
 Include all source lanes from SOURCE_LANES plus originals, including:
 - NASA SVS: official topic discovery, page-level rights/music filtering, source-byte budget, source SHA-256 and verified media.
-- ESO public videos: six verified official RSS categories (ESOcast, cosmology, exoplanets, fulldome, stars, galaxies); max 18 silent H.264 preview downloads; 300 MiB/file; 4 GiB source-byte ceiling; official page SHA-256 verification; audio removed; full visible unaltered credit and modification disclosure required; review identifiable people and page-specific rights exceptions.
+- ESO public videos: six verified official RSS categories; max 18 silent H.264 preview downloads; 300 MiB/file; 4 GiB source-byte ceiling; official page SHA-256 verification; audio removed; full visible unaltered credit and modification disclosure required.
+- Internet Archive: preserve the CC0 item-metadata gate. For Prelinger only, if API rights metadata is absent or exactly Public Domain and its license URL is one of the two allow-listed Public Domain URL forms, verify the exact canonical item page has exactly one Usage row labelled Public Domain with a matching rel=license URL/title. Record this as Public Domain status, never CC0. Reject conflicting rights and third-party items remain human-review flagged. Use deterministic identifier paging and separate 4 GiB Prelinger / 4 GiB NASA byte budgets (8 GiB combined), 250 MiB/file, max 120 selected per collection.
 Require all source lanes from SOURCE_LANES plus originals; the finalizer must verify every shard manifest, bundle coverage, remote byte count and GitHub SHA-256 digest before publishing.
 After publication, compare against every earlier published asset-library release by exact per-asset SHA-256 and update the cumulative index; count only unique indexed resource bytes toward the 50,000,000,000-byte target.
-Build workflow concurrency is serialized with cancel-in-progress=false; do not cancel the currently active Build 70 while this request queues behind it.
+Build workflow concurrency is serialized with cancel-in-progress=false; do not cancel Build 71 (if still active) while this request queues behind it.
