@@ -76,12 +76,13 @@ POLY_PIZZA_LICENSE = "CC0-1.0"
 
 # USGS media is bundled only when its individual detail page's Sources/Usage block
 # contains exactly "Public Domain." — gallery-wide default wording is not sufficient.
-USGS_GALLERY_PAGE_SCAN_LIMIT = 32
-USGS_SELECTION_CAPS = {"images": 120, "videos": 64, "audio": 40}
+# The per-item Public Domain. rights gate remains mandatory; increased ceilings only widen discovery.
+USGS_GALLERY_PAGE_SCAN_LIMIT = 40
+USGS_SELECTION_CAPS = {"images": 120, "videos": 96, "audio": 60}
 USGS_IMAGE_MAX_BYTES = 10 * 1024 * 1024
 USGS_VIDEO_MAX_BYTES = 100 * 1024 * 1024
 USGS_AUDIO_MAX_BYTES = 30 * 1024 * 1024
-USGS_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+USGS_TOTAL_MAX_BYTES = 12 * 1024 * 1024 * 1024
 # OpenGameArt search uses the official CC0 license taxonomy filter, but every result
 # must still pass its own item's license and attachment checks before being downloaded.
 OPENGAMEART_SELECTION_CAPS = {"2d": 60, "3d": 60, "textures": 48, "sfx": 36, "music": 36}
@@ -93,13 +94,13 @@ OPENGAMEART_MAX_PACKAGE_BYTES = 240 * 1024 * 1024
 OPENGAMEART_MAX_TOTAL_BYTES = 8 * 1024 * 1024 * 1024
 # Internet Archive public-domain/CC0 moving-image selections. A collection is a
 # discovery scope only: every item must pass its own licenseurl/rights and file checks.
-INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 120, "nasa": 120}
+INTERNET_ARCHIVE_COLLECTION_CAPS = {"prelinger": 160, "nasa": 160}
 INTERNET_ARCHIVE_SEARCH_ROWS = 100
 INTERNET_ARCHIVE_SEARCH_PAGES = 5
-INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 220
+INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 320
 INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
-INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
-INTERNET_ARCHIVE_COLLECTION_MAX_BYTES = {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024}
+INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 12 * 1024 * 1024 * 1024
+INTERNET_ARCHIVE_COLLECTION_MAX_BYTES = {"prelinger": 6 * 1024 * 1024 * 1024, "nasa": 6 * 1024 * 1024 * 1024}
 INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
 INTERNET_ARCHIVE_VIDEO_EXTENSIONS = {".mp4", ".ogv", ".webm"}
 OPENMOJI_VERSION = "17.0.0"
