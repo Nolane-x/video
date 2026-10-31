@@ -88,7 +88,7 @@ NPS_MEDIA_PATH_RE = re.compile(
 NPS_VIEW_PATH = "/media/video/view.htm"
 NPS_EMBED_PATH = "/media/video/embed.htm"
 NPS_MEDIA_PAGE_PATHS = {NPS_VIEW_PATH, NPS_EMBED_PATH}
-NPS_COPYRIGHT_MARK_RE = re.compile(r"(?:©|\\(c\\)|copyright\\s+(?:19|20)\\d{2})", re.IGNORECASE)
+NPS_COPYRIGHT_MARK_RE = re.compile(r"(?:©|\(c\)|copyright\s+(?:19|20)\d{2})", re.IGNORECASE)
 NPS_DETAIL_PAGE_RE = re.compile(
     r"(?:b[-]?roll|clip|sunclips)",
     re.IGNORECASE,
@@ -346,7 +346,7 @@ def parse_nps_media_page_credit(page_html: str) -> tuple[str, bool]:
     """Accept the item media page only when its visible credit is NPS-owned and unmarked."""
     raw = html_lib.unescape(page_html or "")
     match = re.search(
-        r"<h[1-6]\\b[^>]*>\\s*credit\\s*</h[1-6]\\s*>(.*?)(?=<h[1-6]\\b|$)",
+        r"<h[1-6]\b[^>]*>\s*credit\s*</h[1-6]\s*>(.*?)(?=<h[1-6]\b|$)",
         raw,
         re.IGNORECASE | re.DOTALL,
     )
@@ -617,10 +617,10 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
         page_tasks.extend((row["url"], "media", {**source, "media_hint": row.get("title", "")}) for row in parsed_index["media_pages"])
 
         queued_pages = {row[0] for row in page_tasks}
-    task_cursor = 0
-    while task_cursor < len(page_tasks) and task_cursor < MAX_ITEM_PAGES:
-        page_url, page_kind, source_info = page_tasks[task_cursor]
-        task_cursor += 1
+        task_cursor = 0
+        while task_cursor < len(page_tasks) and task_cursor < MAX_ITEM_PAGES:
+            page_url, page_kind, source_info = page_tasks[task_cursor]
+            task_cursor += 1
             if downloads >= MAX_DOWNLOADS or source_bytes >= MAX_TOTAL_SOURCE_BYTES or metadata_bytes >= MAX_METADATA_BYTES:
                 break
             if page_url in seen_pages:
