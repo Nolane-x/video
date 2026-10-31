@@ -93,6 +93,22 @@ Keep these states separate:
 
 A plugin release, CI pass, or successful export is not artistic approval.
 
+## Final release attestation — mandatory
+
+After the candidate passes the full review above, complete `tools/video/editorial-review.template.json` with:
+- exact source commit, candidate MP4 path, SHA-256 and ffprobe duration;
+- an independent reviewer context/identifier;
+- full-playback-at-normal-speed and audio-review confirmations;
+- contiguous timecoded visual/audio coverage from 0 to the end;
+- scores and timecoded evidence for every category;
+- open-ended findings recorded before the checklist;
+- every P0/P1 finding either resolved and rechecked or the decision remains REVISE/REJECT.
+
+Validate the attestation against the exact MP4:
+`python tools/video/validate_editorial_review.py <review.json> --video <candidate.mp4>`
+
+All category scores must be at least 7/10 and the mean at least 7.5/10; no unresolved P0/P1 defects are allowed. A passing validator confirms that the media identity and review record are complete and consistent. It **cannot prove** that the reviewer actually watched or listened; the independent reviewer is accountable for that attestation. A plan-readiness score is not an artistic quality score and never replaces this final gate.
+
 ## Source provenance
 
 This protocol adapts high-level evaluation practices from sb-dev/video-production-skills at commit 5e82bb9a188d3cfc83cae0979cc39737011411b9 (Apache-2.0). No upstream TypeScript evaluator scripts are bundled or claimed as locally runnable here. See docs/EXPERT_SKILL_SOURCE_AUDIT.md for source scope, licensing and adaptation boundaries.
