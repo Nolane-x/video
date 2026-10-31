@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-audio-speech-studio",
+  "version": "0.1.0",
+  "description": "Specialist workflows for voice-over, Vietnamese speech recognition and alignment, diarization, source separation, audio cleanup, sound design, loudness mastering and accessible captions. Heavy model weights and provider terms are managed separately from code dependencies.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "audio",
+    "speech",
+    "whisperx",
+    "demucs",
+    "captions",
+    "sound-design"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Audio & Speech Studio",
+        "shortDescription": "Narration and audio post",
+        "longDescription": "Specialist workflows for voice-over, Vietnamese speech recognition and alignment, diarization, source separation, audio cleanup, sound design, loudness mastering and accessible captions. Heavy model weights and provider terms are managed separately from code dependencies.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve rights and verify the rendered output."
+      }
+    }
+  }
+}

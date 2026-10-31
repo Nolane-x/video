@@ -52,6 +52,41 @@
       "archiveBytes": 385331224,
       "renderer": "CPU headless",
       "whyOptional": "Official binary ~385 MB; skip ordinary 2D jobs and cache for explicit 3D work."
+    },
+    "editorialPython": {
+      "required": false,
+      "manualOnly": false,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/editorial/requirements.txt",
+      "packages": [
+        "opentimelineio==0.18.1",
+        "scenedetect-headless==0.7.2"
+      ],
+      "purpose": "OTIO timeline interchange plus headless PySceneDetect cut detection; no media copied to or from the asset library.",
+      "workflow": ".github/workflows/video-toolchain-editorial.yml"
+    },
+    "manim": {
+      "required": false,
+      "manualOnly": true,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/manim/requirements.txt",
+      "packages": [
+        "manim==0.22.1"
+      ],
+      "purpose": "Math/science animation; isolated profile with Cairo/Pango/TeX dependencies.",
+      "workflow": ".github/workflows/video-toolchain-manim-proof.yml"
+    },
+    "audioML": {
+      "required": false,
+      "manualOnly": true,
+      "python": "3.12",
+      "requirementsFile": "toolchain/python/audio-ml/requirements.txt",
+      "packages": [
+        "whisperx==3.8.6",
+        "demucs==4.1.0"
+      ],
+      "purpose": "Optional speech alignment and source separation; installs no model weights.",
+      "workflow": ".github/workflows/video-toolchain-audio-ml.yml"
     }
   },
   "tools": [
@@ -266,6 +301,56 @@
       "role": "Transitive npm license report",
       "source": "https://github.com/RSeidelsohn/license-checker-rseidelsohn",
       "default": true
+    },
+    {
+      "name": "OpenTimelineIO",
+      "pythonPackage": "opentimelineio",
+      "version": "0.18.1",
+      "license": "Apache-2.0",
+      "role": "Editorial timeline interchange",
+      "source": "https://github.com/AcademySoftwareFoundation/OpenTimelineIO",
+      "default": false,
+      "profile": "editorialPython"
+    },
+    {
+      "name": "PySceneDetect headless",
+      "pythonPackage": "scenedetect-headless",
+      "version": "0.7.2",
+      "license": "BSD-3-Clause",
+      "role": "Scene boundary detection",
+      "source": "https://github.com/Breakthrough/PySceneDetect",
+      "default": false,
+      "profile": "editorialPython"
+    },
+    {
+      "name": "Manim CE",
+      "pythonPackage": "manim",
+      "version": "0.22.1",
+      "license": "MIT",
+      "role": "Math/science animation",
+      "source": "https://github.com/ManimCommunity/manim",
+      "default": false,
+      "profile": "manim"
+    },
+    {
+      "name": "WhisperX",
+      "pythonPackage": "whisperx",
+      "version": "3.8.6",
+      "license": "BSD-2-Clause",
+      "role": "Speech recognition and alignment",
+      "source": "https://github.com/m-bain/whisperX",
+      "default": false,
+      "profile": "audioML"
+    },
+    {
+      "name": "Demucs",
+      "pythonPackage": "demucs",
+      "version": "4.1.0",
+      "license": "MIT",
+      "role": "Optional music source separation",
+      "source": "https://github.com/facebookresearch/demucs",
+      "default": false,
+      "profile": "audioML"
     }
   ],
   "excludedFromDefault": [

@@ -1,0 +1,61 @@
+name: Optional speech and source-separation runtime
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: video-toolchain-audio-ml
+  cancel-in-progress: false
+
+jobs:
+  install-audio-ml:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: toolchain/python/audio-ml/requirements.txt
+      - name: Install FFmpeg and audio libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+      - name: Install pinned WhisperX and Demucs packages
+        run: python -m pip install --prefer-binary --requirement toolchain/python/audio-ml/requirements.txt
+      - name: Verify CPU runtime imports without downloading model weights
+        env:
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          import torch
+          import whisperx
+          import demucs
+          from importlib.metadata import version
+          print(json.dumps({
+              "python": sys.version,
+              "torch": torch.__version__,
+              "cuda_available": torch.cuda.is_available(),
+              "whisperx": version("whisperx"),
+              "demucs": version("demucs")
+          }, indent=2))
+          PY
+          whisperx --help > whisperx-help.txt
+          demucs --help > demucs-help.txt
+          python -m pip freeze > audio-ml-resolved-requirements.txt
+      - name: Upload audio ML runtime evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: video-audio-ml-runtime-\${{ github.run_id }}
+          path: |
+            whisperx-help.txt
+            demucs-help.txt
+            audio-ml-resolved-requirements.txt
+          if-no-files-found: error
+          retention-days: 14

@@ -1,45 +1,51 @@
 # Nolane Video Actions Toolchain
 
-The repo owns the recipes, pins, wrappers, skills, tests and workflows. GitHub Actions installs runtime packages into ephemeral runner storage and caches downloads. This is intentionally not a node_modules or desktop-installer commit to Git history.
+The repository owns exact pins, installers, profiles, skills, tests and workflows. GitHub Actions installs into isolated runner storage and caches downloads. It does not commit node_modules, browser binaries, model weights or desktop installers into normal Git history.
 
 ## Profiles
 
-| Profile | Contents | When it runs |
-|---|---|---|
-| core | Node 24, Remotion, HyperFrames, Motion Canvas libraries, GSAP, Motion, Three.js, PixiJS, Theatre Core, SVG/D3, resvg, Sharp, postprocessing, Playwright Chromium, FFmpeg and Tesseract EN/VI | Toolchain smoke workflow, CPU-first |
-| blender | Blender 5.2.3 official Linux x64 archive, verified with the official SHA-256 manifest | Manual workflow only; ~385 MB download and CPU render |
+| Profile | Contents | Trigger | Hardware |
+|---|---|---|---|
+| Core | Node 24, Remotion, HyperFrames, GSAP, Motion, Three.js, PixiJS, Theatre Core, SVG/D3, resvg, Sharp, Playwright Chromium, FFmpeg, Tesseract EN/VI | PR/push smoke | CPU |
+| Editorial | OpenTimelineIO 0.18.1 and PySceneDetect headless 0.7.2 | PR and manual proof | CPU |
+| Manim | Manim CE 0.22.1, Cairo/Pango and TeX | Manual proof only | CPU |
+| Audio ML | WhisperX 3.8.6 and Demucs 4.1.0 | Manual install/import only | CPU import; model inference may need GPU |
+| Blender | Blender 5.2.3 official Linux x64 archive verified against official SHA-256 | Manual proof only | CPU |
 
-The existing Remotion film stays pinned at 4.0.538. Do not bump it as part of routine toolchain refreshes. Runtime packages install under toolchain/node; the scripts expose the binary directory and the Actions workflow links the runtime into the existing Remotion workspace for Node module resolution.
+The existing Remotion film remains pinned at 4.0.538. Optional Python profiles have separate exact direct requirements and are not installed into the Node core environment.
 
-## Actions workflow
+## Workflows
 
-1. Run Video toolchain smoke manually or by changing toolchain/skill files. It installs dependencies and Chromium, checks module imports/CLIs, records version data, transitive dependencies, licenses and a CycloneDX SBOM.
-2. Run HyperFrames render proof manually to verify a scaffold → lint → MP4 → snapshot path on a CPU runner.
-3. Run Blender CPU proof only when a planned shot benefits from actual 3D depth, camera parallax, lighting or geometry. The binary is downloaded from the official host and verified against the official checksum file.
+1. **Video toolchain smoke** validates manifests/skill contracts, installs pinned Node packages and Chromium, typechecks the existing Remotion app, tests imports and uploads lockfile/license/SBOM/version evidence.
+2. **HyperFrames render proof** scaffolds a sample, runs doctor/lint/browser/layout/motion/contrast checks, renders an MP4 and uploads snapshots.
+3. **Editorial interchange proof** generates synthetic two-scene media, detects the hard cut and round-trips a frame-accurate OTIO timeline. It never reads the separate asset library.
+4. **Manim proof** is manual-only; installs Cairo/Pango/TeX and renders a short equations/graph scene.
+5. **Audio ML runtime** is manual-only; installs/imports WhisperX/Demucs code but does not fetch models or access credentials.
+6. **Blender proof** downloads the official binary on demand, verifies SHA-256, then renders the short style study.
 
 ## Engine routing
 
-- Remotion: primary deterministic React timeline/compositing.
-- HyperFrames: HTML/CSS/GSAP scenes, lint, render, snapshot and CLI diagnostics.
-- Motion Canvas: vector/explanatory animation; 3.17.2 is a specialist lane and must be smoke-tested before use in a film.
-- GSAP / Motion / Theatre Core: timeline choreography, springs and authored keyframes.
-- Three.js / PixiJS / postprocessing: procedural 3D, 2D particles, depth, filters, glow, blur and compositing.
-- SVG.js / Rough.js / D3 / resvg / Sharp: vector scenes, illustrative accents, data motion, rasterization and image transforms.
-- FFmpeg / Tesseract / Playwright: mastering, media inspection, OCR/caption coverage and browser capture.
-- Blender: optional 3D stage. Start with a low-res 3–5 second proof.
+- Remotion: primary React timeline, captions, typography, transitions and compositing.
+- HyperFrames: HTML/CSS/GSAP, deterministic browser capture, lint/check/snapshots and render.
+- GSAP/Motion: kinetic typography, transition choreography and spring motion.
+- Three.js/PixiJS: browser 3D, particles, depth, filters and effects.
+- Manim: mathematical/scientific/engineering explainers.
+- OpenTimelineIO: timeline interchange data, not a media container.
+- PySceneDetect: shot/cut candidates; humans review false positives.
+- WhisperX: speech recognition/alignment; validate Vietnamese aligner support before claiming word precision.
+- Demucs: optional source separation; inspect artefacts and keep model-weight terms separate from code license.
+- Blender: optional 3D stage only when actual geometry, light, camera or rigging helps.
+- FFmpeg/Tesseract/Playwright: mastering, probing, OCR/caption coverage and visual QA.
 
-## Reproducibility and size
+## Reproducibility and boundaries
 
-- Every direct npm dependency is exact-pinned in toolchain/node/package.json and duplicated in toolchain/manifest.json.
-- Actions creates package-lock.json and uploads it with install evidence. The first transitive lock must be reviewed and promoted into source only after CI resolves successfully.
-- Cache npm and Playwright Chromium by OS + package manifest hash.
-- Blender is fetched only when the manual 3D workflow runs; do not commit its 385 MB binary.
-- No GPU models or giant native SDK stacks are in the default toolchain.
-
-## Existing project boundaries
-
-This workstream does not edit video-library/**, video-library/assets/**, asset downloaders, SFX/music generation or the asset-release workflow. Existing H2 and Remotion render workflows are preserved. The toolchain smoke workflow does not render or overwrite any film master.
+- Node direct dependencies are exact-pinned. CI commits the first generated package-lock to the same-repository PR branch, then subsequent installs use npm ci.
+- Python profiles pin direct dependencies. Their workflows upload resolved pip-freeze evidence for review.
+- Cache npm, pip and Playwright downloads by OS and manifest hash.
+- Blender is fetched only by its manual workflow; never commit the ~385 MB binary.
+- GPU model weights are never part of default CI. The audio ML workflow installs packages only, not model checkpoints.
+- This workstream does not modify video-library/**, video-library/assets/**, resource downloaders, SFX/music acquisition or the asset builder workflow. The parallel asset AI retains ownership.
 
 ## License gates
 
-Read THIRD-PARTY-LICENSES.md and package notices before redistribution or commercial use. Remotion has a tiered license; Theatre Core is Apache-2.0 while Theatre Studio is AGPL-3.0; resvg-js is MPL-2.0. FFmpeg's effective license depends on build flags and enabled codecs.
+Read THIRD-PARTY-LICENSES.md. A package-code license does not grant rights to model weights, voices, footage, fonts, music or presets. Remotion and GSAP have special terms; check commercial eligibility before publishing.

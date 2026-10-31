@@ -1,0 +1,32 @@
+{
+  "interface": {
+    "displayName": "Nolane Video Command Center",
+    "shortDescription": "All video tools and skills",
+    "longDescription": "Use one plugin to route internally across included expert skills for story, motion, Manim, 3D/VFX, audio/speech, captions, editorial timelines, scene analysis, tool installation and evidence-based video QA. Uses Nolane-x/video and GitHub Actions.",
+    "developerName": "Nolane Studio",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Create, continue or improve my video using the Nolane video production system. Select the best included skills and tools, work on the GitHub repo safely, render a candidate and verify it before handoff."
+  },
+  "name": "nolane-video-command-center",
+  "version": "0.3.0",
+  "description": "The single AI-first front door for Nolane video production. Bundles end-to-end direction plus specialist skills for story, motion, Manim explainers, 3D/VFX, audio/speech, editorial interchange, scene analysis, render engineering and release QA.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "keywords": [
+    "video",
+    "orchestration",
+    "ai-agent",
+    "github",
+    "remotion",
+    "hyperframes",
+    "manim",
+    "blender",
+    "audio",
+    "captions",
+    "production"
+  ],
+  "repository": "https://github.com/Nolane-x/video",
+  "skills": "./skills"
+}

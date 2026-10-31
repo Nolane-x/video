@@ -4,12 +4,30 @@ import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_toolchain import validate
+from validate_plugin_packages import validate as validate_plugins
 from build_npm_sbom import build
 ROOT = Path(__file__).resolve().parents[2]
 
 class ToolchainManifestTests(unittest.TestCase):
     def test_manifest_and_npm_direct_pins_are_consistent(self):
         self.assertEqual(validate(ROOT), [])
+    def test_plugin_manifests_and_skill_frontmatter_are_valid(self):
+        self.assertEqual(validate_plugins(ROOT), [])
+
+    def test_optional_python_profiles_have_exact_direct_pins(self):
+        manifest = json.loads((ROOT / "toolchain/manifest.json").read_text(encoding="utf-8"))
+        expected = {
+            "editorialPython": ("toolchain/python/editorial/requirements.txt", ["opentimelineio==0.18.1", "scenedetect-headless==0.7.2"]),
+            "manim": ("toolchain/python/manim/requirements.txt", ["manim==0.22.1"]),
+            "audioML": ("toolchain/python/audio-ml/requirements.txt", ["whisperx==3.8.6", "demucs==4.1.0"]),
+        }
+        for profile, (path, pins) in expected.items():
+            self.assertEqual(manifest["profiles"][profile]["packages"], pins)
+            requirements = [x.strip() for x in (ROOT / path).read_text(encoding="utf-8").splitlines() if x.strip()]
+            self.assertEqual(requirements, pins)
+        self.assertTrue(manifest["profiles"]["manim"]["manualOnly"])
+        self.assertTrue(manifest["profiles"]["audioML"]["manualOnly"])
+
     def test_core_dependencies_are_exact_and_no_gpu_model_is_installed(self):
         package = json.loads((ROOT / "toolchain/node/package.json").read_text(encoding="utf-8"))
         deps = package["dependencies"]

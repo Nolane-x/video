@@ -80,22 +80,7 @@ jobs:
         run: |
           python tools/video/validate_toolchain.py
           python -m unittest discover -s tools/video -p 'test_toolchain.py' -v
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          root = Path('.')
-          for manifest in root.glob('plugins/chatgpt/*/plugin.json'):
-              data = json.loads(manifest.read_text(encoding='utf-8'))
-              assert data.get('$schema') == 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json', manifest
-              assert data.get('name') == manifest.parent.name, manifest
-          for skill in root.glob('.agents/skills/video-*/SKILL.md'):
-              lines = skill.read_text(encoding='utf-8').splitlines()
-              assert len(lines) >= 4 and lines[0] == '---', skill
-              assert lines[1].startswith('name: '), skill
-              assert lines[2].startswith('description: '), skill
-              assert lines[3] == '---', skill
-          print('Plugin manifests and repo video skills validated.')
-          PY
+          python tools/video/validate_plugin_packages.py
 
       - name: Install pinned runtime dependencies
         run: |

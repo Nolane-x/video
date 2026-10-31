@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-manim-explainer-studio",
+  "version": "0.1.0",
+  "description": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "manim",
+    "math",
+    "science",
+    "education",
+    "animation",
+    "video"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Manim Explainer Studio",
+        "shortDescription": "Math and science animation",
+        "longDescription": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve rights and verify the rendered output."
+      }
+    }
+  }
+}
