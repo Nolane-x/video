@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate the machine-readable genre routing contract against the human matrix."""
 from __future__ import annotations
+
 import json
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 ROUTING_PATH = Path("tools/video/genre-routing.json")
 MATRIX_PATH = Path("docs/GENRE_ROUTING_MATRIX.md")
+
 EXPECTED_IDS = {
     "documentary-factual", "science-math-engineering", "narrative-animation",
     "product-software-demo", "tutorial-training", "interview-podcast",
@@ -19,9 +21,9 @@ ALLOWED_TOOLS = {
     "FFmpeg/ffprobe", "OpenTimelineIO", "PySceneDetect", "WhisperX", "Demucs",
     "Tesseract", "VideoDB (optional)", "AI media provider (opt-in)",
 }
-REQUIRED_FIELDS = (
-    "intent", "creativeOwners", "primaryTools", "conditionalTools",
-    "requiredEvidence", "criticalGuardrails", "qaChecks",
+REQUIRED_ARRAY_FIELDS = (
+    "creativeOwners", "primaryTools", "conditionalTools", "requiredEvidence",
+    "criticalGuardrails", "qaChecks",
 )
 REQUIRED_CHECKS = {
     "documentary-factual": {"claim-source-ledger", "rights-and-release-check", "full-audiovisual-review"},
@@ -37,11 +39,25 @@ REQUIRED_CHECKS = {
 }
 
 
+def _string_list(value: Any) -> bool:
+    return (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(item, str) and item.strip() for item in value)
+    )
+
+
 def validate_data(data: dict[str, Any], matrix_text: str) -> list[str]:
     errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["genre-routing document must be a JSON object"]
     if data.get("schemaVersion") != 1:
         errors.append("genre-routing schemaVersion must equal 1")
-    universal = data.get("universalRules", {})
+
+    universal = data.get("universalRules")
+    if not isinstance(universal, dict):
+        errors.append("universalRules must be an object")
+        universal = {}
     required_universal = {
         "briefLedVisualDirection": True,
         "chooseSmallestEffectiveToolset": True,
@@ -53,12 +69,22 @@ def validate_data(data: dict[str, Any], matrix_text: str) -> list[str]:
     for key, expected in required_universal.items():
         if universal.get(key) is not expected:
             errors.append(f"universalRules.{key} must be {str(expected).lower()}")
+
     profiles = data.get("profiles")
     if not isinstance(profiles, list):
         return errors + ["genre-routing profiles must be an array"]
-    ids = [p.get("id") for p in profiles if isinstance(p, dict)]
-    if len(ids) != len(profiles):
-        errors.append("every genre profile must be an object")
+
+    ids: list[str] = []
+    for index, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            errors.append(f"profiles[{index}] must be an object")
+            continue
+        profile_id = profile.get("id")
+        if not isinstance(profile_id, str) or not profile_id.strip():
+            errors.append(f"profiles[{index}].id must be a non-empty string")
+            continue
+        ids.append(profile_id)
+
     if len(ids) != len(set(ids)):
         errors.append("genre profile ids must be unique")
     if set(ids) != EXPECTED_IDS:
@@ -66,34 +92,60 @@ def validate_data(data: dict[str, Any], matrix_text: str) -> list[str]:
             f"genre profile coverage mismatch; missing={sorted(EXPECTED_IDS-set(ids))}, "
             f"extra={sorted(set(ids)-EXPECTED_IDS)}"
         )
+
     for profile in profiles:
         if not isinstance(profile, dict):
             continue
-        profile_id = profile.get("id", "<unknown>")
-        for field in REQUIRED_FIELDS:
+        profile_id = profile.get("id")
+        if not isinstance(profile_id, str) or not profile_id.strip():
+            continue
+
+        intent = profile.get("intent")
+        if not isinstance(intent, str) or not intent.strip():
+            errors.append(f"{profile_id}.intent must be a non-empty string")
+
+        for field in REQUIRED_ARRAY_FIELDS:
             value = profile.get(field)
-            if not isinstance(value, list) or not value or not all(
-                isinstance(item, str) and item.strip() for item in value
-            ):
+            if not _string_list(value):
                 errors.append(f"{profile_id}.{field} must be a non-empty string array")
+
         display_name = profile.get("displayName")
-        if not isinstance(display_name, str) or display_name not in matrix_text:
+        if not isinstance(display_name, str) or not display_name.strip():
+            errors.append(f"{profile_id}.displayName must be a non-empty string")
+        elif display_name not in matrix_text:
             errors.append(f"{profile_id}.displayName must appear in {MATRIX_PATH}")
-        tools = profile.get("primaryTools", []) + profile.get("conditionalTools", [])
+
+        primary = profile.get("primaryTools")
+        conditional = profile.get("conditionalTools")
+        primary = primary if isinstance(primary, list) else []
+        conditional = conditional if isinstance(conditional, list) else []
+        tools = [tool for tool in primary + conditional if isinstance(tool, str)]
         unknown = sorted(set(tools) - ALLOWED_TOOLS)
         if unknown:
             errors.append(f"{profile_id} contains unknown tools: {unknown}")
-        if "H2 Studio" in set(profile.get("primaryTools", [])):
+
+        if "H2 Studio" in primary:
             errors.append(f"{profile_id} must not make H2 Studio a default primary tool")
-        if "H2 Studio" in set(profile.get("conditionalTools", [])):
+        if "H2 Studio" in conditional:
             if profile_id != "narrative-animation":
                 errors.append("H2 Studio may only be conditional for narrative-animation")
-            elif not any(token in " ".join(profile.get("criticalGuardrails", [])).lower()
-                         for token in ("existing series", "explicit request", "do not impose")):
-                errors.append("narrative-animation must guard H2 use behind series continuity or explicit request")
-        missing_checks = REQUIRED_CHECKS.get(profile_id, set()) - set(profile.get("qaChecks", []))
+            else:
+                guardrails = profile.get("criticalGuardrails")
+                guardrail_text = " ".join(guardrails) if _string_list(guardrails) else ""
+                if not any(
+                    token in guardrail_text.lower()
+                    for token in ("existing series", "explicit request", "do not impose")
+                ):
+                    errors.append(
+                        "narrative-animation must guard H2 use behind series continuity or explicit request"
+                    )
+
+        qa_checks = profile.get("qaChecks")
+        qa_checks = set(qa_checks) if _string_list(qa_checks) else set()
+        missing_checks = REQUIRED_CHECKS.get(profile_id, set()) - qa_checks
         if missing_checks:
             errors.append(f"{profile_id} is missing QA checks: {sorted(missing_checks)}")
+
     return errors
 
 
@@ -113,6 +165,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
+
     data = json.loads((ROOT / ROUTING_PATH).read_text(encoding="utf-8"))
     print("GENRE ROUTING VALIDATION: PASS")
     print(f"- Genre profiles: {len(data['profiles'])}")
