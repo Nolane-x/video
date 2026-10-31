@@ -8,6 +8,7 @@ from pathlib import Path, PurePosixPath
 from generate_sticker_meme_library import generate_assets as generate_sticker_meme_assets
 from nasa_svs_importer import download_nasa_svs_media
 from eso_video_importer import download_eso_media
+from cdc_broll_importer import download_cdc_broll_videos
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -6523,6 +6524,7 @@ def main():
             ("nasa", download_nasa_media),
             ("nasa_svs", download_nasa_svs_media),
             ("eso", download_eso_media),
+            ("cdc-broll", download_cdc_broll_videos),
             ("loc", download_loc_public_domain),
             ("wikimedia", download_wikimedia_public_domain),
             ("wikimedia_svg", download_wikimedia_vector_svg),
@@ -6549,6 +6551,7 @@ def main():
     nasa_report=source_reports["nasa"]
     nasa_svs_report=source_reports["nasa_svs"]
     eso_report=source_reports["eso"]
+    cdc_broll_report=source_reports["cdc-broll"]
     loc_report=source_reports["loc"]
     wikimedia_report=source_reports["wikimedia"]
     wikimedia_svg_report=source_reports["wikimedia_svg"]
@@ -6631,6 +6634,8 @@ def main():
               "nasa_svs_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in nasa_svs_report if r.get("status")=="downloaded"),
               "eso_silent_videos_downloaded":sum(r.get("status")=="downloaded" for r in eso_report),
               "eso_silent_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in eso_report if r.get("status")=="downloaded"),
+              "cdc_broll_videos_downloaded":sum(r.get("status")=="downloaded" for r in cdc_broll_report),
+              "cdc_broll_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in cdc_broll_report if r.get("status")=="downloaded"),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
@@ -6658,7 +6663,7 @@ def main():
               "original_caption_overlays":sticker_meme_counts["caption_overlays"]}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. ESO public videos are CC BY 4.0 by default unless page-level exceptions apply; full visible credit and audio-removal disclosure are required, and identifiable-person commercial-use restrictions remain flagged. ESO media is not CC0. Source-only libraries are not raw-bundled.",
+               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. CDC B-roll media is taken only from the official CDC B-roll category pages under CDC's published government-produced Public Domain notice; item caption/credit exceptions are skipped, CDC is credited, and people/healthcare privacy context is flagged for review. CDC media is not relabelled CC0. ESO public videos are CC BY 4.0 by default unless page-level exceptions apply; full visible credit and audio-removal disclosure are required, and identifiable-person commercial-use restrictions remain flagged. ESO media is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"kenney_godot_splashscreens_downloads":kenney_splash_report,
                "polyhaven_downloads":polyhaven_report,
@@ -6670,6 +6675,7 @@ def main():
                "nasa_media_downloads":nasa_report,
                "nasa_svs_media_downloads":nasa_svs_report,
                 "eso_video_downloads":eso_report,
+                "cdc_broll_video_downloads":cdc_broll_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
@@ -6692,6 +6698,12 @@ def main():
       + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in eso_report)
     )
     write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+eso_note+"\n")
+    cdc_broll_note=(
+      "\n\n## CDC Newsroom B-roll — U.S. Government Public Domain footage\n"
+      "The importer starts from the official CDC B-roll index and requires its explicit notice that CDC B-roll is produced by the U.S. Government and is in the public domain. It follows only the exact category pages linked by that index, parses item sections, and accepts direct MP4/MOV files under the CDC media video paths. The selected download is checked for an exact same-host/same-path HTTPS response, MIME type, ISO-BMFF signature, per-file and aggregate byte limits, and SHA-256. Item sections with copyright, third-party, licensed-material or permission exception wording are skipped. CDC asks users to cite CDC as the source; do not imply CDC endorsement. B-roll may show identifiable people or healthcare interactions, so review privacy/publicity releases and intended commercial/promotional use before publication. This source is Public Domain under the CDC B-roll notice, not CC0. Sources: https://www.cdc.gov/media/b-roll/index.html and https://www.cdc.gov/Other/imagereuse.html.\n"
+      + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in cdc_broll_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+cdc_broll_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
