@@ -18,6 +18,12 @@ Start with the full integration guide:
 - Inspect audio engineering signals and optionally ASR WER/CER:
   integrations/voice-studio/voice_quality.py
 
+## Agent skills
+
+- [Voice design director](../.agents/skills/video-voice-design-director/SKILL.md)
+- [Character voice casting engineer](../.agents/skills/video-character-voice-casting-engineer/SKILL.md)
+- [Voice quality auditor](../.agents/skills/video-voice-quality-auditor/SKILL.md)
+
 ## Guardrails
 
 Do not add model weights, reference recordings, API keys, cloned human voices,
