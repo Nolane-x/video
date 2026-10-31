@@ -98,6 +98,7 @@ INTERNET_ARCHIVE_SEARCH_PAGES = 5
 INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 220
 INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
 INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+INTERNET_ARCHIVE_COLLECTION_MAX_BYTES = {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024}
 INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
 INTERNET_ARCHIVE_VIDEO_EXTENSIONS = {".mp4", ".ogv", ".webm"}
 OPENMOJI_VERSION = "17.0.0"
@@ -4467,6 +4468,14 @@ def download_openmoji_assets(root,index):
     return report
 
 
+INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS = {
+    "http://creativecommons.org/licenses/publicdomain/",
+    "https://creativecommons.org/licenses/publicdomain/",
+    "http://creativecommons.org/publicdomain/mark/1.0/",
+    "https://creativecommons.org/publicdomain/mark/1.0/",
+}
+
+
 INTERNET_ARCHIVE_LICENSE_PATHS = {
     "/publicdomain/zero/1.0/": "CC0-1.0",
     "/licenses/cc0/3.0/": "CC0-3.0",
@@ -4505,6 +4514,120 @@ def internet_archive_metadata_url_is_allowed(url,identifier):
         )
     except Exception:
         return False
+
+
+class _InternetArchiveUsageParser(HTMLParser):
+    """Read the exact Usage definition-list entry from an Internet Archive item page."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.dt_parts=[]
+        self.in_dt=False
+        self.current_term=""
+        self.in_usage_dd=False
+        self.usage_rows=[]
+        self.usage_text=[]
+        self.links=[]
+        self.anchor=None
+
+    def handle_starttag(self,tag,attrs):
+        attr={key.casefold():value or "" for key,value in attrs}
+        if tag=="dt":
+            self.dt_parts=[]
+            self.in_dt=True
+        elif tag=="dd":
+            self.in_dt=False
+            term=" ".join("".join(self.dt_parts).split()).casefold()
+            self.in_usage_dd=(term=="usage")
+            if self.in_usage_dd:
+                self.usage_text=[]
+                self.links=[]
+        elif tag=="a" and self.in_usage_dd:
+            self.anchor={
+                "href":attr.get("href",""),
+                "title":attr.get("title",""),
+                "rel":attr.get("rel",""),
+                "text":[]
+            }
+
+    def handle_startendtag(self,tag,attrs):
+        self.handle_starttag(tag,attrs)
+        self.handle_endtag(tag)
+
+    def handle_data(self,data):
+        if self.in_dt:
+            self.dt_parts.append(data)
+        if self.in_usage_dd:
+            self.usage_text.append(data)
+        if self.anchor is not None:
+            self.anchor["text"].append(data)
+
+    def handle_endtag(self,tag):
+        if tag=="dt":
+            self.current_term=" ".join("".join(self.dt_parts).split())
+            self.in_dt=False
+        elif tag=="a" and self.anchor is not None:
+            self.anchor["text"]=" ".join("".join(self.anchor["text"]).split())
+            self.links.append(self.anchor)
+            self.anchor=None
+        elif tag=="dd" and self.in_usage_dd:
+            self.usage_rows.append({
+                "text":" ".join("".join(self.usage_text).split()),
+                "links":list(self.links),
+            })
+            self.in_usage_dd=False
+
+
+def internet_archive_public_domain_usage_is_verified(page_html,identifier,expected_license_url=None):
+    """Accept only an exact item-page Usage: Public Domain label for Prelinger records."""
+    if not internet_archive_identifier_is_allowed(identifier):
+        return False
+    if not isinstance(page_html,str) or len(page_html.encode("utf-8"))>6*1024*1024:
+        return False
+    parser=_InternetArchiveUsageParser()
+    try:
+        parser.feed(page_html)
+        parser.close()
+    except Exception:
+        return False
+    if len(parser.usage_rows)!=1:
+        return False
+    usage=parser.usage_rows[0]
+    if usage["text"].casefold()!="public domain" or len(usage["links"])!=1:
+        return False
+    link=usage["links"][0]
+    if str(link.get("title") or "").strip().casefold()!="public domain":
+        return False
+    if "license" not in str(link.get("rel") or "").casefold().split():
+        return False
+    if str(link.get("text") or "").strip().casefold()!="public domain":
+        return False
+    href=str(link.get("href") or "").strip()
+    if expected_license_url is not None and href!=str(expected_license_url).strip():
+        return False
+    return href in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS
+
+
+def internet_archive_fetch_item_page(identifier,timeout=35):
+    """Fetch one canonical IA detail page and reject redirects away from that exact item."""
+    url="https://archive.org/details/"+str(identifier)
+    if not internet_archive_item_url_is_allowed(url,identifier):
+        raise RuntimeError("Internet Archive item page URL failed the exact-host allow-list")
+    request=urllib.request.Request(
+        url,
+        headers={"User-Agent":UA,"Accept":"text/html,application/xhtml+xml"},
+    )
+    with urllib.request.urlopen(request,timeout=timeout) as response:
+        final_url=response.geturl()
+        if not internet_archive_item_url_is_allowed(final_url,identifier):
+            raise RuntimeError("Internet Archive item page redirected outside its exact canonical URL")
+        content_type=response.headers.get("Content-Type","").split(";",1)[0].strip().casefold()
+        if content_type not in {"text/html","application/xhtml+xml"}:
+            raise RuntimeError("Internet Archive item detail response is not HTML")
+        body=response.read(6*1024*1024+1)
+    if len(body)>6*1024*1024:
+        raise RuntimeError("Internet Archive item detail page exceeded its byte ceiling")
+    return body.decode("utf-8","replace")
 
 
 def internet_archive_license_from_item_metadata(license_url,rights):
@@ -4632,7 +4755,7 @@ def internet_archive_search_url(collection,start):
     params=[
         ("q",query),("fl[]","identifier"),("fl[]","title"),("fl[]","licenseurl"),
         ("fl[]","creator"),("fl[]","year"),("rows",str(INTERNET_ARCHIVE_SEARCH_ROWS)),
-        ("start",str(start)),("output","json"),("sort[]","downloads desc")
+        ("start",str(start)),("output","json"),("sort[]","identifier asc")
     ]
     return "https://archive.org/advancedsearch.php?"+urllib.parse.urlencode(params)
 
@@ -4667,10 +4790,15 @@ def download_internet_archive_videos(root,index):
                 report.append({"id":"internet-archive-"+collection+"-search-"+str(page_no),
                                "status":"search_failed","collection":collection,"source_page":search_url,
                                "reason":str(exc)[:350]})
+        print("[Internet Archive]",collection,"unique search candidates:",len(candidates))
         downloaded_for_collection=0
+        collection_bytes=0
         examined=0
         for identifier in candidates:
-            if downloaded_for_collection>=cap or examined>=INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION or total_bytes>=INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+            if (downloaded_for_collection>=cap
+                    or examined>=INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION
+                    or collection_bytes>=INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]
+                    or total_bytes>=INTERNET_ARCHIVE_TOTAL_MAX_BYTES):
                 break
             examined+=1
             seen.add(identifier)
@@ -4701,20 +4829,55 @@ def download_internet_archive_videos(root,index):
                     row.update(status="skipped_collection",reason="The exact item metadata does not list the requested source collection.")
                     report.append(row); continue
                 rights=internet_archive_license_detail(metadata)
+                rights_verification_method="item-metadata"
+                # Prelinger IA metadata frequently omits the separate "rights" field even
+                # when the canonical item page explicitly renders Usage: Public Domain.
+                # Verify that exact page field before accepting this legacy Public Domain URL.
+                metadata_rights=str(metadata.get("rights") or "").strip()
+                if (not rights["verified"] and collection=="prelinger"
+                        and metadata_rights.casefold() in {"","public domain"}
+                        and rights["license_url"] in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS):
+                    try:
+                        item_page_html=internet_archive_fetch_item_page(identifier)
+                        if internet_archive_public_domain_usage_is_verified(item_page_html,identifier,rights["license_url"]):
+                            rights.update(
+                                license="Public Domain (verified exact Internet Archive item-page Usage label)",
+                                rights_statement="Public Domain (verified from exact item-page Usage block; API rights field absent)",
+                                verified=True,
+                            )
+                            rights_verification_method="prelinger-item-page-usage-public-domain-mark"
+                    except Exception as rights_exc:
+                        row["item_page_rights_verification_error"]=str(rights_exc)[:300]
                 row.update(title=str(metadata.get("title") or identifier)[:260],
                            creator=str(metadata.get("creator") or "")[:260],
                            year=str(metadata.get("year") or "")[:24],
                            license=rights["license"] or "not eligible",
                            license_url=rights["license_url"],
-                           rights_statement=rights["rights_statement"])
+                           rights_statement=rights["rights_statement"],
+                           rights_verification_method=rights_verification_method)
                 if not rights["verified"]:
-                    row.update(status="skipped_rights",reason="The exact item's licenseurl/rights fields are not in the approved CC0/Public Domain allow-list.")
+                    row.update(status="skipped_rights",reason="The exact item's CC0/Public Domain metadata or exact item-page Usage label did not pass the allow-list.")
                     report.append(row); continue
                 chosen=internet_archive_choose_video_file(files)
                 if not chosen:
                     row.update(status="no_eligible_video",reason="No MP4/WebM/OGV file is within the bounded per-file size and duration limits.")
                     report.append(row); continue
                 file_record=chosen["file"]
+                declared_file_size=int(file_record.get("size") or 0)
+                if collection_bytes+declared_file_size>INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]:
+                    row.update(
+                        status="skipped_collection_size_limit",
+                        reason="The declared media size would exceed the "+collection+" collection byte budget.",
+                    )
+                    report.append(row)
+                    break
+                if total_bytes+declared_file_size>INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+                    row.update(
+                        status="skipped_total_size_limit",
+                        reason="The declared video size would exceed the aggregate Internet Archive download ceiling.",
+                    )
+                    report.append(row)
+                    break
                 filename=str(file_record.get("name") or "")
                 file_url="https://archive.org/download/"+identifier+"/"+urllib.parse.quote(filename,safe="")
                 if not internet_archive_file_url_is_allowed(file_url,identifier,filename):
@@ -4734,6 +4897,13 @@ def download_internet_archive_videos(root,index):
                 except Exception as file_exc:
                     row.update(status="download_failed",reason=str(file_exc)[:420])
                     report.append(row); continue
+                if collection_bytes+len(blob)>INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]:
+                    row.update(
+                        status="skipped_collection_size_limit",
+                        reason=f"The video would exceed the {collection} collection byte budget.",
+                    )
+                    report.append(row)
+                    break
                 if total_bytes+len(blob)>INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
                     row.update(status="skipped_total_size_limit",reason="The video would exceed the aggregate Internet Archive download ceiling.")
                     report.append(row); break
@@ -4749,7 +4919,7 @@ def download_internet_archive_videos(root,index):
                     f"- Media file: {filename}\n- Direct download: {file_url}\n"
                     f"- Creator: {metadata.get('creator') or 'Not supplied'}\n- Year: {metadata.get('year') or 'Not supplied'}\n"
                     f"- Item license URL: {rights['license_url']}\n- Item rights statement: {rights['rights_statement'] or 'CC0 declaration in item metadata'}\n"
-                    f"- Exact license classification: {rights['license']}\n- File MD5: {actual_md5}\n- File SHA-1: {expected_sha1 or 'Not supplied'}\n"
+                    f"- Exact license classification: {rights['license']}\n- Rights verification: {rights_verification_method}\n- File MD5: {actual_md5}\n- File SHA-1: {expected_sha1 or 'Not supplied'}\n"
                     f"- SHA-256: {digest}\n\n{str(metadata.get('description') or '')[:1800]}\n"
                 )
                 write_text(folder/(target.stem+".SOURCE_AND_LICENSE.md"),note)
@@ -4763,12 +4933,18 @@ def download_internet_archive_videos(root,index):
                     "source_page":item_url,"metadata_url":metadata_url,"source_file_url":file_url,
                     "license":rights["license"],"license_url":rights["license_url"],
                     "rights_statement":rights["rights_statement"],
-                    "license_verified_from_item_metadata":True,"redistributable":True,
+                    "license_verified_from_item_metadata":rights_verification_method=="item-metadata",
+                    "public_domain_status_verified_from_item_page":rights_verification_method=="prelinger-item-page-usage-public-domain-mark",
+                    "rights_verification_method":rights_verification_method,
+                    "rights_basis":"The exact item metadata identifies CC0/Public Domain; Prelinger records with an absent API rights field are accepted only when the canonical item page has exactly one Usage row labelled Public Domain with the expected IA Public Domain URL. This page-level Public Domain Mark is treated as a public-domain status statement, not a CC0 license. Embedded third-party footage, music, personality and other non-copyright rights require human review before commercial use.",
+                    "embedded_third_party_rights_review_required":True,
+                    "redistributable":True,
                     "duration_seconds":chosen["duration_seconds"],
                     "archive_file_md5":actual_md5,"archive_file_sha1":expected_sha1,
                     "size_bytes":len(blob),"sha256":digest
                 })
                 total_bytes+=len(blob)
+                collection_bytes+=len(blob)
                 downloaded_for_collection+=1
                 row.update(status="downloaded",file=target.name,source_file_url=file_url,
                            filename=filename,size_bytes=len(blob),duration_seconds=chosen["duration_seconds"],
@@ -4779,7 +4955,8 @@ def download_internet_archive_videos(root,index):
             except Exception as exc:
                 row.update(status="item_failed",reason=str(exc)[:420])
                 report.append(row)
-        print("[Internet Archive]",collection,":",downloaded_for_collection,"downloaded from",examined,"item metadata records")
+        report.append({"id":"internet-archive-"+collection+"-summary","status":"summary","collection":collection,"downloaded_videos":downloaded_for_collection,"indexed_resource_bytes":collection_bytes,"max_collection_bytes":INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection],"max_video_bytes":INTERNET_ARCHIVE_MAX_VIDEO_BYTES})
+        print("[Internet Archive]",collection,":",downloaded_for_collection,"downloaded from",examined,"item metadata records;",collection_bytes,"source bytes")
     return report
 
 

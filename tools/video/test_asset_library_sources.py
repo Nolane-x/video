@@ -185,6 +185,8 @@ class ExternalSourceExpansionTests(unittest.TestCase):
         self.assertEqual(library.INTERNET_ARCHIVE_SEARCH_PAGES, 5)
         self.assertGreaterEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 220)
         self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {"prelinger": 120, "nasa": 120})
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES, {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024})
+        self.assertEqual(sum(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES.values()), library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES)
 
     def test_nara_bulk_catalog_is_research_only_until_item_rights_schema_is_verified(self):
         catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
@@ -996,6 +998,161 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         self.assertFalse(library.internet_archive_media_signature_is_valid(
             b"<html>blocked</html>" + b"x" * 20000, ".mp4", "text/html"))
 
+    def _prelinger_usage_page(self, usage="Public Domain", href="http://creativecommons.org/licenses/publicdomain/", title="Public Domain"):
+        return f"""<!doctype html><html><body>
+          <dl>
+            <dt>Publication date</dt><dd>1959</dd>
+            <dt>Usage</dt><dd><a rel="license" title="{title}" href="{href}">{usage}<img src="/images/cc/publicdomain.png"></a></dd>
+            <dt>Topics</dt><dd>Archival film</dd>
+          </dl>
+        </body></html>"""
+
+    def test_prelinger_public_domain_fallback_requires_the_exact_usage_definition_list_entry(self):
+        page = self._prelinger_usage_page()
+        self.assertTrue(
+            library.internet_archive_public_domain_usage_is_verified(
+                page, "TillItHe1959"
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page("Public Domain with restrictions"),
+                "TillItHe1959",
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(href="https://creativecommons.org/licenses/by/4.0/"),
+                "TillItHe1959",
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(title="Public Domain Mark"),
+                "TillItHe1959",
+            )
+        )
+        self.assertTrue(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(
+                    href="http://creativecommons.org/publicdomain/mark/1.0/"
+                ),
+                "TillItHe1959",
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(
+                    href="http://creativecommons.org/publicdomain/zero/1.0/"
+                ),
+                "TillItHe1959",
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                self._prelinger_usage_page(),
+                "TillItHe1959",
+                "http://creativecommons.org/publicdomain/mark/1.0/",
+            )
+        )
+        duplicate = page.replace(
+            "</dl>",
+            '<dt>Usage</dt><dd><a rel="license" title="Public Domain" href="http://creativecommons.org/licenses/publicdomain/">Public Domain</a></dd></dl>',
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                duplicate, "TillItHe1959"
+            )
+        )
+        self.assertFalse(
+            library.internet_archive_public_domain_usage_is_verified(
+                page, "../TillItHe1959"
+            )
+        )
+
+    def test_prelinger_item_page_fetch_is_pinned_to_the_exact_https_item_url(self):
+        page = self._prelinger_usage_page().encode("utf-8")
+        response = mock.MagicMock()
+        response.__enter__.return_value = response
+        response.geturl.return_value = "https://archive.org/details/TillItHe1959"
+        response.headers = {"Content-Type": "text/html; charset=utf-8"}
+        response.read.return_value = page
+        with mock.patch.object(
+            library.urllib.request, "urlopen", return_value=response
+        ) as urlopen:
+            result = library.internet_archive_fetch_item_page("TillItHe1959")
+        self.assertIn("<dt>Usage</dt>", result)
+        self.assertIn("Public Domain", result)
+        urlopen.assert_called_once()
+        request = urlopen.call_args.args[0]
+        self.assertEqual(request.full_url, "https://archive.org/details/TillItHe1959")
+
+        response.geturl.return_value = "https://evil.example/details/TillItHe1959"
+        with mock.patch.object(library.urllib.request, "urlopen", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "redirected outside"):
+                library.internet_archive_fetch_item_page("TillItHe1959")
+
+    def test_prelinger_downloader_uses_page_label_only_when_api_rights_field_is_absent(self):
+        identifier = "TillItHe1959"
+        page = self._prelinger_usage_page()
+        blob = b"\x00\x00\x00\x18ftypisom" + b"x" * 20000
+        file_md5 = hashlib.md5(blob).hexdigest()
+        file_sha1 = hashlib.sha1(blob).hexdigest()
+        item_metadata = {
+            "metadata": {
+                "identifier": identifier,
+                "mediatype": "movies",
+                "collection": ["prelinger"],
+                "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+                "title": "'Till It Helps!",
+                "creator": "Premier Film & Recording Studio",
+                "year": "1959",
+                # The production IA metadata omits "rights"; the detail page has the exact Usage label.
+            },
+            "files": [{
+                "name": "TillItHe1959.mp4",
+                "size": str(len(blob)),
+                "length": "403.47",
+                "source": "derivative",
+                "md5": file_md5,
+                "sha1": file_sha1,
+            }],
+        }
+
+        def fake_json(url, timeout=35):
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+            if "/advancedsearch.php" in url:
+                q = query.get("q", [""])[0]
+                return {"response": {"docs": [{"identifier": identifier}] if "collection:prelinger" in q else []}}
+            if url == "https://archive.org/metadata/" + identifier:
+                return item_metadata
+            raise AssertionError("Unexpected Internet Archive JSON endpoint: " + url)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                mock.patch.object(library, "INTERNET_ARCHIVE_COLLECTION_CAPS",
+                                  {"prelinger": 1, "nasa": 1}),
+                mock.patch.object(library, "INTERNET_ARCHIVE_SEARCH_PAGES", 1),
+                mock.patch.object(library, "INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION", 2),
+                mock.patch.object(library, "request_json", side_effect=fake_json),
+                mock.patch.object(library, "request_bytes", return_value=(blob, "video/mp4")),
+                mock.patch.object(library, "internet_archive_fetch_item_page", return_value=page) as fetch_page,
+                mock.patch.object(library.time, "sleep"),
+            ):
+                index = []
+                report = library.download_internet_archive_videos(Path(tmp), index)
+
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        fetch_page.assert_called_once_with(identifier)
+        self.assertEqual(index[0]["rights_verification_method"], "prelinger-item-page-usage-public-domain-mark")
+        self.assertFalse(index[0]["license_verified_from_item_metadata"])
+        self.assertTrue(index[0]["public_domain_status_verified_from_item_page"])
+        self.assertIn("Public Domain", index[0]["license"])
+        self.assertTrue(index[0]["embedded_third_party_rights_review_required"])
+        self.assertEqual(index[0]["sha256"], hashlib.sha256(blob).hexdigest())
+
     def test_internet_archive_search_url_uses_bounded_collection_and_start_offset(self):
         url = library.internet_archive_search_url("prelinger", 100)
         parsed = urllib.parse.urlsplit(url)
@@ -1006,6 +1163,9 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
         self.assertIn("licenseurl:http*publicdomain*", query["q"][0])
         self.assertIn("licenseurl:http*cc0*", query["q"][0])
         self.assertEqual(query["start"], ["100"])
+        self.assertEqual(query["sort[]"], ["identifier asc"])
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["prelinger"], 4 * 1024 * 1024 * 1024)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES["nasa"], 4 * 1024 * 1024 * 1024)
         with self.assertRaises(ValueError):
             library.internet_archive_search_url("unknown", 0)
         with self.assertRaises(ValueError):
