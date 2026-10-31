@@ -24,6 +24,7 @@ class VoiceoverPipelineTests(unittest.TestCase):
         })
         self.assertEqual([s["id"] for s in segments], ["V001", "V002"])
         self.assertEqual(segments[0]["language"], "vi")
+        self.assertEqual(segments[0]["engine"], "korva-onnx")
         self.assertEqual(segments[1]["engine"], "omnivoice")
 
     def test_cast_is_applied_and_identity_fingerprint_is_stable(self):
