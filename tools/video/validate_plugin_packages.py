@@ -114,11 +114,54 @@ def validate_command_center(path: Path, manifest: dict, errors: list[str]) -> No
         errors.append(f"{path}: description must declare 29 internal skills and 37 separately activated specialist plugins")
 
 
+def validate_genre_routing(root: Path, errors: list[str]) -> None:
+    matrix_path = root / "docs/GENRE_ROUTING_MATRIX.md"
+    master_path = root / ".agents/skills/video-production-master/SKILL.md"
+    agents_path = root / "AGENTS.md"
+    matrix = read_text(matrix_path, errors)
+    master = read_text(master_path, errors)
+    agents = read_text(agents_path, errors)
+
+    required_genres = (
+        "Documentary / factual story",
+        "Science / mathematics / engineering explainer",
+        "Narrative animation / short film",
+        "Product / software demo",
+        "Tutorial / training",
+        "Interview / podcast / narration-led video",
+        "Music video / rhythm-led edit",
+        "Short-form social / vertical",
+        "Advertisement / campaign",
+        "Hybrid / AI-generated inserts",
+    )
+    for genre in required_genres:
+        if genre not in matrix:
+            errors.append(f"{matrix_path}: missing genre route {genre!r}")
+
+    required_engines = (
+        "Remotion", "HyperFrames", "Manim", "H2 Studio", "Blender",
+        "Three.js / PixiJS", "OpenTimelineIO", "PySceneDetect",
+        "Playwright / OCR", "WhisperX / Demucs", "FFmpeg / ffprobe",
+    )
+    for engine in required_engines:
+        if engine not in matrix:
+            errors.append(f"{matrix_path}: missing engine route {engine!r}")
+
+    if "Genre and Production Routing Matrix" not in master:
+        errors.append(f"{master_path}: must link the genre-routing matrix")
+    if "conditional profile" not in master or "not a universal style rule" not in master:
+        errors.append(f"{master_path}: established H2 style must remain explicitly conditional")
+    if "Do not impose this profile on other genres" not in agents:
+        errors.append(f"{agents_path}: H2 style scope must be limited to its established series")
+
+
 def validate(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     manifests = sorted((root / "plugins/chatgpt").glob("*/plugin.json"))
     if not manifests:
         errors.append("No plugin source manifests found")
+
+    validate_genre_routing(root, errors)
 
     for path in manifests:
         data = load_json(path, errors)
