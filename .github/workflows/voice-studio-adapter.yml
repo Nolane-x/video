@@ -8,6 +8,7 @@ on:
       - "integrations/voice-studio/**"
       - ".agents/skills/video-voice-*/*"
       - ".github/workflows/voice-studio-adapter.yml"
+      - ".github/workflows/voice-studio-actions-lab.yml"
   push:
     branches: [main]
     paths:
@@ -36,6 +37,9 @@ jobs:
           grep -q 'url = https://github.com/Nolane-x/VoiceStudio.git' .gitmodules
           git ls-tree HEAD vendor/VoiceStudio | grep -q '^160000 commit faa5294359f23c911972ffe6d27785c50c67097b'
           grep -q 'AGPL-3.0' integrations/voice-studio/VOICE_STUDIO_LOCK.json
+          test -f .github/workflows/voice-studio-actions-lab.yml
+          grep -q 'actions/cache@v6' .github/workflows/voice-studio-actions-lab.yml
+          grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-lab.yml
           test -f .agents/skills/video-voice-design-director/SKILL.md
           test -f .agents/skills/video-character-voice-casting-engineer/SKILL.md
           test -f .agents/skills/video-voice-quality-auditor/SKILL.md
@@ -56,3 +60,7 @@ jobs:
             --manifest integrations/voice-studio/examples/vietnamese-documentary.json \
             --output /tmp/nolane-voice-plan --plan-only
           python integrations/voice-studio/design_voice_library.py --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json --output /tmp/nolane-design-plan
+          python integrations/voice-studio/actions_voice_lab.py \
+            --suite integrations/voice-studio/examples/actions-benchmark-suite.json \
+            --output /tmp/nolane-actions-voice-plan \
+            --model-revision aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --plan-only
