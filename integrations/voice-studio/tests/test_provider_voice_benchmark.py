@@ -77,6 +77,67 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
         self.assertEqual(calls["voice"], "profile-123")
         self.assertNotIn("seed", calls)
 
+    def test_all_benchmarks_local_providers_without_cloud_permission(self):
+        catalog = {
+            "voicestudio": [{"id": "profile-1", "name": "Studio voice"}],
+            "korva": [{"id": "khanh_vy", "name": "Khánh Vy"}],
+        }
+        calls = []
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            calls.append((provider, text, kwargs["seed"]))
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", side_effect=lambda p, language, client: catalog[p]):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    report = benchmark.run_benchmark(
+                        "all", "Cùng một kịch bản.", Path(tmp), engine="voxcpm2",
+                        language="vi", limit=5, seed=4200, allow_cloud=False,
+                        blind=True, client=FakeClient(), delay=0,
+                    )
+            self.assertEqual(report["providers_included"], ["voicestudio", "korva"])
+            self.assertEqual(report["ready"], 2)
+            self.assertEqual([call[1] for call in calls], ["Cùng một kịch bản."] * 2)
+            self.assertEqual({call[0] for call in calls}, {"voicestudio", "korva"})
+            page = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+            self.assertNotIn("Studio voice", page)
+            self.assertNotIn("Khánh Vy", page)
+
+    def test_all_adds_cloud_catalogues_only_after_explicit_allow_flag(self):
+        catalogue_calls = []
+        def fake_catalogue(provider, language, client):
+            catalogue_calls.append(provider)
+            return [{"id": f"{provider}-voice", "name": f"{provider} voice"}]
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", side_effect=fake_catalogue):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    report = benchmark.run_benchmark(
+                        "all", "Same text.", Path(tmp), engine="voxcpm2",
+                        language="vi", limit=2, allow_cloud=True,
+                        client=FakeClient(), delay=0,
+                    )
+            self.assertEqual(
+                catalogue_calls,
+                ["voicestudio", "korva", "google", "elevenlabs"],
+            )
+            self.assertEqual(report["providers_included"], catalogue_calls)
+            self.assertTrue(report["cloud_enabled"])
+            self.assertEqual(report["ready"], 4)
+
+    def test_all_requires_voice_studio_engine_for_fair_comparison(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates") as candidates:
+                with self.assertRaisesRegex(ValueError, "Provider-wide benchmark"):
+                    benchmark.run_benchmark(
+                        "all", "Xin chào", Path(tmp), engine=None
+                    )
+                candidates.assert_not_called()
+
     def test_voice_studio_requires_exact_engine_id(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
