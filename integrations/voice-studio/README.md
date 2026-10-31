@@ -184,6 +184,11 @@ ElevenLabs calls can incur charges; the explicit `--allow-cloud` flag is
 mandatory whenever either cloud provider is included.
 
 A run exports one blind HTML listening page and an identity-mapped JSON report.
+For `--provider all`, inspect the report's `provider_catalogue` table: the run
+is marked `partial` (and exits nonzero) if any selected provider returns an
+empty language catalogue or a catalogue error, even when the other providers
+rendered successfully. Do not treat a partial provider set as a fair
+cross-provider comparison.
 In blind mode, candidate order is shuffled reproducibly (the default
 `--blind-seed` is recorded in the report) so voices from one provider are not
 presented in a single provider block. The benchmark checkpoints after every
