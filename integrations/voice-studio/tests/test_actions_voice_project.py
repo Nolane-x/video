@@ -83,6 +83,9 @@ class ActionsVoiceProjectTests(unittest.TestCase):
 
             def fake_generate(manifest, output_dir, **kwargs):
                 output_dir.mkdir(parents=True, exist_ok=True)
+                hidden_cache = output_dir / ".voice-cache"
+                hidden_cache.mkdir(parents=True, exist_ok=True)
+                (hidden_cache / "internal-cache.wav").write_bytes(b"cache-only")
                 (output_dir / "02-VOICE-actions-test-TTS.txt").write_text(
                     "=== V001 | NARRATOR · Người dẫn chuyện ===\nXin chào Việt Nam.\n",
                     encoding="utf-8",
@@ -182,6 +185,7 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             self.assertIn("captions.srt", manifest_paths)
             self.assertIn("captions-sentence.srt", manifest_paths)
             self.assertIn("voice-cast-report.json", manifest_paths)
+            self.assertFalse(any(path.startswith(".voice-cache/") for path in manifest_paths))
             self.assertEqual(
                 saved["artifact_manifest_summary"]["file_count"],
                 artifact_manifest["file_count"],
