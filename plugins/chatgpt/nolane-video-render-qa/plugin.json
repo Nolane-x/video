@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-video-render-qa",
+  "version": "0.1.0",
+  "description": "GitHub Actions production engineering and evidence-first QA for AI-generated video: pinned runtime, reproducible installation, browser render, FFmpeg checks, caption OCR coverage, artifact manifests and visual sign-off.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "github-actions",
+    "qa",
+    "captions",
+    "rendering",
+    "ci"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane Render & QA",
+        "shortDescription": "Video CI and QA skills",
+        "longDescription": "GitHub Actions production engineering and evidence-first QA for AI-generated video: pinned runtime, reproducible installation, browser render, FFmpeg checks, caption OCR coverage, artifact manifests and visual sign-off.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to help me create professional video in Nolane-x/video through GitHub Actions."
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nolane-3d-vfx-engineering",
+  "version": "0.1.0",
+  "description": "Compact procedural 3D and VFX workflows for Three.js, PixiJS, optional headless Blender, postprocessing, compositing, lights, camera, materials and CPU-aware rendering. Heavy native SDK and GPU model stacks remain opt-in.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "repository": "https://github.com/Nolane-x/video",
+  "keywords": [
+    "video",
+    "3d",
+    "blender",
+    "vfx",
+    "threejs",
+    "compositing"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nolane 3D & VFX",
+        "shortDescription": "3D scenes and VFX skills",
+        "longDescription": "Compact procedural 3D and VFX workflows for Three.js, PixiJS, optional headless Blender, postprocessing, compositing, lights, camera, materials and CPU-aware rendering. Heavy native SDK and GPU model stacks remain opt-in.",
+        "developerName": "Nolane Studio",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Use this specialist workflow to help me create professional video in Nolane-x/video through GitHub Actions."
+      }
+    }
+  }
+}
