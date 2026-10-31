@@ -57,17 +57,25 @@ def synthesize(
     if not 0.5 <= speed <= 2.0:
         raise ValueError("speed must be between 0.5 and 2.0")
     options = settings or {}
-    engine = _engine(int(options.get("num_threads", 4)))
-    total_steps = int(options.get("total_steps", 32))
-    if not 1 <= total_steps <= 32:
-        raise ValueError("KorvaTTS total_steps must be between 1 and 32")
+    num_threads = options.get("num_threads", 4)
+    total_steps = options.get("total_steps", 32)
+    if isinstance(num_threads, bool) or not isinstance(num_threads, int) or not 1 <= num_threads <= 64:
+        raise ValueError("KorvaTTS num_threads must be an integer between 1 and 64")
+    if isinstance(total_steps, bool) or not isinstance(total_steps, int) or not 1 <= total_steps <= 32:
+        raise ValueError("KorvaTTS total_steps must be an integer between 1 and 32")
+    if seed is not None and (isinstance(seed, bool) or not isinstance(seed, int)):
+        raise ValueError("KorvaTTS seed must be an integer")
+    silence = float(options.get("silence_between_chunks", 0.3))
+    if silence < 0:
+        raise ValueError("KorvaTTS silence_between_chunks must be non-negative")
+    engine = _engine(num_threads)
     audio, _duration = engine.synthesize(
         text,
         voice=voice,
         lang="vi",
         total_steps=total_steps,
         speed=speed,
-        silence_between_chunks=float(options.get("silence_between_chunks", 0.3)),
+        silence_between_chunks=silence,
         seed=seed,
     )
     destination = Path(output_path)
