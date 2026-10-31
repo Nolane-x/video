@@ -271,12 +271,14 @@ class VoiceStudioClient:
         chunks: list[bytes] = []
         for field_name, value in fields.items():
             chunks.append(
-                f"--{boundary}\r\n"
-                f'Content-Disposition: form-data; name="{field_name}"\r\n\r\n'
-                f"{value}\r\n".encode("utf-8")
+                (
+                    f"--{boundary}\r\n"
+                    f'Content-Disposition: form-data; name="{field_name}"\r\n\r\n'
+                    f"{value}\r\n"
+                ).encode("utf-8")
             )
         chunks.append(f"--{boundary}--\r\n".encode("ascii"))
-        body, content_type = self._request(
+        body, _content_type = self._request(
             "POST",
             "/profiles",
             raw_data=b"".join(chunks),
