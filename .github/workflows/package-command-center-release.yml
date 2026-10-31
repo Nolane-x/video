@@ -44,8 +44,8 @@ jobs:
         run: |
           mkdir -p out
           cd plugins/chatgpt/nolane-video-command-center
-          zip -qr ../../../../out/nolane-video-command-center-v0.8.0.zip .
-          cd ../../../../
+          zip -qr ../../../out/nolane-video-command-center-v0.8.0.zip .
+          cd ../../../
           unzip -l out/nolane-video-command-center-v0.8.0.zip | head -50
           test -s out/nolane-video-command-center-v0.8.0.zip
       - name: Upload validated Plugin Creator archive
