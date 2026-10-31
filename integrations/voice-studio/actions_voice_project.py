@@ -306,6 +306,163 @@ def _write_delivery_readme(output_dir: Path, report: dict[str, Any]) -> None:
     (output_dir / "README-DELIVERY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_voice_cast_report(
+    output_dir: Path,
+    manifest: dict[str, Any],
+    generation: dict[str, Any],
+    segment_evidence: list[dict[str, Any]],
+    quality: dict[str, Any],
+) -> dict[str, Any]:
+    """Write an auditable speaker-to-voice map and per-character delivery stats."""
+    evidence_by_id = {
+        str(item.get("id")): item for item in segment_evidence if item.get("id")
+    }
+    quality_by_id = {
+        str(item.get("id")): item
+        for item in quality.get("segments", [])
+        if item.get("id")
+    }
+    generated_by_speaker: dict[str, list[dict[str, Any]]] = {}
+    for item in generation.get("segments", []):
+        speaker_id = str(item.get("speaker_id") or "")
+        if speaker_id:
+            generated_by_speaker.setdefault(speaker_id, []).append(item)
+
+    speakers = []
+    for speaker_id, cast in sorted((manifest.get("cast") or {}).items()):
+        segments = generated_by_speaker.get(str(speaker_id), [])
+        evidence = [evidence_by_id.get(str(item.get("id")), {}) for item in segments]
+        metrics = [
+            row.get("audio") or {}
+            for row in evidence
+            if isinstance(row.get("audio"), dict)
+        ]
+        fingerprints = {
+            str(item.get("voice_identity_fingerprint"))
+            for item in segments
+            if item.get("voice_identity_fingerprint")
+        }
+        duration_s = sum(float(row.get("duration_s", 0.0)) for row in metrics)
+        rms_values = [
+            float(row["rms_dbfs"])
+            for row in metrics
+            if isinstance(row.get("rms_dbfs"), (int, float))
+        ]
+        peaks = [
+            float(row["peak_dbfs"])
+            for row in metrics
+            if isinstance(row.get("peak_dbfs"), (int, float))
+        ]
+        quality_rows = [
+            quality_by_id.get(str(item.get("id")), {})
+            for item in segments
+        ]
+        speakers.append({
+            "speaker_id": str(speaker_id),
+            "provider": str(cast.get("provider") or ""),
+            "engine": str(cast.get("engine") or "korva-onnx"),
+            "voice_id": str(cast.get("voice") or ""),
+            "language": str(cast.get("language") or manifest.get("language") or "vi"),
+            "speed": cast.get("speed", 1.0),
+            "seed": cast.get("seed"),
+            "character": next(
+                (
+                    str(item.get("character"))
+                    for item in segments
+                    if item.get("character")
+                ),
+                str(speaker_id),
+            ),
+            "segment_count": len(segments),
+            "segment_ids": [str(item.get("id")) for item in segments],
+            "audio_files": [
+                str(item.get("file"))
+                for item in segments
+                if item.get("file")
+            ],
+            "total_audio_duration_s": round(duration_s, 3),
+            "mean_rms_dbfs": round(sum(rms_values) / len(rms_values), 2) if rms_values else None,
+            "max_peak_dbfs": round(max(peaks), 2) if peaks else None,
+            "identity_fingerprint_count": len(fingerprints),
+            "identity_status": "consistent" if len(fingerprints) <= 1 and segments else "review",
+            "technical_status": (
+                "error" if any(row.get("technical_status") == "error" for row in quality_rows)
+                else "warning" if any(row.get("technical_status") == "warning" for row in quality_rows)
+                else "pass" if segments else "missing"
+            ),
+        })
+
+    report = {
+        "schema_version": 1,
+        "project": manifest.get("project"),
+        "language": manifest.get("language", "vi"),
+        "speaker_count": len(speakers),
+        "segment_count": sum(item["segment_count"] for item in speakers),
+        "speaker_identity_drift": sum(
+            item["identity_fingerprint_count"] > 1 for item in speakers
+        ),
+        "speakers": speakers,
+        "note": (
+            "Voice identity is tracked by the manifest/provider/engine/voice/settings fingerprint. "
+            "This is configuration consistency evidence, not biometric speaker-similarity analysis."
+        ),
+    }
+    destination = output_dir / "voice-cast-report.json"
+    _write_json(destination, report)
+    return {
+        "path": destination.name,
+        "speaker_count": report["speaker_count"],
+        "segment_count": report["segment_count"],
+        "speaker_identity_drift": report["speaker_identity_drift"],
+    }
+
+
+def _write_artifact_manifest(output_dir: Path, report: dict[str, Any]) -> dict[str, Any]:
+    """Hash every delivery file after reports and README have been finalized."""
+    root = output_dir.resolve()
+    files = []
+    for path in sorted(output_dir.rglob("*")):
+        if not path.is_file() or path.name == "artifact-manifest.json":
+            continue
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(root)
+        except ValueError:
+            raise ValueError(f"Delivery artifact escapes output directory: {path}") from None
+        relative = path.relative_to(output_dir).as_posix()
+        files.append({
+            "path": relative,
+            "bytes": path.stat().st_size,
+            "sha256": _sha256(path),
+            "kind": (
+                "audio" if path.suffix.lower() in {".wav", ".mp3", ".flac"}
+                else "subtitle" if path.suffix.lower() in {".srt", ".vtt", ".ass"}
+                else "timeline" if "timeline" in path.parts
+                else "report" if path.suffix.lower() == ".json"
+                else "documentation" if path.suffix.lower() in {".md", ".txt"}
+                else "other"
+            ),
+        })
+    manifest = {
+        "schema_version": 1,
+        "project": report.get("project"),
+        "status": report.get("status"),
+        "runner_run_id": (report.get("runner") or {}).get("run_id"),
+        "model_revision": (report.get("model") or {}).get("revision"),
+        "file_count": len(files),
+        "total_bytes": sum(item["bytes"] for item in files),
+        "files": files,
+        "self_hash_note": "This manifest intentionally excludes its own file to avoid a recursive checksum.",
+    }
+    destination = output_dir / "artifact-manifest.json"
+    _write_json(destination, manifest)
+    return {
+        "path": destination.name,
+        "file_count": manifest["file_count"],
+        "total_bytes": manifest["total_bytes"],
+    }
+
+
 def run_project(
     manifest_path: Path,
     output_dir: Path,
@@ -401,6 +558,9 @@ def run_project(
     generation_path_obj = generation_path.resolve()
     quality = audit_report(generation, generation_path_obj, asr=False, language="vi")
     _write_json(quality_path, quality)
+    cast_report = _write_voice_cast_report(
+        output_dir, data, generation, segment_evidence, quality
+    )
 
     all_segments_ready = (
         len(generation.get("segments", [])) == len(segments)
@@ -512,6 +672,8 @@ def run_project(
         "h2_error": h2_error,
         "captions": captions,
         "caption_error": caption_error,
+        "voice_cast_report": cast_report,
+        "artifact_manifest": "artifact-manifest.json",
         "quality_report": "voice-quality-report.json",
         "generation_report": "voice-generation-report.json",
         "human_listening_required": True,
@@ -526,6 +688,9 @@ def run_project(
     _write_json(output_dir / "actions-voice-project-report.json", result)
     if status == "complete":
         _write_delivery_readme(output_dir, result)
+    artifact_manifest = _write_artifact_manifest(output_dir, result)
+    result["artifact_manifest_summary"] = artifact_manifest
+    _write_json(output_dir / "actions-voice-project-report.json", result)
     return result
 
 
