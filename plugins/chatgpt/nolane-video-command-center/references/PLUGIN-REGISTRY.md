@@ -1,6 +1,6 @@
-# Nolane Video Command Center — specialist registry v0.3.0
+# Nolane Video Command Center — specialist registry v0.4.0
 
-The command center includes the relevant skills internally, so the user can invoke only this plugin for normal video work. Specialist plugins are separate private entry points and optional.
+The command center bundles 23 internal skills and is the normal single entry point. Specialist plugins are independent private entry points for focused work; they are optional, not required for ordinary production.
 
 | Specialist plugin | Plugin ID | Link | Main capabilities |
 |---|---|---|---|
@@ -12,9 +12,9 @@ The command center includes the relevant skills internally, so the user can invo
 | Nolane Audio & Speech Studio | `plugins_6ae5688dc41081919a3251586f71d0e2` | https://chatgpt.com/plugins/plugins_6ae5688dc41081919a3251586f71d0e2 | Voice, speech recognition/alignment, stems and mastering |
 | Nolane Editorial Interchange Studio | `plugins_6ae5689896388191bae1cb45fcc257e1` | https://chatgpt.com/plugins/plugins_6ae5689896388191bae1cb45fcc257e1 | OTIO, PySceneDetect, proxies and timeline exchange |
 
-## Existing plugins kept unchanged
-- Nolane Video Production Studio v0.4.0: https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd
+## Existing private plugins kept unchanged
+- Nolane Video Production Studio v0.4.0 (32 skills): https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd
 - H2 SelfImprove Studio v1.1.0: https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0
 
 ## Activation boundary
-The master command center uses its own bundled skill set. It does not claim to invisibly activate other private plugins. The extra specialist links are optional. Normal routing, instructions and skill execution are available from this plugin's bundled skills plus the connected GitHub tools.
+The Command Center uses its bundled skills and connected GitHub tools. It does not claim to invisibly activate other private plugins. Extra specialist links are optional direct entry points.

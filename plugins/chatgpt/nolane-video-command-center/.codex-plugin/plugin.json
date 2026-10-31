@@ -1,16 +1,16 @@
 {
   "interface": {
     "displayName": "Nolane Video Command Center",
-    "shortDescription": "All video tools and skills",
-    "longDescription": "Use one plugin to route internally across included expert skills for story, motion, Manim, 3D/VFX, audio/speech, captions, editorial timelines, scene analysis, tool installation and evidence-based video QA. Uses Nolane-x/video and GitHub Actions.",
+    "shortDescription": "23 integrated video skills",
+    "longDescription": "Use one private plugin to route internally across 23 bundled expert skills: direction, story, shot design, motion, Manim, 3D/VFX, AI media, voice/audio, speech alignment, captions, editorial timelines, scene analysis, tool installation, license checks and production QA. Works with Nolane-x/video and connected GitHub tools.",
     "developerName": "Nolane Studio",
     "category": "Productivity",
     "capabilities": [],
-    "defaultPrompt": "Create, continue or improve my video using the Nolane video production system. Select the best included skills and tools, work on the GitHub repo safely, render a candidate and verify it before handoff."
+    "defaultPrompt": "Create, continue or improve my video using the Nolane video production system. Select the best included skills and tools, respect the separate asset-library workstream, work safely on GitHub, render a candidate and verify it before handoff."
   },
   "name": "nolane-video-command-center",
-  "version": "0.3.0",
-  "description": "The single AI-first front door for Nolane video production. Bundles end-to-end direction plus specialist skills for story, motion, Manim explainers, 3D/VFX, audio/speech, editorial interchange, scene analysis, render engineering and release QA.",
+  "version": "0.4.0",
+  "description": "The single AI-first front door for Nolane video production. Bundles 23 integrated skills for storytelling, shot design, motion, 3D/VFX, Manim, AI media, audio/speech, captions, editorial interchange, toolchain automation, licensing and evidence-based QA.",
   "author": {
     "name": "Nolane Studio"
   },
@@ -25,7 +25,9 @@
     "blender",
     "audio",
     "captions",
-    "production"
+    "toolchain",
+    "production",
+    "licensing"
   ],
   "repository": "https://github.com/Nolane-x/video",
   "skills": "./skills"
