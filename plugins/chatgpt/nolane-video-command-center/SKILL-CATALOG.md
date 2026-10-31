@@ -1,6 +1,6 @@
-# Nolane Video Command Center — internal skill catalog v0.7.6
+# Nolane Video Command Center — internal skill catalog v0.7.8
 
-The Command Center contains **29 internal skills** and an explicit directory of **32 separate specialist plugins**. Use the internal skills as the normal entry path. Specialist plugins require an explicit switch through the host; they are not silently invoked.
+The Command Center contains **29 internal skills** and an explicit directory of **37 separate specialist plugins**. Use the internal skills as the normal entry path. Specialist plugins require an explicit switch through the host; they are not silently invoked.
 
 ## Direction and orchestration
 - `video-command-center` — single entry point and safe execution.
@@ -43,4 +43,4 @@ The Command Center contains **29 internal skills** and an explicit directory of 
 - `video-production-license-auditor` — code/model/media license checks.
 - `video-quality-assurance` — final technical and visual gate.
 
-See `references/PLUGIN-REGISTRY.md` for all 32 specialist names, current versions and explicit links; see `references/PLUGIN-RESEARCH-METHODOLOGY.md` for source/verification semantics.
+See `references/PLUGIN-REGISTRY.md` for all 37 specialist names, current versions and explicit links; see `references/PLUGIN-RESEARCH-METHODOLOGY.md` for source/verification semantics.
