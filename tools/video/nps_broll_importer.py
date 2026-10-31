@@ -366,12 +366,15 @@ def _media_candidates_from_group(group: dict[str, Any]) -> list[dict[str, Any]]:
     seen = set()
     for item in group.get("sources", []):
         url = normalize_nps_media_url(item.get("url", ""))
-        if not url or url in seen:
+        if not url:
+            continue
+        rank = _resolution_rank(url, item.get("label", ""), item.get("resolution", ""))
+        # A bare <video src> may appear before its equivalent labelled <source>.
+        # Do not let that unresolved duplicate hide the later 720p/1080p rendition.
+        if not rank or url in seen:
             continue
         seen.add(url)
-        rank = _resolution_rank(url, item.get("label", ""), item.get("resolution", ""))
-        if rank:
-            out.append({"url": url, "label": item.get("label") or f"{rank}p", "resolution": rank})
+        out.append({"url": url, "label": item.get("label") or f"{rank}p", "resolution": rank})
     out.sort(key=lambda row: row["resolution"], reverse=True)
     return out
 
