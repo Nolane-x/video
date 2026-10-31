@@ -2027,8 +2027,8 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
     def test_distributed_matrix_matches_registered_source_lanes(self):
         workflow_path = library.REPO / ".github/workflows/build-video-asset-library.yml"
         workflow = workflow_path.read_text(encoding="utf-8")
-        start = workflow.index("        lane:\\n")
-        end = workflow.index("\\n    steps:", start)
+        start = workflow.index("        lane:\n")
+        end = workflow.index("\n    steps:", start)
         matrix_block = workflow[start:end]
         matrix_lanes = {
             line.strip()[2:]
