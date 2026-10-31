@@ -45,6 +45,13 @@ class VoiceStudioClient:
             clean = {k: v for k, v in query.items() if v is not None}
             if clean:
                 url += "?" + urllib.parse.urlencode(clean)
+        parsed_base = urllib.parse.urlsplit(self.base_url)
+        host = (parsed_base.hostname or "").lower()
+        loopback_hosts = {"localhost", "127.0.0.1", "::1"}
+        if self.api_key and parsed_base.scheme != "https" and host not in loopback_hosts:
+            raise VoiceStudioError(
+                "Refusing to send VOICESTUDIO_API_KEY over non-HTTPS to a non-loopback host"
+            )
         headers = {"Accept": "application/json, audio/wav, audio/*"}
         data = None
         if payload is not None:
