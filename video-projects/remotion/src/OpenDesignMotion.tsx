@@ -292,29 +292,18 @@ const ClaimScene = () => {
 };
 
 const miniPosters = [
-  { title: "FUTURE
-IS NOW", bg: "#202e9a", fg: "#fff", accent: "#8af85f", size: 37 },
+  { title: "FUTURE\nIS NOW", bg: "#202e9a", fg: "#fff", accent: "#8af85f", size: 37 },
   { title: "MIND", bg: "#f1b8a7", fg: "#202124", accent: "#ec5a42", size: 58 },
   { title: "EASE", bg: "#b9ee4c", fg: "#152219", accent: "#152219", size: 66 },
-  { title: "NEVER
-LINEAR", bg: "#151515", fg: "#fff", accent: "#b9ee4c", size: 46 },
-  { title: "MOVE
-WITH
-INTENT", bg: "#ff6c4d", fg: "#191919", accent: "#ffe2aa", size: 35 },
+  { title: "NEVER\nLINEAR", bg: "#151515", fg: "#fff", accent: "#b9ee4c", size: 46 },
+  { title: "MOVE\nWITH\nINTENT", bg: "#ff6c4d", fg: "#191919", accent: "#ffe2aa", size: 35 },
   { title: "3.7%", bg: "#e0e8e5", fg: "#172c30", accent: "#ff654a", size: 58 },
-  { title: "TYPE
-IS
-MOTION", bg: "#e5b6e9", fg: "#25212e", accent: "#4b45c6", size: 35 },
+  { title: "TYPE\nIS\nMOTION", bg: "#e5b6e9", fg: "#25212e", accent: "#4b45c6", size: 35 },
   { title: "SHIFT", bg: "#f0e9d6", fg: "#df5138", accent: "#222", size: 60 },
-  { title: "FORM
-FOLLOWS
-FEELING", bg: "#19212d", fg: "#e3e8fa", accent: "#7c9af8", size: 31 },
-  { title: "STAY
-CURIOUS", bg: "#d6d8ff", fg: "#28215e", accent: "#ee6f47", size: 40 },
+  { title: "FORM\nFOLLOWS\nFEELING", bg: "#19212d", fg: "#e3e8fa", accent: "#7c9af8", size: 31 },
+  { title: "STAY\nCURIOUS", bg: "#d6d8ff", fg: "#28215e", accent: "#ee6f47", size: 40 },
   { title: "CREATE", bg: "#f7d44d", fg: "#181818", accent: "#fff", size: 50 },
-  { title: "MORE
-THAN
-STATIC", bg: "#e6f2f3", fg: "#273e46", accent: "#ef684b", size: 34 },
+  { title: "MORE\nTHAN\nSTATIC", bg: "#e6f2f3", fg: "#273e46", accent: "#ef684b", size: 34 },
 ];
 
 const MiniPoster = ({ index, frame }: { index: number; frame: number }) => {
@@ -458,6 +447,47 @@ const LinearPoster = () => {
   );
 };
 
+
+const MindPoster = () => {
+  const f = useCurrentFrame();
+  const orb = interpolate(f, [0, 42], [0.72, 1.04], clamp);
+  return (
+    <AbsoluteFill style={{ ...full, background: "#070a18", color: "#fff" }}>
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 65% 46%,#2536af 0%,#10142f 44%,#05060c 78%)" }} />
+      <div style={{ position: "absolute", left: 82, top: 64, fontSize: 18, letterSpacing: ".2em", fontWeight: 800, color: "#b9c7ff" }}>MIND / MOTION STUDY</div>
+      <div style={{ position: "absolute", left: 75, top: 210, transform: \`translateX(\${interpolate(f, [0, 40], [180, -15], clamp)}px)\` }}>
+        <Word size={310} color="#3457ed" tracking={-0.1}>MIND</Word>
+        <Word size={310} color="#3457ed" tracking={-0.1} style={{ opacity: .42 }}>MIND</Word>
+        <Word size={310} color="#3457ed" tracking={-0.1}>MIND</Word>
+      </div>
+      <div style={{ position: "absolute", width: 430, height: 430, borderRadius: "50%", left: 1080, top: 265, transform: \`scale(\${orb})\`, background: "radial-gradient(circle at 34% 28%,rgba(255,255,255,.95),rgba(104,155,255,.4) 18%,rgba(25,44,148,.1) 48%,transparent 68%)", border: "3px solid rgba(150,190,255,.6)", boxShadow: "0 0 100px rgba(50,90,255,.5)" }}>
+        <div style={{ position: "absolute", inset: 42, border: "2px solid rgba(150,240,110,.75)", borderRadius: "50%", transform: \`rotate(\${f * 2}deg)\` }} />
+        <div style={{ position: "absolute", inset: 95, border: "2px solid rgba(150,240,110,.55)", borderRadius: "50%" }} />
+      </div>
+      <div style={{ position: "absolute", right: 90, bottom: 78, fontSize: 17, fontWeight: 800, letterSpacing: ".18em", color: "#a8b5f4" }}>THINK BEYOND THE FRAME</div>
+    </AbsoluteFill>
+  );
+};
+
+const ClockPoster = () => {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ ...full, background: "#101d53", color: "#fff1b0" }}>
+      <div style={{ position: "absolute", inset: 0, background: "repeating-radial-gradient(circle at 50% 50%,rgba(94,144,241,.24) 0 3px,transparent 4px 18px),radial-gradient(circle at 50% 50%,#253d9a,#08112f 70%)" }} />
+      <div style={{ position: "absolute", top: 67, left: 90, color: "#ffdd75", fontSize: 22, fontWeight: 900, letterSpacing: ".16em" }}>1889</div>
+      <div style={{ position: "absolute", width: 540, height: 540, left: 690, top: 220, borderRadius: "50%", border: "26px solid #e5b94f", boxShadow: "0 0 0 11px rgba(255,224,126,.25),0 0 70px rgba(247,192,65,.46)", background: "radial-gradient(circle,#f7d86e 0%,#b98729 58%,#4a3a2a 100%)", transform: \`rotate(\${f * 1.4}deg)\` }}>
+        <div style={{ position: "absolute", inset: 24, border: "7px solid #f8e69d", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}>
+          <div style={{ position: "absolute", width: 12, height: 195, background: "#27356c", borderRadius: 20, top: 86, transform: \`rotate(\${f * 5 + 20}deg)\`, transformOrigin: "50% 84%" }} />
+          <div style={{ position: "absolute", width: 185, height: 12, background: "#27356c", borderRadius: 20, transform: \`rotate(\${f * 1.8 + 45}deg)\` }} />
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#f8e69d", zIndex: 2 }} />
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 90, bottom: 85, fontSize: 19, fontWeight: 800, letterSpacing: ".15em" }}>TIME IS A MATERIAL</div>
+    </AbsoluteFill>
+  );
+};
+
 const EyePoster = () => {
   const f = useCurrentFrame();
   const blink = frameBlink(f);
@@ -488,11 +518,13 @@ const frameBlink = (frame: number) => {
 
 const PosterReel = () => (
   <AbsoluteFill style={full}>
-    <Sequence from={0} durationInFrames={55}><PosterFuture /></Sequence>
-    <Sequence from={47} durationInFrames={53}><CirclePoster /></Sequence>
-    <Sequence from={92} durationInFrames={47}><EasePoster /></Sequence>
-    <Sequence from={131} durationInFrames={44}><LinearPoster /></Sequence>
-    <Sequence from={167} durationInFrames={52}><EyePoster /></Sequence>
+    <Sequence from={0} durationInFrames={42}><PosterFuture /></Sequence>
+    <Sequence from={38} durationInFrames={40}><MindPoster /></Sequence>
+    <Sequence from={74} durationInFrames={40}><CirclePoster /></Sequence>
+    <Sequence from={110} durationInFrames={40}><EasePoster /></Sequence>
+    <Sequence from={146} durationInFrames={35}><LinearPoster /></Sequence>
+    <Sequence from={177} durationInFrames={25}><ClockPoster /></Sequence>
+    <Sequence from={198} durationInFrames={21}><EyePoster /></Sequence>
   </AbsoluteFill>
 );
 
