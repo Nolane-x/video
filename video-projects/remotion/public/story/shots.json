@@ -17,50 +17,54 @@
   "musicArc": [
     {
       "start": 0,
-      "end": 25,
-      "track": "bed_sad_Am_64bpm"
+      "end": 22,
+      "track": "bed_sad_Am_64bpm",
+      "volume": 0.27
     },
     {
-      "start": 25,
+      "start": 22,
       "end": 45,
-      "track": "bed_dark_E_drone"
+      "track": "bed_dark_E_drone",
+      "volume": 0.22
     },
     {
       "start": 45,
-      "end": 50,
-      "track": "intentional-silence"
+      "end": 51,
+      "track": "intentional-silence",
+      "volume": 0
     },
     {
-      "start": 50,
+      "start": 51,
       "end": 75,
-      "track": "bed_hope_F_76bpm"
+      "track": "bed_hope_F_76bpm",
+      "volume": 0.24
     },
     {
       "start": 75,
       "end": 130,
-      "track": "bed_rise_Am_96bpm"
+      "track": "bed_rise_Am_96bpm",
+      "volume": 0.25
     },
     {
       "start": 130,
       "end": 155,
-      "track": "bed_resolve_C_70bpm"
+      "track": "bed_resolve_C_70bpm",
+      "volume": 0.27
     }
   ],
   "shots": [
     {
       "id": "s001",
       "start": 0,
-      "end": 5,
-      "tpl": "scene",
-      "line": "It starts with one small decision.",
-      "emotion": "compulsive curiosity",
-      "action": "The character scrolls in bed while a large shadow waits behind.",
-      "soundCues": [
-        "notif_msg"
-      ],
+      "end": 4,
+      "tpl": "wide-establishing",
+      "line": "A friend sends an invitation while the protagonist scrolls in bed, phone glowing in the dark.",
+      "emotion": "distraction",
+      "action": "A friend sends an invitation while the protagonist scrolls in bed, phone glowing in the dark.",
+      "soundCues": [],
       "args": {
-        "title": "ONE MORE SCROLL",
-        "subtitle": "It starts with one small decision.",
+        "title": "It starts with a promise.",
+        "subtitle": "A friend sends an invitation while the protagonist scrolls in bed, phone glowing in the dark.",
         "setting": "bedroom",
         "pose": "scroll",
         "x0": 760,
@@ -77,23 +81,29 @@
         "pan1": -8,
         "phone": true,
         "dip": true
-      }
+      },
+      "title": "It starts with a promise.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "high-angle",
+        "cameraMove": "slow push-in",
+        "composition": "Protagonist on the right third; phone light and empty space on the left",
+        "visualPurpose": "Establish the private room and the first choice to ignore a real person"
+      },
+      "storyFunction": "Establish the private room and the first choice to ignore a real person"
     },
     {
       "id": "s002",
-      "start": 5,
-      "end": 10,
-      "tpl": "phone",
-      "line": "The feed always has one more thing.",
+      "start": 4,
+      "end": 8,
+      "tpl": "phone-insert",
+      "line": "The feed advances while the friend's invitation slips beneath new notifications.",
       "emotion": "temptation",
-      "action": "Insert of a feed that keeps producing one more item; red words drift in.",
-      "soundCues": [
-        "notif_msg",
-        "tempt_whisper"
-      ],
+      "action": "The feed advances while the friend's invitation slips beneath new notifications.",
+      "soundCues": [],
       "args": {
-        "title": "THE NEXT THING",
-        "subtitle": "The feed always has one more thing.",
+        "title": "Just one more video.",
+        "subtitle": "The feed advances while the friend's invitation slips beneath new notifications.",
         "setting": "phone",
         "pose": "scroll",
         "x0": 885,
@@ -113,23 +123,29 @@
           "ONE MORE",
           "LATER"
         ]
-      }
+      },
+      "title": "Just one more video.",
+      "shotLanguage": {
+        "shotSize": "extreme close-up",
+        "cameraAngle": "top-down",
+        "cameraMove": "locked-off",
+        "composition": "Phone centered; notification stack fills the screen",
+        "visualPurpose": "Make the endless feed feel crowded and show the invitation physically disappearing"
+      },
+      "storyFunction": "Make the endless feed feel crowded and show the invitation physically disappearing"
     },
     {
       "id": "s003",
-      "start": 10,
-      "end": 15,
-      "tpl": "scene",
-      "line": "Your body moves. Your attention stays behind.",
+      "start": 8,
+      "end": 13,
+      "tpl": "wide-tracking",
+      "line": "The protagonist crosses the wet street with eyes fixed on the phone.",
       "emotion": "disconnection",
-      "action": "The character crosses the street while looking down at the phone.",
-      "soundCues": [
-        "rain_loop",
-        "footsteps"
-      ],
+      "action": "The protagonist crosses the wet street with eyes fixed on the phone.",
+      "soundCues": [],
       "args": {
-        "title": "WALKING, BUT NOT HERE",
-        "subtitle": "Your body moves. Your attention stays behind.",
+        "title": "The street moves. Their attention doesn't.",
+        "subtitle": "The protagonist crosses the wet street with eyes fixed on the phone.",
         "setting": "street",
         "pose": "walk",
         "x0": 235,
@@ -148,22 +164,29 @@
         "redWords": [
           "SCROLL"
         ]
-      }
+      },
+      "title": "The street moves. Their attention doesn't.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "lateral track left",
+        "composition": "Protagonist left third; the street opens ahead",
+        "visualPurpose": "Contrast physical movement with emotional absence"
+      },
+      "storyFunction": "Contrast physical movement with emotional absence"
     },
     {
       "id": "s004",
-      "start": 15,
-      "end": 20,
-      "tpl": "scene",
-      "line": "You don't notice the world passing.",
+      "start": 13,
+      "end": 17,
+      "tpl": "medium-wait",
+      "line": "A friend waits alone beneath the bus-stop clock, checking the time.",
       "emotion": "avoidance",
-      "action": "Waiting at the bus stop, the character does not look up.",
-      "soundCues": [
-        "clock_tick"
-      ],
+      "action": "A friend waits alone beneath the bus-stop clock, checking the time.",
+      "soundCues": [],
       "args": {
-        "title": "WAITING FOR NOTHING",
-        "subtitle": "You don't notice the world passing.",
+        "title": "The message stays unread.",
+        "subtitle": "A friend waits alone beneath the bus-stop clock, checking the time.",
         "setting": "busStop",
         "pose": "tired",
         "x0": 425,
@@ -180,22 +203,29 @@
         "pan1": -14,
         "phone": true,
         "day": "DAY 03"
-      }
+      },
+      "title": "The message stays unread.",
+      "shotLanguage": {
+        "shotSize": "medium-wide",
+        "cameraAngle": "high-angle",
+        "cameraMove": "slow push-in",
+        "composition": "Waiting figure held in the right third with empty bench space",
+        "visualPurpose": "Introduce the person affected by the missed promise"
+      },
+      "storyFunction": "Introduce the person affected by the missed promise"
     },
     {
       "id": "s005",
-      "start": 20,
-      "end": 25,
-      "tpl": "scene",
-      "line": "A room full of people can still feel empty.",
+      "start": 17,
+      "end": 22,
+      "tpl": "layered-classroom",
+      "line": "In a crowded classroom, the protagonist remains isolated behind the screen.",
       "emotion": "isolation",
-      "action": "The classroom is full, but the protagonist is isolated in the screen.",
-      "soundCues": [
-        "clock_tick"
-      ],
+      "action": "In a crowded classroom, the protagonist remains isolated behind the screen.",
+      "soundCues": [],
       "args": {
-        "title": "EVERYONE ELSE IS THERE",
-        "subtitle": "A room full of people can still feel empty.",
+        "title": "Someone is right beside them.",
+        "subtitle": "In a crowded classroom, the protagonist remains isolated behind the screen.",
         "setting": "classroom",
         "pose": "scroll",
         "x0": 745,
@@ -211,22 +241,29 @@
         "pan0": 8,
         "pan1": -5,
         "phone": true
-      }
+      },
+      "title": "Someone is right beside them.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "locked-off",
+        "composition": "Protagonist foreground left; classmates recede into depth",
+        "visualPurpose": "Show that proximity does not equal presence"
+      },
+      "storyFunction": "Show that proximity does not equal presence"
     },
     {
       "id": "s006",
-      "start": 25,
-      "end": 30,
-      "tpl": "scene",
-      "line": "And then the night is gone.",
+      "start": 22,
+      "end": 26,
+      "tpl": "bedroom-hold",
+      "line": "The protagonist keeps scrolling as the room darkens around them.",
       "emotion": "lost time",
-      "action": "Night returns; the character keeps scrolling instead of sleeping.",
-      "soundCues": [
-        "notif_msg"
-      ],
+      "action": "The protagonist keeps scrolling as the room darkens around them.",
+      "soundCues": [],
       "args": {
-        "title": "JUST FIVE MORE MINUTES",
-        "subtitle": "And then the night is gone.",
+        "title": "Five more minutes becomes another night.",
+        "subtitle": "The protagonist keeps scrolling as the room darkens around them.",
         "setting": "bedroom",
         "pose": "scroll",
         "x0": 810,
@@ -242,22 +279,29 @@
         "pan0": 0,
         "pan1": -10,
         "phone": true
-      }
+      },
+      "title": "Five more minutes becomes another night.",
+      "shotLanguage": {
+        "shotSize": "medium",
+        "cameraAngle": "eye-level",
+        "cameraMove": "slow push-in",
+        "composition": "Character right of center; dark negative space grows behind",
+        "visualPurpose": "Make the habit feel like a choice repeating itself"
+      },
+      "storyFunction": "Make the habit feel like a choice repeating itself"
     },
     {
       "id": "s007",
-      "start": 30,
-      "end": 35,
-      "tpl": "calendar",
-      "line": "One day becomes a habit.",
+      "start": 26,
+      "end": 32,
+      "tpl": "calendar-insert",
+      "line": "Calendar pages pass while the protagonist slumps at the edge of frame.",
       "emotion": "regret",
-      "action": "Calendar pages pass while the character slumps.",
-      "soundCues": [
-        "clock_tick"
-      ],
+      "action": "Calendar pages pass while the protagonist slumps at the edge of frame.",
+      "soundCues": [],
       "args": {
-        "title": "THE DAYS DISAPPEAR",
-        "subtitle": "One day becomes a habit.",
+        "title": "Another week disappears.",
+        "subtitle": "Calendar pages pass while the protagonist slumps at the edge of frame.",
         "setting": "calendar",
         "pose": "slump",
         "x0": 290,
@@ -274,22 +318,29 @@
         "pan1": -24,
         "day": "DAY 07",
         "dip": true
-      }
+      },
+      "title": "Another week disappears.",
+      "shotLanguage": {
+        "shotSize": "insert",
+        "cameraAngle": "high-angle",
+        "cameraMove": "short pan right",
+        "composition": "Calendar dominates the frame; character kept small at the edge",
+        "visualPurpose": "Turn vague lost time into visible accumulation"
+      },
+      "storyFunction": "Turn vague lost time into visible accumulation"
     },
     {
       "id": "s008",
-      "start": 35,
-      "end": 40,
-      "tpl": "scene",
-      "line": "You promise it will be different tonight.",
+      "start": 32,
+      "end": 36,
+      "tpl": "mirror-medium",
+      "line": "At 6:12 AM, the protagonist faces a tired reflection and an unfinished reply.",
       "emotion": "exhaustion",
-      "action": "Morning mirror shot: tired posture and cold bathroom light.",
-      "soundCues": [
-        "breath_in"
-      ],
+      "action": "At 6:12 AM, the protagonist faces a tired reflection and an unfinished reply.",
+      "soundCues": [],
       "args": {
-        "title": "THE MORNING AFTER",
-        "subtitle": "You promise it will be different tonight.",
+        "title": "The same promise waits in the morning.",
+        "subtitle": "At 6:12 AM, the protagonist faces a tired reflection and an unfinished reply.",
         "setting": "bathroom",
         "pose": "tired",
         "x0": 450,
@@ -305,23 +356,29 @@
         "pan0": 0,
         "pan1": -8,
         "day": "6:12 AM"
-      }
+      },
+      "title": "The same promise waits in the morning.",
+      "shotLanguage": {
+        "shotSize": "medium close-up",
+        "cameraAngle": "eye-level",
+        "cameraMove": "slow push-in",
+        "composition": "Reflection centered, protagonist offset to one side",
+        "visualPurpose": "Carry the missed message into the next morning"
+      },
+      "storyFunction": "Carry the missed message into the next morning"
     },
     {
       "id": "s009",
-      "start": 40,
-      "end": 45,
-      "tpl": "face",
-      "line": "What you feed begins to follow you.",
+      "start": 36,
+      "end": 41,
+      "tpl": "mirror-close",
+      "line": "The shadow grows behind the protagonist as unread messages collect.",
       "emotion": "self-criticism",
-      "action": "The shadow grows in the mirror.",
-      "soundCues": [
-        "tempt_swell",
-        "tempt_whisper"
-      ],
+      "action": "The shadow grows behind the protagonist as unread messages collect.",
+      "soundCues": [],
       "args": {
-        "title": "THE SHADOW GROWS",
-        "subtitle": "What you feed begins to follow you.",
+        "title": "Later gets heavier.",
+        "subtitle": "The shadow grows behind the protagonist as unread messages collect.",
         "setting": "mirror",
         "pose": "tired",
         "x0": 420,
@@ -341,24 +398,31 @@
           "ONE MORE",
           "LATER"
         ]
-      }
+      },
+      "title": "Later gets heavier.",
+      "shotLanguage": {
+        "shotSize": "close-up",
+        "cameraAngle": "dutch",
+        "cameraMove": "slow push-in",
+        "composition": "Reflection left third; shadow fills the right side",
+        "visualPurpose": "Make the shadow a visual consequence, not a decorative effect"
+      },
+      "storyFunction": "Make the shadow a visual consequence, not a decorative effect"
     },
     {
       "id": "s010",
-      "start": 45,
-      "end": 50,
-      "tpl": "face",
-      "line": "The voice starts sounding like your own.",
+      "start": 41,
+      "end": 45,
+      "tpl": "message-reaction",
+      "line": "The friend's last message sits unanswered in the reflection's phone light.",
       "emotion": "shame",
-      "action": "Close reaction: self-critical words crowd the reflection.",
-      "soundCues": [
-        "tempt_whisper"
-      ],
+      "action": "The friend's last message sits unanswered in the reflection's phone light.",
+      "soundCues": [],
       "args": {
-        "title": "IT KNOWS YOUR NAME",
-        "subtitle": "The voice starts sounding like your own.",
-        "setting": "mirror",
-        "pose": "slump",
+        "title": "Are we still meeting?",
+        "subtitle": "The friend's last message sits unanswered in the reflection's phone light.",
+        "setting": "phone",
+        "pose": "tired",
         "x0": 470,
         "x1": 466,
         "y0": 0,
@@ -372,25 +436,31 @@
         "pan0": 0,
         "pan1": -9,
         "redWords": [
-          "NOT ENOUGH",
-          "LATER"
+          "ARE WE STILL MEETING?"
         ]
-      }
+      },
+      "title": "Are we still meeting?",
+      "shotLanguage": {
+        "shotSize": "extreme close-up",
+        "cameraAngle": "eye-level",
+        "cameraMove": "locked-off",
+        "composition": "Message occupies the center with the protagonist blurred behind",
+        "visualPurpose": "Give the emotional cost a specific human voice"
+      },
+      "storyFunction": "Give the emotional cost a specific human voice"
     },
     {
       "id": "s011",
-      "start": 50,
-      "end": 55,
-      "tpl": "black",
-      "line": "Scroll. Regret. Promise. Repeat.",
+      "start": 45,
+      "end": 51,
+      "tpl": "symbolic-loop",
+      "line": "A near-black loop closes around the protagonist as the same phrases circle back.",
       "emotion": "repetition",
-      "action": "A near-black loop composition surrounds the character with repeated phrases.",
-      "soundCues": [
-        "sting_low"
-      ],
+      "action": "A near-black loop closes around the protagonist as the same phrases circle back.",
+      "soundCues": [],
       "args": {
-        "title": "THE LOOP",
-        "subtitle": "Scroll. Regret. Promise. Repeat.",
+        "title": "Scroll. Sleep. Apologise. Repeat.",
+        "subtitle": "A near-black loop closes around the protagonist as the same phrases circle back.",
         "setting": "void",
         "pose": "slump",
         "x0": 640,
@@ -411,22 +481,29 @@
           "JUST ONCE",
           "LATER"
         ]
-      }
+      },
+      "title": "Scroll. Sleep. Apologise. Repeat.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "low-angle",
+        "cameraMove": "slow pull-back",
+        "composition": "Small isolated figure centered inside negative space",
+        "visualPurpose": "Reach the emotional low point before the soundtrack falls away"
+      },
+      "storyFunction": "Reach the emotional low point before the soundtrack falls away"
     },
     {
       "id": "s012",
-      "start": 55,
-      "end": 60,
-      "tpl": "phone",
-      "line": "The change begins quietly.",
+      "start": 51,
+      "end": 55,
+      "tpl": "phone-pause",
+      "line": "The protagonist holds the phone still instead of opening another video.",
       "emotion": "hesitation",
-      "action": "Phone insert: the character pauses before choosing.",
-      "soundCues": [
-        "notif_msg"
-      ],
+      "action": "The protagonist holds the phone still instead of opening another video.",
+      "soundCues": [],
       "args": {
-        "title": "NO BIG SPEECH",
-        "subtitle": "The change begins quietly.",
+        "title": "This time, they stop.",
+        "subtitle": "The protagonist holds the phone still instead of opening another video.",
         "setting": "phone",
         "pose": "stand",
         "x0": 640,
@@ -443,22 +520,29 @@
         "pan1": 0,
         "phone": true,
         "dip": true
-      }
+      },
+      "title": "This time, they stop.",
+      "shotLanguage": {
+        "shotSize": "extreme close-up",
+        "cameraAngle": "top-down",
+        "cameraMove": "locked-off",
+        "composition": "Phone fills the frame; no other visual distraction",
+        "visualPurpose": "Make the interruption legible through the absence of scrolling"
+      },
+      "storyFunction": "Make the interruption legible through the absence of scrolling"
     },
     {
       "id": "s013",
-      "start": 60,
-      "end": 65,
-      "tpl": "scene",
-      "line": "Let the silence last a second.",
+      "start": 55,
+      "end": 61,
+      "tpl": "hand-detail",
+      "line": "The protagonist lowers the phone onto the desk, releases it and lets the hand withdraw.",
       "emotion": "decision",
-      "action": "The phone is set aside; hold the silence.",
-      "soundCues": [
-        "intentional_silence"
-      ],
+      "action": "The protagonist lowers the phone onto the desk, releases it and lets the hand withdraw.",
+      "soundCues": [],
       "args": {
-        "title": "PUT IT DOWN",
-        "subtitle": "Let the silence last a second.",
+        "title": "They turn the phone face down.",
+        "subtitle": "The protagonist lowers the phone onto the desk, releases it and lets the hand withdraw.",
         "setting": "bedroom",
         "pose": "stand",
         "x0": 760,
@@ -475,22 +559,34 @@
         "pan1": 4,
         "phoneOnDesk": true,
         "dip": true
+      },
+      "title": "They turn the phone face down.",
+      "shotLanguage": {
+        "shotSize": "extreme close-up",
+        "cameraAngle": "high-angle",
+        "cameraMove": "slow tilt down",
+        "composition": "Hand and phone meet in the lower third; desk remains uncluttered",
+        "visualPurpose": "Make the decision a visible prop contact rather than a caption alone"
+      },
+      "storyFunction": "Make the decision a visible prop contact rather than a caption alone",
+      "motionProof": {
+        "keyAction": "The hand lowers the phone until its glass touches the desk.",
+        "contactOrChange": "The phone makes visible contact with the desk; the fingers release and the screen stays still.",
+        "followThrough": "The hand withdraws fully and the character holds the silence before turning away."
       }
     },
     {
       "id": "s014",
-      "start": 65,
-      "end": 70,
-      "tpl": "note",
-      "line": "Not a new life. One small action.",
-      "emotion": "quiet commitment",
-      "action": "The character opens a notebook and begins one line.",
-      "soundCues": [
-        "page_flip"
-      ],
+      "start": 61,
+      "end": 66,
+      "tpl": "notebook-medium",
+      "line": "The protagonist opens a notebook and writes the friend's name and a time to meet.",
+      "emotion": "commitment",
+      "action": "The protagonist opens a notebook and writes the friend's name and a time to meet.",
+      "soundCues": [],
       "args": {
-        "title": "START WITH ONE PAGE",
-        "subtitle": "Not a new life. One small action.",
+        "title": "A real apology starts with a name.",
+        "subtitle": "The protagonist opens a notebook and writes the friend's name and a time to meet.",
         "setting": "desk",
         "pose": "write",
         "x0": 650,
@@ -506,22 +602,34 @@
         "pan0": 2,
         "pan1": -10,
         "phoneOnDesk": true
+      },
+      "title": "A real apology starts with a name.",
+      "shotLanguage": {
+        "shotSize": "medium",
+        "cameraAngle": "over-the-shoulder",
+        "cameraMove": "slow push-in",
+        "composition": "Notebook foreground; protagonist held to the left third",
+        "visualPurpose": "Move from abstract intention to a specific plan"
+      },
+      "storyFunction": "Move from abstract intention to a specific plan",
+      "motionProof": {
+        "keyAction": "The notebook cover opens and the pen touches the page.",
+        "contactOrChange": "The cover rotates to a clear open position; the pen leaves a visible first line.",
+        "followThrough": "The hand lifts from the page and pauses over the friend's name."
       }
     },
     {
       "id": "s015",
-      "start": 70,
-      "end": 75,
-      "tpl": "note",
-      "line": "You don't need to feel ready.",
-      "emotion": "focus",
-      "action": "Closer insert: hand, pen, page, and the phone set safely aside.",
-      "soundCues": [
-        "page_flip"
-      ],
+      "start": 66,
+      "end": 72,
+      "tpl": "handwriting-close",
+      "line": "The hand finishes the apology and underlines the meeting time on the page.",
+      "emotion": "quiet courage",
+      "action": "The hand finishes the apology and underlines the meeting time on the page.",
+      "soundCues": [],
       "args": {
-        "title": "ONE LINE AT A TIME",
-        "subtitle": "You don't need to feel ready.",
+        "title": "I'm sorry. Can we meet today?",
+        "subtitle": "The hand finishes the apology and underlines the meeting time on the page.",
         "setting": "desk",
         "pose": "write",
         "x0": 650,
@@ -540,22 +648,34 @@
         "redWords": [
           "BEGIN"
         ]
+      },
+      "title": "I'm sorry. Can we meet today?",
+      "shotLanguage": {
+        "shotSize": "close-up",
+        "cameraAngle": "top-down",
+        "cameraMove": "locked-off",
+        "composition": "Pen tip and words centered with generous page space",
+        "visualPurpose": "Let the audience read the action and the apology"
+      },
+      "storyFunction": "Let the audience read the action and the apology",
+      "motionProof": {
+        "keyAction": "The hand finishes the apology and underlines the meeting time.",
+        "contactOrChange": "The pen tip stays on the paper during the underline; the written words remain visible.",
+        "followThrough": "The pen lifts and the hand leaves the completed note readable."
       }
     },
     {
       "id": "s016",
-      "start": 75,
-      "end": 80,
-      "tpl": "scene",
-      "line": "Water. Air. A little movement.",
+      "start": 72,
+      "end": 77,
+      "tpl": "kitchen-medium",
+      "line": "The protagonist pours water, pauses and takes one steady breath.",
       "emotion": "self-care",
-      "action": "The character lifts a cup for a small reset.",
-      "soundCues": [
-        "breath_in"
-      ],
+      "action": "The protagonist pours water, pauses and takes one steady breath.",
+      "soundCues": [],
       "args": {
-        "title": "MAKE SPACE",
-        "subtitle": "Water. Air. A little movement.",
+        "title": "First, breathe.",
+        "subtitle": "The protagonist pours water, pauses and takes one steady breath.",
         "setting": "kitchen",
         "pose": "drink",
         "x0": 570,
@@ -570,22 +690,29 @@
         "zoom1": 1.06,
         "pan0": 0,
         "pan1": -10
-      }
+      },
+      "title": "First, breathe.",
+      "shotLanguage": {
+        "shotSize": "medium",
+        "cameraAngle": "eye-level",
+        "cameraMove": "gentle push-in",
+        "composition": "Character left third; warm kitchen light fills the right",
+        "visualPurpose": "Slow the tempo after the decision without adding filler"
+      },
+      "storyFunction": "Slow the tempo after the decision without adding filler"
     },
     {
       "id": "s017",
-      "start": 80,
-      "end": 85,
-      "tpl": "scene",
-      "line": "The first step can be very small.",
-      "emotion": "beginning",
-      "action": "The character bends to tie shoes before leaving.",
-      "soundCues": [
-        "footsteps"
-      ],
+      "start": 77,
+      "end": 83,
+      "tpl": "shoe-detail",
+      "line": "The protagonist ties both shoes before leaving the room.",
+      "emotion": "preparation",
+      "action": "The protagonist ties both shoes before leaving the room.",
+      "soundCues": [],
       "args": {
-        "title": "TIE YOUR SHOES",
-        "subtitle": "The first step can be very small.",
+        "title": "Laces tight. Phone in the bag.",
+        "subtitle": "The protagonist ties both shoes before leaving the room.",
         "setting": "bedroom",
         "pose": "tie",
         "x0": 565,
@@ -601,22 +728,34 @@
         "pan0": 0,
         "pan1": -4,
         "day": "DAY 01"
+      },
+      "title": "Laces tight. Phone in the bag.",
+      "shotLanguage": {
+        "shotSize": "close-up",
+        "cameraAngle": "high-angle",
+        "cameraMove": "locked-off",
+        "composition": "Hands and laces fill the lower center; face outside frame",
+        "visualPurpose": "Show the body committing to the next step"
+      },
+      "storyFunction": "Show the body committing to the next step",
+      "motionProof": {
+        "keyAction": "The protagonist pulls both lace ends and forms the knot.",
+        "contactOrChange": "The knot tightens against the shoe; lace tension and hand position change together.",
+        "followThrough": "The hands release the laces and the foot plants firmly before standing."
       }
     },
     {
       "id": "s018",
-      "start": 85,
-      "end": 90,
-      "tpl": "scene",
-      "line": "Progress is a direction, not a streak.",
+      "start": 83,
+      "end": 89,
+      "tpl": "stair-tracking",
+      "line": "The protagonist climbs the stairs, one deliberate step after another.",
       "emotion": "effort",
-      "action": "The character climbs visible stairs with alternating steps.",
-      "soundCues": [
-        "footsteps"
-      ],
+      "action": "The protagonist climbs the stairs, one deliberate step after another.",
+      "soundCues": [],
       "args": {
-        "title": "SHOW UP AGAIN",
-        "subtitle": "Progress is a direction, not a streak.",
+        "title": "One block at a time.",
+        "subtitle": "The protagonist climbs the stairs, one deliberate step after another.",
         "setting": "stairs",
         "pose": "walk",
         "x0": 245,
@@ -632,22 +771,29 @@
         "pan0": 10,
         "pan1": -18,
         "day": "DAY 02"
-      }
+      },
+      "title": "One block at a time.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "low-angle",
+        "cameraMove": "tracking right",
+        "composition": "Protagonist left third; stair lines lead upward to the right",
+        "visualPurpose": "Give effort a visible direction and spatial progress"
+      },
+      "storyFunction": "Give effort a visible direction and spatial progress"
     },
     {
       "id": "s019",
-      "start": 90,
-      "end": 95,
-      "tpl": "scene",
-      "line": "You can be tired and still begin.",
+      "start": 89,
+      "end": 94,
+      "tpl": "park-wide",
+      "line": "The protagonist walks through the park with eyes away from the phone.",
       "emotion": "movement",
-      "action": "The character moves through a park instead of remaining in the loop.",
-      "soundCues": [
-        "footsteps"
-      ],
+      "action": "The protagonist walks through the park with eyes away from the phone.",
+      "soundCues": [],
       "args": {
-        "title": "MOVE THROUGH THE FEELING",
-        "subtitle": "You can be tired and still begin.",
+        "title": "The city feels different when you look up.",
+        "subtitle": "The protagonist walks through the park with eyes away from the phone.",
         "setting": "park",
         "pose": "walk",
         "x0": 240,
@@ -662,26 +808,33 @@
         "zoom1": 1.055,
         "pan0": 22,
         "pan1": -26
-      }
+      },
+      "title": "The city feels different when you look up.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "lateral track right",
+        "composition": "Character crosses open space with trees framing both sides",
+        "visualPurpose": "Release the cramped indoor compositions into open air"
+      },
+      "storyFunction": "Release the cramped indoor compositions into open air"
     },
     {
       "id": "s020",
-      "start": 95,
+      "start": 94,
       "end": 100,
-      "tpl": "scene",
-      "line": "Discipline is a practice, not a pose.",
-      "emotion": "discipline",
-      "action": "The character draws back and punches a bag.",
-      "soundCues": [
-        "punch_bag"
-      ],
+      "tpl": "street-crossing",
+      "line": "The protagonist crosses toward the café, phone tucked away and pace slowing.",
+      "emotion": "resolve",
+      "action": "The protagonist crosses toward the café, phone tucked away and pace slowing.",
+      "soundCues": [],
       "args": {
-        "title": "MISS. RESET. TRY AGAIN.",
-        "subtitle": "Discipline is a practice, not a pose.",
-        "setting": "gym",
-        "pose": "punch",
-        "x0": 785,
-        "x1": 785,
+        "title": "They choose the meeting place.",
+        "subtitle": "The protagonist crosses toward the café, phone tucked away and pace slowing.",
+        "setting": "street",
+        "pose": "walk",
+        "x0": 235,
+        "x1": 850,
         "y0": 0,
         "y1": 0,
         "scale": 1.25,
@@ -691,116 +844,153 @@
         "zoom0": 1,
         "zoom1": 1.12,
         "pan0": 0,
-        "pan1": -9
-      }
+        "pan1": -9,
+        "phone": false,
+        "friend": false
+      },
+      "title": "They choose the meeting place.",
+      "shotLanguage": {
+        "shotSize": "medium-wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "tracking right",
+        "composition": "Crossing lines guide the protagonist toward frame right",
+        "visualPurpose": "Connect the physical journey to the promised meeting"
+      },
+      "storyFunction": "Connect the physical journey to the promised meeting"
     },
     {
       "id": "s021",
       "start": 100,
-      "end": 105,
-      "tpl": "scene",
-      "line": "Let your actions speak first.",
-      "emotion": "persistence",
-      "action": "A second punch lands; the bag reacts and swings.",
-      "soundCues": [
-        "punch_bag"
-      ],
+      "end": 104,
+      "tpl": "cafe-establishing",
+      "line": "The protagonist opens the café door and sees the friend waiting inside.",
+      "emotion": "nervous relief",
+      "action": "The protagonist opens the café door and sees the friend waiting inside.",
+      "soundCues": [],
       "args": {
-        "title": "ONE MORE REP",
-        "subtitle": "Let your actions speak first.",
-        "setting": "gym",
-        "pose": "punch",
-        "x0": 755,
-        "x1": 755,
+        "title": "The door opens. The friend is still there.",
+        "subtitle": "The protagonist opens the café door and sees the friend waiting inside.",
+        "setting": "cafe",
+        "pose": "stand",
+        "x0": 430,
+        "x1": 450,
         "y0": 0,
         "y1": 0,
         "scale": 1.36,
         "shirt": "#d7a56d",
-        "shadow": 0.12,
+        "shadow": 0.08,
         "shadowX": 1030,
         "zoom0": 1.04,
         "zoom1": 1.16,
         "pan0": 0,
-        "pan1": -12
+        "pan1": -12,
+        "friend": true
+      },
+      "title": "The door opens. The friend is still there.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "slow push-in",
+        "composition": "Doorway frames both characters with room around them",
+        "visualPurpose": "Pay off the earlier waiting shot with a matching location and person"
+      },
+      "storyFunction": "Pay off the earlier waiting shot with a matching location and person",
+      "motionProof": {
+        "keyAction": "The protagonist reaches for the café handle and swings the door open.",
+        "contactOrChange": "The hand stays attached to the handle as the door rotates; the doorway reveals the waiting friend.",
+        "followThrough": "The protagonist steps through the doorway and the door settles behind them."
       }
     },
     {
       "id": "s022",
-      "start": 105,
-      "end": 110,
-      "tpl": "scene",
-      "line": "There is a world beyond the screen.",
-      "emotion": "awareness",
-      "action": "The character finally looks up at the world.",
-      "soundCues": [
-        "breath_in"
-      ],
+      "start": 104,
+      "end": 109,
+      "tpl": "cafe-reaction",
+      "line": "The protagonist recognises the friend and takes a breath before approaching.",
+      "emotion": "vulnerability",
+      "action": "The protagonist recognises the friend and takes a breath before approaching.",
+      "soundCues": [],
       "args": {
-        "title": "LOOK UP",
-        "subtitle": "There is a world beyond the screen.",
-        "setting": "street",
-        "pose": "stand",
-        "x0": 390,
-        "x1": 410,
+        "title": "For a second, neither knows what to say.",
+        "subtitle": "The protagonist recognises the friend and takes a breath before approaching.",
+        "setting": "cafe",
+        "pose": "meet",
+        "x0": 440,
+        "x1": 460,
         "y0": 0,
         "y1": 0,
         "scale": 1.2,
         "shirt": "#d7a56d",
-        "shadow": 0.09,
-        "shadowX": 1050,
+        "shadow": 0.05,
+        "shadowX": 1040,
         "zoom0": 1.04,
         "zoom1": 1.1,
         "pan0": 0,
         "pan1": -8,
-        "dip": true
-      }
+        "dip": true,
+        "friend": true
+      },
+      "title": "For a second, neither knows what to say.",
+      "shotLanguage": {
+        "shotSize": "medium close-up",
+        "cameraAngle": "eye-level",
+        "cameraMove": "gentle push-in",
+        "composition": "Protagonist on left third; friend remains visible across the frame",
+        "visualPurpose": "Allow the emotional beat to register before the apology"
+      },
+      "storyFunction": "Allow the emotional beat to register before the apology"
     },
     {
       "id": "s023",
-      "start": 110,
+      "start": 109,
       "end": 115,
-      "tpl": "scene",
-      "line": "Some things become lighter when shared.",
-      "emotion": "connection",
-      "action": "A friend arrives; the two characters orient toward each other.",
-      "soundCues": [
-        "door_open"
-      ],
+      "tpl": "cafe-two-shot",
+      "line": "The protagonist sits across from the friend, phone away, and apologises.",
+      "emotion": "honesty",
+      "action": "The protagonist sits across from the friend, phone away, and apologises.",
+      "soundCues": [],
       "args": {
-        "title": "YOU ARE NOT ALONE",
-        "subtitle": "Some things become lighter when shared.",
+        "title": "No excuse. Just an apology.",
+        "subtitle": "The protagonist sits across from the friend, phone away, and apologises.",
         "setting": "cafe",
         "pose": "meet",
-        "x0": 440,
-        "x1": 458,
+        "x0": 450,
+        "x1": 465,
         "y0": 0,
         "y1": 0,
         "scale": 1.16,
         "shirt": "#d7a56d",
-        "shadow": 0.12,
-        "shadowX": 1010,
+        "shadow": 0.03,
+        "shadowX": 1050,
         "zoom0": 1,
         "zoom1": 1.045,
         "pan0": -3,
         "pan1": -8,
         "friend": true,
         "dip": true
-      }
+      },
+      "title": "No excuse. Just an apology.",
+      "shotLanguage": {
+        "shotSize": "medium two-shot",
+        "cameraAngle": "eye-level",
+        "cameraMove": "slow lateral track left",
+        "composition": "Both characters share the frame with balanced negative space",
+        "visualPurpose": "Make reconnection a shared scene, not another solo montage"
+      },
+      "storyFunction": "Make reconnection a shared scene, not another solo montage"
     },
     {
       "id": "s024",
       "start": 115,
-      "end": 120,
-      "tpl": "scene",
-      "line": "A real conversation pulls you back.",
+      "end": 119,
+      "tpl": "listening-close",
+      "line": "The friend speaks while the protagonist listens without reaching for the phone.",
       "emotion": "listening",
-      "action": "Reaction close-up: the protagonist listens.",
-      "soundCues": [
-        "intentional_silence"
-      ],
+      "action": "The friend speaks while the protagonist listens without reaching for the phone.",
+      "soundCues": [],
       "args": {
-        "title": "LISTEN",
-        "subtitle": "A real conversation pulls you back.",
+        "title": "This time, they listen.",
+        "subtitle": "The friend speaks while the protagonist listens without reaching for the phone.",
         "setting": "cafe",
         "pose": "listen",
         "x0": 465,
@@ -809,29 +999,36 @@
         "y1": 0,
         "scale": 1.26,
         "shirt": "#d7a56d",
-        "shadow": 0.08,
+        "shadow": 0.02,
         "shadowX": 1040,
         "zoom0": 1.05,
         "zoom1": 1.13,
         "pan0": 0,
         "pan1": -8,
         "friend": true
-      }
+      },
+      "title": "This time, they listen.",
+      "shotLanguage": {
+        "shotSize": "close-up",
+        "cameraAngle": "eye-level",
+        "cameraMove": "locked-off",
+        "composition": "Listener framed off-center; friend softly occupies foreground edge",
+        "visualPurpose": "Show the behavioural change through sustained attention"
+      },
+      "storyFunction": "Show the behavioural change through sustained attention"
     },
     {
       "id": "s025",
-      "start": 120,
-      "end": 125,
-      "tpl": "scene",
-      "line": "Notice the people around you.",
+      "start": 119,
+      "end": 123,
+      "tpl": "bus-wide",
+      "line": "On the bus, the protagonist looks through the window at the passing city.",
       "emotion": "presence",
-      "action": "The character walks through the bus scene with other people present.",
-      "soundCues": [
-        "footsteps"
-      ],
+      "action": "On the bus, the protagonist looks through the window at the passing city.",
+      "soundCues": [],
       "args": {
-        "title": "BE WHERE YOUR FEET ARE",
-        "subtitle": "Notice the people around you.",
+        "title": "The ride home is not lost time.",
+        "subtitle": "On the bus, the protagonist looks through the window at the passing city.",
         "setting": "bus",
         "pose": "walk",
         "x0": 340,
@@ -846,23 +1043,30 @@
         "zoom1": 1.04,
         "pan0": 16,
         "pan1": -25,
-        "friend": true
-      }
+        "friend": false
+      },
+      "title": "The ride home is not lost time.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "high-angle",
+        "cameraMove": "slow pan left",
+        "composition": "Window frames the protagonist and the moving street outside",
+        "visualPurpose": "Return to an earlier transit motif with changed attention"
+      },
+      "storyFunction": "Return to an earlier transit motif with changed attention"
     },
     {
       "id": "s026",
-      "start": 125,
-      "end": 130,
-      "tpl": "scene",
-      "line": "Your attention belongs to you.",
+      "start": 123,
+      "end": 129,
+      "tpl": "library-medium",
+      "line": "The protagonist studies in the library and writes a short plan for tomorrow.",
       "emotion": "focus",
-      "action": "The character studies in the library, protecting the first hour.",
-      "soundCues": [
-        "page_flip"
-      ],
+      "action": "The protagonist studies in the library and writes a short plan for tomorrow.",
+      "soundCues": [],
       "args": {
-        "title": "PROTECT THE FIRST HOUR",
-        "subtitle": "Your attention belongs to you.",
+        "title": "Protect the first hour.",
+        "subtitle": "The protagonist studies in the library and writes a short plan for tomorrow.",
         "setting": "library",
         "pose": "write",
         "x0": 730,
@@ -878,22 +1082,34 @@
         "pan0": 0,
         "pan1": -7,
         "day": "DAY 14"
+      },
+      "title": "Protect the first hour.",
+      "shotLanguage": {
+        "shotSize": "medium",
+        "cameraAngle": "eye-level",
+        "cameraMove": "slow push-in",
+        "composition": "Protagonist left third; desk and open book create depth",
+        "visualPurpose": "Show a practical boundary replacing the old habit"
+      },
+      "storyFunction": "Show a practical boundary replacing the old habit",
+      "motionProof": {
+        "keyAction": "The protagonist writes a short plan beside the open book.",
+        "contactOrChange": "The pen traces visible marks on the page and stops at the end of the line.",
+        "followThrough": "The hand lifts; the written plan remains in frame while the protagonist returns to reading."
       }
     },
     {
       "id": "s027",
-      "start": 130,
-      "end": 135,
-      "tpl": "calendar",
-      "line": "Small choices leave a mark.",
+      "start": 129,
+      "end": 133,
+      "tpl": "calendar-detail",
+      "line": "A calendar records small repeated choices rather than one perfect streak.",
       "emotion": "evidence of progress",
-      "action": "A calendar shows that small choices accumulate over time.",
-      "soundCues": [
-        "clock_tick"
-      ],
+      "action": "A calendar records small repeated choices rather than one perfect streak.",
+      "soundCues": [],
       "args": {
-        "title": "THE DAYS ADD UP",
-        "subtitle": "Small choices leave a mark.",
+        "title": "Not perfect days. More present ones.",
+        "subtitle": "A calendar records small repeated choices rather than one perfect streak.",
         "setting": "calendar",
         "pose": "stand",
         "x0": 310,
@@ -909,22 +1125,29 @@
         "pan0": 0,
         "pan1": -8,
         "day": "DAY 21"
-      }
+      },
+      "title": "Not perfect days. More present ones.",
+      "shotLanguage": {
+        "shotSize": "insert",
+        "cameraAngle": "top-down",
+        "cameraMove": "slow pan right",
+        "composition": "Marked days form a simple readable pattern",
+        "visualPurpose": "Replace perfectionism with a credible measure of progress"
+      },
+      "storyFunction": "Replace perfectionism with a credible measure of progress"
     },
     {
       "id": "s028",
-      "start": 135,
-      "end": 140,
-      "tpl": "face",
-      "line": "You don't have to obey every urge.",
+      "start": 133,
+      "end": 138,
+      "tpl": "mirror-close-resolve",
+      "line": "The shadow shrinks as the protagonist turns toward the reflection.",
       "emotion": "agency",
-      "action": "The shadow shrinks as the protagonist turns toward it.",
-      "soundCues": [
-        "glass_shatter"
-      ],
+      "action": "The shadow shrinks as the protagonist turns toward the reflection.",
+      "soundCues": [],
       "args": {
-        "title": "THE SHADOW SHRINKS",
-        "subtitle": "You don't have to obey every urge.",
+        "title": "The urge is still there. It is not in charge.",
+        "subtitle": "The shadow shrinks as the protagonist turns toward the reflection.",
         "setting": "mirror",
         "pose": "hero",
         "x0": 430,
@@ -942,22 +1165,29 @@
         "redWords": [
           "LATER"
         ]
-      }
+      },
+      "title": "The urge is still there. It is not in charge.",
+      "shotLanguage": {
+        "shotSize": "close-up",
+        "cameraAngle": "low-angle",
+        "cameraMove": "slow pull-back",
+        "composition": "Protagonist and smaller shadow share the frame",
+        "visualPurpose": "Resolve the recurring visual motif through a change in scale"
+      },
+      "storyFunction": "Resolve the recurring visual motif through a change in scale"
     },
     {
       "id": "s029",
-      "start": 140,
-      "end": 145,
-      "tpl": "scene",
-      "line": "The world was here the whole time.",
+      "start": 138,
+      "end": 144,
+      "tpl": "park-two-shot",
+      "line": "The friend smiles; this time the protagonist stays present in the conversation.",
       "emotion": "belonging",
-      "action": "A quiet park two-shot shows belonging outside the loop.",
-      "soundCues": [
-        "intentional_silence"
-      ],
+      "action": "The friend smiles; this time the protagonist stays present in the conversation.",
+      "soundCues": [],
       "args": {
-        "title": "A LIFE OUTSIDE THE LOOP",
-        "subtitle": "The world was here the whole time.",
+        "title": "The world was here the whole time.",
+        "subtitle": "The friend smiles; this time the protagonist stays present in the conversation.",
         "setting": "park",
         "pose": "meet",
         "x0": 470,
@@ -973,22 +1203,29 @@
         "pan0": 5,
         "pan1": -12,
         "friend": true
-      }
+      },
+      "title": "The world was here the whole time.",
+      "shotLanguage": {
+        "shotSize": "wide two-shot",
+        "cameraAngle": "eye-level",
+        "cameraMove": "lateral track right",
+        "composition": "Both friends share the left and right thirds with open space between",
+        "visualPurpose": "Complete the earlier waiting image with a warm shared composition"
+      },
+      "storyFunction": "Complete the earlier waiting image with a warm shared composition"
     },
     {
       "id": "s030",
-      "start": 145,
+      "start": 144,
       "end": 150,
-      "tpl": "scene",
-      "line": "Tomorrow begins with this moment.",
+      "tpl": "dawn-wide",
+      "line": "The protagonist and friend walk toward the warm horizon after their conversation.",
       "emotion": "hope",
-      "action": "The character walks toward the warm horizon.",
-      "soundCues": [
-        "footsteps"
-      ],
+      "action": "The protagonist and friend walk toward the warm horizon after their conversation.",
+      "soundCues": [],
       "args": {
-        "title": "A DIFFERENT DIRECTION",
-        "subtitle": "Tomorrow begins with this moment.",
+        "title": "Tomorrow is built by what happens today.",
+        "subtitle": "The protagonist and friend walk toward the warm horizon after their conversation.",
         "setting": "dawn",
         "pose": "walk",
         "x0": 450,
@@ -1003,19 +1240,26 @@
         "zoom1": 1.055,
         "pan0": 12,
         "pan1": -14
-      }
+      },
+      "title": "Tomorrow is built by what happens today.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "low-angle",
+        "cameraMove": "crane up",
+        "composition": "Figures small against the horizon; open sky carries the release",
+        "visualPurpose": "End on shared direction rather than a solitary hero pose"
+      },
+      "storyFunction": "End on shared direction rather than a solitary hero pose"
     },
     {
       "id": "s031",
       "start": 150,
       "end": 155,
-      "tpl": "card",
+      "tpl": "final-title",
       "line": "Choose where it goes.",
       "emotion": "resolution",
-      "action": "Final title card: attention is a choice.",
-      "soundCues": [
-        "sting_low"
-      ],
+      "action": "Choose where it goes.",
+      "soundCues": [],
       "args": {
         "title": "YOUR ATTENTION IS YOUR LIFE",
         "subtitle": "Choose where it goes.",
@@ -1033,8 +1277,158 @@
         "zoom1": 1,
         "pan0": 0,
         "pan1": 0,
-        "dip": true
-      }
+        "dip": true,
+        "hideCharacter": false
+      },
+      "title": "Your attention is your life.",
+      "shotLanguage": {
+        "shotSize": "wide",
+        "cameraAngle": "eye-level",
+        "cameraMove": "locked-off",
+        "composition": "Centered title with clean negative space and no competing objects",
+        "visualPurpose": "Leave a readable final thought after the narrative resolves"
+      },
+      "storyFunction": "Leave a readable final thought after the narrative resolves"
     }
-  ]
+  ],
+  "creativeBrief": {
+    "audience": "Young adults who feel distracted by their phones and want to reconnect with people who matter",
+    "platform": "YouTube",
+    "language": "English",
+    "aspectRatio": "16:9",
+    "viewerPromise": "A short, human story showing how attention lost to endless scrolling can be repaired through one honest act of reconnection",
+    "hook": "A friend waits for a promised meeting while the protagonist keeps scrolling",
+    "payoff": "The protagonist finally puts the phone away, shows up, apologises and listens; the friendship begins to recover",
+    "narrationPolicy": "none-by-design",
+    "narrationRationale": "This is a dialogue-free visual short. A repeated unread message, the same friend waiting and the eventual face-to-face meeting carry the plot. Short on-screen lines provide essential context; music, silence and concrete sound effects support the action instead of replacing it.",
+    "visualGrammar": "Cinematic 2D story staging with deliberate changes between wide establishing views, phone/prop inserts, close reactions, hand details and two-shots. Cool isolated night spaces gradually give way to warmer practical light. The phone and the shadow are recurring visual motifs; actor and prop movement must remain readable.",
+    "pacingRationale": "Use 4-second inserts and reaction beats, 5-second travel and transition beats, and 6-second emotional holds. Timing follows action, reading time and the music arc rather than a fixed grid. Preserve the 45–51 second silence/loop beat and leave the final title long enough to land."
+  },
+  "storyArc": [
+    {
+      "name": "The promise",
+      "purpose": "Establish a real invitation and a promise to meet, then show the protagonist choosing the feed over the friend"
+    },
+    {
+      "name": "The cost",
+      "purpose": "Let missed moments accumulate and return the friend's unanswered message as the emotional consequence"
+    },
+    {
+      "name": "The interruption",
+      "purpose": "Break the scrolling loop with a quiet pause and a visible decision to respond"
+    },
+    {
+      "name": "The repair",
+      "purpose": "Turn the decision into physical steps: write an apology, leave home and show up"
+    },
+    {
+      "name": "The reconnection",
+      "purpose": "Show the friend in the same visual world and make listening, not another slogan, the turning point"
+    },
+    {
+      "name": "The choice",
+      "purpose": "Resolve the shadow motif and show attention becoming a repeated choice rather than a perfect streak"
+    }
+  ],
+  "audioPlan": {
+    "soundCues": [
+      {
+        "file": "notif_msg",
+        "start": 1.4,
+        "duration": 0.55,
+        "volume": 0.32
+      },
+      {
+        "file": "notif_msg",
+        "start": 5.4,
+        "duration": 0.55,
+        "volume": 0.27
+      },
+      {
+        "file": "rain_loop",
+        "start": 8.2,
+        "duration": 4.2,
+        "volume": 0.12
+      },
+      {
+        "file": "clock_tick",
+        "start": 26.4,
+        "duration": 4.4,
+        "volume": 0.19
+      },
+      {
+        "file": "tempt_swell",
+        "start": 36.8,
+        "duration": 2.1,
+        "volume": 0.17
+      },
+      {
+        "file": "tempt_whisper",
+        "start": 42,
+        "duration": 1.3,
+        "volume": 0.2
+      },
+      {
+        "file": "page_flip",
+        "start": 62.1,
+        "duration": 0.8,
+        "volume": 0.25
+      },
+      {
+        "file": "breath_in",
+        "start": 73.2,
+        "duration": 1.1,
+        "volume": 0.2
+      },
+      {
+        "file": "footsteps",
+        "start": 83.4,
+        "duration": 2.1,
+        "volume": 0.26
+      },
+      {
+        "file": "footsteps",
+        "start": 90,
+        "duration": 2.1,
+        "volume": 0.22
+      },
+      {
+        "file": "door_open",
+        "start": 100.6,
+        "duration": 1.5,
+        "volume": 0.23
+      },
+      {
+        "file": "footsteps",
+        "start": 120,
+        "duration": 2,
+        "volume": 0.2
+      },
+      {
+        "file": "page_flip",
+        "start": 124.2,
+        "duration": 0.8,
+        "volume": 0.22
+      },
+      {
+        "file": "glass_shatter",
+        "start": 134.1,
+        "duration": 1.5,
+        "volume": 0.25
+      },
+      {
+        "file": "breath_in",
+        "start": 145.5,
+        "duration": 1.1,
+        "volume": 0.2
+      },
+      {
+        "file": "sting_low",
+        "start": 151,
+        "duration": 3,
+        "volume": 0.22
+      }
+    ]
+  },
+  "subtitle": "A small story about attention, absence and showing up."
 }
