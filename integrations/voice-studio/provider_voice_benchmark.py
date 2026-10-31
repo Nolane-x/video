@@ -9,7 +9,9 @@ import argparse
 import hashlib
 import html
 import json
+import random
 import re
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -99,6 +101,41 @@ def _synthesize(
             settings={"model_id": "eleven_flash_v2_5"},
         )
     raise ValueError(f"Unsupported provider: {provider}")
+
+
+def _cache_key(
+    provider: str,
+    candidate: dict[str, Any],
+    text: str,
+    *,
+    engine: str | None,
+    language: str,
+    seed: int,
+) -> str:
+    identity = {
+        "pipeline_schema": 1,
+        "synthesis_settings": "provider-defaults-v1",
+        "provider": provider,
+        "voice_id": str(candidate.get("id") or ""),
+        "engine": engine if provider == "voicestudio" else None,
+        "language": language,
+        "seed": seed if provider == "korva" else None,
+        "script_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+    }
+    encoded = json.dumps(identity, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _safe_report_audio_path(output_dir: Path, relative: str | None) -> Path | None:
+    if not relative:
+        return None
+    root = output_dir.resolve()
+    try:
+        candidate = (root / relative).resolve()
+        candidate.relative_to(root)
+    except (OSError, ValueError):
+        return None
+    return candidate if candidate.is_file() else None
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -196,6 +233,8 @@ def run_benchmark(
     allow_cloud: bool = False,
     delay: float = 0.5,
     asr: bool = False,
+    blind_seed: int = 20261031,
+    resume: bool = True,
     client: VoiceStudioClient | None = None,
 ) -> dict[str, Any]:
     valid_providers = {"voicestudio", "korva", "google", "elevenlabs", "all"}
@@ -245,6 +284,28 @@ def run_benchmark(
         raise RuntimeError(
             f"No voices were found for language {language}" + (f" ({details})" if details else "")
         )
+
+    # Sorting first makes the shuffled blind order reproducible across restarts,
+    # even when provider catalogues return candidates in a different order.
+    candidates.sort(key=lambda item: (
+        str(item.get("_provider") or provider), str(item.get("id") or "")
+    ))
+    if blind:
+        random.Random(blind_seed).shuffle(candidates)
+
+    report_path = output_dir / "provider-voice-benchmark.json"
+    previous_rows: dict[str, dict[str, Any]] = {}
+    if resume and report_path.is_file():
+        try:
+            previous = json.loads(report_path.read_text(encoding="utf-8"))
+            previous_rows = {
+                str(row["cache_key"]): row
+                for row in previous.get("candidates", [])
+                if isinstance(row, dict) and row.get("cache_key")
+            }
+        except (OSError, ValueError, TypeError):
+            previous_rows = {}
+
     rows: list[dict[str, Any]] = []
     for index, candidate in enumerate(candidates, 1):
         candidate_provider = str(candidate.get("_provider") or provider)
@@ -256,8 +317,11 @@ def run_benchmark(
             f"{index:03d}-{blind_label.replace(' ', '-')}{extension}"
             if blind else f"{index:03d}-{candidate_provider}-{_slug(voice_id)}{extension}"
         )
-        destination = audio_dir / filename
-        row: dict[str, Any] = {
+        cache_key = _cache_key(
+            candidate_provider, candidate, text,
+            engine=engine, language=language, seed=seed,
+        )
+        rows.append({
             "index": index,
             "id": voice_id,
             "name": name,
@@ -266,60 +330,110 @@ def run_benchmark(
             "engine": engine if candidate_provider == "voicestudio" else None,
             "language": language,
             "status": "pending",
+            "audio_file": (audio_dir / filename).relative_to(output_dir).as_posix(),
+            "cache_key": cache_key,
+            "cache_hit": False,
+        })
+
+    def snapshot(status: str) -> dict[str, Any]:
+        return {
+            "schema_version": 1,
+            "status": status,
+            "provider": provider,
+            "providers_included": requested_providers,
+            "cloud_enabled": any(name in {"google", "elevenlabs"} for name in requested_providers),
+            "asr_enabled": asr,
+            "catalogue_errors": catalogue_errors,
+            "engine": engine,
+            "language": language,
+            "blind": blind,
+            "blind_seed": blind_seed,
+            "resume_enabled": resume,
+            "script": text,
+            "script_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "seed_base": seed,
+            "candidate_count": len(rows),
+            "ready": sum(row["status"] == "ready" for row in rows),
+            "failed": sum(row["status"] == "failed" for row in rows),
+            "pending": sum(row["status"] == "pending" for row in rows),
+            "cache_hits": sum(row.get("cache_hit") is True for row in rows),
+            "candidates": rows,
+            "human_review_required": True,
+            "rating_dimensions": [key for key, _ in DIMENSIONS],
+            "rating_note": "Human ratings are subjective; do not treat the mean as an objective TTS benchmark.",
         }
-        try:
-            path = _synthesize(
-                candidate_provider, candidate, text, destination,
-                engine=engine, language=language, seed=seed, client=client,
+
+    # Persist the complete plan before the first synthesis call. A killed run
+    # can resume from the last atomic checkpoint instead of re-rendering voices.
+    _write_json(report_path, snapshot("running"))
+    for index, (candidate, row) in enumerate(zip(candidates, rows), 1):
+        candidate_provider = row["provider"]
+        destination = output_dir / row["audio_file"]
+        previous = previous_rows.get(row["cache_key"])
+        reused = False
+
+        if resume and previous and previous.get("status") == "ready":
+            cached_path = _safe_report_audio_path(
+                output_dir, previous.get("audio_file")
             )
-            if not path.is_file() or path.stat().st_size <= 44:
-                raise RuntimeError("Provider returned no usable audio file")
-            digest = hashlib.sha256(path.read_bytes()).hexdigest()
-            row.update({
-                "status": "ready",
-                "audio_file": path.relative_to(output_dir).as_posix(),
-                "bytes": path.stat().st_size,
-                "sha256": digest,
-            })
-            if asr:
+            if cached_path:
                 try:
-                    transcript = client.transcribe(path, language=language)
-                    row["asr_intelligibility_proxy"] = compare_text(text, transcript)
-                    row["asr_intelligibility_proxy"]["status"] = "available"
-                except Exception as asr_exc:
-                    row["asr_intelligibility_proxy"] = {
-                        "status": "unavailable",
-                        "reason": f"{type(asr_exc).__name__}: {asr_exc}",
-                    }
-        except Exception as exc:
-            row["status"] = "failed"
-            row["error"] = f"{type(exc).__name__}: {exc}"
-        rows.append(row)
-        print(f"[{index}/{len(candidates)}] {blind_label}: {row['status']}")
+                    digest = hashlib.sha256(cached_path.read_bytes()).hexdigest()
+                    if digest == previous.get("sha256") and cached_path.stat().st_size > 44:
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        if cached_path.resolve() != destination.resolve():
+                            shutil.copy2(cached_path, destination)
+                        row.update({
+                            "status": "ready",
+                            "bytes": destination.stat().st_size,
+                            "sha256": digest,
+                            "cache_hit": True,
+                        })
+                        if previous.get("asr_intelligibility_proxy"):
+                            row["asr_intelligibility_proxy"] = previous["asr_intelligibility_proxy"]
+                        reused = True
+                except OSError:
+                    reused = False
+
+        if not reused:
+            try:
+                path = _synthesize(
+                    candidate_provider, candidate, text, destination,
+                    engine=engine, language=language, seed=seed, client=client,
+                )
+                if not path.is_file() or path.stat().st_size <= 44:
+                    raise RuntimeError("Provider returned no usable audio file")
+                # Benchmark artifacts must stay inside the selected output folder.
+                path.relative_to(output_dir.resolve())
+                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                row.update({
+                    "status": "ready",
+                    "audio_file": path.relative_to(output_dir).as_posix(),
+                    "bytes": path.stat().st_size,
+                    "sha256": digest,
+                    "cache_hit": False,
+                })
+                if asr:
+                    try:
+                        transcript = client.transcribe(path, language=language)
+                        row["asr_intelligibility_proxy"] = compare_text(text, transcript)
+                        row["asr_intelligibility_proxy"]["status"] = "available"
+                    except Exception as asr_exc:
+                        row["asr_intelligibility_proxy"] = {
+                            "status": "unavailable",
+                            "reason": f"{type(asr_exc).__name__}: {asr_exc}",
+                        }
+            except Exception as exc:
+                row["status"] = "failed"
+                row["error"] = f"{type(exc).__name__}: {exc}"
+        print(f"[{index}/{len(candidates)}] {row['blind_label']}: {row['status']}"
+              + (" (resume cache)" if row.get("cache_hit") else ""))
+        _write_json(report_path, snapshot("running"))
         if delay > 0 and index < len(candidates):
             time.sleep(delay)
 
-    report = {
-        "schema_version": 1,
-        "provider": provider,
-        "providers_included": requested_providers,
-        "cloud_enabled": any(name in {"google", "elevenlabs"} for name in requested_providers),
-        "asr_enabled": asr,
-        "catalogue_errors": catalogue_errors,
-        "engine": engine,
-        "language": language,
-        "blind": blind,
-        "script": text,
-        "seed_base": seed,
-        "candidate_count": len(rows),
-        "ready": sum(row["status"] == "ready" for row in rows),
-        "failed": sum(row["status"] == "failed" for row in rows),
-        "candidates": rows,
-        "human_review_required": True,
-        "rating_dimensions": [key for key, _ in DIMENSIONS],
-        "rating_note": "Human ratings are subjective; do not treat the mean as an objective TTS benchmark.",
-    }
-    _write_json(output_dir / "provider-voice-benchmark.json", report)
+    report = snapshot("partial" if any(row["status"] != "ready" for row in rows) else "complete")
+    _write_json(report_path, report)
     (output_dir / "index.html").write_text(
         _rating_html(rows, blind=blind, provider=provider),
         encoding="utf-8",
@@ -336,7 +450,12 @@ def main() -> int:
     parser.add_argument("--engine", help="Exact VoiceStudio engine ID (provider=voicestudio)")
     parser.add_argument("--limit", type=int, default=20,
                         help="Maximum candidates per provider when --provider all is used")
-    parser.add_argument("--seed", type=int, default=4200)
+    parser.add_argument("--seed", type=int, default=4200,
+                        help="Provider seed where supported (e.g. KorvaTTS)")
+    parser.add_argument("--blind-seed", type=int, default=20261031,
+                        help="Deterministic shuffle seed for blind candidate order")
+    parser.add_argument("--no-resume", action="store_true",
+                        help="Render every candidate again even when a valid cached sample exists")
     parser.add_argument("--output", type=Path, default=Path("out/provider-voice-benchmark"))
     parser.add_argument("--no-blind", action="store_true")
     parser.add_argument("--allow-cloud", action="store_true",
@@ -361,6 +480,8 @@ def main() -> int:
         "provider": report["provider"],
         "ready": report["ready"],
         "failed": report["failed"],
+        "cache_hits": report["cache_hits"],
+        "status": report["status"],
         "blind": report["blind"],
         "human_review_required": True,
         "asr_enabled": report.get("asr_enabled", False),
