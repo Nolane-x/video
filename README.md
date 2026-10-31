@@ -51,11 +51,12 @@ profiles/archetypes, KorvaTTS, Google Cloud TTS and ElevenLabs.
 
 - [Voice Studio integration guide](docs/VOICE_STUDIO.md)
 - [Provider adapters, voice casting and H2 handoff](integrations/voice-studio/README.md)
-- [Vietnamese documentary voice-casting example](integrations/voice-studio/examples/vietnamese-documentary.json)
+- [Original Vietnamese synthetic voice set](integrations/voice-studio/examples/vietnamese-original-voice-set.json)
+- [Stable Vietnamese documentary cast](integrations/voice-studio/examples/vietnamese-documentary.json)
+- [Repeatable Vietnamese pronunciation benchmark](integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt)
+- [Voice profile factory, blind audition and audio QA](integrations/voice-studio/README.md)
 
-Model weights and generated audio are not committed. The API stays on loopback
-unless a secured private deployment is configured; provider credentials belong
-in local secret stores or GitHub Actions Secrets, never in source manifests.
+The integration can create reusable fictional voice-design profiles in VoiceStudio, audition saved profiles blindly with a common script, lock a cast by speaker_id, resume failed audio batches and run technical/ASR QA. It does not add weights or output audio to Git. Model rights and real-speaker consent remain separate gates.
 
 ## Downloads and current reference
 
