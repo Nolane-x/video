@@ -1,0 +1,78 @@
+name: Manim educational animation proof
+
+on:
+  pull_request:
+    paths:
+      - "toolchain/python/manim/**"
+      - "tools/video/manim_smoke.py"
+      - "tools/video/test_toolchain.py"
+      - ".agents/skills/video-manim-explainer/**"
+      - ".github/workflows/video-toolchain-manim-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: video-toolchain-manim-proof
+  cancel-in-progress: false
+
+jobs:
+  manim-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: toolchain/python/manim/requirements.txt
+      - name: Install native Cairo, Pango, TeX and FFmpeg dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config python3-dev libcairo2-dev libpango1.0-dev ffmpeg dvisvgm texlive-latex-extra texlive-fonts-recommended
+      - name: Install pinned Manim CE
+        run: |
+          python -m pip install --requirement toolchain/python/manim/requirements.txt
+          manim --version
+          command -v latex
+          command -v dvisvgm
+          python - <<'PY'
+          import manim, cairo, manimpango
+          print('Manim', manim.__version__)
+          print('Cairo bindings:', cairo.version)
+          print('ManimPango:', manimpango.__version__)
+          PY
+      - name: Render mathematical explainer proof
+        run: |
+          mkdir -p out/manim
+          manim -ql --media_dir out/manim tools/video/manim_smoke.py VideoToolchainProof
+          find out/manim/videos -type f -name 'VideoToolchainProof.mp4' -not -path '*/partial_movie_files/*' -print -quit > out/manim-output-path.txt
+          test -s out/manim-output-path.txt
+          video="$(cat out/manim-output-path.txt)"
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$video" | tee out/manim-metadata.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          meta = json.loads(Path("out/manim-metadata.json").read_text(encoding="utf-8"))
+          video = next(s for s in meta["streams"] if s.get("codec_type") == "video")
+          duration = float(meta["format"]["duration"])
+          assert video["codec_name"] == "h264", video
+          assert video["width"] == 854 and video["height"] == 480, video
+          assert video["r_frame_rate"] == "15/1", video
+          assert duration >= 3.0, f"Expected final composition, got only {duration:.3f}s"
+          print(f"Validated final Manim composition: {duration:.3f}s, 854x480, 15fps")
+          PY
+          python -m pip freeze > out/manim-requirements.txt
+      - name: Upload Manim proof
+        uses: actions/upload-artifact@v7
+        with:
+          name: video-manim-proof-${{ github.run_id }}
+          path: |
+            out/manim/
+            out/manim-metadata.json
+            out/manim-output-path.txt
+            out/manim-requirements.txt
+          if-no-files-found: error
+          retention-days: 14

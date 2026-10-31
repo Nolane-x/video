@@ -1,0 +1,7 @@
+{
+  "id": "nolane-production-proof",
+  "name": "nolane-production-proof",
+  "version": "1.0.0",
+  "duration": 17,
+  "notes": "Self-contained local GSAP asset is copied from the pinned toolchain at workflow time."
+}

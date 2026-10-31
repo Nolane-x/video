@@ -5,6 +5,17 @@ on:
     branches: [main]
     paths:
       - "video-projects/remotion/**"
+      - "tools/video/caption_coverage.py"
+      - "tools/video/test_caption_coverage.py"
+      - "tools/video/render_blocking_preview.py"
+      - "tools/video/validate_preview_approval.py"
+      - "tools/video/test_blocking_preview.py"
+      - ".github/workflows/render-remotion.yml"
+  pull_request:
+    paths:
+      - "video-projects/remotion/**"
+      - "tools/video/caption_coverage.py"
+      - "tools/video/test_caption_coverage.py"
       - ".github/workflows/render-remotion.yml"
   workflow_dispatch:
 
@@ -36,6 +47,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
+      - name: Editorial preflight — block unready creative plans before dependency installs
+        run: |
+          python ../../tools/video/evaluate_editorial_plan.py public/story/shots.json --output out/editorial-plan-report.json --strict
 
       - name: Install Remotion dependencies
         run: npm install --no-audit --no-fund
@@ -73,13 +88,31 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Render blocking motion previews
+        run: |
+          python ../../tools/video/render_blocking_preview.py public/story/shots.json --project-root . --output out/blocking-preview
+
+      - name: Upload blocking preview for independent review
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: one-more-scroll-blocking-preview-${{ github.run_id }}
+          path: video-projects/remotion/out/blocking-preview/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Require explicit review of the exact blocking preview
+        run: |
+          python ../../tools/video/validate_preview_approval.py public/story/shots.json --project-root . --manifest out/blocking-preview/manifest.json
+
       - name: Render MP4
         run: npm run render
 
       - name: Install FFmpeg for output mastering
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie
+          tesseract --list-langs
 
       - name: Normalize final audio
         run: |
@@ -87,6 +120,25 @@ jobs:
             -af "loudnorm=I=-14:TP=-2.5:LRA=11" -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
             -movflags +faststart out/master.mp4
           mv out/master.mp4 out/one-more-scroll.mp4
+
+      - name: Audit full rendered video text on pull requests
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          python ../../tools/video/caption_coverage.py \
+            --video out/one-more-scroll.mp4 \
+            --shots public/story/shots.json \
+            --output out/caption-coverage/report.json \
+            --languages vie+eng \
+            --threshold 0.67
+
+      - name: Upload full-video caption report
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: remotion-full-video-caption-qa-${{ github.run_id }}
+          path: out/caption-coverage/report.json
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Validate MP4 and generate contact sheet
         run: |
@@ -128,14 +180,16 @@ jobs:
           PY
 
       - name: Upload render and QA outputs
-        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
           path: |
-            video-projects/remotion/out/one-more-scroll.mp4
-            video-projects/remotion/out/contact-sheet-shots.jpg
-            video-projects/remotion/out/contact-sheet-overview.jpg
-            video-projects/remotion/out/metadata.json
-            video-projects/remotion/out/audio-loudness.txt
-          if-no-files-found: error
+            out/one-more-scroll.mp4
+            out/contact-sheet-shots.jpg
+            out/contact-sheet-overview.jpg
+            out/metadata.json
+            out/editorial-plan-report.json
+            out/audio-loudness.txt
+          if-no-files-found: warn
           retention-days: 90

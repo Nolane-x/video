@@ -1,0 +1,47 @@
+name: Editorial plan quality gate
+
+on:
+  pull_request:
+    paths:
+      - "video-projects/remotion/public/story/**"
+      - "tools/video/evaluate_editorial_plan.py"
+      - "tools/video/test_editorial_plan.py"
+      - ".github/workflows/video-editorial-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-plan-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  editorial-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Generate diagnostic storyboard report before blocking tests
+        continue-on-error: true
+        run: |
+          python tools/video/evaluate_editorial_plan.py video-projects/remotion/public/story/shots.json --output out/editorial-plan-report.json
+      - name: Test editorial evaluator
+        run: python -m unittest tools.video.test_editorial_plan -v
+      - name: Evaluate creative brief, story, pacing and shot language
+        run: |
+          python tools/video/evaluate_editorial_plan.py \
+            video-projects/remotion/public/story/shots.json \
+            --output out/editorial-plan-report.json \
+            --strict
+      - name: Upload editorial plan report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: editorial-plan-preflight-${{ github.run_id }}
+          path: out/editorial-plan-report.json
+          if-no-files-found: warn
+          retention-days: 30

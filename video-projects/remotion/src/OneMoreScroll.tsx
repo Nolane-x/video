@@ -8,17 +8,25 @@ import {
   spring,
   staticFile,
   useCurrentFrame,
-  useVideoConfig,
 } from "remotion";
 import shotPlan from "../public/story/shots.json";
 
-type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer";
+type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer" | "placePhone" | "openDoor";
 type Setting =
   | "bedroom" | "phone" | "street" | "calendar" | "mirror" | "desk"
-  | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end"
+  | "stairs" | "cafe" | "cafeDoor" | "entryway" | "bus" | "void" | "dawn" | "end"
   | "locker" | "classroom" | "busStop" | "bathroom" | "kitchen" | "park" | "gym" | "library";
 
+type ShotLanguage = {
+  shotSize: string;
+  cameraAngle: string;
+  cameraMove: string;
+  composition: string;
+  visualPurpose: string;
+};
+
 type Shot = {
+  shotLanguage?: ShotLanguage;
   title: string;
   subtitle: string;
   setting: Setting;
@@ -44,12 +52,29 @@ type Shot = {
   dip?: boolean;
 };
 
-const FPS = 24;
-const SHOT_FRAMES = 120;
-const shots: Shot[] = shotPlan.shots.map((entry) => entry.args as unknown as Shot);;
+type TimedShot = Shot & { id: string; startFrame: number; endFrame: number };
+type AudioPlan = {
+  narration?: { file: string; start: number; end: number; volume?: number }[];
+  soundCues?: { file: string; start: number; duration: number; volume?: number }[];
+};
+const FPS = Number(shotPlan.fps || 24);
+const shots: TimedShot[] = shotPlan.shots.map((entry) => ({
+  ...(entry.args as unknown as Shot),
+  shotLanguage: entry.shotLanguage as ShotLanguage | undefined,
+  id: entry.id,
+  startFrame: Math.round(entry.start * FPS),
+  endFrame: Math.round(entry.end * FPS),
+}));
+const audioPlan = (shotPlan as unknown as { audioPlan?: AudioPlan }).audioPlan;
 
 const clampInterp = (v: number, input: number[], output: number[]) =>
   interpolate(v, input, output, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+const audioEnvelope = (frame: number, duration: number, maxFadeFrames = 18) => {
+  const edge = Math.min(maxFadeFrames, Math.floor(duration / 3));
+  if (edge < 1) return 1;
+  return clampInterp(frame, [0, edge, duration - edge, duration], [0, 1, 1, 0]);
+};
 
 const Window: React.FC<{ x: number; y: number; w?: number; h?: number; warm?: boolean }> = ({
   x, y, w = 80, h = 110, warm = false,
@@ -265,6 +290,52 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <rect x="0" y="600" width="1280" height="120" fill="#26212d" />
     </g>}
 
+    {setting === "entryway" && <g>
+      <rect width="1280" height="720" fill="#29232f" />
+      <rect width="1280" height="520" fill="url(#h2Wall)" />
+      <rect x="910" y="70" width="240" height="420" fill="#28232e" stroke="#8a7185" strokeWidth="9" />
+      <rect x="929" y="90" width="202" height="380" fill="#354051" />
+      <path d="M1030 90 V470 M929 275 H1131" stroke="#8f8295" strokeWidth="5" opacity=".6" />
+      <circle cx="1093" cy="298" r="9" fill="#d7b38b" />
+      <rect x="150" y="320" width="250" height="50" rx="5" fill="#625064" stroke="#2c2633" strokeWidth="7" />
+      <path d="M176 370 V500 M373 370 V500" stroke="#342b39" strokeWidth="17" />
+      <rect x="0" y="515" width="1280" height="205" fill="#4a3c48" />
+      <path d="M0 522 H1280" stroke="#b38f9c" strokeWidth="4" opacity=".42" />
+      <path d="M0 630 H1280 M260 515 V720 M1000 515 V720" stroke="#312834" strokeWidth="4" opacity=".45" />
+      <rect x="475" y="518" width="330" height="72" rx="8" fill="#625064" stroke="#b49aa9" strokeWidth="4" opacity=".8" />
+      <path d="M495 530 H785" stroke="#d0b8c2" strokeWidth="3" opacity=".5" />
+      <g>
+        <path d="M535 553 Q550 527 594 531 L625 548 Q632 557 619 567 H546 Q525 566 535 553Z" fill="#191820" stroke="#d8c5b4" strokeWidth="3" />
+        <path d="M548 548 L579 544 M554 555 L584 550 M560 561 L590 555" stroke="#e4cbb6" strokeWidth="3" strokeLinecap="round" />
+        <path d="M652 553 Q667 527 711 531 L742 548 Q749 557 736 567 H663 Q642 566 652 553Z" fill="#191820" stroke="#d8c5b4" strokeWidth="3" />
+        <path d="M665 548 L696 544 M671 555 L701 550 M677 561 L707 555" stroke="#e4cbb6" strokeWidth="3" strokeLinecap="round" />
+      </g>
+      <ellipse cx="640" cy="608" rx="230" ry="25" fill="#e2b99c" opacity=".06" />
+    </g>}
+
+    {setting === "cafeDoor" && <g>
+      <rect width="1280" height="720" fill="#342a38" />
+      <rect width="1280" height="550" fill="url(#h2Wall)" />
+      <rect x="365" y="95" width="490" height="470" fill="#211d29" stroke="#9a7b8d" strokeWidth="14" />
+      <rect x="388" y="118" width="445" height="425" fill="#614b5a" />
+      <rect x="405" y="136" width="410" height="389" fill="#9b6f73" opacity=".18" />
+      <Window x={420} y={170} w={94} h={140} warm={true} />
+      <Window x={714} y={170} w={94} h={140} warm={true} />
+      <rect x="430" y="440" width="350" height="76" fill="#382d3c" opacity=".75" />
+      <path d="M430 458 H780" stroke="#aa8797" strokeWidth="4" opacity=".5" />
+      <g transform={"rotate(" + (-36 * clampInterp(t, [0.04, 0.9], [0, 1])) + " 690 555)"}>
+        <rect x="455" y="135" width="235" height="420" fill="#493542" stroke="#d1b1a4" strokeWidth="9" />
+        <rect x="475" y="155" width="195" height="175" fill="#9e7680" stroke="#2a2330" strokeWidth="6" />
+        <rect x="475" y="348" width="195" height="185" fill="#8d6975" stroke="#2a2330" strokeWidth="6" />
+        <path d="M572 155 V330 M572 348 V533" stroke="#d7bec0" strokeWidth="3" opacity=".35" />
+        <circle cx="650" cy="360" r="10" fill="#e5c49d" stroke="#483443" strokeWidth="4" />
+        <path d="M648 360 H662" stroke="#f2d5ad" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <rect x="0" y="570" width="1280" height="150" fill="#27212d" />
+      <path d="M0 575 H1280" stroke="#c5a3a2" strokeWidth="3" opacity=".32" />
+      <ellipse cx="690" cy="540" rx="240" ry="32" fill="#e6b98e" opacity=".08" />
+    </g>}
+
     {setting === "cafe" && <g>
       <rect width="1280" height="720" fill="#332934" />
       <rect width="1280" height="566" fill="#443643" />
@@ -369,8 +440,8 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <rect x="250" y="504" width="610" height="18" rx="4" fill="#6a596d" stroke="#302735" strokeWidth="4" />
       <path d="M292 522 V570 M818 522 V570" stroke="#302735" strokeWidth="16" />
       <rect x="885" y="160" width="68" height="170" rx="8" fill="#28232e" stroke="#bca5b0" strokeWidth="4" />
-      <rect x="897" y="174" width="44" height="32" rx="4" fill="#d1ab81" />
-      <text x="919" y="194" fontSize="10" fontWeight="800" fill="#332735" textAnchor="middle">BUS</text>
+      <rect x="888" y="168" width="62" height="44" rx="4" fill="#e6c39f" />
+      <text x="919" y="198" fontSize="19" fontWeight="900" letterSpacing=".2" fill="#241c26" textAnchor="middle">BUS</text>
       <path d="M0 550 H1280" stroke="#5f4b60" strokeWidth="4" />
       <rect x="0" y="554" width="1280" height="166" fill="url(#h2Road)" />
       <path d="M60 650 H330 M870 650 H1140" stroke="#b7a0a1" strokeWidth="3" opacity=".23" />
@@ -579,6 +650,8 @@ const Character: React.FC<{
   const writeReach = clampInterp(t, [0.05, 0.6, 1], [0, 1, 0.7]);
   const drinkReach = clampInterp(t, [0.05, 0.34, 0.62, 1], [0, 1, 0.82, 0.28]);
   const tieReach = clampInterp(t, [0.04, 0.4, 0.64, 1], [0, 1, 0.78, 0.7]);
+  const phoneDropProgress = clampInterp(t, [0.03, 0.88, 1], [0, 1, 1]);
+  const phoneHandY = -158 + phoneDropProgress * 80;
   const punchStrike = pose === "punch"
     ? Math.max(Math.exp(-Math.pow((t - 0.32) / 0.09, 2)), Math.exp(-Math.pow((t - 0.76) / 0.09, 2)))
     : 0;
@@ -663,6 +736,25 @@ const Character: React.FC<{
           <path d="M24 -105 Q42 -68 39 -31 L35 16" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
           <circle cx="35" cy="16" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
         </g>
+      ) : pose === "placePhone" ? (
+        <g>
+          <path d={"M24 -105 Q43 -106 55 " + (phoneHandY - 13) + " L64 " + phoneHandY} fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={"M24 -105 Q43 -106 55 " + (phoneHandY - 13) + " L64 " + phoneHandY} fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="64" cy={phoneHandY} r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+          <g opacity={1 - phoneDropProgress}>
+            <rect x="52" y="-179" width="26" height="49" rx="5" fill="#17151e" stroke="#ead7c1" strokeWidth="2.5" />
+            <rect x="57" y="-173" width="16" height="34" rx="2" fill="#a84f65" opacity=".9" />
+            <circle cx="65" cy="-135" r="1.8" fill="#ead7c1" />
+          </g>
+        </g>
+      ) : pose === "openDoor" ? (
+        <g>
+          <path d="M24 -105 Q44 -108 59 -94 L67 -82" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M24 -105 Q44 -108 59 -94 L67 -82" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="67" cy="-82" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+          <path d="M-24 -105 Q-39 -88 -43 -69 L-45 -51" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M-24 -105 Q-39 -88 -43 -69 L-45 -51" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
       ) : (
         <>
       <g transform={"rotate(" + leftArm + " -24 -105)"}>
@@ -706,6 +798,9 @@ const Character: React.FC<{
         <path d="M-28 17 Q0 9 28 17" fill="none" stroke="#ead7c1" strokeWidth="3"/>
         <path d="M-18 25 Q0 16 18 25" fill="none" stroke="#c56d9b" strokeWidth="3"/>
       </g>}
+      {pose === "placePhone" && !companion && <g>
+        <path d={"M49 " + (phoneHandY - 8) + " H79"} stroke="#ead7c1" strokeWidth="2" opacity=".4" />
+      </g>}
       {pose === "punch" && !companion && <g opacity={0.15 + punchStrike * 0.8}>
         <path d="M80 -84 l18 -7 M82 -72 l24 0 M79 -61 l17 8" stroke="#f0c58f" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="81" cy="-72" r="3.5" fill="#f0c58f"/>
@@ -719,7 +814,7 @@ const Character: React.FC<{
   );
 };
 
-const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean }> = ({ setting, t, phoneOnDesk }) => (
+const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean; phoneDropProgress?: number }> = ({ setting, t, phoneOnDesk, phoneDropProgress = 1 }) => (
   <svg width="100%" height="100%" viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 7 }}>
     {setting === "bedroom" && <>
       <path d="M255 496 Q493 525 825 493 V578 H255Z" fill="#64596f" opacity=".98" />
@@ -731,10 +826,14 @@ const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean 
       <path d="M360 480 V580 M940 480 V580" stroke="#362b39" strokeWidth="18" />
       <rect x="685" y="438" width="112" height="9" rx="3" fill="#e1d2c4" transform="rotate(-5 490 438)" />
       <path d="M695 434 l14 -19 l12 18" fill="none" stroke="#c9b7aa" strokeWidth="3" />
-      {phoneOnDesk && <g transform={"translate(" + (t * 8) + " 0)"}>
+      {phoneOnDesk && <g transform={"translate(" + (t * 2) + " 0)"} opacity={phoneDropProgress}>
         <rect x="744" y="417" width="28" height="49" rx="5" fill="#15141c" stroke="#dac7b4" strokeWidth="2" transform="rotate(10 812 441)" />
         <rect x="750" y="424" width="16" height="34" rx="2" fill="#473a4e" transform="rotate(10 812 441)" />
       </g>}
+    </>}
+    {setting === "entryway" && <>
+      <path d="M0 575 H1280" stroke="#b49aa9" strokeWidth="4" opacity=".32" />
+      <path d="M0 607 H1280" stroke="#251f2a" strokeWidth="3" opacity=".4" />
     </>}
     {setting === "cafe" && <>
       <path d="M280 500 Q615 470 1010 500 L980 540 H310Z" fill="#9b777c" stroke="#382b39" strokeWidth="5" />
@@ -756,24 +855,28 @@ const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean 
 const DayCounter: React.FC<{ day: string }> = ({ day }) => (
   <div style={{
     position: "absolute", left: 42, top: 25, zIndex: 12,
-    padding: "9px 15px", borderRadius: 11,
-    border: "1.5px solid rgba(218,187,151,.82)",
-    background: "rgba(26,22,32,.9)", boxShadow: "0 4px 14px rgba(0,0,0,.22)",
-    color: "#e7d4be", fontSize: 13, fontWeight: 800, letterSpacing: 2,
+    padding: "9px 14px", borderRadius: 11,
+    border: "1.5px solid rgba(232,204,174,.9)",
+    background: "rgba(26,22,32,.94)", boxShadow: "0 4px 14px rgba(0,0,0,.24)",
+    color: "#f0e4d6", fontSize: 16, fontWeight: 900, letterSpacing: 1.6,
   }}>{day}</div>
 );
 
 const RedWords: React.FC<{ words: string[]; t: number }> = ({ words, t }) => (
   <div style={{ position: "absolute", inset: 0, zIndex: 8, pointerEvents: "none" }}>
     {words.map((word, i) => {
-      const x = 64 + ((i * 197 + 80) % 1100);
-      const y = 150 + ((i * 83 + 38) % 330) + Math.sin(t * 5 + i) * 8;
+      const isMultiword = word.trim().includes(" ");
+      // The first and second phrases use separate negative-space rows, clear of the actor and shadow.
+      const phraseY = i === 0 ? 95 : 160;
+      const x = isMultiword ? 330 : 64 + ((i * 197 + 80) % 1100);
+      const y = (isMultiword ? phraseY : 150 + ((i * 83 + 38) % 330)) + Math.sin(t * 5 + i) * 4;
       return <div key={word + i} style={{
         position: "absolute", left: x, top: y,
-        color: "#c85c70", fontFamily: '"Comic Neue", Arial, sans-serif',
-        fontWeight: 800, fontSize: i % 2 ? 21 : 27,
-        opacity: Math.min(0.75, 0.2 + t * 0.8), transform: "rotate(" + ((i % 3) * 5 - 5) + "deg)",
-        textShadow: "0 0 12px rgba(191,69,91,.13)",
+        color: "#f09aaa", fontFamily: '"Comic Neue", Arial, sans-serif',
+        fontWeight: 900, fontSize: isMultiword ? 28 : (i % 2 ? 24 : 28),
+        opacity: Math.min(0.95, 0.3 + t * 0.85), transform: "rotate(" + ((i % 3) * 3 - 3) + "deg)",
+        textShadow: "0 2px 6px rgba(8,5,10,.98), 0 0 3px rgba(8,5,10,.98)",
+        WebkitTextStroke: "0.35px rgba(18,10,18,.5)",
       }}>{word}</div>;
     })}
   </div>
@@ -821,7 +924,7 @@ const MusicSlice: React.FC<{ file: string; from: number; duration: number; volum
   <Sequence from={from} durationInFrames={duration}>
     <Audio
       src={staticFile("audio/" + file + ".wav")}
-      volume={(f) => volume * clampInterp(f, [0, 18, Math.max(19, duration - 18), duration], [0, 1, 1, 0])}
+      volume={(f) => volume * audioEnvelope(f, duration, 18)}
     />
   </Sequence>
 );
@@ -830,59 +933,130 @@ const SoundCue: React.FC<{ file: string; from: number; duration: number; volume:
   <Sequence from={from} durationInFrames={duration}>
     <Audio
       src={staticFile("audio/" + file + ".wav")}
-      volume={(f) => volume * clampInterp(f, [0, Math.min(3, duration - 1), Math.max(4, duration - 3), duration], [0, 1, 1, 0])}
+      volume={(f) => volume * audioEnvelope(f, duration, 3)}
     />
   </Sequence>
 );
 
-const AudioDesign: React.FC = () => (
-  <AbsoluteFill style={{ pointerEvents: "none" }}>
-    {/* Full H2 emotional arc for a 155-second film: sad -> dark -> intentional silence -> hope -> rise -> resolve. */}
-    <MusicSlice file="bed_sad_Am_64bpm" from={0} duration={600} volume={0.28} />
-    <MusicSlice file="bed_dark_E_drone" from={600} duration={480} volume={0.22} />
-    {/* Frames 1080-1199 (45-50s) are intentionally silent: the moment the phone is put down. */}
-    <MusicSlice file="bed_hope_F_76bpm" from={1200} duration={600} volume={0.24} />
-    <MusicSlice file="bed_rise_Am_96bpm" from={1800} duration={1320} volume={0.25} />
-    <MusicSlice file="bed_resolve_C_70bpm" from={3120} duration={600} volume={0.28} />
-
-    {/* Action-timed SFX; the sound design tells the story without voice-over. */}
-    <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
-    <SoundCue file="notif_msg" from={158} duration={12} volume={0.27} />
-    <SoundCue file="rain_loop" from={250} duration={150} volume={0.12} />
-    <SoundCue file="clock_tick" from={760} duration={120} volume={0.21} />
-    <SoundCue file="tempt_swell" from={920} duration={54} volume={0.17} />
-    <SoundCue file="tempt_whisper" from={1012} duration={40} volume={0.22} />
-    <SoundCue file="page_flip" from={1540} duration={18} volume={0.26} />
-    <SoundCue file="footsteps" from={1840} duration={78} volume={0.27} />
-    <SoundCue file="footsteps" from={2075} duration={78} volume={0.23} />
-    <SoundCue file="punch_bag" from={2200} duration={18} volume={0.34} />
-    <SoundCue file="punch_bag" from={2280} duration={18} volume={0.31} />
-    <SoundCue file="breath_in" from={2355} duration={28} volume={0.22} />
-    <SoundCue file="door_open" from={2675} duration={40} volume={0.23} />
-    <SoundCue file="footsteps" from={2800} duration={78} volume={0.2} />
-    <SoundCue file="glass_shatter" from={3370} duration={42} volume={0.28} />
-    <SoundCue file="breath_in" from={3530} duration={24} volume={0.22} />
-    <SoundCue file="sting_low" from={3615} duration={72} volume={0.22} />
-  </AbsoluteFill>
+const NarrationSlice: React.FC<{ file: string; from: number; duration: number; volume: number }> = ({ file, from, duration, volume }) => (
+  <Sequence from={from} durationInFrames={duration}>
+    <Audio
+      src={staticFile("audio/narration/" + file)}
+      volume={(f) => volume * audioEnvelope(f, duration, 8)}
+    />
+  </Sequence>
 );
+
+const AudioDesign: React.FC = () => {
+  const musicSegments = (shotPlan.musicArc as { start: number; end: number; track: string; volume?: number }[]).filter((segment) => segment.track !== "intentional-silence");
+  const plannedSoundCues = audioPlan?.soundCues;
+  const narration = audioPlan?.narration || [];
+
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      {musicSegments.map((segment, index) => (
+        <MusicSlice
+          key={"music-" + index}
+          file={segment.track}
+          from={Math.round(segment.start * FPS)}
+          duration={Math.max(1, Math.round((segment.end - segment.start) * FPS))}
+          volume={typeof segment.volume === "number" ? segment.volume : 0.25}
+        />
+      ))}
+
+      {narration.map((segment, index) => (
+        <NarrationSlice
+          key={"narration-" + index}
+          file={segment.file}
+          from={Math.round(segment.start * FPS)}
+          duration={Math.max(1, Math.round((segment.end - segment.start) * FPS))}
+          volume={typeof segment.volume === "number" ? segment.volume : 1}
+        />
+      ))}
+
+      {plannedSoundCues ? plannedSoundCues.map((cue, index) => (
+        <SoundCue
+          key={"sfx-" + index}
+          file={cue.file}
+          from={Math.round(cue.start * FPS)}
+          duration={Math.max(1, Math.round(cue.duration * FPS))}
+          volume={typeof cue.volume === "number" ? cue.volume : 0.25}
+        />
+      )) : (
+        <>
+          {/* Legacy cue map retained for the existing technical baseline; new stories should use audioPlan.soundCues. */}
+          <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
+          <SoundCue file="notif_msg" from={158} duration={12} volume={0.27} />
+          <SoundCue file="rain_loop" from={250} duration={150} volume={0.12} />
+          <SoundCue file="clock_tick" from={760} duration={120} volume={0.21} />
+          <SoundCue file="tempt_swell" from={920} duration={54} volume={0.17} />
+          <SoundCue file="tempt_whisper" from={1012} duration={40} volume={0.22} />
+          <SoundCue file="page_flip" from={1540} duration={18} volume={0.26} />
+          <SoundCue file="footsteps" from={1840} duration={78} volume={0.27} />
+          <SoundCue file="footsteps" from={2075} duration={78} volume={0.23} />
+          <SoundCue file="punch_bag" from={2200} duration={18} volume={0.34} />
+          <SoundCue file="punch_bag" from={2280} duration={18} volume={0.31} />
+          <SoundCue file="breath_in" from={2355} duration={28} volume={0.22} />
+          <SoundCue file="door_open" from={2675} duration={40} volume={0.23} />
+          <SoundCue file="footsteps" from={2800} duration={78} volume={0.2} />
+          <SoundCue file="glass_shatter" from={3370} duration={42} volume={0.28} />
+          <SoundCue file="breath_in" from={3530} duration={24} volume={0.22} />
+          <SoundCue file="sting_low" from={3615} duration={72} volume={0.22} />
+        </>
+      )}
+    </AbsoluteFill>
+  );
+};
 
 export const OneMoreScroll: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const shotIndex = Math.min(shots.length - 1, Math.floor(frame / SHOT_FRAMES));
-  const local = frame - shotIndex * SHOT_FRAMES;
-  const t = Math.max(0, Math.min(1, local / (SHOT_FRAMES - 1)));
+  const matchingIndex = shots.findIndex((candidate) => frame < candidate.endFrame);
+  const shotIndex = matchingIndex < 0 ? shots.length - 1 : Math.max(0, matchingIndex);
   const shot = shots[shotIndex];
   const next = shots[shotIndex + 1];
+  const local = Math.max(0, frame - shot.startFrame);
+  const shotFrameCount = Math.max(1, shot.endFrame - shot.startFrame);
+  const t = Math.max(0, Math.min(1, local / Math.max(1, shotFrameCount - 1)));
   const eased = Easing.inOut(Easing.cubic)(t);
-  const x = shot.x0 + (shot.x1 - shot.x0) * eased;
+  const rawX = shot.x0 + (shot.x1 - shot.x0) * eased;
   const y = shot.y0 + (shot.y1 - shot.y0) * eased;
-  const zoom = shot.zoom0 + (shot.zoom1 - shot.zoom0) * eased;
-  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased;
+  const language = shot.shotLanguage;
+  const composition = (language?.composition || "").toLowerCase();
+  const compositionTarget = composition.includes("left third") || composition.includes("subject left") ? 390 :
+    composition.includes("right third") || composition.includes("subject right") ? 890 :
+    composition.includes("center frame") || composition.includes("subject centered") ? 640 : null;
+  const compositionOffset = compositionTarget === null ? 0 : compositionTarget - rawX;
+  const x = rawX;
+  const shotSize = (language?.shotSize || "medium").toLowerCase();
+  const framingScale =
+    shotSize.includes("extreme close") ? 1.48 :
+    shotSize.includes("close") ? 1.30 :
+    shotSize.includes("medium") ? 1.08 :
+    shotSize.includes("wide") || shotSize.includes("establishing") ? 0.92 : 1;
+  const move = (language?.cameraMove || "locked").toLowerCase();
+  const moveProgress = eased;
+  const moveZoom =
+    move.includes("push") || move.includes("dolly in") || move.includes("zoom in") ? 1 + 0.09 * moveProgress :
+    move.includes("pull") || move.includes("dolly out") || move.includes("zoom out") ? 1.09 - 0.09 * moveProgress : 1;
+  const movePan =
+    move.includes("pan left") || move.includes("track left") || move.includes("lateral left") ? -72 * moveProgress :
+    move.includes("pan right") || move.includes("track right") || move.includes("lateral right") ? 72 * moveProgress : 0;
+  const moveTilt =
+    move.includes("tilt up") || move.includes("crane up") ? -34 * moveProgress :
+    move.includes("tilt down") || move.includes("crane down") ? 34 * moveProgress : 0;
+  const angle = (language?.cameraAngle || "eye-level").toLowerCase();
+  const angleRoll = angle.includes("dutch") ? -2.2 : angle.includes("canted") ? 2.2 : 0;
+  const angleScaleY = angle.includes("high-angle") || angle.includes("overhead") ? 0.97 :
+    angle.includes("low-angle") ? 1.035 : 1;
+  const zoom = (shot.zoom0 + (shot.zoom1 - shot.zoom0) * eased) * framingScale * moveZoom;
+  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased + movePan + compositionOffset;
+  const cameraY = moveTilt + (angle.includes("high-angle") ? 8 : angle.includes("low-angle") ? -8 : 0);
+  const cameraRotation = angleRoll + (move.includes("handheld") ? Math.sin(frame / 5) * 0.28 : 0);
   const isEnd = shot.setting === "end";
 
-  const fadeIn = clampInterp(local, [0, 14], [0, 1]);
-  const fadeOut = clampInterp(local, [SHOT_FRAMES - 14, SHOT_FRAMES - 1], [1, 0]);
+  const fadeFrames = Math.min(14, Math.max(2, Math.floor(shotFrameCount * 0.12)));
+  const fadeIn = clampInterp(local, [0, fadeFrames], [0, 1]);
+  const fadeOut = clampInterp(local, [shotFrameCount - fadeFrames, shotFrameCount - 1], [1, 0]);
   const incomingDip = shotIndex === 0 || !!shot.dip;
   const outgoingDip = !!next?.dip;
   const visibility = Math.min(incomingDip ? fadeIn : 1, outgoingDip ? fadeOut : 1);
@@ -899,14 +1073,14 @@ export const OneMoreScroll: React.FC = () => {
       {/* Background and character stage move at different rates for parallax. */}
       <div style={{
         position: "absolute", inset: -16,
-        transform: "translateX(" + (pan * 0.34) + "px) scale(" + (zoom * 0.99) + ")",
+        transform: "translate(" + (pan * 0.34) + "px," + (cameraY * 0.34) + "px) rotate(" + (cameraRotation * 0.34) + "deg) scale(" + (zoom * 0.99) + "," + (angleScaleY * 0.99) + ")",
         transformOrigin: "50% 56%",
       }}>
         <Backdrop setting={shot.setting} t={t} frame={frame} />
       </div>
       <div style={{
         position: "absolute", inset: -18, overflow: "hidden",
-        transform: "translateX(" + pan + "px) scale(" + zoom + ")",
+        transform: "translate(" + pan + "px," + cameraY + "px) rotate(" + cameraRotation + "deg) scale(" + zoom + "," + angleScaleY + ")",
         transformOrigin: "50% 55%",
       }}>
         {shot.shadow > 0.025 && shot.setting !== "end" && (
@@ -917,10 +1091,10 @@ export const OneMoreScroll: React.FC = () => {
           <Character x={x} y={y} pose={shot.pose} t={t} shirt={shot.shirt} scale={shot.scale} />
         )}
         {shot.friend && <Character
-          x={x + (shot.setting === "cafe" ? 270 : 220)}
+          x={x + (shot.setting === "cafe" || shot.setting === "cafeDoor" ? 270 : 220)}
           y={shot.setting === "cafe" ? 0 : 0}
           pose={shot.pose === "listen" ? "listen" : "meet"} t={Math.max(0, t - 0.12)} shirt="#6e59bd"
-          scale={shot.setting === "cafe" ? 1.08 : 0.92} companion
+          scale={shot.setting === "cafe" || shot.setting === "cafeDoor" ? 1.08 : 0.92} companion
         />}
         {shot.setting === "bus" && <>
           <Character x={180} y={0} pose="walk" t={t + 0.2} shirt="#d7a56d" scale={0.78} companion />
@@ -930,7 +1104,7 @@ export const OneMoreScroll: React.FC = () => {
         {shot.setting === "mirror" && <RedWords words={shot.redWords || []} t={t} />}
         {shot.setting === "void" && <RedWords words={shot.redWords || []} t={t} />}
         {shot.setting === "end" && <Character x={640} y={15} pose="hero" t={t} shirt={shot.shirt} scale={0.74} />}
-        <Foreground setting={shot.setting} t={t} phoneOnDesk={shot.phoneOnDesk} />
+        <Foreground setting={shot.setting} t={t} phoneOnDesk={shot.phoneOnDesk} phoneDropProgress={shot.pose === "placePhone" ? phoneDropProgress : 1} />
       </div>
 
       <div style={{position:"absolute",inset:0,zIndex:8,pointerEvents:"none",background:"radial-gradient(ellipse at 50% 44%, rgba(8,6,12,0) 34%, rgba(8,6,12,.30) 100%)"}} />

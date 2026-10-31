@@ -1,0 +1,17 @@
+{
+  "duration": 17,
+  "maxStaticSec": 2.5,
+  "assertions": [
+    { "kind": "appearsBy", "selector": ".title-card", "bySec": 0.25 },
+    { "kind": "staysInFrame", "selector": ".title-card" },
+    { "kind": "appearsBy", "selector": "#moment-1", "bySec": 3.5 },
+    { "kind": "staysInFrame", "selector": "#moment-1" },
+    { "kind": "appearsBy", "selector": "#moment-2", "bySec": 6 },
+    { "kind": "staysInFrame", "selector": "#moment-2" },
+    { "kind": "appearsBy", "selector": "#moment-3", "bySec": 8.8 },
+    { "kind": "staysInFrame", "selector": "#moment-3" },
+    { "kind": "appearsBy", "selector": "#moment-4", "bySec": 12 },
+    { "kind": "staysInFrame", "selector": "#moment-4" },
+    { "kind": "keepsMoving", "withinSelector": "#main-composition", "maxStaticSec": 2.5 }
+  ]
+}

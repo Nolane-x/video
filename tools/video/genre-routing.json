@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Machine-readable routing contract for docs/GENRE_ROUTING_MATRIX.md and Command Center genre evaluation.",
+  "universalRules": {
+    "briefLedVisualDirection": true,
+    "chooseSmallestEffectiveToolset": true,
+    "h2IsDefaultStyle": false,
+    "fullAudiovisualReviewRequiredForFinalApproval": true,
+    "technicalPassEqualsArtisticApproval": false,
+    "mutateParallelAssetLibrary": false
+  },
+  "profiles": [
+    {
+      "id": "documentary-factual",
+      "displayName": "Documentary / factual story",
+      "intent": "Evidence-led factual storytelling using real source material and traceable claims.",
+      "creativeOwners": [
+        "Documentary researcher / fact-checker",
+        "Story architect / director",
+        "Editor / cinematography"
+      ],
+      "primaryTools": [
+        "Authorized source media",
+        "Remotion",
+        "FFmpeg/ffprobe"
+      ],
+      "conditionalTools": [
+        "HyperFrames",
+        "Playwright",
+        "OpenTimelineIO",
+        "PySceneDetect",
+        "VideoDB (optional)",
+        "Blender"
+      ],
+      "requiredEvidence": [
+        "Claim-source ledger with source URLs and timecodes",
+        "Asset provenance, rights, releases and attribution",
+        "Factual review of every material claim",
+        "Full audiovisual review and continuity check"
+      ],
+      "criticalGuardrails": [
+        "Never invent archive footage, interview quotes, source timestamps or factual claims.",
+        "Distinguish verified fact, inference, reconstruction and opinion on screen or in narration.",
+        "Preserve original source files and document every crop, edit or synthetic reconstruction."
+      ],
+      "qaChecks": [
+        "claim-source-ledger",
+        "source-timecode-check",
+        "rights-and-release-check",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "science-math-engineering",
+      "displayName": "Science / mathematics / engineering explainer",
+      "intent": "Teach a concept accurately through equations, data, diagrams, experiments and narration.",
+      "creativeOwners": [
+        "Subject-matter researcher",
+        "Explainer director / instructional designer",
+        "Technical fact-checker"
+      ],
+      "primaryTools": [
+        "Manim",
+        "D3/SVG",
+        "Remotion"
+      ],
+      "conditionalTools": [
+        "Blender",
+        "Three.js",
+        "PixiJS",
+        "HyperFrames",
+        "FFmpeg/ffprobe"
+      ],
+      "requiredEvidence": [
+        "Verified equations, assumptions, units and source data",
+        "Reproducible chart inputs and calculation checks",
+        "Narration-to-equation/diagram synchronization review",
+        "Full audiovisual review for reading time and comprehension"
+      ],
+      "criticalGuardrails": [
+        "Do not animate an equation or numerical claim before validating it independently.",
+        "Label units, axes, scale, uncertainty and simplifications where relevant.",
+        "Use 3D only when spatial reasoning benefits; do not add complexity for decoration."
+      ],
+      "qaChecks": [
+        "formula-and-units-check",
+        "chart-data-reproducibility",
+        "narration-visual-sync",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "narrative-animation",
+      "displayName": "Narrative animation / short film",
+      "intent": "Deliver a coherent fictional story with consistent characters, locations, actions and emotional beats.",
+      "creativeOwners": [
+        "Story architect",
+        "Cinematic director / storyboard artist",
+        "Animation and continuity lead"
+      ],
+      "primaryTools": [
+        "Remotion"
+      ],
+      "conditionalTools": [
+        "H2 Studio",
+        "Krita",
+        "Blender",
+        "Three.js",
+        "PixiJS",
+        "HyperFrames",
+        "FFmpeg/ffprobe"
+      ],
+      "requiredEvidence": [
+        "Approved script-to-shot coverage and visual bible",
+        "Character, prop and environment continuity references",
+        "Action/contact/follow-through motion proofs for complex shots",
+        "Rights, captions, sound sync and full audiovisual review"
+      ],
+      "criticalGuardrails": [
+        "Do not impose the existing stick-figure/H2 look on unrelated stories or genres.",
+        "Keep character identity, props, screen direction and location landmarks consistent.",
+        "Treat still frames as staging evidence only; review moving action and transitions."
+      ],
+      "qaChecks": [
+        "script-shot-coverage",
+        "character-and-scene-continuity",
+        "motion-contact-review",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "product-software-demo",
+      "displayName": "Product / software demo",
+      "intent": "Show truthful, reproducible product behavior with readable UI and clear user outcomes.",
+      "creativeOwners": [
+        "Product truth reviewer",
+        "Browser-capture director",
+        "Editor / technical writer"
+      ],
+      "primaryTools": [
+        "Playwright",
+        "Remotion"
+      ],
+      "conditionalTools": [
+        "HyperFrames",
+        "FFmpeg/ffprobe",
+        "OpenTimelineIO"
+      ],
+      "requiredEvidence": [
+        "Product build/version and reproducible click-path record",
+        "Actual UI capture or a disclosed, source-validated synthetic reconstruction",
+        "Privacy/secrets redaction audit",
+        "UI text, captions and behavior verified against the real product"
+      ],
+      "criticalGuardrails": [
+        "Never depict an unimplemented feature or mock state as real product behavior.",
+        "Keep evidence captures distinct from designed overlays and disclose synthetic UI where necessary.",
+        "Redact credentials, customer records and other private information before capture."
+      ],
+      "qaChecks": [
+        "product-version-and-path",
+        "actual-ui-truth-check",
+        "privacy-redaction-check",
+        "ui-text-and-caption-check"
+      ]
+    },
+    {
+      "id": "tutorial-training",
+      "displayName": "Tutorial / training",
+      "intent": "Enable viewers to perform a task correctly and independently.",
+      "creativeOwners": [
+        "Instructional designer",
+        "Technical reviewer",
+        "Editor / accessibility reviewer"
+      ],
+      "primaryTools": [
+        "Playwright",
+        "Remotion"
+      ],
+      "conditionalTools": [
+        "Manim",
+        "D3/SVG",
+        "HyperFrames",
+        "OpenTimelineIO",
+        "FFmpeg/ffprobe"
+      ],
+      "requiredEvidence": [
+        "Observable learning objective and step-to-objective coverage",
+        "Version-specific commands and steps executed successfully",
+        "Cursor, zoom, labels and screen text readable at target size",
+        "Complete captions/transcript and full audiovisual review"
+      ],
+      "criticalGuardrails": [
+        "Do not present an untested command or workflow as verified.",
+        "Show prerequisites, expected result and recovery path for failure-prone steps.",
+        "Prefer one action per visual beat; do not hide important UI state behind decorative overlays."
+      ],
+      "qaChecks": [
+        "learning-objective-coverage",
+        "tested-step-proof",
+        "screen-readability-check",
+        "caption-and-transcript-check"
+      ]
+    },
+    {
+      "id": "interview-podcast",
+      "displayName": "Interview / podcast / narration-led video",
+      "intent": "Preserve the meaning and intelligibility of recorded speech while shaping a deliberate viewing experience.",
+      "creativeOwners": [
+        "Producer / editor",
+        "Speech and caption alignment specialist",
+        "Audio postproduction engineer"
+      ],
+      "primaryTools": [
+        "OpenTimelineIO",
+        "FFmpeg/ffprobe",
+        "WhisperX"
+      ],
+      "conditionalTools": [
+        "Remotion",
+        "PySceneDetect",
+        "Demucs",
+        "Tesseract"
+      ],
+      "requiredEvidence": [
+        "Recording consent and source-media rights",
+        "Transcript decisions and speaker labels reviewed against source audio",
+        "Caption timing/alignment and sync evidence",
+        "Measured loudness, true peak, channel balance and full audiovisual review"
+      ],
+      "criticalGuardrails": [
+        "Never infer a speaker's identity or attribute a quote without evidence.",
+        "Treat ASR as a draft; review dropped words, overlaps, names, numbers and multilingual speech.",
+        "Preserve source audio and document edits that change meaning or context."
+      ],
+      "qaChecks": [
+        "consent-and-source-rights",
+        "transcript-and-speaker-review",
+        "caption-audio-alignment",
+        "audio-measurement"
+      ]
+    },
+    {
+      "id": "music-video",
+      "displayName": "Music video / rhythm-led edit",
+      "intent": "Create a visual progression that responds intentionally to music, performance and rhythm.",
+      "creativeOwners": [
+        "Music-video director",
+        "Editor / rhythm specialist",
+        "Motion designer / cinematography"
+      ],
+      "primaryTools": [
+        "OpenTimelineIO",
+        "Remotion",
+        "FFmpeg/ffprobe"
+      ],
+      "conditionalTools": [
+        "PySceneDetect",
+        "HyperFrames",
+        "Blender",
+        "Three.js",
+        "PixiJS"
+      ],
+      "requiredEvidence": [
+        "Music, recording, footage and performer rights",
+        "Track analysis and beat/phrase map tied to source time",
+        "Cut and motion sync review against the actual audio",
+        "Full audiovisual review and final master measurements"
+      ],
+      "criticalGuardrails": [
+        "Never assume automatic beat detection is editorially correct.",
+        "Do not use copyrighted music or footage without the required rights.",
+        "Avoid visual cuts that follow every beat mechanically when the music or story calls for contrast."
+      ],
+      "qaChecks": [
+        "music-and-footage-rights",
+        "beat-map-review",
+        "audio-visual-sync",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "short-form-social",
+      "displayName": "Short-form social / vertical",
+      "intent": "Communicate one clear idea quickly in a phone-first viewing context.",
+      "creativeOwners": [
+        "Short-form retention editor",
+        "Motion/caption designer",
+        "Platform packaging reviewer"
+      ],
+      "primaryTools": [
+        "Remotion",
+        "Tesseract",
+        "FFmpeg/ffprobe"
+      ],
+      "conditionalTools": [
+        "HyperFrames",
+        "Playwright",
+        "WhisperX"
+      ],
+      "requiredEvidence": [
+        "Hook and message payoff coverage",
+        "9:16 safe-area and mobile-size text/caption review",
+        "Platform-specific duration, codec and audio checks",
+        "CTA, caption coverage and full mobile-size playback review"
+      ],
+      "criticalGuardrails": [
+        "Do not shrink essential text to fit; rewrite or recompose it for mobile.",
+        "Keep faces, UI controls and captions clear of platform overlays and device safe areas.",
+        "Do not use a generic hook/template when it misrepresents the content."
+      ],
+      "qaChecks": [
+        "hook-payoff-coverage",
+        "vertical-safe-area",
+        "mobile-caption-legibility",
+        "platform-delivery-check"
+      ]
+    },
+    {
+      "id": "advertisement-campaign",
+      "displayName": "Advertisement / campaign",
+      "intent": "Present a persuasive creative idea without making unapproved product, price, performance or endorsement claims.",
+      "creativeOwners": [
+        "Creative director",
+        "Product/legal/brand reviewer",
+        "Rights and provenance auditor"
+      ],
+      "primaryTools": [
+        "Remotion",
+        "HyperFrames",
+        "FFmpeg/ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender",
+        "Krita",
+        "Three.js",
+        "PixiJS"
+      ],
+      "requiredEvidence": [
+        "Approved claims, prices, offer terms and required disclosures",
+        "Brand, trademark, likeness, voice, music and media permissions",
+        "Product truth and visual brand consistency review",
+        "Final legal/brand approval and full audiovisual review"
+      ],
+      "criticalGuardrails": [
+        "Never invent a testimonial, endorsement, certification, price, result or product capability.",
+        "Do not imitate a real person's voice or likeness without documented permission.",
+        "Do not publish a campaign until required claim and rights approvals are recorded."
+      ],
+      "qaChecks": [
+        "approved-claims-check",
+        "brand-and-likeness-rights",
+        "product-truth-check",
+        "legal-brand-approval"
+      ]
+    },
+    {
+      "id": "hybrid-ai-generated",
+      "displayName": "Hybrid / AI-generated inserts",
+      "intent": "Combine generated media with deterministic composition while preserving provenance, truth and editability.",
+      "creativeOwners": [
+        "Director",
+        "AI media asset director",
+        "Provenance / rights auditor"
+      ],
+      "primaryTools": [
+        "Remotion",
+        "FFmpeg/ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender",
+        "HyperFrames",
+        "VideoDB (optional)",
+        "AI media provider (opt-in)"
+      ],
+      "requiredEvidence": [
+        "Provider, model/version, prompt, seed and generation-date provenance where available",
+        "Input/output rights, likeness/privacy and disclosure assessment",
+        "Factual/visual artifact inspection and editable exact text/data",
+        "Generation cost record and full composited audiovisual review"
+      ],
+      "criticalGuardrails": [
+        "Keep exact typography, product UI, equations and legal copy outside generative video frames.",
+        "Do not download model weights or call paid providers without an explicit resource and cost review.",
+        "Inspect generated media for hallucinations, identity drift, temporal defects and rights restrictions."
+      ],
+      "qaChecks": [
+        "model-and-prompt-provenance",
+        "input-output-rights-check",
+        "generated-media-artifact-check",
+        "full-audiovisual-review"
+      ]
+    }
+  ]
+}

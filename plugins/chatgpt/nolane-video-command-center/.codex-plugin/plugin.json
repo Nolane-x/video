@@ -1,0 +1,40 @@
+{
+  "interface": {
+    "capabilities": [],
+    "category": "Productivity",
+    "defaultPrompt": "Use Nolane Video Command Center as the front door. Restore repo/project state, route by genre, run the blocking editorial plan preflight before rendering, and require independent full audiovisual review before release. Use internal skills first; specialist plugin handoff is explicit and host-controlled. Preserve the parallel asset-library boundary.",
+    "developerName": "Nolane Studio",
+    "displayName": "Nolane Video Command Center",
+    "longDescription": "One private entry point with 29 internal skills plus an indexed handoff map for 37 source-backed specialist plugins. Adds a blocking creative-plan preflight and evidence-backed independent audiovisual release gate. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the separate resource-library workstream.",
+    "shortDescription": "29 skills, 37 plugins"
+  },
+  "name": "nolane-video-command-center",
+  "version": "0.8.0",
+  "description": "The single AI-first front door for Nolane video production. Includes 29 internal skills and an explicit routing map for 37 separately activated specialist plugins.",
+  "author": {
+    "name": "Nolane Studio"
+  },
+  "keywords": [
+    "video",
+    "orchestration",
+    "ai-agent",
+    "github",
+    "remotion",
+    "hyperframes",
+    "manim",
+    "blender",
+    "audio",
+    "captions",
+    "toolchain",
+    "production",
+    "licensing",
+    "comfyui",
+    "playwright",
+    "shotcraft",
+    "ai-media",
+    "specialist-plugins",
+    "source-backed-skills"
+  ],
+  "repository": "https://github.com/Nolane-x/video",
+  "skills": "./skills"
+}

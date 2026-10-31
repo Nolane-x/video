@@ -1,0 +1,28 @@
+{
+  "interface": {
+    "capabilities": [],
+    "category": "Productivity",
+    "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve provenance, license constraints and evidence-based QA.",
+    "developerName": "Sio Ca",
+    "displayName": "Nolane Audio & Speech Studio",
+    "longDescription": "Specialist workflows for voice-over, Vietnamese speech recognition and alignment, diarization, source separation, audio cleanup, sound design, loudness mastering and accessible captions. Heavy model weights and provider terms are managed separately from code dependencies.",
+    "shortDescription": "Narration and audio post"
+  },
+  "name": "nolane-audio-speech-studio",
+  "version": "0.1.0",
+  "description": "Specialist workflows for voice-over, Vietnamese speech recognition and alignment, diarization, source separation, audio cleanup, sound design, loudness mastering and accessible captions. Heavy model weights and provider terms are managed separately from code dependencies.",
+  "author": {
+    "name": "Sio Ca",
+    "email": "casioreview20@gmail.com"
+  },
+  "keywords": [
+    "audio",
+    "speech",
+    "whisperx",
+    "demucs",
+    "captions",
+    "sound-design"
+  ],
+  "repository": "https://github.com/Nolane-x/video",
+  "skills": "./skills"
+}

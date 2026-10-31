@@ -1,53 +1,68 @@
 # Nolane Video Studio
 
-Code-first production workspace for cinematic, story-led YouTube animation.
+A genre-aware, code-first production workspace for story-led video, explainers, documentary, product demos, tutorials, interviews, short-form, animation and hybrid media. Select visual grammar and engines from the brief; do not assume every video uses the same style.
 
 ## Start here for every new AI session
 
-**Read [AGENTS.md](AGENTS.md) first**, then the [Video Production Master skill](.agents/skills/video-production-master/SKILL.md), [current project state](docs/STATE.md), [AI handoff](docs/AI_HANDOFF.md), and [video library](video-library/README.md). These files are the persistent creative and technical memory; don't rely on previous chat history alone.
+**Read [AGENTS.md](AGENTS.md) first**, then the [Video Production Master skill](.agents/skills/video-production-master/SKILL.md), [Genre and Production Routing Matrix](docs/GENRE_ROUTING_MATRIX.md), [current project state](docs/STATE.md), [AI handoff](docs/AI_HANDOFF.md), and the relevant project's brief/manifest/shot plan. These files are the persistent creative and technical memory; don't rely on previous chat history alone.
 
-## Canonical visual direction
-Simple reusable stick-figure characters staged in rich, cinematic environments. Warm practical windows against plum/charcoal shadow; architecture and props; varied shot sizes; motivated camera; visible acting/contact; purposeful sound design. The user rejected generic gradient/flat-SVG output and pseudo-real AI humans.
+## Main AI entry point
 
-- [Visual reference analysis](docs/ART_DIRECTION_IFVERSE_DAYONE.md)
-- [Reusable skill](.agents/skills/video-production-master/SKILL.md)
+[**Nolane Video Command Center v0.7.9**](https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc) is the primary private routing plugin:
+- 29 internal production skills.
+- A registry of 37 separately activated specialist plugins with source/provenance notes.
+- Explicit routing and handoff rules. The Command Center does not silently invoke another private plugin; ChatGPT/user controls plugin activation.
+
+Other independent private plugins:
+- [Nolane Video Production Studio v0.4.0](https://chatgpt.com/plugins/plugins_6ae4bb1670748191989e6c0058d1b5bd) — broader 32-skill multi-engine production library with source snapshots and its own licensing boundaries.
+- [H2 SelfImprove Studio v1.1.0](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0) — native H2 rig/renderer and focused self-improvement animation workflow.
+
+These plugins are independent. See [the video plugin registry](docs/CHATGPT_VIDEO_PLUGIN_REGISTRY.md) and the [Command Center registry](plugins/chatgpt/nolane-video-command-center/references/PLUGIN-REGISTRY.md). In particular, the Talkcraft snapshot bundled in Video Production Studio is PolyForm Noncommercial 1.0.0; commercial/monetized use requires prior written authorization. Check its license matrix before use.
+
+## Genre-aware production policy
+
+Read [docs/GENRE_ROUTING_MATRIX.md](docs/GENRE_ROUTING_MATRIX.md) before selecting a workflow. It maps documentary, science/math explainers, narrative animation, product demos, tutorials, interviews, music videos, vertical shorts, advertising and AI/hybrid formats to the relevant specialists, engines and QA evidence.
+
+The canonical [stick-figure visual reference](docs/ART_DIRECTION_IFVERSE_DAYONE.md) is a **conditional direction for the established self-improvement/H2 series**, not a universal visual style. New projects should follow their own audience, purpose and visual grammar.
+
+- [Reusable production skill](.agents/skills/video-production-master/SKILL.md)
 - [Current state](docs/STATE.md)
 - [Video catalog](video-library/README.md)
 - [Verified tools/source inventory](docs/TOOL_INVENTORY.md)
 - [Prior video catalog](video-library/previous-works-catalog.json)
 
-## H2 SelfImprove Studio in ChatGPT
-
-[Open/activate the private H2 SelfImprove Studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). The active Plugin Creator release is **v1.1.0** (`pluginrel_6ade248942988191a57ff1059c818720`), updated and confirmed on 2026-10-25. The 51-file source mirror under [integrations/h2-selfimprove-studio/](integrations/h2-selfimprove-studio/) intentionally preserves the v1.0.2 base source; the production overlay is versioned separately under [integrations/h2-selfimprove-studio-production-overlay/](integrations/h2-selfimprove-studio-production-overlay/). See the [source manifest](integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json), [release result](integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md) and [activation notes](docs/CHATGPT_PLUGIN.md).
-
 ## Production architecture
-- **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
-- **Remotion:** timeline, text, frame-driven composition, compositing and CI. Project: [video-projects/remotion](video-projects/remotion).
-- **Blender:** selected 2.5D/3D shots when depth, camera, light or rigging adds value. [tools/blender](tools/blender).
-- **Krita:** deliberately authored art assets and paintovers. [tools/krita](tools/krita).
-- **FFmpeg/ffprobe:** mastering and technical validation.
 
-## Important distinction
-The Full HD H2 master previously delivered in ChatGPT is noted in the manifest but is not yet committed as a binary file in this repository. The Remotion pipeline generates a separate reproducible render. Do not conflate engines or claim an asset is archived until its permanent URL/checksum is verified.
+Route per deliverable/shot; don't install every tool for every job.
 
-## Workflows
+- **H2 Studio:** the native H2 rig/packs for the established self-improvement animation profile. Keep it distinct from Remotion.
+- **Remotion:** frame-accurate React timeline, text/captions, transitions, composition and reproducible CI. Project: [video-projects/remotion](video-projects/remotion).
+- **HyperFrames:** HTML/CSS/GSAP compositions, beat grids, deterministic browser capture and motion/layout QA.
+- **Manim:** mathematically meaningful science, math and engineering explainers; verify formulas and units before rendering.
+- **Blender:** selected 2.5D/3D shots where geometry, depth, camera, light or rigging adds value. [tools/blender](tools/blender).
+- **Three.js / PixiJS:** procedural browser 3D/2D, particles, shaders, depth and lightweight effects.
+- **Krita:** deliberately authored 2D assets and paintovers. [tools/krita](tools/krita).
+- **OpenTimelineIO / PySceneDetect:** editorial interchange and candidate shot-boundary analysis, not automatic final editorial authority.
+- **Playwright / Tesseract:** authorized browser capture and assisted text/caption coverage.
+- **FFmpeg / ffprobe:** mastering and technical validation.
+
+The CPU-first runtime pins dependencies in `toolchain/manifest.json` and `toolchain/node/package-lock.json`. Blender, Manim and audio-ML are separate/optional profiles; a plugin entry does not mean a runtime or model is installed.
+
+## Canonical video and archive truth
+
+- The canonical Full HD H2 master is stored at `video-library/one-more-scroll/one-more-scroll-h2-final.mp4`; its SHA-256 and technical verification are recorded in the film manifest and [tool inventory](docs/TOOL_INVENTORY.md).
+- The separate Remotion run-36 sample is 155.1 seconds at 1280×720/24 fps. It is not the H2 render.
+- H2 source ZIPs are published as checksum-verified assets in the [H2 production Release](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1).
+- Source-v2/source-v3 are separate candidates, not canonical replacements. Technical render success does not equal full-motion/audio or artistic approval.
+- Keep large masters in durable GitHub Releases where appropriate; do not call an Actions artifact permanent storage. Check its URL, metadata and SHA-256.
+
+## Workflows and references
+
 - [Remotion render](.github/workflows/render-remotion.yml) — generates music/SFX, typechecks, renders, masters audio, validates metadata and uploads QA.
-- [Blender proof](.github/workflows/render-blender-preview.yml)
+- [Blender preview proof](.github/workflows/render-blender-preview.yml)
 - [H2 runtime package](.github/workflows/prepare-h2-runtime.yml)
-- [Video Showcase archive](.github/workflows/archive-video-showcase.yml) — creates a tagged Release with Remotion video and skill ZIP when the triggering render commit includes `[archive-video]`.
+- [Video Showcase archive](.github/workflows/archive-video-showcase.yml)
+- [Install/restore guide](docs/INSTALL_VIDEO_SKILL.md)
+- [Plugin release evidence](docs/CHATGPT_PLUGIN.md)
 
-Large video masters should be kept as Release assets, not ordinary Git blobs. The skill and manifest preserve a distinction between source-only changes, rendered output and visually reviewed output.
-
-## Reusable ChatGPT plugin
-
-The active private H2 plugin is v1.1.0: [Open h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Its current release ID, CI evidence, checksum and base-source/overlay distinction are documented in [docs/CHATGPT_PLUGIN.md](docs/CHATGPT_PLUGIN.md). The native H2 kit remains distinct from the repo's Remotion renderer.
-
-## Downloads and current reference
-
-- **[Download the portable Video Production Master ZIP](video-library/video-production-master-skill.zip)** — reusable agent skill, cross-agent entrypoints, project/source map, tool inventory, state/handoff, Remotion source, storyboard and the archived reference render.
-- **[Open the latest archived Remotion MP4](video-library/one-more-scroll/renders/remotion-run-36/one-more-scroll-remotion-master.mp4)** — 155.1 seconds, 1280×720, 24 fps. See [the current manifest](video-library/one-more-scroll/latest-remotion-release.json) and [QA notes](video-library/one-more-scroll/QA.md).
-- **[Current art-direction/production skill](.agents/skills/video-production-master/SKILL.md)** — canonical source for future AI sessions.
-- **[Tool inventory](docs/TOOL_INVENTORY.md)** — explicitly distinguishes checked-in projects from full app/source archives and older session-only video outputs.
-- **[Prior AI video catalog](video-library/previous-works-catalog.json)** — tracks historical MP4s by checksum and archive status.
-
-The portable ZIP includes both the checksum-verified canonical H2 Canvas/Chromium master and a separate Remotion run-36 reference render; they are distinct outputs. Large H2 source ZIPs and the technically validated source-v2 candidate are published separately in the [H2 production Release](https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1). A deterministic source-v3 shoe-tying patch now has a focused preview pass; corrected full render [run 40286913324](https://github.com/Nolane-x/video/actions/runs/40286913324) is underway after the first render passed video/audio checks but failed review-payload checksum packaging. See [the install/restore guide](docs/INSTALL_VIDEO_SKILL.md), [current state](docs/STATE.md), and [QA log](video-library/one-more-scroll/QA.md).
+Large video masters should be kept as Release assets, not ordinary Git blobs. Always distinguish source-only changes, successful build, rendered candidate, technical QC, full visual/audio review and approved publication.

@@ -1,0 +1,57 @@
+name: Package Nolane Video Command Center
+
+on:
+  pull_request:
+    paths:
+      - "plugins/chatgpt/nolane-video-command-center/**"
+      - "tools/video/validate_plugin_packages.py"
+      - ".github/workflows/package-command-center-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-command-center-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate plugin package and versioned registries
+        run: python tools/video/validate_plugin_packages.py
+      - name: Verify package version and exact bundled skill count
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("plugins/chatgpt/nolane-video-command-center")
+          public = json.loads((root / "plugin.json").read_text())
+          codex = json.loads((root / ".codex-plugin/plugin.json").read_text())
+          skills = list((root / "skills").glob("*/SKILL.md"))
+          assert public["version"] == "0.8.0", public["version"]
+          assert codex["version"] == public["version"], codex["version"]
+          assert len(skills) == 29, len(skills)
+          print(f"Validated Command Center v{public['version']}: {len(skills)} internal skills")
+          PY
+      - name: Build plugin-root ZIP overlay
+        run: |
+          mkdir -p out
+          cd plugins/chatgpt/nolane-video-command-center
+          zip -qr ../../../out/nolane-video-command-center-v0.8.0.zip .
+          cd ../../../
+          unzip -l out/nolane-video-command-center-v0.8.0.zip | head -50
+          test -s out/nolane-video-command-center-v0.8.0.zip
+      - name: Upload validated Plugin Creator archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-video-command-center-v0.8.0
+          path: out/nolane-video-command-center-v0.8.0.zip
+          if-no-files-found: error
+          retention-days: 30
