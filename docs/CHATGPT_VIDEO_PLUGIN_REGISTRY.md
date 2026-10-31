@@ -1,10 +1,10 @@
 # ChatGPT video plugin registry
 
-The **Nolane Video Command Center v0.5.0** is the single normal entry point. It bundles 28 internal production skills; specialist plugins are optional direct entry points for focused work.
+The **Nolane Video Command Center v0.6.0** is the single normal entry point. It bundles 28 internal production skills; specialist plugins are optional direct entry points for focused work.
 
 | Plugin | Version | ID | Private ChatGPT link | Responsibility |
 |---|---:|---|---|---|
-| Nolane Video Command Center | 0.5.0 | `plugins_6ae55f28fb148191b2eb6333f7620cbc` | https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc | Main router; 28 internal skills; story-to-delivery workflow and GitHub coordination |
+| Nolane Video Command Center | 0.6.0 | `plugins_6ae55f28fb148191b2eb6333f7620cbc` | https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc | Main router; 28 internal skills; story-to-delivery workflow and GitHub coordination |
 | Nolane Motion Lab | 0.1.0 | `plugins_6ae55edab2a881919d80ab5cc7a54dfe` | https://chatgpt.com/plugins/plugins_6ae55edab2a881919d80ab5cc7a54dfe | Remotion, HyperFrames, GSAP, Motion, Three.js, PixiJS and motion engineering |
 | Nolane Story Studio | 0.1.0 | `plugins_6ae55ee6e0588191a2d0542ed0235781` | https://chatgpt.com/plugins/plugins_6ae55ee6e0588191a2d0542ed0235781 | Story, storyboard, cinematography, art direction and acting |
 | Nolane 3D & VFX | 0.1.0 | `plugins_6ae55ef184748191beda13ca683156ac` | https://chatgpt.com/plugins/plugins_6ae55ef184748191beda13ca683156ac | Procedural 3D, Blender, lighting, depth and compositing |
