@@ -35,6 +35,14 @@ custom VoiceStudio engine still needs its own Actions lane with compute and
 storage matched to its model requirements. It must not silently fall back to a
 developer's workstation.
 
+The pinned VoiceStudio application itself also has a headless CPU
+[Actions smoke workflow](../.github/workflows/voice-studio-headless-smoke.yml).
+It builds the exact checked-out VoiceStudio submodule using CPU PyTorch,
+starts the server, and verifies health, TTS engine inventory and
+OpenAI-compatible API routes. It does not download an engine's model weights,
+accept engine licence terms or render audio. That separation keeps a successful
+API smoke from being mistaken for a completed Vietnamese TTS acceptance test.
+
 ## Core workflows
 
 - Create a reusable original Vietnamese voice set:
