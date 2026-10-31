@@ -70,6 +70,8 @@ rights.
 - Resume provider benchmarks and aggregate blind listener ratings:
   integrations/voice-studio/provider_voice_benchmark.py and
   integrations/voice-studio/analyze_voice_benchmark.py
+- Run the consent-gated VoiceStudio Supertonic-3 Vietnamese audition in
+  GitHub Actions: integrations/voice-studio/voicestudio_engine_actions_benchmark.py
 
 ## Agent skills
 
