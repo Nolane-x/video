@@ -25,6 +25,13 @@ inference to a developer PC just because an Actions lane is missing or
 underpowered. The current CPU lanes use KorvaTTS's preset voices; they do not
 exercise VoiceStudio custom voice design. Record that scope explicitly.
 
+The separate `.github/workflows/voice-studio-headless-smoke.yml` builds the
+pinned VoiceStudio fork and validates its FastAPI surface on a CPU runner. It
+is a server/API contract check only: a healthy container and a non-empty engine
+catalogue do not mean a Vietnamese model is installed or licensed, and do not
+mean synthesis was performed. Require a separate rendered WAV artifact before
+calling any VoiceStudio engine audio-tested.
+
 For the project renderer, inspect the full delivery package, not just its
 green job status: confirm each WAV hash, per-speaker identity fingerprint,
 H2 block/line/word coverage, master audio peak/loudness, `captions.srt`,
