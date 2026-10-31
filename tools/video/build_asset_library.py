@@ -11,6 +11,7 @@ from eso_video_importer import download_eso_media
 from cdc_broll_importer import download_cdc_broll_videos
 from nps_broll_importer import download_nps_broll_media
 from nps_gallery_image_importer import download_nps_npgallery_images
+from blender_demo_importer import download_blender_demo_assets
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
