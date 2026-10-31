@@ -16,7 +16,10 @@ COPY deploy/torch-constraints.txt ./deploy/torch-constraints.txt
 COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt
 RUN uv pip install --python \"$(command -v python3)\" --no-cache .
 ARG GPU_FLAVOR=cuda
-RUN python3 -c \"import os, torch; flavor = os.environ['GPU_FLAVOR']; accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda; assert accel\"
+RUN python3 -c \"import os, torch, torchaudio, torchvision; \
+    flavor = os.environ['GPU_FLAVOR']; \
+    accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda; \
+    assert accel\"
 """
 
     def test_adds_official_cpu_wheels_and_cpu_hardware_guard(self):
@@ -40,8 +43,8 @@ RUN python3 -c \"import os, torch; flavor = os.environ['GPU_FLAVOR']; accel = to
 
     def test_fails_closed_when_hardware_guard_changes(self):
         altered = self.source().replace(
-            "flavor = os.environ['GPU_FLAVOR']; accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda;",
-            "flavor = os.environ['GPU_FLAVOR']; accel = True;",
+            "accel = torch.version.hip if flavor == 'rocm' else torch.version.cuda;",
+            "accel = True;",
         )
         with self.assertRaisesRegex(ValueError, "GPU-only torch guard"):
             transform_dockerfile(altered)
