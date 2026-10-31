@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from generate_sticker_meme_library import generate_assets as generate_sticker_meme_assets
+from nasa_svs_importer import download_nasa_svs_media
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -6342,6 +6343,7 @@ def main():
             ("smithsonian", download_smithsonian_open_access),
             ("rijksmuseum", download_rijksmuseum_open_access),
             ("nasa", download_nasa_media),
+            ("nasa_svs", download_nasa_svs_media),
             ("loc", download_loc_public_domain),
             ("wikimedia", download_wikimedia_public_domain),
             ("wikimedia_svg", download_wikimedia_vector_svg),
@@ -6366,6 +6368,7 @@ def main():
     smithsonian_report=source_reports["smithsonian"]
     rijksmuseum_report=source_reports["rijksmuseum"]
     nasa_report=source_reports["nasa"]
+    nasa_svs_report=source_reports["nasa_svs"]
     loc_report=source_reports["loc"]
     wikimedia_report=source_reports["wikimedia"]
     wikimedia_svg_report=source_reports["wikimedia_svg"]
@@ -6444,6 +6447,8 @@ def main():
               "nasa_images_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="image" for x in nasa_report),
               "nasa_videos_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="video" for x in nasa_report),
               "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
+              "nasa_svs_videos_downloaded":sum(r.get("status")=="downloaded" for r in nasa_svs_report),
+              "nasa_svs_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in nasa_svs_report if r.get("status")=="downloaded"),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
@@ -6481,6 +6486,7 @@ def main():
                "met_open_access_downloads":met_report,"smithsonian_open_access_downloads":smithsonian_report,
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
+               "nasa_svs_media_downloads":nasa_svs_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
@@ -6491,6 +6497,12 @@ def main():
       + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in openmoji_report)
     )
     write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+openmoji_note+"\n")
+    nasa_svs_note=(
+      "\n\n## NASA Scientific Visualization Studio moving images — Public Domain unless otherwise noted\n"
+      "The importer uses the official NASA SVS Search and Page APIs across science-topic queries, retaining one best-resolution suitable video per complete SVS visualization. HTTP media URLs are upgraded to HTTPS only for the exact svs.gsfc.nasa.gov host and /vis/ path; redirects, MIME/container signatures, byte ceilings and SHA-256 are checked. Page-level licensed-music/copyright/permission notes and non-empty audio_track metadata are skipped rather than silently copying a soundtrack with unclear terms. NASA SVS states that visualizations are public domain unless otherwise noted and that licensed-music visualizations may be reused without their audio tracks; this importer conservatively skips those pages until a silent alternate is explicit. Credits, source page, media URL, data sets, dates, dimensions and keywords are retained. This is Public Domain under the SVS default, not CC0. Credit NASA SVS, do not imply endorsement, and review privacy/publicity, logos and third-party data before commercial/promotional use. Sources: https://svs.gsfc.nasa.gov/help/ and https://www.nasa.gov/nasa-brand-center/images-and-media/.\n"
+      + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in nasa_svs_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+nasa_svs_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
