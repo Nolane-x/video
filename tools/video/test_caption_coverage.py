@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from caption_coverage import expected_text_for_shot, normalize_text, text_coverage
+from caption_coverage import expected_text_for_shot, normalize_text, targeted_ocr_region, text_coverage
 
 
 class CaptionCoverageTests(unittest.TestCase):
@@ -57,6 +57,28 @@ class CaptionCoverageTests(unittest.TestCase):
     def test_fixed_scene_labels_are_included(self):
         shot = {"line": "One day becomes a habit.", "args": {"setting": "calendar", "subtitle": "One day becomes a habit."}}
         self.assertEqual(expected_text_for_shot(shot, 0, 1)[-1], {"kind": "scene-label", "text": "THIS MONTH"})
+
+    def test_targeted_ocr_regions_cover_small_day_counter_and_lower_third(self):
+        shot = {"args": {"day": "DAY 14", "setting": "library"}}
+        day_region = targeted_ocr_region({"kind": "day-counter", "text": "DAY 14"}, shot)
+        subtitle_region = targeted_ocr_region({"kind": "subtitle", "text": "Your attention belongs to you."}, shot)
+        self.assertEqual(day_region, ("top-left-day-counter", (0, 0, 300, 110)))
+        self.assertEqual(subtitle_region, ("lower-third-subtitle", (80, 575, 1120, 145)))
+
+    def test_targeted_ocr_region_tracks_calendar_and_bus_stop_signs(self):
+        calendar = targeted_ocr_region(
+            {"kind": "scene-label", "text": "THIS MONTH"}, {"args": {"setting": "calendar"}}
+        )
+        bus_stop = targeted_ocr_region(
+            {"kind": "scene-label", "text": "BUS"}, {"args": {"setting": "busStop"}}
+        )
+        self.assertEqual(calendar, ("calendar-heading", (570, 65, 520, 115)))
+        self.assertEqual(bus_stop, ("bus-stop-sign", (860, 145, 130, 105)))
+
+    def test_multiword_kinetic_text_uses_clear_above_actor_region(self):
+        shot = {"args": {"setting": "mirror", "redWords": ["TOMORROW", "ONE MORE", "LATER"]}}
+        region = targeted_ocr_region({"kind": "red-word", "text": "ONE MORE"}, shot)
+        self.assertEqual(region, ("red-word-2", (440, 128, 252, 112)))
 
     def test_untracked_no_text_shot_fails_closed(self):
         from caption_coverage import resolve_text_contract

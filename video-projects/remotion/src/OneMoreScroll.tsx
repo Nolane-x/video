@@ -369,8 +369,8 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <rect x="250" y="504" width="610" height="18" rx="4" fill="#6a596d" stroke="#302735" strokeWidth="4" />
       <path d="M292 522 V570 M818 522 V570" stroke="#302735" strokeWidth="16" />
       <rect x="885" y="160" width="68" height="170" rx="8" fill="#28232e" stroke="#bca5b0" strokeWidth="4" />
-      <rect x="897" y="174" width="44" height="32" rx="4" fill="#d1ab81" />
-      <text x="919" y="194" fontSize="10" fontWeight="800" fill="#332735" textAnchor="middle">BUS</text>
+      <rect x="892" y="171" width="54" height="38" rx="4" fill="#e0b88e" />
+      <text x="919" y="197" fontSize="14" fontWeight="900" letterSpacing=".4" fill="#302330" textAnchor="middle">BUS</text>
       <path d="M0 550 H1280" stroke="#5f4b60" strokeWidth="4" />
       <rect x="0" y="554" width="1280" height="166" fill="url(#h2Road)" />
       <path d="M60 650 H330 M870 650 H1140" stroke="#b7a0a1" strokeWidth="3" opacity=".23" />
@@ -756,24 +756,26 @@ const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean 
 const DayCounter: React.FC<{ day: string }> = ({ day }) => (
   <div style={{
     position: "absolute", left: 42, top: 25, zIndex: 12,
-    padding: "9px 15px", borderRadius: 11,
-    border: "1.5px solid rgba(218,187,151,.82)",
-    background: "rgba(26,22,32,.9)", boxShadow: "0 4px 14px rgba(0,0,0,.22)",
-    color: "#e7d4be", fontSize: 13, fontWeight: 800, letterSpacing: 2,
+    padding: "9px 14px", borderRadius: 11,
+    border: "1.5px solid rgba(232,204,174,.9)",
+    background: "rgba(26,22,32,.94)", boxShadow: "0 4px 14px rgba(0,0,0,.24)",
+    color: "#f0e4d6", fontSize: 16, fontWeight: 900, letterSpacing: 1.6,
   }}>{day}</div>
 );
 
 const RedWords: React.FC<{ words: string[]; t: number }> = ({ words, t }) => (
   <div style={{ position: "absolute", inset: 0, zIndex: 8, pointerEvents: "none" }}>
     {words.map((word, i) => {
-      const x = 64 + ((i * 197 + 80) % 1100);
-      const y = 150 + ((i * 83 + 38) % 330) + Math.sin(t * 5 + i) * 8;
+      const isMultiword = word.trim().includes(" ");
+      // Keep multiword phrases out of the character's face/body silhouette.
+      const x = isMultiword ? 470 : 64 + ((i * 197 + 80) % 1100);
+      const y = (isMultiword ? 166 : 150 + ((i * 83 + 38) % 330)) + Math.sin(t * 5 + i) * 5;
       return <div key={word + i} style={{
         position: "absolute", left: x, top: y,
-        color: "#c85c70", fontFamily: '"Comic Neue", Arial, sans-serif',
-        fontWeight: 800, fontSize: i % 2 ? 21 : 27,
-        opacity: Math.min(0.75, 0.2 + t * 0.8), transform: "rotate(" + ((i % 3) * 5 - 5) + "deg)",
-        textShadow: "0 0 12px rgba(191,69,91,.13)",
+        color: "#e07a8d", fontFamily: '"Comic Neue", Arial, sans-serif',
+        fontWeight: 800, fontSize: isMultiword ? 28 : (i % 2 ? 24 : 28),
+        opacity: Math.min(0.9, 0.24 + t * 0.85), transform: "rotate(" + ((i % 3) * 5 - 5) + "deg)",
+        textShadow: "0 2px 5px rgba(15,10,18,.92), 0 0 12px rgba(191,69,91,.2)",
       }}>{word}</div>;
     })}
   </div>

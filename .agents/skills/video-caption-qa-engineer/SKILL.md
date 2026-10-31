@@ -10,14 +10,14 @@ description: Use when creating captions, aligning narration to text, localizing 
 3. Every shot must have a text contract: include subtitles plus every meaningful visible heading, label, counter, kinetic word or end-card title. For Remotion shots, the auditor infers known subtitle, day-counter, red-word and fixed scene-label fields; use `requiredOnScreenText` for additional or genre-specific overlays.
 4. A shot intentionally containing no text must declare `noTextRequired: true` and a specific `noTextReason`. An unexplained empty shot is a missing-contract blocker, not an automatic pass.
 5. Check each spoken sentence and important visual label against the manifest. Do not assume ASR alone is correct.
-6. Render representative frames, OCR actual output with Tesseract EN/VI, and compare detected text to required text. The current audit samples three points per shot and requires readable detection in at least two; a single lucky OCR hit is not enough. OCR is a secondary detector, not final authority.
+6. Render representative frames, OCR actual output with Tesseract EN/VI, and compare detected text to required text. The current audit samples three points per shot and requires readable detection in at least two; a single lucky OCR hit is not enough. When whole-frame OCR misses a known overlay, run a composition-aware crop (for example the day-counter badge, calendar heading, bus-stop sign or lower-third subtitle) and record the crop OCR separately in the report. Crops must target the actual rendered element and must not lower the acceptance threshold. OCR is a secondary detector, not final authority.
 7. Inspect contact sheets and moving playback. Check text size, contrast, line breaks, minimum display duration, reading speed, cropping, occlusion and subtitle overlap with acting.
 
 ## Timing and accessibility
 Synchronize word/phrase segments with actual speech; manually correct Vietnamese names, punctuation, numbers and technical terms. Include speaker labels/sound descriptions when needed. Localize typography rather than translating line-by-line when line length or context requires it. Captions must not cover hands, faces, contact points or important props.
 
 ## Failure gates
-Block delivery when important dialogue has no readable representation, or captions are clipped, too small, brief, off-screen, mistimed or occluded. Report OCR misses/false positives. Never claim full coverage from one sampled frame.
+Block delivery when important dialogue has no readable representation, or captions are clipped, too small, brief, off-screen, mistimed or occluded. In particular, never place kinetic words across faces or let small labels depend on visual guessing. Report OCR misses/false positives and inspect crop evidence before deciding whether a miss is visual or detector-related. Never claim full coverage from one sampled frame.
 
 ## Deliverables
 Transcript/caption source, SRT/VTT or timed JSON, caption coverage table, OCR report, legibility screenshots and manual moving-picture review.

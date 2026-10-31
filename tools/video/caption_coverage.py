@@ -131,6 +131,47 @@ def evaluate_text_samples(expected: str, observed_samples: list[str], threshold:
     }
 
 
+def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str, tuple[int, int, int, int]] | None:
+    """Return a known, composition-specific crop for small or localized overlays."""
+    args = shot.get("args") or {}
+    setting = args.get("setting") or shot.get("setting")
+    kind = item.get("kind")
+
+    if kind == "day-counter":
+        return ("top-left-day-counter", (0, 0, 300, 110))
+    if kind == "subtitle":
+        return ("lower-third-subtitle", (80, 575, 1120, 145))
+    if kind == "end-card-title":
+        return ("centered-end-card", (100, 110, 1080, 500))
+    if kind == "scene-label":
+        regions = {
+            "calendar": ("calendar-heading", (570, 65, 520, 115)),
+            "busStop": ("bus-stop-sign", (860, 145, 130, 105)),
+            "bus": ("bus-sign", (80, 280, 280, 120)),
+            "classroom": ("classroom-board-label", (470, 220, 530, 130)),
+        }
+        return regions.get(setting)
+
+    if kind == "red-word":
+        words = args.get("redWords") or args.get("red_words") or []
+        word_index = next(
+            (index for index, word in enumerate(words) if isinstance(word, str) and word.strip() == item.get("text")),
+            None,
+        )
+        if word_index is None:
+            return None
+        word = str(words[word_index]).strip()
+        if " " in word:
+            # The spaced kinetic phrase is deliberately moved above/clear of the actor.
+            x, y = 470, 166
+        else:
+            x = 64 + ((word_index * 197 + 80) % 1100)
+            y = 150 + ((word_index * 83 + 38) % 330)
+        width = max(250, min(500, len(word) * 19 + 100))
+        return (f"red-word-{word_index + 1}", (max(0, x - 30), max(0, y - 38), width, 112))
+    return None
+
+
 def run_checked(command: list[str]) -> str:
     result = subprocess.run(command, check=True, text=True, capture_output=True)
     return result.stdout
@@ -144,19 +185,70 @@ def get_video_duration(video: Path) -> float:
     return float(raw)
 
 
-def ocr_frame(video: Path, at_seconds: float, languages: str, work_dir: Path, label: str) -> dict[str, str]:
+def ocr_frame(
+    video: Path,
+    at_seconds: float,
+    languages: str,
+    work_dir: Path,
+    label: str,
+    shot: dict[str, Any],
+    expected_items: list[dict[str, str]],
+    threshold: float,
+) -> dict[str, Any]:
     frame = work_dir / f"{label}.png"
     run_checked([
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
         "-ss", f"{at_seconds:.3f}", "-i", str(video),
-        "-frames:v", "1", "-vf", "scale=iw*2:ih*2", str(frame)
+        "-frames:v", "1", "-vf", "scale=iw*2:ih*2:flags=lanczos", str(frame)
     ])
     outputs = []
     for psm in ("11", "6"):
         outputs.append(run_checked([
             "tesseract", str(frame), "stdout", "-l", languages, "--psm", psm
         ]).strip())
-    return {"frame": str(frame), "text": "\n".join(outputs)}
+    full_frame_text = "\n".join(outputs)
+
+    # Only run focused OCR when whole-frame OCR did not find the expected text.
+    # Coordinates are authored in the 1280x720 composition space; the source
+    # frame above is already 2x, and each crop is enlarged another 2x.
+    region_outputs: dict[str, str] = {}
+    combined_text = full_frame_text
+    for item_index, item in enumerate(expected_items):
+        if text_coverage(item["text"], combined_text) >= threshold:
+            continue
+        region = targeted_ocr_region(item, shot)
+        if region is None:
+            continue
+        region_name, (x, y, width, height) = region
+        if region_name in region_outputs:
+            continue
+        x = max(0, min(1279, x))
+        y = max(0, min(719, y))
+        width = max(1, min(width, 1280 - x))
+        height = max(1, min(height, 720 - y))
+        crop = work_dir / f"{label}-{item_index + 1}-{region_name}.png"
+        run_checked([
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-i", str(frame),
+            "-vf",
+            f"crop={width * 2}:{height * 2}:{x * 2}:{y * 2},scale=iw*2:ih*2:flags=lanczos",
+            "-frames:v", "1", str(crop)
+        ])
+        crop_outputs = []
+        for psm in ("6", "7"):
+            crop_outputs.append(run_checked([
+                "tesseract", str(crop), "stdout", "-l", languages, "--psm", psm
+            ]).strip())
+        region_text = "\n".join(crop_outputs).strip()
+        region_outputs[region_name] = region_text
+        if region_text:
+            combined_text += "\n" + region_text
+
+    return {
+        "frame": str(frame),
+        "text": combined_text,
+        "regions": region_outputs,
+    }
 
 
 def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
@@ -202,7 +294,10 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
             sample_records = []
             for sample_index, fraction in enumerate((0.42, 0.58, 0.72), start=1):
                 timestamp = start + (end - start) * fraction
-                frame_result = ocr_frame(video, timestamp, languages, work_dir, f"{shot_id}-{sample_index}")
+                frame_result = ocr_frame(
+                    video, timestamp, languages, work_dir,
+                    f"{shot_id}-{sample_index}", shot, expected_items, threshold
+                )
                 sample_records.append({"at_seconds": round(timestamp, 3), **frame_result})
 
             shot_items = []
@@ -226,14 +321,18 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
                 "status": "pass" if all(item["status"] == "pass" for item in shot_items) else "fail",
                 "required_text": shot_items,
                 "samples": [
-                    {"at_seconds": sample["at_seconds"], "ocr_text": sample["text"]}
+                    {
+                        "at_seconds": sample["at_seconds"],
+                        "ocr_text": sample["text"],
+                        "ocr_regions": sample.get("regions", {}),
+                    }
                     for sample in sample_records
                 ]
             })
 
     failed = total_items - passed_items
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "video": str(video),
         "shot_manifest": str(shots_path),
         "video_duration_seconds": round(duration, 3),
