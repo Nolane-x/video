@@ -6709,11 +6709,11 @@ def main():
       "\n\n## Build 74 source capacity ceilings — limits, not promised downloads\n"
       "NASA SVS: up to 60 videos, 300 MiB each, 6 GiB aggregate and 240 topic-search page IDs; the exact official /vis/ host/path, page-level rights/music exclusions and file SHA-256 remain mandatory.\n"
       "ESO: up to 120 official pages inspected, 30 silent H.264 previews, 300 MiB per source and 6 GiB aggregate; exact official page/CDN URLs, page-published SHA-256, full visible credit, item-rights exclusions, audio removal and adaptation disclosure remain mandatory.\n"
-      "USGS: up to 120 images, 96 videos and 60 audio assets, with 10/100/30 MiB type-specific file ceilings and 12 GiB aggregate; each item's Sources/Usage section must still say exactly Public Domain.\n"
+      "USGS: up to 120 images, 96 videos and 60 audio assets, with 10/100/30 MiB type-specific file ceilings and 13 GiB aggregate; each item's Sources/Usage section must still say exactly Public Domain.\n"
       "Internet Archive: up to 160 items per Prelinger/NASA collection, 320 item records inspected per collection, 250 MiB per video, 6 GiB per collection and 12 GiB aggregate. Only exact item-level CC0/Public Domain evidence is accepted; Prelinger Public Domain fallback requires the matching exact item-page Usage row and is never labelled CC0. Third-party footage/music still requires human review.\n"
       "The final asset index records only successfully downloaded files; changing these ceilings does not change source licences or turn a source-wide default into item-level permission.\n"
     )
-    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+source_capacity_note+"\\n")
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+source_capacity_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
