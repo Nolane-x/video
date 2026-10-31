@@ -68,7 +68,7 @@ NPS_PUBLIC_DOMAIN_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 NPS_ITEM_RIGHTS_EXCEPTION_RE = re.compile(
-    r"third[-\s]?party\s+(?:footage|material|video|content)|"
+    r"third[-\s]?party(?:\s+partner)?\s+(?:footage|material|video|content)|"
     r"copyright(?:ed)?\s+(?:footage|video|music|audio)|"
     r"licensed\s+(?:music|footage|material)|"
     r"used\s+with\s+permission|permission\s+(?:is\s+)?required|"
