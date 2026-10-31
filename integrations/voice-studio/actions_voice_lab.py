@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from audio_mastering import normalize_voice_file
 from providers import korva
 from provider_voice_benchmark import run_benchmark
 from voice_quality import _probe_audio, _technical_findings
@@ -71,6 +72,51 @@ def safe_audio_path(root: Path, relative: str) -> Path:
     return candidate
 
 
+def master_candidates(
+    case_root: Path,
+    benchmark: dict[str, Any],
+) -> dict[str, Any]:
+    """Normalize each raw voice to a common loudness/true-peak target before blind QA."""
+    report_path = case_root / "provider-voice-benchmark.json"
+    for row in benchmark.get("candidates", []):
+        if row.get("status") != "ready":
+            continue
+        try:
+            audio_path = safe_audio_path(case_root, str(row.get("audio_file") or ""))
+            if not row.get("mastering"):
+                mastering = normalize_voice_file(
+                    audio_path,
+                    target_lufs=-20.0,
+                    true_peak_db=-2.5,
+                    loudness_range=7.0,
+                )
+                mastered_path = audio_path.with_suffix(".wav")
+                relative = mastered_path.resolve().relative_to(case_root.resolve())
+                row["audio_file"] = relative.as_posix()
+                row["mastering"] = mastering
+                row["sha256"] = hashlib.sha256(mastered_path.read_bytes()).hexdigest()
+                row["bytes"] = mastered_path.stat().st_size
+            else:
+                mastered_path = safe_audio_path(case_root, str(row["audio_file"]))
+                digest = hashlib.sha256(mastered_path.read_bytes()).hexdigest()
+                if digest != row.get("sha256"):
+                    raise ValueError("Previously mastered audio hash no longer matches")
+        except Exception as exc:
+            row["status"] = "failed"
+            row["error"] = f"Mastering failed: {type(exc).__name__}: {exc}"
+            row["mastering_error"] = row["error"]
+        benchmark["ready"] = sum(item.get("status") == "ready" for item in benchmark["candidates"])
+        benchmark["failed"] = sum(item.get("status") == "failed" for item in benchmark["candidates"])
+        benchmark["pending"] = sum(item.get("status") == "pending" for item in benchmark["candidates"])
+        benchmark["status"] = (
+            "complete"
+            if benchmark["ready"] == benchmark["candidate_count"] and not benchmark.get("catalogue_errors")
+            else "partial"
+        )
+        _write_json(report_path, benchmark)
+    return benchmark
+
+
 def audit_candidate(case_root: Path, candidate: dict[str, Any]) -> dict[str, Any]:
     row = dict(candidate)
     if row.get("status") != "ready" or not row.get("audio_file"):
@@ -87,6 +133,7 @@ def audit_candidate(case_root: Path, candidate: dict[str, Any]) -> dict[str, Any
         if metrics["sample_rate_hz"] != EXPECTED_SAMPLE_RATE:
             findings.append(f"Expected {EXPECTED_SAMPLE_RATE} Hz, got {metrics['sample_rate_hz']} Hz")
         row["audio_metrics"] = metrics
+        row["mastering"] = row.get("mastering")
         row["technical_findings"] = findings
         row["technical_status"] = "warning" if findings else "pass"
         row["audio_sha256_verified"] = True
@@ -136,6 +183,7 @@ def write_summary(output_dir: Path, report: dict[str, Any]) -> None:
         f"- Model and voice-style licence: {MODEL_LICENSE}",
         f"- Output sample rate target: {EXPECTED_SAMPLE_RATE} Hz",
         "- Device: CPU; 4 ONNX threads; 32 inference steps.",
+        "- Every rendered sample is loudness-normalized to -20 LUFS with a -2.5 dBTP true-peak ceiling before blind listening and QA.",
         "- Same text and seed are used for every voice within a test case.",
         "- Blind listening is required; no automatic ElevenLabs-equivalence claim.", "",
         "| Test | Ready | Technical pass | Warnings | Errors |",
@@ -164,6 +212,7 @@ def write_summary(output_dir: Path, report: dict[str, Any]) -> None:
         "", "## Limits", "",
         "- This runs the ten released KorvaTTS presets; it does not create custom voices or clone people.",
         "- Audio engineering measurements do not grade pronunciation, emotion, acting or naturalness.",
+        "- Loudness mastering removes raw output-level differences; it does not repair pronunciation or improve the underlying voice model.",
         "- ASR WER/CER is not included because this job does not run a VoiceStudio ASR engine.",
         "- This CPU baseline is not evidence of GPU engine performance.",
     ])
@@ -225,6 +274,7 @@ def run_lab(
             blind=True, blind_seed=20261031, allow_cloud=False,
             delay=0, asr=False,
         )
+        benchmark = master_candidates(case_root, benchmark)
         audited = [audit_candidate(case_root, item) for item in benchmark["candidates"]]
         ready = sum(row.get("status") == "ready" for row in audited)
         passed = sum(row.get("technical_status") == "pass" for row in audited)
