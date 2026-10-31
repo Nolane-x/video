@@ -65,6 +65,22 @@ Candidate discovery is not treated as permission. Each chosen Asset Detail page 
 
 The image lane is separate from NPS footage. It downloads unmodified original JPG/JPEG/PNG files (no FFmpeg), with a maximum of 180 images, 80 MiB per image, 6 GiB aggregate source bytes and 160 MiB metadata. The item rights are Public Domain with Full Granting Rights, **not CC0**.
 
+
+## USFWS/NCTC wildlife and nature B-roll — source-only candidate
+
+The [official USFWS/NCTC collection index](https://www.fws.gov/library/collections/b-roll-videos) lists six B-roll collections covering American birds, wildlife, fisheries, Monarch butterflies, people and places, and underwater habitats. The category pages describe MP4 downloads through their embedded VBrick players.
+
+The collection notice invites users to download and use the clips when creating videos and requests USFWS credit. Category pages also request creator/photographer/videographer credit plus U.S. Fish & Wildlife Service credit. Preserve the exact creator credit for each selected clip.
+
+**Rights boundary:** this is not an explicit CC0 grant, and the public collection notice does not establish permission to mirror raw MP4s into a standalone downloadable asset library. Keep the source in the catalog as **source-only** until clip-specific terms and raw-file redistribution permission are explicitly reviewed. Do not count this source as downloaded assets or bytes.
+
+Some productions include music licensed to USFWS. The music license covers free distribution of the finished production in its entirety; non-private public use of productions containing that licensed music requires a separate license. Do not reuse supplied soundtrack audio unless separately cleared. A muted derivative should only be considered after verifying the exact clip terms and confirming the output has no audio stream.
+
+Prefer birds, wildlife, plants, underwater habitats and landscape footage without identifiable people. Review visitors, children, researchers, fishermen, rangers, private property, third-party marks and cultural sensitivity before commercial/promotional use. Resolve exact MP4 URLs from each official item/player page; do not guess VBrick URLs.
+
+See the detailed [USFWS/NCTC B-roll research and rights-gate record](research/USFWS_NCTC_BROLL.md) and the [source catalog entry](sources.json).
+
+
 ## New source and rights rules
 
 - **Smithsonian:** only images that are explicitly CC0 both at the collection record and at the selected media object are bundled. The API may require a registered key for reliable usage; API failures are recorded, not represented as zero uncertainty.
