@@ -194,6 +194,10 @@ def run_benchmark(
     valid_providers = {"voicestudio", "korva", "google", "elevenlabs", "all"}
     if provider not in valid_providers:
         raise ValueError(f"Unsupported provider selection: {provider}")
+    if provider in {"google", "elevenlabs"} and not allow_cloud:
+        raise ValueError(
+            f"{provider} synthesis can incur charges; pass --allow-cloud to confirm the calls"
+        )
     if provider == "all" and not engine:
         raise ValueError("Provider-wide benchmark needs the exact VoiceStudio --engine ID")
     if provider == "voicestudio" and not engine:
@@ -243,7 +247,7 @@ def run_benchmark(
         extension = ".mp3" if candidate_provider == "elevenlabs" else ".wav"
         filename = (
             f"{index:03d}-{blind_label.replace(' ', '-')}{extension}"
-            if blind else f"{index:03d}-{_slug(voice_id)}{extension}"
+            if blind else f"{index:03d}-{candidate_provider}-{_slug(voice_id)}{extension}"
         )
         destination = audio_dir / filename
         row: dict[str, Any] = {
@@ -282,7 +286,7 @@ def run_benchmark(
         "schema_version": 1,
         "provider": provider,
         "providers_included": requested_providers,
-        "cloud_enabled": allow_cloud,
+        "cloud_enabled": any(name in {"google", "elevenlabs"} for name in requested_providers),
         "catalogue_errors": catalogue_errors,
         "engine": engine,
         "language": language,
