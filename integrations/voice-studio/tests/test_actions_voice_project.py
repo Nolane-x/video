@@ -37,6 +37,19 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             ],
         }
 
+    def test_repository_actions_documentary_manifest_validates_for_all_cast_roles(self):
+        manifest_path = (
+            Path(__file__).resolve().parents[1]
+            / "examples"
+            / "actions-vietnamese-documentary.json"
+        )
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        segments = project.validate_actions_project(data)
+        self.assertEqual(len(data["cast"]), 4)
+        self.assertEqual(len(segments), 10)
+        self.assertEqual({item["provider"] for item in segments}, {"korva"})
+        self.assertEqual({item["engine"] for item in segments}, {"korva-onnx"})
+
     def test_actions_project_rejects_non_korva_provider(self):
         data = self.manifest()
         data["cast"]["narrator"]["provider"] = "voicestudio"
@@ -96,8 +109,9 @@ class ActionsVoiceProjectTests(unittest.TestCase):
                 timeline = output_dir / "h2-project" / "timeline"
                 timeline.mkdir(parents=True, exist_ok=True)
                 (timeline / "voice.wav").write_bytes(b"RIFF" + b"\0" * 64)
-                for name in ("blocks.json", "lines.json", "words.json"):
-                    (timeline / name).write_text("[]", encoding="utf-8")
+                (timeline / "blocks.json").write_text('[{"id":"V001"}]', encoding="utf-8")
+                (timeline / "lines.json").write_text('[{"id":"L001"}]', encoding="utf-8")
+                (timeline / "words.json").write_text('[{"w":"Xin"}]', encoding="utf-8")
                 (timeline / "transcript.txt").write_text("Xin chào Việt Nam.\n", encoding="utf-8")
                 return {"timeline_dir": "h2-project/timeline", "outputs": {}}
 
@@ -128,6 +142,10 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             self.assertEqual(report["generated_segments"], 1)
             self.assertIsNotNone(report["h2_timing"])
             self.assertEqual(report["technical_pass"], 1)
+            self.assertEqual(report["h2_timing"]["block_count"], 1)
+            self.assertEqual(report["h2_timing"]["line_count"], 1)
+            self.assertEqual(report["h2_timing"]["word_count"], 1)
+            self.assertTrue((out / "project-manifest.json").is_file())
             saved = json.loads((out / "actions-voice-project-report.json").read_text(encoding="utf-8"))
             self.assertEqual(saved["model"]["revision"], "a" * 40)
             self.assertEqual(saved["elevenlabs_equivalence"], None)
