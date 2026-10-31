@@ -26,6 +26,9 @@ class FakeApi:
         self.posts.append((path, payload))
         return {"ok": True, "engine_id": "supertonic3", "accepted": True}
 
+    def synthesize(self, *_args, **_kwargs):
+        raise AssertionError("synthesis must not run before licence consent")
+
 
 class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
     def test_acceptance_is_not_written_without_explicit_manual_confirmation(self):
