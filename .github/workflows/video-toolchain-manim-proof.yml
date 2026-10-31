@@ -1,6 +1,12 @@
 name: Manim educational animation proof
 
 on:
+  pull_request:
+    paths:
+      - "toolchain/python/manim/**"
+      - "tools/video/manim_smoke.py"
+      - ".agents/skills/video-manim-explainer/**"
+      - ".github/workflows/video-toolchain-manim-proof.yml"
   workflow_dispatch:
 
 permissions:
@@ -34,7 +40,7 @@ jobs:
         run: |
           mkdir -p out/manim
           manim -ql --media_dir out/manim tools/video/manim_smoke.py VideoToolchainProof
-          find out/manim -type f -name '*.mp4' -print -quit > out/manim-output-path.txt
+          find out/manim/videos -type f -name '*.mp4' -print -quit > out/manim-output-path.txt
           test -s out/manim-output-path.txt
           video="$(cat out/manim-output-path.txt)"
           ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$video" | tee out/manim-metadata.json
