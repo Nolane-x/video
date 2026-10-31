@@ -2,6 +2,8 @@
 
 This is a decision aid for the Command Center and Video Production Master skill. It is not a rigid template: use the user's brief and current project state as the source of truth, select only the smallest effective engine/skill set, and record any deliberate exception.
 
+The machine-readable routing contract lives in `tools/video/genre-routing.json`. It is the canonical source for route IDs, owners, primary/conditional tools, required evidence, guardrails and QA checks. Run `python tools/video/validate_genre_routing.py` (also included in the core unit-test suite) to verify all 10 profiles against this human-readable matrix. Update both in the same change when a genre route changes.
+
 ## 1. Brief contract — required before tool selection
 
 Record or resolve:
