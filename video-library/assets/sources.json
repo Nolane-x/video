@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
-  "checked_on": "2026-10-30",
+  "checked_on": "2026-10-31",
   "bundling_policy": {
     "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
     "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
@@ -344,6 +344,19 @@
       "verified_page_license": true,
       "bundling": "manual-or-future-api",
       "note": "CC0 assets can be commercially used and redistributed, but every downloaded asset still needs its own provenance and integrity entry."
+    },
+    {
+      "id": "blender-demo-cc0",
+      "title": "Blender Demo Files — selected CC0 project files and asset bundles",
+      "provider": "Blender Foundation / Blender Studio and named contributors",
+      "kind": "3D project files and asset bundles",
+      "category": "3D models, scenes, procedural Geometry Nodes and shading demos",
+      "source_page": "https://www.blender.org/download/demo-files/",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_page_license": true,
+      "bundling": "fixed-exact-download-url-allowlist-with-live-title-level-CC0-marker-and-binary-integrity-checks",
+      "note": "Only the explicit CC0 items in the allowlist are downloaded. Every build re-reads the official Blender Demo Files catalog and requires the exact item title to be followed by a CC0 marker plus the exact official download link. CC-BY and CC-BY-SA works are deliberately excluded from this CC0 lane; Blender ZIPs must contain safe paths and at least one .blend project, and standalone .blend files must pass the Blender binary signature check."
     },
     {
       "id": "openverse",
