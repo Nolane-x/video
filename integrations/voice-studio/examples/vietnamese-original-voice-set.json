@@ -1,0 +1,32 @@
+{
+  "engine": "voxcpm2",
+  "language": "vi",
+  "sample_text": "Xin chào. Đây là mẫu thử giọng tiếng Việt của Nolane Video Studio. Trời trở lạnh, trăng sáng trên những tán cây.",
+  "voices": [
+    {
+      "name": "Nolane VI — Warm Documentary Narrator",
+      "description": "An original fictional Vietnamese female narrator, adult, warm low-mid register, smooth resonant timbre, clear Hanoi-standard Vietnamese articulation, measured documentary pacing, calm and intimate emotional delivery, precise final consonants and natural sentence endings.",
+      "seed": 4201
+    },
+    {
+      "name": "Nolane VI — Credible Male Expert",
+      "description": "An original fictional Vietnamese male expert voice, adult, medium-low register, grounded chest resonance, clean Hanoi-standard Vietnamese pronunciation, steady measured cadence, restrained confidence, articulate technical terms and numbers, neutral documentary delivery without theatrical exaggeration.",
+      "seed": 4202
+    },
+    {
+      "name": "Nolane VI — Bright Channel Host",
+      "description": "An original fictional Vietnamese female host voice, young adult, medium register with a bright forward timbre, lively but controlled energy, natural conversational rhythm, crisp consonants, friendly curiosity, varied intonation and clear Northern Vietnamese diction.",
+      "seed": 4203
+    },
+    {
+      "name": "Nolane VI — Cinematic Storyteller",
+      "description": "An original fictional Vietnamese male storyteller, mature adult, low register, dark warm resonance, deliberate cinematic pacing, soft breath-supported phrases, nuanced dramatic emphasis, articulate Vietnamese tones and consonants, intimate rather than booming.",
+      "seed": 4204
+    },
+    {
+      "name": "Nolane VI — Gentle Companion",
+      "description": "An original fictional Vietnamese female companion voice, adult, medium-low register, soft rounded timbre, reassuring warmth, natural pauses, relaxed conversational rhythm, emotionally empathetic but not whispery, clear Vietnamese pronunciation.",
+      "seed": 4205
+    }
+  ]
+}
