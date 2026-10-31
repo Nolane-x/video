@@ -3010,6 +3010,12 @@ class NPSBrollImporterTests(unittest.TestCase):
         third_party = dict(detail)
         third_party["PhotoCredit"] = "Independent Film Studio"
         self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, third_party, asset_id))
+        restricted = dict(detail)
+        restricted["Description"] = "Video contains licensed third-party footage."
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, restricted, asset_id))
+        restricted_access = dict(detail)
+        restricted_access["Access Constraints"] = "Permission required"
+        self.assertFalse(nps_broll_importer._npgallery_rights_verified(asset, restricted_access, asset_id))
 
     def test_full_npgallery_import_revalidates_detail_downloads_original_and_records_provenance(self):
         asset_id, asset, search_html, detail_html = self._npgallery_fixture()
