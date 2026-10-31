@@ -2982,7 +2982,7 @@ class NPSNPGalleryImageImporterTests(unittest.TestCase):
         self.assertEqual(index[0]["sha256"], hashlib.sha256(source_bytes).hexdigest())
         self.assertEqual(index[0]["width"], 48)
         self.assertEqual(index[0]["height"], 32)
-        self.assertEqual(limits, [nps_gallery_image_importer.MAX_TOTAL_SOURCE_BYTES])
+        self.assertEqual(limits, [nps_gallery_image_importer.MAX_IMAGE_BYTES])
         self.assertEqual(
             len([row for row in report if row.get("status") == "downloaded"]),
             1,
