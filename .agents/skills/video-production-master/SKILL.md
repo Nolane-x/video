@@ -59,6 +59,8 @@ User references:
 Open the source and actually watch it before recording timestamped observations; the standalone reference MP4s were not found in the current workspace/Library snapshot. Study the high-level visual grammar. Do not copy frames, characters, dialogue, scripts or music.
 
 ## Hard production gates
+
+0. **Editorial readiness before render:** complete the audience/platform/language/aspect/voice-policy/hook/promise/payoff brief. Run `python tools/video/evaluate_editorial_plan.py <shot-plan.json> --output <report.json> --strict`; a blocked plan must be revised before rendering. Do not use uniform shot timing or a dominant scene template by default. Every shot needs a story function and explicit framing/angle/camera/composition; physical contacts need an action/contact/follow-through proof. A plan-ready report permits only blocking/animatic and preview, never final release.
 1. **Repository truth:** inspect code, storyboard, assets, commits, CI and storage status.
 2. **Brief:** audience, platform, ratio, duration, language, voice-over policy, emotional outcome and constraints. Don't ask again for known details.
 3. **Reference breakdown:** sample the whole video, not thumbnails alone. Record framing, angle, camera, characters, action, emotion, set, palette/light, props/contact, text, transitions and sound beats. Separate observation from inference.
@@ -74,7 +76,7 @@ Open the source and actually watch it before recording timestamped observations;
 12. **Render:** record exact engine, command, CI run and source commit. Use a temporary master and preserve last known-good output.
 13. **QA:** validate shot variety, contact, continuity, crops, transitions, audio, duration, ratio, FPS and codecs. P0/P1 defects block release or must be disclosed.
 14. **Delivery:** MP4, source/reproducible commit, manifest, contact sheets, QA, audio measurements, metadata and known limits.
-15. **Truthfulness:** never say H2/Remotion/Blender ran unless logs support that exact claim.
+15. **Truthfulness:** never say H2/Remotion/Blender ran unless logs support that exact claim. A 100% text OCR score or technical render pass does not demonstrate story quality, visual variety, pacing, sound design or emotional impact.
 16. **State transfer:** update state, handoff and film manifest at end of every session.
 
 ## Engine architecture
