@@ -13,6 +13,10 @@ on:
       - "tools/video/cdc_broll_importer.py"
       - "tools/video/nps_broll_importer.py"
       - "tools/video/nps_gallery_image_importer.py"
+      - "tools/video/blender_demo_importer.py"
+      - "tools/video/test_blender_demo_importer.py"
+      - "tools/video/blender_demo_importer.py"
+      - "tools/video/test_blender_demo_importer.py"
       - "tools/video/probe_nasa_svs.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
@@ -74,6 +78,8 @@ jobs:
           python -m py_compile tools/video/cdc_broll_importer.py
           python -m py_compile tools/video/nps_broll_importer.py
           python -m py_compile tools/video/nps_gallery_image_importer.py
+          python -m py_compile tools/video/blender_demo_importer.py
+          python -m py_compile tools/video/test_blender_demo_importer.py
           python -m py_compile tools/video/probe_nasa_svs.py
           python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/finalize_asset_library_release.py
@@ -84,6 +90,9 @@ jobs:
 
       - name: Run offline source-rights and asset-family regression tests
         run: python tools/video/test_asset_library_sources.py
+
+      - name: Run Blender CC0 catalog and bundle rights tests
+        run: python tools/video/test_blender_demo_importer.py
 
       - name: Generate and verify every original asset family without network access
         run: |
