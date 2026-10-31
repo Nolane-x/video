@@ -82,7 +82,7 @@ def valid_plan():
 class EditorialPlanTests(unittest.TestCase):
     def test_complete_plan_is_ready_for_blocking_not_release(self):
         report = evaluate_plan(valid_plan())
-        self.assertEqual(report["status"], "PLAN_READY_FOR_RENDER")
+        self.assertEqual(report["status"], "PLAN_READY_FOR_RENDER", json.dumps({"severityCounts": report["severityCounts"], "findings": report["findings"]}, ensure_ascii=False))
         self.assertGreaterEqual(report["planReadinessScore"], 75)
         self.assertTrue(any("never a production release" in item for item in report["limitations"]))
 
