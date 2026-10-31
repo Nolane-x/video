@@ -1,7 +1,17 @@
-# HyperFrames proof lane
+# HyperFrames CPU proof — Nolane Video
 
-This lane demonstrates that the pinned HyperFrames CLI can scaffold, lint, render and snapshot a small HTML video on a CPU-only GitHub Actions runner. It uses the built-in \`warm-grain\` example so it does not pull from the separately managed asset/audio library.
+This repository-owned 17-second, 1920×1080 sample verifies the pinned HyperFrames runtime and its production checks. It is self-contained: the workflow copies the exact pinned GSAP distribution into `vendor/`; no CDN, external footage, music, font or remote texture is needed.
 
-Run \`.github/workflows/video-toolchain-hyperframes-proof.yml\` manually. The generated project and final MP4 are runner-local; only the proof MP4, lint JSON, ffprobe metadata and key-frame snapshots are uploaded as a short-lived Actions artifact.
+## What it demonstrates
 
-For a real film, create the composition in the project folder dedicated to that film, define exact shot and caption timing, then use the same CLI commands after the visual proof is reviewed.
+- A visible first frame and readable title treatment.
+- Four timed visual beats: story, motion, clarity and final delivery.
+- Phrase-level on-screen text with comfortable reading holds.
+- Locally bundled GSAP timelines and a motion sidecar with time-based assertions.
+- Deterministic CPU browser rendering.
+
+## Quality gates
+
+The workflow runs HyperFrames `check` with strict mode, snapshots, sampled frames and transition sampling. The generated JSON is passed to `tools/video/validate_hyperframes_report.py`, which fails on warnings/errors, disabled motion checks, missing motion samples or failed contrast/layout/runtime/craft sections. The final MP4 is independently checked for duration, dimensions, frame rate and codec.
+
+A passing proof validates this sample/runtime integration only. It does not certify every future project or grant rights to assets, models, fonts or music.

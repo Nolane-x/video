@@ -25,14 +25,20 @@ class HyperFramesReportTests(unittest.TestCase):
         report = clean_report()
         report["contrast"]["ok"] = False
         report["contrast"]["errorCount"] = 1
-        report["contrast"]["findings"] = [{"severity": "error", "code": "contrast_aa_failure"}]
+        report["contrast"]["findings"] = [
+            {"severity": "error", "code": "contrast_aa_failure"}
+        ]
         self.assertTrue(any("contrast" in item for item in validate_report(report)))
 
     def test_report_with_craft_warning_fails(self):
         report = clean_report()
         report["craft"]["warningCount"] = 1
-        report["craft"]["findings"] = [{"severity": "warning", "code": "line_unread"}]
-        self.assertTrue(any("warningCount=1" in item for item in validate_report(report)))
+        report["craft"]["findings"] = [
+            {"severity": "warning", "code": "line_unread"}
+        ]
+        self.assertTrue(
+            any("warningCount=1" in item for item in validate_report(report))
+        )
 
     def test_report_without_motion_sidecar_fails(self):
         report = clean_report()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed when HyperFrames' integrated QA report contains any non-zero findings."""
+"""Fail closed when HyperFrames' integrated QA report contains non-zero findings."""
 from __future__ import annotations
 
 import json
@@ -34,9 +34,10 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         if isinstance(findings, list):
             for finding in findings:
                 if isinstance(finding, dict):
-                    severity = finding.get("severity", "unknown")
-                    code = finding.get("code", "unknown")
-                    errors.append(f"{section_name}: {severity} finding {code}")
+                    errors.append(
+                        f"{section_name}: {finding.get('severity', 'unknown')} "
+                        f"finding {finding.get('code', 'unknown')}"
+                    )
         else:
             errors.append(f"{section_name}: findings must be an array")
 
@@ -62,7 +63,10 @@ def validate_report(report: dict[str, Any]) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     if len(args) != 1:
-        print("Usage: validate_hyperframes_report.py <hyperframes-check.json>", file=sys.stderr)
+        print(
+            "Usage: validate_hyperframes_report.py <hyperframes-check.json>",
+            file=sys.stderr,
+        )
         return 2
     path = Path(args[0])
     try:
