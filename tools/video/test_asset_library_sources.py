@@ -1793,6 +1793,7 @@ class NARABulkDatasetProbeTests(unittest.TestCase):
         response = mock.MagicMock()
         response.__enter__.return_value = response
         response.status = 206
+        response.geturl.return_value = url
         response.headers = {
             "Content-Type": "video/mp4",
             "Content-Range": "bytes 0-63/292897920",
@@ -1910,6 +1911,11 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov:444/vis/movie.mp4"))
         self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov/api/5687/movie.mp4"))
         self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov/vis/movie.mp4?redirect=1"))
+        official_https = "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"
+        official_http = "http://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"
+        self.assertTrue(nasa_svs_importer.svs_response_url_is_allowed(official_https, official_https))
+        self.assertFalse(nasa_svs_importer.svs_response_url_is_allowed(official_https, official_http))
+        self.assertFalse(nasa_svs_importer.svs_response_url_is_allowed(official_https, "https://evil.example/vis/movie.mp4"))
 
     def test_svs_page_parser_finds_movies_and_detects_explicit_licensed_music_notes(self):
         page = {
