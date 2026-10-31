@@ -8,6 +8,7 @@ on:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
       - "tools/video/build_asset_library_shard.py"
+      - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/generate_sfx_library.py"
@@ -20,6 +21,7 @@ on:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
       - "tools/video/build_asset_library_shard.py"
+      - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/generate_original_stickers.py"
@@ -57,6 +59,7 @@ jobs:
         run: |
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/generate_original_stickers.py
