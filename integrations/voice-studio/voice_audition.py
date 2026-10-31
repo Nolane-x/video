@@ -73,6 +73,9 @@ def collect_auditions(
     search: str | None = None,
     limit: int = 20,
     delay: float = 0.5,
+    benchmark_text: str | None = None,
+    engine: str | None = None,
+    blind: bool = False,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     entries: list[dict[str, Any]] = []
@@ -107,7 +110,8 @@ def collect_auditions(
     for index, (kind, item) in enumerate(tasks, 1):
         identifier = str(item.get("id") or item.get("profile_id") or f"voice-{index:03d}")
         name = str(item.get("name") or identifier)
-        destination = audio_dir / f"{index:03d}-{_safe_filename(identifier)}.audio"
+        filename_key = f"candidate-{index:03d}" if blind else _safe_filename(identifier)
+        destination = audio_dir / f"{index:03d}-{filename_key}.audio"
         row: dict[str, Any] = {
             "kind": kind,
             "id": identifier,
@@ -122,8 +126,20 @@ def collect_auditions(
             "is_featured": item.get("is_featured"),
             "status": "pending",
         }
+        if blind:
+            row["blind_label"] = f"Candidate {index:02d}"
         try:
-            if kind == "profile":
+            if kind == "profile" and benchmark_text:
+                if not engine:
+                    raise ValueError("--engine is required when --text-file is used")
+                audio_path = client.synthesize(
+                    benchmark_text, destination,
+                    engine=engine, voice=identifier,
+                    language=language,
+                )
+                row["benchmark_text"] = benchmark_text
+                row["benchmark_engine"] = engine
+            elif kind == "profile":
                 audio_path = client.profile_audio(identifier, destination)
             else:
                 row["preview_state"] = client.archetype_preview_state(identifier)
@@ -149,6 +165,7 @@ def collect_auditions(
         "ready": sum(row["status"] == "ready" for row in entries),
         "failed": sum(row["status"] == "failed" for row in entries),
         "entries": entries,
+        "blind": blind,
         "human_review": {
             "required": True,
             "note": "Listen to the clips. Metadata and successful HTTP responses do not establish naturalness, pronunciation, voice rights or character suitability.",
@@ -158,15 +175,17 @@ def collect_auditions(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    _write_html(result, output_dir / "index.html")
+    _write_html(result, output_dir / "index.html", blind=blind)
     return result
 
 
-def _write_html(data: dict[str, Any], destination: Path) -> None:
+def _write_html(data: dict[str, Any], destination: Path, *, blind: bool = False) -> None:
     cards = []
     for item in data["entries"]:
-        name = html.escape(str(item.get("name", "Voice")))
-        meta = " · ".join(
+        name = html.escape(
+            str(item.get("blind_label") if blind else item.get("name", "Voice"))
+        )
+        meta = "Blind listening candidate" if blind else " · ".join(
             html.escape(str(value))
             for value in (
                 item.get("kind"),
@@ -184,10 +203,11 @@ def _write_html(data: dict[str, Any], destination: Path) -> None:
             audio = f'<audio controls preload="none" src="{src}"></audio>'
         else:
             audio = f'<p class="error">{html.escape(str(item.get("error", "Preview unavailable")))}</p>'
-        instruct = html.escape(str(item.get("instruct") or ""))
+        instruct = "" if blind else html.escape(str(item.get("instruct") or ""))
+        identifier = "" if blind else f'<code>{html.escape(str(item.get("id", "")))}</code>'
         cards.append(
             f'<article><h2>{name}</h2><p class="meta">{meta}</p>{audio}'
-            f'<p class="instruct">{instruct}</p><code>{html.escape(str(item.get("id", "")))}</code></article>'
+            f'<p class="instruct">{instruct}</p>{identifier}</article>'
         )
     document = """<!doctype html>
 <html lang="vi"><head><meta charset="utf-8">
@@ -218,17 +238,35 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--delay", type=float, default=0.5)
     parser.add_argument("--output", type=Path, default=Path("out/voice-auditions"))
+    parser.add_argument("--text-file", type=Path,
+                        help="Use the same fixed script for each saved profile (A/B test)")
+    parser.add_argument("--engine", help="Exact installed VoiceStudio engine ID used with --text-file")
+    parser.add_argument("--blind", action="store_true",
+                        help="Hide voice names/IDs in the local audition HTML")
     args = parser.parse_args()
     if not 1 <= args.limit <= 500:
         parser.error("--limit must be between 1 and 500")
     if args.delay < 0:
         parser.error("--delay cannot be negative")
     language = None if args.language.lower() == "all" else args.language
+    if args.text_file and args.source == "archetypes":
+        parser.error("--text-file is for saved profiles; archetype previews use their curated sample text")
+    if args.text_file and not args.engine:
+        parser.error("--engine is required with --text-file")
+    benchmark_text = None
+    if args.text_file:
+        try:
+            benchmark_text = args.text_file.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            parser.error(f"Cannot read --text-file: {exc}")
+        if not benchmark_text or len(benchmark_text) > 4096:
+            parser.error("--text-file must contain 1–4096 characters")
     try:
         result = collect_auditions(
             VoiceStudioClient(), args.output,
             source=args.source, language=language, search=args.search,
             limit=args.limit, delay=args.delay,
+            benchmark_text=benchmark_text, engine=args.engine, blind=args.blind,
         )
     except Exception as exc:
         print(f"Voice audition failed: {exc}", file=sys.stderr)
