@@ -110,6 +110,8 @@ def synthesize(
 ) -> Path:
     if not voice:
         raise ValueError("An ElevenLabs voice_id is required")
+    if not 0.7 <= speed <= 1.2:
+        raise ValueError("ElevenLabs speed must be between 0.7 and 1.2")
     options = settings or {}
     model_id = str(options.get("model_id", "eleven_flash_v2_5"))
     body = {
