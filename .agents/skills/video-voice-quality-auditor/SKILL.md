@@ -32,6 +32,18 @@ catalogue do not mean a Vietnamese model is installed or licensed, and do not
 mean synthesis was performed. Require a separate rendered WAV artifact before
 calling any VoiceStudio engine audio-tested.
 
+The native Supertonic-3 audition is a separate workflow:
+`.github/workflows/voice-studio-supertonic-cpu.yml`. Push runs must verify the
+engine and show its OpenRAIL-M gate as unaccepted without downloading model
+weights. Only a human-triggered `workflow_dispatch` with
+`accept_openrail_m=true` may write acceptance and synthesize. The model
+snapshot is downloaded into ephemeral runner storage only: never keep it in
+Actions cache, Git or the artifact. The artifact should contain only generated
+audios, blind pages and audit reports. Record the SDK MIT and weights
+OpenRAIL-M terms separately from the app's AGPL-3.0; explicit acceptance is
+not a commercial-use clearance. Review the workflow's licence receipt and
+weight-download evidence before calling the engine tested.
+
 For the project renderer, inspect the full delivery package, not just its
 green job status: confirm each WAV hash, per-speaker identity fingerprint,
 H2 block/line/word coverage, master audio peak/loudness, `captions.srt`,
