@@ -70,8 +70,8 @@ class ActionsVoiceLabTests(unittest.TestCase):
     def test_audio_path_must_remain_inside_case_output(self):
         with tempfile.TemporaryDirectory() as root:
             with tempfile.TemporaryDirectory() as outside:
-                audio = Path(root) / "case" / "audio.wav"
-                audio.parent.mkdir()
+                audio = Path(root) / "case" / "audio" / "audio.wav"
+                audio.parent.mkdir(parents=True)
                 audio.write_bytes(b"audio")
                 self.assertEqual(
                     safe_audio_path(Path(root) / "case", "audio/audio.wav"),
