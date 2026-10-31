@@ -12,8 +12,9 @@ from pathlib import Path
 from typing import Any
 
 BASE = "https://svs.gsfc.nasa.gov"
-SEARCH_TERMS = ("Earth", "Moon", "Mars", "Sun", "Ocean", "Climate", "Spacecraft", "Galaxy", "Aurora", "Hurricane")
-MAX_PAGES = 96
+SEARCH_TERMS = ("Earth", "Moon", "Mars", "Sun", "Ocean", "Climate", "Spacecraft", "Galaxy", "Aurora", "Hurricane", "Volcano", "Asteroid", "Eclipse", "Weather", "Telescope", "Wildfire", "Spaceflight")
+MAX_PAGES = 160
+MAX_SEARCH_JSON_BYTES = 2 * 1024 * 1024
 MAX_PER_TERM = 10
 MAX_DOWNLOADS = 36
 MAX_JSON_BYTES = 8 * 1024 * 1024
@@ -168,7 +169,7 @@ def _search_pages(report: list[dict[str, Any]]) -> list[tuple[int, str]]:
     for term in SEARCH_TERMS:
         query = urllib.parse.urlencode({"studio": "SVS", "search": term, "limit": "100", "offset": "0"})
         try:
-            data, _ = _json(BASE + "/api/search/?" + query)
+            data, _ = _json(BASE + "/api/search/?" + query, MAX_SEARCH_JSON_BYTES)
             added = 0
             for row in data.get("results") or []:
                 if not isinstance(row, dict) or str(row.get("result_type") or "").casefold() != "visualization":
