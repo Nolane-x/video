@@ -33,6 +33,24 @@ class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
         self.assertEqual(api.posts, [])
         self.assertEqual(api.last_get, "/api/settings/license/supertonic3")
 
+    def test_benchmark_stops_before_output_or_synthesis_without_model_consent(self):
+        api = FakeApi([{"engine_id": "supertonic3", "accepted": False}])
+        suite = (
+            Path(__file__).resolve().parents[1]
+            / "examples"
+            / "actions-benchmark-suite.json"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "must-not-exist"
+            with patch.object(api, "synthesize", side_effect=AssertionError("synthesis must not run")) as synthesize:
+                with self.assertRaises(PermissionError):
+                    bench.run_benchmark(
+                        suite, output, api, accept_model_license=False,
+                    )
+            synthesize.assert_not_called()
+            self.assertFalse(output.exists())
+            self.assertEqual(api.posts, [])
+
     def test_explicit_confirmation_accepts_license_and_records_provenance(self):
         api = FakeApi([
             {"engine_id": "supertonic3", "accepted": False},
