@@ -20,6 +20,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from audio_mastering import normalize_voice_file
 from generate_voiceover import generate, validate_manifest
 from providers import korva
 from voice_quality import _probe_audio, _technical_findings, audit_report
@@ -119,40 +120,6 @@ def _download_model(revision: str) -> Path:
     return assets
 
 
-def _apply_headroom(audio_path: Path, attenuation_db: float = 3.0) -> dict[str, Any]:
-    """Apply deterministic pre-H2 headroom so concatenation cannot peak at 0 dBFS."""
-    temporary = audio_path.with_name(audio_path.stem + ".headroom.tmp.wav")
-    command = [
-        "ffmpeg", "-nostdin", "-v", "error", "-y", "-i", str(audio_path),
-        "-af", f"volume=-{attenuation_db:g}dB",
-        "-c:a", "pcm_s16le", str(temporary),
-    ]
-    completed = subprocess.run(
-        command, check=False, capture_output=True, text=True, timeout=120,
-    )
-    if completed.returncode or not temporary.is_file() or temporary.stat().st_size <= 44:
-        temporary.unlink(missing_ok=True)
-        raise RuntimeError(
-            "FFmpeg headroom pass failed: "
-            + (completed.stderr[-2000:] or completed.stdout[-2000:] or str(completed.returncode))
-        )
-    metrics = _probe_audio(temporary)
-    if metrics["sample_rate_hz"] != EXPECTED_SAMPLE_RATE:
-        temporary.unlink(missing_ok=True)
-        raise RuntimeError("Headroom pass unexpectedly changed the source sample rate")
-    if metrics["peak_dbfs"] > -2.5:
-        temporary.unlink(missing_ok=True)
-        raise RuntimeError(
-            f"Headroom pass did not leave sufficient peak margin: {metrics['peak_dbfs']} dBFS"
-        )
-    temporary.replace(audio_path)
-    return {
-        "attenuation_db": attenuation_db,
-        "post_peak_dbfs": metrics["peak_dbfs"],
-        "post_rms_dbfs": metrics["rms_dbfs"],
-    }
-
-
 def _run_h2_timing(output_dir: Path, voice_txt: Path, audio_dir: Path) -> dict[str, Any]:
     if not H2_PREP_VOICE.is_file():
         raise FileNotFoundError(f"The pinned H2 prep_voice.py tool is missing: {H2_PREP_VOICE}")
@@ -194,6 +161,137 @@ def _run_h2_timing(output_dir: Path, voice_txt: Path, audio_dir: Path) -> dict[s
             for name in required
         },
     }
+
+
+def _subtitle_timestamp(seconds: float, *, webvtt: bool = False) -> str:
+    milliseconds = max(0, round(seconds * 1000))
+    hours, remainder = divmod(milliseconds, 3_600_000)
+    minutes, remainder = divmod(remainder, 60_000)
+    secs, millis = divmod(remainder, 1000)
+    separator = "." if webvtt else ","
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}{separator}{millis:03d}"
+
+
+def _write_caption_assets(output_dir: Path, timeline_dir: Path) -> dict[str, Any]:
+    """Export sentence-level SRT/VTT from H2's estimated line timestamps."""
+    lines = json.loads((timeline_dir / "lines.json").read_text(encoding="utf-8"))
+    blocks = json.loads((timeline_dir / "blocks.json").read_text(encoding="utf-8"))
+    master_path = timeline_dir / "voice.wav"
+    master_duration = float(_probe_audio(master_path)["duration_s"])
+    block_ids = {str(item.get("id")) for item in blocks}
+    if not lines or not block_ids:
+        raise RuntimeError("Cannot export captions without H2 blocks and sentence lines")
+
+    plain: list[tuple[int, int, str]] = []
+    labelled: list[tuple[int, int, str]] = []
+    previous_end_ms = 0
+    for index, item in enumerate(lines, 1):
+        block_id = str(item.get("block") or "")
+        text = " ".join(str(item.get("text") or "").split())
+        if block_id not in block_ids or not text:
+            raise RuntimeError(f"Invalid H2 caption line {index}: missing block or text")
+        try:
+            start_s = float(item["start"])
+            end_s = float(item["end"])
+        except (KeyError, TypeError, ValueError):
+            raise RuntimeError(f"Invalid H2 timestamp on caption line {index}") from None
+        if not (0 <= start_s < end_s <= master_duration + 0.05):
+            raise RuntimeError(f"Caption line {index} falls outside the master audio")
+        start_ms = max(previous_end_ms, round(start_s * 1000))
+        end_ms = min(round(master_duration * 1000), round(end_s * 1000))
+        if end_ms <= start_ms:
+            raise RuntimeError(f"Caption line {index} has no positive display duration")
+        plain.append((start_ms, end_ms, text))
+        speaker = " ".join(str(item.get("char") or "").split())
+        labelled.append((start_ms, end_ms, f"{speaker}: {text}" if speaker else text))
+        previous_end_ms = end_ms
+
+    def render_srt(cues: list[tuple[int, int, str]]) -> str:
+        rows = []
+        for cue_no, (start, end, text) in enumerate(cues, 1):
+            rows.append(
+                f"{cue_no}\n"
+                f"{_subtitle_timestamp(start / 1000)} --> {_subtitle_timestamp(end / 1000)}\n"
+                f"{text}\n"
+            )
+        return "\n".join(rows) + "\n"
+
+    def render_vtt(cues: list[tuple[int, int, str]]) -> str:
+        rows = ["WEBVTT", ""]
+        for start, end, text in cues:
+            rows.extend([
+                f"{_subtitle_timestamp(start / 1000, webvtt=True)} --> "
+                f"{_subtitle_timestamp(end / 1000, webvtt=True)}",
+                text,
+                "",
+            ])
+        return "\n".join(rows)
+
+    files = {
+        "captions.srt": render_srt(plain),
+        "captions.vtt": render_vtt(plain),
+        "captions-speaker-labelled.srt": render_srt(labelled),
+        "captions-speaker-labelled.vtt": render_vtt(labelled),
+    }
+    outputs = {}
+    for filename, content in files.items():
+        destination = output_dir / filename
+        destination.write_text(content, encoding="utf-8")
+        outputs[filename] = {
+            "bytes": destination.stat().st_size,
+            "sha256": _sha256(destination),
+        }
+    metadata = {
+        "status": "generated",
+        "line_count": len(lines),
+        "speaker_labels": "available in speaker-labelled variants",
+        "alignment_type": "estimated_sentence_timestamps",
+        "alignment_source": "H2 prep_voice.py proportional sentence-boundary heuristic",
+        "not_forced_aligned": True,
+        "master_duration_s": round(master_duration, 3),
+        "outputs": outputs,
+        "note": (
+            "Sentence boundaries are estimated from H2 audio-duration and text-length "
+            "heuristics. They are editing captions, not ASR forced-alignment ground truth."
+        ),
+    }
+    _write_json(output_dir / "caption-export-report.json", metadata)
+    return metadata
+
+
+def _write_delivery_readme(output_dir: Path, report: dict[str, Any]) -> None:
+    lines = [
+        "# Voice-over delivery package",
+        "",
+        f"- Project: {report.get('project')}",
+        f"- Production status: **{report.get('status')}**",
+        f"- Dialogue segments: {report.get('generated_segments')}/{report.get('segment_count')}",
+        "- Master audio: h2-project/timeline/voice.wav",
+        "- H2 timeline: h2-project/timeline/blocks.json, lines.json, words.json",
+        f"- Caption file count: {len(report.get('captions', {}).get('outputs', {}))}",
+        "",
+        "## Handoff",
+        "",
+        "1. Use the H2 voice.wav file as the assembled voice track.",
+        "2. Use voice/V001.wav … voice/V010.wav for per-line edits or replacement.",
+        "3. Import captions.srt or captions.vtt as sentence-level captions.",
+        "4. Use speaker-labelled caption variants for review and speaker attribution.",
+        "5. Use H2 blocks.json, lines.json and words.json to drive the edit timeline.",
+        "",
+        "## Timing limitation",
+        "",
+        "Caption line timing is estimated by H2's proportional sentence-boundary heuristic. "
+        "It has not been forced-aligned by an ASR model and must be reviewed before publication.",
+        "",
+        "## Audio and rights",
+        "",
+        "Every segment is loudness-normalized to -20 LUFS with a -2.5 dBTP ceiling, "
+        "then checked for codec, sample rate, clipping, silence and SHA-256 integrity.",
+        "Technical QA does not certify naturalness, acting, pronunciation accuracy or voice similarity.",
+        "This example uses KorvaTTS released preset voices; model and output terms must be checked "
+        "before commercial distribution.",
+    ]
+    (output_dir / "README-DELIVERY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def run_project(
@@ -243,9 +341,13 @@ def run_project(
             audio_path.relative_to(output_dir.resolve())
         except ValueError:
             raise ValueError(f"Generation report audio path escapes output: {relative}") from None
-        item["headroom"] = _apply_headroom(audio_path, attenuation_db=3.0)
-        item["sha256"] = _sha256(audio_path)
-        item["bytes"] = audio_path.stat().st_size
+        item["mastering"] = normalize_voice_file(
+            audio_path, target_lufs=-20.0, true_peak_db=-2.5, loudness_range=7.0
+        )
+        item["file"] = Path(relative).with_suffix(".wav").as_posix()
+        mastered_path = output_dir / item["file"]
+        item["sha256"] = _sha256(mastered_path)
+        item["bytes"] = mastered_path.stat().st_size
     _write_json(generation_path, generation)
 
     segment_evidence: list[dict[str, Any]] = []
@@ -255,6 +357,7 @@ def run_project(
             "speaker_id": item.get("speaker_id"),
             "voice": item.get("voice"),
             "status": item.get("status"),
+            "mastering": item.get("mastering"),
         }
         relative = item.get("file")
         audio_path = (output_dir / relative).resolve() if relative else None
@@ -337,9 +440,18 @@ def run_project(
         except Exception as exc:
             h2_error = f"{type(exc).__name__}: {exc}"
 
+    captions = None
+    caption_error = None
+    if h2 is not None and h2_error is None:
+        try:
+            captions = _write_caption_assets(output_dir, output_dir / h2["timeline_dir"])
+        except Exception as exc:
+            caption_error = f"{type(exc).__name__}: {exc}"
+
     failed = int(generation.get("failed_segments", 0))
     status = "complete" if (
-        all_segments_ready and segment_errors == 0 and h2 is not None and h2_error is None
+        all_segments_ready and segment_errors == 0 and h2 is not None
+        and h2_error is None and captions is not None and caption_error is None
     ) else "partial"
     result = {
         "schema_version": 1,
@@ -370,7 +482,12 @@ def run_project(
             "steps": QUALITY_STEPS,
             "threads": CPU_THREADS,
             "seed_policy": "Per speaker: fixed manifest seed",
-            "pre_h2_mastering": {"attenuation_db": 3.0, "peak_headroom": True},
+            "mastering": {
+                "method": "FFmpeg loudnorm",
+                "integrated_loudness_lufs": -20.0,
+                "true_peak_ceiling_dbtp": -2.5,
+                "loudness_range_lu": 7.0,
+            },
         },
         "segment_count": len(segments),
         "generated_segments": int(generation.get("generated_segments", 0)),
@@ -381,6 +498,8 @@ def run_project(
         "segments": segment_evidence,
         "h2_timing": h2,
         "h2_error": h2_error,
+        "captions": captions,
+        "caption_error": caption_error,
         "quality_report": "voice-quality-report.json",
         "generation_report": "voice-generation-report.json",
         "human_listening_required": True,
@@ -393,6 +512,8 @@ def run_project(
         ],
     }
     _write_json(output_dir / "actions-voice-project-report.json", result)
+    if status == "complete":
+        _write_delivery_readme(output_dir, result)
     return result
 
 
