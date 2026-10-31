@@ -155,6 +155,14 @@ class GenreRoutingContractTests(unittest.TestCase):
         errors = validate_genre_routing_data(data, matrix)
         self.assertTrue(any("actual-ui-truth-check" in error for error in errors))
 
+    def test_command_center_entrypoint_uses_machine_readable_genre_routes(self):
+        skill = (
+            ROOT / "plugins/chatgpt/nolane-video-command-center/skills/video-command-center/SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("tools/video/genre-routing.json", skill)
+        self.assertIn("primary versus conditional tools", skill)
+        self.assertIn("parallel asset-library workstream", skill)
+
     def test_quality_assurance_skill_requires_independent_review(self):
         skill = (
             ROOT / "plugins/chatgpt/nolane-video-command-center/skills/video-quality-assurance/SKILL.md"
