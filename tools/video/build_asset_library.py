@@ -4745,7 +4745,7 @@ def internet_archive_search_url(collection,start):
     params=[
         ("q",query),("fl[]","identifier"),("fl[]","title"),("fl[]","licenseurl"),
         ("fl[]","creator"),("fl[]","year"),("rows",str(INTERNET_ARCHIVE_SEARCH_ROWS)),
-        ("start",str(start)),("output","json"),("sort[]","downloads desc")
+        ("start",str(start)),("output","json"),("sort[]","identifier asc")
     ]
     return "https://archive.org/advancedsearch.php?"+urllib.parse.urlencode(params)
 
@@ -4780,6 +4780,7 @@ def download_internet_archive_videos(root,index):
                 report.append({"id":"internet-archive-"+collection+"-search-"+str(page_no),
                                "status":"search_failed","collection":collection,"source_page":search_url,
                                "reason":str(exc)[:350]})
+        print("[Internet Archive]",collection,"unique search candidates:",len(candidates))
         downloaded_for_collection=0
         examined=0
         for identifier in candidates:
@@ -4814,14 +4815,36 @@ def download_internet_archive_videos(root,index):
                     row.update(status="skipped_collection",reason="The exact item metadata does not list the requested source collection.")
                     report.append(row); continue
                 rights=internet_archive_license_detail(metadata)
+                rights_verification_method="item-metadata"
+                # Prelinger IA metadata frequently omits the separate "rights" field even
+                # when the canonical item page explicitly renders Usage: Public Domain.
+                # Verify that exact page field before accepting this legacy Public Domain URL.
+                metadata_rights=str(metadata.get("rights") or "").strip()
+                if (not rights["verified"] and collection=="prelinger"
+                        and not metadata_rights
+                        and internet_archive_license_from_item_metadata(
+                            rights["license_url"],"Public Domain"
+                        )=="Public Domain (item-level Internet Archive rights statement)"):
+                    try:
+                        item_page_html=internet_archive_fetch_item_page(identifier)
+                        if internet_archive_public_domain_usage_is_verified(item_page_html,identifier):
+                            rights.update(
+                                license="Public Domain (verified exact Internet Archive item-page Usage label)",
+                                rights_statement="Public Domain (verified from exact item-page Usage block; API rights field absent)",
+                                verified=True,
+                            )
+                            rights_verification_method="item-page-usage"
+                    except Exception as rights_exc:
+                        row["item_page_rights_verification_error"]=str(rights_exc)[:300]
                 row.update(title=str(metadata.get("title") or identifier)[:260],
                            creator=str(metadata.get("creator") or "")[:260],
                            year=str(metadata.get("year") or "")[:24],
                            license=rights["license"] or "not eligible",
                            license_url=rights["license_url"],
-                           rights_statement=rights["rights_statement"])
+                           rights_statement=rights["rights_statement"],
+                           rights_verification_method=rights_verification_method)
                 if not rights["verified"]:
-                    row.update(status="skipped_rights",reason="The exact item's licenseurl/rights fields are not in the approved CC0/Public Domain allow-list.")
+                    row.update(status="skipped_rights",reason="The exact item's CC0/Public Domain metadata or exact item-page Usage label did not pass the allow-list.")
                     report.append(row); continue
                 chosen=internet_archive_choose_video_file(files)
                 if not chosen:
@@ -4862,7 +4885,7 @@ def download_internet_archive_videos(root,index):
                     f"- Media file: {filename}\n- Direct download: {file_url}\n"
                     f"- Creator: {metadata.get('creator') or 'Not supplied'}\n- Year: {metadata.get('year') or 'Not supplied'}\n"
                     f"- Item license URL: {rights['license_url']}\n- Item rights statement: {rights['rights_statement'] or 'CC0 declaration in item metadata'}\n"
-                    f"- Exact license classification: {rights['license']}\n- File MD5: {actual_md5}\n- File SHA-1: {expected_sha1 or 'Not supplied'}\n"
+                    f"- Exact license classification: {rights['license']}\n- Rights verification: {rights_verification_method}\n- File MD5: {actual_md5}\n- File SHA-1: {expected_sha1 or 'Not supplied'}\n"
                     f"- SHA-256: {digest}\n\n{str(metadata.get('description') or '')[:1800]}\n"
                 )
                 write_text(folder/(target.stem+".SOURCE_AND_LICENSE.md"),note)
@@ -4876,7 +4899,12 @@ def download_internet_archive_videos(root,index):
                     "source_page":item_url,"metadata_url":metadata_url,"source_file_url":file_url,
                     "license":rights["license"],"license_url":rights["license_url"],
                     "rights_statement":rights["rights_statement"],
-                    "license_verified_from_item_metadata":True,"redistributable":True,
+                    "license_verified_from_item_metadata":rights_verification_method=="item-metadata",
+                    "license_verified_from_item_page":rights_verification_method=="item-page-usage",
+                    "rights_verification_method":rights_verification_method,
+                    "rights_basis":"The exact item metadata identifies CC0/Public Domain; Prelinger records with an absent API rights field are accepted only when the canonical item page has exactly one Usage row labelled Public Domain with the expected Creative Commons Public Domain URL. Public Domain Mark is not relabelled CC0. Embedded third-party footage, music, personality and other non-copyright rights require human review before commercial use.",
+                    "embedded_third_party_rights_review_required":True,
+                    "redistributable":True,
                     "duration_seconds":chosen["duration_seconds"],
                     "archive_file_md5":actual_md5,"archive_file_sha1":expected_sha1,
                     "size_bytes":len(blob),"sha256":digest
