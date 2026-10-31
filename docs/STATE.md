@@ -259,3 +259,14 @@ This section is independent of the asset-library workstream above. Do not modify
 Do not render/publish the current blocked storyboard. First rebuild the creative brief and shot plan with meaningful shot-duration variation, distinct visual grammar/action/framing, an explicit narration/music-led decision and story payoff. Run editorial preflight and inspect a short blocking/animatic preview. Only continue to full render after a genuine plan-ready result and preview review. Full final review must include start-to-finish picture and audio playback with evidence; no claim of approval based on OCR/contact sheets alone.
 
 PR #26 remains open and unmerged. Keep the asset-library workstream untouched.
+
+
+## Remotion timing and audio engine update — 2026-10-31
+
+- `video-projects/remotion/src/OneMoreScroll.tsx` no longer hardcodes 120 frames per shot. It derives each shot's start/end frames from the story JSON and computes local animation progress/fades using that shot's actual duration.
+- Music playback is driven by `musicArc` time ranges rather than duplicated frame constants. New story plans can provide `audioPlan.soundCues` with file/start/duration/volume and `audioPlan.narration` with file/start/end/volume. Narration files are expected under `public/audio/narration/`; SFX files under `public/audio/`. Legacy SFX timing is retained only as a backward-compatible fallback for the old storyboard.
+- `tools/video/evaluate_editorial_plan.py` now blocks timeline gaps, overlaps, a non-zero starting point or a final shot that does not reach the declared composition duration. It also requires timed audio segments and file references for voiceover/dialogue plans.
+- Regression tests now assert that the Remotion source consumes `startFrame/endFrame`, has no `SHOT_FRAMES` constant, and supports data-driven music/narration/SFX.
+- Core smoke workflow pull_request path filters now include Remotion source/package/tsconfig paths so typecheck can run even when the full Remotion render workflow is intentionally blocked by editorial preflight.
+- Latest required verification is core smoke run [41204537911](https://github.com/Nolane-x/video/actions/runs/41204537911), which was pending/in progress at last poll. Do not claim the new TypeScript path passed until that run's Remotion typecheck step is complete.
+- Active storyboard remains BLOCKED; renderer capability improvements do not repair the story. Do not render a new full film until a new creative brief/shot plan passes preflight and its blocking/animatic preview is reviewed.
