@@ -2158,8 +2158,7 @@ class ESOVideoImporterTests(unittest.TestCase):
         self.assertFalse(parsed["credit_text"])
 
         missing_checksum = self._page_html().replace(
-            f'data-title="sha256 checksum"\n                     data-content="{self.SOURCE_SHA256}&nbsp;&nbsp;{self.VIDEO_ID}.mp4"',
-            'data-title="checksum not supplied" data-content="missing"',
+            self.SOURCE_SHA256, "not-a-checksum"
         )
         parsed = eso_video_importer.parse_eso_video_page(self.VIDEO_ID, missing_checksum)
         self.assertFalse(parsed["media_candidates"])
@@ -2203,7 +2202,7 @@ class ESOVideoImporterTests(unittest.TestCase):
             def fake_run(args, **kwargs):
                 calls.append(args)
                 if args[0] == "/usr/bin/ffmpeg":
-                    Path(args[-1]).write_bytes(b"silent-video" * 1000)
+                    Path(args[-1]).write_bytes(b"silent-video" * 50000)
                     return mock.Mock(returncode=0, stdout="", stderr="")
                 return mock.Mock(
                     returncode=0,
