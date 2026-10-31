@@ -164,6 +164,14 @@ def nps_item_page_rights_exception(title: str, description: str) -> bool:
 def _resolution_rank(url: str, label: str = "", resolution: str = "") -> int:
     text = f"{label} {resolution} {url}".casefold()
     explicit = re.search(r"\b(2160|1440|1080|1280|854|720|640|480|426|360|240)p?\b", text)
+    if not explicit:
+        # NPS audiovisual IDs and their rendition suffix are concatenated (UUID720p.mp4),
+        # so the normal word boundary cannot see the height after the final UUID digit.
+        explicit = re.search(
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+            r"(2160|1920|1440|1280|1080|854|720|640|480|426|360|240)p\.mp4$",
+            url.casefold(),
+        )
     if explicit:
         value = int(explicit.group(1))
         if "1280x720" in text:
