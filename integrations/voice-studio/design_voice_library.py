@@ -200,6 +200,8 @@ def create_library(
                 _write_report(report_path, {
                     "schema_version": 1, "engine": engine, "language": language,
                     "status": "partial", "voices": rows,
+                    "failed": sum(r["status"] == "failed" for r in rows),
+                    "preview_failed": sum(r.get("preview_status") == "pending_or_failed" for r in rows),
                     "cast": _cast_from_rows(rows),
                 })
                 _write_cast(output_dir, language, rows)
@@ -229,6 +231,7 @@ def create_library(
             "status": "creating",
             "created_or_reused": sum(r["status"] in {"created", "reused"} for r in rows),
             "failed": sum(r["status"] == "failed" for r in rows),
+            "preview_failed": sum(r.get("preview_status") == "pending_or_failed" for r in rows),
             "voices": rows,
             "cast": _cast_from_rows(rows),
             "cast_file": "voice-cast.json" if create else None,
@@ -240,13 +243,16 @@ def create_library(
             time.sleep(delay)
 
     failed = sum(row["status"] == "failed" for row in rows)
+    preview_failed = sum(row.get("preview_status") == "pending_or_failed" for row in rows)
+    incomplete = failed > 0 or (create and render_previews and preview_failed > 0)
     report = {
         "schema_version": 1,
         "engine": engine,
         "language": language,
-        "status": "plan_only" if not create else "partial" if failed else "complete",
+        "status": "plan_only" if not create else "partial" if incomplete else "complete",
         "created_or_reused": sum(row["status"] in {"created", "reused"} for row in rows),
         "failed": failed,
+        "preview_failed": preview_failed,
         "voices": rows,
         "cast": _cast_from_rows(rows),
         "cast_file": "voice-cast.json" if create else None,
