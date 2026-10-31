@@ -95,7 +95,10 @@
         "demucs==4.1.0"
       ],
       "purpose": "Optional speech alignment and source separation; installs no model weights.",
-      "workflow": ".github/workflows/video-toolchain-audio-ml.yml"
+      "workflow": ".github/workflows/video-toolchain-audio-ml.yml",
+      "triggers": [
+        "workflow_dispatch"
+      ]
     }
   },
   "tools": [
@@ -300,7 +303,7 @@
       "role": "Optional headless 3D shots and lighting",
       "source": "https://github.com/blender/blender",
       "default": false,
-      "notes": "Official binary ~385 MB; manual workflow only."
+      "notes": "Optional on-demand profile; path-scoped PR proof or workflow_dispatch only. The official archive is ~385 MB and is never part of the core 2D install."
     },
     {
       "name": "npm License Checker",
