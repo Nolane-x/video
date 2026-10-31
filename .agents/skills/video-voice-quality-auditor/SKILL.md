@@ -32,6 +32,16 @@ catalogue do not mean a Vietnamese model is installed or licensed, and do not
 mean synthesis was performed. Require a separate rendered WAV artifact before
 calling any VoiceStudio engine audio-tested.
 
+For Supertonic-3, use
+`.github/workflows/voice-studio-supertonic-cpu.yml`. This is a preset-voice
+engine (M1/M3/M4/M5/F3/F4/F5), not voice design or cloning. Its SDK is MIT but
+the pinned weights are OpenRAIL-M. Default push executions must not accept the
+licence or download weights; a person must manually dispatch with the explicit
+`accept_openrail_m` checkbox after reading the terms. Model weights stay on
+the temporary runner and are neither cached nor uploaded. Rate the seven
+voices blind across all fixed scripts; do not claim ElevenLabs equivalence from
+technical QA or a single sample.
+
 The native Supertonic-3 audition is a separate workflow:
 `.github/workflows/voice-studio-supertonic-cpu.yml`. Push runs must verify the
 engine and show its OpenRAIL-M gate as unaccepted without downloading model
