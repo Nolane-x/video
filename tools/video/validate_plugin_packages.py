@@ -157,12 +157,18 @@ def validate_genre_routing(root: Path, errors: list[str]) -> None:
     plan_validator = root / "tools/video/evaluate_editorial_plan.py"
     review_validator = root / "tools/video/validate_editorial_review.py"
     review_template = root / "tools/video/editorial-review.template.json"
+    preview_renderer = root / "tools/video/render_blocking_preview.py"
+    preview_validator = root / "tools/video/validate_preview_approval.py"
     if not plan_validator.is_file():
         errors.append(f"{plan_validator}: editorial plan preflight is required")
     if not review_validator.is_file():
         errors.append(f"{review_validator}: final audiovisual review validator is required")
     if not review_template.is_file():
         errors.append(f"{review_template}: final audiovisual review contract template is required")
+    if not preview_renderer.is_file():
+        errors.append(f"{preview_renderer}: blocking motion-preview renderer is required")
+    if not preview_validator.is_file():
+        errors.append(f"{preview_validator}: explicit preview-approval validator is required")
 
     command_center = read_text(
         root / "plugins/chatgpt/nolane-video-command-center/skills/video-command-center/SKILL.md",
@@ -178,8 +184,12 @@ def validate_genre_routing(root: Path, errors: list[str]) -> None:
     )
     for source, required in (
         (command_center, "evaluate_editorial_plan.py"),
+        (command_center, "render_blocking_preview.py"),
+        (command_center, "validate_preview_approval.py"),
         (command_center, "validate_editorial_review.py"),
         (director, "evaluate_editorial_plan.py"),
+        (director, "render_blocking_preview.py"),
+        (qa, "validate_preview_approval.py"),
         (qa, "validate_editorial_review.py"),
         (qa, "Watch the complete video with sound at normal speed."),
     ):
