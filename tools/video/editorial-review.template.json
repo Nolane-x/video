@@ -10,7 +10,7 @@
     "reviewerId": "REPLACE_WITH_REVIEWER_IDENTIFIER",
     "role": "independent-editorial-reviewer",
     "contextIndependent": true,
-    "reviewedAtUtc": "2026-01-01T00:00:00Z"
+    "reviewedAtUtc": "REPLACE_WITH_ISO8601_UTC_TIMESTAMP"
   },
   "method": {
     "fullPlaybackWithAudio": false,
