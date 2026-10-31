@@ -60,7 +60,7 @@
       "tpl": "wide-establishing",
       "line": "A friend sends an invitation while the protagonist scrolls in bed, phone glowing in the dark.",
       "emotion": "distraction",
-      "action": "A friend sends an invitation while the protagonist scrolls in bed, phone glowing in the dark.",
+      "action": "A notification lights the phone; the protagonist scrolls past the friend's invitation instead of replying.",
       "soundCues": [],
       "args": {
         "title": "It starts with a promise.",
@@ -99,7 +99,7 @@
       "tpl": "phone-insert",
       "line": "The feed advances while the friend's invitation slips beneath new notifications.",
       "emotion": "temptation",
-      "action": "The feed advances while the friend's invitation slips beneath new notifications.",
+      "action": "The thumb swipes upward; the invitation disappears beneath a fresh stack of feed cards.",
       "soundCues": [],
       "args": {
         "title": "Just one more video.",
@@ -141,7 +141,7 @@
       "tpl": "wide-tracking",
       "line": "The protagonist crosses the wet street with eyes fixed on the phone.",
       "emotion": "disconnection",
-      "action": "The protagonist crosses the wet street with eyes fixed on the phone.",
+      "action": "The protagonist crosses the wet street with eyes fixed on the phone, missing the people passing nearby.",
       "soundCues": [],
       "args": {
         "title": "The street moves. Their attention doesn't.",
@@ -182,7 +182,7 @@
       "tpl": "medium-wait",
       "line": "A friend waits alone beneath the bus-stop clock, checking the time.",
       "emotion": "avoidance",
-      "action": "A friend waits alone beneath the bus-stop clock, checking the time.",
+      "action": "The friend waits beneath the bus-stop clock, checks the time and watches the bus pull away.",
       "soundCues": [],
       "args": {
         "title": "The message stays unread.",
@@ -221,7 +221,7 @@
       "tpl": "layered-classroom",
       "line": "In a crowded classroom, the protagonist remains isolated behind the screen.",
       "emotion": "isolation",
-      "action": "In a crowded classroom, the protagonist remains isolated behind the screen.",
+      "action": "The protagonist scrolls while classmates talk around the desk, never noticing the conversation beside them.",
       "soundCues": [],
       "args": {
         "title": "Someone is right beside them.",
@@ -259,7 +259,7 @@
       "tpl": "bedroom-hold",
       "line": "The protagonist keeps scrolling as the room darkens around them.",
       "emotion": "lost time",
-      "action": "The protagonist keeps scrolling as the room darkens around them.",
+      "action": "The protagonist stays in bed as the room darkens and the screen remains bright.",
       "soundCues": [],
       "args": {
         "title": "Five more minutes becomes another night.",
@@ -297,7 +297,7 @@
       "tpl": "calendar-insert",
       "line": "Calendar pages pass while the protagonist slumps at the edge of frame.",
       "emotion": "regret",
-      "action": "Calendar pages pass while the protagonist slumps at the edge of frame.",
+      "action": "Calendar sheets turn forward while the protagonist's posture drops lower.",
       "soundCues": [],
       "args": {
         "title": "Another week disappears.",
@@ -336,7 +336,7 @@
       "tpl": "mirror-medium",
       "line": "At 6:12 AM, the protagonist faces a tired reflection and an unfinished reply.",
       "emotion": "exhaustion",
-      "action": "At 6:12 AM, the protagonist faces a tired reflection and an unfinished reply.",
+      "action": "The protagonist faces the bathroom mirror, tired and still holding the unfinished reply.",
       "soundCues": [],
       "args": {
         "title": "The same promise waits in the morning.",
@@ -374,7 +374,7 @@
       "tpl": "mirror-close",
       "line": "The shadow grows behind the protagonist as unread messages collect.",
       "emotion": "self-criticism",
-      "action": "The shadow grows behind the protagonist as unread messages collect.",
+      "action": "The shadow expands across the mirror as the unread messages collect.",
       "soundCues": [],
       "args": {
         "title": "Later gets heavier.",
@@ -416,7 +416,7 @@
       "tpl": "message-reaction",
       "line": "The friend's last message sits unanswered in the reflection's phone light.",
       "emotion": "shame",
-      "action": "The friend's last message sits unanswered in the reflection's phone light.",
+      "action": "The last message remains open on the phone; no reply appears.",
       "soundCues": [],
       "args": {
         "title": "Are we still meeting?",
@@ -456,7 +456,7 @@
       "tpl": "symbolic-loop",
       "line": "A near-black loop closes around the protagonist as the same phrases circle back.",
       "emotion": "repetition",
-      "action": "A near-black loop closes around the protagonist as the same phrases circle back.",
+      "action": "Repeated words circle the isolated figure until the image closes into a loop.",
       "soundCues": [],
       "args": {
         "title": "Scroll. Sleep. Apologise. Repeat.",
@@ -499,7 +499,7 @@
       "tpl": "phone-pause",
       "line": "The protagonist holds the phone still instead of opening another video.",
       "emotion": "hesitation",
-      "action": "The protagonist holds the phone still instead of opening another video.",
+      "action": "The thumb stops above the feed; the next video never starts.",
       "soundCues": [],
       "args": {
         "title": "This time, they stop.",
@@ -538,7 +538,7 @@
       "tpl": "hand-detail",
       "line": "The protagonist lowers the phone onto the desk, releases it and lets the hand withdraw.",
       "emotion": "decision",
-      "action": "The protagonist lowers the phone onto the desk, releases it and lets the hand withdraw.",
+      "action": "The protagonist puts the phone down on the desk, releases it and lets the hand withdraw.",
       "soundCues": [],
       "args": {
         "title": "They turn the phone face down.",
@@ -582,7 +582,7 @@
       "tpl": "notebook-medium",
       "line": "The protagonist opens a notebook and writes the friend's name and a time to meet.",
       "emotion": "commitment",
-      "action": "The protagonist opens a notebook and writes the friend's name and a time to meet.",
+      "action": "The protagonist opens the notebook and writes the friend's name beside a time to meet.",
       "soundCues": [],
       "args": {
         "title": "A real apology starts with a name.",
@@ -625,7 +625,7 @@
       "tpl": "handwriting-close",
       "line": "The hand finishes the apology and underlines the meeting time on the page.",
       "emotion": "quiet courage",
-      "action": "The hand finishes the apology and underlines the meeting time on the page.",
+      "action": "The hand writes a short apology and draws a line beneath the meeting time.",
       "soundCues": [],
       "args": {
         "title": "I'm sorry. Can we meet today?",
@@ -671,7 +671,7 @@
       "tpl": "kitchen-medium",
       "line": "The protagonist pours water, pauses and takes one steady breath.",
       "emotion": "self-care",
-      "action": "The protagonist pours water, pauses and takes one steady breath.",
+      "action": "The protagonist pours a glass of water, drinks and takes one steady breath.",
       "soundCues": [],
       "args": {
         "title": "First, breathe.",
@@ -708,7 +708,7 @@
       "tpl": "shoe-detail",
       "line": "The protagonist ties both shoes before leaving the room.",
       "emotion": "preparation",
-      "action": "The protagonist ties both shoes before leaving the room.",
+      "action": "The protagonist bends down, ties both shoelaces and plants both feet on the floor.",
       "soundCues": [],
       "args": {
         "title": "Laces tight. Phone in the bag.",
@@ -751,7 +751,7 @@
       "tpl": "stair-tracking",
       "line": "The protagonist climbs the stairs, one deliberate step after another.",
       "emotion": "effort",
-      "action": "The protagonist climbs the stairs, one deliberate step after another.",
+      "action": "The protagonist climbs the stairway one deliberate step after another.",
       "soundCues": [],
       "args": {
         "title": "One block at a time.",
@@ -789,7 +789,7 @@
       "tpl": "park-wide",
       "line": "The protagonist walks through the park with eyes away from the phone.",
       "emotion": "movement",
-      "action": "The protagonist walks through the park with eyes away from the phone.",
+      "action": "The protagonist walks through the park with eyes lifted from the phone.",
       "soundCues": [],
       "args": {
         "title": "The city feels different when you look up.",
@@ -826,7 +826,7 @@
       "tpl": "street-crossing",
       "line": "The protagonist crosses toward the café, phone tucked away and pace slowing.",
       "emotion": "resolve",
-      "action": "The protagonist crosses toward the café, phone tucked away and pace slowing.",
+      "action": "The protagonist crosses the street toward the café, phone tucked away.",
       "soundCues": [],
       "args": {
         "title": "They choose the meeting place.",
@@ -865,7 +865,7 @@
       "tpl": "cafe-establishing",
       "line": "The protagonist opens the café door and sees the friend waiting inside.",
       "emotion": "nervous relief",
-      "action": "The protagonist opens the café door and sees the friend waiting inside.",
+      "action": "The protagonist reaches for the handle, opens the café door and sees the friend waiting inside.",
       "soundCues": [],
       "args": {
         "title": "The door opens. The friend is still there.",
@@ -908,7 +908,7 @@
       "tpl": "cafe-reaction",
       "line": "The protagonist recognises the friend and takes a breath before approaching.",
       "emotion": "vulnerability",
-      "action": "The protagonist recognises the friend and takes a breath before approaching.",
+      "action": "The protagonist pauses in the doorway and recognises the friend across the room.",
       "soundCues": [],
       "args": {
         "title": "For a second, neither knows what to say.",
@@ -947,7 +947,7 @@
       "tpl": "cafe-two-shot",
       "line": "The protagonist sits across from the friend, phone away, and apologises.",
       "emotion": "honesty",
-      "action": "The protagonist sits across from the friend, phone away, and apologises.",
+      "action": "The protagonist sits across from the friend and offers a direct apology.",
       "soundCues": [],
       "args": {
         "title": "No excuse. Just an apology.",
@@ -986,7 +986,7 @@
       "tpl": "listening-close",
       "line": "The friend speaks while the protagonist listens without reaching for the phone.",
       "emotion": "listening",
-      "action": "The friend speaks while the protagonist listens without reaching for the phone.",
+      "action": "The protagonist listens while the friend speaks and keeps both hands away from the phone.",
       "soundCues": [],
       "args": {
         "title": "This time, they listen.",
@@ -1024,7 +1024,7 @@
       "tpl": "bus-wide",
       "line": "On the bus, the protagonist looks through the window at the passing city.",
       "emotion": "presence",
-      "action": "On the bus, the protagonist looks through the window at the passing city.",
+      "action": "The bus moves through the city as the protagonist looks out of the window.",
       "soundCues": [],
       "args": {
         "title": "The ride home is not lost time.",
@@ -1062,7 +1062,7 @@
       "tpl": "library-medium",
       "line": "The protagonist studies in the library and writes a short plan for tomorrow.",
       "emotion": "focus",
-      "action": "The protagonist studies in the library and writes a short plan for tomorrow.",
+      "action": "The protagonist writes a short plan beside the open library book, then returns to reading.",
       "soundCues": [],
       "args": {
         "title": "Protect the first hour.",
@@ -1105,7 +1105,7 @@
       "tpl": "calendar-detail",
       "line": "A calendar records small repeated choices rather than one perfect streak.",
       "emotion": "evidence of progress",
-      "action": "A calendar records small repeated choices rather than one perfect streak.",
+      "action": "Small marks accumulate on the calendar as the days pass.",
       "soundCues": [],
       "args": {
         "title": "Not perfect days. More present ones.",
@@ -1143,7 +1143,7 @@
       "tpl": "mirror-close-resolve",
       "line": "The shadow shrinks as the protagonist turns toward the reflection.",
       "emotion": "agency",
-      "action": "The shadow shrinks as the protagonist turns toward the reflection.",
+      "action": "The shadow contracts as the protagonist turns toward the reflection.",
       "soundCues": [],
       "args": {
         "title": "The urge is still there. It is not in charge.",
@@ -1183,7 +1183,7 @@
       "tpl": "park-two-shot",
       "line": "The friend smiles; this time the protagonist stays present in the conversation.",
       "emotion": "belonging",
-      "action": "The friend smiles; this time the protagonist stays present in the conversation.",
+      "action": "The two friends walk together through the park and remain in the same conversation.",
       "soundCues": [],
       "args": {
         "title": "The world was here the whole time.",
@@ -1221,7 +1221,7 @@
       "tpl": "dawn-wide",
       "line": "The protagonist and friend walk toward the warm horizon after their conversation.",
       "emotion": "hope",
-      "action": "The protagonist and friend walk toward the warm horizon after their conversation.",
+      "action": "The protagonist and friend walk toward the horizon as the city warms around them.",
       "soundCues": [],
       "args": {
         "title": "Tomorrow is built by what happens today.",
@@ -1258,7 +1258,7 @@
       "tpl": "final-title",
       "line": "Choose where it goes.",
       "emotion": "resolution",
-      "action": "Choose where it goes.",
+      "action": "A clean final title appears after the characters leave the frame.",
       "soundCues": [],
       "args": {
         "title": "YOUR ATTENTION IS YOUR LIFE",
