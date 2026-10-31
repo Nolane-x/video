@@ -2699,5 +2699,70 @@ class CumulativeAssetLibraryIndexTests(unittest.TestCase):
         self.assertEqual(downloads_doc["bundles"][0]["download_url"], "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-A/bundle-a.zip")
 
 
+class SourceCapacityExpansionTests(unittest.TestCase):
+    """Capacity ceilings may widen; per-item rights and file checks remain unchanged."""
+
+    def test_usgs_expansion_keeps_the_declared_media_budget_inside_aggregate_cap(self):
+        self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 40)
+        self.assertEqual(library.USGS_SELECTION_CAPS, {
+            "images": 120, "videos": 96, "audio": 60,
+        })
+        declared_max = (
+            library.USGS_SELECTION_CAPS["images"] * library.USGS_IMAGE_MAX_BYTES
+            + library.USGS_SELECTION_CAPS["videos"] * library.USGS_VIDEO_MAX_BYTES
+            + library.USGS_SELECTION_CAPS["audio"] * library.USGS_AUDIO_MAX_BYTES
+        )
+        self.assertLessEqual(declared_max, library.USGS_TOTAL_MAX_BYTES)
+        self.assertEqual(library.USGS_TOTAL_MAX_BYTES, 12 * 1024**3)
+
+    def test_internet_archive_expansion_keeps_independent_rights_scopes_and_byte_budgets(self):
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_CAPS, {
+            "prelinger": 160, "nasa": 160,
+        })
+        self.assertEqual(library.INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION, 320)
+        self.assertEqual(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES, {
+            "prelinger": 6 * 1024**3, "nasa": 6 * 1024**3,
+        })
+        self.assertEqual(library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES, 12 * 1024**3)
+        self.assertEqual(
+            sum(library.INTERNET_ARCHIVE_COLLECTION_MAX_BYTES.values()),
+            library.INTERNET_ARCHIVE_TOTAL_MAX_BYTES,
+        )
+        self.assertEqual(library.INTERNET_ARCHIVE_MAX_VIDEO_BYTES, 250 * 1024**2)
+        # The strict exact-item license/public-domain page tests stay active.
+        self.assertEqual(
+            library.internet_archive_license_from_item_metadata(
+                "http://creativecommons.org/licenses/publicdomain/", ""
+            ),
+            None,
+        )
+
+    def test_nasa_svs_expansion_does_not_exceed_discovery_page_or_byte_budget(self):
+        self.assertEqual(nasa_svs_importer.MAX_DOWNLOADS, 60)
+        self.assertEqual(nasa_svs_importer.MAX_TOTAL_BYTES, 6 * 1024**3)
+        self.assertEqual(nasa_svs_importer.MAX_VIDEO_BYTES, 300 * 1024**2)
+        self.assertGreaterEqual(
+            nasa_svs_importer.MAX_PAGES,
+            len(nasa_svs_importer.SEARCH_TERMS) * nasa_svs_importer.MAX_PER_TERM,
+        )
+        self.assertLessEqual(nasa_svs_importer.MAX_TOTAL_BYTES,
+                             nasa_svs_importer.MAX_DOWNLOADS * nasa_svs_importer.MAX_VIDEO_BYTES)
+
+    def test_eso_expansion_preserves_per_page_checksum_credit_and_silent_video_gates(self):
+        self.assertEqual(eso_video_importer.MAX_PAGE_REQUESTS, 120)
+        self.assertEqual(eso_video_importer.MAX_DOWNLOADS, 30)
+        self.assertEqual(eso_video_importer.MAX_TOTAL_SOURCE_BYTES, 6 * 1024**3)
+        self.assertEqual(eso_video_importer.MAX_VIDEO_BYTES, 300 * 1024**2)
+        self.assertEqual(eso_video_importer.MAX_METADATA_BYTES, 96 * 1024**2)
+        self.assertEqual(len(eso_video_importer.FEED_CATEGORIES), 6)
+        self.assertIn("sha256", eso_video_importer.SHA256_RE.pattern.casefold())
+        self.assertTrue(eso_video_importer.normalize_eso_media_url(
+            "https://cdn.eso.org/videos/ultra_hd/eso1234a.mp4", "eso1234a"
+        ))
+        self.assertIsNone(eso_video_importer.normalize_eso_media_url(
+            "https://cdn.eso.org.evil.example/videos/ultra_hd/eso1234a.mp4", "eso1234a"
+        ))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
