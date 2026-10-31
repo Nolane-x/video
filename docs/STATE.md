@@ -225,3 +225,37 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - Research confirmed category feeds such as `https://www.eso.org/public/videos/feed/category/esocast/` and `.../cosmology/`; 4K preview/Full HD formats and per-item SHA-256 are available on item pages. Some pages have third-party footage credits or non-ESO materials, so page-level rights screening is mandatory.
 - Branch `feature/eso-video-archive-lane` has been created from main for isolated work, but at this checkpoint no ESO importer or source-shard code has yet been committed. Do not present ESO as an implemented or downloaded source until code, tests, CI and a real shard run are complete.
 - Official sources: https://www.eso.org/public/copyright/ and https://www.eso.org/public/videoformats/.
+
+## Creative quality corrective action — 2026-10-31 (toolchain workstream)
+
+This section is independent of the asset-library workstream above. Do not modify its source counts, download/build state or release records when continuing the video-production toolchain work.
+
+### User feedback and verified Remotion candidate defects
+- The user explicitly judged the previous video unsatisfactory. Do not defend it using technical CI or OCR results.
+- Re-downloaded the exact latest Remotion run candidate from Actions run [41199855835](https://github.com/Nolane-x/video/actions/runs/41199855835), artifact [13041889297](https://github.com/Nolane-x/video/actions/runs/41199855835/artifacts/13041889297), and inspected the source storyboard plus contact sheets/native-resolution samples. The candidate is the Remotion "ONE MORE SCROLL" composition, distinct from the canonical H2 Canvas/Chromium master.
+- Verified storyboard facts: 31 shots; every shot exactly 5 seconds; the generic `scene` template occurs in 20/31 shots (64.52%); no `creativeBrief` or narration plan is recorded. The Remotion AudioDesign is music/SFX-led. These findings explain structural repetition and missing creative direction.
+- Review limitation: contact sheets and selected native-resolution frames were inspected; a continuous start-to-finish human playback/listening of all 155.1 seconds was **not** completed. Do not claim complete editorial sign-off.
+
+### New blocking quality gates
+- `tools/video/evaluate_editorial_plan.py` + `tools/video/test_editorial_plan.py`: requires audience, platform, language, ratio, promise, hook, payoff, narration policy, visual grammar, story arc/purpose, per-shot story function and shot/camera/composition intent; checks physical-action contact/follow-through proof, reading speed, music coverage, shot-duration variation and template concentration. A plan-ready score is completeness evidence only and authorizes blocking/preview, never publication.
+- `tools/video/validate_editorial_review.py`, `tools/video/editorial-review.template.json`, `tools/video/test_editorial_review.py`: requires an independent reviewer, full normal-speed visual/audio review, contiguous timecoded coverage from 0 to end, open-ended findings before checklist, evidenced category scores (each >=7/10, mean >=7.5/10), exact MP4 SHA-256/duration and no unresolved P0/P1 defects. Validator cannot prove the reviewer actually watched/listened; the reviewer is accountable for the attestation.
+- `.github/workflows/video-editorial-preflight.yml` provides a dedicated plan report.
+- `.github/workflows/render-remotion.yml` now runs the editorial preflight before Remotion render; an incomplete creative plan blocks the MP4 render rather than consuming a runner to recreate a weak film.
+- Editorial report must use paths relative to the workflow's `video-projects/remotion` working directory. The latest fix is in the workflow; inspect run logs after any workflow changes.
+
+### Latest verified blocking evidence
+- Editorial preflight run [41203679460](https://github.com/Nolane-x/video/actions/runs/41203679460) completed the 8 evaluator tests and then correctly marked the current storyboard `BLOCKED`: plan readiness **15/100**, **21 P1**, **1 P2**. Metrics include a uniform 5-second grid and dominant template share 64.52%. Report artifact: [13043816063](https://github.com/Nolane-x/video/actions/runs/41203679460/artifacts/13043816063).
+- Remotion run [41203679618](https://github.com/Nolane-x/video/actions/runs/41203679618) was blocked at the pre-render editorial gate. No new MP4 is authorised from the current blocked plan. This is intended; do not weaken the checks or add fake rationales to force a green result.
+- Core smoke run [41203226665](https://github.com/Nolane-x/video/actions/runs/41203226665) passed: genre routing PASS; 12 toolchain tests, 8 editorial-plan tests and 6 editorial-review tests passed; plugin package validation and the core install/typecheck/CLI/SBOM checks passed.
+- Command Center packaging run [41203226657](https://github.com/Nolane-x/video/actions/runs/41203226657) passed and published ZIP artifact [13043188752](https://github.com/Nolane-x/video/actions/runs/41203226657/artifacts/13043188752).
+
+### Active Command Center release
+- Private Plugin Creator package **Nolane Video Command Center v0.8.0**, 29 internal skills / 37 separately activated specialists.
+- Plugin URL: https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc
+- Current release ID: `pluginrel_6ae5e594c6a48191920894826e2902e5`.
+- Read-back verified public + Codex manifests both 0.8.0, 29 skill files, editorial gates reference, upstream source audit, Command Center preflight instructions and QA final-review attestation.
+
+### Next action
+Do not render/publish the current blocked storyboard. First rebuild the creative brief and shot plan with meaningful shot-duration variation, distinct visual grammar/action/framing, an explicit narration/music-led decision and story payoff. Run editorial preflight and inspect a short blocking/animatic preview. Only continue to full render after a genuine plan-ready result and preview review. Full final review must include start-to-finish picture and audio playback with evidence; no claim of approval based on OCR/contact sheets alone.
+
+PR #26 remains open and unmerged. Keep the asset-library workstream untouched.
