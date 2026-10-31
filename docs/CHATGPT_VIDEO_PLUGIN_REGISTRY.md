@@ -4,7 +4,7 @@ Last verified against Plugin Creator: **2026-10-31**.
 
 ## Main entry point
 
-**Nolane Video Command Center v0.7.8** is the primary routing plugin. Its active private release is `pluginrel_6ae5b3d7bd7c8191b7e28c78e94b0042`.
+**Nolane Video Command Center v0.7.9** is the primary routing plugin. Its active private release is `pluginrel_6ae5b448d6948191a011fc39d2ec282d`.
 
 - 29 internal production skills.
 - 37 separately activated specialist plugins with a source/provenance registry.
