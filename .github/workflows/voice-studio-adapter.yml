@@ -8,8 +8,10 @@ on:
       - "integrations/voice-studio/**"
       - ".agents/skills/video-voice-*/*"
       - ".github/workflows/voice-studio-adapter.yml"
+      - ".github/workflows/voice-studio-headless-smoke.yml"
       - ".github/workflows/voice-studio-actions-lab.yml"
       - ".github/workflows/voice-studio-actions-project.yml"
+      - ".github/workflows/voice-studio-headless-smoke.yml"
   push:
     branches: [main]
     paths:
@@ -44,6 +46,12 @@ jobs:
           test -f integrations/voice-studio/actions_voice_project.py
           test -f integrations/voice-studio/caption_delivery.py
           test -f integrations/voice-studio/tests/test_caption_delivery.py
+          test -f integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py
+          test -f integrations/voice-studio/tests/test_prepare_voicestudio_cpu_dockerfile.py
+          test -f .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'submodules: true' .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'GPU_FLAVOR=cpu' .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'faa5294359f23c911972ffe6d27785c50c67097b' .github/workflows/voice-studio-headless-smoke.yml
           test -f integrations/voice-studio/examples/actions-benchmark-suite.json
           test -f integrations/voice-studio/examples/actions-vietnamese-documentary.json
           grep -q 'actions/cache@v6' .github/workflows/voice-studio-actions-lab.yml
