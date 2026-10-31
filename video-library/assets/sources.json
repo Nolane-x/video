@@ -468,6 +468,22 @@
       "note": "Only records attributed to NASA centers are considered. Explicit copyright/third-party-rights markers, NASA logos/seals, and obvious identifiable-person keyword categories are skipped. Every bundled record preserves source/media URL and rights basis. Credit NASA, do not imply endorsement, avoid protected insignia, and review privacy/publicity rights before commercial or promotional use."
     },
     {
+      "id": "nasa-scientific-visualization-studio-public-domain-videos",
+      "title": "NASA Scientific Visualization Studio — public-domain science visualization videos",
+      "provider": "NASA Goddard Scientific Visualization Studio",
+      "kind": "official science visualization and moving-image archive",
+      "category": "Earth science, climate, oceans, hurricanes, astronomy, planetary science, spacecraft, solar activity, aurora and scientific data visualization",
+      "source_page": "https://svs.gsfc.nasa.gov/",
+      "search_api": "https://svs.gsfc.nasa.gov/api/search/",
+      "page_api": "https://svs.gsfc.nasa.gov/api/{page_id}/",
+      "api_docs": "https://svs.gsfc.nasa.gov/help/",
+      "license": "NASA SVS public-domain default unless otherwise noted; not CC0",
+      "license_url": "https://svs.gsfc.nasa.gov/help/",
+      "verified_page_license": true,
+      "bundling": "bounded-official-api-video-download-after-page-level-music-and-rights-screen",
+      "note": "Uses official NASA SVS Search/Page APIs across topic queries. Preserves title, description, dimensions, dates, creator/employer credits, datasets, science categories, missions, keywords, source page and exact video URL. Only complete studio=SVS pages are considered. HTTP media links are upgraded to HTTPS only on the exact svs.gsfc.nasa.gov /vis/ path; redirects, MIME/container signatures, byte ceilings and SHA-256 are verified. Pages with explicit licensed-music/copyright/permission notes or non-empty audio_track metadata are skipped pending a safe silent variant. NASA SVS says visualizations are public domain unless otherwise noted and that visuals with licensed music may be used without their associated audio tracks. Credit NASA SVS; do not imply endorsement or use insignia as a logo; review privacy/publicity and third-party data before commercial/promotional use."
+    },
+    {
       "id": "library-of-congress-rights-verified-photos",
       "title": "Library of Congress — photographs with explicit item-level rights statements",
       "provider": "Library of Congress",

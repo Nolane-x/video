@@ -24,6 +24,7 @@ import finalize_asset_library_release as release_finalizer  # noqa: E402
 import build_cumulative_asset_library_index as cumulative_index  # noqa: E402
 import probe_nara_bulk_dataset as nara_probe  # noqa: E402
 import probe_nasa_svs as nasa_svs_probe  # noqa: E402
+import nasa_svs_importer as nasa_svs_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -1792,6 +1793,7 @@ class NARABulkDatasetProbeTests(unittest.TestCase):
         response = mock.MagicMock()
         response.__enter__.return_value = response
         response.status = 206
+        response.geturl.return_value = url
         response.headers = {
             "Content-Type": "video/mp4",
             "Content-Range": "bytes 0-63/292897920",
@@ -1901,8 +1903,19 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         )
         self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://example.com/vis/movie.mp4"))
         self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://svs.gsfc.nasa.gov/api/5101/"))
-        self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("http://svs.gsfc.nasa.gov/vis/movie.mp4"))
+        self.assertTrue(nasa_svs_probe.svs_movie_url_is_allowed("http://svs.gsfc.nasa.gov/vis/movie.mp4"))
+        self.assertEqual(nasa_svs_importer.normalize_svs_media_url("http://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"), "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4")
         self.assertFalse(nasa_svs_probe.svs_movie_url_is_allowed("https://svs.gsfc.nasa.gov/vis/frame.tif"))
+        self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov.evil.example/vis/movie.mp4"))
+        self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://user@svs.gsfc.nasa.gov/vis/movie.mp4"))
+        self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov:444/vis/movie.mp4"))
+        self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov/api/5687/movie.mp4"))
+        self.assertIsNone(nasa_svs_importer.normalize_svs_media_url("https://svs.gsfc.nasa.gov/vis/movie.mp4?redirect=1"))
+        official_https = "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"
+        official_http = "http://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/movie.mp4"
+        self.assertTrue(nasa_svs_importer.svs_response_url_is_allowed(official_https, official_https))
+        self.assertFalse(nasa_svs_importer.svs_response_url_is_allowed(official_https, official_http))
+        self.assertFalse(nasa_svs_importer.svs_response_url_is_allowed(official_https, "https://evil.example/vis/movie.mp4"))
 
     def test_svs_page_parser_finds_movies_and_detects_explicit_licensed_music_notes(self):
         page = {
@@ -1934,9 +1947,10 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         self.assertEqual(result["allowlisted_movie_count"], 1)
         self.assertFalse(result["exception_flagged"])
         self.assertEqual(result["movie_samples"][0]["width"], 3840)
+        self.assertTrue(result["movie_samples"][0]["url"].startswith("https://svs.gsfc.nasa.gov/"))
 
         page["media_groups"][0]["description"] = (
-            "The visualization includes music licensed from a third-party rights holder."
+            "Music credit: this track is from a third-party production library."
         )
         with mock.patch.object(nasa_svs_probe, "fetch_json", return_value=(page, 2048)):
             flagged, _ = nasa_svs_probe.inspect_page(5101)
@@ -1947,6 +1961,7 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         url = "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/ocean.mp4"
         response = mock.MagicMock()
         response.__enter__.return_value = response
+        response.geturl.return_value = url
         response.status = 206
         response.headers = {
             "Content-Type": "video/mp4",
@@ -1962,6 +1977,73 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         response.read.assert_called_once_with(65)
 
 
+    def test_nasa_svs_chooses_highest_resolution_and_rejects_music_notes(self):
+        page = {
+            "page_type": "Visualization", "progress": "Complete", "studio": "SVS",
+            "main_video": {
+                "url": "http://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/1080.mp4",
+                "media_type": "Movie", "width": 1920, "height": 1080, "audio_track": None,
+            },
+            "media_groups": [{
+                "caption": "A global science visualization.",
+                "items": [
+                    {"instance": {
+                        "url": "http://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/4k.mp4",
+                        "media_type": "Movie", "width": 3840, "height": 2160,
+                    }},
+                    {"instance": {
+                        "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/music.webm",
+                        "media_type": "Movie", "width": 3840, "height": 2160, "audio_track": {"name": "licensed"},
+                    }},
+                ],
+            }],
+        }
+        chosen, reason = nasa_svs_importer.choose_video_candidate(page)
+        self.assertIsNotNone(chosen)
+        self.assertTrue(chosen["url"].endswith("/4k.mp4"))
+        self.assertIn("no page-level", reason)
+        page["media_groups"][0]["items"][0]["caption"] = "Music credit: licensed soundtrack."
+        chosen, reason = nasa_svs_importer.choose_video_candidate(page)
+        self.assertIsNone(chosen)
+        self.assertIn("third-party-music", reason)
+
+    def test_nasa_svs_json_respects_per_request_byte_ceiling(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value = response
+        response.headers = {"Content-Length": "11"}
+        with mock.patch.object(nasa_svs_importer.urllib.request, "urlopen", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "exceeds response ceiling"):
+                nasa_svs_importer._json("https://svs.gsfc.nasa.gov/api/search/", 10)
+        response.read.assert_not_called()
+
+    def test_nasa_svs_downloader_obeys_declared_metadata_budget(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(nasa_svs_importer, "MAX_METADATA_BYTES", 1), \
+                 mock.patch.object(nasa_svs_importer, "_search_pages", return_value=[(5687, "Earth")]), \
+                 mock.patch.object(nasa_svs_importer, "_json", return_value=({"page_type": "Visualization"}, 2)):
+                report = nasa_svs_importer.download_nasa_svs_media(Path(tmp), [])
+        skipped = next(row for row in report if row.get("status") == "metadata-budget-exhausted")
+        self.assertEqual(skipped["id"], "nasa-svs-5687")
+
+    def test_distributed_matrix_matches_registered_source_lanes(self):
+        workflow_path = library.REPO / ".github/workflows/build-video-asset-library.yml"
+        lines = workflow_path.read_text(encoding="utf-8").splitlines()
+        start = lines.index("        lane:")
+        end = lines.index("    steps:", start)
+        matrix_lanes = {
+            line.strip()[2:]
+            for line in lines[start + 1:end]
+            if line.strip().startswith("- ")
+        }
+        expected_lanes = {"originals", *shard_builder.SOURCE_LANES.keys()}
+        self.assertEqual(matrix_lanes, expected_lanes)
+
+    def test_nasa_svs_shard_lane_is_registered_and_packaged_as_footage(self):
+        self.assertEqual(shard_builder.SOURCE_LANES["nasa-svs"], "download_nasa_svs_media")
+        self.assertEqual(bundle_packager.classify_asset({
+            "type": "nasa-svs-video",
+            "path": "third-party/nasa-svs/video/5687-ocean.mp4",
+        }), "footage")
 
 
 class CumulativeAssetLibraryIndexTests(unittest.TestCase):

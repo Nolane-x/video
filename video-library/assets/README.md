@@ -238,3 +238,9 @@ The official KenneyNL/Godot-SplashScreens repository README distinguishes the or
 
 It explicitly excludes Screen/Original logo/ because the original Godot logo is CC-BY-4.0; it also excludes Pixel and Pride paths because the README does not explicitly grant those folders CC0. The archive README must contain both sides of the mixed-license notice before any files are extracted. Only PNG/SVG media is imported, with ZIP traversal/member/size/compression checks, SVG sanitization, PNG signature validation and per-file SHA-256. Current allow-list ceiling: 40 files.
 
+
+## NASA Scientific Visualization Studio — topic-diverse video lane
+
+The official SVS Search and Page APIs find complete science visualizations across Earth, Moon, Mars, Sun, oceans, climate, spacecraft, galaxies, aurora, hurricanes, volcanoes, asteroids, eclipses, weather, telescopes, wildfires and spaceflight. The importer selects one suitable best-resolution movie per visualization rather than taking the first low-resolution rendition, and preserves metadata, credits and dataset references.
+
+The SVS FAQ says its visualizations are public domain unless otherwise noted, but some use licensed music; the visuals remain reusable without those audio tracks. The importer fails closed on explicit music/copyright/permission notes and non-empty audio-track metadata. It does not silently reuse uncertain soundtrack audio. Media URLs are upgraded from HTTP only for the exact svs.gsfc.nasa.gov host and /vis/ path; downloads are bounded, MIME/container-checked and SHA-256 indexed. This is NASA public domain, not CC0. Source: https://svs.gsfc.nasa.gov/help/ .
