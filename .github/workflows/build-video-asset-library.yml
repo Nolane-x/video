@@ -18,6 +18,8 @@ concurrency:
 jobs:
   prepare-release:
     name: Create draft release for this distributed build
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -42,6 +44,8 @@ jobs:
 
   build-source-shards:
     name: Build source shard — ${{ matrix.lane }}
+    permissions:
+      contents: write
     needs: prepare-release
     runs-on: ubuntu-24.04
     timeout-minutes: 240
@@ -112,6 +116,8 @@ jobs:
 
   finalize-and-publish:
     name: Merge manifests, verify every upload and publish the library
+    permissions:
+      contents: write
     needs: [prepare-release, build-source-shards]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
