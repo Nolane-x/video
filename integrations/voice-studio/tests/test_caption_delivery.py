@@ -83,6 +83,11 @@ class CaptionDeliveryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "does not match text"):
                 build_cues(timeline)
 
+    def test_ass_timestamps_use_centiseconds(self):
+        from caption_delivery import _ass_time
+        self.assertEqual(_ass_time(2.349), "0:00:02.35")
+        self.assertEqual(_ass_time(65.0), "0:01:05.00")
+
     def test_rejects_unmatched_extra_words(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
