@@ -66,6 +66,7 @@ jobs:
           - rijksmuseum
           - nasa
           - nasa-svs
+          - eso
           - loc
           - wikimedia
           - wikimedia-svg
@@ -86,8 +87,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install FFmpeg only for the generated motion-loop shard
-        if: matrix.lane == 'originals'
+      - name: Install FFmpeg for generated loops and ESO silent footage
+        if: matrix.lane == 'originals' || matrix.lane == 'eso'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
@@ -99,6 +100,7 @@ jobs:
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
           python -m py_compile tools/video/nasa_svs_importer.py
+          python -m py_compile tools/video/eso_video_importer.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/package_asset_bundles.py
 

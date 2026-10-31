@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from generate_sticker_meme_library import generate_assets as generate_sticker_meme_assets
 from nasa_svs_importer import download_nasa_svs_media
+from eso_video_importer import download_eso_media
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -6344,6 +6345,7 @@ def main():
             ("rijksmuseum", download_rijksmuseum_open_access),
             ("nasa", download_nasa_media),
             ("nasa_svs", download_nasa_svs_media),
+            ("eso", download_eso_media),
             ("loc", download_loc_public_domain),
             ("wikimedia", download_wikimedia_public_domain),
             ("wikimedia_svg", download_wikimedia_vector_svg),
@@ -6369,6 +6371,7 @@ def main():
     rijksmuseum_report=source_reports["rijksmuseum"]
     nasa_report=source_reports["nasa"]
     nasa_svs_report=source_reports["nasa_svs"]
+    eso_report=source_reports["eso"]
     loc_report=source_reports["loc"]
     wikimedia_report=source_reports["wikimedia"]
     wikimedia_svg_report=source_reports["wikimedia_svg"]
@@ -6449,6 +6452,8 @@ def main():
               "nasa_audio_downloaded":sum(x.get("status")=="downloaded" and x.get("media_type")=="audio" for x in nasa_report),
               "nasa_svs_videos_downloaded":sum(r.get("status")=="downloaded" for r in nasa_svs_report),
               "nasa_svs_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in nasa_svs_report if r.get("status")=="downloaded"),
+              "eso_silent_videos_downloaded":sum(r.get("status")=="downloaded" for r in eso_report),
+              "eso_silent_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in eso_report if r.get("status")=="downloaded"),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
@@ -6476,7 +6481,7 @@ def main():
               "original_caption_overlays":sticker_meme_counts["caption_overlays"]}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. Source-only libraries are not raw-bundled.",
+               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. ESO public videos are CC BY 4.0 by default unless page-level exceptions apply; full visible credit and audio-removal disclosure are required, and identifiable-person commercial-use restrictions remain flagged. ESO media is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"kenney_godot_splashscreens_downloads":kenney_splash_report,
                "polyhaven_downloads":polyhaven_report,
@@ -6487,6 +6492,7 @@ def main():
                "rijksmuseum_open_access_downloads":rijksmuseum_report,
                "nasa_media_downloads":nasa_report,
                "nasa_svs_media_downloads":nasa_svs_report,
+                "eso_video_downloads":eso_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
@@ -6503,6 +6509,12 @@ def main():
       + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in nasa_svs_report)
     )
     write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+nasa_svs_note+"\n")
+    eso_note=(
+      "\n\n## European Southern Observatory public videos — CC BY 4.0 default, silent footage only\n"
+      "The ESO lane discovers public video pages through official RSS feeds. Each page must expose a complete credit block and a checksum-published H.264 4K or 1080p preview. The downloader is restricted to the exact cdn.eso.org preview paths, verifies the published SHA-256 against the source bytes, checks MP4 signatures and size ceilings, then stream-copies only the video stream with FFmpeg and verifies that the output contains zero audio streams. This is not a blanket CC0 grant: the default public-video terms are CC BY 4.0 unless the specific page states otherwise. The complete credit wording is retained in ASSET_INDEX.json (HTML formatting and whitespace are normalized) and must be shown visibly and unaltered in the finished video (for example, an end-credit card); a description-only credit is insufficient. NoDerivatives, non-commercial, permission-required and other restrictive page notices are rejected. ESO music is not included: every imported file has its audio removed. If identifiable people appear, ESO states commercial use is not permitted for that material; review each output visually before commercial use. Disclose that audio was removed when adapting the footage. Do not use ESO logos or imply ESO endorsement. Sources: https://www.eso.org/public/copyright/ and https://www.eso.org/public/videoformats/.\n"
+      + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in eso_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+eso_note+"\n")
     write_text(STAGE/"ASSET_INDEX.json",json.dumps(index_doc,ensure_ascii=False,indent=2)+"\n")
     make_asset_catalog(STAGE,index,summary)
 
