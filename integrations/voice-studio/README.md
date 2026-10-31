@@ -157,6 +157,36 @@ names and English terms embedded in Vietnamese. Use the *same text* when
 comparing models or voice profiles; otherwise the A/B result is confounded by
 different scripts.
 
+Compare a whole provider's catalogue on that same benchmark script:
+
+```bash
+python integrations/voice-studio/provider_voice_benchmark.py \
+  --provider korva --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
+  --language vi --limit 10 --output out/benchmark-korva
+
+python integrations/voice-studio/provider_voice_benchmark.py \
+  --provider voicestudio --engine voxcpm2 \
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
+  --language vi --limit 20 --output out/benchmark-voicestudio
+
+python integrations/voice-studio/provider_voice_benchmark.py \
+  --provider google --allow-cloud \
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
+  --language vi-VN --limit 20 --output out/benchmark-google
+
+python integrations/voice-studio/provider_voice_benchmark.py \
+  --provider elevenlabs --allow-cloud \
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
+  --language vi --limit 20 --output out/benchmark-elevenlabs
+```
+
+Google and ElevenLabs calls can incur charges; the explicit `--allow-cloud`
+flag is mandatory. Each run exports an identity-mapped JSON report and a
+blind listening page. Rate naturalness, Vietnamese clarity/tones, identity,
+expressiveness and character fit from 1–5, then click **Export human ratings
+JSON**. The ratings are subjective review evidence, not a validated
+ElevenLabs-equivalence percentage.
+
 ## 5. Lock a cast and generate the voice-over
 
 Use a top-level \`cast\` object to declare each character's voice once. Every
