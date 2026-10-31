@@ -26,6 +26,8 @@ Read `AGENTS.md`, `docs/STATE.md`, `docs/AI_HANDOFF.md`, `docs/TOOL_INVENTORY.md
 
 ## Genre-aware production routing
 
+Use the versioned [Genre and Production Routing Matrix](../../docs/GENRE_ROUTING_MATRIX.md) as the full format/engine/acceptance reference. The checklist below is the working summary; the matrix records the deeper routing and evidence contract.
+
 Choose the genre, delivery format and production grammar before choosing an engine. Do not assume every request is a short cinematic animation or inherits the visual style of an earlier project.
 
 At the start of each task, resolve from the brief and existing project state:
