@@ -96,8 +96,13 @@ def validate_manifest(data: dict[str, Any]) -> list[dict[str, Any]]:
         item["language"] = str(item.get("language") or data.get("language") or "vi")
         item["engine"] = str(item.get("engine") or data.get("engine") or "omnivoice")
         item["speed"] = float(item.get("speed", data.get("speed", 1.0)))
-        if not 0.25 <= item["speed"] <= 4.0:
-            raise ValueError(f"segments[{index - 1}].speed must be between 0.25 and 4.0")
+        speed_min, speed_max = (0.5, 2.0) if item["provider"] == "korva" else (0.7, 1.2) if item["provider"] == "elevenlabs" else (0.25, 4.0)
+        if not speed_min <= item["speed"] <= speed_max:
+            raise ValueError(
+                f"segments[{index - 1}].speed for {item['provider']} must be between {speed_min} and {speed_max}"
+            )
+        if item.get("seed") is not None and not isinstance(item.get("seed"), int):
+            raise ValueError(f"segments[{index - 1}].seed must be an integer")
         if not isinstance(item.get("settings", {}), dict):
             raise ValueError(f"segments[{index - 1}].settings must be an object")
         if item["provider"] not in {"voicestudio", "korva", "google", "elevenlabs"}:
@@ -136,6 +141,7 @@ def _synthesize(item: dict[str, Any], output_path: Path,
         return korva.synthesize(
             item["text"], item["voice"], output_path,
             language=item["language"], speed=item["speed"], settings=settings,
+            seed=item.get("seed"),
         )
     if provider == "google":
         return google_cloud.synthesize(
