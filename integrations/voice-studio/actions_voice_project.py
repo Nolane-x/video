@@ -16,6 +16,7 @@ import os
 import re
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -169,6 +170,11 @@ def run_project(
 ) -> dict[str, Any]:
     if importlib.metadata.version("korvatts") != PACKAGE_VERSION:
         raise RuntimeError(f"Expected korvatts=={PACKAGE_VERSION}")
+    manifest_path = manifest_path.resolve()
+    try:
+        manifest_path.relative_to(REPO_ROOT)
+    except ValueError:
+        raise ValueError("Project manifest must stay inside the checked-out repository") from None
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     segments = validate_actions_project(data)
     assets = _download_model(model_revision)
@@ -184,6 +190,8 @@ def run_project(
         )
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_copy = output_dir / "project-manifest.json"
+    shutil.copy2(manifest_path, manifest_copy)
     report = generate(data, output_dir, plan_only=False, stop_on_error=False)
     generation_path = output_dir / "voice-generation-report.json"
     quality_path = output_dir / "voice-quality-report.json"
@@ -247,6 +255,25 @@ def run_project(
             master_path = output_dir / h2["timeline_dir"] / "voice.wav"
             h2["master_audio"] = _probe_audio(master_path)
             h2["master_technical_findings"] = _technical_findings(h2["master_audio"])
+            blocks_path = output_dir / h2["timeline_dir"] / "blocks.json"
+            lines_path = output_dir / h2["timeline_dir"] / "lines.json"
+            words_path = output_dir / h2["timeline_dir"] / "words.json"
+            blocks = json.loads(blocks_path.read_text(encoding="utf-8"))
+            lines = json.loads(lines_path.read_text(encoding="utf-8"))
+            words = json.loads(words_path.read_text(encoding="utf-8"))
+            expected_ids = {str(item["id"]) for item in segments}
+            actual_ids = {str(item.get("id")) for item in blocks}
+            if actual_ids != expected_ids:
+                raise RuntimeError(
+                    f"H2 block coverage mismatch: missing={sorted(expected_ids - actual_ids)}, "
+                    f"unexpected={sorted(actual_ids - expected_ids)}"
+                )
+            if not lines or not words:
+                raise RuntimeError("H2 prep_voice.py produced empty line or word timestamps")
+            h2["block_count"] = len(blocks)
+            h2["line_count"] = len(lines)
+            h2["word_count"] = len(words)
+            h2["timestamp_coverage"] = "all_project_blocks"
         except Exception as exc:
             h2_error = f"{type(exc).__name__}: {exc}"
 
@@ -266,6 +293,10 @@ def run_project(
             "revision": model_revision,
             "license": MODEL_LICENSE,
             "assets_path": str(assets),
+            "project_manifest": {
+                "path": "project-manifest.json",
+                "sha256": _sha256(manifest_copy),
+            },
             "device": "CPU / ONNX Runtime",
         },
         "runner": {
@@ -289,6 +320,8 @@ def run_project(
         "segments": segment_evidence,
         "h2_timing": h2,
         "h2_error": h2_error,
+        "quality_report": "voice-quality-report.json",
+        "generation_report": "voice-generation-report.json",
         "human_listening_required": True,
         "naturalness_score": None,
         "elevenlabs_equivalence": None,
