@@ -73,6 +73,8 @@ jobs:
         run: |
           docker buildx build --load --progress=plain             --file "$RUNNER_TEMP/VoiceStudio.Supertonic.CPU.Dockerfile"             --build-arg "BASE_IMAGE=${{ steps.base.outputs.image }}"             --build-arg "GPU_FLAVOR=cpu"             --build-arg "BUILD_COMMIT=$VOICESTUDIO_COMMIT"             --tag "$IMAGE_NAME"             vendor/VoiceStudio
           docker image inspect "$IMAGE_NAME" --format '{{range .Config.Env}}{{println .}}{{end}}'             | grep -Fx "OMNIVOICE_BUILD_COMMIT=$VOICESTUDIO_COMMIT"
+          docker run --rm --entrypoint python3 "$IMAGE_NAME" -c \
+            'from importlib.metadata import version; assert version("supertonic") == "1.3.1"; print("supertonic SDK:", version("supertonic"))'
 
       - name: Install FFmpeg diagnostics on the Actions runner
         run: |
@@ -161,8 +163,6 @@ jobs:
 
       - name: Run 7 × 4 real VoiceStudio Supertonic-3 Vietnamese auditions
         if: inputs.accept_openrail_m == true
-        env:
-          VOICESTUDIO_API_KEY: ${{ env.VOICESTUDIO_API_KEY }}
         run: |
           python integrations/voice-studio/voicestudio_engine_actions_benchmark.py             --suite integrations/voice-studio/examples/actions-benchmark-suite.json             --output out/supertonic3-actions             --base-url http://127.0.0.1:3900             --accept-model-license
 
