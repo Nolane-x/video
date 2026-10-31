@@ -10,6 +10,7 @@ from nasa_svs_importer import download_nasa_svs_media
 from eso_video_importer import download_eso_media
 from cdc_broll_importer import download_cdc_broll_videos
 from nps_broll_importer import download_nps_broll_media
+from nps_gallery_image_importer import download_nps_npgallery_images
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -6528,6 +6529,7 @@ def main():
             ("eso", download_eso_media),
             ("cdc-broll", download_cdc_broll_videos),
             ("nps-broll", download_nps_broll_media),
+            ("nps-gallery-images", download_nps_npgallery_images),
             ("loc", download_loc_public_domain),
             ("wikimedia", download_wikimedia_public_domain),
             ("wikimedia_svg", download_wikimedia_vector_svg),
@@ -6556,6 +6558,7 @@ def main():
     eso_report=source_reports["eso"]
     cdc_broll_report=source_reports["cdc-broll"]
     nps_broll_report=source_reports["nps-broll"]
+    nps_gallery_images_report=source_reports["nps-gallery-images"]
     loc_report=source_reports["loc"]
     wikimedia_report=source_reports["wikimedia"]
     wikimedia_svg_report=source_reports["wikimedia_svg"]
@@ -6642,6 +6645,8 @@ def main():
               "cdc_broll_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in cdc_broll_report if r.get("status")=="downloaded"),
               "nps_broll_videos_downloaded":sum(r.get("status")=="downloaded" for r in nps_broll_report),
               "nps_broll_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in nps_broll_report if r.get("status")=="downloaded"),
+              "nps_gallery_images_downloaded":sum(r.get("status")=="downloaded" for r in nps_gallery_images_report),
+              "nps_gallery_image_bytes_downloaded":sum(r.get("size_bytes",0) for r in nps_gallery_images_report if r.get("status")=="downloaded"),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
@@ -6721,7 +6726,12 @@ def main():
       "The five park archive indexes are each capped at three clips so NPGallery retains a fair share of the 36-video lane; each file is limited to 350 MiB and aggregate NPS source downloads are limited to 4 GiB. NPGallery runs bounded first-page searches for b-roll, video and footage; the preliminary search pool contains 39 unique candidate IDs after query interleaving and deduplication. Search results are used only to discover candidate IDs. The individual Asset Detail page is re-fetched and must confirm the same Asset ID, Constraints Information 'Public domain: Full Granting Rights', Resource Type Video, Resource Format mp4 and PhotoCredit containing NPS. Only then is the exact official npgallery.nps.gov/GetAsset/{asset_id}/original endpoint downloaded. Search records with unknown/partial rights, albums, non-MP4 resources, missing/non-NPS credit or mismatched detail metadata are rejected. The source MP4 is checked for MIME, exact host/path, byte ceilings, ISO-BMFF signature and SHA-256; audio is removed and ffprobe checks the output. Preserve PhotoCredit verbatim. The item-level Full Granting Rights label is not represented as CC0. Source: https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=b-roll\n"
       + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in nps_broll_report)
     )
-    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+nps_broll_note+npgallery_broll_note+"\n")
+    npgallery_images_note=(
+      "\\n\\n## NPS NPGallery photographs — item-level Full Public Domain rights\\n"
+      "The image lane searches 11 curated NPGallery topics (wildlife, forest, mountain, coast, geology, historic, waterfall, desert, night sky, architecture and river), interleaves first-page candidates and deduplicates by Asset ID. It retains only file-backed Image records in JPG/JPEG/PNG with item-level Public domain: Full Granting Rights and an NPS PhotoCredit. Each selected Asset Detail page is fetched again and must reconfirm the same Asset ID, rights, Image type, exact format, Public Can View access and NPS credit; explicit image/photo copyright, third-party, licensed, permission-required or all-rights-reserved exceptions are rejected. Only the exact official npgallery.nps.gov/GetAsset/{asset_id}/original.{format} endpoint is downloaded. MIME, redirect, format signature, per-file/aggregate byte ceilings and SHA-256 are checked. Preserve PhotoCredit and Copyright fields; review identifiable people, private property, cultural sensitivity and third-party marks. These item-level rights are Public Domain with Full Granting Rights, not CC0. Limits: 180 images, 80 MiB/file, 6 GiB aggregate source bytes and 160 MiB metadata.\\n"
+      + "\\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in nps_gallery_images_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+nps_broll_note+npgallery_broll_note+npgallery_images_note+"\\n")
     source_capacity_note=(
       "\n\n## Build 74 source capacity ceilings — limits, not promised downloads\n"
       "NASA SVS: up to 60 videos, 300 MiB each, 6 GiB aggregate and 240 topic-search page IDs; the exact official /vis/ host/path, page-level rights/music exclusions and file SHA-256 remain mandatory.\n"
