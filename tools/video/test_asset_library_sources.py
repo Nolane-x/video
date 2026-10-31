@@ -3155,6 +3155,7 @@ class NPSBrollImporterTests(unittest.TestCase):
                      "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
                  },),
              ), \
+             mock.patch.object(nps_broll_importer, "_fetch_npgallery_page", side_effect=RuntimeError("network disabled in offline importer test")), \
              mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
              mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
              mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux), \
@@ -3274,6 +3275,7 @@ class NPSBrollImporterTests(unittest.TestCase):
                      "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
                  },),
              ), \
+             mock.patch.object(nps_broll_importer, "_fetch_npgallery_page", side_effect=RuntimeError("network disabled in offline importer test")), \
              mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
              mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
              mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux):
