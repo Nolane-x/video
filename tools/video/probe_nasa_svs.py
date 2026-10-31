@@ -11,6 +11,8 @@ import urllib.request
 from collections import Counter
 from typing import Any
 
+from nasa_svs_importer import normalize_svs_media_url, page_rights_exception_markers
+
 SEARCH_URL = "https://svs.gsfc.nasa.gov/api/search/"
 BASE_URL = "https://svs.gsfc.nasa.gov"
 USER_AGENT = "NolaneVideoAssetLibrary-NASA-SVS-Probe/1.0"
@@ -24,12 +26,7 @@ MAX_SAMPLE_MOVIE_ROWS = 12
 # Restrict rights exceptions to explicit license/copyright language. General mentions
 # of music are not enough on their own; the SVS FAQ says licensed music is noted on
 # the individual visualization page and that the visual itself can be used without it.
-EXCEPTION_PATTERN = re.compile(
-    r"licensed music|music (?:is|was) licensed|copyright(?:ed)? (?:music|audio|footage|material)|"
-    r"third[- ]party (?:music|audio|footage|content)|used with permission|not in the public domain|"
-    r"not public domain|permission required|rights holder",
-    re.IGNORECASE,
-)
+EXCEPTION_PATTERN = re.compile(r"licensed music|music credit|music\\s*[:=]|music\\s+(?:by|from)\\b|copyright(?:ed)?\\s+(?:music|audio|footage|material)|third[- ]party\\s+(?:music|audio|footage|content)|used with permission|not in the public domain|not public domain|permission required|rights holder|licensed soundtrack", re.IGNORECASE)
 
 
 def fetch_json(url: str, timeout: int = 30) -> tuple[dict[str, Any], int]:
@@ -48,18 +45,14 @@ def fetch_json(url: str, timeout: int = 30) -> tuple[dict[str, Any], int]:
 
 
 def svs_movie_url_is_allowed(url: str) -> bool:
-    parsed = urllib.parse.urlsplit(str(url or ""))
-    if parsed.scheme != "https" or parsed.hostname != "svs.gsfc.nasa.gov":
-        return False
-    if parsed.username or parsed.password or parsed.port:
-        return False
-    path = urllib.parse.unquote(parsed.path).casefold()
-    return path.startswith("/vis/") and path.endswith((".mp4", ".webm", ".mpg", ".dv"))
+    return normalize_svs_media_url(url) is not None
 
 
 def probe_movie_header(url: str) -> dict[str, Any]:
-    if not svs_movie_url_is_allowed(url):
+    normalized_url = normalize_svs_media_url(url)
+    if not normalized_url:
         return {"status": "rejected-url"}
+    url = normalized_url
     request = urllib.request.Request(
         url,
         headers={
@@ -148,14 +141,15 @@ def inspect_page(page_id: int) -> tuple[dict[str, Any], int]:
         return {"id": page_id, "status": "not-complete", "progress": page.get("progress")}, size
 
     full_text = "\n".join(collect_page_text(page))
-    matches = sorted(set(match.group(0).casefold() for match in EXCEPTION_PATTERN.finditer(full_text)))
+    matches = page_rights_exception_markers(page)
     movies = []
     all_movie_items = []
     for media, group in iter_media_objects(page):
         if str(media.get("media_type") or "").casefold() != "movie":
             continue
         row = {
-            "url": str(media.get("url") or ""),
+            "url": normalize_svs_media_url(str(media.get("url") or "")) or str(media.get("url") or ""),
+            "audio_track": media.get("audio_track"),
             "filename": str(media.get("filename") or ""),
             "width": media.get("width"),
             "height": media.get("height"),
