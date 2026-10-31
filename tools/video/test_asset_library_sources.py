@@ -2942,19 +2942,19 @@ class NPSBrollImporterTests(unittest.TestCase):
         }) + ";</script>"
         detail_html = f"""
         <html><body>
-          <label>Asset ID:</label><p>{asset_id}</p>
-          <label>Title:</label><p>Acadia B-Roll: Coastal Scenery</p>
-          <label>AltText:</label><p>Waves crashing against rocky shores.</p>
-          <label>Description:</label><p>Footage of Acadia's scenic coastline.</p>
-          <label>Copyright:</label><p>Digital assets without copyright restrictions are public domain.</p>
-          <label>PhotoCredit:</label><p>NPS Video</p>
-          <label>Constraints Information:</label><p>Public domain:Full Granting Rights</p>
-          <label>Resource Type:</label><p>Video</p>
-          <label>Resource Format:</label><p>mp4</p>
-          <label>Access Constraints:</label><p>Public Can View</p>
-          <label>Original File Name:</label><p>broll_coastalscenery.mp4</p>
-          <label>File Size (bytes):</label><p>67400000</p>
-          <label>NPS Units:</label><p>Acadia National Park, Code: ACAD</p>
+          <label class="col-md-3 col-sm-3 text-right">Asset ID:</label><div class="col-md-7 col-sm-7 text-left">{asset_id}</div>
+          <label class="col-md-3 col-sm-3 text-right">Title:</label><div class="col-md-7 col-sm-7 text-left">Acadia B-Roll: Coastal Scenery</div>
+          <label class="col-md-3 col-sm-3 text-right">AltText:</label><div class="col-md-7 col-sm-7 text-left">Waves crashing against rocky shores.</div>
+          <label class="col-md-3 col-sm-3 text-right">Description:</label><div class="col-md-7 col-sm-7 text-left">Footage of Acadia's scenic coastline.</div>
+          <label class="col-md-3 col-sm-3 text-right">Copyright:</label><div class="col-md-7 col-sm-7 text-left">Digital assets without copyright restrictions are public domain.</div>
+          <label class="col-md-3 col-sm-3 text-right">PhotoCredit:</label><div class="col-md-7 col-sm-7 text-left">NPS Video</div>
+          <label class="col-md-3 col-sm-3 text-right">Constraints Information:</label><div class="col-md-7 col-sm-7 text-left">Public domain:Full Granting Rights</div>
+          <label class="col-md-3 col-sm-3 text-right">Resource Type:</label><div class="col-md-7 col-sm-7 text-left">Video</div>
+          <label class="col-md-3 col-sm-3 text-right">Resource Format:</label><div class="col-md-7 col-sm-7 text-left">mp4</div>
+          <label class="col-md-3 col-sm-3 text-right">Access Constraints:</label><div class="col-md-7 col-sm-7 text-left">Public Can View</div>
+          <label class="col-md-3 col-sm-3 text-right">Original File Name:</label><div class="col-md-7 col-sm-7 text-left">broll_coastalscenery.mp4</div>
+          <label class="col-md-3 col-sm-3 text-right">File Size (bytes):</label><div class="col-md-7 col-sm-7 text-left">67400000</div>
+          <label class="col-md-3 col-sm-3 text-right">NPS Units:</label><div class="col-md-7 col-sm-7 text-left">Acadia National Park, Code: ACAD</div>
         </body></html>
         """
         return asset_id, asset, search_html, detail_html
