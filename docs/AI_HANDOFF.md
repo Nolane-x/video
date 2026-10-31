@@ -124,3 +124,49 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Recovery workflow .github/workflows/recover-video-asset-library-release.yml reuses existing 22 shard manifests and remote assets. For another draft, update .github/ASSET_LIBRARY_RECOVERY_REQUEST to the exact draft tag; finalizer rebuilds the metadata, verifies every remote asset, and publishes.
 - Next step: run the next full build using expanded caps. Then create a cumulative cross-release index with SHA-256 deduplication so repeat source items aren't counted twice toward the 50 GB total.
 
+
+
+## Editorial quality corrective handoff — 2026-10-31
+
+This handoff is for the toolchain/editorial workstream only. The parallel AI still owns the asset library. Do not edit or trigger `video-library/**`, asset source catalogues, asset downloaders/importers, asset packaging or `.github/workflows/build-video-asset-library.yml`.
+
+### User feedback to preserve
+The user said the previous video was a failure and expressed disappointment. Do not defend it using green CI, successful encoding, loudness or OCR coverage. We inspected the Remotion candidate's story/shot manifest and contact sheets/native-resolution samples and found:
+- 31 shots all exactly 5 seconds long;
+- 20/31 shots use the same generic `scene` template (64.52%);
+- the plan has no structured creative brief for audience, platform, language, promise, hook, payoff, visual grammar or narration policy;
+- the soundtrack is designed as music/SFX-only without a documented story-specific rationale for not using narration/dialogue;
+- physical-action shots do not have explicit contact/follow-through proof plans.
+A complete continuous watch/listen of the 155.1-second film was not performed; never claim one.
+
+### Mandatory gates now available
+Pre-render:
+```bash
+python tools/video/evaluate_editorial_plan.py video-projects/remotion/public/story/shots.json --output video-projects/remotion/out/editorial-plan-report.json --strict
+```
+Run from repo root. A blocked result is a stop sign. A plan-ready result only authorizes a blocking/animatic and low-cost preview; it is not a video approval.
+
+Post-render, only after a reviewer independently watched/listened to the complete exact candidate:
+```bash
+python tools/video/validate_editorial_review.py path/to/editorial-review.json --video path/to/candidate.mp4
+```
+Start from `tools/video/editorial-review.template.json`. Coverage must span every second from first frame to final frame for both video and audio; all eight scores need >=7/10, mean >=7.5/10, and no unresolved P0/P1 defect. Validator confirms exact hash/duration and record completeness; it cannot prove the reviewer actually watched the candidate.
+
+### Latest evidence
+- Editorial preflight run [41203679460](https://github.com/Nolane-x/video/actions/runs/41203679460) — 8 tests passed; current storyboard is correctly BLOCKED, 15/100, 21 P1 and 1 P2, uniform 5s grid, dominant template 64.52%. Report artifact [13043816063](https://github.com/Nolane-x/video/actions/runs/41203679460/artifacts/13043816063).
+- Remotion workflow run [41203679618](https://github.com/Nolane-x/video/actions/runs/41203679618) was blocked before rendering because the current plan is not ready. Do not bypass this by relaxing thresholds.
+- Core smoke run [41203226665](https://github.com/Nolane-x/video/actions/runs/41203226665) — 12 core, 8 editorial-plan, 6 review-attestation tests all passed; genre validator and plugin-package validation passed.
+- Command Center packaging run [41203226657](https://github.com/Nolane-x/video/actions/runs/41203226657) — passed, artifact [13043188752](https://github.com/Nolane-x/video/actions/runs/41203226657/artifacts/13043188752).
+- Current live private Command Center **v0.8.0**, release `pluginrel_6ae5e594c6a48191920894826e2902e5`, 29 internal skills / 37 separate specialists. Link: https://chatgpt.com/plugins/plugins_6ae55f28fb148191b2eb6333f7620cbc. Read-back verified manifests, skills and gate references.
+
+### Required next work
+Rebuild the actual creative brief and the shot plan, not just the validator:
+- make a clear story promise, audience, language, platform and chosen narration/dialogue policy;
+- vary duration by dramatic action, speech and rhythm rather than a uniform 5-second grid;
+- design a sequence of contrasting shot sizes, angles, camera movement, composition, environment, subject actions and purposeful holds;
+- make physical contacts visible and testable (hands/props, feet/ground, impact/reaction/follow-through);
+- make every scene change something in information, action, relationship, stakes or emotional state;
+- plan exact on-screen information and reading time;
+- prototype the hardest moments with a low-cost blocking/animatic preview before a full render.
+
+Do not call the previous 155-second candidate fixed or approved. Do not create another full MP4 until the plan passes and the blocking preview is accepted. The final reviewer still has to watch/listen to the entire resulting film and record evidence. PR #26 is open/unmerged; do not merge unless the user explicitly asks.
