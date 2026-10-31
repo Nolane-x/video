@@ -1,4 +1,4 @@
-# Nolane Video Command Center v0.7.8
+# Nolane Video Command Center v0.7.9
 
 One private front door for the Nolane video workflow. It retains **29 internal production skills** and adds an explicit routing directory for **37 focused specialist plugins** with recorded source/provenance notes.
 
