@@ -13,14 +13,14 @@ from typing import Any
 
 BASE = "https://svs.gsfc.nasa.gov"
 SEARCH_TERMS = ("Earth", "Moon", "Mars", "Sun", "Ocean", "Climate", "Spacecraft", "Galaxy", "Aurora", "Hurricane", "Volcano", "Asteroid", "Eclipse", "Weather", "Telescope", "Wildfire", "Spaceflight")
-MAX_PAGES = 170
+MAX_PAGES = 240
 MAX_SEARCH_JSON_BYTES = 2 * 1024 * 1024
-MAX_PER_TERM = 10
-MAX_DOWNLOADS = 36
+MAX_PER_TERM = 14
+MAX_DOWNLOADS = 60
 MAX_JSON_BYTES = 8 * 1024 * 1024
 MAX_METADATA_BYTES = 64 * 1024 * 1024
 MAX_VIDEO_BYTES = 300 * 1024 * 1024
-MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+MAX_TOTAL_BYTES = 6 * 1024 * 1024 * 1024
 MIN_VIDEO_BYTES = 20 * 1024
 UA = "NolaneVideoAssetLibrary-NASA-SVS/1.0 (+https://github.com/Nolane-x/video)"
 VIDEO_EXTS = {".mp4", ".webm", ".mpg"}
