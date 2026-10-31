@@ -22,12 +22,12 @@ CPU_INSTALL = (
 
 COPY_ANCHOR = "COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt\n"
 GUARD_PATTERN = re.compile(
-    r"flavor = os\.environ\['GPU_FLAVOR'\];\s*"
+    r"flavor = os\.environ\['GPU_FLAVOR'\];\s*\\\s*"
     r"accel = torch\.version\.hip if flavor == 'rocm' else torch\.version\.cuda;"
 )
 GUARD_CPU = (
-    "flavor = os.environ['GPU_FLAVOR']; "
-    "accel = torch.version.hip if flavor == 'rocm' "
+    "flavor = os.environ['GPU_FLAVOR']; \\\n"
+    "    accel = torch.version.hip if flavor == 'rocm' "
     "else (torch.version.cuda if flavor == 'cuda' else 'cpu');"
 )
 
@@ -38,7 +38,7 @@ def transform_dockerfile(source: str) -> str:
     if "torch==2.8.0" in source and "index-url https://download.pytorch.org/whl/cpu" in source:
         raise ValueError("CPU PyTorch install already exists; refusing to double-patch Dockerfile")
     transformed = source.replace(COPY_ANCHOR, COPY_ANCHOR + CPU_INSTALL, 1)
-    transformed, count = GUARD_PATTERN.subn(GUARD_CPU, transformed)
+    transformed, count = GUARD_PATTERN.subn(lambda _match: GUARD_CPU, transformed)
     if count != 1:
         raise ValueError(
             f"Pinned VoiceStudio Dockerfile changed: expected one GPU-only torch guard, found {count}"
