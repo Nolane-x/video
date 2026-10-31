@@ -1,0 +1,16 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "nolane-production-proof",
+  "type": "hyperframes:example",
+  "title": "Nolane Production Proof",
+  "description": "A self-contained 17-second production workflow sample with strict motion, layout and caption checks.",
+  "dimensions": { "width": 1920, "height": 1080 },
+  "duration": 17,
+  "files": [
+    { "path": "compositions/captions.html", "target": "compositions/captions.html", "type": "hyperframes:composition" },
+    { "path": "compositions/graphics.html", "target": "compositions/graphics.html", "type": "hyperframes:composition" },
+    { "path": "compositions/intro.html", "target": "compositions/intro.html", "type": "hyperframes:composition" },
+    { "path": "index.html", "target": "index.html", "type": "hyperframes:composition" },
+    { "path": "index.motion.json", "target": "index.motion.json", "type": "hyperframes:motion" }
+  ]
+}
