@@ -37,6 +37,16 @@ separate Actions job on a runner with enough disk/RAM/GPU for that exact model.
 No live model should be silently moved to a personal computer when Actions
 resources are insufficient.
 
+The actual pinned VoiceStudio server is also smoke-tested on Actions by
+[VoiceStudio headless CPU API smoke](../../.github/workflows/voice-studio-headless-smoke.yml).
+That workflow initializes only the pinned app submodule, builds the app's own
+Dockerfile against a digest-pinned CPU Python base with official CPU PyTorch
+wheels, verifies the in-container build commit, starts the HTTP service, and
+checks health, TTS engine discovery, model listing and OpenAI-compatible API
+routes. It does not pull `latest`, download model weights, create profiles,
+accept model terms or synthesize audio. The service smoke is deliberately
+separate from the KorvaTTS audio renderer.
+
 For a complete project with multiple characters, use the separate
 [Voice Studio Actions production renderer](../../.github/workflows/voice-studio-actions-project.yml).
 It reads a committed project manifest, synthesizes every dialogue block with a
