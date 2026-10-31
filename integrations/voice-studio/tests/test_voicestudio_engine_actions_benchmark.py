@@ -15,8 +15,10 @@ class FakeApi:
     def __init__(self, states):
         self.states = list(states)
         self.posts = []
+        self.gets = []
 
     def get_json(self, path):
+        self.gets.append(path)
         self.last_get = path
         return self.states.pop(0)
 
@@ -55,6 +57,10 @@ class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
         api = FakeApi([
             {"engine_id": "supertonic3", "accepted": False},
             {"engine_id": "supertonic3", "accepted": True},
+            {"backends": [{
+                "id": "supertonic3", "available": True, "license_accepted": True,
+                "reason": "ready (CPU-only via onnxruntime)",
+            }]},
         ])
         receipt = bench.verify_or_accept_license(api, accept_model_license=True)
         self.assertEqual(
@@ -65,13 +71,36 @@ class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
         self.assertTrue(receipt["accepted_in_this_run"])
         self.assertEqual(receipt["model_license"], "OpenRAIL-M")
         self.assertEqual(receipt["model_revision"], bench.MODEL_REVISION)
+        self.assertTrue(receipt["engine_available"])
+        self.assertEqual(api.last_get, "/engines/tts")
 
     def test_previously_accepted_license_is_not_reaccepted(self):
-        api = FakeApi([{"engine_id": "supertonic3", "accepted": True}])
+        api = FakeApi([
+            {"engine_id": "supertonic3", "accepted": True},
+            {"backends": [{
+                "id": "supertonic3", "available": True, "license_accepted": True,
+                "reason": "ready (CPU-only via onnxruntime)",
+            }]},
+        ])
         receipt = bench.verify_or_accept_license(api, accept_model_license=False)
         self.assertEqual(api.posts, [])
         self.assertTrue(receipt["accepted"])
         self.assertFalse(receipt["accepted_in_this_run"])
+        self.assertTrue(receipt["engine_available"])
+
+    def test_engine_must_be_available_after_license_is_accepted(self):
+        api = FakeApi([
+            {"engine_id": "supertonic3", "accepted": False},
+            {"engine_id": "supertonic3", "accepted": True},
+            {"backends": [{
+                "id": "supertonic3", "available": False, "license_accepted": True,
+                "reason": "supertonic package missing in runtime",
+            }]},
+        ])
+        with self.assertRaisesRegex(bench.VoiceStudioApiError, "still unavailable"):
+            bench.verify_or_accept_license(api, accept_model_license=True)
+        self.assertEqual(len(api.posts), 1)
+        self.assertEqual(api.gets[-1], "/engines/tts")
 
     def test_only_loopback_voice_studio_api_urls_are_allowed(self):
         for url in (
