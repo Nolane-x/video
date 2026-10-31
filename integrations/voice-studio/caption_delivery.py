@@ -28,6 +28,14 @@ def _time(value: float, *, vtt: bool = False) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}{separator}{millis:03d}"
 
 
+def _ass_time(value: float) -> str:
+    centiseconds = max(0, round(float(value) * 100))
+    hours, remainder = divmod(centiseconds, 360_000)
+    minutes, remainder = divmod(remainder, 6_000)
+    seconds, centis = divmod(remainder, 100)
+    return f"{hours}:{minutes:02d}:{seconds:02d}.{centis:02d}"
+
+
 def _wrap_caption(words: list[str], max_line_chars: int) -> str:
     lines: list[str] = []
     current = ""
@@ -191,7 +199,7 @@ def write_subtitles(
         ass_text = cue["text"].replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}")
         ass_text = ass_text.replace("\n", r"\N")
         ass_dialogue.append(
-            f"Dialogue: 0,{_time(cue['start'], vtt=True)[:-1]},{_time(cue['end'], vtt=True)[:-1]},"
+            f"Dialogue: 0,{_ass_time(cue['start'])},{_ass_time(cue['end'])},"
             f"Default,,0,0,0,,{ass_text}"
         )
 
