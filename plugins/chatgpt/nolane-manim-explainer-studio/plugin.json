@@ -1,12 +1,23 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "nolane-manim-explainer-studio",
-  "version": "0.1.0",
-  "description": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing.",
   "author": {
-    "name": "Nolane Studio"
+    "email": "casioreview20@gmail.com",
+    "name": "Sio Ca"
   },
-  "repository": "https://github.com/Nolane-x/video",
+  "description": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing. Designed for repeatable educational video production and evidence-based visual review.",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "capabilities": [],
+        "category": "Productivity",
+        "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve provenance, license constraints and evidence-based QA.",
+        "developerName": "Sio Ca",
+        "displayName": "Nolane Manim Explainer Studio",
+        "longDescription": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing. Designed for repeatable educational video production and evidence-based visual review.",
+        "shortDescription": "Math and science animation"
+      }
+    }
+  },
   "keywords": [
     "manim",
     "math",
@@ -15,17 +26,7 @@
     "animation",
     "video"
   ],
-  "extensions": {
-    "com.openai": {
-      "interface": {
-        "displayName": "Nolane Manim Explainer Studio",
-        "shortDescription": "Math and science animation",
-        "longDescription": "Create precise mathematical and scientific explanatory animations with Manim Community Edition, including diagrams, equations, plots, geometry, camera moves and narration timing.",
-        "developerName": "Nolane Studio",
-        "category": "Productivity",
-        "capabilities": [],
-        "defaultPrompt": "Use this specialist workflow to create or improve a video in the Nolane production system. Preserve rights and verify the rendered output."
-      }
-    }
-  }
+  "name": "nolane-manim-explainer-studio",
+  "repository": "https://github.com/Nolane-x/video",
+  "version": "0.1.0"
 }
