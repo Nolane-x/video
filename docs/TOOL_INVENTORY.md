@@ -70,3 +70,6 @@ The canonical H2 source ZIPs are already published at https://github.com/Nolane-
 - The current VoiceStudio archetype catalogue is mainly English/Chinese combinatorial presets with a curated subset of other languages; it must not be described as hundreds of ready-made Vietnamese voices.
 - CI uses mocks only. No model downloads, service keys, generated samples or reference recordings are included.
 - VoxCPM2 is a promising Vietnamese voice-design option, but VoiceStudio's current licence audit marks component closure incomplete and output rights not specifically granted. Do not claim commercial clearance without checking exact installed revision, dependency terms and voice/input permissions.
+
+
+- provider_voice_benchmark.py: identical-script comparison across VoiceStudio, KorvaTTS, Google Cloud TTS and ElevenLabs, with cloud cost gate, blind HTML listening and human-rating export. This produces comparable audition evidence, not a model-independent objective quality score.
