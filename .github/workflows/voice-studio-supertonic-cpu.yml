@@ -83,11 +83,10 @@ jobs:
           ffmpeg -version | head -n 2
           ffprobe -version | head -n 2
 
-      - name: Restore Supertonic model cache (weights remain absent unless accepted)
-        uses: actions/cache@v6
-        with:
-          path: ${{ runner.temp }}/voicestudio-data/huggingface
-          key: ${{ runner.os }}-supertonic3-1.3.1-724fb5abbf5502583fb520898d45929e62f02c0b
+      - name: Confirm model weights are transient and never cached
+        run: |
+          echo "Supertonic-3 OpenRAIL-M weights are downloaded only into the ephemeral runner data volume when manually confirmed."
+          echo "They are not saved into Actions cache or included in uploaded artifacts."
 
       - name: Create ephemeral VoiceStudio API key and data volume
         shell: bash
