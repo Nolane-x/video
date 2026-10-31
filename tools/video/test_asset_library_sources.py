@@ -1119,17 +1119,19 @@ class InternetArchiveVideoRightsAndParsingTests(unittest.TestCase):
                 return item_metadata
             raise AssertionError("Unexpected Internet Archive JSON endpoint: " + url)
 
-        with tempfile.TemporaryDirectory() as tmp, \\
-             mock.patch.object(library, "INTERNET_ARCHIVE_COLLECTION_CAPS",
-                               {"prelinger": 1, "nasa": 1}), \\
-             mock.patch.object(library, "INTERNET_ARCHIVE_SEARCH_PAGES", 1), \\
-             mock.patch.object(library, "INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION", 2), \\
-             mock.patch.object(library, "request_json", side_effect=fake_json), \\
-             mock.patch.object(library, "request_bytes", return_value=(blob, "video/mp4")), \\
-             mock.patch.object(library, "internet_archive_fetch_item_page", return_value=page) as fetch_page, \\
-             mock.patch.object(library.time, "sleep"):
-            index = []
-            report = library.download_internet_archive_videos(Path(tmp), index)
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                mock.patch.object(library, "INTERNET_ARCHIVE_COLLECTION_CAPS",
+                                  {"prelinger": 1, "nasa": 1}),
+                mock.patch.object(library, "INTERNET_ARCHIVE_SEARCH_PAGES", 1),
+                mock.patch.object(library, "INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION", 2),
+                mock.patch.object(library, "request_json", side_effect=fake_json),
+                mock.patch.object(library, "request_bytes", return_value=(blob, "video/mp4")),
+                mock.patch.object(library, "internet_archive_fetch_item_page", return_value=page) as fetch_page,
+                mock.patch.object(library.time, "sleep"),
+            ):
+                index = []
+                report = library.download_internet_archive_videos(Path(tmp), index)
 
         downloaded = [row for row in report if row.get("status") == "downloaded"]
         self.assertEqual(len(downloaded), 1)
