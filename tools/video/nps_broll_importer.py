@@ -197,6 +197,7 @@ class _NPSHTMLParser(HTMLParser):
         self.anchor: dict[str, str] | None = None
         self.video_groups: list[dict[str, Any]] = []
         self.global_media: list[dict[str, str]] = []
+        self.all_text_parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key.casefold(): value or "" for key, value in attrs}
@@ -213,8 +214,6 @@ class _NPSHTMLParser(HTMLParser):
         if tag == "div":
             self.div_depth += 1
             classes = set(attr.get("class", "").casefold().split())
-            if "vide ohero" in classes:
-                pass
             if "videohero" in classes and self.video_group is None:
                 self.video_group = {
                     "depth": self.div_depth,
@@ -245,6 +244,7 @@ class _NPSHTMLParser(HTMLParser):
                     self.video_group["sources"].append(media)
 
     def handle_data(self, data: str) -> None:
+        self.all_text_parts.append(data)
         if self.h1_depth:
             self.h1_parts.append(data)
         if self.title_capture_depth is not None and self.video_group is not None:
@@ -295,6 +295,7 @@ class _NPSHTMLParser(HTMLParser):
             "links": self.links,
             "video_groups": groups,
             "global_media": self.global_media,
+            "page_text": _clean_text("".join(self.all_text_parts), 30000),
         }
 
 
@@ -349,6 +350,7 @@ def parse_nps_index_page(page_html: str, park: str, index_url: str) -> dict[str,
         "description": parsed["description"],
         "video_groups": parsed["video_groups"],
         "global_media": parsed["global_media"],
+        "page_text": parsed["page_text"],
         "child_pages": child_pages[:MAX_ITEM_PAGES],
         "media_pages": media_pages[:MAX_ITEM_PAGES],
         "credit_text": parse_nps_credit(page_html)[0],
@@ -606,7 +608,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     break
                 title = group.get("title") or source_info["title"]
                 description = group.get("description") or ""
-                if nps_item_page_rights_exception(title, description):
+                if nps_item_page_rights_exception(title, description + " " + parsed.get("page_text", "")):
                     report.append({
                         "id": "nps-skip-" + hashlib.sha256((page_url + title).encode("utf-8")).hexdigest()[:12],
                         "status": "skipped",
@@ -635,6 +637,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                             source_path.unlink(missing_ok=True)
                             failures.append("aggregate NPS source-byte ceiling reached")
                             break
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
                         video_info = _strip_nps_audio_with_ffmpeg(source_path, output_path)
                         source_path.unlink(missing_ok=True)
                         selected = {
