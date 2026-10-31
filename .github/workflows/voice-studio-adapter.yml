@@ -9,6 +9,7 @@ on:
       - ".agents/skills/video-voice-*/*"
       - ".github/workflows/voice-studio-adapter.yml"
       - ".github/workflows/voice-studio-actions-lab.yml"
+      - ".github/workflows/voice-studio-actions-project.yml"
   push:
     branches: [main]
     paths:
@@ -38,7 +39,13 @@ jobs:
           git ls-tree HEAD vendor/VoiceStudio | grep -q '^160000 commit faa5294359f23c911972ffe6d27785c50c67097b'
           grep -q 'AGPL-3.0' integrations/voice-studio/VOICE_STUDIO_LOCK.json
           test -f .github/workflows/voice-studio-actions-lab.yml
+          test -f .github/workflows/voice-studio-actions-project.yml
+          test -f integrations/voice-studio/actions_voice_lab.py
+          test -f integrations/voice-studio/actions_voice_project.py
+          test -f integrations/voice-studio/examples/actions-benchmark-suite.json
+          test -f integrations/voice-studio/examples/actions-vietnamese-documentary.json
           grep -q 'actions/cache@v6' .github/workflows/voice-studio-actions-lab.yml
+          grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-project.yml
           grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-lab.yml
           test -f .agents/skills/video-voice-design-director/SKILL.md
           test -f .agents/skills/video-character-voice-casting-engineer/SKILL.md
