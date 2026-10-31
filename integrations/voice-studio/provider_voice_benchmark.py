@@ -422,6 +422,8 @@ def run_benchmark(
                         })
                         if asr and (previous.get("asr_intelligibility_proxy") or {}).get("status") == "available":
                             row["asr_intelligibility_proxy"] = previous["asr_intelligibility_proxy"]
+                        if previous.get("mastering"):
+                            row["mastering"] = previous["mastering"]
                         reused = True
                         if asr and (row.get("asr_intelligibility_proxy") or {}).get("status") != "available":
                             try:
