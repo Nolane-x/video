@@ -77,7 +77,7 @@ manifests or Git.
 ## 3. Create a reusable Nolane voice set
 
 The repository includes an original Vietnamese voice-design set:
-`examples/vietnamese-original-voice-set.json`. It defines five fictional
+`examples/vietnamese-original-voice-set.json`. It defines ten fictional
 speaker identities with different timbre, delivery, and seed settings. It uses
 the exact engine ID `voxcpm2`; change that only to an installed engine that
 declares native voice-design support.
@@ -184,12 +184,34 @@ ElevenLabs calls can incur charges; the explicit `--allow-cloud` flag is
 mandatory whenever either cloud provider is included.
 
 A run exports one blind HTML listening page and an identity-mapped JSON report.
+In blind mode, candidate order is shuffled reproducibly (the default
+`--blind-seed` is recorded in the report) so voices from one provider are not
+presented in a single provider block. The benchmark checkpoints after every
+candidate; rerunning in the same output directory reuses verified audio files
+and retries failed or incomplete candidates. Use `--no-resume` to force fresh
+synthesis. A cache hit means the saved file hash matches the previous report;
+it does not prove that a remote provider has not changed the underlying voice.
+
 Add `--asr` to send each generated sample through the same VoiceStudio ASR
 backend and attach WER/CER pronunciation/intelligibility proxies. This requires
 a configured local ASR engine in VoiceStudio. Rate naturalness, Vietnamese
 clarity/tones, identity, expressiveness and character fit from 1–5, then click
-**Export human ratings JSON**. ASR WER/CER and subjective ratings are not a
-validated ElevenLabs-equivalence percentage.
+**Export human ratings JSON**. Once you have exported the ratings file, join it
+to the private candidate identity map and calculate provider-level summaries:
+
+```bash
+python integrations/voice-studio/analyze_voice_benchmark.py \\
+  --benchmark out/benchmark-all/provider-voice-benchmark.json \\
+  --ratings out/benchmark-all/voice-human-ratings.json \\
+  --min-ratings 3
+```
+
+The analysis report shows rating coverage, the highest-rated candidate, and
+per-provider averages. A candidate must have at least three of the five
+dimensions rated to enter the comparison by default. Candidate means are
+equally weighted when calculating provider means. ASR WER/CER stays separate
+from human ratings; neither is an objective naturalness score or a validated
+ElevenLabs-equivalence percentage.
 
 ## 5. Lock a cast and generate the voice-over
 
