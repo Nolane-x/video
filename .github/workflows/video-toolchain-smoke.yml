@@ -138,7 +138,7 @@ jobs:
             'npm': subprocess.check_output(['npm','--version'], text=True).strip(),
             'ffmpeg': subprocess.check_output(['ffmpeg','-version'], text=True).splitlines()[0],
             'ffprobe': subprocess.check_output(['ffprobe','-version'], text=True).splitlines()[0],
-            'remotion': subprocess.check_output(['remotion','--version'], text=True).strip(),
+            'remotion': subprocess.check_output(['remotion','versions'], text=True).strip(),
             'hyperframes': subprocess.check_output(['hyperframes','--version'], text=True).strip(),
             'typescript': subprocess.check_output(['tsc','--version'], text=True).strip(),
             'tesseract_languages': subprocess.check_output(['tesseract','--list-langs'], text=True).splitlines()[1:]
