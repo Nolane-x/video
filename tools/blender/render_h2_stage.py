@@ -39,7 +39,25 @@ scene.render.resolution_percentage = 100
 scene.render.fps = 24
 scene.frame_start = 1
 scene.frame_end = 120
-scene.render.image_settings.file_format = "FFMPEG"
+# Blender 5.0+ separates image/video media types from the file format.
+image_settings = scene.render.image_settings
+if hasattr(image_settings, "media_type"):
+    media_types = {
+        item.identifier
+        for item in image_settings.bl_rna.properties["media_type"].enum_items
+    }
+    if "VIDEO" in media_types:
+        image_settings.media_type = "VIDEO"
+available_file_formats = {
+    item.identifier
+    for item in image_settings.bl_rna.properties["file_format"].enum_items
+}
+if "FFMPEG" not in available_file_formats:
+    raise RuntimeError(
+        "This Blender build does not expose FFmpeg video output after selecting "
+        f"media_type=VIDEO. Available file formats: {sorted(available_file_formats)}"
+    )
+image_settings.file_format = "FFMPEG"
 scene.render.ffmpeg.format = "MPEG4"
 scene.render.ffmpeg.codec = "H264"
 scene.render.ffmpeg.constant_rate_factor = "MEDIUM"
