@@ -61,6 +61,22 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
             self.assertEqual([row[2] for row in seen], [1234, 1234])
             self.assertTrue(all(row[3] is client for row in seen))
 
+    def test_voice_studio_keeps_the_profile_saved_seed(self):
+        calls = {}
+        class Client:
+            def synthesize(self, text, destination, **kwargs):
+                calls.update(kwargs)
+                destination.write_bytes(b"RIFF" + b"\\0" * 64)
+                return destination
+        with tempfile.TemporaryDirectory() as tmp:
+            benchmark._synthesize(
+                "voicestudio", {"id": "profile-123"}, "Same Vietnamese script",
+                Path(tmp) / "voice.wav", engine="voxcpm2", language="vi",
+                seed=9999, client=Client(),
+            )
+        self.assertEqual(calls["voice"], "profile-123")
+        self.assertNotIn("seed", calls)
+
     def test_voice_studio_requires_exact_engine_id(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
