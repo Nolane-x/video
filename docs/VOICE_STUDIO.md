@@ -7,6 +7,18 @@ adds voice-casting, batch orchestration, audition and audio-QA workflows.
 Start with the full integration guide:
 [integrations/voice-studio/README.md](../integrations/voice-studio/README.md).
 
+## GitHub Actions execution
+
+Production audio render/QA runs are orchestrated by
+[Voice Studio Actions CPU lab](../.github/workflows/voice-studio-actions-lab.yml).
+It renders ten KorvaTTS Vietnamese presets across four scripts, performs
+FFprobe/FFmpeg checks, and uploads WAVs, blind audition pages and reports as a
+GitHub Actions artifact. No local workstation is required for this baseline.
+
+This CPU lane is explicitly a preset-voice baseline, not the full VoiceStudio
+voice-design service. Custom VoiceStudio engines need a separate Actions lane
+with compute/storage matching their actual model requirements.
+
 ## Core workflows
 
 - Create a reusable original Vietnamese voice set:
