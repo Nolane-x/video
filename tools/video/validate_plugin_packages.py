@@ -181,7 +181,7 @@ def validate_genre_routing(root: Path, errors: list[str]) -> None:
         (command_center, "validate_editorial_review.py"),
         (director, "evaluate_editorial_plan.py"),
         (qa, "validate_editorial_review.py"),
-        (qa, "full playback with audio"),
+        (qa, "Watch the complete video with sound at normal speed."),
     ):
         if required not in source:
             errors.append("Command Center/Director/QA skills must reference required editorial gate: " + required)
