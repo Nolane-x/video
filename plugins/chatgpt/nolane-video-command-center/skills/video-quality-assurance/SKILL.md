@@ -20,6 +20,10 @@ A render is a candidate, not a finished film. Separate technical validity, creat
 9. Audit sound: intelligibility, pronunciation, measured loudness and true peak, music ducking, SFX timing, channel balance, silence, clicks/pops and sync drift.
 10. Record each issue with severity, timecode/frame range, evidence, impact, owning layer and a concrete corrective action.
 
+## Blocking preview — required before a full render
+
+A plan-ready report authorizes only the selected low-resolution motion previews. Use `tools/video/render_blocking_preview.py` and inspect the exact clips for the hook, every physical contact proof, prop continuity, high-risk acting, emotional reaction/listening and final payoff. Record explicit approval against both `previewSpecSha256` (the storyboard + renderer source contract) and `previewArtifactSha256` (the exact rendered clip set), plus reviewer identity, UTC timestamp, all reviewed shot IDs and actionable notes. Validate with `tools/video/validate_preview_approval.py`. If any source, timeline, renderer or preview clip changes, the approval is stale and the preview must be reviewed again. The existence of a successful preview render is not approval.
+
 ## Independent evaluation — required for final candidates
 
 Use a reviewer context that did not create or edit the candidate. Give it only:
