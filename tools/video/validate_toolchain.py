@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the repo-owned, CPU-first video toolchain manifest."""
+"""Validate the pinned, CPU-first video toolchain and reproducible npm lockfile."""
 from __future__ import annotations
 
 import json
@@ -60,8 +60,11 @@ def validate(root: Path = ROOT) -> list[str]:
         package = json.loads(
             (root / "toolchain/node/package.json").read_text(encoding="utf-8")
         )
+        lock = json.loads(
+            (root / "toolchain/node/package-lock.json").read_text(encoding="utf-8")
+        )
     except Exception as exc:
-        return [f"Could not load JSON manifests: {exc}"]
+        return [f"Could not load JSON manifests/lockfile: {exc}"]
 
     if manifest.get("schemaVersion") != 1:
         errors.append("manifest.schemaVersion must equal 1")
@@ -104,6 +107,30 @@ def validate(root: Path = ROOT) -> list[str]:
         errors.append(
             "profiles.core.npmDependencies must exactly match package.json dependencies"
         )
+
+    # The lockfile is reviewed source, not a CI-generated side effect. Validate
+    # both its root dependency contract and each resolved direct package.
+    if lock.get("lockfileVersion") != 3:
+        errors.append("package-lock.json must use lockfileVersion 3")
+    lock_root = lock.get("packages", {}).get("", {})
+    if lock_root.get("name") != package.get("name"):
+        errors.append("package-lock root name must match package.json")
+    if lock_root.get("version") != package.get("version"):
+        errors.append("package-lock root version must match package.json")
+    if lock_root.get("dependencies", {}) != dependencies:
+        errors.append("package-lock root dependencies must exactly match package.json")
+    for name, version in dependencies.items():
+        locked = lock.get("packages", {}).get(f"node_modules/{name}", {})
+        if locked.get("version") != version:
+            errors.append(
+                f"package-lock must resolve {name} to exact direct version {version}"
+            )
+        resolved = locked.get("resolved", "")
+        integrity = locked.get("integrity", "")
+        if not str(resolved).startswith("https://registry.npmjs.org/"):
+            errors.append(f"package-lock {name} must resolve from registry.npmjs.org")
+        if not isinstance(integrity, str) or not integrity.startswith("sha"):
+            errors.append(f"package-lock {name} is missing a package integrity hash")
 
     profiles = manifest.get("profiles", {})
     blender = profiles.get("blender", {})
@@ -164,6 +191,7 @@ def main() -> int:
     print("VIDEO TOOLCHAIN VALIDATION: PASS")
     print(f"- Exact npm dependencies: {len(package['dependencies'])}")
     print(f"- Manifest tools: {len(manifest['tools'])}")
+    print("- Committed npm v3 lockfile: exact direct pins + registry integrity")
     print("- CPU-first core; optional path-scoped Manim/Blender proof profiles")
     print("- Audio ML remains manual-only; no model weights are installed")
     return 0
