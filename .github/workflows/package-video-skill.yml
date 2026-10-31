@@ -210,6 +210,7 @@ jobs:
               "integrations/voice-studio/design_voice_library.py",
               "integrations/voice-studio/generate_voiceover.py",
               "integrations/voice-studio/provider_voice_benchmark.py",
+              "integrations/voice-studio/analyze_voice_benchmark.py",
               "integrations/voice-studio/voice_quality.py",
               "integrations/voice-studio/VOICE_STUDIO_LOCK.json",
               "README.md",
