@@ -25,6 +25,7 @@ import build_cumulative_asset_library_index as cumulative_index  # noqa: E402
 import probe_nara_bulk_dataset as nara_probe  # noqa: E402
 import probe_nasa_svs as nasa_svs_probe  # noqa: E402
 import nasa_svs_importer as nasa_svs_importer  # noqa: E402
+import eso_video_importer as eso_video_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -2044,6 +2045,244 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
             "type": "nasa-svs-video",
             "path": "third-party/nasa-svs/video/5687-ocean.mp4",
         }), "footage")
+
+
+class ESOVideoImporterTests(unittest.TestCase):
+    VIDEO_ID = "eso1234a"
+    SOURCE_URL = "https://cdn.eso.org/videos/ultra_hd/eso1234a.mp4"
+    SOURCE_SHA256 = "a" * 64
+
+    def _page_html(self, extra_body=""):
+        return f"""
+        <html>
+          <head>
+            <title>Example ESO video</title>
+            <meta property="og:title" content="Example ESO science video">
+            <meta name="description" content="A test astronomy visualisation.">
+          </head>
+          <body>
+            <div id="body">
+              <p>Public science video.</p>
+              {extra_body}
+              <strong>Credit:</strong><br>
+              <div class="credit">
+                <p>ESO</p>
+                <p><strong>Directed by</strong>: Test Director.<br>
+                   <strong>Music</strong>: Third-party Composer.</p>
+              </div>
+              <div class="archive_download">
+                <span class="archive_dl_text">
+                  <a href="{self.SOURCE_URL}">4K Ultra HD Preview H.264</a>
+                </span>
+                <span class="archive_dl_size">
+                  <div>10.0 MB</div>
+                  <a data-title="sha256 checksum"
+                     data-content="{self.SOURCE_SHA256}&nbsp;&nbsp;{self.VIDEO_ID}.mp4">checksum</a>
+                </span>
+              </div>
+            </div>
+          </body>
+        </html>
+        """
+
+    def test_page_and_media_urls_are_exact_host_path_and_video_id_allowlisted(self):
+        self.assertEqual(
+            eso_video_importer.normalize_eso_page_url(
+                "https://www.eso.org/public/videos/eso1234a/"
+            ),
+            "https://www.eso.org/public/videos/eso1234a/",
+        )
+        for url in (
+            "https://www.eso.org.evil.example/public/videos/eso1234a/",
+            "http://www.eso.org/public/videos/eso1234a/",
+            "https://user@www.eso.org/public/videos/eso1234a/",
+            "https://www.eso.org:444/public/videos/eso1234a/",
+            "https://www.eso.org/public/news/eso1234a/",
+            "https://www.eso.org/public/videos/eso1234a/?download=1",
+        ):
+            self.assertIsNone(eso_video_importer.normalize_eso_page_url(url), url)
+
+        self.assertEqual(
+            eso_video_importer.normalize_eso_media_url(self.SOURCE_URL, self.VIDEO_ID),
+            self.SOURCE_URL,
+        )
+        self.assertIsNone(
+            eso_video_importer.normalize_eso_media_url(self.SOURCE_URL, "different-id")
+        )
+        for url in (
+            "https://cdn.eso.org.evil.example/videos/ultra_hd/eso1234a.mp4",
+            "http://cdn.eso.org/videos/ultra_hd/eso1234a.mp4",
+            "https://user@cdn.eso.org/videos/ultra_hd/eso1234a.mp4",
+            "https://cdn.eso.org:444/videos/ultra_hd/eso1234a.mp4",
+            "https://cdn.eso.org/videos/ultra_hd/eso1234a.mp4?redirect=1",
+            "https://cdn2.eso.org/videos/ultra_hd/eso1234a.mp4",
+            "https://cdn.eso.org/videos/ultra_hd_broadcast/eso1234a.mov",
+        ):
+            self.assertIsNone(
+                eso_video_importer.normalize_eso_media_url(url, self.VIDEO_ID), url
+            )
+
+        self.assertTrue(
+            eso_video_importer.eso_response_url_is_allowed(
+                self.SOURCE_URL, self.SOURCE_URL, self.VIDEO_ID
+            )
+        )
+        self.assertFalse(
+            eso_video_importer.eso_response_url_is_allowed(
+                self.SOURCE_URL,
+                "https://evil.example/videos/ultra_hd/eso1234a.mp4",
+                self.VIDEO_ID,
+            )
+        )
+
+    def test_page_parser_extracts_credit_source_hash_and_best_format(self):
+        parsed = eso_video_importer.parse_eso_video_page(
+            self.VIDEO_ID, self._page_html()
+        )
+        self.assertEqual(parsed["title"], "Example ESO science video")
+        self.assertIn("Directed by: Test Director.", parsed["credit_text"])
+        self.assertIn("Third-party Composer", parsed["credit_text"])
+        self.assertEqual(len(parsed["media_candidates"]), 1)
+        selected = parsed["media_candidates"][0]
+        self.assertEqual(selected["url"], self.SOURCE_URL)
+        self.assertEqual(selected["expected_source_sha256"], self.SOURCE_SHA256)
+        self.assertEqual(selected["rank"], 2)
+        self.assertEqual(selected["advertised_size_bytes"], int(10 * 1024 * 1024))
+        self.assertFalse(parsed["rights_exception_markers"])
+
+    def test_missing_credit_checksum_or_item_level_rights_exception_fails_closed(self):
+        missing_credit = self._page_html().replace(
+            '<div class="credit">', '<div class="creator-info">'
+        )
+        parsed = eso_video_importer.parse_eso_video_page(self.VIDEO_ID, missing_credit)
+        self.assertFalse(parsed["credit_text"])
+
+        missing_checksum = self._page_html().replace(
+            f'data-title="sha256 checksum"\n                     data-content="{self.SOURCE_SHA256}&nbsp;&nbsp;{self.VIDEO_ID}.mp4"',
+            'data-title="checksum not supplied" data-content="missing"',
+        )
+        parsed = eso_video_importer.parse_eso_video_page(self.VIDEO_ID, missing_checksum)
+        self.assertFalse(parsed["media_candidates"])
+
+        restricted = eso_video_importer.parse_eso_video_page(
+            self.VIDEO_ID, self._page_html("<p>Creative Commons Attribution-NoDerivatives applies.</p>")
+        )
+        self.assertTrue(restricted["rights_exception_markers"])
+        self.assertFalse(restricted["rights_exception_markers"] == [])
+
+    def test_feed_parser_accepts_only_official_video_pages(self):
+        xml = b"""<?xml version="1.0"?>
+        <rss version="2.0"><channel>
+          <item><title>ESO astronomy</title>
+            <link>https://www.eso.org/public/videos/eso1234a/</link>
+            <description>&lt;img src=&quot;thumbnail.jpg&quot; /&gt;A distant galaxy.</description>
+            <pubDate>Sat, 31 Oct 2026 10:00:00 +0100</pubDate>
+          </item>
+          <item><title>Bad host</title>
+            <link>https://www.eso.org.evil.example/public/videos/bad123/</link>
+          </item>
+        </channel></rss>"""
+        rows = eso_video_importer.parse_eso_feed(xml, "esocast")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["id"], self.VIDEO_ID)
+        self.assertEqual(rows[0]["category"], "esocast")
+        self.assertIn("A distant galaxy", rows[0]["description"])
+        self.assertNotIn("<img", rows[0]["description"])
+
+    def test_ffmpeg_output_is_video_only_and_verified_by_ffprobe(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "input.mp4"
+            output = Path(tmp) / "silent.mp4"
+            source.write_bytes(b"input")
+            calls = []
+
+            def fake_run(args, **kwargs):
+                calls.append(args)
+                if args[0] == "/usr/bin/ffmpeg":
+                    Path(args[-1]).write_bytes(b"silent-video" * 1000)
+                    return mock.Mock(returncode=0, stdout="", stderr="")
+                return mock.Mock(
+                    returncode=0,
+                    stdout=json.dumps({
+                        "streams": [{"codec_type": "video", "codec_name": "h264",
+                                     "width": 3840, "height": 2160}]
+                    }),
+                    stderr="",
+                )
+
+            with mock.patch.object(eso_video_importer.shutil, "which",
+                                   side_effect=lambda name: "/usr/bin/" + name), \
+                 mock.patch.object(eso_video_importer.subprocess, "run",
+                                   side_effect=fake_run):
+                info = eso_video_importer._strip_audio_with_ffmpeg(source, output)
+
+            self.assertEqual(info["width"], 3840)
+            self.assertEqual(info["height"], 2160)
+            self.assertIn("-map", calls[0])
+            self.assertIn("0:v:0", calls[0])
+            self.assertIn("-an", calls[0])
+            self.assertEqual(calls[1][0], "/usr/bin/ffprobe")
+            self.assertTrue(output.is_file())
+
+    def test_full_downloader_records_silent_output_and_visible_credit_obligation(self):
+        feed = f"""<rss><channel><item>
+          <title>Example ESO science video</title>
+          <link>https://www.eso.org/public/videos/{self.VIDEO_ID}/</link>
+          <description>An astronomy scene.</description>
+          <pubDate>Sat, 31 Oct 2026 10:00:00 +0100</pubDate>
+        </item></channel></rss>""".encode()
+        page_html = self._page_html()
+
+        def fake_fetch(url, limit, expected_host, timeout=35):
+            if "/feed/" in url:
+                return feed, "application/rss+xml"
+            return page_html.encode(), "text/html"
+
+        def fake_download(url, video_id, expected_sha256, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"verified-source-fixture")
+            return destination.stat().st_size, self.SOURCE_SHA256
+
+        def fake_silent_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"silent-video-fixture" * 1000)
+            return {"width": 3840, "height": 2160, "video_codec": "h264"}
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(eso_video_importer, "FEED_CATEGORIES", ("esocast",)), \
+             mock.patch.object(eso_video_importer, "_fetch_bytes", side_effect=fake_fetch), \
+             mock.patch.object(eso_video_importer, "_download_source_video", side_effect=fake_download), \
+             mock.patch.object(eso_video_importer, "_strip_audio_with_ffmpeg", side_effect=fake_silent_remux):
+            index = []
+            report = eso_video_importer.download_eso_media(Path(tmp), index)
+
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        self.assertTrue(index[0]["audio_stripped"])
+        self.assertTrue(index[0]["credit_required_visible"])
+        self.assertIn("Directed by: Test Director", index[0]["credit_text"])
+        self.assertEqual(index[0]["license"], "CC BY 4.0 (ESO public-video default unless item specifies otherwise)")
+        self.assertEqual(index[0]["sha256"], hashlib.sha256(
+            (b"silent-video-fixture" * 1000)
+        ).hexdigest())
+        self.assertGreater(index[0]["size_bytes"], 0)
+
+    def test_distributed_registry_classifies_eso_as_footage_and_catalogs_license(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["eso"], "download_eso_media"
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "eso-silent-video",
+                "path": "third-party/eso/video/eso1234a.mp4",
+            }),
+            "footage",
+        )
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(row for row in catalog["sources"] if row["id"] == "eso-public-video-archive")
+        self.assertIn("CC BY 4.0", entry["license"])
+        self.assertIn("silent", entry["bundling"])
 
 
 class CumulativeAssetLibraryIndexTests(unittest.TestCase):
