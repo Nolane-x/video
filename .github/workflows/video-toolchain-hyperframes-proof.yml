@@ -79,7 +79,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          metadata = json.loads(Path("out/hyperframes-metadata.json").read_text(encoding="utf-8"))
+          metadata = json.loads(Path("../hyperframes-metadata.json").read_text(encoding="utf-8"))
           video = next(stream for stream in metadata["streams"] if stream.get("codec_type") == "video")
           audio = next(stream for stream in metadata["streams"] if stream.get("codec_type") == "audio")
           duration = float(metadata["format"]["duration"])
