@@ -30,9 +30,10 @@ def sample_set():
 
 
 class FakeVoiceStudio:
-    def __init__(self):
+    def __init__(self, fail_preview=False):
         self.created = []
         self.previews = []
+        self.fail_preview = fail_preview
 
     def create_design_profile(self, name, description, **kwargs):
         profile_id = f"profile-{kwargs['seed']}"
@@ -40,6 +41,8 @@ class FakeVoiceStudio:
         return {"id": profile_id, "name": name}
 
     def profile_audio(self, profile_id, output_path):
+        if self.fail_preview:
+            raise RuntimeError("simulated model not ready")
         path = Path(output_path).with_suffix(".wav")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"RIFF" + b"\0" * 64)
@@ -65,6 +68,20 @@ class VoiceDesignLibraryTests(unittest.TestCase):
         self.assertEqual(report["status"], "plan_only")
         self.assertEqual(client.created, [])
         self.assertEqual(client.previews, [])
+
+    def test_failed_preview_keeps_profile_id_but_marks_library_partial(self):
+        client = FakeVoiceStudio(fail_preview=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            report = create_library(
+                sample_set(), Path(tmp), create=True, render_previews=True,
+                delay=0, client=client,
+            )
+            self.assertEqual(report["status"], "partial")
+            self.assertEqual(report["created_or_reused"], 2)
+            self.assertEqual(report["preview_failed"], 2)
+            self.assertTrue(all(row.get("profile_id") for row in report["voices"]))
+            cast = __import__("json").loads((Path(tmp) / "voice-cast.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(cast["cast"]), 2)
 
     def test_creates_profiles_renders_previews_and_resumes_without_duplicates(self):
         client = FakeVoiceStudio()
