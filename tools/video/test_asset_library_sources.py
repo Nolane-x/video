@@ -2024,6 +2024,20 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         skipped = next(row for row in report if row.get("status") == "metadata-budget-exhausted")
         self.assertEqual(skipped["id"], "nasa-svs-5687")
 
+    def test_distributed_matrix_matches_registered_source_lanes(self):
+        workflow_path = library.REPO / ".github/workflows/build-video-asset-library.yml"
+        workflow = workflow_path.read_text(encoding="utf-8")
+        start = workflow.index("        lane:\\n")
+        end = workflow.index("\\n    steps:", start)
+        matrix_block = workflow[start:end]
+        matrix_lanes = {
+            line.strip()[2:]
+            for line in matrix_block.splitlines()[1:]
+            if line.strip().startswith("- ")
+        }
+        expected_lanes = {"originals", *shard_builder.SOURCE_LANES.keys()}
+        self.assertEqual(matrix_lanes, expected_lanes)
+
     def test_nasa_svs_shard_lane_is_registered_and_packaged_as_footage(self):
         self.assertEqual(shard_builder.SOURCE_LANES["nasa-svs"], "download_nasa_svs_media")
         self.assertEqual(bundle_packager.classify_asset({
