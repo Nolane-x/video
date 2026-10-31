@@ -83,7 +83,7 @@ class VoiceStudioClientTests(unittest.TestCase):
             open_url.assert_not_called()
 
     def test_download_audio_preserves_mp3_content_type(self):
-        response = FakeResponse(b"ID3" + b"\\0" * 64, "audio/mpeg")
+        response = FakeResponse(b"ID3" + b"\0" * 64, "audio/mpeg")
         with patch("urllib.request.urlopen", return_value=response):
             with tempfile.TemporaryDirectory() as tmp:
                 path = VoiceStudioClient().download_audio(
@@ -96,7 +96,7 @@ class VoiceStudioClientTests(unittest.TestCase):
         response = FakeResponse(b'{"text":"Xin chao Viet Nam"}', "application/json")
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "sample.wav"
-            source.write_bytes(b"RIFF" + b"\\0" * 64)
+            source.write_bytes(b"RIFF" + b"\0" * 64)
             with patch("urllib.request.urlopen", return_value=response) as open_url:
                 transcript = VoiceStudioClient().transcribe(source, language="vi")
             request = open_url.call_args.args[0]
@@ -113,6 +113,38 @@ class VoiceStudioClientTests(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertEqual(request.call_args.kwargs["query"]["lang"], "Vietnamese")
         self.assertEqual(request.call_args.kwargs["query"]["featured"], "true")
+
+    def test_create_design_profile_posts_native_recipe_and_returns_profile_id(self):
+        response = FakeResponse(b'{"id":"profile-abc","name":"Nolane voice"}')
+        with patch("urllib.request.urlopen", return_value=response) as open_url:
+            result = VoiceStudioClient().create_design_profile(
+                "Nolane voice",
+                "Original fictional Vietnamese narrator, warm low-mid voice.",
+                engine="voxcpm2", language="vi", seed=4201,
+                sample_text="Xin chào.",
+            )
+        request = open_url.call_args.args[0]
+        body = request.data
+        self.assertEqual(result["id"], "profile-abc")
+        self.assertIn("multipart/form-data; boundary=", request.get_header("Content-type"))
+        for field in (b'name="name"', b'name="kind"', b'name="vd_states"',
+                      b'name="design_recipe"', b'name="engine"', b'name="seed"'):
+            self.assertIn(field, body)
+        self.assertIn(b"Original fictional Vietnamese narrator", body)
+        self.assertIn(b"voxcpm2", body)
+        self.assertIn(b"4201", body)
+
+    def test_create_design_profile_rejects_empty_or_oversize_description(self):
+        with patch("urllib.request.urlopen") as open_url:
+            with self.assertRaises(ValueError):
+                VoiceStudioClient().create_design_profile(
+                    "bad", " ", engine="voxcpm2"
+                )
+            with self.assertRaises(ValueError):
+                VoiceStudioClient().create_design_profile(
+                    "bad", "x" * 2001, engine="voxcpm2"
+                )
+            open_url.assert_not_called()
 
     def test_json_error_is_not_written_as_audio(self):
         response = FakeResponse(b'{"detail":"engine unavailable"}', "application/json")
