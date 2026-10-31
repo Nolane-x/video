@@ -16,6 +16,9 @@ on:
       - "tools/video/validate_editorial_review.py"
       - "tools/video/test_editorial_review.py"
       - "tools/video/editorial-review.template.json"
+      - "tools/video/render_blocking_preview.py"
+      - "tools/video/validate_preview_approval.py"
+      - "tools/video/test_blocking_preview.py"
       - "tools/video/test_toolchain.py"
       - "tools/video/build_npm_sbom.py"
       - "toolchain/scripts/smoke-toolchain.mjs"
@@ -36,6 +39,9 @@ on:
       - "tools/video/validate_editorial_review.py"
       - "tools/video/test_editorial_review.py"
       - "tools/video/editorial-review.template.json"
+      - "tools/video/render_blocking_preview.py"
+      - "tools/video/validate_preview_approval.py"
+      - "tools/video/test_blocking_preview.py"
       - "tools/video/validate_toolchain.py"
       - "tools/video/test_toolchain.py"
       - "tools/video/build_npm_sbom.py"
@@ -101,6 +107,7 @@ jobs:
           python -m unittest discover -s tools/video -p 'test_toolchain.py' -v
           python -m unittest tools.video.test_editorial_plan -v
           python -m unittest tools.video.test_editorial_review -v
+          python -m unittest tools.video.test_blocking_preview -v
           python tools/video/validate_plugin_packages.py
 
       - name: Require reviewed lockfile and install pinned runtime dependencies
