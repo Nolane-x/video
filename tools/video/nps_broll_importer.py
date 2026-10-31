@@ -718,7 +718,12 @@ def _fetch_npgallery_page(url: str, limit: int = MAX_PAGE_BYTES, timeout: int = 
     return body
 
 
-def _download_npgallery_source(url: str, asset_id: str, destination: Path) -> tuple[int, str]:
+def _download_npgallery_source(
+    url: str,
+    asset_id: str,
+    destination: Path,
+    max_bytes: int = MAX_VIDEO_BYTES,
+) -> tuple[int, str]:
     normalized = normalize_npgallery_original_url(url, asset_id)
     if not normalized:
         raise RuntimeError("NPGallery original URL is outside the exact asset-specific download allow-list")
@@ -742,16 +747,16 @@ def _download_npgallery_source(url: str, asset_id: str, destination: Path) -> tu
         if content_type not in {"video/mp4", "application/mp4", "application/octet-stream", "binary/octet-stream"}:
             raise RuntimeError(f"unexpected NPGallery original MIME type: {content_type}")
         length = response.headers.get("Content-Length")
-        if length and int(length) > MAX_VIDEO_BYTES:
-            raise RuntimeError("NPGallery original exceeds the per-file byte ceiling")
+        if length and int(length) > min(MAX_VIDEO_BYTES, max_bytes):
+            raise RuntimeError("NPGallery original exceeds the remaining source-byte ceiling")
         with destination.open("wb") as output:
             while True:
                 chunk = response.read(1024 * 1024)
                 if not chunk:
                     break
                 total += len(chunk)
-                if total > MAX_VIDEO_BYTES:
-                    raise RuntimeError("NPGallery original exceeds the per-file byte ceiling")
+                if total > min(MAX_VIDEO_BYTES, max_bytes):
+                    raise RuntimeError("NPGallery original exceeds the remaining source-byte ceiling")
                 digest.update(chunk)
                 output.write(chunk)
     if total < MIN_VIDEO_BYTES:
@@ -772,6 +777,7 @@ def download_npgallery_broll_media(
     max_downloads: int,
     max_total_source_bytes: int,
     max_metadata_bytes: int,
+    seen_source_hashes: set[str] | None = None,
 ) -> tuple[list[dict], dict[str, int]]:
     """Import NPGallery candidates only after per-item Full Public Domain rights are rechecked."""
     report: list[dict] = []
@@ -799,7 +805,7 @@ def download_npgallery_broll_media(
         return report, stats
 
     seen_asset_ids: set[str] = set()
-    seen_source_hashes: set[str] = set()
+    seen_source_hashes = seen_source_hashes if seen_source_hashes is not None else set()
     for asset in candidates[: min(60, max_downloads)]:
         if (
             stats["videos_downloaded"] >= max_downloads
@@ -848,7 +854,13 @@ def download_npgallery_broll_media(
         )
         source_path = Path(root) / ".staging" / (asset_id + ".npgallery.source.mp4")
         try:
-            file_size, source_hash = _download_npgallery_source(original_url, asset_id, source_path)
+            remaining = max_total_source_bytes - stats["source_bytes_downloaded"]
+            file_size, source_hash = _download_npgallery_source(
+                original_url,
+                asset_id,
+                source_path,
+                max_bytes=min(MAX_VIDEO_BYTES, remaining),
+            )
             if stats["source_bytes_downloaded"] + file_size > max_total_source_bytes:
                 source_path.unlink(missing_ok=True)
                 report.append({
@@ -967,6 +979,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
     indexed_bytes = 0
     seen_pages = set()
     seen_media = set()
+    seen_source_hashes: set[str] = set()
     collection_count = 0
 
     for source in INDEXES[:MAX_INDEXES]:
@@ -1131,6 +1144,18 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     continue
 
                 output_path = selected["output_path"]
+                if selected["source_sha256"] in seen_source_hashes:
+                    output_path.unlink(missing_ok=True)
+                    source_bytes += selected["source_size"]
+                    report.append({
+                        "id": "nps-duplicate-" + hashlib.sha256(selected["source_url"].encode("utf-8")).hexdigest()[:12],
+                        "status": "duplicate",
+                        "source_page": page_url,
+                        "source_sha256": selected["source_sha256"],
+                        "reason": "identical source bytes already imported from another NPS source URL",
+                    })
+                    continue
+                seen_source_hashes.add(selected["source_sha256"])
                 output_hash = hashlib.sha256(output_path.read_bytes()).hexdigest()
                 output_size = output_path.stat().st_size
                 people_review = bool(NPS_REVIEW_PEOPLE_RE.search(title + " " + description))
@@ -1201,11 +1226,27 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                 })
                 time.sleep(0.12)
 
+    gallery_report, gallery_stats = download_npgallery_broll_media(
+        Path(root),
+        index,
+        max_downloads=max(0, MAX_DOWNLOADS - downloads),
+        max_total_source_bytes=max(0, MAX_TOTAL_SOURCE_BYTES - source_bytes),
+        max_metadata_bytes=max(0, MAX_METADATA_BYTES - metadata_bytes),
+        seen_source_hashes=seen_source_hashes,
+    )
+    report.extend(gallery_report)
+    downloads += gallery_stats["videos_downloaded"]
+    source_bytes += gallery_stats["source_bytes_downloaded"]
+    indexed_bytes += gallery_stats["indexed_resource_bytes"]
+    metadata_bytes += gallery_stats["metadata_bytes"]
+
     report.append({
         "id": "nps-broll-build-summary",
         "status": "summary",
         "collection_indexes_checked": collection_count,
         "item_pages_inspected": pages_inspected,
+        "npgallery_videos_downloaded": gallery_stats["videos_downloaded"],
+        "npgallery_source_bytes_downloaded": gallery_stats["source_bytes_downloaded"],
         "videos_downloaded": downloads,
         "source_bytes_downloaded": source_bytes,
         "indexed_resource_bytes": indexed_bytes,
