@@ -154,6 +154,38 @@ def validate_genre_routing(root: Path, errors: list[str]) -> None:
     if "Do not impose this profile on other genres" not in agents:
         errors.append(f"{agents_path}: H2 style scope must be limited to its established series")
 
+    plan_validator = root / "tools/video/evaluate_editorial_plan.py"
+    review_validator = root / "tools/video/validate_editorial_review.py"
+    review_template = root / "tools/video/editorial-review.template.json"
+    if not plan_validator.is_file():
+        errors.append(f"{plan_validator}: editorial plan preflight is required")
+    if not review_validator.is_file():
+        errors.append(f"{review_validator}: final audiovisual review validator is required")
+    if not review_template.is_file():
+        errors.append(f"{review_template}: final audiovisual review contract template is required")
+
+    command_center = read_text(
+        root / "plugins/chatgpt/nolane-video-command-center/skills/video-command-center/SKILL.md",
+        errors,
+    )
+    director = read_text(
+        root / "plugins/chatgpt/nolane-video-command-center/skills/video-production-director/SKILL.md",
+        errors,
+    )
+    qa = read_text(
+        root / "plugins/chatgpt/nolane-video-command-center/skills/video-quality-assurance/SKILL.md",
+        errors,
+    )
+    for source, required in (
+        (command_center, "evaluate_editorial_plan.py"),
+        (command_center, "validate_editorial_review.py"),
+        (director, "evaluate_editorial_plan.py"),
+        (qa, "validate_editorial_review.py"),
+        (qa, "full playback with audio"),
+    ):
+        if required not in source:
+            errors.append("Command Center/Director/QA skills must reference required editorial gate: " + required)
+
 
 def validate(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
