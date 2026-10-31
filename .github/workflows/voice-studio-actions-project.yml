@@ -1,0 +1,149 @@
+name: Voice Studio Actions production renderer
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: "Vietnamese project manifest committed in the repository"
+        type: string
+        default: "integrations/voice-studio/examples/actions-vietnamese-documentary.json"
+        required: true
+      quality_steps:
+        description: "KorvaTTS quality preset"
+        type: choice
+        options: ["32"]
+        default: "32"
+        required: true
+  push:
+    branches:
+      - feat/voice-studio-integration
+    paths:
+      - ".github/workflows/voice-studio-actions-project.yml"
+      - "integrations/voice-studio/actions_voice_project.py"
+      - "integrations/voice-studio/examples/actions-vietnamese-documentary.json"
+      - "integrations/voice-studio/generate_voiceover.py"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/common.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voice-studio-actions-project-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-project:
+    name: Generate per-line voice-over and H2 timeline (CPU)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      HF_HOME: ${{ github.workspace }}/.hf-cache
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      DO_NOT_TRACK: "1"
+      OMP_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - name: Checkout video production repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned CPU TTS and H2 runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "korvatts==0.1.3" "numpy>=1.24"
+          python - <<'PY'
+          from importlib.metadata import version
+          import numpy
+          import onnxruntime
+          assert version("korvatts") == "0.1.3"
+          print("korvatts:", version("korvatts"))
+          print("numpy:", numpy.__version__)
+          print("onnxruntime:", onnxruntime.__version__)
+          PY
+      - name: Resolve pinned model revision
+        id: model
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import re
+          import sys
+          from huggingface_hub import model_info
+          revision = str(model_info("dogenthq/KorvaTTS").sha or "")
+          if not re.fullmatch(r"[0-9a-f]{40,64}", revision):
+              raise SystemExit(f"Invalid immutable model revision: {revision!r}")
+          print(f"revision={revision}")
+          print(f"KorvaTTS model snapshot pinned: {revision}", file=sys.stderr)
+          PY
+      - name: Restore exact ONNX model cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/.hf-cache/hub
+          key: ${{ runner.os }}-korvatts-0.1.3-${{ steps.model.outputs.revision }}
+      - name: Install FFmpeg for H2 timing and audio QA
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 2
+          ffprobe -version | head -n 2
+      - name: Validate selected project manifest
+        env:
+          MANIFEST_PATH: ${{ inputs.manifest_path || 'integrations/voice-studio/examples/actions-vietnamese-documentary.json' }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          root = Path.cwd().resolve()
+          manifest = (root / os.environ["MANIFEST_PATH"]).resolve()
+          try:
+              manifest.relative_to(root)
+          except ValueError:
+              raise SystemExit("Manifest path must stay inside the checked-out repository.")
+          if not manifest.is_file():
+              raise SystemExit(f"Manifest not found: {manifest}")
+          print(f"Project manifest: {manifest.relative_to(root)}")
+          PY
+      - name: Render the complete project and build H2 timestamps
+        env:
+          MANIFEST_PATH: ${{ inputs.manifest_path || 'integrations/voice-studio/examples/actions-vietnamese-documentary.json' }}
+          MODEL_REVISION: ${{ steps.model.outputs.revision }}
+          QUALITY_STEPS: ${{ inputs.quality_steps || '32' }}
+        run: |
+          python integrations/voice-studio/actions_voice_project.py \
+            --manifest "$MANIFEST_PATH" \
+            --output out/actions-voice-project \
+            --model-revision "$MODEL_REVISION"
+      - name: Publish production report in the Actions summary
+        if: always()
+        run: |
+          if [ -f out/actions-voice-project/actions-voice-project-report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          report = json.loads(Path("out/actions-voice-project/actions-voice-project-report.json").read_text(encoding="utf-8"))
+          print("# Actions voice project")
+          print()
+          print(f"- Status: **{report['status']}**")
+          print(f"- Project: `{report['project']}`")
+          print(f"- Segments: {report['generated_segments']}/{report['segment_count']}")
+          print(f"- Technical pass / warning / error: {report['technical_pass']} / {report['technical_warning']} / {report['technical_error']}")
+          print(f"- H2 timeline created: {report['h2_timing'] is not None}")
+          print(f"- Model revision: `{report['model']['revision']}`")
+          print()
+          print("Human listening is required before approving the voice cast.")
+          PY
+          else
+            echo "The voice project did not produce an acceptance report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload all WAVs, H2 timeline and QA reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-actions-voice-project-${{ github.run_number }}
+          path: out/actions-voice-project/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 14
