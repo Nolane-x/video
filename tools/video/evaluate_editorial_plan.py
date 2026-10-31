@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import statistics
 from collections import Counter
 from pathlib import Path
@@ -27,6 +28,20 @@ REQUIRED_BRIEF_FIELDS = (
 )
 NARRATION_POLICIES = {"voiceover", "dialogue", "none-by-design", "music-led"}
 SHOT_LANGUAGE_FIELDS = ("shotSize", "cameraAngle", "cameraMove", "composition", "visualPurpose")
+
+CONTACT_ACTION_PATTERNS = tuple(re.compile(pattern, re.IGNORECASE) for pattern in (
+    r"\\b(?:punch(?:es|ed|ing)?|hit(?:s|ting)?|strike(?:s|ing)?|struck|land(?:s|ed|ing)?|grab(?:s|bed|bing)?|catch(?:es|ing)?|caught)\\b",
+    r"\\b(?:pick(?:s|ed)? up|put(?:s)? down|set(?:s)? down|place(?:s|d)?|lower(?:s|ed)?|release(?:s|d)?)\\b",
+    r"\\b(?:open|opens|opened|opening)\\s+(?:the|a|an|their|his|her|its)\\b",
+    r"\\b(?:close|closes|closed|closing)\\s+(?:the|a|an|their|his|her|its)\\b",
+    r"\\b(?:write|writes|writing|wrote|written)\\b",
+    r"\\b(?:tie|ties|tied|tying)\\s+(?:the|their|his|her|both)\\b",
+))
+
+
+def requires_motion_proof(action: str) -> bool:
+    """Detect actual contact/prop verbs, not adjectives such as 'message remains open'."""
+    return any(pattern.search(action) for pattern in CONTACT_ACTION_PATTERNS)
 
 
 def _nonempty(value: Any) -> bool:
@@ -221,7 +236,7 @@ def evaluate_plan(plan: dict[str, Any]) -> dict[str, Any]:
         motion_proof = shot.get("motionProof")
         if isinstance(motion_proof, dict) and all(_nonempty(motion_proof.get(k)) for k in ("keyAction", "contactOrChange", "followThrough")):
             motion_proof_complete += 1
-        if any(token in action.lower() for token in ("punch", "hit", "strike", "land", "grab", "catch", "pick up", "put down", "open", "close", "write", "tie")):
+        if requires_motion_proof(action):
             contact_actions.append(shot_id)
             if not isinstance(motion_proof, dict):
                 findings.append(_finding(
