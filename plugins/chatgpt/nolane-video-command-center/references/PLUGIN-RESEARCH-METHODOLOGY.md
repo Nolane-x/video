@@ -16,7 +16,7 @@ Every source-backed update should keep: source repository URL, immutable commit 
 
 ## Current source audit
 
-The pinned upstream repositories, exact commits, license terms, intended use and adaptation boundaries are tracked in `docs/EXPERT_SKILL_SOURCE_AUDIT.md`. Treat that register as the source of truth for source-backed changes; refresh it whenever a source revision changes. A source may be useful for research while still being prohibited from direct bundling or commercial reuse.
+The pinned upstream repositories, exact commits, license terms, intended use and adaptation boundaries are tracked in `references/EXPERT_SKILL_SOURCE_AUDIT.md`. Treat that register as the source of truth for source-backed changes; refresh it whenever a source revision changes. A source may be useful for research while still being prohibited from direct bundling or commercial reuse.
 
 
 ## Editorial gate provenance
