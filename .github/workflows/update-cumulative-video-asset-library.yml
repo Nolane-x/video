@@ -110,16 +110,17 @@ jobs:
           {
             echo "## Cumulative video asset library"
             echo
-            cat dist/cumulative/CUMULATIVE_ASSET_INDEX.json | python -c '
-          import json,sys
-          d=json.load(sys.stdin)
-          s=d["summary"]
-          print(f"- Unique resources: {s['unique_asset_count']:,}")
-          print(f"- Unique bytes: {s['unique_resource_bytes']:,} ({s['unique_resource_gb']:.3f} GB)")
-          print(f"- Target progress: {100*s['unique_resource_bytes']/s['target_bytes']:.2f}%")
-          print(f"- Duplicate resource occurrences: {s['duplicate_resource_occurrences']:,}")
-          print(f"- Source Releases: {s['source_release_count']}")
-          '
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("dist/cumulative/CUMULATIVE_ASSET_INDEX.json").read_text(encoding="utf-8"))
+          summary = data["summary"]
+          print(f"- Unique resources: {summary['unique_asset_count']:,}")
+          print(f"- Unique bytes: {summary['unique_resource_bytes']:,} ({summary['unique_resource_gb']:.3f} GB)")
+          print(f"- Target progress: {100 * summary['unique_resource_bytes'] / summary['target_bytes']:.2f}%")
+          print(f"- Duplicate resource occurrences: {summary['duplicate_resource_occurrences']:,}")
+          print(f"- Source Releases: {summary['source_release_count']}")
+          PY
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload cumulative index to the latest published Release
