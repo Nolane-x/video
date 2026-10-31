@@ -1,0 +1,80 @@
+name: Recover and publish verified video asset library release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/ASSET_LIBRARY_RECOVERY_REQUEST"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing draft video asset library release tag
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-asset-library-release-recovery
+  cancel-in-progress: false
+
+jobs:
+  finalize-existing-release:
+    name: Merge existing shard manifests, verify assets and publish
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Resolve the requested draft Release tag
+        id: target
+        env:
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            release_tag="$(tr -d '\r\n' < .github/ASSET_LIBRARY_RECOVERY_REQUEST)"
+          else
+            release_tag="${RELEASE_TAG_INPUT}"
+          fi
+          case "${release_tag}" in
+            video-asset-library-build-*) ;;
+            *) echo "Refusing unexpected Release tag: ${release_tag}" >&2; exit 1 ;;
+          esac
+          echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Download the 22 already-uploaded source shard manifests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.target.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/shard-manifests
+          gh release download "${RELEASE_TAG}" \
+            --pattern "asset-shard--*.json" \
+            --dir dist/shard-manifests
+          count=$(find dist/shard-manifests -maxdepth 1 -type f -name 'asset-shard--*.json' | wc -l)
+          echo "Downloaded ${count} source manifests."
+          test "${count}" -eq 22
+
+      - name: Rebuild global catalog, verify every remote SHA-256 and publish the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.target.outputs.release_tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python tools/video/finalize_asset_library_release.py \
+            --manifest-dir dist/shard-manifests \
+            --output-dir dist/final \
+            --repository "${REPOSITORY}" \
+            --release-tag "${RELEASE_TAG}"
