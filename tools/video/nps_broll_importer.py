@@ -95,7 +95,10 @@ NPS_DETAIL_PAGE_RE = re.compile(
     re.IGNORECASE,
 )
 NPS_REVIEW_PEOPLE_RE = re.compile(
-    r"\b(?:people|person|visitors?|crowds?|rangers?|staff|employees?|climbers?|hikers?|interview|ceremony|children|students)\b",
+    r"\b(?:people|persons?|visitors?|crowds?|rangers?|staff|employees?|climbers?|hikers?|"
+    r"interviews?|ceremon(?:y|ies)|children|students|volunteers?|participants?|speakers?|"
+    r"interpreters?|performers?|families|groups?|audiences?|workers?|personnel|"
+    r"men|women|man|woman|protesters?|demonstrators?)\b",
     re.IGNORECASE,
 )
 
