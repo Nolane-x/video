@@ -54,6 +54,8 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
             self.assertIn("Candidate 01", page)
             self.assertIn("Naturalness", page)
             self.assertIn("Export human ratings JSON", page)
+            self.assertIn("data-notes", page)
+            self.assertIn("Why does this voice work or fail?", page)
             self.assertNotIn("Private Voice A", page)
             self.assertNotIn("secret-voice-a", page)
             self.assertEqual(saved["candidates"][0]["id"], "secret-voice-a")
