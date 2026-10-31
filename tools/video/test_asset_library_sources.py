@@ -378,7 +378,7 @@ class PolyPizzaCC0APITests(unittest.TestCase):
                  mock.patch.object(library.time, "sleep", return_value=None):
                 report = library.download_poly_pizza(root, index)
             downloaded = [row for row in report if row.get("status") == "downloaded"]
-            self.assertEqual(len(downloaded), 1)
+            self.assertEqual(len(downloaded), 1, report)
             self.assertEqual(len(index), 1)
             asset = index[0]
             self.assertEqual(asset["license"], "CC0-1.0")
@@ -2914,6 +2914,10 @@ class NPSBrollImporterTests(unittest.TestCase):
         )
         self.assertEqual(
             detail["links"][0]["href"],
+            self.EMBED_URL,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(detail["links"][0]["href"]),
             self.VIEW_URL,
         )
 
