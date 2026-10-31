@@ -618,6 +618,26 @@
       "note": "Build 47 raises listing discovery to 20 pages and successful downloads to at most 200 images and 120 videos, with an 8 GiB aggregate ceiling. It still requires an explicit NOAA Credit field, skips a copyright marker in caption/credit/alt text, screens possible identifiable-person/interview contexts, downloads only official item Download URLs, and retains caption, credit, source, metadata and SHA-256."
     },
     {
+      "id": "cdc-government-broll",
+      "title": "CDC Newsroom — official government-produced B-roll video library",
+      "provider": "Centers for Disease Control and Prevention (CDC)",
+      "kind": "official B-roll video archive",
+      "category": "public health, CDC facilities, field operations, disease prevention, laboratory footage, insects and health education",
+      "index_page": "https://www.cdc.gov/media/b-roll/index.html",
+      "category_pages": [
+        "https://www.cdc.gov/media/media/b-roll/cdc-exterior.html",
+        "https://www.cdc.gov/media/media/b-roll/cdc-in-the-field.html",
+        "https://www.cdc.gov/media/media/b-roll/cdc-operations-and-facilities.html",
+        "https://www.cdc.gov/media/media/b-roll/outbreaks-and-diseases.html",
+        "https://www.cdc.gov/media/media/b-roll/Mosquitoes-and-Ticks.html"
+      ],
+      "license": "Public Domain (official CDC B-roll government-production notice; item exception screen); not CC0",
+      "license_url": "https://www.cdc.gov/media/b-roll/index.html",
+      "verified_page_license": true,
+      "bundling": "bounded-official-cdc-broll-category-import-with-item-exception-screen-and-direct-media-integrity-verification",
+      "note": "The importer first verifies that the official CDC B-roll index states that CDC B-roll is produced by the U.S. Government and is in the public domain. It follows only the exact category pages linked by that index and imports direct MP4/MOV anchors from individual DFE item sections. It selects the highest available quality variant per section (preferring 4K, 1080p and full-size files), rejects item sections containing copyright, third-party, licensed-material or permission exception wording, and restricts downloads to exact HTTPS www.cdc.gov/media/video/b-roll/ or /media/video/fullvideo/ paths. MIME type, ISO-BMFF signature, redirect target, per-file and total byte ceilings and SHA-256 are checked. CDC asks users to cite CDC as the source; do not imply CDC endorsement. People and healthcare footage is flagged for privacy/publicity review before commercial or promotional use. Public Domain status under the CDC B-roll notice is not represented as CC0. Limits: 60 downloads, 300 MiB per file and 4 GiB total."
+    },
+    {
       "id": "internet-archive-prelinger-nasa-moving-images",
       "title": "Internet Archive — Prelinger and NASA public-domain/CC0 moving images",
       "provider": "Internet Archive",

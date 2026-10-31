@@ -44,6 +44,12 @@ The GitHub Actions workflow runs offline license-gate regression tests before ma
 
 Large binary assets are shipped as a GitHub Release asset, not ordinary Git blobs. Open the [builds and downloadable releases](https://github.com/Nolane-x/video/releases) and download `video-asset-library.zip`; open `ASSET_CATALOG.html` after extraction to browse offline. Run metadata/checksum reports are also attached to each Actions run for 30 days.
 
+## CDC B-roll — official U.S. Government footage
+
+The importer begins at the [official CDC B-roll index](https://www.cdc.gov/media/b-roll/index.html), which explicitly states that CDC B-roll is produced by the U.S. Government and is public domain. It follows only the five official category pages linked from that index and selects one best available MP4/MOV rendition for each item section. It requires the official CDC media host and B-roll/fullvideo path, same-path HTTPS response, video MIME type, ISO-BMFF file signature, 300 MiB per-file limit, 4 GiB total source limit and a recorded SHA-256. Item sections containing copyright, third-party, licensed-material or permission exception wording are skipped.
+
+Credit CDC as the source and do not imply CDC endorsement. CDC B-roll may show identifiable people, patients or healthcare interactions; review privacy/publicity releases and the intended commercial/promotional use before publication. The source is Public Domain under the CDC B-roll government-production notice, **not CC0**. CDC's broader materials policy notes that contractor/grantee/third-party media can have separate restrictions; the item exception screen is fail-closed.
+
 ## New source and rights rules
 
 - **Smithsonian:** only images that are explicitly CC0 both at the collection record and at the selected media object are bundled. The API may require a registered key for reliable usage; API failures are recorded, not represented as zero uncertainty.
