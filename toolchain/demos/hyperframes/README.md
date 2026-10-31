@@ -12,6 +12,6 @@ This repository-owned 17-second, 1920×1080 sample verifies the pinned HyperFram
 
 ## Quality gates
 
-The workflow runs HyperFrames `check` with strict mode, snapshots, sampled frames and transition sampling. The generated JSON is passed to `tools/video/validate_hyperframes_report.py`, which fails on warnings/errors, disabled motion checks, missing motion samples or failed contrast/layout/runtime/craft sections. The final MP4 is independently checked for duration, dimensions, frame rate and codec.
+The workflow runs HyperFrames `check` with strict mode, snapshots, sampled frames and transition sampling. The generated JSON is passed to `tools/video/validate_hyperframes_report.py`, which fails on warnings/errors, disabled motion checks, missing audio evidence, fewer than five screenshots or missing screenshot files. The workflow copies all five visual review frames and a six-frame contact sheet into the downloadable artifact. The final MP4 is independently checked for duration, dimensions, frame rate and codec.
 
 The audio file is a procedural CI fixture, not a downloaded resource-library asset. A passing proof validates this sample/runtime integration only. It does not certify every future project or grant rights to assets, models, fonts or music.

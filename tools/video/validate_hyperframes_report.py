@@ -7,10 +7,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
-SECTIONS = ("lint", "runtime", "layout", "motion", "contrast", "craft")
+SECTIONS = ("lint", "runtime", "layout", "motion", "contrast", "craft", "audio")
 
 
-def validate_report(report: dict[str, Any]) -> list[str]:
+def validate_report(
+    report: dict[str, Any],
+    *,
+    snapshot_root: Path | None = None,
+) -> list[str]:
     errors: list[str] = []
     if report.get("ok") is not True:
         errors.append("HyperFrames check report did not return ok=true")
@@ -54,8 +58,25 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         errors.append("contrast: contrast audit was not enabled")
 
     snapshots = report.get("snapshots")
-    if isinstance(snapshots, dict) and snapshots.get("enabled") is not True:
-        errors.append("snapshots: screenshot evidence was not enabled")
+    snapshot_files: list[str] = []
+    if isinstance(snapshots, dict):
+        if snapshots.get("enabled") is not True:
+            errors.append("snapshots: screenshot evidence was not enabled")
+        files = snapshots.get("files")
+        if not isinstance(files, list) or len(files) < 5:
+            errors.append("snapshots: at least five screenshot samples are required")
+        else:
+            snapshot_files = [str(item) for item in files]
+    else:
+        errors.append("Missing QA section: snapshots")
+
+    if snapshot_root is not None:
+        for relative_path in snapshot_files:
+            candidate = Path(relative_path)
+            if not candidate.is_absolute():
+                candidate = snapshot_root / candidate
+            if not candidate.is_file():
+                errors.append(f"snapshots: missing screenshot file {relative_path}")
 
     return errors
 
@@ -74,15 +95,16 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:
         print(f"HYPERFRAMES QA: FAIL — cannot read report: {exc}", file=sys.stderr)
         return 2
-    failures = validate_report(report)
+    failures = validate_report(report, snapshot_root=Path.cwd())
     if failures:
         print("HYPERFRAMES QA: FAIL")
         for failure in failures:
             print(f"- {failure}")
         return 1
     print("HYPERFRAMES QA: PASS")
-    print("- strict mode, runtime, lint, layout, motion, contrast and craft")
+    print("- strict mode, runtime, lint, layout, motion, contrast, craft and audio")
     print(f"- evaluated motion samples: {report['motion']['samples']}")
+    print(f"- preserved frame samples: {len(report['snapshots']['files'])}")
     return 0
 
 
