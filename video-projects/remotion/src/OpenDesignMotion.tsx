@@ -17,7 +17,7 @@ const TOTAL = 1119;
 const clamp = { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as const };
 
 const ease = (f: number, from: number, to: number, start = 0, end = 1) =>
-  interpolate(f, [from, to], [start, end], { ...clamp, easing: Easing.outCubic });
+  interpolate(f, [from, to], [start, end], { ...clamp, easing: Easing.out(Easing.cubic) });
 
 const fadeIn = (f: number, frames = 18) => ease(f, 0, frames);
 const fadeOut = (f: number, length: number, frames = 14) =>
