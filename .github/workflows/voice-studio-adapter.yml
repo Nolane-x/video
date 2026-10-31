@@ -44,3 +44,4 @@ jobs:
           python integrations/voice-studio/generate_voiceover.py \
             --manifest integrations/voice-studio/examples/vietnamese-documentary.json \
             --output /tmp/nolane-voice-plan --plan-only
+          python integrations/voice-studio/design_voice_library.py --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json --output /tmp/nolane-design-plan
