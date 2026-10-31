@@ -15,7 +15,7 @@ from pathlib import Path
 
 SR = 48_000
 DURATION = 37.3
-BPM = 118.0
+BPM = 115.0
 TAU = math.tau
 
 
@@ -38,7 +38,7 @@ def main() -> None:
     # A bright, modern tech pulse: D-minor colour with suspended upper notes.
     scale = [146.83, 174.61, 220.00, 261.63, 293.66, 349.23, 392.00, 440.00]
     beat_seconds = 60.0 / BPM
-    transition_times = [0.0, 6.8, 9.8, 12.5, 15.2, 18.1, 20.3, 22.5, 26.8, 30.3, 34.0]
+    transition_times = [0.0, 3.0, 4.5, 5.5, 7.5, 10.5, 19.5, 21.0, 25.5, 30.5, 32.5, 35.3]
 
     # Pre-compute transition swells and UI ticks so each frame remains deterministic.
     cues = []
@@ -145,7 +145,7 @@ def main() -> None:
         wav.setframerate(SR)
         wav.writeframes(interleaved.tobytes())
 
-    print(f"Generated original score: {out} ({DURATION:.1f}s, {BPM:.0f} BPM, {SR} Hz stereo)")
+    print(f"Generated original score: {out} ({DURATION:.1f}s, {BPM:.0f} BPM, {SR} Hz stereo; reference-aligned original composition)")
 
 
 if __name__ == "__main__":
