@@ -8,7 +8,6 @@ import {
   spring,
   staticFile,
   useCurrentFrame,
-  useVideoConfig,
 } from "remotion";
 import shotPlan from "../public/story/shots.json";
 
@@ -927,7 +926,6 @@ const AudioDesign: React.FC = () => {
 
 export const OneMoreScroll: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
   const matchingIndex = shots.findIndex((candidate) => frame < candidate.endFrame);
   const shotIndex = matchingIndex < 0 ? shots.length - 1 : Math.max(0, matchingIndex);
   const shot = shots[shotIndex];
