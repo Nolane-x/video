@@ -241,6 +241,6 @@ It explicitly excludes Screen/Original logo/ because the original Godot logo is 
 
 ## NASA Scientific Visualization Studio — topic-diverse video lane
 
-The official SVS Search and Page APIs find complete science visualizations across Earth, Moon, Mars, Sun, oceans, climate, spacecraft, galaxies, aurora and hurricanes. The importer selects one suitable best-resolution movie per visualization rather than taking the first low-resolution rendition, and preserves metadata, credits and dataset references.
+The official SVS Search and Page APIs find complete science visualizations across Earth, Moon, Mars, Sun, oceans, climate, spacecraft, galaxies, aurora, hurricanes, volcanoes, asteroids, eclipses, weather, telescopes, wildfires and spaceflight. The importer selects one suitable best-resolution movie per visualization rather than taking the first low-resolution rendition, and preserves metadata, credits and dataset references.
 
 The SVS FAQ says its visualizations are public domain unless otherwise noted, but some use licensed music; the visuals remain reusable without those audio tracks. The importer fails closed on explicit music/copyright/permission notes and non-empty audio-track metadata. It does not silently reuse uncertain soundtrack audio. Media URLs are upgraded from HTTP only for the exact svs.gsfc.nasa.gov host and /vis/ path; downloads are bounded, MIME/container-checked and SHA-256 indexed. This is NASA public domain, not CC0. Source: https://svs.gsfc.nasa.gov/help/ .
