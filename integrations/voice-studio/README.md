@@ -47,6 +47,23 @@ routes. It does not pull `latest`, download model weights, create profiles,
 accept model terms or synthesize audio. The service smoke is deliberately
 separate from the KorvaTTS audio renderer.
 
+The next VoiceStudio-native Vietnamese lane is
+[VoiceStudio Supertonic-3 Vietnamese CPU audition](../../.github/workflows/voice-studio-supertonic-cpu.yml).
+Supertonic-3 is an ONNX CPU engine with seven surfaced presets and Vietnamese
+language support. The workflow builds the pinned app with the exact
+`supertonic==1.3.1` SDK, checks the engine's licence gate, and defaults to
+**not accepting OpenRAIL-M, not downloading model weights, and not synthesizing
+audio**. To run the actual 7-preset × 4-script audition, manually open
+**Actions → VoiceStudio Supertonic-3 Vietnamese CPU audition → Run workflow**
+and explicitly enable `accept_openrail_m` only after reading the model terms.
+The job downloads the pinned ~400 MB weights into the ephemeral runner only;
+weights are not placed in GitHub Actions cache or uploaded as artifacts. It
+then uses VoiceStudio's own `/v1/audio/speech` API, normalizes the audition
+samples to a shared loudness target, checks each WAV and uploads only the audio,
+blind pages and evidence report. The model's OpenRAIL-M terms are independent
+of the app's AGPL-3.0 and SDK's MIT licence; accepting the gate is not a blanket
+commercial-output clearance. The workflow never claims ElevenLabs equivalence.
+
 For a complete project with multiple characters, use the separate
 [Voice Studio Actions production renderer](../../.github/workflows/voice-studio-actions-project.yml).
 It reads a committed project manifest, synthesizes every dialogue block with a
