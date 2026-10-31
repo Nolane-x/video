@@ -85,7 +85,7 @@ NPS_MEDIA_PATH_RE = re.compile(
 )
 NPS_VIEW_PATH = "/media/video/view.htm"
 NPS_DETAIL_PAGE_RE = re.compile(
-    r"(?:b[-]?roll|clip|clips|sunclips|video)",
+    r"(?:b[-]?roll|clip|sunclips)",
     re.IGNORECASE,
 )
 NPS_REVIEW_PEOPLE_RE = re.compile(
