@@ -19,6 +19,10 @@ CPU_INSTALL = (
     "--index-url https://download.pytorch.org/whl/cpu "
     "torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0\n"
 )
+SUPERTONIC_INSTALL = (
+    'RUN uv pip install --python "$(command -v python3)" --no-cache '
+    'supertonic==1.3.1\n'
+)
 
 COPY_ANCHOR = "COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt\n"
 GUARD_PATTERN = re.compile(
@@ -32,12 +36,15 @@ GUARD_CPU = (
 )
 
 
-def transform_dockerfile(source: str) -> str:
+def transform_dockerfile(source: str, *, install_supertonic: bool = False) -> str:
     if source.count(COPY_ANCHOR) != 1:
         raise ValueError("Pinned VoiceStudio Dockerfile changed: torch install anchor must occur once")
     if "torch==2.8.0" in source and "index-url https://download.pytorch.org/whl/cpu" in source:
         raise ValueError("CPU PyTorch install already exists; refusing to double-patch Dockerfile")
-    transformed = source.replace(COPY_ANCHOR, COPY_ANCHOR + CPU_INSTALL, 1)
+    if install_supertonic and "supertonic==1.3.1" in source:
+        raise ValueError("Supertonic-3 SDK install already exists; refusing to double-patch Dockerfile")
+    additions = CPU_INSTALL + (SUPERTONIC_INSTALL if install_supertonic else "")
+    transformed = source.replace(COPY_ANCHOR, COPY_ANCHOR + additions, 1)
     transformed, count = GUARD_PATTERN.subn(lambda _match: GUARD_CPU, transformed)
     if count != 1:
         raise ValueError(
@@ -54,10 +61,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True, type=Path, help="Pinned vendor/VoiceStudio/deploy/Dockerfile")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--install-supertonic",
+        action="store_true",
+        help="Install the pinned Supertonic-3 CPU SDK only; model weights remain behind the licence gate.",
+    )
     args = parser.parse_args()
     try:
         original = args.source.read_text(encoding="utf-8")
-        transformed = transform_dockerfile(original)
+        transformed = transform_dockerfile(original, install_supertonic=args.install_supertonic)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(transformed, encoding="utf-8")
     except Exception as exc:
