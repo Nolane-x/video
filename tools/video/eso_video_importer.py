@@ -34,6 +34,8 @@ VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$")
 SHA256_RE = re.compile(r"(?i)(?:^|\s)([0-9a-f]{64})(?:\s|$)")
 RIGHTS_EXCEPTION_RE = re.compile(
     r"creative\s+commons\s+attribution[-\s]?no.?derivatives|"
+    r"creative\s+commons\s+attribution[-\s]?share[-\s]?alike|"
+    r"creative\s+commons\s+attribution[-\s]?non[-\s]?commercial|"
     r"\bCC\s*BY\s*[-–]?\s*(?:ND|NC|SA)\b|\bno.?derivatives\b|"
     r"\bnon[- ]commercial\b|\bnoncommercial\b|"
     r"not\s+licensed\s+for\s+other\s+uses|"
