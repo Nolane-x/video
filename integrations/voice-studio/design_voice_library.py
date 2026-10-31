@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -31,6 +32,44 @@ def _fingerprint(engine: str, language: str, item: dict[str, Any]) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+
+
+def _speaker_id(name: str) -> str:
+    value = re.sub(r"[^a-z0-9]+", "_", name.casefold()).strip("_")
+    return value[:48] or "voice"
+
+
+def _cast_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    cast: dict[str, Any] = {}
+    for row in rows:
+        profile_id = row.get("profile_id")
+        if not profile_id or row.get("status") == "failed":
+            continue
+        speaker = _speaker_id(str(row["name"]))
+        cast[speaker] = {
+            "provider": "voicestudio",
+            "engine": row["engine"],
+            "voice": profile_id,
+            "language": row["language"],
+            "seed": row["seed"],
+        }
+    return cast
+
+
+def _write_cast(output_dir: Path, language: str, rows: list[dict[str, Any]]) -> None:
+    cast = _cast_from_rows(rows)
+    if not cast:
+        return
+    _write_report(
+        output_dir / "voice-cast.json",
+        {
+            "schema_version": 1,
+            "language": language,
+            "cast": cast,
+        },
+    )
+
+
 def validate_design_set(data: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
     engine = str(data.get("engine") or "").strip()
     language = str(data.get("language") or "vi").strip()
@@ -43,6 +82,7 @@ def validate_design_set(data: dict[str, Any]) -> tuple[str, str, list[dict[str, 
         raise ValueError("Voice design set must include a non-empty voices array")
     voices: list[dict[str, Any]] = []
     seen_names: set[str] = set()
+    seen_speaker_ids: set[str] = set()
     seen_seeds: set[int] = set()
     for index, raw in enumerate(raw_voices, 1):
         if not isinstance(raw, dict):
@@ -54,6 +94,10 @@ def validate_design_set(data: dict[str, Any]) -> tuple[str, str, list[dict[str, 
         if name.casefold() in seen_names:
             raise ValueError(f"Duplicate design-profile name: {name}")
         seen_names.add(name.casefold())
+        speaker_id = _speaker_id(name)
+        if speaker_id in seen_speaker_ids:
+            raise ValueError(f"Voice names collide after speaker_id normalization: {name}")
+        seen_speaker_ids.add(speaker_id)
         if not description or len(description) > 2000:
             raise ValueError(
                 f"voices[{index - 1}].description must contain 1–2000 characters"
@@ -156,7 +200,9 @@ def create_library(
                 _write_report(report_path, {
                     "schema_version": 1, "engine": engine, "language": language,
                     "status": "partial", "voices": rows,
+                    "cast": _cast_from_rows(rows),
                 })
+                _write_cast(output_dir, language, rows)
                 if delay > 0 and index < len(voices):
                     time.sleep(delay)
                 continue
@@ -184,7 +230,9 @@ def create_library(
             "created_or_reused": sum(r["status"] in {"created", "reused"} for r in rows),
             "failed": sum(r["status"] == "failed" for r in rows),
             "voices": rows,
-            "next_step": "Use each profile_id as voice for its stable speaker_id in a video cast.",
+            "cast": _cast_from_rows(rows),
+            "cast_file": "voice-cast.json" if create else None,
+            "next_step": "Use voice-cast.json as the cast object in a video project manifest.",
             "human_review_required": True,
         })
         print(f"[{index}/{len(voices)}] {item['name']}: {row['status']} / {row['preview_status']}")
@@ -200,8 +248,10 @@ def create_library(
         "created_or_reused": sum(row["status"] in {"created", "reused"} for row in rows),
         "failed": failed,
         "voices": rows,
+        "cast": _cast_from_rows(rows),
+        "cast_file": "voice-cast.json" if create else None,
         "next_step": (
-            "Use each profile_id as voice for its stable speaker_id in a video cast."
+            "Use voice-cast.json as the cast object in a video project manifest."
             if create else "Review the plan, then run again with --create to save VoiceStudio profiles."
         ),
         "human_review_required": True,
@@ -211,6 +261,8 @@ def create_library(
         ),
     }
     _write_report(report_path, report)
+    if create:
+        _write_cast(output_dir, language, rows)
     return report
 
 
