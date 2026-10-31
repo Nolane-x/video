@@ -44,9 +44,19 @@ type Shot = {
   dip?: boolean;
 };
 
-const FPS = 24;
-const SHOT_FRAMES = 120;
-const shots: Shot[] = shotPlan.shots.map((entry) => entry.args as unknown as Shot);;
+type TimedShot = Shot & { id: string; startFrame: number; endFrame: number };
+type AudioPlan = {
+  narration?: { file: string; start: number; end: number; volume?: number }[];
+  soundCues?: { file: string; start: number; duration: number; volume?: number }[];
+};
+const FPS = Number(shotPlan.fps || 24);
+const shots: TimedShot[] = shotPlan.shots.map((entry) => ({
+  ...(entry.args as unknown as Shot),
+  id: entry.id,
+  startFrame: Math.round(entry.start * FPS),
+  endFrame: Math.round(entry.end * FPS),
+}));
+const audioPlan = (shotPlan as unknown as { audioPlan?: AudioPlan }).audioPlan;
 
 const clampInterp = (v: number, input: number[], output: number[]) =>
   interpolate(v, input, output, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -839,45 +849,86 @@ const SoundCue: React.FC<{ file: string; from: number; duration: number; volume:
   </Sequence>
 );
 
-const AudioDesign: React.FC = () => (
-  <AbsoluteFill style={{ pointerEvents: "none" }}>
-    {/* Full H2 emotional arc for a 155-second film: sad -> dark -> intentional silence -> hope -> rise -> resolve. */}
-    <MusicSlice file="bed_sad_Am_64bpm" from={0} duration={600} volume={0.28} />
-    <MusicSlice file="bed_dark_E_drone" from={600} duration={480} volume={0.22} />
-    {/* Frames 1080-1199 (45-50s) are intentionally silent: the moment the phone is put down. */}
-    <MusicSlice file="bed_hope_F_76bpm" from={1200} duration={600} volume={0.24} />
-    <MusicSlice file="bed_rise_Am_96bpm" from={1800} duration={1320} volume={0.25} />
-    <MusicSlice file="bed_resolve_C_70bpm" from={3120} duration={600} volume={0.28} />
-
-    {/* Action-timed SFX; the sound design tells the story without voice-over. */}
-    <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
-    <SoundCue file="notif_msg" from={158} duration={12} volume={0.27} />
-    <SoundCue file="rain_loop" from={250} duration={150} volume={0.12} />
-    <SoundCue file="clock_tick" from={760} duration={120} volume={0.21} />
-    <SoundCue file="tempt_swell" from={920} duration={54} volume={0.17} />
-    <SoundCue file="tempt_whisper" from={1012} duration={40} volume={0.22} />
-    <SoundCue file="page_flip" from={1540} duration={18} volume={0.26} />
-    <SoundCue file="footsteps" from={1840} duration={78} volume={0.27} />
-    <SoundCue file="footsteps" from={2075} duration={78} volume={0.23} />
-    <SoundCue file="punch_bag" from={2200} duration={18} volume={0.34} />
-    <SoundCue file="punch_bag" from={2280} duration={18} volume={0.31} />
-    <SoundCue file="breath_in" from={2355} duration={28} volume={0.22} />
-    <SoundCue file="door_open" from={2675} duration={40} volume={0.23} />
-    <SoundCue file="footsteps" from={2800} duration={78} volume={0.2} />
-    <SoundCue file="glass_shatter" from={3370} duration={42} volume={0.28} />
-    <SoundCue file="breath_in" from={3530} duration={24} volume={0.22} />
-    <SoundCue file="sting_low" from={3615} duration={72} volume={0.22} />
-  </AbsoluteFill>
+const NarrationSlice: React.FC<{ file: string; from: number; duration: number; volume: number }> = ({ file, from, duration, volume }) => (
+  <Sequence from={from} durationInFrames={duration}>
+    <Audio
+      src={staticFile("audio/narration/" + file)}
+      volume={(f) => volume * clampInterp(f, [0, Math.min(8, duration - 1), Math.max(9, duration - 8), duration], [0, 1, 1, 0])}
+    />
+  </Sequence>
 );
+
+const AudioDesign: React.FC = () => {
+  const musicSegments = (shotPlan.musicArc || []).filter((segment) => segment.track !== "intentional-silence");
+  const plannedSoundCues = audioPlan?.soundCues;
+  const narration = audioPlan?.narration || [];
+
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      {musicSegments.map((segment, index) => (
+        <MusicSlice
+          key={"music-" + index}
+          file={segment.track}
+          from={Math.round(segment.start * FPS)}
+          duration={Math.max(1, Math.round((segment.end - segment.start) * FPS))}
+          volume={typeof segment.volume === "number" ? segment.volume : 0.25}
+        />
+      ))}
+
+      {narration.map((segment, index) => (
+        <NarrationSlice
+          key={"narration-" + index}
+          file={segment.file}
+          from={Math.round(segment.start * FPS)}
+          duration={Math.max(1, Math.round((segment.end - segment.start) * FPS))}
+          volume={typeof segment.volume === "number" ? segment.volume : 1}
+        />
+      ))}
+
+      {plannedSoundCues ? plannedSoundCues.map((cue, index) => (
+        <SoundCue
+          key={"sfx-" + index}
+          file={cue.file}
+          from={Math.round(cue.start * FPS)}
+          duration={Math.max(1, Math.round(cue.duration * FPS))}
+          volume={typeof cue.volume === "number" ? cue.volume : 0.25}
+        />
+      )) : (
+        <>
+          {/* Legacy cue map retained for the existing technical baseline; new stories should use audioPlan.soundCues. */}
+          <SoundCue file="notif_msg" from={38} duration={12} volume={0.32} />
+          <SoundCue file="notif_msg" from={158} duration={12} volume={0.27} />
+          <SoundCue file="rain_loop" from={250} duration={150} volume={0.12} />
+          <SoundCue file="clock_tick" from={760} duration={120} volume={0.21} />
+          <SoundCue file="tempt_swell" from={920} duration={54} volume={0.17} />
+          <SoundCue file="tempt_whisper" from={1012} duration={40} volume={0.22} />
+          <SoundCue file="page_flip" from={1540} duration={18} volume={0.26} />
+          <SoundCue file="footsteps" from={1840} duration={78} volume={0.27} />
+          <SoundCue file="footsteps" from={2075} duration={78} volume={0.23} />
+          <SoundCue file="punch_bag" from={2200} duration={18} volume={0.34} />
+          <SoundCue file="punch_bag" from={2280} duration={18} volume={0.31} />
+          <SoundCue file="breath_in" from={2355} duration={28} volume={0.22} />
+          <SoundCue file="door_open" from={2675} duration={40} volume={0.23} />
+          <SoundCue file="footsteps" from={2800} duration={78} volume={0.2} />
+          <SoundCue file="glass_shatter" from={3370} duration={42} volume={0.28} />
+          <SoundCue file="breath_in" from={3530} duration={24} volume={0.22} />
+          <SoundCue file="sting_low" from={3615} duration={72} volume={0.22} />
+        </>
+      )}
+    </AbsoluteFill>
+  );
+};
 
 export const OneMoreScroll: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const shotIndex = Math.min(shots.length - 1, Math.floor(frame / SHOT_FRAMES));
-  const local = frame - shotIndex * SHOT_FRAMES;
-  const t = Math.max(0, Math.min(1, local / (SHOT_FRAMES - 1)));
+  const matchingIndex = shots.findIndex((candidate) => frame < candidate.endFrame);
+  const shotIndex = matchingIndex < 0 ? shots.length - 1 : Math.max(0, matchingIndex);
   const shot = shots[shotIndex];
   const next = shots[shotIndex + 1];
+  const local = Math.max(0, frame - shot.startFrame);
+  const shotFrameCount = Math.max(1, shot.endFrame - shot.startFrame);
+  const t = Math.max(0, Math.min(1, local / Math.max(1, shotFrameCount - 1)));
   const eased = Easing.inOut(Easing.cubic)(t);
   const x = shot.x0 + (shot.x1 - shot.x0) * eased;
   const y = shot.y0 + (shot.y1 - shot.y0) * eased;
@@ -885,8 +936,9 @@ export const OneMoreScroll: React.FC = () => {
   const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased;
   const isEnd = shot.setting === "end";
 
-  const fadeIn = clampInterp(local, [0, 14], [0, 1]);
-  const fadeOut = clampInterp(local, [SHOT_FRAMES - 14, SHOT_FRAMES - 1], [1, 0]);
+  const fadeFrames = Math.min(14, Math.max(2, Math.floor(shotFrameCount * 0.12)));
+  const fadeIn = clampInterp(local, [0, fadeFrames], [0, 1]);
+  const fadeOut = clampInterp(local, [shotFrameCount - fadeFrames, shotFrameCount - 1], [1, 0]);
   const incomingDip = shotIndex === 0 || !!shot.dip;
   const outgoingDip = !!next?.dip;
   const visibility = Math.min(incomingDip ? fadeIn : 1, outgoingDip ? fadeOut : 1);
