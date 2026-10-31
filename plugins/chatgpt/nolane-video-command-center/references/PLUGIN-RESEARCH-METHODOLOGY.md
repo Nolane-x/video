@@ -12,3 +12,8 @@ The registry contains **37 separate specialist plugins** with recorded source or
 A green plugin update means the host accepted a structurally valid package. It does not prove that the upstream CLI/tool is installed, that all upstream tests were run, that a native dependency is compatible, or that a generated video is artistically approved. Each specialist must verify the exact project's version/capabilities and run a task-relevant smoke test.
 
 Every source-backed update should keep: source repository URL, immutable commit SHA, version or source release, license and notice file, selected files, adaptation boundary, test/eval evidence (upstream vs locally run), and known limitations. Re-audit on upstream release changes before using an API or command that may have moved.
+
+
+## Current source audit
+
+The pinned upstream repositories, exact commits, license terms, intended use and adaptation boundaries are tracked in `docs/EXPERT_SKILL_SOURCE_AUDIT.md`. Treat that register as the source of truth for source-backed changes; refresh it whenever a source revision changes. A source may be useful for research while still being prohibited from direct bundling or commercial reuse.
