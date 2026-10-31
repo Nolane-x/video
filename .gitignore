@@ -21,3 +21,9 @@ Thumbs.db
 *.mkv
 *.wav
 *.mp3
+
+# Voice Studio generated audio and local caches
+.voice-cache/
+**/.voice-cache/
+out/voiceover/
+voice-generation-report.json

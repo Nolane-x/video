@@ -47,3 +47,13 @@ See [previous-works-catalog.json](../video-library/previous-works-catalog.json).
 To import a downloaded set of previous MP4s, run `tools/video/archive_previous_works.py --source-dir <folder>`; it checks every hash before staging. Commit/push the result and let the “Verify previous AI video assets” workflow finish before calling those files archived.
 
 The canonical H2 source ZIPs are already published at https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1. Both ZIPs contain pre-rendered music/SFX WAVs. Their `packs/dem/audio.py` script imports `synth`/ `music` modules not included in the archives, so use the verified WAV library with `tools/mix.py` unless the generator dependencies are restored. To publish a later replacement, use `tools/video/publish_h2_source_release.ps1 -AssetsDir <folder>` with exact allow-listed files and a new release tag; it rejects hash mismatches and refuses to overwrite an existing tag. Do not upload full upstream Remotion, Blender or Krita application archives as part of the H2 release.
+
+
+## Voice Studio adapter — 2026-10-31
+
+- The user's fork `Nolane-x/VoiceStudio` is pinned as a separate AGPL-3.0 submodule at `vendor/VoiceStudio`; exact commit is recorded in `integrations/voice-studio/VOICE_STUDIO_LOCK.json`.
+- The integration layer uses the local VoiceStudio API instead of importing its large backend or duplicating model weights.
+- Optional direct adapters: KorvaTTS (10 Vietnamese preset voices), Google Cloud TTS (dynamic voice list) and ElevenLabs (paginated account voice catalogue). Cloud discovery is account-dependent; global library counts are not treated as Vietnamese voice counts.
+- `generate_voiceover.py` writes per-speaker audio segments and an H2-compatible `02-VOICE-<project>-TTS.txt` for the existing `prep_voice.py` timing tool.
+- Model/component licensing remains per exact weight and use case. Default OmniVoice weights are non-commercial in the fork's reviewed inventory; do not assume the whole VoiceStudio model catalogue is commercially cleared.
+- GitHub Actions tests adapter logic with mocks only; no model weights, reference voices, API keys, cloud calls or real TTS audio are included in CI.

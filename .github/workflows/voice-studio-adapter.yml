@@ -1,0 +1,46 @@
+name: Voice Studio adapter checks
+
+on:
+  pull_request:
+    paths:
+      - ".gitmodules"
+      - "vendor/VoiceStudio"
+      - "integrations/voice-studio/**"
+      - ".github/workflows/voice-studio-adapter.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".gitmodules"
+      - "vendor/VoiceStudio"
+      - "integrations/voice-studio/**"
+      - ".github/workflows/voice-studio-adapter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adapter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify pinned VoiceStudio gitlink and licence boundary
+        run: |
+          test -f .gitmodules
+          grep -q 'path = vendor/VoiceStudio' .gitmodules
+          grep -q 'url = https://github.com/Nolane-x/VoiceStudio.git' .gitmodules
+          git ls-tree HEAD vendor/VoiceStudio | grep -q '^160000 commit faa5294359f23c911972ffe6d27785c50c67097b'
+          grep -q 'AGPL-3.0' integrations/voice-studio/VOICE_STUDIO_LOCK.json
+      - name: Compile adapter
+        run: python -m compileall -q integrations/voice-studio
+      - name: Run offline adapter tests
+        run: python -m unittest discover -s integrations/voice-studio/tests -v
+      - name: Validate example manifests without contacting providers
+        run: |
+          python integrations/voice-studio/generate_voiceover.py \
+            --manifest integrations/voice-studio/examples/vietnamese-documentary.json \
+            --output /tmp/nolane-voice-plan --plan-only

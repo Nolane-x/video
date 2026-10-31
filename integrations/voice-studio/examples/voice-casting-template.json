@@ -1,0 +1,25 @@
+{
+  "project": "ten-video",
+  "language": "vi",
+  "segments": [
+    {
+      "id": "V001",
+      "slot": "NARRATOR",
+      "character": "Narrator",
+      "provider": "voicestudio",
+      "engine": "REPLACE_WITH_AVAILABLE_ENGINE_ID",
+      "voice": "REPLACE_WITH_VOICE_PROFILE_ID",
+      "language": "vi",
+      "text": "Thay bằng lời thoại..."
+    },
+    {
+      "id": "V002",
+      "slot": "HOST",
+      "character": "Host",
+      "provider": "google",
+      "voice": "REPLACE_WITH_GOOGLE_VOICE_ID",
+      "language": "vi-VN",
+      "text": "Thay bằng lời thoại của nhân vật..."
+    }
+  ]
+}
