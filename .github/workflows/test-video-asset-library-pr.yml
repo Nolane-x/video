@@ -8,6 +8,10 @@ on:
       - ".github/workflows/build-video-asset-library.yml"
       - "tools/video/build_asset_library.py"
       - "tools/video/build_asset_library_shard.py"
+      - "tools/video/nasa_svs_importer.py"
+      - "tools/video/probe_nasa_svs.py"
+      - "tools/video/nasa_svs_importer.py"
+      - "tools/video/probe_nasa_svs.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
       - "tools/video/build_cumulative_asset_library_index.py"
@@ -59,6 +63,8 @@ jobs:
         run: |
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/nasa_svs_importer.py
+          python -m py_compile tools/video/probe_nasa_svs.py
           python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/build_cumulative_asset_library_index.py
