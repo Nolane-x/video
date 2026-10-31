@@ -16,7 +16,23 @@ for datablocks in (bpy.data.materials, bpy.data.curves, bpy.data.cameras, bpy.da
     pass
 
 scene = bpy.context.scene
-scene.render.engine = "BLENDER_EEVEE_NEXT" if bpy.app.version >= (4, 2, 0) else "BLENDER_EEVEE"
+available_engines = {
+    item.identifier
+    for item in scene.render.bl_rna.properties["engine"].enum_items
+}
+preferred_engines = (
+    "BLENDER_EEVEE_NEXT",
+    "BLENDER_EEVEE",
+    "BLENDER_WORKBENCH",
+    "CYCLES",
+)
+scene.render.engine = next(
+    (engine for engine in preferred_engines if engine in available_engines),
+    None,
+) or next(iter(available_engines), "")
+if not scene.render.engine:
+    raise RuntimeError("Blender runtime did not expose any supported render engines.")
+print("Selected Blender render engine:", scene.render.engine)
 scene.render.resolution_x = 1280
 scene.render.resolution_y = 720
 scene.render.resolution_percentage = 100

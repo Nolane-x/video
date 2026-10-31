@@ -7,6 +7,9 @@ on:
       - "toolchain/scripts/install-blender.sh"
       - "toolchain/manifest.json"
       - ".github/workflows/video-toolchain-blender.yml"
+      - "toolchain/scripts/install-blender.sh"
+      - "toolchain/manifest.json"
+      - ".github/workflows/video-toolchain-blender.yml"
   workflow_dispatch:
 
 permissions:
