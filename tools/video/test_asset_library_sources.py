@@ -2698,6 +2698,8 @@ class NPSBrollImporterTests(unittest.TestCase):
         group = parsed["video_groups"][0]
         self.assertEqual(group["title"], "Aerial of Grand Canyon Cliffs and Temples")
         self.assertIn("Slow aerial footage", group["description"])
+        self.assertEqual(nps_broll_importer.normalize_nps_media_url(self.URL_720), self.URL_720)
+        self.assertEqual(len(group["sources"]), 3)
         options = nps_broll_importer._media_candidates_from_group(group)
         self.assertEqual([row["resolution"] for row in options], [1080, 720])
         self.assertEqual(options[0]["url"], URL_1080)
