@@ -29,6 +29,7 @@ SOURCE_LANES = {
     "eso": "download_eso_media",
     "cdc-broll": "download_cdc_broll_videos",
     "nps-broll": "download_nps_broll_media",
+    "nps-gallery-images": "download_nps_npgallery_images",
     "loc": "download_loc_public_domain",
     "wikimedia": "download_wikimedia_public_domain",
     "wikimedia-svg": "download_wikimedia_vector_svg",
