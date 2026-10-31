@@ -178,7 +178,24 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             self.assertEqual(saved["captions"]["word_timed_cue_count"], 1)
             self.assertGreater(saved["artifact_manifest_summary"]["file_count"], 5)
             artifact_manifest = json.loads((out / "artifact-manifest.json").read_text(encoding="utf-8"))
-            self.assertIn("captions.srt", {item["path"] for item in artifact_manifest["files"]})
+            manifest_paths = {item["path"] for item in artifact_manifest["files"]}
+            self.assertIn("captions.srt", manifest_paths)
+            self.assertIn("captions-sentence.srt", manifest_paths)
+            self.assertIn("voice-cast-report.json", manifest_paths)
+            self.assertEqual(
+                saved["artifact_manifest_summary"]["file_count"],
+                artifact_manifest["file_count"],
+            )
+            for item in artifact_manifest["files"]:
+                self.assertEqual(
+                    project._sha256(out / item["path"]),
+                    item["sha256"],
+                    msg=f"Artifact manifest hash mismatch: {item['path']}",
+                )
+            captions = (out / "captions.srt").read_text(encoding="utf-8")
+            self.assertIn("Xin chào Việt Nam.", captions)
+            ass = (out / "captions.ass").read_text(encoding="utf-8-sig")
+            self.assertIn("Dialogue: 0,0:00:00.50,0:00:01.40", ass)
 
 
 if __name__ == "__main__":
