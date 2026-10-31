@@ -117,6 +117,15 @@ class VoiceStudioClient:
                 "VoiceStudio returned a text/JSON response instead of audio"
             )
         destination = Path(output_path)
+        if destination.suffix.lower() in {"", ".audio"}:
+            media = content_type.lower()
+            extension = (
+                ".mp3" if "mpeg" in media or "mp3" in media
+                else ".ogg" if "ogg" in media
+                else ".flac" if "flac" in media
+                else ".wav"
+            )
+            destination = destination.with_suffix(extension)
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = destination.with_name(destination.name + ".part")
         try:
