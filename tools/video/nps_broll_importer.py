@@ -665,9 +665,10 @@ def parse_npgallery_search_results(page_html: str) -> list[dict[str, Any]]:
 
 
 def _npgallery_label_field(page_html: str, label: str) -> str:
+    """Read the value container following an NPGallery <label> (normally a sibling <div>)."""
     pattern = (
         r"<label\b[^>]*>\s*" + re.escape(label) +
-        r"\s*:\s*</label>\s*<p\b[^>]*>(.*?)</p>"
+        r"\s*:\s*</label>\s*<(?:div|p)\b[^>]*>(.*?)</(?:div|p)>"
     )
     match = re.search(pattern, page_html or "", re.IGNORECASE | re.DOTALL)
     if not match:
