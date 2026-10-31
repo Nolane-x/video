@@ -30,6 +30,14 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def rendered_preview_digest(segments: list[dict[str, Any]]) -> str:
+    ordered = [
+        {"shotId": item["shotId"], "sha256": item["sha256"], "sizeBytes": item["sizeBytes"]}
+        for item in sorted(segments, key=lambda item: item["shotId"])
+    ]
+    return sha256_bytes(canonical_bytes(ordered))
+
+
 def plan_without_approval(plan: dict[str, Any]) -> dict[str, Any]:
     copy_plan = json.loads(json.dumps(plan))
     brief = copy_plan.get("creativeBrief")
@@ -149,11 +157,14 @@ def main() -> int:
         if not args.dry_run:
             rendered = render_segments(spec, args.project_root.resolve(), args.output.resolve())
             spec["renderedSegments"] = rendered
+            spec["previewArtifactSha256"] = rendered_preview_digest(rendered)
         args.output.mkdir(parents=True, exist_ok=True)
         manifest = args.output / "manifest.json"
         manifest.write_text(json.dumps(spec, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print("BLOCKING PREVIEW READY")
         print(f"- Preview spec SHA-256: {spec['previewSpecSha256']}")
+        if not args.dry_run:
+            print(f"- Rendered preview bundle SHA-256: {spec['previewArtifactSha256']}")
         print(f"- Selected shots: {', '.join(segment['shotId'] for segment in spec['segments'])}")
         print(f"- Manifest: {manifest}")
         if not args.dry_run:
