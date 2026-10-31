@@ -667,6 +667,13 @@
         "detail_page_revalidation": true,
         "download_path": "/GetAsset/{asset_id}/original",
         "license": "Public Domain with Full Granting Rights; not CC0"
+      },
+      "download_limits": {
+        "total_videos": 36,
+        "max_videos_per_park_archive": 3,
+        "max_source_file_bytes": 367001600,
+        "max_aggregate_source_bytes": 4294967296,
+        "allocation": "five park indexes are capped at three clips each; NPGallery may fill remaining video slots"
       }
     },
     {
