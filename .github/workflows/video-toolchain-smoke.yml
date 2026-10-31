@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: video-toolchain-smoke-${{ github.ref }}
@@ -40,8 +40,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Setup Node 24
         uses: actions/setup-node@v7
@@ -82,25 +80,11 @@ jobs:
           python -m unittest discover -s tools/video -p 'test_toolchain.py' -v
           python tools/video/validate_plugin_packages.py
 
-      - name: Install pinned runtime dependencies
+      - name: Require reviewed lockfile and install pinned runtime dependencies
         run: |
+          test -s toolchain/node/package-lock.json
           bash toolchain/scripts/install-core.sh
           echo "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin" >> "$GITHUB_PATH"
-
-      - name: Persist first resolved package lock on same-repository PRs
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add toolchain/node/package-lock.json
-          if ! git diff --cached --quiet; then
-            git commit -m "build: lock resolved video toolchain dependencies"
-            git push origin "HEAD:$HEAD_REF"
-          else
-            echo "Resolved package lock is already committed."
-          fi
 
       - name: Expose pinned modules to the existing Remotion workspace
         run: |
