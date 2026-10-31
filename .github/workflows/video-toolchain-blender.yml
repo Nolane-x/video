@@ -33,7 +33,10 @@ jobs:
       - name: Install Blender if cache missed
         run: |
           bash toolchain/scripts/install-blender.sh | tee blender-install.txt
-          blender --background --version
+          BLENDER_DIR="$HOME/.cache/nolane-video-toolchain/blender-5.2.3-linux-x64"
+          test -x "$BLENDER_DIR/blender"
+          "$BLENDER_DIR/blender" --background --version
+          echo "$BLENDER_DIR" >> "$GITHUB_PATH"
 
       - name: Install FFmpeg
         run: |
