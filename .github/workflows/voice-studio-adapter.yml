@@ -46,6 +46,8 @@ jobs:
           test -f integrations/voice-studio/examples/actions-vietnamese-documentary.json
           grep -q 'actions/cache@v6' .github/workflows/voice-studio-actions-lab.yml
           grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-project.yml
+          grep -q 'voice-studio-actions-lab.yml' .github/workflows/package-video-skill.yml
+          grep -q 'voice-studio-actions-project.yml' .github/workflows/package-video-skill.yml
           grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-lab.yml
           test -f .agents/skills/video-voice-design-director/SKILL.md
           test -f .agents/skills/video-character-voice-casting-engineer/SKILL.md
