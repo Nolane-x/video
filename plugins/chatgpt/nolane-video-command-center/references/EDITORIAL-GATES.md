@@ -19,6 +19,24 @@ The preflight requires a named audience, platform, language, aspect ratio, viewe
 
 A blocked plan must be revised. A plan-ready result authorizes only blocking/animatic and a low-cost preview. It is not a subjective quality score and never grants final release approval.
 
+## Gate A.5 — rendered blocking preview and approval (before full render)
+
+Once Gate A is ready, render the seven selected story/action proofs:
+
+```bash
+python tools/video/render_blocking_preview.py video-projects/remotion/public/story/shots.json --project-root video-projects/remotion --output video-projects/remotion/out/blocking-preview
+```
+
+The preview consists of low-resolution motion clips, not contact sheets alone. Inspect the hook, phone release, writing/action contacts, shoe tying, café door, listening reaction and shared two-shot. The owner/reviewer must add a `creativeBrief.blockingPreviewApproval` object with reviewer ID, ISO-8601 UTC time, exact `previewSpecSha256`, exact `previewArtifactSha256`, all `reviewedSegmentIds` and concrete `reviewNotes`.
+
+The full render workflow verifies approval with:
+
+```bash
+python tools/video/validate_preview_approval.py video-projects/remotion/public/story/shots.json --project-root video-projects/remotion --manifest video-projects/remotion/out/blocking-preview/manifest.json
+```
+
+A missing/stale approval blocks the full render. Changes to the shot plan, renderer source, selected segments or preview clips invalidate it. CI only verifies the attestation and hashes; it cannot attest that the reviewer genuinely watched the clips.
+
 ## Gate B — independent full audiovisual review (after rendering)
 
 Start from `tools/video/editorial-review.template.json`, fill it for the exact candidate, then run:
