@@ -28,6 +28,7 @@ import nasa_svs_importer as nasa_svs_importer  # noqa: E402
 import eso_video_importer as eso_video_importer  # noqa: E402
 import cdc_broll_importer as cdc_broll_importer  # noqa: E402
 import nps_broll_importer as nps_broll_importer  # noqa: E402
+import nps_gallery_image_importer as nps_gallery_image_importer  # noqa: E402
 import generate_sfx_library as sfx_library  # noqa: E402
 import json
 import hashlib
@@ -2765,6 +2766,240 @@ class SourceCapacityExpansionTests(unittest.TestCase):
             "https://cdn.eso.org.evil.example/videos/ultra_hd/eso1234a.mp4", "eso1234a"
         ))
 
+
+
+class NPSNPGalleryImageImporterTests(unittest.TestCase):
+    ASSET_ID = "c8527b66-4f06-4661-bfab-ef2af37323cf"
+    SEARCH_ASSET = {
+        "AssetBaseType": "File",
+        "AssetID": ASSET_ID,
+        "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Full"},
+        "Description": "Two cave crickets hanging on the cave wall.",
+        "AltText": "Two cave crickets hanging on the cave wall.",
+        "PhotoCredit": "NPS/Andrew Shirey",
+        "PrimaryType": "image",
+        "ResourceFormat": "jpg",
+        "ResourceType": "Image",
+        "Title": "Cave Crickets",
+    }
+    SEARCH_HTML = "<script>var search = " + json.dumps({
+        "Page": 1,
+        "PageSize": 60,
+        "ResultCount": 3,
+        "Results": [
+            {"Asset": SEARCH_ASSET},
+            {"Asset": {
+                **SEARCH_ASSET,
+                "AssetID": "57acfe20-26e5-4769-bd37-4e193cbbaa8b",
+                "ConstraintsInformation": {"Constraint": "Public domain", "GrantingRights": "Unknown"},
+            }},
+            {"Asset": {
+                **SEARCH_ASSET,
+                "AssetID": "18b5d0ca-6a2c-4f1f-83e9-271148f84b4e",
+                "PhotoCredit": "Independent Film Studio",
+            }},
+        ],
+    }) + ";</script>"
+    DETAIL_HTML = f"""
+    <html><body>
+      <label class="col-md-3 col-sm-3 text-right">Asset ID:</label><div class="col-md-7 col-sm-7 text-left">{ASSET_ID}</div>
+      <label class="col-md-3 col-sm-3 text-right">Title:</label><div class="col-md-7 col-sm-7 text-left">Cave Crickets</div>
+      <label class="col-md-3 col-sm-3 text-right">AltText:</label><div class="col-md-7 col-sm-7 text-left">Two cave crickets hanging on the cave wall.</div>
+      <label class="col-md-3 col-sm-3 text-right">Description:</label><div class="col-md-7 col-sm-7 text-left">Two cave crickets hanging on the cave wall.</div>
+      <label class="col-md-3 col-sm-3 text-right">Copyright:</label><div class="col-md-7 col-sm-7 text-left">NPS/Andrew Shirey</div>
+      <label class="col-md-3 col-sm-3 text-right">PhotoCredit:</label><div class="col-md-7 col-sm-7 text-left">NPS/Andrew Shirey</div>
+      <label class="col-md-3 col-sm-3 text-right">Constraints Information:</label><div class="col-md-7 col-sm-7 text-left">Public domain:Full Granting Rights</div>
+      <label class="col-md-3 col-sm-3 text-right">Resource Type:</label><div class="col-md-7 col-sm-7 text-left">Image</div>
+      <label class="col-md-3 col-sm-3 text-right">Resource Format:</label><div class="col-md-7 col-sm-7 text-left">jpg</div>
+      <label class="col-md-3 col-sm-3 text-right">Access Constraints:</label><div class="col-md-7 col-sm-7 text-left">Public Can View</div>
+      <label class="col-md-3 col-sm-3 text-right">Original File Name:</label><div class="col-md-7 col-sm-7 text-left">_K9A3907.jpg</div>
+      <label class="col-md-3 col-sm-3 text-right">File Size (bytes):</label><div class="col-md-7 col-sm-7 text-left">12.1 MB</div>
+      <label class="col-md-3 col-sm-3 text-right">NPS Units:</label><div class="col-md-7 col-sm-7 text-left">Timpanogos Cave National Monument, Code: TICA</div>
+    </body></html>
+    """
+
+    @staticmethod
+    def _jpeg_fixture() -> bytes:
+        # JPEG SOF0 header: 48 x 32 pixels, followed by deterministic payload bytes.
+        return (
+            b"\xff\xd8\xff\xc0\x00\x11\x08\x00\x20\x00\x30\x03"
+            b"\x01\x11\x00\x02\x11\x00\x03\x11\x00"
+            + b"nps-image-fixture" * 900
+        )
+
+    def test_search_parser_requires_full_public_domain_nps_credited_image_files(self):
+        url = nps_gallery_image_importer.SEARCH_URLS["wildlife"]
+        candidates = nps_gallery_image_importer.parse_npgallery_image_search_results(
+            self.SEARCH_HTML, url
+        )
+        self.assertEqual([row["AssetID"] for row in candidates], [self.ASSET_ID])
+        self.assertEqual(candidates[0]["ResourceFormat"], "jpg")
+        with self.assertRaisesRegex(RuntimeError, "allow-list"):
+            nps_gallery_image_importer.parse_npgallery_image_search_results(
+                self.SEARCH_HTML,
+                "https://npgallery.nps.gov/SearchResults?pagesize=60&keyword=landscape",
+            )
+
+    def test_exact_search_detail_and_original_image_url_allowlists(self):
+        expected_search = nps_gallery_image_importer.SEARCH_URLS["night sky"]
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_page_url(expected_search),
+            expected_search,
+        )
+        detail_url = f"https://npgallery.nps.gov/AssetDetail/{self.ASSET_ID}"
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_page_url(detail_url),
+            detail_url,
+        )
+        original = f"https://npgallery.nps.gov/GetAsset/{self.ASSET_ID}/original.jpg"
+        self.assertEqual(
+            nps_gallery_image_importer.normalize_npgallery_original_url(
+                original + "?", self.ASSET_ID, "jpg"
+            ),
+            original,
+        )
+        for bad in (
+            "http://npgallery.nps.gov/AssetDetail/" + self.ASSET_ID,
+            "https://npgallery.nps.gov.evil.example/AssetDetail/" + self.ASSET_ID,
+            "https://user@npgallery.nps.gov/AssetDetail/" + self.ASSET_ID,
+            "https://npgallery.nps.gov/GetAsset/" + self.ASSET_ID + "/proxyhires.jpg",
+            "https://evil.example/GetAsset/" + self.ASSET_ID + "/original.jpg",
+        ):
+            if "/AssetDetail/" in bad:
+                self.assertIsNone(nps_gallery_image_importer.normalize_npgallery_page_url(bad))
+            else:
+                self.assertIsNone(
+                    nps_gallery_image_importer.normalize_npgallery_original_url(
+                        bad, self.ASSET_ID, "jpg"
+                    )
+                )
+
+    def test_detail_page_revalidates_full_rights_photo_credit_access_and_exceptions(self):
+        detail = nps_broll_importer.parse_npgallery_asset_detail(self.DETAIL_HTML)
+        self.assertEqual(detail["Asset ID"], self.ASSET_ID)
+        self.assertEqual(detail["PhotoCredit"], "NPS/Andrew Shirey")
+        self.assertEqual(detail["Constraints Information"], "Public domain:Full Granting Rights")
+        self.assertEqual(detail["Resource Type"], "Image")
+        self.assertEqual(detail["Access Constraints"], "Public Can View")
+        self.assertTrue(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, detail, self.ASSET_ID
+            )
+        )
+        restricted = dict(detail)
+        restricted["Copyright"] = "Copyrighted photograph used with permission."
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, restricted, self.ASSET_ID
+            )
+        )
+        not_public = dict(detail)
+        not_public["Constraints Information"] = "Public domain:Unknown Granting Rights"
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, not_public, self.ASSET_ID
+            )
+        )
+        not_viewable = dict(detail)
+        not_viewable["Access Constraints"] = "Permission required"
+        self.assertFalse(
+            nps_gallery_image_importer.npgallery_image_rights_verified(
+                self.SEARCH_ASSET, not_viewable, self.ASSET_ID
+            )
+        )
+
+    def test_jpeg_and_png_signatures_and_dimensions_are_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            jpeg = root / "image.jpg"
+            jpeg.write_bytes(self._jpeg_fixture())
+            self.assertTrue(nps_gallery_image_importer._image_signature_is_valid(jpeg, "jpg"))
+            self.assertEqual(
+                nps_gallery_image_importer._image_dimensions(jpeg, "jpg"),
+                (48, 32),
+            )
+            png = root / "image.png"
+            png_bytes = (
+                b"\x89PNG\r\n\x1a\n"
+                + (13).to_bytes(4, "big")
+                + b"IHDR"
+                + (1920).to_bytes(4, "big")
+                + (1080).to_bytes(4, "big")
+                + b"\x08\x02\x00\x00\x00"
+                + b"fixture-data" * 1000
+            )
+            png.write_bytes(png_bytes)
+            self.assertTrue(nps_gallery_image_importer._image_signature_is_valid(png, "png"))
+            self.assertEqual(
+                nps_gallery_image_importer._image_dimensions(png, "png"),
+                (1920, 1080),
+            )
+            self.assertFalse(nps_gallery_image_importer._image_signature_is_valid(png, "jpg"))
+
+    def test_full_image_import_rechecks_detail_downloads_original_and_records_provenance(self):
+        source_bytes = self._jpeg_fixture()
+        expected_detail = f"https://npgallery.nps.gov/AssetDetail/{self.ASSET_ID}"
+        expected_original = f"https://npgallery.nps.gov/GetAsset/{self.ASSET_ID}/original.jpg"
+        fetched = []
+        limits = []
+
+        def fake_fetch(url, limit=nps_gallery_image_importer.MAX_PAGE_BYTES, timeout=35):
+            fetched.append(url)
+            if url in nps_gallery_image_importer.SEARCH_URLS.values():
+                return self.SEARCH_HTML.encode()
+            if url == expected_detail:
+                return self.DETAIL_HTML.encode()
+            raise AssertionError("unexpected NPGallery image URL: " + url)
+
+        def fake_download(url, asset_id, fmt, destination, *, max_bytes=nps_gallery_image_importer.MAX_IMAGE_BYTES):
+            self.assertEqual(url, expected_original)
+            self.assertEqual(asset_id, self.ASSET_ID)
+            self.assertEqual(fmt, "jpg")
+            limits.append(max_bytes)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(nps_gallery_image_importer, "_fetch_npgallery_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_gallery_image_importer, "_download_npgallery_image", side_effect=fake_download), \
+             mock.patch.object(nps_gallery_image_importer.time, "sleep"):
+            index = []
+            report = nps_gallery_image_importer.download_nps_npgallery_images(Path(tmp), index)
+
+        for url in nps_gallery_image_importer.SEARCH_URLS.values():
+            self.assertIn(url, fetched)
+        self.assertIn(expected_detail, fetched)
+        self.assertEqual(len(index), 1)
+        self.assertEqual(index[0]["type"], "nps-photograph")
+        self.assertEqual(index[0]["path"].split(".")[-1], "jpg")
+        self.assertEqual(index[0]["source_file_url"], expected_original)
+        self.assertEqual(index[0]["collection_page"], nps_gallery_image_importer.SEARCH_URLS["wildlife"])
+        self.assertEqual(index[0]["license"], "Public Domain (NPGallery item-level Public domain: Full Granting Rights; not CC0)")
+        self.assertEqual(index[0]["credit_text"], "NPS/Andrew Shirey")
+        self.assertEqual(index[0]["copyright_text"], "NPS/Andrew Shirey")
+        self.assertEqual(index[0]["source_sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(index[0]["sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(index[0]["width"], 48)
+        self.assertEqual(index[0]["height"], 32)
+        self.assertEqual(limits, [nps_gallery_image_importer.MAX_TOTAL_SOURCE_BYTES])
+        self.assertEqual(
+            len([row for row in report if row.get("status") == "downloaded"]),
+            1,
+        )
+
+    def test_image_lane_is_registered_and_classified_as_photography(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["nps-gallery-images"],
+            "download_nps_npgallery_images",
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "nps-photograph",
+                "path": "third-party/nps/npgallery/images/cave-crickets.jpg",
+            }),
+            "photography",
+        )
 
 
 class NPSBrollImporterTests(unittest.TestCase):
