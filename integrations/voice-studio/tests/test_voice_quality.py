@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import unicodedata
 import unittest
 from pathlib import Path
 
