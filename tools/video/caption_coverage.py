@@ -32,6 +32,12 @@ def text_coverage(expected: str, observed: str) -> float:
         return 0.0
     if normalized_expected in normalized_observed:
         return 1.0
+    # OCR commonly emits compact labels such as DAY14 or 6:12AM without spaces.
+    # Compare compact alphanumeric forms exactly; do not use fuzzy compact matching.
+    compact_expected = "".join(expected_tokens)
+    compact_observed = "".join(observed_tokens)
+    if compact_expected and compact_expected in compact_observed:
+        return 1.0
     scores = []
     for token in expected_tokens:
         best = max(
@@ -138,7 +144,8 @@ def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str
     kind = item.get("kind")
 
     if kind == "day-counter":
-        return ("top-left-day-counter", (0, 0, 300, 110))
+        # Tight crop around the absolute top-left badge, excluding unrelated scene text.
+        return ("top-left-day-counter", (25, 12, 140, 68))
     if kind == "subtitle":
         return ("lower-third-subtitle", (80, 575, 1120, 145))
     if kind == "end-card-title":
@@ -146,7 +153,7 @@ def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str
     if kind == "scene-label":
         regions = {
             "calendar": ("calendar-heading", (570, 65, 520, 115)),
-            "busStop": ("bus-stop-sign", (860, 145, 130, 105)),
+            "busStop": ("bus-stop-sign", (890, 148, 90, 70)),
             "bus": ("bus-sign", (80, 280, 280, 120)),
             "classroom": ("classroom-board-label", (470, 220, 530, 130)),
         }
@@ -162,11 +169,11 @@ def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str
             return None
         word = str(words[word_index]).strip()
         if " " in word:
-            # The spaced kinetic phrase is deliberately moved above/clear of the actor.
-            x, y = 470, 166
-        else:
-            x = 64 + ((word_index * 197 + 80) % 1100)
-            y = 150 + ((word_index * 83 + 38) % 330)
+            # Multiword phrases occupy distinct negative-space rows, never the same anchor.
+            x, y = (330, 95) if word_index == 0 else (330, 160)
+            return (f"red-word-{word_index + 1}", (x, y, 260, 70))
+        x = 64 + ((word_index * 197 + 80) % 1100)
+        y = 150 + ((word_index * 83 + 38) % 330)
         width = max(250, min(500, len(word) * 19 + 100))
         return (f"red-word-{word_index + 1}", (max(0, x - 30), max(0, y - 38), width, 112))
     return None
@@ -231,13 +238,21 @@ def ocr_frame(
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
             "-i", str(frame),
             "-vf",
-            f"crop={width * 2}:{height * 2}:{x * 2}:{y * 2},scale=iw*2:ih*2:flags=lanczos",
+            (
+                f"crop={width * 2}:{height * 2}:{x * 2}:{y * 2},"
+                "scale=iw*2:ih*2:flags=lanczos,format=gray,"
+                "eq=contrast=1.6:brightness=0.02,"
+                "unsharp=5:5:1.0:5:5:0.0"
+            ),
             "-frames:v", "1", str(crop)
         ])
         crop_outputs = []
-        for psm in ("6", "7"):
+        # The current Remotion counters, signs and kinetic words are English labels.
+        # Keep EN/VI for captions; use the less-confusable English model for these tight crops.
+        crop_language = languages if item.get("kind") in {"subtitle", "end-card-title"} else "eng"
+        for psm in ("7", "11", "8"):
             crop_outputs.append(run_checked([
-                "tesseract", str(crop), "stdout", "-l", languages, "--psm", psm
+                "tesseract", str(crop), "stdout", "-l", crop_language, "--psm", psm
             ]).strip())
         region_text = "\n".join(crop_outputs).strip()
         region_outputs[region_name] = region_text
@@ -332,7 +347,7 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
 
     failed = total_items - passed_items
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "video": str(video),
         "shot_manifest": str(shots_path),
         "video_duration_seconds": round(duration, 3),

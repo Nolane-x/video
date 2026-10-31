@@ -13,6 +13,10 @@ class CaptionCoverageTests(unittest.TestCase):
     def test_text_coverage_is_case_and_punctuation_tolerant(self):
         self.assertGreaterEqual(text_coverage("The feed can wait.", "THE FEED can wait"), 0.99)
 
+    def test_text_coverage_accepts_ocr_that_collapses_label_spacing(self):
+        self.assertEqual(text_coverage("DAY 14", "DAY14"), 1.0)
+        self.assertEqual(text_coverage("6:12 AM", "6:12AM"), 1.0)
+
     def test_ocr_single_word_error_is_reported_as_partial_not_zero(self):
         score = text_coverage("The feed always has one more thing", "The feed always has one more think")
         self.assertGreaterEqual(score, 0.8)
@@ -62,7 +66,7 @@ class CaptionCoverageTests(unittest.TestCase):
         shot = {"args": {"day": "DAY 14", "setting": "library"}}
         day_region = targeted_ocr_region({"kind": "day-counter", "text": "DAY 14"}, shot)
         subtitle_region = targeted_ocr_region({"kind": "subtitle", "text": "Your attention belongs to you."}, shot)
-        self.assertEqual(day_region, ("top-left-day-counter", (0, 0, 300, 110)))
+        self.assertEqual(day_region, ("top-left-day-counter", (25, 12, 140, 68)))
         self.assertEqual(subtitle_region, ("lower-third-subtitle", (80, 575, 1120, 145)))
 
     def test_targeted_ocr_region_tracks_calendar_and_bus_stop_signs(self):
@@ -73,12 +77,15 @@ class CaptionCoverageTests(unittest.TestCase):
             {"kind": "scene-label", "text": "BUS"}, {"args": {"setting": "busStop"}}
         )
         self.assertEqual(calendar, ("calendar-heading", (570, 65, 520, 115)))
-        self.assertEqual(bus_stop, ("bus-stop-sign", (860, 145, 130, 105)))
+        self.assertEqual(bus_stop, ("bus-stop-sign", (890, 148, 90, 70)))
 
-    def test_multiword_kinetic_text_uses_clear_above_actor_region(self):
-        shot = {"args": {"setting": "mirror", "redWords": ["TOMORROW", "ONE MORE", "LATER"]}}
-        region = targeted_ocr_region({"kind": "red-word", "text": "ONE MORE"}, shot)
-        self.assertEqual(region, ("red-word-2", (440, 128, 252, 112)))
+    def test_multiword_kinetic_phrases_use_distinct_clear_regions(self):
+        shot = {"args": {"setting": "void", "redWords": ["ONE MORE", "TOMORROW", "JUST ONCE", "LATER"]}}
+        one_more = targeted_ocr_region({"kind": "red-word", "text": "ONE MORE"}, shot)
+        just_once = targeted_ocr_region({"kind": "red-word", "text": "JUST ONCE"}, shot)
+        self.assertEqual(one_more, ("red-word-1", (330, 95, 260, 70)))
+        self.assertEqual(just_once, ("red-word-3", (330, 160, 260, 70)))
+        self.assertNotEqual(one_more[1][1], just_once[1][1])
 
     def test_untracked_no_text_shot_fails_closed(self):
         from caption_coverage import resolve_text_contract

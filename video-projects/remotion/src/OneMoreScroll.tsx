@@ -369,8 +369,8 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <rect x="250" y="504" width="610" height="18" rx="4" fill="#6a596d" stroke="#302735" strokeWidth="4" />
       <path d="M292 522 V570 M818 522 V570" stroke="#302735" strokeWidth="16" />
       <rect x="885" y="160" width="68" height="170" rx="8" fill="#28232e" stroke="#bca5b0" strokeWidth="4" />
-      <rect x="892" y="171" width="54" height="38" rx="4" fill="#e0b88e" />
-      <text x="919" y="197" fontSize="14" fontWeight="900" letterSpacing=".4" fill="#302330" textAnchor="middle">BUS</text>
+      <rect x="888" y="168" width="62" height="44" rx="4" fill="#e6c39f" />
+      <text x="919" y="198" fontSize="19" fontWeight="900" letterSpacing=".2" fill="#241c26" textAnchor="middle">BUS</text>
       <path d="M0 550 H1280" stroke="#5f4b60" strokeWidth="4" />
       <rect x="0" y="554" width="1280" height="166" fill="url(#h2Road)" />
       <path d="M60 650 H330 M870 650 H1140" stroke="#b7a0a1" strokeWidth="3" opacity=".23" />
@@ -767,15 +767,17 @@ const RedWords: React.FC<{ words: string[]; t: number }> = ({ words, t }) => (
   <div style={{ position: "absolute", inset: 0, zIndex: 8, pointerEvents: "none" }}>
     {words.map((word, i) => {
       const isMultiword = word.trim().includes(" ");
-      // Keep multiword phrases out of the character's face/body silhouette.
-      const x = isMultiword ? 470 : 64 + ((i * 197 + 80) % 1100);
-      const y = (isMultiword ? 166 : 150 + ((i * 83 + 38) % 330)) + Math.sin(t * 5 + i) * 5;
+      // The first and second phrases use separate negative-space rows, clear of the actor and shadow.
+      const phraseY = i === 0 ? 95 : 160;
+      const x = isMultiword ? 330 : 64 + ((i * 197 + 80) % 1100);
+      const y = (isMultiword ? phraseY : 150 + ((i * 83 + 38) % 330)) + Math.sin(t * 5 + i) * 4;
       return <div key={word + i} style={{
         position: "absolute", left: x, top: y,
-        color: "#e07a8d", fontFamily: '"Comic Neue", Arial, sans-serif',
-        fontWeight: 800, fontSize: isMultiword ? 28 : (i % 2 ? 24 : 28),
-        opacity: Math.min(0.9, 0.24 + t * 0.85), transform: "rotate(" + ((i % 3) * 5 - 5) + "deg)",
-        textShadow: "0 2px 5px rgba(15,10,18,.92), 0 0 12px rgba(191,69,91,.2)",
+        color: "#f09aaa", fontFamily: '"Comic Neue", Arial, sans-serif',
+        fontWeight: 900, fontSize: isMultiword ? 28 : (i % 2 ? 24 : 28),
+        opacity: Math.min(0.95, 0.3 + t * 0.85), transform: "rotate(" + ((i % 3) * 3 - 3) + "deg)",
+        textShadow: "0 2px 6px rgba(8,5,10,.98), 0 0 3px rgba(8,5,10,.98)",
+        WebkitTextStroke: "0.35px rgba(18,10,18,.5)",
       }}>{word}</div>;
     })}
   </div>
