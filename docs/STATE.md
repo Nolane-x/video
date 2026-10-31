@@ -172,3 +172,17 @@ These are historical identifiers, not proof about current HEAD. Check the live A
 - DVIDS was investigated as a possible public-media lane but is not integrated: API access requires a user API key, and the item-level copyright / privacy / publicity / non-endorsement terms need stricter verification than the current API search payload alone provides.
 - **The 50 GB target has not been reached or published.** Do not count compressed bytes, configured caps or unverified sources as target progress. Next: allow Build 62 USGS to finish, verify its manifest and Release SHA-256s, then inspect Build 68's actual per-lane indexed byte counts and improve the largest yielding lanes.
 
+## Build 62 recovery and published baseline — 2026-10-31
+
+- Build 62 source run: [41078978167](https://github.com/Nolane-x/video/actions/runs/41078978167). All 22 source lanes completed and produced 44 ZIP volumes plus 22 shard manifests.
+- The original finalizer attempt failed only at its lookup of a draft release by tag. The source shards and 7 global metadata files were already uploaded; no media had to be downloaded again.
+- Fixed tools/video/finalize_asset_library_release.py to resolve draft/published releases using the release collection (GET /repos/{owner}/{repo}/releases?per_page=100) and added regression tests for draft selection / missing tags. This avoids the integration-context failure from the by-tag draft endpoint.
+- Recovery workflow: [run 41149796885](https://github.com/Nolane-x/video/actions/runs/41149796885) — **success**. It downloaded the 22 existing manifests, rebuilt the global index/catalog/license ledger/checksum files, verified all remote Release asset names, sizes and GitHub SHA-256 digests, and published the draft.
+- Published Release: https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41078978167. Release is no longer a draft and contains **73 assets**: 44 volumes, 22 shard manifests and 7 global metadata files.
+- Final measured library size: **12,303,303,941 indexed resource bytes** (12.303 GB decimal / 11.458 GiB), **55,700 indexed assets**, **44 download volumes**. The 50,000,000,000-byte target remains incomplete; progress = 24.606%.
+- Total compressed size of the 44 ZIP volumes: **11,677,924,120 bytes**. This is not the target metric; use indexed resource bytes only.
+- Highest-yield lanes: USGS 3,612,237,266 bytes / 196 assets; NASA 2,030,638,116 / 47; NOAA 1,962,159,985 / 340; OpenGameArt 1,434,785,584 / 42,030; Internet Archive 1,092,253,646 / 11; ambientCG 869,348,271 / 1,241; Wikimedia 517,246,544 / 660; Poly Haven 384,999,485 / 338. Other lanes add the remaining bytes; exact aggregate is authoritative in ASSET_INDEX.json.
+- The next full library build is deliberately gated by .github/ASSET_LIBRARY_BUILD_REQUEST; code edits and documentation no longer relaunch a full 22-lane download. The build workflow uses group video-asset-library-distributed-v4, job-level contents: write permissions, and max-parallel: 18.
+- Recovery-specific workflow: .github/workflows/recover-video-asset-library-release.yml; future recovery runs can republish already-uploaded draft assets without re-running the source matrix.
+- Next build should use the latest caps on main. Measure its actual per-lane bytes and compare against Build 62 via SHA-256 / asset IDs before counting cumulative library growth. Do not simply add repeated downloads as unique assets. After another incremental build, produce a cumulative index across published releases using content hashes to deduplicate.
+
