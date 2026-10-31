@@ -196,8 +196,10 @@ Add `--asr` to send each generated sample through the same VoiceStudio ASR
 backend and attach WER/CER pronunciation/intelligibility proxies. This requires
 a configured local ASR engine in VoiceStudio. Rate naturalness, Vietnamese
 clarity/tones, identity, expressiveness and character fit from 1–5, then click
-**Export human ratings JSON**. Once you have exported the ratings file, join it
-to the private candidate identity map and calculate provider-level summaries:
+**Export human ratings JSON**. The page also captures per-candidate listener
+notes; these are preserved in the analysis output. Once you have exported the
+ratings file, join it to the private candidate identity map and calculate
+provider-level summaries:
 
 ```bash
 python integrations/voice-studio/analyze_voice_benchmark.py \\
