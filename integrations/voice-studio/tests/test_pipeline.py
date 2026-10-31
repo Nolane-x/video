@@ -31,6 +31,16 @@ class VoiceoverPipelineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_manifest({"segments": [{"text": "a", "provider": "unknown"}]})
 
+    def test_sanitizes_voice_block_metadata(self):
+        segments = validate_manifest({"segments": [{
+            "text": "Xin chào", "character": "A | B = C · D\\nline 2"
+        }]})
+        self.assertEqual(segments[0]["character"], "A / B - C - D line 2")
+
+    def test_rejects_invalid_speed(self):
+        with self.assertRaises(ValueError):
+            validate_manifest({"segments": [{"text": "Xin chào", "speed": 9}]})
+
     def test_rejects_oversized_text(self):
         with self.assertRaises(ValueError):
             validate_manifest({"segments": [{"text": "x" * 4097}]})
