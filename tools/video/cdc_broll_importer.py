@@ -79,7 +79,8 @@ def normalize_cdc_media_url(raw_url: str) -> str | None:
             or parsed.password
             or parsed.query
             or parsed.fragment
-            or not MEDIA_PATH_RE.fullmatch(urllib.parse.unquote(parsed.path))
+            or not MEDIA_PATH_RE.fullmatch(parsed.path)
+            or re.search(r"%(?![0-9A-Fa-f]{2})", parsed.path)
         ):
             return None
         return urllib.parse.urlunsplit(("https", "www.cdc.gov", parsed.path, "", ""))
@@ -288,6 +289,8 @@ def _fetch_cdc_page(url: str, limit: int = MAX_PAGE_BYTES, timeout: int = 35) ->
             or final.port not in (None, 443)
             or final.username
             or final.password
+            or final.query
+            or final.fragment
             or final.path != parsed.path
         ):
             raise RuntimeError("CDC page redirected away from its exact official page")
@@ -438,10 +441,6 @@ def download_cdc_broll_videos(root: Path, index: list[dict]) -> list[dict]:
                     )
                     report.append(row)
                     break
-                target_hash = hashlib.sha256(target.read_bytes()).hexdigest()
-                if target_hash != digest:
-                    target.unlink(missing_ok=True)
-                    raise RuntimeError("CDC file digest changed after writing")
                 human_review = bool(HUMAN_CONTEXT_RE.search(title + " " + caption))
                 entry = {
                     "id": row_id,
