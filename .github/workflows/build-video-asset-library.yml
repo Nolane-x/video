@@ -98,6 +98,7 @@ jobs:
         run: |
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/nasa_svs_importer.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/package_asset_bundles.py
 
@@ -142,7 +143,15 @@ jobs:
             --pattern "asset-shard--*.json" \
             --dir dist/shard-manifests
           count=$(find dist/shard-manifests -maxdepth 1 -type f -name 'asset-shard--*.json' | wc -l)
-          test "${count}" -eq 22
+          expected=$(python - <<'PY'
+          import sys
+          sys.path.insert(0, "tools/video")
+          import build_asset_library_shard
+          print(1 + len(build_asset_library_shard.SOURCE_LANES))
+          PY
+          )
+          echo "Expected source manifests: ${expected}; downloaded: ${count}"
+          test "${count}" -eq "${expected}"
 
       - name: Merge catalog and verify remote Release assets before publication
         env:
