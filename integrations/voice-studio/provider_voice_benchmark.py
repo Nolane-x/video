@@ -286,6 +286,29 @@ def run_benchmark(
                 "provider": provider_name,
                 "error": f"{type(exc).__name__}: {exc}",
             })
+    error_by_provider = {row["provider"]: row["error"] for row in catalogue_errors}
+    count_by_provider = {
+        provider_name: sum(
+            item.get("_provider") == provider_name for item in candidates
+        )
+        for provider_name in requested_providers
+    }
+    provider_catalogue = [
+        {
+            "provider": provider_name,
+            "candidate_count": count_by_provider[provider_name],
+            "status": (
+                "error" if provider_name in error_by_provider
+                else "available" if count_by_provider[provider_name] > 0
+                else "empty"
+            ),
+            **(
+                {"error": error_by_provider[provider_name]}
+                if provider_name in error_by_provider else {}
+            ),
+        }
+        for provider_name in requested_providers
+    ]
     if not candidates:
         details = "; ".join(f"{row['provider']}: {row['error']}" for row in catalogue_errors)
         raise RuntimeError(
@@ -351,6 +374,7 @@ def run_benchmark(
             "cloud_enabled": any(name in {"google", "elevenlabs"} for name in requested_providers),
             "asr_enabled": asr,
             "catalogue_errors": catalogue_errors,
+            "provider_catalogue": provider_catalogue,
             "engine": engine,
             "language": language,
             "blind": blind,
@@ -449,7 +473,11 @@ def run_benchmark(
         if delay > 0 and index < len(candidates):
             time.sleep(delay)
 
-    report = snapshot("partial" if any(row["status"] != "ready" for row in rows) else "complete")
+    incomplete_catalogue = any(
+        item["status"] != "available" for item in provider_catalogue
+    )
+    incomplete_audio = any(row["status"] != "ready" for row in rows)
+    report = snapshot("partial" if incomplete_catalogue or incomplete_audio else "complete")
     _write_json(report_path, report)
     (output_dir / "index.html").write_text(
         _rating_html(rows, blind=blind, provider=provider),
@@ -499,11 +527,12 @@ def main() -> int:
         "failed": report["failed"],
         "cache_hits": report["cache_hits"],
         "status": report["status"],
+        "provider_catalogue": report["provider_catalogue"],
         "blind": report["blind"],
         "human_review_required": True,
         "asr_enabled": report.get("asr_enabled", False),
     }, ensure_ascii=False, indent=2))
-    return 1 if report["failed"] else 0
+    return 1 if report["status"] != "complete" else 0
 
 
 if __name__ == "__main__":
