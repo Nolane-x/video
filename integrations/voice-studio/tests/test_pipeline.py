@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import re
 import sys
 import tempfile
@@ -149,15 +150,33 @@ class VoiceoverPipelineTests(unittest.TestCase):
                     Path(tmp),
                 )
             script = (Path(tmp) / "02-VOICE-parser-test-TTS.txt").read_text(encoding="utf-8")
-            match = re.search(
-                r"^===\s*(V\d+)\s*\|\s*([^=]*?)\s*===\s*\n(.*?)(?=^===|\Z)",
-                script, re.S | re.M,
+            repo_root = Path(__file__).resolve().parents[3]
+            parser_path = (
+                repo_root / "integrations/h2-selfimprove-studio/skills/"
+                "lam-video-selfimprove/kit/tools/prep_voice.py"
             )
+            parser_ast = ast.parse(parser_path.read_text(encoding="utf-8-sig"))
+            parser_pattern = None
+            for node in ast.walk(parser_ast):
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "finditer"
+                    and node.args
+                    and isinstance(node.args[0], ast.Constant)
+                    and isinstance(node.args[0].value, str)
+                    and node.args[0].value.startswith("^===")
+                ):
+                    parser_pattern = node.args[0].value
+                    break
+            self.assertIsNotNone(parser_pattern, "Could not find the actual H2 parse_voice_txt regex")
+            match = re.search(parser_pattern, script, re.S | re.M)
             self.assertIsNotNone(match)
             self.assertEqual(match.group(1), "V001")
             self.assertIn("NARRATOR", match.group(2))
             self.assertIn("Người kể chuyện", match.group(2))
             self.assertIn("Xin chào Việt Nam.", match.group(3))
+            self.assertTrue((Path(tmp) / "voice" / "V001.wav").is_file())
 
 
 if __name__ == "__main__":
