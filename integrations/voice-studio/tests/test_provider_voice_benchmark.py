@@ -254,6 +254,36 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
                     )
                 )
 
+    def test_missing_provider_catalogue_marks_multi_provider_run_partial(self):
+        def fake_catalogue(provider, language, client):
+            if provider == "google":
+                return []
+            if provider == "elevenlabs":
+                raise RuntimeError("catalogue temporarily unavailable")
+            return [{"id": f"{provider}-voice", "name": f"{provider} voice"}]
+
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", side_effect=fake_catalogue):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    report = benchmark.run_benchmark(
+                        "all", "Same script.", Path(tmp), engine="voxcpm2",
+                        language="vi", allow_cloud=True, client=FakeClient(), delay=0,
+                    )
+            self.assertEqual(report["ready"], 2)
+            self.assertEqual(report["failed"], 0)
+            self.assertEqual(report["status"], "partial")
+            status_by_provider = {
+                row["provider"]: row["status"]
+                for row in report["provider_catalogue"]
+            }
+            self.assertEqual(status_by_provider["google"], "empty")
+            self.assertEqual(status_by_provider["elevenlabs"], "error")
+
     def test_all_requires_voice_studio_engine_for_fair_comparison(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
