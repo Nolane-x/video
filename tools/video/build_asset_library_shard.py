@@ -25,6 +25,7 @@ SOURCE_LANES = {
     "smithsonian": "download_smithsonian_open_access",
     "rijksmuseum": "download_rijksmuseum_open_access",
     "nasa": "download_nasa_media",
+    "nasa-svs": "download_nasa_svs_media",
     "loc": "download_loc_public_domain",
     "wikimedia": "download_wikimedia_public_domain",
     "wikimedia-svg": "download_wikimedia_vector_svg",
