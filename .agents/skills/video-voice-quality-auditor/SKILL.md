@@ -80,6 +80,19 @@ python integrations/voice-studio/provider_voice_benchmark.py \
 
 The resulting benchmark is evidence about the selected engines, voices, script, settings and current revisions, not a universal ranking.
 
+The provider benchmark is restartable. In blind mode it shuffles candidates reproducibly with `--blind-seed`, checkpoints after every candidate and resumes only when the saved audio file still matches its SHA-256 and remains inside the benchmark output directory. Failed candidates are retried. After changing a remote service/model revision or any synthesis setting not represented in the cache key, use `--no-resume` to force a fresh comparison.
+
+After listening, export the ratings JSON from the HTML page and join it to the benchmark's private identity map:
+
+```bash
+python integrations/voice-studio/analyze_voice_benchmark.py \
+  --benchmark out/benchmark-all/provider-voice-benchmark.json \
+  --ratings out/benchmark-all/voice-human-ratings.json \
+  --min-ratings 3
+```
+
+Review rating coverage before comparing providers. The report includes per-dimension and provider means, with each eligible candidate weighted equally. A candidate needs at least 3 of 5 dimensions rated by default. ASR WER/CER remains a separate intelligibility proxy. Never interpret the average as a naturalness score or an ElevenLabs-equivalence percentage.
+
 ## Identity audit
 
 Review the `speaker_identity_audit` in `voice-quality-report.json`. A character with one `speaker_id` must keep one provider/engine/profile identity fingerprint. Any “drift” is a release blocker until the casting change is intentional and documented. “not_recorded” means a legacy/third-party report lacks a fingerprint; do not silently claim that it was consistent.
