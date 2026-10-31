@@ -1,10 +1,10 @@
-# Nolane Video Command Center — internal skill catalog v0.7.9
+# Nolane Video Command Center — internal skill catalog v0.8.0
 
-The Command Center contains **29 internal skills** and an explicit directory of **37 separate specialist plugins**. Use the internal skills as the normal entry path. Specialist plugins require an explicit switch through the host; they are not silently invoked.
+The Command Center contains **29 internal skills** and an explicit directory of **37 separate specialist plugins**. Use the internal skills as the normal entry path. Specialist plugins require an explicit switch through the host; they are not silently invoked. Rendering is blocked until the editorial plan preflight passes; final release requires an independent full audiovisual review.
 
 ## Direction and orchestration
 - `video-command-center` — single entry point and safe execution.
-- `video-production-director` — end-to-end production planning and release lifecycle.
+- `video-production-director` — end-to-end production planning, pre-render editorial gate and release lifecycle.
 - `video-production-master` — persistent repo memory, engine choice and handoff.
 - `video-toolchain-orchestrator` — tool/runner selection and capability gates.
 - `specialist-plugin-router` — explicit handoff to source-backed specialist plugins.
@@ -41,6 +41,6 @@ The Command Center contains **29 internal skills** and an explicit directory of 
 - `video-render-qa` — runtime, dependency and CI evidence.
 - `video-render-ci-engineer` — reproducible Actions installs, caches, SBOM and artifacts.
 - `video-production-license-auditor` — code/model/media license checks.
-- `video-quality-assurance` — final technical and visual gate.
+- `video-quality-assurance` — plan-to-master QA, independent full audiovisual review and release attestation.
 
 See `references/PLUGIN-REGISTRY.md` for all 37 specialist names, current versions and explicit links; see `references/PLUGIN-RESEARCH-METHODOLOGY.md` for source/verification semantics.
