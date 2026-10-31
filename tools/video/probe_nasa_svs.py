@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 import time
 import urllib.error
 import urllib.parse
@@ -26,9 +25,6 @@ MAX_SAMPLE_MOVIE_ROWS = 12
 # Restrict rights exceptions to explicit license/copyright language. General mentions
 # of music are not enough on their own; the SVS FAQ says licensed music is noted on
 # the individual visualization page and that the visual itself can be used without it.
-EXCEPTION_PATTERN = re.compile(r"licensed music|music credit|music\\s*[:=]|music\\s+(?:by|from)\\b|copyright(?:ed)?\\s+(?:music|audio|footage|material)|third[- ]party\\s+(?:music|audio|footage|content)|used with permission|not in the public domain|not public domain|permission required|rights holder|licensed soundtrack", re.IGNORECASE)
-
-
 def fetch_json(url: str, timeout: int = 30) -> tuple[dict[str, Any], int]:
     request = urllib.request.Request(
         url,
@@ -140,7 +136,6 @@ def inspect_page(page_id: int) -> tuple[dict[str, Any], int]:
     if str(page.get("progress") or "").casefold() != "complete":
         return {"id": page_id, "status": "not-complete", "progress": page.get("progress")}, size
 
-    full_text = "\n".join(collect_page_text(page))
     matches = page_rights_exception_markers(page)
     movies = []
     all_movie_items = []
