@@ -1,37 +1,144 @@
 #!/usr/bin/env python3
-"""Validate repository-owned ChatGPT plugin manifests and Agent Skill frontmatter."""
+"""Validate repository-owned ChatGPT plugin manifests, skills and versioned registries."""
 from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
+
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
 NAME = re.compile(r"^[a-z0-9][a-z0-9.-]{0,63}$")
+SEMVER = re.compile(r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$")
+PLUGIN_ROW = re.compile(r"^\|\s*[^|]+\s*\|\s*\d+\.\d+\.\d+\s*\|\s*https://chatgpt\.com/plugins/[^|]+\|", re.M)
+
+
+def load_json(path: Path, errors: list[str]) -> dict | None:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            errors.append(f"{path}: expected a JSON object")
+            return None
+        return value
+    except Exception as exc:
+        errors.append(f"{path}: invalid JSON: {exc}")
+        return None
+
+
+def read_text(path: Path, errors: list[str]) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception as exc:
+        errors.append(f"{path}: cannot read UTF-8 text: {exc}")
+        return ""
+
+
+def validate_command_center(path: Path, manifest: dict, errors: list[str]) -> None:
+    root = path.parent
+    version = str(manifest.get("version", ""))
+    skills = sorted((root / "skills").glob("*/SKILL.md"))
+    actual_names: set[str] = set()
+
+    for skill in skills:
+        lines = read_text(skill, errors).splitlines()
+        if len(lines) < 4 or lines[0] != "---" or lines[3] != "---":
+            errors.append(f"{skill}: malformed first four frontmatter lines")
+            continue
+        if not lines[1].startswith("name: ") or not lines[2].startswith("description: "):
+            errors.append(f"{skill}: requires name and description")
+            continue
+        name = lines[1][6:].strip()
+        if name:
+            actual_names.add(name)
+
+    if len(skills) != 29:
+        errors.append(f"{root}: expected 29 bundled skills, found {len(skills)}")
+    if len(actual_names) != len(skills):
+        errors.append(f"{root}: skill frontmatter names are missing or duplicated")
+
+    codex_path = root / ".codex-plugin/plugin.json"
+    codex = load_json(codex_path, errors)
+    if codex:
+        if codex.get("name") != manifest.get("name"):
+            errors.append(f"{codex_path}: plugin name differs from plugin.json")
+        if codex.get("version") != version:
+            errors.append(f"{codex_path}: version differs from plugin.json")
+        codex_interface = codex.get("interface", {})
+        public_interface = manifest.get("extensions", {}).get("com.openai", {}).get("interface", {})
+        if codex_interface.get("shortDescription") != public_interface.get("shortDescription"):
+            errors.append(f"{codex_path}: shortDescription differs from plugin.json")
+
+    readme = read_text(root / "README.md", errors)
+    catalog = read_text(root / "SKILL-CATALOG.md", errors)
+    registry = read_text(root / "references/PLUGIN-REGISTRY.md", errors)
+    methodology = read_text(root / "references/PLUGIN-RESEARCH-METHODOLOGY.md", errors)
+
+    for label, content in (
+        ("README.md", readme),
+        ("SKILL-CATALOG.md", catalog),
+        ("PLUGIN-REGISTRY.md", registry),
+        ("PLUGIN-RESEARCH-METHODOLOGY.md", methodology),
+    ):
+        header = re.search(r"^#.*?v(\d+\.\d+\.\d+)", content, re.M)
+        if not header or header.group(1) != version:
+            errors.append(f"{root}/{label}: version header must match {version}")
+
+    catalog_names = set(re.findall(r"^- `([a-z0-9-]+)` —", catalog, re.M))
+    if catalog_names != actual_names:
+        missing = sorted(actual_names - catalog_names)
+        stale = sorted(catalog_names - actual_names)
+        errors.append(f"{root}/SKILL-CATALOG.md: skill index mismatch; missing={missing}, stale={stale}")
+
+    readme_skills = re.search(r"\*\*(\d+) internal production skills\*\*", readme)
+    readme_specialists = re.search(r"\*\*(\d+) focused specialist plugins\*\*", readme)
+    catalog_skills = re.search(r"\*\*(\d+) internal skills\*\*", catalog)
+    catalog_specialists = re.search(r"\*\*(\d+) separate specialist plugins\*\*", catalog)
+    methodology_specialists = re.search(r"\*\*(\d+) separate specialist plugins\*\*", methodology)
+    claims = [
+        ("README.md internal skill count", readme_skills, len(skills)),
+        ("README.md specialist count", readme_specialists, 37),
+        ("SKILL-CATALOG.md internal skill count", catalog_skills, len(skills)),
+        ("SKILL-CATALOG.md specialist count", catalog_specialists, 37),
+        ("PLUGIN-RESEARCH-METHODOLOGY.md specialist count", methodology_specialists, 37),
+    ]
+    for label, match, expected in claims:
+        if not match or int(match.group(1)) != expected:
+            errors.append(f"{root}/{label}: expected {expected}")
+
+    registry_count = len(PLUGIN_ROW.findall(registry))
+    if registry_count != 37:
+        errors.append(f"{root}/PLUGIN-REGISTRY.md: expected 37 specialist entries, found {registry_count}")
+
+    description = str(manifest.get("description", ""))
+    if "29 internal skills" not in description or "37 separately activated specialist plugins" not in description:
+        errors.append(f"{path}: description must declare 29 internal skills and 37 separately activated specialist plugins")
+
 
 def validate(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     manifests = sorted((root / "plugins/chatgpt").glob("*/plugin.json"))
     if not manifests:
         errors.append("No plugin source manifests found")
+
     for path in manifests:
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except Exception as exc:
-            errors.append(f"{path}: invalid JSON: {exc}")
+        data = load_json(path, errors)
+        if data is None:
             continue
         if data.get("$schema") != SCHEMA:
             errors.append(f"{path}: invalid schema")
         if data.get("name") != path.parent.name or not NAME.fullmatch(str(data.get("name", ""))):
             errors.append(f"{path}: plugin name must match its directory")
-        if not re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", str(data.get("version", ""))):
+        if not SEMVER.fullmatch(str(data.get("version", ""))):
             errors.append(f"{path}: invalid semantic version")
+
         interface = data.get("extensions", {}).get("com.openai", {}).get("interface", {})
         short = interface.get("shortDescription", "")
         if not isinstance(short, str) or not short.strip() or len(short) > 30:
             errors.append(f"{path}: shortDescription must be 1–30 characters")
+
         seen: set[str] = set()
         for skill in sorted(path.parent.glob("skills/*/SKILL.md")):
-            lines = skill.read_text(encoding="utf-8").splitlines()
+            lines = read_text(skill, errors).splitlines()
             if len(lines) < 4 or lines[0] != "---" or lines[3] != "---":
                 errors.append(f"{skill}: malformed first four frontmatter lines")
                 continue
@@ -44,7 +151,12 @@ def validate(root: Path = ROOT) -> list[str]:
             if name in seen:
                 errors.append(f"{skill}: duplicate skill name {name!r} in plugin")
             seen.add(name)
+
+        if data.get("name") == "nolane-video-command-center":
+            validate_command_center(path, data, errors)
+
     return errors
+
 
 if __name__ == "__main__":
     failures = validate()
