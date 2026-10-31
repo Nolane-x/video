@@ -10,7 +10,7 @@ import urllib.request
 from collections import Counter
 from typing import Any
 
-from nasa_svs_importer import normalize_svs_media_url, page_rights_exception_markers
+from nasa_svs_importer import normalize_svs_media_url, page_rights_exception_markers, svs_response_url_is_allowed
 
 SEARCH_URL = "https://svs.gsfc.nasa.gov/api/search/"
 BASE_URL = "https://svs.gsfc.nasa.gov"
@@ -61,6 +61,8 @@ def probe_movie_header(url: str) -> dict[str, Any]:
     )
     try:
         with urllib.request.urlopen(request, timeout=25) as response:
+            if not svs_response_url_is_allowed(url, response.geturl()):
+                return {"status": "rejected-redirect"}
             sample = response.read(65)
             content_range = response.headers.get("Content-Range", "")
             total_size = None
