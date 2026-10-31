@@ -193,6 +193,10 @@ class EditorialPlanTests(unittest.TestCase):
     def test_message_state_word_open_is_not_a_physical_action(self):
         self.assertFalse(requires_motion_proof("The last message remains open on the phone; no reply appears."))
 
+    def test_descriptive_lower_is_not_a_prop_contact_action(self):
+        self.assertFalse(requires_motion_proof("Calendar sheets turn forward while the protagonist's posture drops lower."))
+        self.assertTrue(requires_motion_proof("The hand lowers the phone onto the desk."))
+
     def test_opening_a_door_is_a_contact_action(self):
         self.assertTrue(requires_motion_proof("The protagonist opens the café door and steps inside."))
 
