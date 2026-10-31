@@ -565,6 +565,393 @@ def _strip_nps_audio_with_ffmpeg(source: Path, destination: Path) -> dict[str, A
     }
 
 
+
+NPGALLERY_BASE = "https://npgallery.nps.gov"
+NPGALLERY_SEARCH_URL = NPGALLERY_BASE + "/SearchResults?pagesize=60&keyword=b-roll"
+NPGALLERY_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+
+def _npgallery_is_official_url(raw_url: str) -> urllib.parse.SplitResult | None:
+    try:
+        parsed = urllib.parse.urlsplit(str(raw_url or "").strip())
+        if (
+            parsed.scheme.casefold() != "https"
+            or (parsed.hostname or "").casefold() != "npgallery.nps.gov"
+            or parsed.username
+            or parsed.password
+            or parsed.port
+            or parsed.fragment
+        ):
+            return None
+        return parsed
+    except (TypeError, ValueError):
+        return None
+
+
+def normalize_npgallery_page_url(raw_url: str) -> str | None:
+    parsed = _npgallery_is_official_url(raw_url)
+    if not parsed:
+        return None
+    if parsed.path == "/SearchResults":
+        query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
+        if set(query) != {"pagesize", "keyword"}:
+            return None
+        if query.get("pagesize") != ["60"] or query.get("keyword", [""])[0].casefold() != "b-roll":
+            return None
+        return NPGALLERY_SEARCH_URL
+    match = re.fullmatch(r"/AssetDetail/(" + NPGALLERY_UUID_RE.pattern[1:-1] + r")", parsed.path, re.IGNORECASE)
+    if not match or parsed.query:
+        return None
+    return f"{NPGALLERY_BASE}/AssetDetail/{match.group(1).lower()}"
+
+
+def normalize_npgallery_original_url(raw_url: str, asset_id: str) -> str | None:
+    if not NPGALLERY_UUID_RE.fullmatch(str(asset_id or "")):
+        return None
+    parsed = _npgallery_is_official_url(raw_url)
+    if not parsed or parsed.query:
+        return None
+    expected = f"/GetAsset/{asset_id.lower()}/original"
+    if parsed.path.casefold() != expected.casefold():
+        return None
+    return f"{NPGALLERY_BASE}{expected}"
+
+
+def parse_npgallery_search_results(page_html: str) -> list[dict[str, Any]]:
+    """Parse the official NPGallery search payload and retain only clearly eligible MP4 videos."""
+    match = re.search(r"\bvar\s+search\s*=\s*", page_html or "")
+    if not match:
+        raise RuntimeError("NPGallery search payload was not found")
+    start = (page_html or "").find("{", match.end())
+    if start < 0:
+        raise RuntimeError("NPGallery search payload has no JSON object")
+    payload, _ = json.JSONDecoder().raw_decode((page_html or "")[start:])
+    results = payload.get("Results") or []
+    eligible: list[dict[str, Any]] = []
+    for row in results[:60]:
+        asset = row.get("Asset") or {}
+        rights = asset.get("ConstraintsInformation") or {}
+        asset_id = str(asset.get("AssetID") or "").strip()
+        photo_credit = str(asset.get("PhotoCredit") or "").strip()
+        if (
+            not NPGALLERY_UUID_RE.fullmatch(asset_id)
+            or str(asset.get("AssetBaseType") or "").casefold() != "file"
+            or str(asset.get("PrimaryType") or "").casefold() != "video"
+            or str(asset.get("ResourceType") or "").casefold() != "video"
+            or str(asset.get("ResourceFormat") or "").casefold() != "mp4"
+            or str(rights.get("Constraint") or "").casefold() != "public domain"
+            or str(rights.get("GrantingRights") or "").casefold() != "full"
+            or "nps" not in photo_credit.casefold()
+        ):
+            continue
+        eligible.append(asset)
+    return eligible
+
+
+def _npgallery_label_field(page_html: str, label: str) -> str:
+    pattern = (
+        r"<label\b[^>]*>\s*" + re.escape(label) +
+        r"\s*:\s*</label>\s*<p\b[^>]*>(.*?)</p>"
+    )
+    match = re.search(pattern, page_html or "", re.IGNORECASE | re.DOTALL)
+    if not match:
+        return ""
+    value = re.sub(r"<br\s*/?>", " ", match.group(1), flags=re.IGNORECASE)
+    value = re.sub(r"<[^>]+>", " ", value)
+    return _clean_text(value, 4000)
+
+
+def parse_npgallery_asset_detail(page_html: str) -> dict[str, str]:
+    fields = (
+        "Asset ID", "Title", "AltText", "Description", "Copyright",
+        "PhotoCredit", "Constraints Information", "Resource Type",
+        "Resource Format", "Access Constraints", "Original File Name",
+        "File Size (bytes)", "NPS Units",
+    )
+    parsed = {name: _npgallery_label_field(page_html, name) for name in fields}
+    return parsed
+
+
+def _npgallery_rights_verified(asset: dict[str, Any], detail: dict[str, str], asset_id: str) -> bool:
+    search_rights = asset.get("ConstraintsInformation") or {}
+    search_credit = str(asset.get("PhotoCredit") or "").strip()
+    detail_rights = re.sub(r"\s+", " ", detail.get("Constraints Information", "")).strip().casefold()
+    detail_id = detail.get("Asset ID", "").strip().lower()
+    detail_credit = detail.get("PhotoCredit", "").strip()
+    return bool(
+        detail_id == asset_id.lower()
+        and str(search_rights.get("Constraint") or "").casefold() == "public domain"
+        and str(search_rights.get("GrantingRights") or "").casefold() == "full"
+        and detail_rights.replace(" ", "") == "publicdomain:fullgrantingrights"
+        and str(asset.get("ResourceType") or "").casefold() == "video"
+        and detail.get("Resource Type", "").casefold() == "video"
+        and str(asset.get("ResourceFormat") or "").casefold() == "mp4"
+        and detail.get("Resource Format", "").casefold() == "mp4"
+        and "nps" in search_credit.casefold()
+        and "nps" in detail_credit.casefold()
+        and not NPS_COPYRIGHT_MARK_RE.search(detail_credit)
+        and bool(detail.get("Title"))
+    )
+
+
+def _fetch_npgallery_page(url: str, limit: int = MAX_PAGE_BYTES, timeout: int = 35) -> bytes:
+    normalized = normalize_npgallery_page_url(url)
+    if not normalized:
+        raise RuntimeError("NPGallery page URL is outside the exact official HTTPS allow-list")
+    request = urllib.request.Request(
+        normalized,
+        headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml"},
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        final = normalize_npgallery_page_url(response.geturl())
+        if final != normalized:
+            raise RuntimeError("NPGallery page redirect changed the approved source URL")
+        content_type = response.headers.get("Content-Type", "text/html").split(";", 1)[0].strip().casefold()
+        if content_type not in {"text/html", "application/xhtml+xml", "application/octet-stream"}:
+            raise RuntimeError(f"unexpected NPGallery page MIME type: {content_type}")
+        length = response.headers.get("Content-Length")
+        if length and int(length) > limit:
+            raise RuntimeError("NPGallery page exceeded metadata byte ceiling")
+        body = response.read(limit + 1)
+    if len(body) > limit:
+        raise RuntimeError("NPGallery page exceeded metadata byte ceiling")
+    return body
+
+
+def _download_npgallery_source(url: str, asset_id: str, destination: Path) -> tuple[int, str]:
+    normalized = normalize_npgallery_original_url(url, asset_id)
+    if not normalized:
+        raise RuntimeError("NPGallery original URL is outside the exact asset-specific download allow-list")
+    request = urllib.request.Request(
+        normalized,
+        headers={
+            "User-Agent": UA,
+            "Accept": "video/mp4,application/mp4,application/octet-stream",
+            "Accept-Encoding": "identity",
+            "Referer": f"{NPGALLERY_BASE}/AssetDetail/{asset_id.lower()}",
+        },
+    )
+    digest = hashlib.sha256()
+    total = 0
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with urllib.request.urlopen(request, timeout=90) as response:
+        final = normalize_npgallery_original_url(response.geturl(), asset_id)
+        if final != normalized:
+            raise RuntimeError("NPGallery original download redirected outside the exact asset endpoint")
+        content_type = response.headers.get("Content-Type", "application/octet-stream").split(";", 1)[0].strip().casefold()
+        if content_type not in {"video/mp4", "application/mp4", "application/octet-stream", "binary/octet-stream"}:
+            raise RuntimeError(f"unexpected NPGallery original MIME type: {content_type}")
+        length = response.headers.get("Content-Length")
+        if length and int(length) > MAX_VIDEO_BYTES:
+            raise RuntimeError("NPGallery original exceeds the per-file byte ceiling")
+        with destination.open("wb") as output:
+            while True:
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > MAX_VIDEO_BYTES:
+                    raise RuntimeError("NPGallery original exceeds the per-file byte ceiling")
+                digest.update(chunk)
+                output.write(chunk)
+    if total < MIN_VIDEO_BYTES:
+        destination.unlink(missing_ok=True)
+        raise RuntimeError("NPGallery original is unexpectedly small")
+    with destination.open("rb") as handle:
+        header = handle.read(64)
+    if len(header) < 12 or b"ftyp" not in header[:32]:
+        destination.unlink(missing_ok=True)
+        raise RuntimeError("NPGallery original MP4 container signature is missing")
+    return total, digest.hexdigest()
+
+
+def download_npgallery_broll_media(
+    root: Path,
+    index: list[dict],
+    *,
+    max_downloads: int,
+    max_total_source_bytes: int,
+    max_metadata_bytes: int,
+) -> tuple[list[dict], dict[str, int]]:
+    """Import NPGallery candidates only after per-item Full Public Domain rights are rechecked."""
+    report: list[dict] = []
+    stats = {"videos_downloaded": 0, "source_bytes_downloaded": 0, "indexed_resource_bytes": 0, "metadata_bytes": 0}
+    if max_downloads <= 0 or max_total_source_bytes <= 0 or max_metadata_bytes <= 0:
+        return report, stats
+    try:
+        body = _fetch_npgallery_page(NPGALLERY_SEARCH_URL, limit=min(MAX_PAGE_BYTES, max_metadata_bytes))
+        stats["metadata_bytes"] += len(body)
+        candidates = parse_npgallery_search_results(body.decode("utf-8", "replace"))
+        report.append({
+            "id": "nps-npgallery-search",
+            "status": "searched",
+            "source_page": NPGALLERY_SEARCH_URL,
+            "search_result_count": len(candidates),
+            "rights_filter": "video + MP4 + Public domain + Full Granting Rights + NPS credit",
+        })
+    except Exception as exc:
+        report.append({
+            "id": "nps-npgallery-search",
+            "status": "search-failed",
+            "source_page": NPGALLERY_SEARCH_URL,
+            "reason": str(exc)[:400],
+        })
+        return report, stats
+
+    seen_asset_ids: set[str] = set()
+    seen_source_hashes: set[str] = set()
+    for asset in candidates[: min(60, max_downloads)]:
+        if (
+            stats["videos_downloaded"] >= max_downloads
+            or stats["source_bytes_downloaded"] >= max_total_source_bytes
+            or stats["metadata_bytes"] >= max_metadata_bytes
+        ):
+            break
+        asset_id = str(asset.get("AssetID") or "").lower()
+        if asset_id in seen_asset_ids:
+            continue
+        seen_asset_ids.add(asset_id)
+        detail_url = f"{NPGALLERY_BASE}/AssetDetail/{asset_id}"
+        try:
+            detail_body = _fetch_npgallery_page(
+                detail_url,
+                limit=min(MAX_PAGE_BYTES, max_metadata_bytes - stats["metadata_bytes"]),
+            )
+            stats["metadata_bytes"] += len(detail_body)
+            detail_html = detail_body.decode("utf-8", "replace")
+            detail = parse_npgallery_asset_detail(detail_html)
+            if not _npgallery_rights_verified(asset, detail, asset_id):
+                report.append({
+                    "id": "nps-npgallery-" + asset_id[:12],
+                    "status": "skipped_rights_exception",
+                    "source_page": detail_url,
+                    "title": detail.get("Title") or asset.get("Title", ""),
+                    "reason": "item detail does not reconfirm Public domain: Full Granting Rights, MP4 video and NPS credit",
+                })
+                continue
+        except Exception as exc:
+            report.append({
+                "id": "nps-npgallery-" + asset_id[:12],
+                "status": "detail-failed",
+                "source_page": detail_url,
+                "reason": str(exc)[:350],
+            })
+            continue
+
+        title = detail.get("Title") or str(asset.get("Title") or "NPS NPGallery B-roll")
+        description = detail.get("Description") or str(asset.get("Description") or "")
+        alt_text = detail.get("AltText") or str(asset.get("AltText") or "")
+        credit = detail.get("PhotoCredit", "").strip()
+        original_url = f"{NPGALLERY_BASE}/GetAsset/{asset_id}/original"
+        output_path = Path(root) / "third-party" / "nps" / "npgallery" / (
+            f"{_slug(title)}-{asset_id[:10]}.mp4"
+        )
+        source_path = Path(root) / ".staging" / (asset_id + ".npgallery.source.mp4")
+        try:
+            file_size, source_hash = _download_npgallery_source(original_url, asset_id, source_path)
+            if stats["source_bytes_downloaded"] + file_size > max_total_source_bytes:
+                source_path.unlink(missing_ok=True)
+                report.append({
+                    "id": "nps-npgallery-" + asset_id[:12],
+                    "status": "skipped",
+                    "source_page": detail_url,
+                    "reason": "aggregate NPS source-byte ceiling reached",
+                })
+                break
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            video_info = _strip_nps_audio_with_ffmpeg(source_path, output_path)
+            source_path.unlink(missing_ok=True)
+        except Exception as exc:
+            source_path.unlink(missing_ok=True)
+            output_path.unlink(missing_ok=True)
+            report.append({
+                "id": "nps-npgallery-" + asset_id[:12],
+                "status": "failed",
+                "source_page": detail_url,
+                "source_file_url": original_url,
+                "title": title[:240],
+                "reason": str(exc)[:400],
+            })
+            continue
+
+        if source_hash in seen_source_hashes:
+            output_path.unlink(missing_ok=True)
+            stats["source_bytes_downloaded"] += file_size
+            report.append({
+                "id": "nps-npgallery-" + asset_id[:12],
+                "status": "duplicate",
+                "source_page": detail_url,
+                "source_sha256": source_hash,
+                "reason": "identical source bytes already imported from an earlier NPGallery asset",
+            })
+            continue
+        seen_source_hashes.add(source_hash)
+        output_hash = hashlib.sha256(output_path.read_bytes()).hexdigest()
+        output_size = output_path.stat().st_size
+        people_review = bool(NPS_REVIEW_PEOPLE_RE.search(title + " " + description + " " + alt_text))
+        unit = detail.get("NPS Units", "").strip()
+        entry = {
+            "id": "nps-npgallery-" + asset_id,
+            "path": output_path.relative_to(root).as_posix(),
+            "type": "nps-broll-video",
+            "title": title[:300],
+            "description": description[:3000],
+            "park": unit,
+            "collection": "nps-npgallery-broll-search",
+            "source_page": detail_url,
+            "collection_page": NPGALLERY_SEARCH_URL,
+            "source_file_url": original_url,
+            "source_sha256": source_hash,
+            "source_sha256_method": "computed after download; NPGallery detail metadata does not publish a per-file SHA-256",
+            "source_size_bytes": file_size,
+            "sha256": output_hash,
+            "size_bytes": output_size,
+            "width": video_info.get("width"),
+            "height": video_info.get("height"),
+            "video_codec": video_info.get("video_codec"),
+            "duration_seconds": video_info.get("duration_seconds"),
+            "source_resolution_label": "Original MP4",
+            "source_resolution_rank": video_info.get("height"),
+            "license": "Public Domain (NPGallery item-level Public domain: Full Granting Rights; not CC0)",
+            "license_url": detail_url,
+            "public_domain_verified": True,
+            "rights_basis": "The individual NPGallery asset detail page reconfirms Public domain: Full Granting Rights, Resource Type Video, Resource Format mp4 and an NPS PhotoCredit. The search result alone is never treated as sufficient permission. Do not imply NPS endorsement or use protected NPS insignia.",
+            "credit_text": credit,
+            "credit_required_visible": True,
+            "credit_note": "Preserve the NPGallery PhotoCredit text verbatim; do not imply NPS endorsement.",
+            "audio_stripped": True,
+            "modifications_disclosed": "Audio streams removed; the original video stream was copied without re-encoding.",
+            "privacy_publicity_review_required": people_review,
+            "commercial_promotional_review_required_if_people_identifiable": people_review,
+            "usage_notes": "NPGallery item-level Public Domain with Full Granting Rights, not CC0. Preserve PhotoCredit, do not imply NPS endorsement, and review identifiable people, private property, third-party marks and context before commercial/promotional publication.",
+            "redistributable": True,
+        }
+        index.append(entry)
+        stats["videos_downloaded"] += 1
+        stats["source_bytes_downloaded"] += file_size
+        stats["indexed_resource_bytes"] += output_size
+        report.append({
+            "id": entry["id"],
+            "status": "downloaded",
+            "title": title[:240],
+            "source_page": detail_url,
+            "source_file_url": original_url,
+            "path": entry["path"],
+            "selected_format": "Original MP4",
+            "source_size_bytes": file_size,
+            "size_bytes": output_size,
+            "source_sha256": source_hash,
+            "sha256": output_hash,
+            "resolution": f"{entry['width']}x{entry['height']}",
+            "audio_stripped": True,
+            "credit_text": credit,
+            "credit_required_visible": True,
+            "people_privacy_review_required": people_review,
+            "license": entry["license"],
+        })
+    return report, stats
+
+
 def _slug(value: str) -> str:
     value = re.sub(r"[^A-Za-z0-9]+", "-", _clean_text(value, 240)).strip("-").lower()
     return (value[:80] or "nps-broll")
