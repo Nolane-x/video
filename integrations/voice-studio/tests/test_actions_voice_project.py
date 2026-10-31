@@ -109,9 +109,21 @@ class ActionsVoiceProjectTests(unittest.TestCase):
                 timeline = output_dir / "h2-project" / "timeline"
                 timeline.mkdir(parents=True, exist_ok=True)
                 (timeline / "voice.wav").write_bytes(b"RIFF" + b"\0" * 64)
-                (timeline / "blocks.json").write_text('[{"id":"V001"}]', encoding="utf-8")
-                (timeline / "lines.json").write_text('[{"id":"L001"}]', encoding="utf-8")
-                (timeline / "words.json").write_text('[{"w":"Xin"}]', encoding="utf-8")
+                (timeline / "blocks.json").write_text(
+                    '[{"id":"V001","slot":"NARRATOR","char":"Người dẫn chuyện"}]',
+                    encoding="utf-8",
+                )
+                (timeline / "lines.json").write_text(json.dumps([{
+                    "id":"L001","block":"V001","slot":"NARRATOR",
+                    "char":"Người dẫn chuyện","text":"Xin chào Việt Nam.",
+                    "start":0.5,"end":1.5,
+                }], ensure_ascii=False), encoding="utf-8")
+                (timeline / "words.json").write_text(json.dumps([
+                    {"w":"Xin","t":0.5,"e":0.7},
+                    {"w":"chào","t":0.72,"e":0.9},
+                    {"w":"Việt","t":0.92,"e":1.1},
+                    {"w":"Nam","t":1.12,"e":1.4},
+                ], ensure_ascii=False), encoding="utf-8")
                 (timeline / "transcript.txt").write_text("Xin chào Việt Nam.\n", encoding="utf-8")
                 return {"timeline_dir": "h2-project/timeline", "outputs": {}}
 
@@ -122,9 +134,9 @@ class ActionsVoiceProjectTests(unittest.TestCase):
                             engine.return_value.list_voices.return_value = ["khanh_vy"]
                             with patch.object(project, "generate", side_effect=fake_generate):
                                 with patch.object(
-                                    project, "_apply_headroom",
-                                    return_value={"attenuation_db": 3.0, "post_peak_dbfs": -3.0, "post_rms_dbfs": -21.0},
-                                ) as headroom:
+                                    project, "normalize_voice_file",
+                                    return_value={"integrated_lufs": -20.0, "true_peak_dbtp": -2.5},
+                                ) as mastering:
                                     with patch.object(project, "audit_report", return_value={"technical_pass": 1}):
                                         with patch.object(project, "_probe_audio", return_value={
                                             "sample_rate_hz": 44100,
@@ -143,7 +155,7 @@ class ActionsVoiceProjectTests(unittest.TestCase):
                                                         model_revision="a" * 40,
                                                     )
             h2.assert_called_once()
-            headroom.assert_called_once()
+            mastering.assert_called_once()
             self.assertEqual(report["status"], "complete")
             self.assertEqual(report["generated_segments"], 1)
             self.assertIsNotNone(report["h2_timing"])
@@ -152,9 +164,21 @@ class ActionsVoiceProjectTests(unittest.TestCase):
             self.assertEqual(report["h2_timing"]["line_count"], 1)
             self.assertEqual(report["h2_timing"]["word_count"], 1)
             self.assertTrue((out / "project-manifest.json").is_file())
+            self.assertTrue((out / "captions.srt").is_file())
+            self.assertTrue((out / "captions.vtt").is_file())
+            self.assertTrue((out / "captions.ass").is_file())
+            self.assertTrue((out / "captions-sentence.srt").is_file())
+            self.assertTrue((out / "captions-speaker-labelled.srt").is_file())
+            self.assertTrue((out / "voice-cast-report.json").is_file())
+            self.assertTrue((out / "artifact-manifest.json").is_file())
             saved = json.loads((out / "actions-voice-project-report.json").read_text(encoding="utf-8"))
             self.assertEqual(saved["model"]["revision"], "a" * 40)
             self.assertEqual(saved["elevenlabs_equivalence"], None)
+            self.assertEqual(saved["voice_cast_report"]["speaker_count"], 1)
+            self.assertEqual(saved["captions"]["word_timed_cue_count"], 1)
+            self.assertGreater(saved["artifact_manifest_summary"]["file_count"], 5)
+            artifact_manifest = json.loads((out / "artifact-manifest.json").read_text(encoding="utf-8"))
+            self.assertIn("captions.srt", {item["path"] for item in artifact_manifest["files"]})
 
 
 if __name__ == "__main__":
