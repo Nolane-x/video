@@ -2705,7 +2705,7 @@ class SourceCapacityExpansionTests(unittest.TestCase):
     def test_usgs_expansion_keeps_the_declared_media_budget_inside_aggregate_cap(self):
         self.assertEqual(library.USGS_GALLERY_PAGE_SCAN_LIMIT, 40)
         self.assertEqual(library.USGS_SELECTION_CAPS, {
-            "images": 120, "videos": 96, "audio": 60,
+            "images": 160, "videos": 96, "audio": 60,
         })
         declared_max = (
             library.USGS_SELECTION_CAPS["images"] * library.USGS_IMAGE_MAX_BYTES
