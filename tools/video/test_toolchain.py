@@ -18,6 +18,24 @@ class ToolchainManifestTests(unittest.TestCase):
     def test_plugin_manifests_and_skill_frontmatter_are_valid(self):
         self.assertEqual(validate_plugins(ROOT), [])
 
+    def test_committed_npm_lockfile_matches_exact_direct_dependencies(self):
+        package = json.loads(
+            (ROOT / "toolchain/node/package.json").read_text(encoding="utf-8")
+        )
+        lock = json.loads(
+            (ROOT / "toolchain/node/package-lock.json").read_text(encoding="utf-8")
+        )
+        root_lock = lock["packages"][""]
+        self.assertEqual(lock["lockfileVersion"], 3)
+        self.assertEqual(root_lock["name"], package["name"])
+        self.assertEqual(root_lock["version"], package["version"])
+        self.assertEqual(root_lock["dependencies"], package["dependencies"])
+        for name, version in package["dependencies"].items():
+            entry = lock["packages"][f"node_modules/{name}"]
+            self.assertEqual(entry["version"], version)
+            self.assertTrue(entry["resolved"].startswith("https://registry.npmjs.org/"))
+            self.assertTrue(entry["integrity"].startswith("sha"))
+
     def test_optional_python_profiles_have_exact_direct_pins(self):
         manifest = json.loads(
             (ROOT / "toolchain/manifest.json").read_text(encoding="utf-8")
