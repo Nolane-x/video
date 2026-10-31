@@ -7,17 +7,38 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from render_blocking_preview import build_preview_spec
+from render_blocking_preview import build_preview_spec, rendered_preview_digest, sha256_file
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def validate_approval(plan: dict, manifest: dict, project_root: Path) -> list[str]:
+def validate_approval(plan: dict, manifest: dict, project_root: Path, manifest_path: Path) -> list[str]:
     errors = []
     current_spec = build_preview_spec(plan, project_root)
     approved_spec = manifest.get("previewSpecSha256")
     if not isinstance(approved_spec, str) or approved_spec != current_spec["previewSpecSha256"]:
         errors.append("preview manifest does not match the current storyboard/renderer spec; review the new preview")
+    rendered_segments = manifest.get("renderedSegments")
+    expected_ids = [segment["shotId"] for segment in current_spec["segments"]]
+    if not isinstance(rendered_segments, list) or {item.get("shotId") for item in rendered_segments if isinstance(item, dict)} != set(expected_ids):
+        errors.append("preview manifest must contain a rendered clip for every selected shot")
+    else:
+        for segment in rendered_segments:
+            if not isinstance(segment, dict):
+                errors.append("rendered preview segment entry must be an object")
+                continue
+            filename = segment.get("outputFile")
+            if not isinstance(filename, str) or Path(filename).name != filename:
+                errors.append(f"invalid preview filename for {segment.get('shotId')}")
+                continue
+            clip_path = manifest_path.parent / filename
+            if not clip_path.is_file() or clip_path.stat().st_size <= 0:
+                errors.append(f"rendered preview clip missing or empty: {filename}")
+            elif sha256_file(clip_path) != segment.get("sha256") or clip_path.stat().st_size != segment.get("sizeBytes"):
+                errors.append(f"rendered preview clip changed since manifest creation: {filename}")
+        actual_digest = rendered_preview_digest(rendered_segments)
+        if manifest.get("previewArtifactSha256") != actual_digest:
+            errors.append("previewArtifactSha256 does not match the rendered preview clips")
     approval = plan.get("creativeBrief", {}).get("blockingPreviewApproval")
     if not isinstance(approval, dict):
         return errors + ["creativeBrief.blockingPreviewApproval is missing; full render is not authorised"]
@@ -36,6 +57,8 @@ def validate_approval(plan: dict, manifest: dict, project_root: Path) -> list[st
             errors.append("blockingPreviewApproval.reviewedAtUtc is not a valid ISO-8601 timestamp")
     if approval.get("previewSpecSha256") != current_spec["previewSpecSha256"]:
         errors.append("blockingPreviewApproval.previewSpecSha256 does not match the exact preview spec")
+    if approval.get("previewArtifactSha256") != manifest.get("previewArtifactSha256"):
+        errors.append("blockingPreviewApproval.previewArtifactSha256 does not match the exact rendered preview clips")
     ids = [segment["shotId"] for segment in current_spec["segments"]]
     reviewed_ids = approval.get("reviewedSegmentIds")
     if not isinstance(reviewed_ids, list) or set(reviewed_ids) != set(ids) or len(reviewed_ids) != len(ids):
@@ -55,7 +78,7 @@ def main() -> int:
     try:
         plan = json.loads(args.plan.read_text(encoding="utf-8"))
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-        errors = validate_approval(plan, manifest, args.project_root.resolve())
+        errors = validate_approval(plan, manifest, args.project_root.resolve(), args.manifest.resolve())
     except Exception as exc:
         print(f"PREVIEW APPROVAL VALIDATION: ERROR — {exc}")
         return 2
