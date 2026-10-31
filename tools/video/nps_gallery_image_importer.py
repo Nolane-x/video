@@ -133,6 +133,17 @@ def parse_npgallery_image_search_results(page_html: str, search_url: str) -> lis
     return eligible
 
 
+IMAGE_RIGHTS_EXCEPTION_RE = re.compile(
+    r"third[-\s]?party(?:\s+partner)?\s+(?:image|photo|photograph|picture|artwork|content)|"
+    r"copyright(?:ed)?\s+(?:image|photo|photograph|picture|artwork)|"
+    r"licensed\s+(?:image|photo|photograph|picture|artwork)|"
+    r"used\s+with\s+permission|permission\s+(?:is\s+)?required|"
+    r"all\s+rights\s+reserved|not\s+(?:in\s+the\s+)?public\s+domain|"
+    r"non[-\s]?commercial|not\s+cleared\s+for\s+(?:commercial|public)",
+    re.IGNORECASE,
+)
+
+
 def _rights_exception_text(asset: dict[str, Any], detail: dict[str, str]) -> str:
     values = [
         asset.get("Title"),
@@ -141,6 +152,7 @@ def _rights_exception_text(asset: dict[str, Any], detail: dict[str, str]) -> str
         detail.get("Title"),
         detail.get("Description"),
         detail.get("AltText"),
+        detail.get("Copyright"),
     ]
     return " ".join(str(value or "") for value in values)
 
@@ -174,6 +186,7 @@ def npgallery_image_rights_verified(
         and "nps" in detail_credit.casefold()
         and not NPS_COPYRIGHT_MARK_RE.search(detail_credit)
         and not NPS_ITEM_RIGHTS_EXCEPTION_RE.search(exception_text)
+        and not IMAGE_RIGHTS_EXCEPTION_RE.search(exception_text)
         and bool(detail.get("Title"))
     )
 
@@ -357,6 +370,8 @@ def download_nps_npgallery_images(root: Path, index: list[dict]) -> list[dict]:
             body = _fetch_npgallery_page(search_url, limit=min(MAX_PAGE_BYTES, MAX_METADATA_BYTES - metadata_bytes))
             metadata_bytes += len(body)
             candidates = parse_npgallery_image_search_results(body.decode("utf-8", "replace"), search_url)
+            for candidate in candidates:
+                candidate["NPGallerySearchURL"] = search_url
             candidate_groups.append(candidates)
             report.append({
                 "id": "nps-photo-search-" + _slug(term),
@@ -523,6 +538,7 @@ def download_nps_npgallery_images(root: Path, index: list[dict]) -> list[dict]:
             "public_domain_verified": True,
             "rights_basis": "The individual NPGallery Asset Detail page reconfirms the matching Asset ID, Public domain: Full Granting Rights, Resource Type Image, an approved original image format, Access Constraints Public Can View and an NPS PhotoCredit. Search results alone are never treated as sufficient permission.",
             "credit_text": credit,
+            "copyright_text": detail.get("Copyright", "")[:1200],
             "credit_required_visible": True,
             "credit_note": "Preserve NPGallery PhotoCredit verbatim; do not imply NPS endorsement.",
             "privacy_publicity_review_required": people_review,
