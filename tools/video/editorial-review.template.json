@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "candidate": {
+    "sourceCommit": "REPLACE_WITH_GIT_COMMIT",
+    "videoPath": "REPLACE_WITH_CANDIDATE_MP4",
+    "sha256": "REPLACE_WITH_64_HEX_SHA256",
+    "durationSeconds": 0
+  },
+  "reviewer": {
+    "reviewerId": "REPLACE_WITH_REVIEWER_IDENTIFIER",
+    "role": "independent-editorial-reviewer",
+    "contextIndependent": true,
+    "reviewedAtUtc": "2026-01-01T00:00:00Z"
+  },
+  "method": {
+    "fullPlaybackWithAudio": false,
+    "normalPlaybackSpeed": true,
+    "openEndedFindingsRecordedFirst": false,
+    "checklistReviewedAfter": false,
+    "checkedAtNativeDeliveryResolution": false
+  },
+  "coverage": [
+    {
+      "start": 0,
+      "end": 10,
+      "visualReviewed": false,
+      "audioReviewed": false,
+      "notes": "Replace with contiguous segments that cover the full candidate."
+    }
+  ],
+  "scores": {
+    "storyClarity": 0,
+    "pacing": 0,
+    "visualVariety": 0,
+    "motionContinuity": 0,
+    "audioIntelligibility": 0,
+    "captionLegibility": 0,
+    "referenceFit": 0,
+    "platformFit": 0
+  },
+  "scoreEvidence": {
+    "storyClarity": "Replace with timecoded observations supporting the score.",
+    "pacing": "Replace with timecoded observations supporting the score.",
+    "visualVariety": "Replace with timecoded observations supporting the score.",
+    "motionContinuity": "Replace with timecoded observations supporting the score.",
+    "audioIntelligibility": "Replace with timecoded observations supporting the score.",
+    "captionLegibility": "Replace with timecoded observations supporting the score.",
+    "referenceFit": "Replace with timecoded observations supporting the score.",
+    "platformFit": "Replace with timecoded observations supporting the score."
+  },
+  "openEndedFindings": [
+    "Replace with unaided first-pass findings recorded before opening the structured checklist."
+  ],
+  "findings": [],
+  "decision": "REVISE",
+  "limitationsAcknowledged": true
+}
