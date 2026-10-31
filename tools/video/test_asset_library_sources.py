@@ -2611,7 +2611,7 @@ class NPSBrollImporterTests(unittest.TestCase):
       </div>
       <a href="{DETAIL_URL}">Aerial of Grand Canyon Cliffs and Temples</a>
       <a href="https://evil.example/grca/learn/photosmultimedia/b-roll_hd99.htm">Bad host</a>
-      <a href="https://www.nps.gov/grca/learn/photosmultimedia/not-a-video.htm">Unrelated page</a>
+      <a href="https://www.nps.gov/grca/learn/photosmultimedia/contact.htm">Unrelated page</a>
     </body></html>
     """
     DETAIL_HTML = f"""
