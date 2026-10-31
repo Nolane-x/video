@@ -896,60 +896,6 @@ const LaunchKitWindow = ({ frame, variant, countdown = -1 }: { frame: number; va
   );
 };
 
-const PreviewArtwork = ({ variant, frame }: { variant: number; frame: number }) => {
-  if (variant === 0) return (
-    <div style={{ position: "absolute", inset: 0, background: "#d8c9a7", overflow: "hidden" }}>
-      <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(0deg,rgba(75,54,25,.1) 0 3px,transparent 3px 13px),linear-gradient(120deg,#e2d6bd,#c0b28c)" }} />
-      <div style={{ position: "absolute", left: 95, right: 95, top: 54, bottom: 54, border: "8px solid #35302a", borderRadius: "50%", display: "grid", placeItems: "center", boxShadow: "0 0 0 16px rgba(238,225,186,.8)" }}>
-        <div style={{ position: "absolute", width: 14, height: 180, background: "#31302e", borderRadius: 20, top: 45, transform: "rotate(" + (frame * 2 + 12) + "deg)", transformOrigin: "50% 84%" }} />
-        <div style={{ width: 150, height: 150, borderRadius: "50%", border: "5px solid #333", background: "#dbbb63" }} />
-      </div>
-      <div style={{ position: "absolute", bottom: 25, left: 30, color: "#34312d", fontSize: 17, fontWeight: 900, letterSpacing: ".16em" }}>1889 / MECHANICAL TIME</div>
-      <div style={{ position: "absolute", right: 35, top: 25, color: "#b02820", fontSize: 15, fontWeight: 900 }}>OPEN DESIGN</div>
-    </div>
-  );
-  if (variant === 1) return (
-    <div style={{ position: "absolute", inset: 0, background: "#1721be", color: "#fff", overflow: "hidden" }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(0deg,transparent 0 37px,rgba(255,255,255,.14) 38px 40px)" }} />
-      <Word size={123} color="#fff" style={{ position: "absolute", left: 42, top: 74 }}>WORLD</Word>
-      <Word size={123} color="#fff" style={{ position: "absolute", left: 42, top: 190 }}>WORLD</Word>
-      <div style={{ position: "absolute", width: 190, height: 190, borderRadius: "50%", border: "9px solid #c5e8fb", right: 72, top: 105, background: "radial-gradient(circle at 34% 29%,#fff,#87a9ff 35%,#101978 72%)" }} />
-      <div style={{ position: "absolute", bottom: 27, right: 35, fontSize: 16, fontWeight: 900, letterSpacing: ".2em" }}>STUDIO / 02</div>
-    </div>
-  );
-  if (variant === 2) return (
-    <div style={{ position: "absolute", inset: 0, background: "#2d78ce", color: "#fff", overflow: "hidden" }}>
-      <div style={{ position: "absolute", left: 50, top: 50, fontSize: 18, fontWeight: 900, letterSpacing: ".15em" }}>COURSE / NEW RELEASE</div>
-      <div style={{ position: "absolute", left: 60, bottom: 60, width: 300, height: 300, borderRadius: "45%", background: "#e8f0fb", display: "grid", placeItems: "center", transform: "rotate(-9deg)" }}>
-        <div style={{ width: 190, height: 230, borderRadius: "45% 45% 38% 38%", background: "#313b4a", position: "relative" }}>
-          <div style={{ position: "absolute", left: 24, top: 35, width: 25, height: 25, borderRadius: "50%", background: "#fff" }} />
-          <div style={{ position: "absolute", right: 24, top: 35, width: 25, height: 25, borderRadius: "50%", background: "#fff" }} />
-          <div style={{ position: "absolute", left: 60, top: 100, width: 70, height: 9, borderRadius: 10, background: "#ed987a" }} />
-        </div>
-      </div>
-      <div style={{ position: "absolute", right: 48, top: 190, width: 275, height: 285, background: "#fff", borderRadius: 18, padding: 25, boxSizing: "border-box", color: "#15202b", boxShadow: "0 22px 35px rgba(0,0,0,.18)" }}>
-        <div style={{ fontSize: 16, fontWeight: 900 }}>Courses</div>
-        <div style={{ marginTop: 25, width: 175, height: 120, background: "#e9eff4", borderRadius: 12 }} />
-        <div style={{ marginTop: 20, fontSize: 24, fontWeight: 900 }}>Learn to create.</div>
-      </div>
-    </div>
-  );
-  return (
-    <div style={{ position: "absolute", inset: 0, background: "#bfe2d4", overflow: "hidden", color: "#263d34" }}>
-      <div style={{ position: "absolute", left: 58, top: 56, fontSize: 18, fontWeight: 900, letterSpacing: ".16em" }}>WEBSITES / OPEN DESIGN</div>
-      <div style={{ position: "absolute", left: 65, right: 65, top: 130, bottom: 74, background: "#f5efe2", borderRadius: 16, padding: 35, boxSizing: "border-box", boxShadow: "0 25px 40px rgba(42,73,60,.12)" }}>
-        <Word size={92} color="#243c31">a little</Word>
-        <Word size={92} color="#243c31">wonder.</Word>
-        <div style={{ position: "absolute", right: 70, top: 72, width: 185, height: 185, borderRadius: "50%", background: "#e6bb54" }}>
-          <div style={{ position: "absolute", left: 78, top: 28, width: 30, height: 130, background: "#fff4d4", transform: "rotate(22deg)" }} />
-          <div style={{ position: "absolute", left: 25, top: 78, width: 130, height: 30, background: "#f27e6e", transform: "rotate(-18deg)" }} />
-        </div>
-        <div style={{ position: "absolute", left: 36, bottom: 27, fontSize: 24, fontWeight: 950, letterSpacing: ".12em" }}>websites</div>
-      </div>
-    </div>
-  );
-};
-
 const LaunchVariant = ({ variant, countdown = -1 }: { variant: number; countdown?: number }) => {
   const frame = useCurrentFrame();
   return <LaunchKitWindow frame={frame} variant={variant} countdown={countdown} />;
