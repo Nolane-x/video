@@ -1,10 +1,12 @@
 """Google Cloud Text-to-Speech adapter with dynamic voice discovery."""
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 
+@lru_cache(maxsize=1)
 def _client():
     try:
         from google.cloud import texttospeech
