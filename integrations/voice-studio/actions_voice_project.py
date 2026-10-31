@@ -295,8 +295,8 @@ def _write_delivery_readme(output_dir: Path, report: dict[str, Any]) -> None:
         "",
         "## Timing limitation",
         "",
-        "Caption line timing is estimated by H2's proportional sentence-boundary heuristic. "
-        "It has not been forced-aligned by an ASR model and must be reviewed before publication.",
+        "Word and sentence caption times are estimated by H2's proportional text/audio heuristics. "
+        "They have not been forced-aligned by an ASR model and must be reviewed before publication.",
         "",
         "## Audio and rights",
         "",
@@ -425,7 +425,15 @@ def _write_artifact_manifest(output_dir: Path, report: dict[str, Any]) -> dict[s
     root = output_dir.resolve()
     files = []
     for path in sorted(output_dir.rglob("*")):
-        if not path.is_file() or path.name == "artifact-manifest.json":
+        relative_parts = path.relative_to(output_dir).parts
+        # Hidden folders (notably .voice-cache) are internal resumability
+        # caches and are excluded from upload-artifact by default. Do not
+        # claim them as delivered files in the public integrity manifest.
+        if (
+            not path.is_file()
+            or path.name == "artifact-manifest.json"
+            or any(part.startswith(".") for part in relative_parts)
+        ):
             continue
         resolved = path.resolve()
         try:
@@ -695,7 +703,9 @@ def run_project(
     # making the report's checksum stable without recursive self-hashing.
     _write_json(output_dir / "actions-voice-project-report.json", result)
     file_count = sum(
-        path.is_file() and path.name != "artifact-manifest.json"
+        path.is_file()
+        and path.name != "artifact-manifest.json"
+        and not any(part.startswith(".") for part in path.relative_to(output_dir).parts)
         for path in output_dir.rglob("*")
     )
     result["artifact_manifest_summary"] = {
