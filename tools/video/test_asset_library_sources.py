@@ -2000,6 +2000,15 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         self.assertIsNone(chosen)
         self.assertIn("third-party-music", reason)
 
+    def test_nasa_svs_json_respects_per_request_byte_ceiling(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value = response
+        response.headers = {"Content-Length": "11"}
+        with mock.patch.object(nasa_svs_importer.urllib.request, "urlopen", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "exceeds response ceiling"):
+                nasa_svs_importer._json("https://svs.gsfc.nasa.gov/api/search/", 10)
+        response.read.assert_not_called()
+
     def test_nasa_svs_shard_lane_is_registered_and_packaged_as_footage(self):
         self.assertEqual(shard_builder.SOURCE_LANES["nasa-svs"], "download_nasa_svs_media")
         self.assertEqual(bundle_packager.classify_asset({
