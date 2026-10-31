@@ -1,4 +1,4 @@
-# Nolane Video Command Center — internal skill catalog v0.7.8
+# Nolane Video Command Center — internal skill catalog v0.7.9
 
 The Command Center contains **29 internal skills** and an explicit directory of **37 separate specialist plugins**. Use the internal skills as the normal entry path. Specialist plugins require an explicit switch through the host; they are not silently invoked.
 
