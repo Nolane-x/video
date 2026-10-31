@@ -872,7 +872,7 @@ const ModelAgentScene = () => {
     const suffix=agent?"gent.":"del.";
     return (
       <div style={{ position: "absolute", left: 0, right: 0, top: 330, display: "flex", justifyContent: "center", alignItems: "baseline", color: "#111315", fontFamily: displayFont, fontSize: 158, fontWeight: 900, letterSpacing: "-.09em", whiteSpace: "nowrap" }}>
-        <span>{prefix}</span><span style={{ position:"relative", display:"inline-block" }}>{centerLetter}
+        <span style={{marginRight:agent?24:0}}>{agent?"Any": "Any m"}</span><span style={{ position:"relative", display:"inline-block" }}>{centerLetter}
           <div style={{position:"absolute",left:"49%",top:-22,transform:"translateX(-50%)",display:"flex",alignItems:"center"}}>
             {Array.from({length:5},(_,i)=><div key={i} style={{width:47,height:47,marginLeft:i?-13:0,borderRadius:"50%",border:"3px solid #fff",background:["#fff","#e8f0ff","#fff","#f6f2e9","#fff"][i],boxShadow:"0 5px 15px rgba(0,0,0,.13)",display:"grid",placeItems:"center",fontSize:21,fontWeight:950,color:["#263b75","#e66b52","#303239","#5375bf","#d39d53"][i]}}>{["✦","◈","M","∞","A"][i]}</div>)}
           </div>
