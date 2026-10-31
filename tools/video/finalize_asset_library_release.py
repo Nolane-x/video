@@ -293,9 +293,48 @@ def write_release_metadata(merged: dict, output_dir: Path, repository: str, rele
     ]
 
 
-def _run_gh_json(args: list[str]) -> dict:
-    result = subprocess.run(args, check=True, capture_output=True, text=True, env=os.environ.copy())
-    return json.loads(result.stdout)
+def _run_gh_json(args: list[str]) -> Any:
+    """Run gh api and retain actionable diagnostics instead of hiding stderr in CalledProcessError."""
+    result = subprocess.run(
+        args, check=False, capture_output=True, text=True, env=os.environ.copy()
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "gh api returned no error detail").strip()
+        raise RuntimeError(
+            f"GitHub API request failed (exit {result.returncode}): {detail[-1800:]}"
+        )
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"GitHub API returned invalid JSON for {' '.join(args)}: {result.stdout[:800]!r}"
+        ) from exc
+
+
+def release_by_tag(repository: str, release_tag: str) -> dict:
+    """Find a draft/published release via the release listing endpoint.
+
+    The by-tag endpoint can return 404 for draft releases in some GitHub
+    integration contexts, even though the same draft is visible in the release
+    collection and its assets are uploadable. Listing releases is the reliable
+    authenticated path for the recovery/finalization job.
+    """
+    releases = _run_gh_json(
+        ["gh", "api", f"repos/{repository}/releases?per_page=100"]
+    )
+    if not isinstance(releases, list):
+        raise RuntimeError("GitHub release listing did not return a JSON array")
+    matches = [
+        release for release in releases
+        if isinstance(release, dict) and release.get("tag_name") == release_tag
+    ]
+    if not matches:
+        raise RuntimeError(
+            f"Draft/published release tag {release_tag!r} was not found in the first 100 releases"
+        )
+    if len(matches) != 1:
+        raise RuntimeError(f"GitHub returned duplicate Release records for tag {release_tag!r}")
+    return matches[0]
 
 
 def verify_release_assets(
@@ -306,7 +345,7 @@ def verify_release_assets(
     manifest_paths: list[Path],
 ) -> dict:
     """Require exact asset names, byte sizes and GitHub-computed SHA-256 digests."""
-    release = _run_gh_json(["gh", "api", f"repos/{repository}/releases/tags/{release_tag}"])
+    release = release_by_tag(repository, release_tag)
     if not release.get("draft"):
         raise RuntimeError("Release was published before the final validation gate")
     remote_assets = {asset.get("name"): asset for asset in release.get("assets", [])}
@@ -354,7 +393,7 @@ def verify_release_assets(
 
 def publish_release(repository: str, release_tag: str, release_title: str, notes_path: Path) -> dict:
     """Publish a draft only after all volumes and metadata have been verified."""
-    release = _run_gh_json(["gh", "api", f"repos/{repository}/releases/tags/{release_tag}"])
+    release = release_by_tag(repository, release_tag)
     release_id = release["id"]
     result = subprocess.run(
         [
