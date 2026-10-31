@@ -5,6 +5,14 @@ on:
     branches: [main]
     paths:
       - "video-projects/remotion/**"
+      - "tools/video/caption_coverage.py"
+      - "tools/video/test_caption_coverage.py"
+      - ".github/workflows/render-remotion.yml"
+  pull_request:
+    paths:
+      - "video-projects/remotion/**"
+      - "tools/video/caption_coverage.py"
+      - "tools/video/test_caption_coverage.py"
       - ".github/workflows/render-remotion.yml"
   workflow_dispatch:
 
@@ -79,7 +87,27 @@ jobs:
       - name: Install FFmpeg for output mastering
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie
+          tesseract --list-langs
+
+      - name: Audit full rendered video text on pull requests
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          python ../../tools/video/caption_coverage.py \
+            --video out/one-more-scroll.mp4 \
+            --shots public/story/shots.json \
+            --output out/caption-coverage/report.json \
+            --languages vie+eng \
+            --threshold 0.67
+
+      - name: Upload full-video caption report
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: remotion-full-video-caption-qa-${{ github.run_id }}
+          path: out/caption-coverage/report.json
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Normalize final audio
         run: |
@@ -128,7 +156,7 @@ jobs:
           PY
 
       - name: Upload render and QA outputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
           path: |

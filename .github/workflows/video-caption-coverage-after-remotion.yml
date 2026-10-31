@@ -37,7 +37,7 @@ jobs:
           tesseract --list-langs
 
       - name: Download the MP4 artifact from the completed render run
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: one-more-scroll-remotion-mp4
           run-id: ${{ github.event.workflow_run.id }}
