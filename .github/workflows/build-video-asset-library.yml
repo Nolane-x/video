@@ -69,6 +69,7 @@ jobs:
           - eso
           - cdc-broll
           - nps-broll
+          - nps-gallery-images
           - loc
           - wikimedia
           - wikimedia-svg
@@ -105,6 +106,7 @@ jobs:
           python -m py_compile tools/video/eso_video_importer.py
           python -m py_compile tools/video/cdc_broll_importer.py
           python -m py_compile tools/video/nps_broll_importer.py
+          python -m py_compile tools/video/nps_gallery_image_importer.py
           python -m py_compile tools/video/finalize_asset_library_release.py
           python -m py_compile tools/video/package_asset_bundles.py
 
