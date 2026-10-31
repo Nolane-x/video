@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - "toolchain/**"
+      - "video-projects/remotion/src/**"
+      - "video-projects/remotion/package.json"
+      - "video-projects/remotion/tsconfig.json"
       - "tools/video/validate_toolchain.py"
       - "tools/video/validate_genre_routing.py"
       - "tools/video/genre-routing.json"
