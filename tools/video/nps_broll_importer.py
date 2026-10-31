@@ -576,7 +576,13 @@ def _strip_nps_audio_with_ffmpeg(source: Path, destination: Path) -> dict[str, A
 
 
 NPGALLERY_BASE = "https://npgallery.nps.gov"
-NPGALLERY_SEARCH_URL = NPGALLERY_BASE + "/SearchResults?pagesize=60&keyword=b-roll"
+NPGALLERY_SEARCH_TERMS = ("b-roll", "video", "footage")
+NPGALLERY_SEARCH_URLS = {
+    term: NPGALLERY_BASE + "/SearchResults?pagesize=60&keyword=" + urllib.parse.quote(term)
+    for term in NPGALLERY_SEARCH_TERMS
+}
+NPGALLERY_SEARCH_URL = NPGALLERY_SEARCH_URLS["b-roll"]
+NPGALLERY_MAX_CANDIDATES = 60
 NPGALLERY_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 
@@ -605,9 +611,10 @@ def normalize_npgallery_page_url(raw_url: str) -> str | None:
         query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
         if set(query) != {"pagesize", "keyword"}:
             return None
-        if query.get("pagesize") != ["60"] or query.get("keyword", [""])[0].casefold() != "b-roll":
+        keyword = query.get("keyword", [""])[0].casefold()
+        if query.get("pagesize") != ["60"] or keyword not in NPGALLERY_SEARCH_URLS:
             return None
-        return NPGALLERY_SEARCH_URL
+        return NPGALLERY_SEARCH_URLS[keyword]
     match = re.fullmatch(r"/AssetDetail/(" + NPGALLERY_UUID_RE.pattern[1:-1] + r")", parsed.path, re.IGNORECASE)
     if not match or parsed.query:
         return None
@@ -796,34 +803,79 @@ def download_npgallery_broll_media(
     max_metadata_bytes: int,
     seen_source_hashes: set[str] | None = None,
 ) -> tuple[list[dict], dict[str, int]]:
-    """Import NPGallery candidates only after per-item Full Public Domain rights are rechecked."""
+    """Import curated NPGallery video candidates only after per-item Full Public Domain rights are rechecked."""
     report: list[dict] = []
     stats = {"videos_downloaded": 0, "source_bytes_downloaded": 0, "indexed_resource_bytes": 0, "metadata_bytes": 0}
     if max_downloads <= 0 or max_total_source_bytes <= 0 or max_metadata_bytes <= 0:
         return report, stats
-    try:
-        body = _fetch_npgallery_page(NPGALLERY_SEARCH_URL, limit=min(MAX_PAGE_BYTES, max_metadata_bytes))
-        stats["metadata_bytes"] += len(body)
-        candidates = parse_npgallery_search_results(body.decode("utf-8", "replace"))
-        report.append({
-            "id": "nps-npgallery-search",
-            "status": "searched",
-            "source_page": NPGALLERY_SEARCH_URL,
-            "search_result_count": len(candidates),
-            "rights_filter": "video + MP4 + Public domain + Full Granting Rights + NPS credit",
-        })
-    except Exception as exc:
-        report.append({
-            "id": "nps-npgallery-search",
-            "status": "search-failed",
-            "source_page": NPGALLERY_SEARCH_URL,
-            "reason": str(exc)[:400],
-        })
-        return report, stats
+
+    candidate_groups: list[list[dict[str, Any]]] = []
+    for term, search_url in NPGALLERY_SEARCH_URLS.items():
+        if stats["metadata_bytes"] >= max_metadata_bytes:
+            break
+        try:
+            body = _fetch_npgallery_page(
+                search_url,
+                limit=min(MAX_PAGE_BYTES, max_metadata_bytes - stats["metadata_bytes"]),
+            )
+            stats["metadata_bytes"] += len(body)
+            found = parse_npgallery_search_results(body.decode("utf-8", "replace"))
+            group = []
+            for row in found:
+                candidate = dict(row)
+                candidate["NPGallerySearchURL"] = search_url
+                group.append(candidate)
+            candidate_groups.append(group)
+            report.append({
+                "id": "nps-npgallery-search-" + _slug(term),
+                "status": "searched",
+                "source_page": search_url,
+                "search_result_count": len(group),
+                "rights_filter": "video + MP4 + Public domain + Full Granting Rights + NPS credit",
+            })
+        except Exception as exc:
+            report.append({
+                "id": "nps-npgallery-search-" + _slug(term),
+                "status": "search-failed",
+                "source_page": search_url,
+                "reason": str(exc)[:400],
+            })
+
+    # Interleave each query's relevance-ranked candidates so the first 21 gallery
+    # slots are not dominated by a single broad search term.
+    candidates: list[dict[str, Any]] = []
+    positions = [0] * len(candidate_groups)
+    seen_candidate_ids: set[str] = set()
+    while len(candidates) < NPGALLERY_MAX_CANDIDATES:
+        progressed = False
+        for group_index, group in enumerate(candidate_groups):
+            while positions[group_index] < len(group):
+                candidate = group[positions[group_index]]
+                positions[group_index] += 1
+                asset_id = str(candidate.get("AssetID") or "").lower()
+                if not asset_id or asset_id in seen_candidate_ids:
+                    continue
+                seen_candidate_ids.add(asset_id)
+                candidates.append(candidate)
+                progressed = True
+                break
+            if len(candidates) >= NPGALLERY_MAX_CANDIDATES:
+                break
+        if not progressed:
+            break
+
+    report.append({
+        "id": "nps-npgallery-candidate-summary",
+        "status": "summary",
+        "search_terms": list(NPGALLERY_SEARCH_TERMS),
+        "unique_candidate_count": len(candidates),
+        "candidate_deduplication": "interleaved searches, unique NPGallery AssetID",
+    })
 
     seen_asset_ids: set[str] = set()
     seen_source_hashes = seen_source_hashes if seen_source_hashes is not None else set()
-    for asset in candidates[: min(60, max_downloads)]:
+    candidate_limit = min(NPGALLERY_MAX_CANDIDATES, max_downloads * 3)
+    for asset in candidates[:candidate_limit]:
         if (
             stats["videos_downloaded"] >= max_downloads
             or stats["source_bytes_downloaded"] >= max_total_source_bytes
@@ -911,7 +963,7 @@ def download_npgallery_broll_media(
                 "status": "duplicate",
                 "source_page": detail_url,
                 "source_sha256": source_hash,
-                "reason": "identical source bytes already imported from an earlier NPGallery asset",
+                "reason": "identical source bytes already imported from an earlier NPS asset",
             })
             continue
         seen_source_hashes.add(source_hash)
@@ -919,6 +971,7 @@ def download_npgallery_broll_media(
         output_size = output_path.stat().st_size
         people_review = bool(NPS_REVIEW_PEOPLE_RE.search(title + " " + description + " " + alt_text))
         unit = detail.get("NPS Units", "").strip()
+        search_url = str(asset.get("NPGallerySearchURL") or NPGALLERY_SEARCH_URL)
         entry = {
             "id": "nps-npgallery-" + asset_id,
             "path": output_path.relative_to(root).as_posix(),
@@ -926,9 +979,9 @@ def download_npgallery_broll_media(
             "title": title[:300],
             "description": description[:3000],
             "park": unit,
-            "collection": "nps-npgallery-broll-search",
+            "collection": "nps-npgallery-curated-video-search",
             "source_page": detail_url,
-            "collection_page": NPGALLERY_SEARCH_URL,
+            "collection_page": search_url,
             "source_file_url": original_url,
             "source_sha256": source_hash,
             "source_sha256_method": "computed after download; NPGallery detail metadata does not publish a per-file SHA-256",
