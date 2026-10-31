@@ -14,7 +14,7 @@ class PrepareVoiceStudioCpuDockerfileTests(unittest.TestCase):
         # end of a normal Python triple-quoted line would escape the newline.
         lines = [
             "ARG BASE_IMAGE=pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime",
-            "FROM \${BASE_IMAGE} AS runtime",
+            "FROM ${BASE_IMAGE} AS runtime",
             "COPY deploy/torch-constraints.txt ./deploy/torch-constraints.txt",
             "COPY deploy/uv-overrides.txt ./deploy/uv-overrides.txt",
             'RUN uv pip install --python "$(command -v python3)" --no-cache .',
@@ -37,6 +37,24 @@ class PrepareVoiceStudioCpuDockerfileTests(unittest.TestCase):
             transformed.index("RUN uv pip install"),
         )
         self.assertEqual(transformed.count("torch==2.8.0 torchvision"), 1)
+
+    def test_optional_supertonic_install_is_exactly_pinned_and_weight_free(self):
+        transformed = transform_dockerfile(self.source(), install_supertonic=True)
+        self.assertIn(
+            'uv pip install --python "$(command -v python3)" --no-cache supertonic==1.3.1',
+            transformed,
+        )
+        self.assertEqual(transformed.count("supertonic==1.3.1"), 1)
+        self.assertNotIn("Supertone/supertonic-3", transformed)
+        self.assertNotIn("snapshot_download", transformed)
+
+    def test_supertonic_install_refuses_duplicate_package(self):
+        altered = self.source().replace(
+            "ARG GPU_FLAVOR=cuda",
+            "RUN uv pip install supertonic==1.3.1\nARG GPU_FLAVOR=cuda",
+        )
+        with self.assertRaisesRegex(ValueError, "Supertonic-3 SDK install already exists"):
+            transform_dockerfile(altered, install_supertonic=True)
 
     def test_fails_closed_when_upstream_copy_anchor_changes(self):
         altered = self.source().replace(
