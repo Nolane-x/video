@@ -17,7 +17,16 @@ type Setting =
   | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end"
   | "locker" | "classroom" | "busStop" | "bathroom" | "kitchen" | "park" | "gym" | "library";
 
+type ShotLanguage = {
+  shotSize: string;
+  cameraAngle: string;
+  cameraMove: string;
+  composition: string;
+  visualPurpose: string;
+};
+
 type Shot = {
+  shotLanguage?: ShotLanguage;
   title: string;
   subtitle: string;
   setting: Setting;
@@ -51,6 +60,7 @@ type AudioPlan = {
 const FPS = Number(shotPlan.fps || 24);
 const shots: TimedShot[] = shotPlan.shots.map((entry) => ({
   ...(entry.args as unknown as Shot),
+  shotLanguage: entry.shotLanguage as ShotLanguage | undefined,
   id: entry.id,
   startFrame: Math.round(entry.start * FPS),
   endFrame: Math.round(entry.end * FPS),
@@ -936,8 +946,32 @@ export const OneMoreScroll: React.FC = () => {
   const eased = Easing.inOut(Easing.cubic)(t);
   const x = shot.x0 + (shot.x1 - shot.x0) * eased;
   const y = shot.y0 + (shot.y1 - shot.y0) * eased;
-  const zoom = shot.zoom0 + (shot.zoom1 - shot.zoom0) * eased;
-  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased;
+  const language = shot.shotLanguage;
+  const shotSize = (language?.shotSize || "medium").toLowerCase();
+  const framingScale =
+    shotSize.includes("extreme close") ? 1.34 :
+    shotSize.includes("close") ? 1.22 :
+    shotSize.includes("medium") ? 1.08 :
+    shotSize.includes("wide") || shotSize.includes("establishing") ? 0.92 : 1;
+  const move = (language?.cameraMove || "locked").toLowerCase();
+  const moveProgress = eased;
+  const moveZoom =
+    move.includes("push") || move.includes("dolly in") || move.includes("zoom in") ? 1 + 0.09 * moveProgress :
+    move.includes("pull") || move.includes("dolly out") || move.includes("zoom out") ? 1.09 - 0.09 * moveProgress : 1;
+  const movePan =
+    move.includes("pan left") || move.includes("track left") || move.includes("lateral left") ? -72 * moveProgress :
+    move.includes("pan right") || move.includes("track right") || move.includes("lateral right") ? 72 * moveProgress : 0;
+  const moveTilt =
+    move.includes("tilt up") || move.includes("crane up") ? -34 * moveProgress :
+    move.includes("tilt down") || move.includes("crane down") ? 34 * moveProgress : 0;
+  const angle = (language?.cameraAngle || "eye-level").toLowerCase();
+  const angleRoll = angle.includes("dutch") ? -2.2 : angle.includes("canted") ? 2.2 : 0;
+  const angleScaleY = angle.includes("high-angle") || angle.includes("overhead") ? 0.97 :
+    angle.includes("low-angle") ? 1.035 : 1;
+  const zoom = (shot.zoom0 + (shot.zoom1 - shot.zoom0) * eased) * framingScale * moveZoom;
+  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased + movePan;
+  const cameraY = moveTilt + (angle.includes("high-angle") ? 8 : angle.includes("low-angle") ? -8 : 0);
+  const cameraRotation = angleRoll + (move.includes("handheld") ? Math.sin(frame / 5) * 0.28 : 0);
   const isEnd = shot.setting === "end";
 
   const fadeFrames = Math.min(14, Math.max(2, Math.floor(shotFrameCount * 0.12)));
@@ -959,14 +993,14 @@ export const OneMoreScroll: React.FC = () => {
       {/* Background and character stage move at different rates for parallax. */}
       <div style={{
         position: "absolute", inset: -16,
-        transform: "translateX(" + (pan * 0.34) + "px) scale(" + (zoom * 0.99) + ")",
+        transform: "translate(" + (pan * 0.34) + "px," + (cameraY * 0.34) + "px) rotate(" + (cameraRotation * 0.34) + "deg) scale(" + (zoom * 0.99) + "," + (angleScaleY * 0.99) + ")",
         transformOrigin: "50% 56%",
       }}>
         <Backdrop setting={shot.setting} t={t} frame={frame} />
       </div>
       <div style={{
         position: "absolute", inset: -18, overflow: "hidden",
-        transform: "translateX(" + pan + "px) scale(" + zoom + ")",
+        transform: "translate(" + pan + "px," + cameraY + "px) rotate(" + cameraRotation + "deg) scale(" + zoom + "," + angleScaleY + ")",
         transformOrigin: "50% 55%",
       }}>
         {shot.shadow > 0.025 && shot.setting !== "end" && (
