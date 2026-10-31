@@ -31,7 +31,7 @@ SHOT_LANGUAGE_FIELDS = ("shotSize", "cameraAngle", "cameraMove", "composition", 
 
 CONTACT_ACTION_PATTERNS = tuple(re.compile(pattern, re.IGNORECASE) for pattern in (
     r"\b(?:punch(?:es|ed|ing)?|hit(?:s|ting)?|strike(?:s|ing)?|struck|land(?:s|ed|ing)?|grab(?:s|bed|bing)?|catch(?:es|ing)?|caught)\b",
-    r"\b(?:pick(?:s|ed)? up|put(?:s)? down|set(?:s)? down|place(?:s|d)?|lower(?:s|ed)?|release(?:s|d)?)\b",
+    r"\b(?:pick(?:s|ed)? up|put(?:s)? down|set(?:s)? down|place(?:s|d)?|lower(?:s|ed)?|release(?:s|d)?)\s+(?:the|a|an|their|his|her|its)\b",
     r"\b(?:open|opens|opened|opening)\s+(?:the|a|an|their|his|her|its)\b",
     r"\b(?:close|closes|closed|closing)\s+(?:the|a|an|their|his|her|its)\b",
     r"\b(?:write|writes|writing|wrote|written)\b",
