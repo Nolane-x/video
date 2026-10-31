@@ -9,6 +9,7 @@ from generate_sticker_meme_library import generate_assets as generate_sticker_me
 from nasa_svs_importer import download_nasa_svs_media
 from eso_video_importer import download_eso_media
 from cdc_broll_importer import download_cdc_broll_videos
+from nps_broll_importer import download_nps_broll_media
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path("dist/video-assets").resolve()
@@ -6526,6 +6527,7 @@ def main():
             ("nasa_svs", download_nasa_svs_media),
             ("eso", download_eso_media),
             ("cdc-broll", download_cdc_broll_videos),
+            ("nps-broll", download_nps_broll_media),
             ("loc", download_loc_public_domain),
             ("wikimedia", download_wikimedia_public_domain),
             ("wikimedia_svg", download_wikimedia_vector_svg),
@@ -6553,6 +6555,7 @@ def main():
     nasa_svs_report=source_reports["nasa_svs"]
     eso_report=source_reports["eso"]
     cdc_broll_report=source_reports["cdc-broll"]
+    nps_broll_report=source_reports["nps-broll"]
     loc_report=source_reports["loc"]
     wikimedia_report=source_reports["wikimedia"]
     wikimedia_svg_report=source_reports["wikimedia_svg"]
@@ -6637,6 +6640,8 @@ def main():
               "eso_silent_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in eso_report if r.get("status")=="downloaded"),
               "cdc_broll_videos_downloaded":sum(r.get("status")=="downloaded" for r in cdc_broll_report),
               "cdc_broll_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in cdc_broll_report if r.get("status")=="downloaded"),
+              "nps_broll_videos_downloaded":sum(r.get("status")=="downloaded" for r in nps_broll_report),
+              "nps_broll_video_bytes_downloaded":sum(r.get("size_bytes",0) for r in nps_broll_report if r.get("status")=="downloaded"),
               "loc_images_downloaded":sum(r.get("status")=="downloaded" for r in loc_report),
               "wikimedia_images_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_report),
               "wikimedia_svgs_downloaded":sum(r.get("status")=="downloaded" for r in wikimedia_svg_report),
@@ -6664,7 +6669,7 @@ def main():
               "original_caption_overlays":sticker_meme_counts["caption_overlays"]}
     index_doc={"schema_version":"1.0.0","built_at":datetime.now(timezone.utc).isoformat(),
                "repository":"https://github.com/Nolane-x/video",
-               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. CDC B-roll media is taken only from the official CDC B-roll category pages under CDC's published government-produced Public Domain notice; item caption/credit exceptions are skipped, CDC is credited, and people/healthcare privacy context is flagged for review. CDC media is not relabelled CC0. ESO public videos are CC BY 4.0 by default unless page-level exceptions apply; full visible credit and audio-removal disclosure are required, and identifiable-person commercial-use restrictions remain flagged. ESO media is not CC0. Source-only libraries are not raw-bundled.",
+               "policy":"Repository-generated original assets are CC0. Third-party assets are bundled only under their own verified source-specific terms: item-level CC0/Public Domain, SIL Open Font License 1.1, or CC BY-SA 4.0 with attribution and ShareAlike obligations preserved. NOAA Ocean Exploration media is screened under its official public-domain default and item-level copyright exceptions. NASA-origin media is separately filtered against official NASA Media Usage Guidelines and explicit copyright markers; NASA media is not relabelled CC0. CDC B-roll media is taken only from the official CDC B-roll category pages under CDC's published government-produced Public Domain notice; item caption/credit exceptions are skipped, CDC is credited, and people/healthcare privacy context is flagged for review. CDC media is not relabelled CC0. NPS B-roll is bundled only from verified park archives with explicit Public Domain notices; NPS endorsement, insignia and identifiable-person review restrictions remain. NPS media is not relabelled CC0. ESO public videos are CC BY 4.0 by default unless page-level exceptions apply; full visible credit and audio-removal disclosure are required, and identifiable-person commercial-use restrictions remain flagged. ESO media is not CC0. Source-only libraries are not raw-bundled.",
                "summary":summary,"original_assets_license":{"license":CC0,"license_url":CC0_URL},
                "kenney_downloads":kenney_report,"kenney_godot_splashscreens_downloads":kenney_splash_report,
                "polyhaven_downloads":polyhaven_report,
@@ -6677,6 +6682,7 @@ def main():
                "nasa_svs_media_downloads":nasa_svs_report,
                 "eso_video_downloads":eso_report,
                 "cdc_broll_video_downloads":cdc_broll_report,
+                "nps_broll_video_downloads":nps_broll_report,
                "loc_public_domain_downloads":loc_report,"wikimedia_public_domain_downloads":wikimedia_report,
                "wikimedia_vector_svg_downloads":wikimedia_svg_report,
                "wikimedia_video_audio_downloads":wikimedia_av_report,
@@ -6705,6 +6711,12 @@ def main():
       + "\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in cdc_broll_report)
     )
     write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+cdc_broll_note+"\n")
+    nps_broll_note=(
+      "\\n\\n## National Park Service park B-roll — Public Domain collection archives\\n"
+      "The NPS lane starts only from five official park B-roll indexes (Grand Canyon, Joshua Tree, Death Valley, Yosemite and San Antonio Missions) whose page text explicitly states Public Domain use. It follows only same-park multimedia detail pages or NPS media-view pages linked from those indexes and accepts direct MP4 files under the official www.nps.gov/nps-audiovideo/audiovideo or park-scoped legacy paths. The best available 1080p/720p MP4 rendition is selected; exact HTTPS host/path allowlists, MIME type, MP4 container signature, byte ceilings and computed SHA-256 are checked. NPS pages do not publish item SHA-256 values, so the manifest clearly labels the hash as computed after download rather than source-verified. All audio is removed with FFmpeg and ffprobe verifies zero audio streams. Preserve any explicit park credit (including its original wording), do not imply NPS endorsement or use the protected arrowhead, and review identifiable people, private property and third-party marks before commercial/promotional use. This source is Public Domain under the exact park archive notices, not CC0. Sources: https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm, https://www.nps.gov/jotr/learn/photosmultimedia/broll.htm, https://www.nps.gov/deva/learn/photosmultimedia/b-roll-footage.htm, https://www.nps.gov/yose/learn/photosmultimedia/b-roll.htm and https://www.nps.gov/saan/learn/photosmultimedia/videos.htm.\\n"
+      + "\\n".join(f"- {r.get('id')}: {r.get('status')} — {r.get('source_page',r.get('reason',''))}" for r in nps_broll_report)
+    )
+    write_text(STAGE/"SOURCES_AND_LICENSES.md",(STAGE/"SOURCES_AND_LICENSES.md").read_text(encoding="utf-8")+nps_broll_note+"\\n")
     source_capacity_note=(
       "\n\n## Build 74 source capacity ceilings — limits, not promised downloads\n"
       "NASA SVS: up to 60 videos, 300 MiB each, 6 GiB aggregate and 240 topic-search page IDs; the exact official /vis/ host/path, page-level rights/music exclusions and file SHA-256 remain mandatory.\n"
