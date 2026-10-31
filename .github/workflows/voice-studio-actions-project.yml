@@ -20,6 +20,7 @@ on:
     paths:
       - ".github/workflows/voice-studio-actions-project.yml"
       - "integrations/voice-studio/actions_voice_project.py"
+      - "integrations/voice-studio/caption_delivery.py"
       - "integrations/voice-studio/examples/actions-vietnamese-documentary.json"
       - "integrations/voice-studio/generate_voiceover.py"
       - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py"
@@ -131,6 +132,9 @@ jobs:
           print(f"- Segments: {report['generated_segments']}/{report['segment_count']}")
           print(f"- Technical pass / warning / error: {report['technical_pass']} / {report['technical_warning']} / {report['technical_error']}")
           print(f"- H2 timeline created: {report['h2_timing'] is not None}")
+          print(f"- Word-timed caption cues: {report.get('captions', {}).get('word_timed_cue_count', 0)}")
+          print(f"- Cast report: {report.get('voice_cast_report', {}).get('path', 'missing')}")
+          print(f"- Artifact manifest: {report.get('artifact_manifest_summary', {}).get('file_count', 0)} files")
           print(f"- Model revision: `{report['model']['revision']}`")
           print()
           print("Human listening is required before approving the voice cast.")
