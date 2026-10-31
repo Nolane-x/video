@@ -392,6 +392,16 @@ def run_benchmark(
                         if previous.get("asr_intelligibility_proxy"):
                             row["asr_intelligibility_proxy"] = previous["asr_intelligibility_proxy"]
                         reused = True
+                        if asr and not row.get("asr_intelligibility_proxy"):
+                            try:
+                                transcript = client.transcribe(destination, language=language)
+                                row["asr_intelligibility_proxy"] = compare_text(text, transcript)
+                                row["asr_intelligibility_proxy"]["status"] = "available"
+                            except Exception as asr_exc:
+                                row["asr_intelligibility_proxy"] = {
+                                    "status": "unavailable",
+                                    "reason": f"{type(asr_exc).__name__}: {asr_exc}",
+                                }
                 except OSError:
                     reused = False
 
@@ -404,11 +414,11 @@ def run_benchmark(
                 if not path.is_file() or path.stat().st_size <= 44:
                     raise RuntimeError("Provider returned no usable audio file")
                 # Benchmark artifacts must stay inside the selected output folder.
-                path.relative_to(output_dir.resolve())
+                relative_audio = path.resolve().relative_to(output_dir.resolve())
                 digest = hashlib.sha256(path.read_bytes()).hexdigest()
                 row.update({
                     "status": "ready",
-                    "audio_file": path.relative_to(output_dir).as_posix(),
+                    "audio_file": relative_audio.as_posix(),
                     "bytes": path.stat().st_size,
                     "sha256": digest,
                     "cache_hit": False,
