@@ -33,7 +33,7 @@ class VoiceoverPipelineTests(unittest.TestCase):
 
     def test_sanitizes_voice_block_metadata(self):
         segments = validate_manifest({"segments": [{
-            "text": "Xin chào", "character": "A | B = C · D\\nline 2"
+            "text": "Xin chào", "character": "A | B = C · D\nline 2"
         }]})
         self.assertEqual(segments[0]["character"], "A / B - C - D line 2")
 
