@@ -8,6 +8,9 @@ on:
       - "AGENTS.md"
       - "CLAUDE.md"
       - ".agents/skills/video-production-master/**"
+      - ".agents/skills/video-voice-design-director/**"
+      - ".agents/skills/video-character-voice-casting-engineer/**"
+      - ".agents/skills/video-voice-quality-auditor/**"
       - ".claude/skills/video-production-master/**"
       - "docs/STATE.md"
       - "docs/AI_HANDOFF.md"
@@ -18,6 +21,8 @@ on:
       - "integrations/h2-selfimprove-studio/**"
       - "integrations/h2-selfimprove-studio-production-overlay/**"
       - "docs/TOOL_INVENTORY.md"
+      - "docs/VOICE_STUDIO.md"
+      - "integrations/voice-studio/**"
       - "tools/video/build_asset_library.py"
       - "tools/video/generate_sfx_library.py"
       - "tools/video/validate_story.py"
@@ -81,15 +86,19 @@ jobs:
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library bundle/.github/workflows
           cp README.md AGENTS.md CLAUDE.md bundle/
-          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/verify-h2-source-v3.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
+          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/verify-h2-source-v3.yml .github/workflows/sync-h2-source-release-manifest.yml .github/workflows/voice-studio-actions-lab.yml .github/workflows/voice-studio-actions-project.yml .github/workflows/voice-studio-headless-smoke.yml bundle/.github/workflows/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
+          cp -R .agents/skills/video-voice-design-director bundle/.agents/skills/
+          cp -R .agents/skills/video-character-voice-casting-engineer bundle/.agents/skills/
+          cp -R .agents/skills/video-voice-quality-auditor bundle/.agents/skills/
           cp -R .claude/skills/video-production-master bundle/.claude/skills/
           cp docs/STATE.md docs/AI_HANDOFF.md docs/ART_DIRECTION_IFVERSE_DAYONE.md \
-             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md docs/CHATGPT_PLUGIN.md bundle/docs/
+             docs/VIDEO_PRODUCTION_STATE_SCHEMA.json docs/INSTALL_VIDEO_SKILL.md docs/TOOL_INVENTORY.md docs/CHATGPT_PLUGIN.md docs/VOICE_STUDIO.md bundle/docs/
           cp tools/video/build_asset_library.py tools/video/generate_sfx_library.py tools/video/validate_story.py tools/video/archive_h2_master.py tools/video/archive_previous_works.py tools/video/patch_h2_shoelace_scene.py tools/video/publish_h2_source_release.ps1 bundle/tools/video/
           mkdir -p bundle/integrations
           cp -R integrations/h2-selfimprove-studio bundle/integrations/
           cp -R integrations/h2-selfimprove-studio-production-overlay bundle/integrations/
+          cp -R integrations/voice-studio bundle/integrations/
           cp video-library/README.md video-library/previous-works-catalog.json video-library/reference-clips.json bundle/video-library/
           cp -R video-library/assets bundle/video-library/assets
           # Carry historical contact sheets/metadata in the portable bundle without duplicating every large MP4.
@@ -142,6 +151,16 @@ jobs:
             "created_from_commit": "$(git rev-parse HEAD)",
             "created_at_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "canonical_skill": ".agents/skills/video-production-master/SKILL.md",
+            "voice_design_skill": ".agents/skills/video-voice-design-director/SKILL.md",
+            "voice_casting_skill": ".agents/skills/video-character-voice-casting-engineer/SKILL.md",
+            "voice_quality_audit_skill": ".agents/skills/video-voice-quality-auditor/SKILL.md",
+            "includes_voice_studio_integration": true,
+            "voice_studio_integration": "integrations/voice-studio/README.md",
+            "voice_studio_app_repository": "https://github.com/Nolane-x/VoiceStudio",
+            "voice_studio_app_commit": "faa5294359f23c911972ffe6d27785c50c67097b",
+            "voice_studio_application_license": "AGPL-3.0",
+            "voice_studio_model_weights_embedded": false,
+            "voice_studio_generated_audio_embedded": false,
             "cross_agent_entrypoints": ["AGENTS.md", "CLAUDE.md", ".claude/skills/video-production-master/SKILL.md"],
             "included_reference_render": "$VIDEO_PATH",
             "included_reference_render_sha256": "$(sha256sum "$VIDEO_PATH" | cut -d ' ' -f1)",
@@ -183,6 +202,21 @@ jobs:
           path = "video-production-master-skill.zip"
           required = [
               ".agents/skills/video-production-master/SKILL.md",
+              ".agents/skills/video-voice-design-director/SKILL.md",
+              ".agents/skills/video-character-voice-casting-engineer/SKILL.md",
+              ".agents/skills/video-voice-quality-auditor/SKILL.md",
+              "docs/VOICE_STUDIO.md",
+              "integrations/voice-studio/README.md",
+              "integrations/voice-studio/design_voice_library.py",
+              "integrations/voice-studio/generate_voiceover.py",
+              "integrations/voice-studio/provider_voice_benchmark.py",
+              "integrations/voice-studio/analyze_voice_benchmark.py",
+              "integrations/voice-studio/actions_voice_lab.py",
+              "integrations/voice-studio/actions_voice_project.py",
+              "integrations/voice-studio/examples/actions-benchmark-suite.json",
+              "integrations/voice-studio/examples/actions-vietnamese-documentary.json",
+              "integrations/voice-studio/voice_quality.py",
+              "integrations/voice-studio/VOICE_STUDIO_LOCK.json",
               "README.md",
               "AGENTS.md",
               "CLAUDE.md",
@@ -221,6 +255,9 @@ jobs:
               ".github/workflows/preview-h2-source-v3-shoelace.yml",
               ".github/workflows/verify-h2-source-v3.yml",
               ".github/workflows/sync-h2-source-release-manifest.yml",
+              ".github/workflows/voice-studio-actions-lab.yml",
+              ".github/workflows/voice-studio-actions-project.yml",
+              ".github/workflows/voice-studio-headless-smoke.yml",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
           with zipfile.ZipFile(path) as archive:

@@ -1,0 +1,85 @@
+name: Voice Studio adapter checks
+
+on:
+  pull_request:
+    paths:
+      - ".gitmodules"
+      - "vendor/VoiceStudio"
+      - "integrations/voice-studio/**"
+      - ".agents/skills/video-voice-*/*"
+      - ".github/workflows/voice-studio-adapter.yml"
+      - ".github/workflows/voice-studio-headless-smoke.yml"
+      - ".github/workflows/voice-studio-actions-lab.yml"
+      - ".github/workflows/voice-studio-actions-project.yml"
+      - ".github/workflows/voice-studio-headless-smoke.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".gitmodules"
+      - "vendor/VoiceStudio"
+      - "integrations/voice-studio/**"
+      - ".github/workflows/voice-studio-adapter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adapter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify pinned VoiceStudio gitlink and licence boundary
+        run: |
+          test -f .gitmodules
+          grep -q 'path = vendor/VoiceStudio' .gitmodules
+          grep -q 'url = https://github.com/Nolane-x/VoiceStudio.git' .gitmodules
+          git ls-tree HEAD vendor/VoiceStudio | grep -q '^160000 commit faa5294359f23c911972ffe6d27785c50c67097b'
+          grep -q 'AGPL-3.0' integrations/voice-studio/VOICE_STUDIO_LOCK.json
+          test -f .github/workflows/voice-studio-actions-lab.yml
+          test -f .github/workflows/voice-studio-actions-project.yml
+          test -f integrations/voice-studio/actions_voice_lab.py
+          test -f integrations/voice-studio/actions_voice_project.py
+          test -f integrations/voice-studio/caption_delivery.py
+          test -f integrations/voice-studio/tests/test_caption_delivery.py
+          test -f integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py
+          test -f integrations/voice-studio/tests/test_prepare_voicestudio_cpu_dockerfile.py
+          test -f .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'submodules: true' .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'GPU_FLAVOR=cpu' .github/workflows/voice-studio-headless-smoke.yml
+          grep -q 'faa5294359f23c911972ffe6d27785c50c67097b' .github/workflows/voice-studio-headless-smoke.yml
+          test -f integrations/voice-studio/examples/actions-benchmark-suite.json
+          test -f integrations/voice-studio/examples/actions-vietnamese-documentary.json
+          grep -q 'actions/cache@v6' .github/workflows/voice-studio-actions-lab.yml
+          grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-project.yml
+          grep -q 'voice-studio-actions-lab.yml' .github/workflows/package-video-skill.yml
+          grep -q 'voice-studio-actions-project.yml' .github/workflows/package-video-skill.yml
+          grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-lab.yml
+          test -f .agents/skills/video-voice-design-director/SKILL.md
+          test -f .agents/skills/video-character-voice-casting-engineer/SKILL.md
+          test -f .agents/skills/video-voice-quality-auditor/SKILL.md
+      - name: Verify portable video bundle includes voice skills and integration
+        run: |
+          grep -q 'cp -R .agents/skills/video-voice-design-director bundle/.agents/skills/' .github/workflows/package-video-skill.yml
+          grep -q 'cp -R .agents/skills/video-character-voice-casting-engineer bundle/.agents/skills/' .github/workflows/package-video-skill.yml
+          grep -q 'cp -R .agents/skills/video-voice-quality-auditor bundle/.agents/skills/' .github/workflows/package-video-skill.yml
+          grep -q 'cp -R integrations/voice-studio bundle/integrations/' .github/workflows/package-video-skill.yml
+          grep -q '"integrations/voice-studio/analyze_voice_benchmark.py"' .github/workflows/package-video-skill.yml
+      - name: Compile adapter
+        run: python -m compileall -q integrations/voice-studio
+      - name: Run offline adapter tests
+        run: python -m unittest discover -s integrations/voice-studio/tests -v
+      - name: Validate example manifests without contacting providers
+        run: |
+          python integrations/voice-studio/generate_voiceover.py \
+            --manifest integrations/voice-studio/examples/vietnamese-documentary.json \
+            --output /tmp/nolane-voice-plan --plan-only
+          python integrations/voice-studio/design_voice_library.py --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json --output /tmp/nolane-design-plan
+          python integrations/voice-studio/actions_voice_lab.py \
+            --suite integrations/voice-studio/examples/actions-benchmark-suite.json \
+            --output /tmp/nolane-actions-voice-plan \
+            --model-revision aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --plan-only

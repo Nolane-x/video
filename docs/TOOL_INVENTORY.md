@@ -47,3 +47,36 @@ See [previous-works-catalog.json](../video-library/previous-works-catalog.json).
 To import a downloaded set of previous MP4s, run `tools/video/archive_previous_works.py --source-dir <folder>`; it checks every hash before staging. Commit/push the result and let the “Verify previous AI video assets” workflow finish before calling those files archived.
 
 The canonical H2 source ZIPs are already published at https://github.com/Nolane-x/video/releases/tag/h2-production-assets-v1. Both ZIPs contain pre-rendered music/SFX WAVs. Their `packs/dem/audio.py` script imports `synth`/ `music` modules not included in the archives, so use the verified WAV library with `tools/mix.py` unless the generator dependencies are restored. To publish a later replacement, use `tools/video/publish_h2_source_release.ps1 -AssetsDir <folder>` with exact allow-listed files and a new release tag; it rejects hash mismatches and refuses to overwrite an existing tag. Do not upload full upstream Remotion, Blender or Krita application archives as part of the H2 release.
+
+
+## Voice Studio adapter — 2026-10-31
+
+- The user's fork `Nolane-x/VoiceStudio` is pinned as a separate AGPL-3.0 submodule at `vendor/VoiceStudio`; exact commit is recorded in `integrations/voice-studio/VOICE_STUDIO_LOCK.json`.
+- The integration layer uses the local VoiceStudio API instead of importing its large backend or duplicating model weights.
+- Optional direct adapters: KorvaTTS (10 Vietnamese preset voices), Google Cloud TTS (dynamic voice list) and ElevenLabs (paginated account voice catalogue). Cloud discovery is account-dependent; global library counts are not treated as Vietnamese voice counts.
+- `generate_voiceover.py` writes per-speaker audio segments and an H2-compatible `02-VOICE-<project>-TTS.txt` for the existing `prep_voice.py` timing tool.
+- Model/component licensing remains per exact weight and use case. Default OmniVoice weights are non-commercial in the fork's reviewed inventory; do not assume the whole VoiceStudio model catalogue is commercially cleared.
+- GitHub Actions tests adapter logic with mocks only; no model weights, reference voices, API keys, cloud calls or real TTS audio are included in CI.
+
+
+## Voice design and narration studio — expanded 2026-10-31
+
+- Pinned app: vendor/VoiceStudio submodule at the exact fork commit in integrations/voice-studio/VOICE_STUDIO_LOCK.json (AGPL-3.0).
+- client.py provides profile/archetype preview, native free-form design-profile creation, TTS, and ASR round-trip through the local VoiceStudio API.
+- design_voice_library.py creates original synthetic voice profiles from a JSON voice set, saves their VoiceStudio profile IDs and seeds, renders samples on request, writes resumable progress and avoids re-creating profiles already recorded in the same output report.
+- voice_audition.py exports a local listenable gallery and fixed-script blind A/B comparisons. voice_quality.py reports audio engineering metrics and optional ASR WER/CER; these are not naturalness or likeness scores.
+- generate_voiceover.py supports top-level cast + speaker_id, refuses identity drift, resumes line-level caches, continues after per-line provider failures and writes the existing H2 prep_voice.py block format.
+- KorvaTTS is pinned in documentation to package 0.1.3 and exposes 10 Vietnamese presets only; upstream cloning/training is still roadmap. Native synthetic custom profiles are created through an available VoiceStudio voice-design engine such as VoxCPM2.
+- The current VoiceStudio archetype catalogue is mainly English/Chinese combinatorial presets with a curated subset of other languages; it must not be described as hundreds of ready-made Vietnamese voices.
+- CI uses mocks only. No model downloads, service keys, generated samples or reference recordings are included.
+- VoxCPM2 is a promising Vietnamese voice-design option, but VoiceStudio's current licence audit marks component closure incomplete and output rights not specifically granted. Do not claim commercial clearance without checking exact installed revision, dependency terms and voice/input permissions.
+
+
+- provider_voice_benchmark.py: identical-script comparison across VoiceStudio, KorvaTTS, Google Cloud TTS and ElevenLabs, with cloud cost gate, blind HTML listening and human-rating export. This produces comparable audition evidence, not a model-independent objective quality score.
+
+
+## Reusable voice-production agent skills
+
+- `.agents/skills/video-voice-design-director/SKILL.md`: original synthetic voice design, model/language selection, profile creation, audition and rights gates.
+- `.agents/skills/video-character-voice-casting-engineer/SKILL.md`: stable `speaker_id` cast, line segmentation, batch synthesis, resumable cache and H2 timing handoff.
+- `.agents/skills/video-voice-quality-auditor/SKILL.md`: technical audio diagnostics, Vietnamese ASR WER/CER proxy, blind human audition and post-render identity drift audit.

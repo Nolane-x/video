@@ -1,0 +1,425 @@
+# Nolane Voice Studio Integration
+
+This is the voice-production layer for `Nolane-x/video`. It reuses the user's
+pinned VoiceStudio application as the voice-management and synthesis core; it
+does not rebuild another desktop studio or duplicate the upstream backend.
+
+## 0. Production execution: GitHub Actions first
+
+All production audio acceptance runs in GitHub Actions; do not use a developer
+PC as the render worker. The first live CPU lane is
+[Voice Studio Actions CPU lab](../../.github/workflows/voice-studio-actions-lab.yml).
+
+It runs on GitHub-hosted Ubuntu 24.04 and performs a real render, not only unit
+tests:
+
+- Pins `korvatts==0.1.3` and resolves an immutable Hugging Face model commit
+  before downloading the ONNX model snapshot.
+- Downloads only `onnx/` and `voice_styles/`; it deliberately excludes raw
+  reference recordings and demo audio.
+- Renders all ten Vietnamese preset voices against four identical test
+  scenarios: tones/phonemes, Vietnamese-English code-switching, numbers/names,
+  and long-form documentary narration. That is 40 WAV samples per full run.
+- Probes every WAV with FFprobe/FFmpeg, verifies SHA-256, and records duration,
+  sample rate, channels, codec, RMS, peak, clipping and silence signals.
+- Exports blind listening pages, machine-readable reports and an Actions
+  artifact containing WAVs and QA evidence. Artifacts are retained for 14 days.
+
+Run it from GitHub: open **Actions → Voice Studio Actions CPU lab → Run
+workflow**. It also runs for changes to the voice-lab source on the integration
+branch and weekly on the default branch after merge.
+
+The CPU lab is the repeatable Vietnamese baseline, not the full VoiceStudio
+voice-design service. It does not create custom profiles, clone speakers or
+claim ElevenLabs-level quality. The pinned VoiceStudio application remains the
+voice-management/design core; a heavier VoiceStudio engine lane must run as a
+separate Actions job on a runner with enough disk/RAM/GPU for that exact model.
+No live model should be silently moved to a personal computer when Actions
+resources are insufficient.
+
+The actual pinned VoiceStudio server is also smoke-tested on Actions by
+[VoiceStudio headless CPU API smoke](../../.github/workflows/voice-studio-headless-smoke.yml).
+That workflow initializes only the pinned app submodule, builds the app's own
+Dockerfile against a digest-pinned CPU Python base with official CPU PyTorch
+wheels, verifies the in-container build commit, starts the HTTP service, and
+checks health, TTS engine discovery, model listing and OpenAI-compatible API
+routes. It does not pull `latest`, download model weights, create profiles,
+accept model terms or synthesize audio. The service smoke is deliberately
+separate from the KorvaTTS audio renderer.
+
+For a complete project with multiple characters, use the separate
+[Voice Studio Actions production renderer](../../.github/workflows/voice-studio-actions-project.yml).
+It reads a committed project manifest, synthesizes every dialogue block with a
+stable speaker cast, audits the WAV files, then invokes the repository's actual
+H2 `prep_voice.py` to create `voice.wav`, `blocks.json`, `lines.json`,
+`words.json` and `transcript.txt`. It also creates word-timed `captions.srt`,
+`captions.vtt` and styled `captions.ass`, plus sentence-level and speaker-
+labelled caption variants. `voice-cast-report.json` maps each stable character
+to its voice ID and audio statistics; `artifact-manifest.json` contains SHA-256
+hashes for every file actually delivered (internal hidden caches are excluded).
+All files are uploaded as a GitHub Actions artifact. The included example
+manifest has four character voices and ten dialogue segments. The workflow
+rejects non-Korva providers rather than silently routing to local VoiceStudio
+or a cloud API.
+
+Caption times are derived from H2's proportional speech/word timing heuristic,
+not ASR forced alignment. Treat them as an editing draft and review them before
+publication. The word-level track is shorter and more readable than displaying
+a complete long sentence for several seconds; the sentence-level track remains
+available for workflows that prefer one cue per sentence.
+
+## 1. VoiceStudio application
+
+The application is pinned as an independent Git submodule:
+
+- Repository: https://github.com/Nolane-x/VoiceStudio
+- Parent: https://github.com/debpalash/VoiceStudio
+- Commit: `faa5294359f23c911972ffe6d27785c50c67097b`
+- Application license: AGPL-3.0
+- Model weights and local voice assets are not committed to this repository.
+
+Initialize the submodule:
+
+```bash
+git submodule update --init vendor/VoiceStudio
+```
+
+Start VoiceStudio locally (desktop app or its documented Docker service).
+The adapter defaults to `http://127.0.0.1:3900`.
+
+- `VOICESTUDIO_BASE_URL` — optional service URL.
+- `VOICESTUDIO_API_KEY` — optional on loopback; required if the remote
+  service is configured for API-key access. Remote API keys require HTTPS.
+  Never commit the value.
+
+The adapter uses VoiceStudio's documented health, TTS engine/model, profile,
+archetype, preview and OpenAI-compatible speech/transcription APIs. A voice
+profile ID is the stable identifier to keep in a video cast.
+
+## 2. Where the voices come from
+
+| Source | What it contributes | Important limit |
+|---|---|---|
+| VoiceStudio saved profiles | Reusable cloned or designed voices, preview samples, profile IDs | Cloning requires the speaker's authorization and a legally usable reference recording |
+| VoiceStudio archetypes | Several hundred combinatorial designs, plus a curated multilingual subset | Most generated combinations are English/Chinese; it is not a Vietnamese-only catalogue |
+| VoxCPM2 through VoiceStudio | Native text-description voice design and zero-shot reference cloning; supports Vietnamese | Model and component licence review is still required; design descriptions do not guarantee the same identity quality as ElevenLabs |
+| OmniVoice through VoiceStudio | Very broad language coverage and reference cloning/design | The current default weights are in a CC-BY-NC family with extra component terms; do not assume commercial use |
+| KorvaTTS | 10 Vietnamese preset voices (5 female, 5 male), 44.1 kHz ONNX/CPU, code-switching | Preset voices only today; voice cloning/training is still on the upstream roadmap |
+| Google Cloud TTS | Live provider voice catalogue | Cloud account/billing/service terms apply |
+| ElevenLabs | Account library, verified-language metadata and TTS | API key, account plan, voice-specific rights and language support apply |
+
+**Important catalogue distinction:** VoiceStudio's language support is not the
+same as its number of ready-made speaker identities. Its current built-in
+combinatorial archetype catalogue is mainly English and Chinese, with a small
+curated subset in other languages; do not claim hundreds of ready-made
+Vietnamese archetypes. For Vietnamese original synthetic profiles, use an
+engine that supports Vietnamese voice design (for example VoxCPM2, subject to
+engine availability and rights review) and save the result as a VoiceStudio
+profile.
+
+KorvaTTS is installed only when selected:
+
+```bash
+python -m pip install "korvatts==0.1.3"
+```
+
+Its official API loads one CPU model, exposes the ten bundled IDs through
+`list_voices()`, and supports a fixed seed, 1–32 inference steps and speed
+from 0.5 to 2.0. The adapter pins CPU inference and caches the model object for
+the batch, rather than reloading it for every utterance.
+
+Other optional provider installs:
+
+```bash
+python -m pip install google-cloud-texttospeech
+```
+
+Google credentials use Application Default Credentials. ElevenLabs reads
+`ELEVENLABS_API_KEY`. Keep all credentials in local secret stores, never in
+manifests or Git.
+
+## 3. Create a reusable Nolane voice set
+
+The repository includes an original Vietnamese voice-design set:
+`examples/vietnamese-original-voice-set.json`. It defines ten fictional
+speaker identities with different timbre, delivery, and seed settings. It uses
+the exact engine ID `voxcpm2`; change that only to an installed engine that
+declares native voice-design support.
+
+First create a plan. This makes no API calls and changes nothing in VoiceStudio:
+
+```bash
+python integrations/voice-studio/design_voice_library.py \\
+  --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
+  --output out/nolane-vietnamese-voices
+```
+
+After reviewing the plan, create the profiles and render their sample clips:
+
+```bash
+python integrations/voice-studio/design_voice_library.py \\
+  --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
+  --output out/nolane-vietnamese-voices --create
+```
+
+This calls VoiceStudio's native `POST /profiles` design path with a validated
+recipe, exact engine ID, language and seed. The service stores a reusable
+profile ID. The first profile-audio request lazily renders the identity sample.
+The local `voice-design-library.json` records names, profile IDs, description
+fingerprints, preview status and failures. Rerunning against the same output
+directory reuses profiles already recorded there; it does not recreate them.
+
+To create the profiles but defer expensive preview/model loading:
+
+```bash
+python integrations/voice-studio/design_voice_library.py \\
+  --manifest integrations/voice-studio/examples/vietnamese-original-voice-set.json \\
+  --output out/nolane-vietnamese-voices --create --no-preview
+```
+
+The profile IDs from the report are the values to put in the cast. A seed
+provides reproducible sampling; it does not by itself guarantee perfect
+speaker identity, naturalness or identical prosody on every long passage.
+
+## 4. Audition and choose voices
+
+List the current VoiceStudio engines, saved profiles and archetypes:
+
+```bash
+python integrations/voice-studio/voice_catalog.py --provider voicestudio --language vi
+python integrations/voice-studio/voice_catalog.py --provider korva --language vi
+python integrations/voice-studio/voice_catalog.py --provider google --language vi-VN
+python integrations/voice-studio/voice_catalog.py --provider elevenlabs --language vi
+```
+
+Build a local gallery from saved profiles and previews:
+
+```bash
+python integrations/voice-studio/voice_audition.py \\
+  --source profiles --language vi --limit 40 \\
+  --output out/voice-auditions
+```
+
+For an A/B comparison, use the exact same script and engine across saved
+profiles, and hide their names while listening:
+
+```bash
+python integrations/voice-studio/voice_audition.py \\
+  --source profiles --language vi \\
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
+  --engine voxcpm2 --blind \\
+  --output out/voice-a-b
+```
+
+Open `out/voice-a-b/index.html` locally. The blind page labels candidates
+rather than revealing profile names/IDs. The JSON report retains the mapping
+so the listener can reveal the selected voice after the comparison. A blind
+listening test is a selection aid, not an automatic quality score.
+
+The benchmark includes Vietnamese initial consonants, tone contrasts, numbers,
+names and English terms embedded in Vietnamese. Use the *same text* when
+comparing models or voice profiles; otherwise the A/B result is confounded by
+different scripts.
+
+Compare local and cloud providers in one run with the same script:
+
+```bash
+python integrations/voice-studio/provider_voice_benchmark.py \\
+  --provider all --engine voxcpm2 \\
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
+  --language vi --limit 20 --output out/benchmark-all
+```
+
+By default `--provider all` compares VoiceStudio saved profiles and KorvaTTS
+local presets only. To include Google and ElevenLabs as well:
+
+```bash
+python integrations/voice-studio/provider_voice_benchmark.py \\
+  --provider all --engine voxcpm2 --allow-cloud \\
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \\
+  --language vi --limit 20 --output out/benchmark-all-cloud
+```
+
+Here `--limit` is the maximum number of candidates **per provider**. A
+VoiceStudio engine ID is required so the selected profile family uses the
+same engine. Saved VoiceStudio profiles retain their own design seed;
+KorvaTTS uses the same supplied benchmark seed for every preset. Google and
+ElevenLabs calls can incur charges; the explicit `--allow-cloud` flag is
+mandatory whenever either cloud provider is included.
+
+A run exports one blind HTML listening page and an identity-mapped JSON report.
+For `--provider all`, inspect the report's `provider_catalogue` table: the run
+is marked `partial` (and exits nonzero) if any selected provider returns an
+empty language catalogue or a catalogue error, even when the other providers
+rendered successfully. Do not treat a partial provider set as a fair
+cross-provider comparison.
+In blind mode, candidate order is shuffled reproducibly (the default
+`--blind-seed` is recorded in the report) so voices from one provider are not
+presented in a single provider block. The benchmark checkpoints after every
+candidate; rerunning in the same output directory reuses verified audio files
+and retries failed or incomplete candidates. Use `--no-resume` to force fresh
+synthesis. A cache hit means the saved file hash matches the previous report;
+it does not prove that a remote provider has not changed the underlying voice.
+
+Add `--asr` to send each generated sample through the same VoiceStudio ASR
+backend and attach WER/CER pronunciation/intelligibility proxies. This requires
+a configured local ASR engine in VoiceStudio. Rate naturalness, Vietnamese
+clarity/tones, identity, expressiveness and character fit from 1–5, then click
+**Export human ratings JSON**. The page also captures per-candidate listener
+notes; these are preserved in the analysis output. Once you have exported the
+ratings file, join it to the private candidate identity map and calculate
+provider-level summaries:
+
+```bash
+python integrations/voice-studio/analyze_voice_benchmark.py \\
+  --benchmark out/benchmark-all/provider-voice-benchmark.json \\
+  --ratings out/benchmark-all/voice-human-ratings.json \\
+  --min-ratings 3
+```
+
+The analysis report shows rating coverage, the highest-rated candidate, and
+per-provider averages. A candidate must have at least three of the five
+dimensions rated to enter the comparison by default. Candidate means are
+equally weighted when calculating provider means. ASR WER/CER stays separate
+from human ratings; neither is an objective naturalness score or a validated
+ElevenLabs-equivalence percentage.
+
+## 5. Lock a cast and generate the voice-over
+
+Use a top-level `cast` object to declare each character's voice once. Every
+line references a `speaker_id`. The generator fingerprints provider, engine,
+voice/profile ID, language, description/instruct, seed and settings; it stops
+if the same speaker ID silently changes voice identity.
+
+`examples/voice-casting-template.json` shows the structure. A shortened
+example:
+
+```json
+{
+  "language": "vi",
+  "cast": {
+    "narrator": {
+      "provider": "korva",
+      "voice": "khanh_vy",
+      "language": "vi",
+      "seed": 4201
+    },
+    "expert": {
+      "provider": "voicestudio",
+      "engine": "voxcpm2",
+      "voice": "PASTE_SAVED_PROFILE_ID",
+      "language": "vi",
+      "seed": 4202
+    }
+  },
+  "segments": [
+    {"id": "V001", "speaker_id": "narrator", "slot": "NARRATOR", "text": "Lời dẫn..."},
+    {"id": "V002", "speaker_id": "expert", "slot": "EXPERT", "text": "Lời chuyên gia..."},
+    {"id": "V003", "speaker_id": "narrator", "slot": "NARRATOR", "text": "Lời dẫn tiếp..."}
+  ]
+}
+```
+
+Plan without calling a provider:
+
+```bash
+python integrations/voice-studio/generate_voiceover.py \\
+  --manifest integrations/voice-studio/examples/vietnamese-documentary.json \\
+  --output out/voiceover --plan-only
+```
+
+Generate:
+
+```bash
+python integrations/voice-studio/generate_voiceover.py \\
+  --manifest integrations/voice-studio/examples/vietnamese-documentary.json \\
+  --output out/voiceover
+```
+
+The batch:
+
+- Generates one MP3/WAV per dialogue segment.
+- Caches by text + provider + model + voice + seed + synthesis settings.
+- Writes progress after each segment; on one failed segment it records the
+  error and continues with the rest. Re-running reuses successful cache items.
+- Writes `voice-generation-report.json` with profile identity, expected text,
+  audio path, byte count and SHA-256.
+- Writes `02-VOICE-<project>-TTS.txt` in the exact block format read by the
+  existing H2 `prep_voice.py`. That tool remains responsible for creating
+  `voice.wav`, `blocks.json`, `lines.json`, `words.json` and
+  `transcript.txt`.
+
+## 6. Audio and intelligibility QA
+
+Run technical analysis on the generated report:
+
+```bash
+python integrations/voice-studio/voice_quality.py \\
+  --report out/voiceover/voice-generation-report.json
+```
+
+For an ASR round-trip (requires a working ASR engine already configured in
+VoiceStudio):
+
+```bash
+python integrations/voice-studio/voice_quality.py \\
+  --report out/voiceover/voice-generation-report.json --asr --language vi
+```
+
+The quality report measures technical signals such as duration, sample rate,
+peak/RMS, clipping and near-silence. Optional WER/CER compares the generated
+audio's ASR transcript with the expected script. **WER/CER is only an
+intelligibility/pronunciation proxy**; it does not grade timbre, naturalness,
+emotion, acting, speaker similarity or whether a voice fits a scene.
+
+Human listening remains mandatory. Review Vietnamese tones, final consonants,
+proper names, numbers, pauses, emotional arc, long-form identity consistency
+and differences between characters. Keep a human-approved voice-cast manifest
+for each series.
+
+## 7. Connect to the H2 / Remotion production pipeline
+
+The generator outputs a ready-to-use H2 voice block file and individual
+segment audio. Run the existing H2 timing stage with the actual tool path
+recorded in the report:
+
+`integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/prep_voice.py`.
+
+The video renderer still owns the final timing, subtitle alignment, sound mix
+and master. TTS generation is not the final audio master.
+
+## 8. Rights, licensing and consent
+
+- VoiceStudio application code is AGPL-3.0. Keep it as a separate submodule
+  and comply with AGPL obligations if you distribute a modified network
+  service.
+- VoiceStudio model rights are separate from the app license. The current
+  fork's registry shows OmniVoice weights in a CC-BY-NC family with additional
+  tokenizer/component terms. Do not assume it is cleared for monetized video.
+- VoxCPM2 is a promising Vietnamese voice-design/clone engine. Its upstream
+  model card identifies Apache-2.0, but VoiceStudio's own audit marks component
+  closure incomplete and generated-output terms not specifically granted in
+  the reviewed evidence. Verify the installed revision, every required
+  component, attribution/NOTICE and intended distribution before commercial use.
+- KorvaTTS source and model weights are published under Apache-2.0. Its ten
+  shipped voices are presets; custom cloning/training is not yet part of the
+  released upstream implementation.
+- Google Cloud and ElevenLabs are subject to current service plans, voice
+  permissions and provider terms. A public voice-library item is not blanket
+  permission to impersonate a real person.
+- Do not clone a real person's voice without documented consent and the rights
+  needed for the intended output. Store consent evidence and source recordings
+  privately, outside Git and outside public Releases.
+
+## 9. Tests and honest limits
+
+CI checks the integration logic, API request formatting, cast identity locks,
+batch recovery, H2 handoff grammar, audition page escaping and Vietnamese
+text-comparison logic using mocks. CI does **not** download weights, call paid
+APIs, render audio or claim a naturalness score.
+
+A live acceptance pass still requires a reachable VoiceStudio service, an
+installed/licence-accepted engine, actual profile creation, rendered Vietnamese
+samples, ASR checks and human listening. No claim is made that this matches
+ElevenLabs; this workflow creates a measurable, repeatable path to improve
+and compare each voice set.
