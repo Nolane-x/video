@@ -65,6 +65,7 @@ jobs:
           - smithsonian
           - rijksmuseum
           - nasa
+          - nasa-svs
           - loc
           - wikimedia
           - wikimedia-svg
