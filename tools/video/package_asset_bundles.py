@@ -41,6 +41,8 @@ def classify_asset(asset: dict) -> str:
         return "original-graphics"
     if asset_type.startswith("kenney-godot-splashscreens-") or "kenney/godot-splashscreens" in path:
         return "original-graphics"
+    if asset_type.startswith("blender-demo-cc0-"):
+        return "3d-models"
     if asset_type.startswith("lazytextures-models-"):
         return "3d-models"
     if asset_type.startswith(("lazytextures-materials-", "lazytextures-hdris-", "lazytextures-textures-")):
