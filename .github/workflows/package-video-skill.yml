@@ -86,7 +86,7 @@ jobs:
           set -euo pipefail
           mkdir -p bundle/.agents/skills bundle/.claude/skills bundle/docs bundle/tools/video bundle/video-library bundle/.github/workflows
           cp README.md AGENTS.md CLAUDE.md bundle/
-          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/verify-h2-source-v3.yml .github/workflows/sync-h2-source-release-manifest.yml bundle/.github/workflows/
+          cp .github/workflows/verify-h2-source-v2.yml .github/workflows/preview-h2-source-v3-shoelace.yml .github/workflows/verify-h2-source-v3.yml .github/workflows/sync-h2-source-release-manifest.yml .github/workflows/voice-studio-actions-lab.yml .github/workflows/voice-studio-actions-project.yml bundle/.github/workflows/
           cp -R .agents/skills/video-production-master bundle/.agents/skills/
           cp -R .agents/skills/video-voice-design-director bundle/.agents/skills/
           cp -R .agents/skills/video-character-voice-casting-engineer bundle/.agents/skills/
@@ -255,6 +255,8 @@ jobs:
               ".github/workflows/preview-h2-source-v3-shoelace.yml",
               ".github/workflows/verify-h2-source-v3.yml",
               ".github/workflows/sync-h2-source-release-manifest.yml",
+              ".github/workflows/voice-studio-actions-lab.yml",
+              ".github/workflows/voice-studio-actions-project.yml",
               "VIDEO_PRODUCTION_BUNDLE_MANIFEST.json",
           ]
           with zipfile.ZipFile(path) as archive:
