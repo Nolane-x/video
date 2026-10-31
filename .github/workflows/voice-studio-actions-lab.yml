@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: voice-studio-actions-lab-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   cpu-voice-lab:
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
-      HF_HOME: ${{ runner.temp }}/huggingface
+      HF_HOME: ${{ github.workspace }}/.hf-cache
       HF_HUB_DISABLE_TELEMETRY: "1"
       DO_NOT_TRACK: "1"
       OMP_NUM_THREADS: "4"
@@ -79,7 +79,7 @@ jobs:
       - name: Restore exact model snapshot cache
         uses: actions/cache@v6
         with:
-          path: ${{ runner.temp }}/huggingface/hub
+          path: ${{ github.workspace }}/.hf-cache/hub
           key: ${{ runner.os }}-korvatts-0.1.3-${{ steps.model.outputs.revision }}
       - name: Install audio diagnostics
         run: |
@@ -101,7 +101,12 @@ jobs:
           PY
       - name: Render all presets and run audio QA
         run: |
-          python integrations/voice-studio/actions_voice_lab.py             --suite integrations/voice-studio/examples/actions-benchmark-suite.json             --output out/actions-voice-lab             --model-revision "${{ steps.model.outputs.revision }}"             --steps "${{ inputs.quality_steps || '32' }}"             --threads 4
+          python integrations/voice-studio/actions_voice_lab.py \
+            --suite integrations/voice-studio/examples/actions-benchmark-suite.json \
+            --output out/actions-voice-lab \
+            --model-revision "${{ steps.model.outputs.revision }}" \
+            --steps "${{ inputs.quality_steps || '32' }}" \
+            --threads 4
       - name: Add QA summary to the Actions run
         if: always()
         run: |
