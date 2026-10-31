@@ -13,7 +13,7 @@ from typing import Any
 
 BASE = "https://svs.gsfc.nasa.gov"
 SEARCH_TERMS = ("Earth", "Moon", "Mars", "Sun", "Ocean", "Climate", "Spacecraft", "Galaxy", "Aurora", "Hurricane", "Volcano", "Asteroid", "Eclipse", "Weather", "Telescope", "Wildfire", "Spaceflight")
-MAX_PAGES = 160
+MAX_PAGES = 170
 MAX_SEARCH_JSON_BYTES = 2 * 1024 * 1024
 MAX_PER_TERM = 10
 MAX_DOWNLOADS = 36
