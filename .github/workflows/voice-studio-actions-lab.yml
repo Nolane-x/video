@@ -74,7 +74,7 @@ jobs:
           if not re.fullmatch(r"[0-9a-f]{40,64}", revision):
               raise SystemExit(f"Invalid Hugging Face model revision: {revision!r}")
           print(f"revision={revision}")
-          print(f"Model snapshot: {revision}")
+          print(f"Model snapshot pinned: {revision}", file=__import__("sys").stderr)
           PY
       - name: Restore exact model snapshot cache
         uses: actions/cache@v6
