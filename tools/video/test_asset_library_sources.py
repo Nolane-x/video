@@ -2755,7 +2755,8 @@ class SourceCapacityExpansionTests(unittest.TestCase):
         self.assertEqual(eso_video_importer.MAX_VIDEO_BYTES, 300 * 1024**2)
         self.assertEqual(eso_video_importer.MAX_METADATA_BYTES, 96 * 1024**2)
         self.assertEqual(len(eso_video_importer.FEED_CATEGORIES), 6)
-        self.assertIn("sha256", eso_video_importer.SHA256_RE.pattern.casefold())
+        valid_hash = "a" * 64
+        self.assertEqual(eso_video_importer.SHA256_RE.search(" " + valid_hash + " ").group(1), valid_hash)
         self.assertTrue(eso_video_importer.normalize_eso_media_url(
             "https://cdn.eso.org/videos/ultra_hd/eso1234a.mp4", "eso1234a"
         ))
