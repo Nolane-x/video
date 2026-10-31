@@ -27,7 +27,7 @@ MAX_POLY_FILE = 60 * 1024 * 1024
 NASA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
 NASA_VIDEO_MAX_BYTES = 250 * 1024 * 1024
 NASA_AUDIO_MAX_BYTES = 48 * 1024 * 1024
-NASA_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+NASA_TOTAL_MAX_BYTES = 10 * 1024 * 1024 * 1024
 SOURCE_DOWNLOAD_WORKERS = 6  # Provider-level parallelism; provider-specific pacing remains enabled.
 
 # Discovery ceilings for official sources. These are maximums, not promised download counts;
@@ -3879,8 +3879,8 @@ def download_google_fonts(root,index):
 
 # NOAA Ocean Exploration uses a public-domain default for its own media, but
 # item captions/credits can identify selected copyrighted or partner-owned content.
-NOAA_MEDIA_PAGE_SCAN_LIMIT = 40
-NOAA_MEDIA_SELECTION_CAPS = {"image": 300, "video": 180}
+NOAA_MEDIA_PAGE_SCAN_LIMIT = 60
+NOAA_MEDIA_SELECTION_CAPS = {"image": 420, "video": 260}
 NOAA_IMAGE_MAX_BYTES = 48 * 1024 * 1024
 NOAA_VIDEO_MAX_BYTES = 200 * 1024 * 1024
 NOAA_TOTAL_MAX_BYTES = 9 * 1024 * 1024 * 1024
