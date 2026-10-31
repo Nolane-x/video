@@ -1,0 +1,130 @@
+{
+  "id": "opendesign-motion-rebuild",
+  "reference": {
+    "filename": "preview.mp4",
+    "durationSeconds": 37.312,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "note": "User-supplied reference. Do not commit the source video, its frames, or its soundtrack to the public repository."
+  },
+  "output": {
+    "durationFrames": 1119,
+    "durationSeconds": 37.3,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H.264",
+    "audio": "AAC stereo 48 kHz",
+    "visualIntent": "A close structural and motion-language reconstruction using newly authored typography, vector artwork, UI cards, CSS 3D and an original score."
+  },
+  "shots": [
+    {
+      "id": "S01",
+      "startFrame": 0,
+      "endFrame": 204,
+      "startSeconds": 0,
+      "endSeconds": 6.8,
+      "label": "Sky prompt / text composition",
+      "visuals": ["pastel cloudscape", "serif title", "prompt field", "typed phrase", "cursor / send interaction"],
+      "motion": ["slow parallax clouds", "type-on prompt", "cursor travel", "button press", "small status pulse"],
+      "transitionOut": "prompt-card scale and white flash into title"
+    },
+    {
+      "id": "S02",
+      "startFrame": 204,
+      "endFrame": 294,
+      "startSeconds": 6.8,
+      "endSeconds": 9.8,
+      "label": "Oversized title",
+      "visuals": ["layered white italic display type", "soft cloud horizon", "extruded type shadow"],
+      "motion": ["three-line stagger", "heavy easing", "camera push", "subtle parallax"],
+      "transitionOut": "large type slides past lens"
+    },
+    {
+      "id": "S03",
+      "startFrame": 294,
+      "endFrame": 375,
+      "startSeconds": 9.8,
+      "endSeconds": 12.5,
+      "label": "Brand mark / positioning statement",
+      "visuals": ["warm paper background", "original red radial mark", "Claude Motion wordmark text", "green highlighted phrase"],
+      "motion": ["radial mark spin", "wordmark rise", "highlight wipe", "type stagger"],
+      "transitionOut": "paper plane folds into gallery grid"
+    },
+    {
+      "id": "S04",
+      "startFrame": 375,
+      "endFrame": 456,
+      "startSeconds": 12.5,
+      "endSeconds": 15.2,
+      "label": "Motion poster gallery",
+      "visuals": ["perspective wall of original mini posters", "varied colour / type systems", "editorial poster grid"],
+      "motion": ["deep camera push", "gallery pan", "card stagger", "perspective rotation"],
+      "transitionOut": "hero poster fills frame"
+    },
+    {
+      "id": "S05",
+      "startFrame": 456,
+      "endFrame": 675,
+      "startSeconds": 15.2,
+      "endSeconds": 22.5,
+      "label": "Kinetic typography / poster reel",
+      "visuals": ["blue future poster", "circular type system", "lime EASE panel", "NEVER LINEAR typography", "clock graphic", "abstract eye / 3.7% panel"],
+      "motion": ["hard beat cuts", "rotating circular type", "oversized type slam", "mask wipes", "graphic eye blink", "micro-shake accents"],
+      "transitionOut": "green field expands to colour columns"
+    },
+    {
+      "id": "S06",
+      "startFrame": 675,
+      "endFrame": 804,
+      "startSeconds": 22.5,
+      "endSeconds": 26.8,
+      "label": "Any model / any agent",
+      "visuals": ["pastel vertical panels", "oversized headline", "abstract model and agent chips"],
+      "motion": ["pan across columns", "logo-chip orbit", "elastic stagger", "headline swap"],
+      "transitionOut": "chips become interface cards"
+    },
+    {
+      "id": "S07",
+      "startFrame": 804,
+      "endFrame": 909,
+      "startSeconds": 26.8,
+      "endSeconds": 30.3,
+      "label": "Launch-kit interface / examples",
+      "visuals": ["editorial dashboard mockup", "asset tiles", "preview gallery", "small motion examples"],
+      "motion": ["UI panels stack", "cursor/toggle gestures", "thumbnail cascade", "camera dolly"],
+      "transitionOut": "interface panel folds into numeric slab"
+    },
+    {
+      "id": "S08",
+      "startFrame": 909,
+      "endFrame": 1020,
+      "startSeconds": 30.3,
+      "endSeconds": 34,
+      "label": "3D countdown / typography",
+      "visuals": ["large beveled blue numbers", "deep perspective", "bold cutout typography"],
+      "motion": ["3-to-2-to-1 roll", "camera orbit", "fast perspective pushes", "motion streaks"],
+      "transitionOut": "number rotates into cube"
+    },
+    {
+      "id": "S09",
+      "startFrame": 1020,
+      "endFrame": 1119,
+      "startSeconds": 34,
+      "endSeconds": 37.3,
+      "label": "Rotating cubes / final lockup",
+      "visuals": ["rounded 3D cubes", "play / window symbols", "original blue app tile", "OpenDesign Motion end card"],
+      "motion": ["multi-axis cube rotation", "depth choreography", "logo assembly", "slow final hold"],
+      "transitionOut": "final lockup holds to end"
+    }
+  ],
+  "qualityGates": [
+    "The full 37.3-second render must pass ffprobe metadata checks.",
+    "Review the 1fps and 2fps contact sheets from beginning to end.",
+    "Inspect moving samples around all nine shot boundaries and the title, UI, countdown and cube motions.",
+    "On-screen text must be spelled correctly, fully visible and legible at 1920x1080.",
+    "The final logo lockup must hold long enough to read.",
+    "A green Actions run is technical evidence only, not artistic approval."
+  ]
+}
