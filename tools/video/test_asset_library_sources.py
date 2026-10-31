@@ -2773,6 +2773,17 @@ class NPSBrollImporterTests(unittest.TestCase):
     VIDEO_ID = "44ce0b69-81e4-491c-896f-d10a744bc5db"
     URL_720 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}720p.mp4"
     URL_1080 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}1080p.mp4"
+    EMBED_ID = "B6D01994-155D-451F-679C4406F71D1006"
+    EMBED_URL = "https://www.nps.gov/media/video/embed.htm?id=" + EMBED_ID
+    VIEW_URL = "https://www.nps.gov/media/video/view.htm?id=" + EMBED_ID
+    MEDIA_VIEW_HTML = f"""
+    <html><head>
+      <meta property="og:title" content="Desert View Rim Country - B-Roll Video">
+      <meta property="og:description" content="Aerial footage over the Grand Canyon.">
+      <meta property="og:video" content="{URL_720}">
+      <meta property="og:video:secure_url" content="{URL_720}">
+    </head><body><h2>Credit</h2><p>NPS Video: Richard Burton</p></body></html>
+    """
     INDEX_HTML = f"""
     <html><body>
       <h1>Grand Canyon National Park B-Roll archive</h1>
@@ -2802,6 +2813,7 @@ class NPSBrollImporterTests(unittest.TestCase):
           <div class="vjs-dock-description">Slow aerial footage over the canyon.</div>
         </div>
       </div>
+      <iframe title="Video Embed" src="{EMBED_URL}"></iframe>
     </body></html>
     """
 
@@ -2815,6 +2827,10 @@ class NPSBrollImporterTests(unittest.TestCase):
                 "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper()
             ),
             "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper(),
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(self.EMBED_URL),
+            self.VIEW_URL,
         )
         legacy_id = "BEB855EF-9E28-4D45-3077A632DA293D46"
         legacy_view_url = "https://www.nps.gov/media/video/view.htm?id=" + legacy_id
@@ -2891,6 +2907,95 @@ class NPSBrollImporterTests(unittest.TestCase):
         options = nps_broll_importer._media_candidates_from_group(group)
         self.assertEqual([row["resolution"] for row in options], [1080, 720])
         self.assertEqual(options[0]["url"], self.URL_1080)
+
+    def test_nps_embed_iframe_resolves_to_view_og_video_and_credit_gate(self):
+        detail = nps_broll_importer.parse_nps_page(
+            f'<html><body><iframe src="{self.EMBED_URL}" title="Video Embed"></iframe></body></html>'
+        )
+        self.assertEqual(
+            detail["links"][0]["href"],
+            self.VIEW_URL,
+        )
+
+        media_page = nps_broll_importer.parse_nps_page(self.MEDIA_VIEW_HTML)
+        self.assertEqual(
+            media_page["page_title"],
+            "Desert View Rim Country - B-Roll Video",
+        )
+        groups = nps_broll_importer._groups_for_page(media_page, self.VIEW_URL)
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["media_candidates"][0]["url"], self.URL_720)
+        self.assertEqual(groups[0]["media_candidates"][0]["resolution"], 720)
+
+        credit, allowed = nps_broll_importer.parse_nps_media_page_credit(self.MEDIA_VIEW_HTML)
+        self.assertEqual(credit, "NPS Video: Richard Burton")
+        self.assertTrue(allowed)
+        _, allowed = nps_broll_importer.parse_nps_media_page_credit(
+            "<html><body><h2>Credit</h2><p>Independent Film Studio</p></body></html>"
+        )
+        self.assertFalse(allowed)
+        _, allowed = nps_broll_importer.parse_nps_media_page_credit(
+            "<html><body><h2>Credit</h2><p>© 2020 NPS Video</p></body></html>"
+        )
+        self.assertFalse(allowed)
+
+    def test_full_downloader_follows_embed_iframe_to_official_mp4_metadata(self):
+        source_bytes = b"verified NPS player source fixture" * 12000
+        silent_bytes = b"silent NPS player fixture" * 12000
+        detail_html = f"""
+        <html><body><h1>Grand Canyon B-roll clips</h1>
+          <iframe title="Video Embed" src="{self.EMBED_URL}"></iframe>
+        </body></html>
+        """
+        fetched_pages = []
+
+        def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            fetched_pages.append(url)
+            if url == self.INDEX_URL:
+                return self.INDEX_HTML.encode()
+            if url == self.DETAIL_URL:
+                return detail_html.encode()
+            if url == self.VIEW_URL:
+                return self.MEDIA_VIEW_HTML.encode()
+            raise AssertionError("unexpected NPS page fetch: " + url)
+
+        def fake_download(url, destination):
+            self.assertEqual(url, self.URL_720)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        def fake_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(silent_bytes)
+            return {
+                "width": 1920, "height": 720,
+                "video_codec": "h264", "duration_seconds": 40.582,
+            }
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(
+                 nps_broll_importer, "INDEXES",
+                 ({
+                     "id": "grand-canyon", "park": "grca",
+                     "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
+                 },),
+             ), \
+             mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
+             mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux), \
+             mock.patch.object(nps_broll_importer.time, "sleep"):
+            index = []
+            report = nps_broll_importer.download_nps_broll_media(Path(tmp), index)
+
+        self.assertIn(self.VIEW_URL, fetched_pages)
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        self.assertEqual(index[0]["source_file_url"], self.URL_720)
+        self.assertEqual(index[0]["credit_text"], "NPS Video: Richard Burton")
+        self.assertEqual(index[0]["source_resolution_rank"], 720)
+        self.assertTrue(index[0]["credit_required_visible"])
 
     def test_item_level_rights_exceptions_are_rejected(self):
         for description in (
