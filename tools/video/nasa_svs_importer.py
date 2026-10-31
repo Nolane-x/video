@@ -252,7 +252,7 @@ def download_nasa_svs_media(root: Path, index: list[dict]) -> list[dict]:
         try:
             page, size = _json(f"{BASE}/api/{page_id}/")
             metadata_bytes += size
-            if metadata_bytes > MAX_TOTAL_JSON_BYTES:
+            if metadata_bytes > MAX_METADATA_BYTES:
                 report.append({"id": f"nasa-svs-{page_id}", "status": "metadata-budget-exhausted", "source_page": page_url})
                 break
             chosen, reason = choose_video_candidate(page)
