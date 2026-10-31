@@ -944,9 +944,15 @@ export const OneMoreScroll: React.FC = () => {
   const shotFrameCount = Math.max(1, shot.endFrame - shot.startFrame);
   const t = Math.max(0, Math.min(1, local / Math.max(1, shotFrameCount - 1)));
   const eased = Easing.inOut(Easing.cubic)(t);
-  const x = shot.x0 + (shot.x1 - shot.x0) * eased;
+  const rawX = shot.x0 + (shot.x1 - shot.x0) * eased;
   const y = shot.y0 + (shot.y1 - shot.y0) * eased;
   const language = shot.shotLanguage;
+  const composition = (language?.composition || "").toLowerCase();
+  const compositionTarget = composition.includes("left third") || composition.includes("subject left") ? 390 :
+    composition.includes("right third") || composition.includes("subject right") ? 890 :
+    composition.includes("center frame") || composition.includes("subject centered") ? 640 : null;
+  const compositionOffset = compositionTarget === null ? 0 : compositionTarget - rawX;
+  const x = rawX;
   const shotSize = (language?.shotSize || "medium").toLowerCase();
   const framingScale =
     shotSize.includes("extreme close") ? 1.34 :
@@ -969,7 +975,7 @@ export const OneMoreScroll: React.FC = () => {
   const angleScaleY = angle.includes("high-angle") || angle.includes("overhead") ? 0.97 :
     angle.includes("low-angle") ? 1.035 : 1;
   const zoom = (shot.zoom0 + (shot.zoom1 - shot.zoom0) * eased) * framingScale * moveZoom;
-  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased + movePan;
+  const pan = shot.pan0 + (shot.pan1 - shot.pan0) * eased + movePan + compositionOffset;
   const cameraY = moveTilt + (angle.includes("high-angle") ? 8 : angle.includes("low-angle") ? -8 : 0);
   const cameraRotation = angleRoll + (move.includes("handheld") ? Math.sin(frame / 5) * 0.28 : 0);
   const isEnd = shot.setting === "end";
