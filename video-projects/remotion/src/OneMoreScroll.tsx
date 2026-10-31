@@ -11,10 +11,10 @@ import {
 } from "remotion";
 import shotPlan from "../public/story/shots.json";
 
-type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer";
+type Pose = "scroll" | "slump" | "stand" | "walk" | "run" | "write" | "meet" | "hero" | "tired" | "sit" | "stretch" | "punch" | "drink" | "tie" | "listen" | "cheer" | "placePhone" | "openDoor";
 type Setting =
   | "bedroom" | "phone" | "street" | "calendar" | "mirror" | "desk"
-  | "stairs" | "cafe" | "bus" | "void" | "dawn" | "end"
+  | "stairs" | "cafe" | "cafeDoor" | "entryway" | "bus" | "void" | "dawn" | "end"
   | "locker" | "classroom" | "busStop" | "bathroom" | "kitchen" | "park" | "gym" | "library";
 
 type ShotLanguage = {
@@ -288,6 +288,52 @@ const Backdrop: React.FC<{ setting: Setting; t: number; frame: number }> = ({ se
       <path d="M125 572 L1200 135" stroke="#201d27" strokeWidth="17" />
       <path d="M125 560 L1200 123" stroke="#9d8598" strokeWidth="4" opacity=".7" />
       <rect x="0" y="600" width="1280" height="120" fill="#26212d" />
+    </g>}
+
+    {setting === "entryway" && <g>
+      <rect width="1280" height="720" fill="#29232f" />
+      <rect width="1280" height="520" fill="url(#h2Wall)" />
+      <rect x="910" y="70" width="240" height="420" fill="#28232e" stroke="#8a7185" strokeWidth="9" />
+      <rect x="929" y="90" width="202" height="380" fill="#354051" />
+      <path d="M1030 90 V470 M929 275 H1131" stroke="#8f8295" strokeWidth="5" opacity=".6" />
+      <circle cx="1093" cy="298" r="9" fill="#d7b38b" />
+      <rect x="150" y="320" width="250" height="50" rx="5" fill="#625064" stroke="#2c2633" strokeWidth="7" />
+      <path d="M176 370 V500 M373 370 V500" stroke="#342b39" strokeWidth="17" />
+      <rect x="0" y="515" width="1280" height="205" fill="#4a3c48" />
+      <path d="M0 522 H1280" stroke="#b38f9c" strokeWidth="4" opacity=".42" />
+      <path d="M0 630 H1280 M260 515 V720 M1000 515 V720" stroke="#312834" strokeWidth="4" opacity=".45" />
+      <rect x="475" y="518" width="330" height="72" rx="8" fill="#625064" stroke="#b49aa9" strokeWidth="4" opacity=".8" />
+      <path d="M495 530 H785" stroke="#d0b8c2" strokeWidth="3" opacity=".5" />
+      <g>
+        <path d="M535 553 Q550 527 594 531 L625 548 Q632 557 619 567 H546 Q525 566 535 553Z" fill="#191820" stroke="#d8c5b4" strokeWidth="3" />
+        <path d="M548 548 L579 544 M554 555 L584 550 M560 561 L590 555" stroke="#e4cbb6" strokeWidth="3" strokeLinecap="round" />
+        <path d="M652 553 Q667 527 711 531 L742 548 Q749 557 736 567 H663 Q642 566 652 553Z" fill="#191820" stroke="#d8c5b4" strokeWidth="3" />
+        <path d="M665 548 L696 544 M671 555 L701 550 M677 561 L707 555" stroke="#e4cbb6" strokeWidth="3" strokeLinecap="round" />
+      </g>
+      <ellipse cx="640" cy="608" rx="230" ry="25" fill="#e2b99c" opacity=".06" />
+    </g>}
+
+    {setting === "cafeDoor" && <g>
+      <rect width="1280" height="720" fill="#342a38" />
+      <rect width="1280" height="550" fill="url(#h2Wall)" />
+      <rect x="365" y="95" width="490" height="470" fill="#211d29" stroke="#9a7b8d" strokeWidth="14" />
+      <rect x="388" y="118" width="445" height="425" fill="#614b5a" />
+      <rect x="405" y="136" width="410" height="389" fill="#9b6f73" opacity=".18" />
+      <Window x={420} y={170} w={94} h={140} warm={true} />
+      <Window x={714} y={170} w={94} h={140} warm={true} />
+      <rect x="430" y="440" width="350" height="76" fill="#382d3c" opacity=".75" />
+      <path d="M430 458 H780" stroke="#aa8797" strokeWidth="4" opacity=".5" />
+      <g transform={"rotate(" + (-36 * clampInterp(t, [0.04, 0.9], [0, 1])) + " 690 555)"}>
+        <rect x="455" y="135" width="235" height="420" fill="#493542" stroke="#d1b1a4" strokeWidth="9" />
+        <rect x="475" y="155" width="195" height="175" fill="#9e7680" stroke="#2a2330" strokeWidth="6" />
+        <rect x="475" y="348" width="195" height="185" fill="#8d6975" stroke="#2a2330" strokeWidth="6" />
+        <path d="M572 155 V330 M572 348 V533" stroke="#d7bec0" strokeWidth="3" opacity=".35" />
+        <circle cx="650" cy="360" r="10" fill="#e5c49d" stroke="#483443" strokeWidth="4" />
+        <path d="M648 360 H662" stroke="#f2d5ad" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <rect x="0" y="570" width="1280" height="150" fill="#27212d" />
+      <path d="M0 575 H1280" stroke="#c5a3a2" strokeWidth="3" opacity=".32" />
+      <ellipse cx="690" cy="540" rx="240" ry="32" fill="#e6b98e" opacity=".08" />
     </g>}
 
     {setting === "cafe" && <g>
@@ -604,6 +650,8 @@ const Character: React.FC<{
   const writeReach = clampInterp(t, [0.05, 0.6, 1], [0, 1, 0.7]);
   const drinkReach = clampInterp(t, [0.05, 0.34, 0.62, 1], [0, 1, 0.82, 0.28]);
   const tieReach = clampInterp(t, [0.04, 0.4, 0.64, 1], [0, 1, 0.78, 0.7]);
+  const phoneDropProgress = clampInterp(t, [0.03, 0.88, 1], [0, 1, 1]);
+  const phoneHandY = -158 + phoneDropProgress * 80;
   const punchStrike = pose === "punch"
     ? Math.max(Math.exp(-Math.pow((t - 0.32) / 0.09, 2)), Math.exp(-Math.pow((t - 0.76) / 0.09, 2)))
     : 0;
@@ -688,6 +736,25 @@ const Character: React.FC<{
           <path d="M24 -105 Q42 -68 39 -31 L35 16" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
           <circle cx="35" cy="16" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
         </g>
+      ) : pose === "placePhone" ? (
+        <g>
+          <path d={"M24 -105 Q43 -106 55 " + (phoneHandY - 13) + " L64 " + phoneHandY} fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={"M24 -105 Q43 -106 55 " + (phoneHandY - 13) + " L64 " + phoneHandY} fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="64" cy={phoneHandY} r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+          <g opacity={1 - phoneDropProgress}>
+            <rect x="52" y="-179" width="26" height="49" rx="5" fill="#17151e" stroke="#ead7c1" strokeWidth="2.5" />
+            <rect x="57" y="-173" width="16" height="34" rx="2" fill="#a84f65" opacity=".9" />
+            <circle cx="65" cy="-135" r="1.8" fill="#ead7c1" />
+          </g>
+        </g>
+      ) : pose === "openDoor" ? (
+        <g>
+          <path d="M24 -105 Q44 -108 59 -94 L67 -82" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M24 -105 Q44 -108 59 -94 L67 -82" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="67" cy="-82" r="8" fill="#24212b" stroke="#ead7c1" strokeWidth="2.8" />
+          <path d="M-24 -105 Q-39 -88 -43 -69 L-45 -51" fill="none" stroke="#ead7c1" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M-24 -105 Q-39 -88 -43 -69 L-45 -51" fill="none" stroke={shirt} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
       ) : (
         <>
       <g transform={"rotate(" + leftArm + " -24 -105)"}>
@@ -731,6 +798,9 @@ const Character: React.FC<{
         <path d="M-28 17 Q0 9 28 17" fill="none" stroke="#ead7c1" strokeWidth="3"/>
         <path d="M-18 25 Q0 16 18 25" fill="none" stroke="#c56d9b" strokeWidth="3"/>
       </g>}
+      {pose === "placePhone" && !companion && <g>
+        <path d={"M49 " + (phoneHandY - 8) + " H79"} stroke="#ead7c1" strokeWidth="2" opacity=".4" />
+      </g>}
       {pose === "punch" && !companion && <g opacity={0.15 + punchStrike * 0.8}>
         <path d="M80 -84 l18 -7 M82 -72 l24 0 M79 -61 l17 8" stroke="#f0c58f" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="81" cy="-72" r="3.5" fill="#f0c58f"/>
@@ -744,7 +814,7 @@ const Character: React.FC<{
   );
 };
 
-const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean }> = ({ setting, t, phoneOnDesk }) => (
+const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean; phoneDropProgress?: number }> = ({ setting, t, phoneOnDesk, phoneDropProgress = 1 }) => (
   <svg width="100%" height="100%" viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 7 }}>
     {setting === "bedroom" && <>
       <path d="M255 496 Q493 525 825 493 V578 H255Z" fill="#64596f" opacity=".98" />
@@ -756,10 +826,14 @@ const Foreground: React.FC<{ setting: Setting; t: number; phoneOnDesk?: boolean 
       <path d="M360 480 V580 M940 480 V580" stroke="#362b39" strokeWidth="18" />
       <rect x="685" y="438" width="112" height="9" rx="3" fill="#e1d2c4" transform="rotate(-5 490 438)" />
       <path d="M695 434 l14 -19 l12 18" fill="none" stroke="#c9b7aa" strokeWidth="3" />
-      {phoneOnDesk && <g transform={"translate(" + (t * 8) + " 0)"}>
+      {phoneOnDesk && <g transform={"translate(" + (t * 2) + " 0)"} opacity={phoneDropProgress}>
         <rect x="744" y="417" width="28" height="49" rx="5" fill="#15141c" stroke="#dac7b4" strokeWidth="2" transform="rotate(10 812 441)" />
         <rect x="750" y="424" width="16" height="34" rx="2" fill="#473a4e" transform="rotate(10 812 441)" />
       </g>}
+    </>}
+    {setting === "entryway" && <>
+      <path d="M0 575 H1280" stroke="#b49aa9" strokeWidth="4" opacity=".32" />
+      <path d="M0 607 H1280" stroke="#251f2a" strokeWidth="3" opacity=".4" />
     </>}
     {setting === "cafe" && <>
       <path d="M280 500 Q615 470 1010 500 L980 540 H310Z" fill="#9b777c" stroke="#382b39" strokeWidth="5" />
@@ -955,8 +1029,8 @@ export const OneMoreScroll: React.FC = () => {
   const x = rawX;
   const shotSize = (language?.shotSize || "medium").toLowerCase();
   const framingScale =
-    shotSize.includes("extreme close") ? 1.34 :
-    shotSize.includes("close") ? 1.22 :
+    shotSize.includes("extreme close") ? 1.48 :
+    shotSize.includes("close") ? 1.30 :
     shotSize.includes("medium") ? 1.08 :
     shotSize.includes("wide") || shotSize.includes("establishing") ? 0.92 : 1;
   const move = (language?.cameraMove || "locked").toLowerCase();
@@ -1017,10 +1091,10 @@ export const OneMoreScroll: React.FC = () => {
           <Character x={x} y={y} pose={shot.pose} t={t} shirt={shot.shirt} scale={shot.scale} />
         )}
         {shot.friend && <Character
-          x={x + (shot.setting === "cafe" ? 270 : 220)}
+          x={x + (shot.setting === "cafe" || shot.setting === "cafeDoor" ? 270 : 220)}
           y={shot.setting === "cafe" ? 0 : 0}
           pose={shot.pose === "listen" ? "listen" : "meet"} t={Math.max(0, t - 0.12)} shirt="#6e59bd"
-          scale={shot.setting === "cafe" ? 1.08 : 0.92} companion
+          scale={shot.setting === "cafe" || shot.setting === "cafeDoor" ? 1.08 : 0.92} companion
         />}
         {shot.setting === "bus" && <>
           <Character x={180} y={0} pose="walk" t={t + 0.2} shirt="#d7a56d" scale={0.78} companion />
@@ -1030,7 +1104,7 @@ export const OneMoreScroll: React.FC = () => {
         {shot.setting === "mirror" && <RedWords words={shot.redWords || []} t={t} />}
         {shot.setting === "void" && <RedWords words={shot.redWords || []} t={t} />}
         {shot.setting === "end" && <Character x={640} y={15} pose="hero" t={t} shirt={shot.shirt} scale={0.74} />}
-        <Foreground setting={shot.setting} t={t} phoneOnDesk={shot.phoneOnDesk} />
+        <Foreground setting={shot.setting} t={t} phoneOnDesk={shot.phoneOnDesk} phoneDropProgress={shot.pose === "placePhone" ? phoneDropProgress : 1} />
       </div>
 
       <div style={{position:"absolute",inset:0,zIndex:8,pointerEvents:"none",background:"radial-gradient(ellipse at 50% 44%, rgba(8,6,12,0) 34%, rgba(8,6,12,.30) 100%)"}} />
