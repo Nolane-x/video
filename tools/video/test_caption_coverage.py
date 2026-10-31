@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from caption_coverage import expected_text_for_shot, normalize_text, targeted_ocr_region, text_coverage
+from caption_coverage import expected_text_for_shot, normalize_text, targeted_ocr_region, targeted_ocr_threshold, text_coverage
 
 
 class CaptionCoverageTests(unittest.TestCase):
@@ -69,6 +69,20 @@ class CaptionCoverageTests(unittest.TestCase):
         self.assertEqual(day_region, ("top-left-day-counter", (25, 12, 140, 68)))
         self.assertEqual(subtitle_region, ("lower-third-subtitle", (80, 575, 1120, 145)))
 
+    def test_overlay_specific_binary_ocr_thresholds(self):
+        self.assertEqual(targeted_ocr_threshold(
+            {"kind": "day-counter", "text": "DAY 14"}, {"args": {"setting": "library"}}
+        ), 140)
+        self.assertEqual(targeted_ocr_threshold(
+            {"kind": "scene-label", "text": "BUS"}, {"args": {"setting": "busStop"}}
+        ), 80)
+        self.assertEqual(targeted_ocr_threshold(
+            {"kind": "scene-label", "text": "THIS MONTH"}, {"args": {"setting": "calendar"}}
+        ), 80)
+        self.assertIsNone(targeted_ocr_threshold(
+            {"kind": "subtitle", "text": "Caption"}, {"args": {"setting": "library"}}
+        ))
+
     def test_targeted_ocr_region_tracks_calendar_and_bus_stop_signs(self):
         calendar = targeted_ocr_region(
             {"kind": "scene-label", "text": "THIS MONTH"}, {"args": {"setting": "calendar"}}
@@ -76,8 +90,8 @@ class CaptionCoverageTests(unittest.TestCase):
         bus_stop = targeted_ocr_region(
             {"kind": "scene-label", "text": "BUS"}, {"args": {"setting": "busStop"}}
         )
-        self.assertEqual(calendar, ("calendar-heading", (570, 65, 520, 115)))
-        self.assertEqual(bus_stop, ("bus-stop-sign", (890, 148, 90, 70)))
+        self.assertEqual(calendar, ("calendar-heading", (560, 35, 570, 125)))
+        self.assertEqual(bus_stop, ("bus-stop-sign", (900, 153, 72, 52)))
 
     def test_multiword_kinetic_phrases_use_distinct_clear_regions(self):
         shot = {"args": {"setting": "void", "redWords": ["ONE MORE", "TOMORROW", "JUST ONCE", "LATER"]}}

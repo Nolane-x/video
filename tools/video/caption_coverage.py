@@ -152,8 +152,10 @@ def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str
         return ("centered-end-card", (100, 110, 1080, 500))
     if kind == "scene-label":
         regions = {
-            "calendar": ("calendar-heading", (570, 65, 520, 115)),
-            "busStop": ("bus-stop-sign", (890, 148, 90, 70)),
+            # Camera pan/zoom moves the calendar heading upward through this shot.
+            "calendar": ("calendar-heading", (560, 35, 570, 125)),
+            # Crop only the gold label, not the dark pole/shadow around it.
+            "busStop": ("bus-stop-sign", (900, 153, 72, 52)),
             "bus": ("bus-sign", (80, 280, 280, 120)),
             "classroom": ("classroom-board-label", (470, 220, 530, 130)),
         }
@@ -176,6 +178,18 @@ def targeted_ocr_region(item: dict[str, str], shot: dict[str, Any]) -> tuple[str
         y = 150 + ((word_index * 83 + 38) % 330)
         width = max(250, min(500, len(word) * 19 + 100))
         return (f"red-word-{word_index + 1}", (max(0, x - 30), max(0, y - 38), width, 112))
+    return None
+
+
+def targeted_ocr_threshold(item: dict[str, str], shot: dict[str, Any]) -> int | None:
+    """Return a restrained binary threshold for known overlay colors/backgrounds."""
+    kind = item.get("kind")
+    args = shot.get("args") or {}
+    setting = args.get("setting") or shot.get("setting")
+    if kind == "day-counter":
+        return 140
+    if kind == "scene-label" and setting in {"busStop", "calendar"}:
+        return 80
     return None
 
 
@@ -253,6 +267,26 @@ def ocr_frame(
         for psm in ("7", "11", "8"):
             crop_outputs.append(run_checked([
                 "tesseract", str(crop), "stdout", "-l", crop_language, "--psm", psm
+            ]).strip())
+        # Binarized OCR tuned to each overlay's known foreground/background palette.
+        # This adds evidence but keeps the same acceptance threshold and 2-of-3 rule.
+        binary_threshold = targeted_ocr_threshold(item, shot)
+        if binary_threshold is not None:
+            binary_crop = work_dir / f"{label}-{item_index + 1}-{region_name}-binary.png"
+            run_checked([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                "-i", str(frame),
+                "-vf",
+                (
+                    f"crop={width * 2}:{height * 2}:{x * 2}:{y * 2},"
+                    "scale=iw*2:ih*2:flags=lanczos,format=gray,"
+                    f"lut=y='if(gte(val,{binary_threshold}),255,0)'"
+                ),
+                "-frames:v", "1", str(binary_crop)
+            ])
+            crop_outputs.append(run_checked([
+                "tesseract", str(binary_crop), "stdout",
+                "-l", crop_language, "--psm", "7"
             ]).strip())
         region_text = "\n".join(crop_outputs).strip()
         region_outputs[region_name] = region_text
@@ -347,7 +381,7 @@ def audit(video: Path, shots_path: Path, languages: str = "vie+eng",
 
     failed = total_items - passed_items
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "video": str(video),
         "shot_manifest": str(shots_path),
         "video_duration_seconds": round(duration, 3),
