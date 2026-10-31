@@ -4467,6 +4467,14 @@ def download_openmoji_assets(root,index):
     return report
 
 
+INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS = {
+    "http://creativecommons.org/licenses/publicdomain/",
+    "https://creativecommons.org/licenses/publicdomain/",
+    "http://creativecommons.org/publicdomain/mark/1.0/",
+    "https://creativecommons.org/publicdomain/mark/1.0/",
+}
+
+
 INTERNET_ARCHIVE_LICENSE_PATHS = {
     "/publicdomain/zero/1.0/": "CC0-1.0",
     "/licenses/cc0/3.0/": "CC0-3.0",
@@ -4593,9 +4601,8 @@ def internet_archive_public_domain_usage_is_verified(page_html,identifier):
         return False
     if str(link.get("text") or "").strip().casefold()!="public domain":
         return False
-    return internet_archive_license_from_item_metadata(
-        link.get("href"),"Public Domain"
-    )=="Public Domain (item-level Internet Archive rights statement)"
+    href=str(link.get("href") or "").strip()
+    return href in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS
 
 
 def internet_archive_fetch_item_page(identifier,timeout=35):
@@ -4821,10 +4828,8 @@ def download_internet_archive_videos(root,index):
                 # Verify that exact page field before accepting this legacy Public Domain URL.
                 metadata_rights=str(metadata.get("rights") or "").strip()
                 if (not rights["verified"] and collection=="prelinger"
-                        and not metadata_rights
-                        and internet_archive_license_from_item_metadata(
-                            rights["license_url"],"Public Domain"
-                        )=="Public Domain (item-level Internet Archive rights statement)"):
+                        and metadata_rights.casefold() in {"","public domain"}
+                        and rights["license_url"] in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS):
                     try:
                         item_page_html=internet_archive_fetch_item_page(identifier)
                         if internet_archive_public_domain_usage_is_verified(item_page_html,identifier):
