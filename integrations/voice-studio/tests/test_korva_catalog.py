@@ -38,11 +38,11 @@ class KorvaCatalogueTests(unittest.TestCase):
                     "Xin chào", "khanh_vy", Path(tmp) / "voice.wav",
                     settings={"total_steps": 32, "num_threads": 4}, seed=123,
                 )
-        loader.assert_called_once_with(4)
+                loader.assert_called_once_with(4)
+                self.assertTrue(output.is_file())
         self.assertEqual(engine.kwargs["lang"], "vi")
         self.assertEqual(engine.kwargs["total_steps"], 32)
         self.assertEqual(engine.kwargs["seed"], 123)
-        self.assertTrue(output.is_file())
 
     def test_rejects_quality_steps_above_upstream_maximum(self):
         with tempfile.TemporaryDirectory() as tmp:
