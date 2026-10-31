@@ -74,7 +74,8 @@ NPS_ITEM_RIGHTS_EXCEPTION_RE = re.compile(
     r"used\s+with\s+permission|permission\s+(?:is\s+)?required|"
     r"not\s+(?:in\s+the\s+)?public\s+domain|"
     r"all\s+rights\s+reserved|non[-\s]?commercial|"
-    r"not\s+cleared\s+for\s+(?:commercial|public)",
+    r"not\s+cleared\s+for\s+(?:commercial|public)|"
+    r"commercial(?:\s+or\s+promotional)?\s+use\s+(?:is\s+)?not\s+(?:cleared|permitted|authorized)",
     re.IGNORECASE,
 )
 NPS_MEDIA_PATH_RE = re.compile(
