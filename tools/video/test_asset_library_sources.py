@@ -1961,6 +1961,7 @@ class NASASVSPublicDomainProbeTests(unittest.TestCase):
         url = "https://svs.gsfc.nasa.gov/vis/a000000/a005100/a005101/ocean.mp4"
         response = mock.MagicMock()
         response.__enter__.return_value = response
+        response.geturl.return_value = url
         response.status = 206
         response.headers = {
             "Content-Type": "video/mp4",
