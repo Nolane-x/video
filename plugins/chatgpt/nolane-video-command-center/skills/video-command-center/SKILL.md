@@ -10,6 +10,8 @@ Act as the user's single front door to Nolane video production. Restore project 
 ## Internal routing
 There are 29 bundled skills. Use them automatically; do not ask the user to enable another plugin for tasks already covered internally. The 29th skill, `specialist-plugin-router`, selects a separate specialist plugin only when deeper tool-specific expertise materially helps.
 
+Before selecting engines for a video project, read `docs/GENRE_ROUTING_MATRIX.md` and, when the repository workspace is available, `tools/video/genre-routing.json`. Treat the JSON as the machine-readable routing contract: choose the closest primary profile, then follow its creative owners, primary versus conditional tools, required evidence, guardrails and `qaChecks`. For a deliberate hybrid, name the primary profile and explain the specific secondary route. Conditional tools are not mandatory dependencies. H2/stick-figure style is not a global house style; only consider it inside the narrative-animation route when the brief or an established series explicitly calls for it. The route must never mutate the parallel asset-library workstream.
+
 The separate specialist plugins are indexed in `references/PLUGIN-REGISTRY.md`. When a deeper handoff is needed:
 1. Select the smallest relevant specialist and read its source registry/license notice.
 2. Pass the task, repo/branch/path, exact installed versions, accepted inputs, limitations, acceptance criteria and required evidence.
