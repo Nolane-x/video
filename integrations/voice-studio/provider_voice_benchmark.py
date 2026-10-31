@@ -67,6 +67,7 @@ def _synthesize(
     engine: str | None,
     language: str,
     seed: int,
+    client: VoiceStudioClient,
 ) -> Path:
     voice_id = str(candidate.get("id") or "")
     if not voice_id:
@@ -74,7 +75,7 @@ def _synthesize(
     if provider == "voicestudio":
         if not engine:
             raise ValueError("VoiceStudio benchmark requires an exact --engine ID")
-        return VoiceStudioClient().synthesize(
+        return client.synthesize(
             text, destination, engine=engine, voice=voice_id,
             language=language, speed=1.0, seed=seed,
         )
@@ -233,7 +234,7 @@ def run_benchmark(
         try:
             path = _synthesize(
                 provider, candidate, text, destination,
-                engine=engine, language=language, seed=seed + index,
+                engine=engine, language=language, seed=seed, client=client,
             )
             if not path.is_file() or path.stat().st_size <= 44:
                 raise RuntimeError("Provider returned no usable audio file")
