@@ -1600,6 +1600,29 @@ class DistributedAssetLibraryTests(unittest.TestCase):
 
 
 
+class ReleaseLookupTests(unittest.TestCase):
+    def test_release_lookup_finds_draft_in_release_collection(self):
+        releases = [
+            {"id": 5, "tag_name": "older", "draft": False, "assets": []},
+            {"id": 42, "tag_name": "draft-build", "draft": True, "assets": []},
+        ]
+        with mock.patch.object(release_finalizer, "_run_gh_json", return_value=releases) as gh:
+            release = release_finalizer.release_by_tag("Nolane-x/video", "draft-build")
+        self.assertEqual(release["id"], 42)
+        self.assertTrue(release["draft"])
+        gh.assert_called_once_with([
+            "gh", "api", "repos/Nolane-x/video/releases?per_page=100"
+        ])
+
+    def test_release_lookup_fails_clearly_when_tag_is_not_listed(self):
+        with mock.patch.object(
+            release_finalizer, "_run_gh_json",
+            return_value=[{"id": 5, "tag_name": "other", "draft": True, "assets": []}],
+        ):
+            with self.assertRaisesRegex(RuntimeError, "not found in the first 100"):
+                release_finalizer.release_by_tag("Nolane-x/video", "missing-tag")
+
+
 class ReleaseAssetVerificationTests(unittest.TestCase):
     def test_release_verification_requires_all_uploaded_asset_hashes_and_sizes(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1622,7 +1645,7 @@ class ReleaseAssetVerificationTests(unittest.TestCase):
             ]
             with mock.patch.object(
                 release_finalizer, "_run_gh_json",
-                return_value={"id": 42, "draft": True, "assets": remote_assets},
+                return_value=[{"id": 42, "tag_name": "draft-build", "draft": True, "assets": remote_assets}],
             ):
                 result = release_finalizer.verify_release_assets(
                     "Nolane-x/video",
@@ -1654,7 +1677,7 @@ class ReleaseAssetVerificationTests(unittest.TestCase):
             remote_assets.append({"name": "video-assets-stale.zip", "size": 1, "digest": "sha256:" + "0" * 64})
             with mock.patch.object(
                 release_finalizer, "_run_gh_json",
-                return_value={"id": 42, "draft": True, "assets": remote_assets},
+                return_value=[{"id": 42, "tag_name": "draft-build", "draft": True, "assets": remote_assets}],
             ):
                 with self.assertRaisesRegex(RuntimeError, "unexpected/stale"):
                     release_finalizer.verify_release_assets(
@@ -1678,7 +1701,7 @@ class ReleaseAssetVerificationTests(unittest.TestCase):
             ]
             with mock.patch.object(
                 release_finalizer, "_run_gh_json",
-                return_value={"id": 42, "draft": True, "assets": remote_assets},
+                return_value=[{"id": 42, "tag_name": "draft-build", "draft": True, "assets": remote_assets}],
             ):
                 with self.assertRaisesRegex(RuntimeError, "SHA-256 digest is missing"):
                     release_finalizer.verify_release_assets(
