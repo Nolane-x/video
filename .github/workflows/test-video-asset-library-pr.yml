@@ -12,6 +12,7 @@ on:
       - "tools/video/eso_video_importer.py"
       - "tools/video/cdc_broll_importer.py"
       - "tools/video/nps_broll_importer.py"
+      - "tools/video/nps_gallery_image_importer.py"
       - "tools/video/probe_nasa_svs.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
@@ -28,6 +29,7 @@ on:
       - "tools/video/nasa_svs_importer.py"
       - "tools/video/eso_video_importer.py"
       - "tools/video/nps_broll_importer.py"
+      - "tools/video/nps_gallery_image_importer.py"
       - "tools/video/probe_nasa_svs.py"
       - "tools/video/build_cumulative_asset_library_index.py"
       - "tools/video/finalize_asset_library_release.py"
@@ -71,6 +73,7 @@ jobs:
           python -m py_compile tools/video/eso_video_importer.py
           python -m py_compile tools/video/cdc_broll_importer.py
           python -m py_compile tools/video/nps_broll_importer.py
+          python -m py_compile tools/video/nps_gallery_image_importer.py
           python -m py_compile tools/video/probe_nasa_svs.py
           python -m py_compile tools/video/build_cumulative_asset_library_index.py
           python -m py_compile tools/video/finalize_asset_library_release.py
