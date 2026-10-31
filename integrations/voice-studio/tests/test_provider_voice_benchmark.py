@@ -129,6 +129,32 @@ class ProviderVoiceBenchmarkTests(unittest.TestCase):
             self.assertTrue(report["cloud_enabled"])
             self.assertEqual(report["ready"], 4)
 
+    def test_optional_asr_uses_same_voice_studio_client_and_adds_wer_cer(self):
+        candidate = {"id": "khanh_vy", "name": "Khánh Vy"}
+        class AsrClient:
+            def transcribe(self, audio_path, language=None):
+                self.last_path = audio_path
+                self.last_language = language
+                return "Xin chào Việt Nam."
+        client = AsrClient()
+        def fake_synthesize(provider, candidate, text, destination, **kwargs):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"RIFF" + b"\\0" * 64)
+            return destination
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(benchmark, "_candidates", return_value=[candidate]):
+                with patch.object(benchmark, "_synthesize", side_effect=fake_synthesize):
+                    report = benchmark.run_benchmark(
+                        "korva", "Xin chào Việt Nam.", Path(tmp),
+                        language="vi", seed=99, asr=True, client=client, delay=0,
+                    )
+            row = report["candidates"][0]
+            self.assertEqual(row["asr_intelligibility_proxy"]["wer"], 0)
+            self.assertEqual(row["asr_intelligibility_proxy"]["cer"], 0)
+            self.assertEqual(client.last_language, "vi")
+            page = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+            self.assertIn("ASR proxy WER 0.0%", page)
+
     def test_all_requires_voice_studio_engine_for_fair_comparison(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(benchmark, "_candidates") as candidates:
