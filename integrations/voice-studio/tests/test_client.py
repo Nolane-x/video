@@ -57,6 +57,24 @@ class VoiceStudioClientTests(unittest.TestCase):
             finally:
                 out.unlink(missing_ok=True)
 
+    def test_refuses_api_key_over_plain_http_to_remote_host(self):
+        with patch("urllib.request.urlopen") as open_url:
+            client = VoiceStudioClient(
+                base_url="http://192.0.2.10:3900", api_key="secret-test-key"
+            )
+            with self.assertRaises(VoiceStudioError):
+                client.health()
+            open_url.assert_not_called()
+
+    def test_allows_api_key_over_https(self):
+        response = FakeResponse(b'{"status":"ok"}')
+        with patch("urllib.request.urlopen", return_value=response) as open_url:
+            result = VoiceStudioClient(
+                base_url="https://voice.example.test", api_key="secret-test-key"
+            ).health()
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(open_url.call_args.args[0].get_header("Authorization"), "Bearer secret-test-key")
+
     def test_rejects_overlong_segment_before_network(self):
         with patch("urllib.request.urlopen") as open_url:
             with self.assertRaises(ValueError):
