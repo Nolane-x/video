@@ -98,6 +98,7 @@ INTERNET_ARCHIVE_SEARCH_PAGES = 5
 INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION = 220
 INTERNET_ARCHIVE_MAX_VIDEO_BYTES = 250 * 1024 * 1024
 INTERNET_ARCHIVE_TOTAL_MAX_BYTES = 8 * 1024 * 1024 * 1024
+INTERNET_ARCHIVE_COLLECTION_MAX_BYTES = {"prelinger": 4 * 1024 * 1024 * 1024, "nasa": 4 * 1024 * 1024 * 1024}
 INTERNET_ARCHIVE_MAX_DURATION_SECONDS = 1800
 INTERNET_ARCHIVE_VIDEO_EXTENSIONS = {".mp4", ".ogv", ".webm"}
 OPENMOJI_VERSION = "17.0.0"
@@ -4789,9 +4790,13 @@ def download_internet_archive_videos(root,index):
                                "reason":str(exc)[:350]})
         print("[Internet Archive]",collection,"unique search candidates:",len(candidates))
         downloaded_for_collection=0
+        collection_bytes=0
         examined=0
         for identifier in candidates:
-            if downloaded_for_collection>=cap or examined>=INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION or total_bytes>=INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+            if (downloaded_for_collection>=cap
+                    or examined>=INTERNET_ARCHIVE_MAX_ITEM_PAGES_PER_COLLECTION
+                    or collection_bytes>=INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]
+                    or total_bytes>=INTERNET_ARCHIVE_TOTAL_MAX_BYTES):
                 break
             examined+=1
             seen.add(identifier)
@@ -4875,6 +4880,13 @@ def download_internet_archive_videos(root,index):
                 except Exception as file_exc:
                     row.update(status="download_failed",reason=str(file_exc)[:420])
                     report.append(row); continue
+                if collection_bytes+len(blob)>INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]:
+                    row.update(
+                        status="skipped_collection_size_limit",
+                        reason=f"The video would exceed the {collection} collection byte budget.",
+                    )
+                    report.append(row)
+                    break
                 if total_bytes+len(blob)>INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
                     row.update(status="skipped_total_size_limit",reason="The video would exceed the aggregate Internet Archive download ceiling.")
                     report.append(row); break
@@ -4915,6 +4927,7 @@ def download_internet_archive_videos(root,index):
                     "size_bytes":len(blob),"sha256":digest
                 })
                 total_bytes+=len(blob)
+                collection_bytes+=len(blob)
                 downloaded_for_collection+=1
                 row.update(status="downloaded",file=target.name,source_file_url=file_url,
                            filename=filename,size_bytes=len(blob),duration_seconds=chosen["duration_seconds"],
@@ -4925,7 +4938,8 @@ def download_internet_archive_videos(root,index):
             except Exception as exc:
                 row.update(status="item_failed",reason=str(exc)[:420])
                 report.append(row)
-        print("[Internet Archive]",collection,":",downloaded_for_collection,"downloaded from",examined,"item metadata records")
+        report.append({"id":"internet-archive-"+collection+"-summary","status":"summary","collection":collection,"downloaded_videos":downloaded_for_collection,"indexed_resource_bytes":collection_bytes,"max_collection_bytes":INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection],"max_video_bytes":INTERNET_ARCHIVE_MAX_VIDEO_BYTES})
+        print("[Internet Archive]",collection,":",downloaded_for_collection,"downloaded from",examined,"item metadata records;",collection_bytes,"source bytes")
     return report
 
 
