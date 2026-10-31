@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_toolchain import validate
 from validate_plugin_packages import validate as validate_plugins
+from validate_genre_routing import validate as validate_genre_routing, validate_data as validate_genre_routing_data
 from build_npm_sbom import build
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -129,6 +130,45 @@ class ToolchainManifestTests(unittest.TestCase):
             )
         )
         self.assertTrue(str(blender["checksumUrl"]).endswith("blender-5.2.3.sha256"))
+
+
+class GenreRoutingContractTests(unittest.TestCase):
+    def test_machine_readable_genre_routes_match_human_matrix(self):
+        self.assertEqual(validate_genre_routing(ROOT), [])
+
+    def test_genre_routing_rejects_missing_profile(self):
+        data = json.loads(
+            (ROOT / "tools/video/genre-routing.json").read_text(encoding="utf-8")
+        )
+        data["profiles"].pop()
+        matrix = (ROOT / "docs/GENRE_ROUTING_MATRIX.md").read_text(encoding="utf-8")
+        errors = validate_genre_routing_data(data, matrix)
+        self.assertTrue(any("genre profile coverage mismatch" in error for error in errors))
+
+    def test_genre_routing_requires_product_truth_and_privacy_checks(self):
+        data = json.loads(
+            (ROOT / "tools/video/genre-routing.json").read_text(encoding="utf-8")
+        )
+        product = next(p for p in data["profiles"] if p["id"] == "product-software-demo")
+        product["qaChecks"].remove("actual-ui-truth-check")
+        matrix = (ROOT / "docs/GENRE_ROUTING_MATRIX.md").read_text(encoding="utf-8")
+        errors = validate_genre_routing_data(data, matrix)
+        self.assertTrue(any("actual-ui-truth-check" in error for error in errors))
+
+    def test_quality_assurance_skill_requires_independent_review(self):
+        skill = (
+            ROOT / "plugins/chatgpt/nolane-video-command-center/skills/video-quality-assurance/SKILL.md"
+        ).read_text(encoding="utf-8").lower()
+        for phrase in (
+            "independent evaluation",
+            "open-ended defect search",
+            "technical defect",
+            "creative defect",
+            "continuity defect",
+            "generation/model defect",
+            "corrective-action protocol",
+        ):
+            self.assertIn(phrase, skill)
 
 
 if __name__ == "__main__":
