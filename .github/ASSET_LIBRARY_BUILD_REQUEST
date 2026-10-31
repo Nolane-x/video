@@ -1,1 +1,5 @@
-Build from latest main source caps. Previous published baseline: video-asset-library-build-41078978167. Compare next build against prior per-asset SHA-256 to measure unique library growth.
+Build from latest main source caps after PR #19 (NASA SVS source lane).
+Previous published baseline: video-asset-library-build-41078978167.
+Include the NASA SVS lane (17-topic discovery, max 170 page checks, max 36 videos, 300 MiB/file, 4 GiB lane ceiling).
+Require all source lanes from SOURCE_LANES plus originals; the finalizer must verify every shard manifest, bundle coverage, remote byte count and GitHub SHA-256 digest before publishing.
+After publication, compare against every earlier published asset-library release by exact per-asset SHA-256 and update the cumulative index; count only unique indexed resource bytes toward the 50,000,000,000-byte target.
