@@ -62,6 +62,18 @@ Credit CDC as the source and do not imply CDC endorsement. CDC B-roll may show i
 - The Met and Wikimedia continue to use per-item Public Domain/CC0 checks. Smithsonian Open Access is attempted with the configured `SMITHSONIAN_API_KEY` or the low-volume `DEMO_KEY` fallback; no Smithsonian asset is counted as successful unless both the record and exact media file pass the CC0 gate.
 - Exact successful download counts are generated into each `ASSET_INDEX.json`; API timeouts and skipped records are not represented as successful downloads.
 
+
+## Build 74 capacity expansion — source caps, not promised download counts
+
+The next full build widens the ceiling on already-vetted source lanes. These are hard maximums; the actual index records what each source returns and successfully passes through every rights, format, size and checksum gate.
+
+- **NASA SVS:** up to 60 videos, 300 MiB per source file and 6 GiB aggregate; up to 240 official page IDs are considered across topic searches. The public-domain-unless-noted rule, page-level music/copyright screen, exact `svs.gsfc.nasa.gov/vis/` allowlist and source SHA-256 checks are unchanged.
+- **ESO:** up to 120 official video pages inspected and 30 silent H.264 previews imported, 300 MiB per original file and 6 GiB aggregate. Full credit, official page-published source SHA-256, visible attribution, audio removal and adaptation disclosure remain mandatory; restrictive item rights are skipped.
+- **USGS:** up to 160 images, 96 videos and 60 audio files; 10 MiB/image, 100 MiB/video, 30 MiB/audio and 13 GiB aggregate. Every item still requires the exact item-level `Sources/Usage: Public Domain` statement and approved direct-media host/path.
+- **Internet Archive:** up to 160 items per collection and 320 item metadata pages inspected per collection; 250 MiB/file, 6 GiB for Prelinger, 6 GiB for NASA and 12 GiB aggregate. CC0 is accepted only from the exact item metadata license URL. Prelinger Public Domain fallback still requires the exact canonical item's Usage row and matching Public Domain license link; it is never relabelled CC0. Third-party footage/music flags remain for human review.
+
+No cap increase changes a licence or turns a source-level default into blanket permission. Only files actually downloaded, verified and included by the finalizer appear in a release index.
+
 ## Usage
 
 Use `GENRE_PLAYBOOK.md` to select a visual language first, then search by category and combine only assets that help the story. Do not make every film look alike by swapping the title over the same background. Mix source media, purpose-built environments, real 3D models, diagrams, and custom composition when the genre calls for them.
