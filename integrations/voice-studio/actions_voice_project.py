@@ -690,6 +690,10 @@ def run_project(
     }
     if status == "complete":
         _write_delivery_readme(output_dir, result)
+    # Create the report before counting so its own final file is represented in
+    # the count. The manifest is then generated after the report is finalized,
+    # making the report's checksum stable without recursive self-hashing.
+    _write_json(output_dir / "actions-voice-project-report.json", result)
     file_count = sum(
         path.is_file() and path.name != "artifact-manifest.json"
         for path in output_dir.rglob("*")
