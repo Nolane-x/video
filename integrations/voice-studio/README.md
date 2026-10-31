@@ -4,6 +4,39 @@ This is the voice-production layer for `Nolane-x/video`. It reuses the user's
 pinned VoiceStudio application as the voice-management and synthesis core; it
 does not rebuild another desktop studio or duplicate the upstream backend.
 
+## 0. Production execution: GitHub Actions first
+
+All production audio acceptance runs in GitHub Actions; do not use a developer
+PC as the render worker. The first live CPU lane is
+[Voice Studio Actions CPU lab](../../.github/workflows/voice-studio-actions-lab.yml).
+
+It runs on GitHub-hosted Ubuntu 24.04 and performs a real render, not only unit
+tests:
+
+- Pins `korvatts==0.1.3` and resolves an immutable Hugging Face model commit
+  before downloading the ONNX model snapshot.
+- Downloads only `onnx/` and `voice_styles/`; it deliberately excludes raw
+  reference recordings and demo audio.
+- Renders all ten Vietnamese preset voices against four identical test
+  scenarios: tones/phonemes, Vietnamese-English code-switching, numbers/names,
+  and long-form documentary narration. That is 40 WAV samples per full run.
+- Probes every WAV with FFprobe/FFmpeg, verifies SHA-256, and records duration,
+  sample rate, channels, codec, RMS, peak, clipping and silence signals.
+- Exports blind listening pages, machine-readable reports and an Actions
+  artifact containing WAVs and QA evidence. Artifacts are retained for 14 days.
+
+Run it from GitHub: open **Actions → Voice Studio Actions CPU lab → Run
+workflow**. It also runs for changes to the voice-lab source on the integration
+branch and weekly on the default branch after merge.
+
+The CPU lab is the repeatable Vietnamese baseline, not the full VoiceStudio
+voice-design service. It does not create custom profiles, clone speakers or
+claim ElevenLabs-level quality. The pinned VoiceStudio application remains the
+voice-management/design core; a heavier VoiceStudio engine lane must run as a
+separate Actions job on a runner with enough disk/RAM/GPU for that exact model.
+No live model should be silently moved to a personal computer when Actions
+resources are insufficient.
+
 ## 1. VoiceStudio application
 
 The application is pinned as an independent Git submodule:
