@@ -2592,6 +2592,256 @@ class CDCBrollImporterTests(unittest.TestCase):
         )
 
 
+class NPSBrollImporterTests(unittest.TestCase):
+    INDEX_URL = "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm"
+    DETAIL_URL = "https://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd10.htm"
+    VIDEO_ID = "44ce0b69-81e4-491c-896f-d10a744bc5db"
+    URL_720 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}720p.mp4"
+    URL_1080 = f"https://www.nps.gov/nps-audiovideo/audiovideo/{VIDEO_ID}1080p.mp4"
+    INDEX_HTML = f"""
+    <html><body>
+      <h1>Grand Canyon National Park B-Roll archive</h1>
+      <div class="TextWrapped">
+        Grand Canyon National Park's B-Roll archive provides free, public domain,
+        downloadable video clips. All video files in this archive are "public domain"
+        clips. You are free to use these videos without a release from the National
+        Park Service. The videos must not be used to imply National Park Service
+        endorsement. The NPS arrowhead is protected.
+        Please credit "Courtesy of the National Park Service."
+      </div>
+      <a href="{self.DETAIL_URL}">Aerial of Grand Canyon Cliffs and Temples</a>
+      <a href="https://evil.example/grca/learn/photosmultimedia/b-roll_hd99.htm">Bad host</a>
+      <a href="https://www.nps.gov/grca/learn/photosmultimedia/not-a-video.htm">Unrelated page</a>
+    </body></html>
+    """
+    DETAIL_HTML = f"""
+    <html><head><meta name="description" content="Aerial footage of Grand Canyon cliffs and temples."></head>
+    <body><h1>B-roll Video: Aerial of Cliffs and Temples</h1>
+      <div class="VideoHero">
+        <video src="{URL_720}">
+          <source src="{URL_720}" type="video/mp4" res="720" label="720p">
+          <source src="{URL_1080}" type="video/mp4" res="1080" label="1080p">
+        </video>
+        <div class="vjs-dock-text">
+          <div class="vjs-dock-title">Aerial of Grand Canyon Cliffs and Temples</div>
+          <div class="vjs-dock-description">Slow aerial footage over the canyon.</div>
+        </div>
+      </div>
+    </body></html>
+    """
+
+    def test_official_page_and_media_allowlists_reject_spoofed_hosts_and_bad_paths(self):
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(self.INDEX_URL),
+            self.INDEX_URL,
+        )
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_page_url(
+                "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper()
+            ),
+            "https://www.nps.gov/media/video/view.htm?id=" + self.VIDEO_ID.upper(),
+        )
+        for url in (
+            "http://www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov.evil.example/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://user@www.nps.gov/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov:444/grca/learn/photosmultimedia/b-roll_hd_index.htm",
+            "https://www.nps.gov/yose/learn/photosmultimedia/b-roll_hd_index.htm?x=1",
+            "https://www.nps.gov/media/video/view.htm?id=not-a-guid",
+            "https://www.nps.gov/grca/other/b-roll_hd_index.htm",
+        ):
+            self.assertIsNone(nps_broll_importer.normalize_nps_page_url(url), url)
+
+        self.assertEqual(
+            nps_broll_importer.normalize_nps_media_url(self.URL_1080), self.URL_1080
+        )
+        for url in (
+            "http://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov.evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4?download=1",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mov",
+            "https://www.nps.gov/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "9999p.mp4",
+            "https://evil.example/nps-audiovideo/audiovideo/" + self.VIDEO_ID + "1080p.mp4",
+        ):
+            self.assertIsNone(nps_broll_importer.normalize_nps_media_url(url), url)
+        self.assertTrue(
+            nps_broll_importer.nps_media_response_url_is_allowed(
+                self.URL_1080, self.URL_1080
+            )
+        )
+        self.assertFalse(
+            nps_broll_importer.nps_media_response_url_is_allowed(
+                self.URL_1080, "https://cdn.example.net/video.mp4"
+            )
+        )
+
+    def test_index_requires_explicit_public_domain_and_only_follows_approved_same_park_links(self):
+        parsed = nps_broll_importer.parse_nps_index_page(
+            self.INDEX_HTML, "grca", self.INDEX_URL
+        )
+        self.assertEqual(parsed["child_pages"], [self.DETAIL_URL])
+        self.assertEqual(parsed["media_pages"], [])
+        self.assertTrue(parsed["credit_required_visible"])
+        self.assertEqual(
+            parsed["credit_text"], "Courtesy of the National Park Service."
+        )
+        with self.assertRaisesRegex(RuntimeError, "explicit Public Domain"):
+            nps_broll_importer.parse_nps_index_page(
+                '<html><body><a href="/grca/learn/photosmultimedia/b-roll_hd10.htm">Clip</a></body></html>',
+                "grca",
+                self.INDEX_URL,
+            )
+
+    def test_video_group_parser_preserves_title_caption_and_prefers_best_rendition(self):
+        parsed = nps_broll_importer.parse_nps_page(self.DETAIL_HTML)
+        self.assertEqual(len(parsed["video_groups"]), 1)
+        group = parsed["video_groups"][0]
+        self.assertEqual(group["title"], "Aerial of Grand Canyon Cliffs and Temples")
+        self.assertIn("Slow aerial footage", group["description"])
+        options = nps_broll_importer._media_candidates_from_group(group)
+        self.assertEqual([row["resolution"] for row in options], [1080, 720])
+        self.assertEqual(options[0]["url"], self.URL_1080)
+
+    def test_item_level_rights_exceptions_are_rejected(self):
+        for description in (
+            "Copyrighted footage used with permission.",
+            "Third-party partner footage supplied under license.",
+            "Licensed music must not be redistributed.",
+            "Commercial use is not cleared.",
+        ):
+            self.assertTrue(
+                nps_broll_importer.nps_item_page_rights_exception(
+                    "NPS clip", description
+                ),
+                description,
+            )
+        self.assertFalse(
+            nps_broll_importer.nps_item_page_rights_exception(
+                "Grand Canyon aerial", "Slow silent aerial footage over the canyon."
+            )
+        )
+
+    def test_credit_parser_preserves_park_specific_credit_wording_verbatim(self):
+        credit, required = nps_broll_importer.parse_nps_credit(
+            '<p>Please credit "Courtsey of the National Park Service."</p>'
+        )
+        self.assertTrue(required)
+        self.assertEqual(credit, "Courtsey of the National Park Service.")
+        fallback, required = nps_broll_importer.parse_nps_credit("<p>No credit line</p>")
+        self.assertFalse(required)
+        self.assertEqual(fallback, "National Park Service")
+
+    def test_audio_remux_uses_video_only_mapping_and_ffprobe_confirms_zero_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "input.mp4"
+            output = Path(tmp) / "silent.mp4"
+            source.write_bytes(b"source")
+            output.parent.mkdir(parents=True, exist_ok=True)
+            calls = []
+
+            def fake_run(args, **kwargs):
+                calls.append(args)
+                if args[0] == "/usr/bin/ffmpeg":
+                    Path(args[-1]).write_bytes(b"silent-video-fixture" * 20000)
+                    return mock.Mock(returncode=0, stdout="", stderr="")
+                return mock.Mock(
+                    returncode=0,
+                    stdout=json.dumps({
+                        "streams": [{
+                            "codec_type": "video", "codec_name": "h264",
+                            "width": 1920, "height": 1080,
+                        }],
+                        "format": {"duration": "123.5"},
+                    }),
+                    stderr="",
+                )
+
+            with mock.patch.object(nps_broll_importer.shutil, "which",
+                                   side_effect=lambda name: "/usr/bin/" + name), \
+                 mock.patch.object(nps_broll_importer.subprocess, "run",
+                                   side_effect=fake_run):
+                info = nps_broll_importer._strip_nps_audio_with_ffmpeg(source, output)
+
+            self.assertEqual(info["width"], 1920)
+            self.assertEqual(info["height"], 1080)
+            self.assertEqual(info["duration_seconds"], 123.5)
+            self.assertIn("-map", calls[0])
+            self.assertIn("0:v:0", calls[0])
+            self.assertIn("-an", calls[0])
+            self.assertEqual(calls[1][0], "/usr/bin/ffprobe")
+
+    def test_full_downloader_indexes_silent_public_domain_clip_with_provenance(self):
+        source_bytes = b"verified NPS source fixture"
+        silent_bytes = b"silent nps video output" * 20000
+        index_html = self.INDEX_HTML
+        detail_html = self.DETAIL_HTML
+
+        def fake_fetch(url, limit=nps_broll_importer.MAX_PAGE_BYTES, timeout=35):
+            if url == self.INDEX_URL:
+                return index_html.encode()
+            if url == self.DETAIL_URL:
+                return detail_html.encode()
+            raise AssertionError("unexpected NPS page fetch: " + url)
+
+        def fake_download(url, destination):
+            self.assertEqual(url, self.URL_1080)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source_bytes)
+            return len(source_bytes), hashlib.sha256(source_bytes).hexdigest()
+
+        def fake_remux(source, destination):
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(silent_bytes)
+            return {
+                "width": 1920, "height": 1080,
+                "video_codec": "h264", "duration_seconds": 123.5,
+            }
+
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(
+                 nps_broll_importer, "INDEXES",
+                 ({
+                     "id": "grand-canyon", "park": "grca",
+                     "url": self.INDEX_URL, "title": "Grand Canyon B-roll",
+                 },),
+             ), \
+             mock.patch.object(nps_broll_importer, "_fetch_nps_page", side_effect=fake_fetch), \
+             mock.patch.object(nps_broll_importer, "_download_nps_source", side_effect=fake_download), \
+             mock.patch.object(nps_broll_importer, "_strip_nps_audio_with_ffmpeg", side_effect=fake_remux):
+            index = []
+            report = nps_broll_importer.download_nps_broll_media(Path(tmp), index)
+
+        downloaded = [row for row in report if row.get("status") == "downloaded"]
+        self.assertEqual(len(downloaded), 1)
+        self.assertEqual(len(index), 1)
+        entry = index[0]
+        self.assertEqual(entry["type"], "nps-broll-video")
+        self.assertEqual(entry["license"], "Public Domain (explicit National Park Service B-roll collection statement; not CC0)")
+        self.assertTrue(entry["public_domain_verified"])
+        self.assertTrue(entry["audio_stripped"])
+        self.assertEqual(entry["credit_text"], "Courtesy of the National Park Service.")
+        self.assertEqual(entry["source_sha256"], hashlib.sha256(source_bytes).hexdigest())
+        self.assertEqual(entry["sha256"], hashlib.sha256(silent_bytes).hexdigest())
+        self.assertEqual(entry["size_bytes"], len(silent_bytes))
+        self.assertEqual(entry["source_resolution_rank"], 1080)
+
+    def test_nps_lane_is_registered_catalogued_and_classified_as_footage(self):
+        self.assertEqual(
+            shard_builder.SOURCE_LANES["nps-broll"], "download_nps_broll_media"
+        )
+        self.assertEqual(
+            bundle_packager.classify_asset({
+                "type": "nps-broll-video",
+                "path": "third-party/nps/broll/grand-canyon.mp4",
+            }),
+            "footage",
+        )
+        catalog = json.loads(library.SOURCES_PATH.read_text(encoding="utf-8"))
+        entry = next(row for row in catalog["sources"] if row["id"] == "nps-park-broll-archive")
+        self.assertIn("Public Domain", entry["license"])
+        self.assertIn("not CC0", entry["license"])
+
+
 class CumulativeAssetLibraryIndexTests(unittest.TestCase):
     def _release(self, tag, repository, assets, bundle_name):
         bundle_paths = [asset["path"] for asset in assets]
