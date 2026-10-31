@@ -34,7 +34,7 @@ VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$")
 SHA256_RE = re.compile(r"(?i)(?:^|\s)([0-9a-f]{64})(?:\s|$)")
 RIGHTS_EXCEPTION_RE = re.compile(
     r"creative\s+commons\s+attribution[-\s]?no.?derivatives|"
-    r"\bCC\s*BY\s*[-–]?\s*ND\b|\bno.?derivatives\b|"
+    r"\bCC\s*BY\s*[-–]?\s*(?:ND|NC|SA)\b|\bno.?derivatives\b|"
     r"\bnon[- ]commercial\b|\bnoncommercial\b|"
     r"not\s+licensed\s+for\s+other\s+uses|"
     r"all\s+rights\s+reserved|permission\s+required|"
@@ -485,12 +485,17 @@ def download_eso_media(root: Path, index: list[dict]) -> list[dict]:
                 "license": "CC BY 4.0 (ESO public-video default unless item specifies otherwise)",
                 "license_url": "https://www.eso.org/public/copyright/",
                 "credit_text": parsed["credit_text"],
+                "credit_formatting_note": "Complete credit wording retained; HTML presentation and whitespace normalized for the metadata field.",
                 "credit_required_visible": True,
                 "credit_placement": "Reproduce the complete credit wording unaltered, clearly and visibly; use a visible end credit or on-screen overlay. A description-only credit is insufficient.",
                 "audio_stripped": True,
+                "modifications_disclosed": "Original audio streams removed; video stream copied without re-encoding.",
+                "adaptation_disclosure_required": True,
+                "people_in_frame_review_required": True,
+                "commercial_use_review_required_if_identifiable_people": True,
                 "audio_policy": "All audio streams removed. ESO music is not covered by the general CC BY 4.0 grant unless explicitly identified as part of the ESO Music Archive.",
-                "rights_basis": "Official ESO public-video page; default CC BY 4.0 applies unless that page states an exception. Full credit retained. Page-specific NoDerivatives, non-commercial, permission and other restrictive markers fail closed.",
-                "usage_notes": "Keep the full credit visible and unaltered. Do not use the ESO logo or imply ESO endorsement. Audio was stripped; do not restore the original soundtrack without separately verifying its rights.",
+                "rights_basis": "Official ESO public-video page; default CC BY 4.0 applies unless that page states an exception. Full credit wording retained. Page-specific NoDerivatives, non-commercial, ShareAlike variant, permission and other restrictive markers fail closed; identifiable-person restrictions are surfaced for review.",
+                "usage_notes": "Keep the full credit wording visible and unaltered. Disclose that audio streams were removed. If identifiable people appear, ESO states commercial use is not permitted for that material. Do not use the ESO logo or imply ESO endorsement. Do not restore the original soundtrack without separately verifying its rights.",
                 "license_filter_passed": True,
                 "redistributable": True,
             }
