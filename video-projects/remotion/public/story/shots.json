@@ -1328,7 +1328,24 @@
         "name": "The choice",
         "purpose": "Resolve the shadow motif and show attention becoming a repeated choice rather than a perfect streak"
       }
-    ]
+    ],
+    "blockingPreviewShotIds": [
+      "s001",
+      "s013",
+      "s015",
+      "s017",
+      "s021",
+      "s024",
+      "s029"
+    ],
+    "blockingPreviewApproval": {
+      "approved": false,
+      "reviewerId": "",
+      "reviewedAtUtc": "",
+      "previewSpecSha256": "",
+      "reviewedSegmentIds": [],
+      "reviewNotes": ""
+    }
   },
   "audioPlan": {
     "soundCues": [
