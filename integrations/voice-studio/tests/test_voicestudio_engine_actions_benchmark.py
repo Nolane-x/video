@@ -28,7 +28,7 @@ class FakeApi:
 class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
     def test_acceptance_is_not_written_without_explicit_manual_confirmation(self):
         api = FakeApi([{"engine_id": "supertonic3", "accepted": False}])
-        with self.assertRaisesRegex(PermissionError, "manually-dispatched"):
+        with self.assertRaisesRegex(PermissionError, "manually dispatch"):
             bench.verify_or_accept_license(api, accept_model_license=False)
         self.assertEqual(api.posts, [])
         self.assertEqual(api.last_get, "/api/settings/license/supertonic3")
@@ -95,6 +95,9 @@ class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
             with patch("urllib.request.urlopen", return_value=FakeResponse()) as opener:
                 path = Path(tmp) / "candidate.wav"
                 result = api.synthesize("Xin chào Việt Nam.", "F3", path)
+                self.assertTrue(path.is_file())
+                self.assertEqual(result["content_type"], "audio/wav")
+                self.assertEqual(result["sha256"], bench._sha256(path))
         request = opener.call_args.args[0]
         payload = json.loads(request.data.decode("utf-8"))
         self.assertEqual(payload["model"], "supertonic3")
@@ -102,9 +105,6 @@ class VoiceStudioEngineActionsBenchmarkTests(unittest.TestCase):
         self.assertEqual(payload["voice"], "F3")
         self.assertEqual(payload["num_step"], 12)
         self.assertEqual(payload["response_format"], "wav")
-        self.assertEqual(result["content_type"], "audio/wav")
-        self.assertTrue(path.is_file())
-        self.assertEqual(result["sha256"], bench._sha256(path))
 
 
 if __name__ == "__main__":
