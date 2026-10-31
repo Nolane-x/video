@@ -115,28 +115,29 @@ class ActionsVoiceProjectTests(unittest.TestCase):
                 (timeline / "transcript.txt").write_text("Xin chào Việt Nam.\n", encoding="utf-8")
                 return {"timeline_dir": "h2-project/timeline", "outputs": {}}
 
-            with patch.object(project.importlib.metadata, "version", return_value="0.1.3"):
-                with patch.object(project, "_download_model", return_value=root / "assets"):
-                    with patch.object(project.korva, "_engine") as engine:
-                        engine.return_value.list_voices.return_value = ["khanh_vy"]
-                        with patch.object(project, "generate", side_effect=fake_generate):
-                            with patch.object(project, "audit_report", return_value={"technical_pass": 1}):
-                                with patch.object(project, "_probe_audio", return_value={
-                                    "sample_rate_hz": 44100,
-                                    "duration_s": 2.0,
-                                    "peak_dbfs": -2.0,
-                                    "rms_dbfs": -18.0,
-                                    "clipped_sample_ratio": 0.0,
-                                    "trailing_silence_s": 0.1,
-                                    "silence_ratio_below_minus_40_db": 0.05,
-                                }):
-                                    with patch.object(project, "_technical_findings", return_value=[]):
-                                        with patch.object(project, "_run_h2_timing", side_effect=fake_h2) as h2:
-                                            report = project.run_project(
-                                                manifest_path,
-                                                out,
-                                                model_revision="a" * 40,
-                                            )
+            with patch.object(project, "REPO_ROOT", root):
+                with patch.object(project.importlib.metadata, "version", return_value="0.1.3"):
+                    with patch.object(project, "_download_model", return_value=root / "assets"):
+                        with patch.object(project.korva, "_engine") as engine:
+                            engine.return_value.list_voices.return_value = ["khanh_vy"]
+                            with patch.object(project, "generate", side_effect=fake_generate):
+                                with patch.object(project, "audit_report", return_value={"technical_pass": 1}):
+                                    with patch.object(project, "_probe_audio", return_value={
+                                        "sample_rate_hz": 44100,
+                                        "duration_s": 2.0,
+                                        "peak_dbfs": -2.0,
+                                        "rms_dbfs": -18.0,
+                                        "clipped_sample_ratio": 0.0,
+                                        "trailing_silence_s": 0.1,
+                                        "silence_ratio_below_minus_40_db": 0.05,
+                                    }):
+                                        with patch.object(project, "_technical_findings", return_value=[]):
+                                            with patch.object(project, "_run_h2_timing", side_effect=fake_h2) as h2:
+                                                report = project.run_project(
+                                                    manifest_path,
+                                                    out,
+                                                    model_revision="a" * 40,
+                                                )
             h2.assert_called_once()
             self.assertEqual(report["status"], "complete")
             self.assertEqual(report["generated_segments"], 1)
