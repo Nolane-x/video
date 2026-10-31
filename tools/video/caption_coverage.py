@@ -14,6 +14,7 @@ from typing import Any
 
 
 def normalize_text(value: str) -> str:
+    value = value.replace("Đ", "D").replace("đ", "d")
     folded = unicodedata.normalize("NFKD", value.casefold())
     without_marks = "".join(ch for ch in folded if not unicodedata.combining(ch))
     return " ".join(re.findall(r"[a-z0-9]+", without_marks))
