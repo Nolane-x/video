@@ -1,16 +1,16 @@
 {
   "interface": {
-    "displayName": "Nolane Video Command Center",
-    "shortDescription": "28 production video skills",
-    "longDescription": "One private entry point with 28 internal skills for end-to-end video direction, story, cinematography, Remotion/HyperFrames, Manim, 3D/VFX, AI media planning, ComfyUI, browser capture, audio/speech, bilingual caption QA, editorial interchange, CI, licensing and production review. Routes across the CPU-first Nolane-x/video toolchain and protects the separate resource-library workstream.",
-    "developerName": "Nolane Studio",
-    "category": "Productivity",
     "capabilities": [],
-    "defaultPrompt": "Create, continue or improve my video using Nolane Video Command Center. Select the smallest effective set of internal skills and tools, work in a clean dedicated GitHub branch, preserve the parallel asset workstream, render candidates and verify technical plus visual quality before delivery."
+    "category": "Productivity",
+    "defaultPrompt": "Use Nolane Video Command Center as the front door. First restore repo/project state and use its internal skills. When deeper tool-specific expertise is needed, consult the specialist registry and explicitly hand off to that plugin; do not claim hidden cross-plugin calls. Preserve the parallel asset-library boundary, research provenance, render candidates and verify actual visual/audio output.",
+    "developerName": "Nolane Studio",
+    "displayName": "Nolane Video Command Center",
+    "longDescription": "One private entry point with 29 internal skills plus an indexed handoff map for 37 source-backed specialist plugins across engines, storytelling, data visualization, vector/SVG tooling, media/speech, OCR/audio analysis, editorial, 3D/VFX, post-processing, interactive vector, browser, CI security and QA. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the separate resource-library workstream.",
+    "shortDescription": "29 core skills + 37 specialists"
   },
   "name": "nolane-video-command-center",
-  "version": "0.6.0",
-  "description": "The single AI-first front door for Nolane video production. Bundles 28 integrated skills for story, cinematography, motion, 3D/VFX, Manim, AI media, audio/speech, editorial, toolchain automation, licensing and evidence-based QA.",
+  "version": "0.7.7",
+  "description": "The single AI-first front door for Nolane video production. Includes 29 internal skills and an explicit routing map for 37 separately activated specialist plugins.",
   "author": {
     "name": "Nolane Studio"
   },
@@ -27,7 +27,13 @@
     "captions",
     "toolchain",
     "production",
-    "licensing"
+    "licensing",
+    "comfyui",
+    "playwright",
+    "shotcraft",
+    "ai-media",
+    "specialist-plugins",
+    "source-backed-skills"
   ],
   "repository": "https://github.com/Nolane-x/video",
   "skills": "./skills"
