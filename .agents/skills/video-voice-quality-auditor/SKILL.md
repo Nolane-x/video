@@ -1,0 +1,107 @@
+---
+name: video-voice-quality-auditor
+description: Audit TTS samples and production voice-over for intelligibility, Vietnamese pronunciation, audio engineering defects, speaker identity drift and human-reviewed naturalness. Use after auditions, batch synthesis, dubbing or voice casting.
+---
+
+# Video Voice Quality Auditor
+
+## Mission
+
+Separate measurable defects from subjective vocal quality. A technically valid WAV is not automatically a good performance, and an ASR score is not a naturalness score. Evaluate pronunciation, stability, intelligibility, emotional fit and audio engineering without inventing an ElevenLabs-equivalence percentage.
+
+## Three distinct evidence layers
+
+### A. Audio engineering signals
+
+Use the repository checker:
+
+```bash
+python integrations/voice-studio/voice_quality.py \
+  --report out/<project>-voice/voice-generation-report.json
+```
+
+Review codec, sample rate, channels, duration, peak/RMS, clipped-sample ratio, near-silence ratio and leading/trailing silence. Investigate:
+- empty or truncated files;
+- long silent tails;
+- near-silence;
+- clipping/peak headroom;
+- inconsistent channel/rate handling;
+- abrupt concatenation or bad fades;
+- excessive loudness differences between characters.
+
+Do not use a universal loudness target without considering the platform, soundtrack and mastering stage. Per-segment voice output is not the final mix.
+
+### B. Pronunciation and intelligibility proxy
+
+When VoiceStudio has a usable ASR engine installed, compare each generated sample to the exact script:
+
+```bash
+python integrations/voice-studio/voice_quality.py \
+  --report out/<project>-voice/voice-generation-report.json \
+  --asr --language vi
+```
+
+Or run the cross-provider same-script benchmark with `--asr`.
+
+Interpret WER/CER carefully:
+- NFC/diacritic-preserving comparison is essential for Vietnamese.
+- Check initial consonants, final consonants, all six tones, vowel length, numbers, dates, proper names, abbreviations and English technical terms embedded in Vietnamese.
+- An ASR can be wrong even when the speech is correct. Listen to every surprising mismatch.
+- ASR can normalize punctuation/spacing. A low WER is not proof of good rhythm, naturalness or speaker similarity.
+- A high WER can reflect ASR weakness, TTS pronunciation errors, text normalization mismatch or a clipped audio file.
+
+WER/CER is an intelligibility/pronunciation proxy only. Never translate it into “x% of ElevenLabs”.
+
+### C. Human performance and voice identity
+
+Listen to full samples and review them in scene context. Evaluate each dimension separately:
+1. naturalness: artifacts, breath/noise behaviour, smoothness, coarticulation;
+2. Vietnamese articulation: tones, consonants, names, numbers and code-switching;
+3. identity stability: same character across multiple lines and episodes;
+4. expression: emphasis, emotion, pauses and delivery control;
+5. character fit: does this sound like the correct narrator/host/expert/character?
+6. cast separation: are voices distinct enough when heard back-to-back?
+7. long-form stamina: does voice quality degrade or become repetitive over a long narration?
+
+Use blind same-script audition pages so the listener does not know which provider/profile is playing. Rate each dimension 1–5 only after listening to the complete samples. Record why a voice wins; do not treat the arithmetic mean as an objective benchmark.
+
+## Compare fairly
+
+Use the same script, language, engine configuration, synthesis speed, reference conditions and post-processing wherever possible. Korva can share an explicit seed across preset comparisons. VoiceStudio designed profiles must retain their saved design seed; do not overwrite it during A/B. Google/ElevenLabs calls can incur cost and require explicit `--allow-cloud`.
+
+Example:
+
+```bash
+python integrations/voice-studio/provider_voice_benchmark.py \
+  --provider all --engine voxcpm2 --allow-cloud --asr \
+  --text-file integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt \
+  --language vi --limit 20 --output out/benchmark-all
+```
+
+The resulting benchmark is evidence about the selected engines, voices, script, settings and current revisions, not a universal ranking.
+
+## Identity audit
+
+Review the `speaker_identity_audit` in `voice-quality-report.json`. A character with one `speaker_id` must keep one provider/engine/profile identity fingerprint. Any “drift” is a release blocker until the casting change is intentional and documented. “not_recorded” means a legacy/third-party report lacks a fingerprint; do not silently claim that it was consistent.
+
+## Acceptance gates
+
+A voice can be:
+- **Rejected:** wrong pronunciation, unstable identity, audible artifacts, unsuitable acting or unresolved rights.
+- **Needs revision:** good core timbre but script, pacing, seed, instruction or mastering needs work.
+- **Candidate:** usable sample but not yet approved for the series.
+- **Approved for role:** passed full listening, benchmark and rights gates for a specific character/series. It is not an endorsement for impersonation or unrestricted reuse.
+
+Do not accept a profile based only on its description, a successful API response, a model-card marketing claim or a blind rating average.
+
+## Required QA package
+
+- source script and stable cast manifest;
+- engine/model revision and licence/consent gate;
+- generated audio checksums;
+- technical audio report;
+- ASR transcript + WER/CER where available;
+- blind human ratings and reviewer notes;
+- identity drift report;
+- explicit status per voice and per segment;
+- known limitations and untested conditions.
