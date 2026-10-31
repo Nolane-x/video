@@ -1,0 +1,75 @@
+name: HyperFrames render proof
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hyperframes-render-proof
+  cancel-in-progress: false
+
+jobs:
+  render-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      HYPERFRAMES_SKIP_SKILLS: "1"
+      HYPERFRAMES_NO_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node24-hyperframes-${{ hashFiles('toolchain/node/package.json') }}
+
+      - name: Install core video runtime and browser
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          bash toolchain/scripts/install-core.sh
+
+      - name: Scaffold clean HyperFrames example
+        run: |
+          mkdir -p out
+          toolchain/node/node_modules/.bin/hyperframes init out/hyperframes-demo --example warm-grain --non-interactive
+          test -s out/hyperframes-demo/index.html
+
+      - name: Diagnose HyperFrames environment
+        run: toolchain/node/node_modules/.bin/hyperframes doctor --json
+
+      - name: Lint and run browser/layout/motion checks
+        working-directory: out/hyperframes-demo
+        run: |
+          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" lint --json | tee "$GITHUB_WORKSPACE/out/hyperframes-lint.json"
+          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" check --json --snapshots | tee "$GITHUB_WORKSPACE/out/hyperframes-check.json"
+
+      - name: Render proof MP4 and inspect streams
+        working-directory: out/hyperframes-demo
+        run: |
+          "$GITHUB_WORKSPACE/toolchain/node/node_modules/.bin/hyperframes" render --output "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" --fps 24 --quality draft
+          test -s "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4"
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate -of json "$GITHUB_WORKSPACE/out/hyperframes-demo.mp4" | tee "$GITHUB_WORKSPACE/out/hyperframes-metadata.json"
+
+      - name: Upload HyperFrames proof
+        uses: actions/upload-artifact@v7
+        with:
+          name: hyperframes-render-proof-${{ github.run_id }}
+          path: |
+            out/hyperframes-demo.mp4
+            out/hyperframes-lint.json
+            out/hyperframes-check.json
+            out/hyperframes-metadata.json
+            out/hyperframes-demo/.hyperframes/artifacts/snapshots/
+          if-no-files-found: error
+          retention-days: 14
