@@ -149,7 +149,7 @@ def validate_genre_routing(root: Path, errors: list[str]) -> None:
 
     if "Genre and Production Routing Matrix" not in master:
         errors.append(f"{master_path}: must link the genre-routing matrix")
-    if "conditional profile" not in master or "not a universal style rule" not in master:
+    if "conditional project profile" not in master or "not a universal style rule" not in master:
         errors.append(f"{master_path}: established H2 style must remain explicitly conditional")
     if "Do not impose this profile on other genres" not in agents:
         errors.append(f"{agents_path}: H2 style scope must be limited to its established series")
