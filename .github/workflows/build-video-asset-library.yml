@@ -1,6 +1,10 @@
 name: Build cross-genre video asset library
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/ASSET_LIBRARY_BUILD_REQUEST"
   workflow_dispatch:
 
 permissions:
@@ -8,7 +12,7 @@ permissions:
 
 # Serialize separate library builds, but fan out the independent source jobs inside one build.
 concurrency:
-  group: video-asset-library-distributed-v3
+  group: video-asset-library-distributed-v4
   cancel-in-progress: false
 
 jobs:
