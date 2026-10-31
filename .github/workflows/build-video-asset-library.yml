@@ -59,6 +59,7 @@ jobs:
           - kenney-splash
           - polyhaven
           - ambientcg
+          - blender-demo-cc0
           - lazytextures
           - poly-pizza
           - met
@@ -102,6 +103,7 @@ jobs:
         run: |
           python -m py_compile tools/video/build_asset_library.py
           python -m py_compile tools/video/build_asset_library_shard.py
+          python -m py_compile tools/video/blender_demo_importer.py
           python -m py_compile tools/video/nasa_svs_importer.py
           python -m py_compile tools/video/eso_video_importer.py
           python -m py_compile tools/video/cdc_broll_importer.py
