@@ -149,14 +149,16 @@ def choose_video_candidate(page: dict[str, Any]) -> tuple[dict[str, Any] | None,
     return candidates[0], "complete-svs-visualization; no page-level licensed-music marker"
 
 
-def _json(url: str) -> tuple[dict[str, Any], int]:
+def _json(url: str, limit: int = MAX_JSON_BYTES) -> tuple[dict[str, Any], int]:
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > MAX_JSON_BYTES:
+        raise ValueError("NASA SVS JSON limit must be between 1 and MAX_JSON_BYTES")
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=35) as response:
         length = response.headers.get("Content-Length")
-        if length and int(length) > MAX_JSON_BYTES:
+        if length and int(length) > limit:
             raise RuntimeError("NASA SVS JSON exceeds response ceiling")
-        body = response.read(MAX_JSON_BYTES + 1)
-    if len(body) > MAX_JSON_BYTES:
+        body = response.read(limit + 1)
+    if len(body) > limit:
         raise RuntimeError("NASA SVS JSON exceeds response ceiling")
     result = json.loads(body.decode("utf-8-sig"))
     if not isinstance(result, dict):
