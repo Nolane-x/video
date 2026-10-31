@@ -1,0 +1,134 @@
+name: Update cumulative content-addressed video asset library index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/CUMULATIVE_ASSET_INDEX_REQUEST"
+  workflow_dispatch:
+    inputs:
+      release_tags:
+        description: Newline-separated published video-asset-library Release tags (oldest to newest)
+        required: true
+        type: string
+      destination_release_tag:
+        description: Published Release that should receive the cumulative index
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cumulative-video-asset-library-index
+  cancel-in-progress: false
+
+jobs:
+  build-cumulative-index:
+    name: Deduplicate published library Releases by SHA-256
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Resolve and validate published Release tags
+        id: inputs
+        env:
+          RELEASE_TAGS_INPUT: ${{ inputs.release_tags }}
+          DESTINATION_TAG_INPUT: ${{ inputs.destination_release_tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            mapfile -t release_tags < .github/CUMULATIVE_ASSET_INDEX_REQUEST
+            destination_tag="${release_tags[-1]}"
+          else
+            mapfile -t release_tags < <(printf '%s\n' "${RELEASE_TAGS_INPUT}")
+            destination_tag="${DESTINATION_TAG_INPUT}"
+          fi
+
+          test "${#release_tags[@]}" -ge 1
+          seen="$(printf '%s\n' "${release_tags[@]}" | sort | uniq -d)"
+          test -z "${seen}"
+          for tag in "${release_tags[@]}"; do
+            case "${tag}" in
+              video-asset-library-build-*) ;;
+              *) echo "Refusing unexpected Release tag: ${tag}" >&2; exit 1 ;;
+            esac
+          done
+          case "${destination_tag}" in
+            video-asset-library-build-*) ;;
+            *) echo "Refusing unexpected destination Release tag: ${destination_tag}" >&2; exit 1 ;;
+          esac
+
+          releases_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100")"
+          for tag in "${release_tags[@]}"; do
+            jq -e --arg tag "${tag}" '.[] | select(.tag_name == $tag and .draft == false)' <<< "${releases_json}" >/dev/null
+          done
+          jq -e --arg tag "${destination_tag}" '.[] | select(.tag_name == $tag and .draft == false)' <<< "${releases_json}" >/dev/null
+
+          {
+            echo "destination_tag=${destination_tag}"
+            echo "release_count=${#release_tags[@]}"
+          } >> "${GITHUB_OUTPUT}"
+          printf '%s\n' "${release_tags[@]}" > dist-release-tags.txt
+
+      - name: Download only the index and volume manifests from each published Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/cumulative-input
+          while IFS= read -r tag; do
+            test -n "${tag}"
+            destination="dist/cumulative-input/${tag}"
+            mkdir -p "${destination}"
+            gh release download "${tag}" \
+              --pattern "ASSET_INDEX.json" \
+              --pattern "ASSET_BUNDLES.json" \
+              --dir "${destination}"
+            test -s "${destination}/ASSET_INDEX.json"
+            test -s "${destination}/ASSET_BUNDLES.json"
+          done < dist-release-tags.txt
+
+      - name: Merge provenance, deduplicate exact resource bytes and build download map
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/build_cumulative_asset_library_index.py
+          python tools/video/build_cumulative_asset_library_index.py \
+            --input-dir dist/cumulative-input \
+            --output-dir dist/cumulative
+
+          {
+            echo "## Cumulative video asset library"
+            echo
+            cat dist/cumulative/CUMULATIVE_ASSET_INDEX.json | python -c '
+          import json,sys
+          d=json.load(sys.stdin)
+          s=d["summary"]
+          print(f"- Unique resources: {s['unique_asset_count']:,}")
+          print(f"- Unique bytes: {s['unique_resource_bytes']:,} ({s['unique_resource_gb']:.3f} GB)")
+          print(f"- Target progress: {100*s['unique_resource_bytes']/s['target_bytes']:.2f}%")
+          print(f"- Duplicate resource occurrences: {s['duplicate_resource_occurrences']:,}")
+          print(f"- Source Releases: {s['source_release_count']}")
+          '
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload cumulative index to the latest published Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DESTINATION_TAG: ${{ steps.inputs.outputs.destination_tag }}
+        run: |
+          set -euo pipefail
+          gh release upload "${DESTINATION_TAG}" \
+            dist/cumulative/CUMULATIVE_ASSET_INDEX.json \
+            dist/cumulative/CUMULATIVE_ASSET_DOWNLOADS.json \
+            --clobber
