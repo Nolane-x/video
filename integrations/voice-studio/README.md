@@ -37,6 +37,16 @@ separate Actions job on a runner with enough disk/RAM/GPU for that exact model.
 No live model should be silently moved to a personal computer when Actions
 resources are insufficient.
 
+For a complete project with multiple characters, use the separate
+[Voice Studio Actions production renderer](../../.github/workflows/voice-studio-actions-project.yml).
+It reads a committed project manifest, synthesizes every dialogue block with a
+stable speaker cast, audits the WAV files, then invokes the repository's actual
+H2 `prep_voice.py` to create `voice.wav`, `blocks.json`, `lines.json`,
+`words.json` and `transcript.txt`. All files are uploaded as a GitHub Actions
+artifact. The included example manifest has four character voices and ten
+dialogue segments. The workflow rejects non-Korva providers rather than
+silently routing to local VoiceStudio or a cloud API.
+
 ## 1. VoiceStudio application
 
 The application is pinned as an independent Git submodule:
