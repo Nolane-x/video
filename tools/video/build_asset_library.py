@@ -4578,7 +4578,7 @@ class _InternetArchiveUsageParser(HTMLParser):
             self.in_usage_dd=False
 
 
-def internet_archive_public_domain_usage_is_verified(page_html,identifier):
+def internet_archive_public_domain_usage_is_verified(page_html,identifier,expected_license_url=None):
     """Accept only an exact item-page Usage: Public Domain label for Prelinger records."""
     if not internet_archive_identifier_is_allowed(identifier):
         return False
@@ -4603,6 +4603,8 @@ def internet_archive_public_domain_usage_is_verified(page_html,identifier):
     if str(link.get("text") or "").strip().casefold()!="public domain":
         return False
     href=str(link.get("href") or "").strip()
+    if expected_license_url is not None and href!=str(expected_license_url).strip():
+        return False
     return href in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS
 
 
@@ -4837,7 +4839,7 @@ def download_internet_archive_videos(root,index):
                         and rights["license_url"] in INTERNET_ARCHIVE_PUBLIC_DOMAIN_PAGE_URLS):
                     try:
                         item_page_html=internet_archive_fetch_item_page(identifier)
-                        if internet_archive_public_domain_usage_is_verified(item_page_html,identifier):
+                        if internet_archive_public_domain_usage_is_verified(item_page_html,identifier,rights["license_url"]):
                             rights.update(
                                 license="Public Domain (verified exact Internet Archive item-page Usage label)",
                                 rights_statement="Public Domain (verified from exact item-page Usage block; API rights field absent)",
@@ -4861,6 +4863,21 @@ def download_internet_archive_videos(root,index):
                     row.update(status="no_eligible_video",reason="No MP4/WebM/OGV file is within the bounded per-file size and duration limits.")
                     report.append(row); continue
                 file_record=chosen["file"]
+                declared_file_size=int(file_record.get("size") or 0)
+                if collection_bytes+declared_file_size>INTERNET_ARCHIVE_COLLECTION_MAX_BYTES[collection]:
+                    row.update(
+                        status="skipped_collection_size_limit",
+                        reason="The declared media size would exceed the "+collection+" collection byte budget.",
+                    )
+                    report.append(row)
+                    break
+                if total_bytes+declared_file_size>INTERNET_ARCHIVE_TOTAL_MAX_BYTES:
+                    row.update(
+                        status="skipped_total_size_limit",
+                        reason="The declared video size would exceed the aggregate Internet Archive download ceiling.",
+                    )
+                    report.append(row)
+                    break
                 filename=str(file_record.get("name") or "")
                 file_url="https://archive.org/download/"+identifier+"/"+urllib.parse.quote(filename,safe="")
                 if not internet_archive_file_url_is_allowed(file_url,identifier,filename):
