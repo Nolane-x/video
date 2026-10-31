@@ -55,6 +55,7 @@ MAX_ITEM_PAGES = 96
 MAX_PAGE_BYTES = 8 * 1024 * 1024
 MAX_METADATA_BYTES = 160 * 1024 * 1024
 MAX_DOWNLOADS = 36
+MAX_PARK_ARCHIVE_DOWNLOADS_PER_INDEX = 3
 MAX_VIDEO_BYTES = 350 * 1024 * 1024
 MAX_TOTAL_SOURCE_BYTES = 4 * 1024 * 1024 * 1024
 MIN_VIDEO_BYTES = 256 * 1024
@@ -1020,6 +1021,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
 
         collection_credit = parsed_index["credit_text"]
         credit_required = parsed_index["credit_required_visible"]
+        downloads_for_index = 0
         page_tasks = [(collection_url, "collection", source)]
         page_tasks.extend((url, "detail", source) for url in parsed_index["child_pages"])
         page_tasks.extend((row["url"], "media", {**source, "media_hint": row.get("title", "")}) for row in parsed_index["media_pages"])
@@ -1091,7 +1093,11 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                     queued_pages.add(media_page)
 
             for group_number, group in enumerate(groups, 1):
-                if downloads >= MAX_DOWNLOADS or source_bytes >= MAX_TOTAL_SOURCE_BYTES:
+                if (
+                    downloads >= MAX_DOWNLOADS
+                    or downloads_for_index >= MAX_PARK_ARCHIVE_DOWNLOADS_PER_INDEX
+                    or source_bytes >= MAX_TOTAL_SOURCE_BYTES
+                ):
                     break
                 title = group.get("title") or source_info["title"]
                 description = group.get("description") or ""
@@ -1210,6 +1216,7 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
                 index.append(entry)
                 seen_media.add(selected["source_url"])
                 downloads += 1
+                downloads_for_index += 1
                 source_bytes += selected["source_size"]
                 indexed_bytes += output_size
                 report.append({
@@ -1253,6 +1260,8 @@ def download_nps_broll_media(root: Path, index: list[dict]) -> list[dict]:
         "status": "summary",
         "collection_indexes_checked": collection_count,
         "item_pages_inspected": pages_inspected,
+        "park_archive_videos_downloaded": downloads - gallery_stats["videos_downloaded"],
+        "max_park_archive_videos_per_index": MAX_PARK_ARCHIVE_DOWNLOADS_PER_INDEX,
         "npgallery_videos_downloaded": gallery_stats["videos_downloaded"],
         "npgallery_source_bytes_downloaded": gallery_stats["source_bytes_downloaded"],
         "videos_downloaded": downloads,
