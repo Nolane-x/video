@@ -1,25 +1,48 @@
 {
   "project": "ten-video",
   "language": "vi",
+  "cast": {
+    "narrator": {
+      "provider": "korva",
+      "voice": "khanh_vy",
+      "language": "vi",
+      "speed": 1.0,
+      "seed": 42,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4
+      }
+    },
+    "host": {
+      "provider": "voicestudio",
+      "engine": "REPLACE_WITH_INSTALLED_ENGINE_ID",
+      "voice": "REPLACE_WITH_SAVED_VOICE_PROFILE_ID",
+      "language": "vi",
+      "speed": 1.0,
+      "seed": 42
+    }
+  },
   "segments": [
     {
       "id": "V001",
+      "speaker_id": "narrator",
       "slot": "NARRATOR",
-      "character": "Narrator",
-      "provider": "voicestudio",
-      "engine": "REPLACE_WITH_AVAILABLE_ENGINE_ID",
-      "voice": "REPLACE_WITH_VOICE_PROFILE_ID",
-      "language": "vi",
-      "text": "Thay bằng lời thoại..."
+      "character": "Người dẫn chuyện",
+      "text": "Thay bằng lời thoại của người dẫn chuyện..."
     },
     {
       "id": "V002",
+      "speaker_id": "host",
       "slot": "HOST",
-      "character": "Host",
-      "provider": "google",
-      "voice": "REPLACE_WITH_GOOGLE_VOICE_ID",
-      "language": "vi-VN",
-      "text": "Thay bằng lời thoại của nhân vật..."
+      "character": "Người dẫn chương trình",
+      "text": "Thay bằng lời thoại của người dẫn chương trình..."
+    },
+    {
+      "id": "V003",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Cùng một speaker_id sẽ luôn giữ cùng provider, engine, voice, ngôn ngữ và seed."
     }
   ]
 }
