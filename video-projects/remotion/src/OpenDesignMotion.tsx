@@ -140,7 +140,7 @@ const OpeningScene = () => {
           </span>
         </div>
       </div>
-      <div style={{ position: "absolute", top: 153, left: 0, right: 0, textAlign: "center", color: "rgba(35,52,58,.6)", fontSize: 14, letterSpacing: ".09em", fontWeight: 600 }}>
+      <div style={{ position: "absolute", top: 184, left: 0, right: 0, textAlign: "center", color: "rgba(35,52,58,.68)", fontSize: 14, letterSpacing: ".09em", fontWeight: 600 }}>
         Good work starts here
       </div>
       <div style={{
@@ -866,35 +866,44 @@ const LogoChip = ({ index, frame }: { index: number; frame: number }) => {
 };
 
 const ModelAgentScene = () => {
-  const InlinePhrase = ({ agent }: { agent:boolean }) => {
-    const prefix=agent?"Any ":"Any m";
-    const centerLetter=agent?"a":"o";
-    const suffix=agent?"gent.":"del.";
-    return (
-      <div style={{ position: "absolute", left: 0, right: 0, top: 330, display: "flex", justifyContent: "center", alignItems: "baseline", color: "#111315", fontFamily: displayFont, fontSize: 158, fontWeight: 900, letterSpacing: "-.09em", whiteSpace: "nowrap" }}>
-        <span style={{marginRight:agent?24:0}}>{agent?"Any": "Any m"}</span><span style={{ position:"relative", display:"inline-block" }}>{centerLetter}
-          <div style={{position:"absolute",left:"49%",top:-22,transform:"translateX(-50%)",display:"flex",alignItems:"center"}}>
-            {Array.from({length:5},(_,i)=><div key={i} style={{width:47,height:47,marginLeft:i?-13:0,borderRadius:"50%",border:"3px solid #fff",background:["#fff","#e8f0ff","#fff","#f6f2e9","#fff"][i],boxShadow:"0 5px 15px rgba(0,0,0,.13)",display:"grid",placeItems:"center",fontSize:21,fontWeight:950,color:["#263b75","#e66b52","#303239","#5375bf","#d39d53"][i]}}>{["✦","◈","M","∞","A"][i]}</div>)}
-          </div>
-        </span><span>{suffix}</span>
-      </div>
-    );
-  };
+  const f = useCurrentFrame();
+  const InlinePhrase = ({ agent }: { agent:boolean }) => (
+    <div style={{ position: "absolute", left: 0, right: 0, top: 330, display: "flex", justifyContent: "center", alignItems: "baseline", color: "#111315", fontFamily: displayFont, fontSize: 158, fontWeight: 900, letterSpacing: "-.09em", whiteSpace: "nowrap" }}>
+      <span>{agent ? "Any" : "Any m"}</span><span>{agent ? " agent." : "odel."}</span>
+    </div>
+  );
+  const LogoStrip = ({ seed=0 }: { seed?:number }) => (
+    <div style={{position:"absolute",left:0,right:0,top:535,display:"flex",justifyContent:"center",alignItems:"center",gap:17}}>
+      {Array.from({length:7},(_,i)=>(
+        <div key={i} style={{width:58,height:58,borderRadius:18,background:["#263b75","#e66b52","#303239","#5275bf","#d39d53","#4c8b74","#363d86"][(i+seed)%7],border:"2px solid rgba(255,255,255,.9)",boxShadow:"0 9px 22px rgba(20,29,36,.13)",display:"grid",placeItems:"center",fontSize:25,fontWeight:950,color:"#fff",transform:"translateY("+(Math.sin(f/7+i)*4)+"px) rotate("+(Math.sin(f/10+i)*3)+"deg)"}}>
+          {["✦","◈","M","∞","A","⌘","N"][(i+seed)%7]}
+        </div>
+      ))}
+    </div>
+  );
+  const Subline = ({children,color}: {children:string;color:string}) => (
+    <div style={{position:"absolute",left:0,right:0,top:650,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color}}>{children}</div>
+  );
   return (
     <AbsoluteFill style={full}>
       <Sequence from={0} durationInFrames={34}>
-        <AbsoluteFill style={{background:"#9ed2e4"}}><InlinePhrase agent={false}/><div style={{position:"absolute",left:0,right:0,top:535,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color:"#446879"}}>ONE CANVAS / ANY MODEL</div></AbsoluteFill>
+        <AbsoluteFill style={{background:"#9ed2e4"}}>
+          <InlinePhrase agent={false}/><LogoStrip seed={0}/><Subline color="#446879">ONE CANVAS / ANY MODEL</Subline>
+        </AbsoluteFill>
       </Sequence>
       <Sequence from={34} durationInFrames={34}>
-        <AbsoluteFill style={{background:"#dfa77f"}}><InlinePhrase agent={false}/><div style={{position:"absolute",left:0,right:0,top:535,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color:"#754d37"}}>CHOOSE THE ENGINE THAT FITS</div></AbsoluteFill>
+        <AbsoluteFill style={{background:"#dfa77f"}}>
+          <InlinePhrase agent={false}/><LogoStrip seed={1}/><Subline color="#754d37">CHOOSE THE ENGINE THAT FITS</Subline>
+        </AbsoluteFill>
       </Sequence>
       <Sequence from={68} durationInFrames={34}>
-        <AbsoluteFill style={{background:"#b7d6c7"}}><InlinePhrase agent={true}/><div style={{position:"absolute",left:0,right:0,top:535,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color:"#456b58"}}>ANY AGENT / YOUR TOOLS</div></AbsoluteFill>
+        <AbsoluteFill style={{background:"#b7d6c7"}}>
+          <InlinePhrase agent={true}/><LogoStrip seed={2}/><Subline color="#456b58">ANY AGENT / YOUR TOOLS</Subline>
+        </AbsoluteFill>
       </Sequence>
       <Sequence from={102} durationInFrames={33}>
         <AbsoluteFill style={{background:"#d1dfe0"}}>
-          <div style={{position:"absolute",left:0,right:0,top:350,textAlign:"center",fontFamily:displayFont,fontSize:157,fontWeight:950,letterSpacing:"-.09em",color:"#111315"}}>Any agent.</div>
-          <div style={{position:"absolute",left:0,right:0,top:535,textAlign:"center",fontSize:18,fontWeight:850,letterSpacing:".18em",color:"#647679"}}>THE MODEL IS YOURS / THE TOOLS ARE YOURS</div>
+          <InlinePhrase agent={true}/><LogoStrip seed={3}/><Subline color="#647679">THE MODEL IS YOURS / THE TOOLS ARE YOURS</Subline>
         </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>

@@ -15,9 +15,9 @@ V3 replaces the V2 generic poster-card / invented dashboard approach with a shot
 - 4.5–5.5s: radial mark and Claude Motion reveal.
 - 5.5–7.5s: open-source positioning line and lime highlight.
 - 7.5–10.5s: individual artwork in a deep perspective gallery.
-- 10.5–19.5s: rapid 12-beat poster sequence (comic, MIND, concentric type, collage, IN, NEVER/LINEAR, 1889 clock, toggle, 3.7% eye, second comic and 3D type).
+- 10.5–19.5s: rapid 17-beat poster sequence (comic, MIND, concentric type, collage, IN, NEVER/LINEAR, 1889 clock, toggle, 3.7% eye, second comic and 3D type).
 - 19.5–21s: “Not just Opus 5.5” on black.
-- 21–25.5s: Any model / Any agent.
+- 21–25.5s: Any model / Any agent, with the model/agent mark strip on its own readable line.
 - 25.5–30.5s: Launch Kit UI with prompt/model controls and changing previews.
 - 30.5–32.5s: 3–2–1 countdown inside the same UI frame.
 - 32.5–35.3s: textured multi-face 3D cube.
