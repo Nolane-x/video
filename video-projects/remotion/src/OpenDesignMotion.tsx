@@ -270,26 +270,26 @@ const OpeningScene = () => {
    </div>
   </div>
   <div style={{position:"absolute",top:350,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
-  <div style={{position:"absolute",left:290,right:290,top:390,height:330,background:"rgba(255,255,255,.48)",border:"1px solid rgba(255,255,255,.82)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
+  <div style={{position:"absolute",left:290,right:290,top:390,height:345,background:"rgba(255,255,255,.48)",border:"1px solid rgba(255,255,255,.82)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+(55-3*e(f,0,30))+"px) scale("+(0.99-0.05*e(f,0,30)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
   <div style={{position:"absolute",left:0,right:0,top:0,height:278,background:"rgba(255,255,255,.97)",borderRadius:24,boxShadow:"0 12px 30px rgba(49,82,91,.06)"}}/>
    <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:38,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
     {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
     {typing?<span style={{display:"inline-block",width:2,height:34,background:count<introLength?"#313a3d":"#5cda4c",verticalAlign:"middle",marginLeft:4}}/>:null}
    </div>
-   <div style={{position:"absolute",bottom:52,left:38,display:"flex",alignItems:"center",gap:18}}>
-    <div style={{fontSize:22,color:"#9ca5a4"}}>＋</div><div style={{fontSize:22,color:"#9ca5a4"}}>◉</div>
-    <div style={{background:"#d9f5d9",color:"#26763d",padding:"8px 17px",borderRadius:7,fontSize:17,fontWeight:850}}>✦ Motion design</div>
+   <div style={{position:"absolute",bottom:87,left:-12,display:"flex",alignItems:"center",gap:12}}>
+    <div style={{width:48,height:48,border:"2px solid #e9e9e6",borderRadius:"50%",display:"grid",placeItems:"center",boxSizing:"border-box",fontSize:24,color:"#9ca5a4"}}>＋</div><div style={{width:48,height:48,border:"2px solid #e9e9e6",borderRadius:"50%",display:"grid",placeItems:"center",boxSizing:"border-box",fontSize:22,color:"#9ca5a4"}}>◐</div>
+    <div style={{background:"#d9f5d9",color:"#26763d",padding:"8px 22px",borderRadius:26,fontSize:22,fontWeight:850}}>▣ Motion design⌄</div>
     
    </div>
-   <div style={{position:"absolute",left:38,bottom:10,fontSize:15,color:"#899493"}}>▱ Working directory⌄</div>
-   <div style={{position:"absolute",right:31,bottom:52,display:"flex",gap:9,alignItems:"center"}}>
-    <span style={{width:10,height:10,borderRadius:"50%",background:"#67d46c"}}/><span style={{width:10,height:10,borderRadius:"50%",background:"#5b72dc"}}/>
-    <div style={{width:58,height:58,borderRadius:"50%",background:"#12191b",display:"grid",placeItems:"center",transform:"scale("+(1-pressed*.09)+")",boxShadow:"0 4px 14px rgba(20,30,31,.22)"}}>
-     <svg viewBox="0 0 30 30" width="27" height="27"><path d="M5 15H24M16 6L25 15L16 24" fill="none" stroke="#75e44c" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+   <div style={{position:"absolute",left:38,bottom:10,fontSize:18,color:"#899493"}}>▱ Working directory⌄</div>
+   <div style={{position:"absolute",right:40,bottom:87,display:"flex",gap:10,alignItems:"center"}}>
+    <span style={{width:13,height:13,borderRadius:"50%",background:"#67d46c"}}/><span style={{width:13,height:13,borderRadius:"50%",background:"#5b72dc"}}/>
+    <div style={{width:68,height:68,borderRadius:"50%",background:"#12191b",display:"grid",placeItems:"center",transform:"scale("+(1-pressed*.09)+")",boxShadow:"0 4px 14px rgba(20,30,31,.22)"}}>
+     <svg viewBox="0 0 30 30" width="31" height="31"><path d="M5 15H24M16 6L25 15L16 24" fill="none" stroke="#75e44c" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
     </div>
    </div>
   </div>
-  <div style={{position:"absolute",top:955-397*e(f,42,60),left:1875-525*e(f,42,60),width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
+  <div style={{position:"absolute",top:955-315*e(f,42,60),left:1875-337*e(f,42,60),width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
    <svg viewBox="0 0 30 40" width="29" height="38"><path d="M2 2L2 33L10 25L17 38L23 35L16 22L28 22Z" fill="#fff" stroke="#262b2d" strokeWidth="2" strokeLinejoin="round"/></svg>
   </div>
  </AbsoluteFill>;

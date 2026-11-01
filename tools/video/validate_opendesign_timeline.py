@@ -73,7 +73,8 @@ need("frame<76?-1:frame<91?3:frame<106?2:1" in source, "number 1 must remain ins
 need("const CountdownPrism=" in source, "blue extruded countdown prism artwork is missing")
 need("wc-cloud-edge-v40" in source and "wc-paper-v40" in source and "wc-pigment-v40" in source and "wc-wash-texture-v40" in source and "const lowerPaint=Array.from({length:132}" in source, "V44 expanded watercolor wash, paper-grain and pigment treatment are missing")
 need("wc-cloud-light-v40" in source and "wc-cloud-coral-v40" in source and "wc-ridge-near-v40" in source and "wc-ridge-far-v40" in source and "M-120 1018C-8 1003" in source, "V44 low painted cloud bank and near-bottom blue horizon are missing")
-need("left:290,right:290,top:390,height:330" in source, "V34 prompt card source proportions are missing")
+need("left:290,right:290,top:390,height:345" in source and 'translateY("+(55-3*e(f,0,30))+"px) scale("+(0.99-0.05*e(f,0,30)-pressed*.008)+")' in source, "V45 frame0/frame30 prompt card position and width are source-matched")
+need("right:40,bottom:87" in source and "width:68,height:68" in source, "V45 submit control size and position are source-matched")
 need('fontSize:370,fontWeight:1000,letterSpacing:"-.02em"' in source, "V34 MOTION letter scale and tracking are missing")
 need("fontSize:132,fontWeight:850" in source and 'fontSize:40,fontWeight:650,color:"#fff"' in source, "V34 OpenDesign/Introducing title hierarchy is missing")
 need("wc-wash-white-v40" in source and "wc-wash-blue-v40" in source and "wc-wash-peach-v40" in source, "V40 broken organic diagonal sky washes are missing")
@@ -144,5 +145,5 @@ print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 
 
 need('fontSize:100,fontWeight:700,letterSpacing:"-.055em"' in source, "V38 opening headline scale is missing")
 need('const firstPhaseCount=Math.round(Math.max(0,Math.min(1,(f-14)/16))*introLength)' in source and 'const finalPhaseCount=introLength+Math.round(Math.max(0,Math.min(1,(f-30)/30))*(text.length-introLength))' in source, "typed prompt must reach Introducing at frame30 and the full line at frame60")
-need("left:1875-525*e(f,42,60)" in source and "top:955-397*e(f,42,60)" in source, "V44 cursor motion must land on the submit control")
-need('height:278,background:"rgba(255,255,255,.97)",borderRadius:24' in source and 'bottom:52,left:38' in source and "▱ Working directory⌄" in source, "V39 separate prompt field and translucent directory shelf are missing")
+need("left:1875-337*e(f,42,60)" in source and "top:955-315*e(f,42,60)" in source, "V45 cursor motion must land on the submit control")
+need('height:278,background:"rgba(255,255,255,.97)",borderRadius:24' in source and 'bottom:87,left:-12' in source and "▱ Working directory⌄" in source, "V45 source-sized prompt field and toolbar are missing")

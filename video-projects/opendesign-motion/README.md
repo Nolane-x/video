@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V44 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V45 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
@@ -6,7 +6,7 @@ This is an independently authored Remotion/SVG/CSS reconstruction, not the origi
 
 ## Current focus: reference-led visual corrections across the whole film
 
-Latest authored revision: V44. Latest technically verified render is V43 / Actions #102; V44 awaits render and visual review.
+Latest authored revision: V45. Latest technically verified render is V44 / Actions #103; V45 awaits its own render and frame review.
 
 The source-indexed timeline remains fixed; each revision below is recorded against actual rendered frames and the supplied native preview.
 
@@ -19,7 +19,7 @@ The source-indexed timeline remains fixed; each revision below is recorded again
 - V40 reduces the upper-sky marks to a few broad irregular watercolor washes, while retaining the source-timed 0/30/60 typing and cursor choreography plus the separate directory shelf. Render [#99](https://github.com/Nolane-x/video/actions/runs/41318630418) passed the 1,119-frame, 1080p/30fps, audio and checksum gates; V40 remains a technical candidate pending full watch-through.
 - V41 rendered successfully in [Actions #100](https://github.com/Nolane-x/video/actions/runs/41320461921). Native-frame review tightened S08 colors and the Any/model/agent order, but found the model type-on starts at frame645, the text must clear as the logo orbit forms at760, and Launch Film begins at769.
 - V42 introduced the model type-on at645, dynamic capability typography, the provider-orbit replacement and Launch Film at769. Actions #101 stopped at a stale validator string that still expected V41's static layout; no render was produced. V43 updates that guard and rendered successfully in [Actions #102](https://github.com/Nolane-x/video/actions/runs/41321380345). Visual review confirmed the S08/Launch cut and countdown timing, then identified that the opening prompt typed too slowly, the pointer missed the send control, and its painted lower cloud/horizon still looked too geometric.
-- V44 changes the prompt typewriter to complete “Introducing” at frame30 and the full line by frame60, keeps a green caret after both beats, retargets the mouse pointer to the send control, and rebuilds the lower clouds with distributed watercolor pigment and a low shoreline. It awaits a fresh Actions render.
+- V44 rendered successfully in [Actions #103](https://github.com/Nolane-x/video/actions/runs/41322081460), with 1,119 frames, 1080p/30fps, H.264/AAC and −14 LUFS mastering. Native frame comparison confirmed the frame30/60 prompt card still translated upward by roughly 62 px and expanded horizontally relative to the reference. V45 preserves its lower landing while shrinking it to the source frame30/60 width; it also adds the circular bottom controls, repositions the send button and retargets the pointer.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.
