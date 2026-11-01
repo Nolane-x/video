@@ -1420,13 +1420,20 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
   </svg>
  </div>;
- const yellow=<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:22,border:"8px solid #191a1c",boxShadow:"inset 0 0 0 4px #f8e5b4"}}/>
-  <div style={{position:"absolute",left:30,top:25,fontFamily:"Georgia,serif",fontSize:23,fontWeight:800}}>100K</div>
-  <div style={{position:"absolute",left:28,right:28,top:74,bottom:90,background:"#f8f1de",border:"7px solid #191a1c",display:"grid",placeItems:"center",transform:"rotate(-2deg)"}}>
-   <svg viewBox="0 0 300 230" width="100%" height="100%"><circle cx="150" cy="115" r="90" fill="#e0b64d" stroke="#fff1bf" strokeWidth="12"/><circle cx="150" cy="115" r="65" fill="#132b6e" stroke="#9c7336" strokeWidth="10"/><path d="M130 52L219 113L144 134L124 180Z" fill="#f6dd93"/></svg>
+ const yellow=<div style={{position:"absolute",inset:0,background:"#dff3e7",color:"#17191c",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:16,border:"9px solid #e4bb54",boxShadow:"inset 0 0 0 3px #fff7d9"}}/>
+  <div style={{position:"absolute",left:25,right:25,top:22,height:35,background:"#ebcf75",border:"3px solid #26272a",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 12px",fontFamily:"monospace",fontSize:15,fontWeight:900}}><span>100K</span><span>✳ OPEN DESIGN</span></div>
+  <div style={{position:"absolute",left:18,right:18,top:72,bottom:55,display:"grid",placeItems:"center",background:"#eff8f0",border:"4px solid #202627",overflow:"hidden"}}>
+   <svg viewBox="0 0 360 260" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+    <defs><pattern id="stars-grid-v30" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M14 0H0V14" stroke="#9bcdb5" strokeWidth="1" fill="none" opacity=".7"/></pattern></defs>
+    <rect width="360" height="260" fill="url(#stars-grid-v30)"/>
+    <path d="M0 205L360 64" stroke="#b1dbc4" strokeWidth="2" opacity=".7"/>
+    <path d="M20 0V260M340 0V260" stroke="#d0e9da" strokeWidth="3"/>
+   </svg>
+   <div style={{position:"relative",fontFamily:displayFont,fontSize:104,fontWeight:1000,letterSpacing:"-.12em",color:"#141c1a",textShadow:"3px 3px 0 #b6dfc9"}}>100K</div>
+   <div style={{position:"absolute",left:0,right:0,bottom:19,textAlign:"center",fontFamily:"monospace",fontSize:13,fontWeight:950,letterSpacing:".18em",color:"#245a42"}}>GITHUB STARS / THE FUTURE</div>
   </div>
-  <div style={{position:"absolute",left:25,right:25,bottom:27,fontFamily:"Georgia,serif",fontSize:20,fontWeight:800,textAlign:"center"}}>THE FUTURE / 100K</div>
+  <div style={{position:"absolute",left:12,right:12,bottom:11,textAlign:"center",fontSize:15,fontWeight:900,letterSpacing:".15em",color:"#476c5c"}}>OPEN DESIGN / 100K</div>
  </div>;
  const ease=<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
