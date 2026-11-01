@@ -90,55 +90,58 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.075,breath=1+.004*Math.sin(frame/23);
- const strokes=Array.from({length:52},(_,i)=>{
-  const x=(i*193)%2100-90,y=95+(i*131)%795,w=90+(i*71)%290,h=7+(i*23)%32;
-  const palette=["#fff9ec","#e8f2f1","#c5e0eb","#f8d8c6","#f4c6b8","#aacbda"];
-  return {x,y,w,h,angle:-23+(i%9)*5,color:palette[i%palette.length],opacity:.045+(i%6)*.018};
+ const drift=frame*.06;
+ const brush=Array.from({length:58},(_,i)=>{
+  const x=(i*173)%2040-70,y=80+(i*113)%820,w=80+(i*61)%340,h=5+(i*17)%25;
+  const palette=["#fff9ed","#eaf4ed","#c2e0ec","#f8d9c7","#f4c2b2","#9bc9df","#e4e9df"];
+  return {x,y,w,h,angle:-31+(i%11)*6,color:palette[i%palette.length],opacity:.06+(i%5)*.018};
  });
  return <AbsoluteFill style={{background:"#83bfe3",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v34" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#6db5e2"/><stop offset=".31" stopColor="#9bc9e3"/><stop offset=".58" stopColor="#d9e6e3"/><stop offset=".76" stopColor="#f3d8c8"/><stop offset="1" stopColor="#e9bda9"/></linearGradient>
-    <linearGradient id="wc-blue-wash-v34" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#5eaddb" stopOpacity=".05"/><stop offset=".35" stopColor="#d7e9ed" stopOpacity=".55"/><stop offset=".72" stopColor="#f8f3e9" stopOpacity=".24"/><stop offset="1" stopColor="#a8d0e2" stopOpacity=".02"/></linearGradient>
-    <linearGradient id="wc-cloud-cream-v34" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff9ed" stopOpacity=".8"/><stop offset=".48" stopColor="#f8eadb" stopOpacity=".47"/><stop offset="1" stopColor="#f2d6c8" stopOpacity=".04"/></linearGradient>
-    <linearGradient id="wc-cloud-peach-v34" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff1df" stopOpacity=".12"/><stop offset=".4" stopColor="#f4c7b2" stopOpacity=".58"/><stop offset=".76" stopColor="#dbaeb0" stopOpacity=".3"/><stop offset="1" stopColor="#d2dfe1" stopOpacity=".06"/></linearGradient>
-    <filter id="wc-paint-edge-v34"><feTurbulence type="fractalNoise" baseFrequency=".009 .021" numOctaves="3" seed="31" result="grain"/><feDisplacementMap in="SourceGraphic" in2="grain" scale="25" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="wc-soft-v34"><feGaussianBlur stdDeviation="34"/></filter>
-    <filter id="wc-soft-tight-v34"><feGaussianBlur stdDeviation="12"/></filter>
-    <filter id="wc-paper-v34"><feTurbulence type="fractalNoise" baseFrequency=".68" numOctaves="2" seed="15"/><feColorMatrix type="saturate" values="0"/></filter>
+    <linearGradient id="wc-sky-v35" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#67b5e3"/><stop offset=".32" stopColor="#9ccfe5"/><stop offset=".58" stopColor="#dce9e5"/><stop offset=".77" stopColor="#f4d8c8"/><stop offset="1" stopColor="#eabda9"/></linearGradient>
+    <linearGradient id="wc-diagonal-cool-v35" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f7fbf2" stopOpacity=".08"/><stop offset=".34" stopColor="#e7f2ed" stopOpacity=".62"/><stop offset=".67" stopColor="#c6dfeb" stopOpacity=".36"/><stop offset="1" stopColor="#fff0df" stopOpacity=".04"/></linearGradient>
+    <linearGradient id="wc-diagonal-warm-v35" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff4e7" stopOpacity=".05"/><stop offset=".38" stopColor="#f9d9c5" stopOpacity=".58"/><stop offset=".73" stopColor="#edb7ad" stopOpacity=".26"/><stop offset="1" stopColor="#fff1e3" stopOpacity=".03"/></linearGradient>
+    <linearGradient id="wc-cloud-white-v35" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fffdf2" stopOpacity=".88"/><stop offset=".5" stopColor="#fff5e7" stopOpacity=".62"/><stop offset="1" stopColor="#f5d7c9" stopOpacity=".05"/></linearGradient>
+    <linearGradient id="wc-cloud-peach-v35" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff2e3" stopOpacity=".18"/><stop offset=".42" stopColor="#f6cdb9" stopOpacity=".7"/><stop offset=".82" stopColor="#dcaeb0" stopOpacity=".32"/><stop offset="1" stopColor="#d4e3e6" stopOpacity=".04"/></linearGradient>
+    <filter id="wc-soft-v35"><feGaussianBlur stdDeviation="26"/></filter>
+    <filter id="wc-mid-v35"><feGaussianBlur stdDeviation="11"/></filter>
+    <filter id="wc-edge-v35"><feTurbulence type="fractalNoise" baseFrequency=".011 .026" numOctaves="3" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="28" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="wc-paper-v35"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="25"/><feColorMatrix type="saturate" values="0"/></filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v34)"/>
-   <g transform={"translate("+(-drift)+",0) scale("+breath+")"} opacity=".68">
-    <path d="M-150 360C-30 300 44 227 166 226C282 167 397 153 497 177C632 106 788 91 911 121C1032 76 1171 80 1283 124C1404 58 1561 65 1654 132C1776 91 1910 122 2070 198L2020 336C1896 276 1792 291 1699 263C1588 311 1466 298 1372 252C1237 309 1122 279 1021 237C902 305 774 288 671 242C531 301 409 292 310 258C191 317 50 319 -150 360Z" fill="url(#wc-blue-wash-v34)" filter="url(#wc-soft-v34)"/>
-    <path d="M-160 288C-45 252 37 186 152 180C265 126 379 118 478 144C596 84 748 70 856 103C964 65 1092 64 1200 100C1310 49 1448 55 1543 109C1650 70 1779 79 1940 151" fill="none" stroke="#f8f5e9" strokeWidth="112" strokeLinecap="round" opacity=".3" filter="url(#wc-soft-v34)"/>
-    <path d="M-120 404C56 336 169 283 304 295C436 230 577 218 684 250C823 189 955 189 1068 226C1196 173 1335 185 1447 236C1575 191 1734 209 1980 302" fill="none" stroke="#cbe3e9" strokeWidth="73" strokeLinecap="round" opacity=".42" filter="url(#wc-soft-v34)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v35)"/>
+   <g transform={"translate("+(-drift)+",0)"} filter="url(#wc-soft-v35)">
+    <path d="M-180 470C-42 376 97 338 224 321C370 230 527 178 685 183C836 111 1018 108 1156 155C1320 84 1478 104 1614 164C1743 141 1904 173 2070 265C1886 286 1756 272 1604 308C1456 366 1320 328 1187 300C1026 385 866 344 747 306C601 399 441 388 322 356C174 441 26 460 -180 470Z" fill="url(#wc-diagonal-cool-v35)" opacity=".82"/>
+    <path d="M-80 590C92 475 228 445 365 449C524 355 676 329 826 360C982 288 1119 305 1247 360C1402 305 1542 328 1665 392C1796 382 1910 412 2040 488" fill="none" stroke="#f5f8f0" strokeWidth="98" strokeLinecap="round" opacity=".22"/>
+    <path d="M-100 320C89 241 236 196 374 202C526 126 666 111 800 149C942 83 1082 83 1210 131C1353 63 1517 92 1621 148C1749 119 1887 149 2010 207" fill="none" stroke="#d7eaf0" strokeWidth="70" strokeLinecap="round" opacity=".36"/>
    </g>
-   <g transform={"translate("+(drift*.22)+",0)"} filter="url(#wc-soft-v34)" opacity=".83">
-    <path d="M-125 780C-86 700 -18 660 74 677C121 618 220 605 284 649C350 606 446 631 477 694C558 675 631 704 666 763C733 766 782 820 805 888C716 952 628 945 552 902C475 967 374 946 313 907C225 959 132 925 82 891C4 921 -72 885 -125 780Z" fill="url(#wc-cloud-cream-v34)"/>
-    <path d="M-55 817C9 750 72 745 144 757C214 702 296 718 352 766C426 727 496 752 535 799C609 793 670 830 705 889C626 942 536 928 478 895C409 943 322 925 262 891C188 927 100 909 52 876C-1 895 -35 864 -55 817Z" fill="#f5c9b5" opacity=".44"/>
-    <path d="M300 853C368 759 471 741 554 772C641 721 755 733 823 795C893 759 998 782 1042 845C1122 834 1202 872 1250 929C1158 979 1067 957 1002 927C917 979 824 954 765 917C690 957 596 937 550 906C460 944 367 925 300 853Z" fill="url(#wc-cloud-peach-v34)"/>
-    <path d="M786 825C854 767 927 761 1006 783C1080 737 1175 747 1236 791C1302 755 1387 777 1438 825C1515 815 1599 851 1647 903C1569 958 1480 946 1411 915C1342 954 1256 943 1198 911C1115 948 1022 923 969 893C886 920 819 886 786 825Z" fill="#f7e3d7" opacity=".34"/>
-    <path d="M1170 862C1236 810 1305 800 1377 824C1451 774 1556 787 1606 830C1686 785 1786 806 1832 859C1896 845 1966 877 2045 927L2020 1010C1928 976 1861 982 1792 950C1709 997 1608 972 1558 941C1475 988 1381 960 1324 929C1252 959 1195 922 1170 862Z" fill="#f1c6b3" opacity=".26"/>
+   <g transform={"translate("+(drift*.28)+",0)"} filter="url(#wc-edge-v35)">
+    <path d="M-170 795C-129 737 -53 705 39 720C104 652 213 641 294 692C383 644 477 676 518 739C605 710 694 745 736 813C817 842 844 900 863 969C772 1005 689 980 610 943C517 1014 416 984 348 943C256 1002 143 962 91 924C-1 949 -102 900 -170 795Z" fill="url(#wc-cloud-white-v35)" opacity=".94"/>
+    <path d="M-120 832C-50 768 24 756 95 776C170 720 262 738 320 785C409 737 503 757 546 812C632 793 705 832 751 897C675 962 580 943 514 915C429 966 341 941 273 907C181 946 83 922 36 885C-36 909 -94 876 -120 832Z" fill="#fff3df" opacity=".62" filter="url(#wc-mid-v35)"/>
+    <path d="M170 882C251 797 351 782 431 813C526 750 644 766 711 823C805 776 909 797 959 858C1044 850 1116 894 1152 949C1066 1000 974 981 904 947C826 1000 730 974 674 941C579 977 489 953 432 920C338 958 237 934 170 882Z" fill="url(#wc-cloud-peach-v35)" opacity=".83"/>
+    <path d="M-40 902C44 851 118 850 194 873C263 821 344 827 414 872C484 841 553 857 597 898" fill="none" stroke="#fff9ed" strokeWidth="52" strokeLinecap="round" opacity=".5" filter="url(#wc-mid-v35)"/>
+    <path d="M220 957C326 903 436 906 525 937S719 981 846 929" fill="none" stroke="#f3c0aa" strokeWidth="38" strokeLinecap="round" opacity=".44" filter="url(#wc-mid-v35)"/>
    </g>
-   <g filter="url(#wc-paint-edge-v34)" opacity=".62">
-    <path d="M-170 246C5 186 111 119 246 141C350 88 471 88 567 132C707 66 853 58 959 98C1095 52 1230 62 1332 111C1470 49 1595 76 1700 124C1830 87 1967 119 2100 183" fill="none" stroke="#fff9ec" strokeWidth="33" strokeLinecap="round"/>
-    <path d="M-80 448C72 388 174 340 295 351C413 294 538 296 645 338C748 292 883 287 982 321C1104 281 1228 288 1326 333C1445 292 1577 316 1681 365" fill="none" stroke="#f0f4ef" strokeWidth="19" strokeLinecap="round" opacity=".54"/>
-    <path d="M-50 518C96 466 202 438 319 455C440 409 560 411 663 449" fill="none" stroke="#b7dbe7" strokeWidth="12" strokeLinecap="round" opacity=".48"/>
+   <g transform={"translate("+(drift*.17)+",0)"} filter="url(#wc-soft-v35)" opacity=".42">
+    <path d="M680 805C771 747 865 755 941 785C1033 739 1132 752 1197 797C1302 760 1402 780 1464 832C1557 802 1656 818 1742 874C1628 931 1529 912 1455 880C1361 928 1265 899 1208 865C1119 911 1010 886 952 853C851 888 760 859 680 805Z" fill="#f5d3c1"/>
    </g>
-   <g filter="url(#wc-soft-tight-v34)" opacity=".34">
-    {strokes.map((p,i)=><path key={i} d={"M"+(p.x)+" "+(p.y)+" q "+(p.w*.28)+" "+(-p.h)+" "+(p.w*.62)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+   <g filter="url(#wc-soft-v35)" opacity=".5">
+    <path d="M-130 518C91 450 205 440 377 463S680 478 841 409S1136 341 1306 379" fill="none" stroke="#e6f1ed" strokeWidth="43" strokeLinecap="round"/>
+    <path d="M420 548C597 477 725 481 895 508S1165 528 1314 467S1621 421 1795 461" fill="none" stroke="#f2d8ca" strokeWidth="30" strokeLinecap="round"/>
    </g>
-   <g transform={"translate("+(drift*.08)+",0)"} opacity=".78">
-    <path d="M-80 974C114 925 263 957 421 940C577 920 709 952 840 939C995 924 1125 951 1265 939C1433 922 1593 944 1740 925C1823 914 1884 920 1995 908V1080H-80Z" fill="#a9cad0" opacity=".24" filter="url(#wc-soft-v34)"/>
-    <path d="M-80 1014C93 990 243 1006 392 992C542 976 665 1009 800 995C927 982 1049 1009 1196 992C1356 975 1488 1006 1640 988C1776 973 1880 985 1995 973V1080H-80Z" fill="#5d94ae" opacity=".36"/>
-    <path d="M-80 1039C95 1016 241 1031 386 1019C531 1004 678 1037 819 1022C970 1006 1112 1037 1261 1020C1414 1004 1572 1035 1712 1018C1826 1003 1914 1015 1995 1004V1080H-80Z" fill="#2a668e" opacity=".47"/>
-    <path d="M-40 1011C124 985 229 999 345 987C450 975 567 986 656 1003C752 1021 856 1003 955 992" fill="none" stroke="#ecdbcb" strokeWidth="13" opacity=".22" filter="url(#wc-soft-tight-v34)"/>
+   <g filter="url(#wc-mid-v35)" opacity=".32">
+    {strokes.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.3)+" "+(-p.h*1.5)+" "+(p.w*.68)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
-   <rect width="1920" height="1080" filter="url(#wc-paper-v34)" opacity=".045" style={{mixBlendMode:"soft-light"}}/>
+   <g transform={"translate("+(drift*.08)+",0)"} opacity=".83">
+    <path d="M-100 970C74 940 225 959 366 944C515 926 659 953 800 939C945 926 1092 955 1238 940C1377 924 1532 952 1681 931C1802 914 1900 925 2020 911V1080H-100Z" fill="#afccd0" opacity=".26" filter="url(#wc-soft-v35)"/>
+    <path d="M-100 1010C65 988 227 1007 365 992C518 975 661 1012 802 995C947 979 1103 1010 1246 992C1390 976 1540 1007 1690 989C1812 974 1921 987 2020 974V1080H-100Z" fill="#6197ae" opacity=".38"/>
+    <path d="M-100 1040C65 1018 219 1035 370 1019C526 1003 678 1039 823 1022C972 1005 1119 1039 1265 1020C1419 1003 1571 1038 1719 1019C1840 1004 1934 1016 2020 1002V1080H-100Z" fill="#2c6d91" opacity=".48"/>
+    <path d="M-80 1004C40 979 170 993 285 983C397 972 497 985 607 1002" fill="none" stroke="#f0dfd0" strokeWidth="16" opacity=".22" filter="url(#wc-soft-v35)"/>
+   </g>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v35)" opacity=".04" style={{mixBlendMode:"soft-light"}}/>
   </svg>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 57% 49%,transparent 42%,rgba(246,225,212,.12) 100%)"}}/>
-  <Noise opacity={.012}/>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 49%,transparent 48%,rgba(246,225,212,.1) 100%)"}}/>
+  <Noise opacity={.01}/>
  </AbsoluteFill>;
 };
 

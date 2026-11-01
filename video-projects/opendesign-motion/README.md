@@ -9,7 +9,7 @@ This is an independently authored Remotion/SVG/CSS reconstruction, not the origi
 V30 follows full-frame inspection of V29's render and exact source frame pairs. It is a broad visual-QA pass, not just another timing-only edit.
 
 ### Opening and gallery
-- V34 is a direct visual correction after comparing the rendered frames with the source: it removes scalloped cloud rows and instead paints broad diagonal blue/cream wisps, diffuse overlapping lower-left peach/white cloud banks, scattered brush marks, subtle paper grain and a low dark-blue shoreline. The prompt card now uses 290px side margins and a taller 330px frame. MOTION is enlarged with looser tracking, OpenDesign and Introducing scale up, and the unsupported bottom strapline is removed.
+- V35 is a follow-up visual correction after V34 review: it removes the lingering continuous top wave line, keeps more open blue sky, strengthens the irregular cream-white lower-left cloud mass, and adds broad broken diagonal washes with peach/pink glazing through the lower centre and a low rolling blue/teal shoreline. The prompt card now uses 290px side margins and a taller 330px frame. MOTION is enlarged with looser tracking, OpenDesign and Introducing scale up, and the unsupported bottom strapline is removed.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.
