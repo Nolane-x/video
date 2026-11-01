@@ -23,13 +23,14 @@ It returns canonical IDs and preserves each source's rights notice:
 
 ```bash
 python tools/video/list_voicestudio_voices.py --language vi --commercial-permitted-only
-python tools/video/list_voicestudio_voices.py --language en --engine vieneu --json
+python tools/video/list_voicestudio_voices.py --language en --engine kokoro --json
 ```
 
 Use the exact `voice_id` in the resulting record when constructing the job
 JSON. The commercial-permission filter selects only manifest rows carrying
-the upstream VieNeu generated-audio permission statement; it does not replace
-reviewing original terms and attribution. For an offline copy, pass
+an upstream VieNeu generated-audio permission statement or Apache-2.0 model/voice
+asset licence; it does not replace reviewing original terms and attribution
+or confer any real-person publicity/endorsement rights. For an offline copy, pass
 `--manifest path/to/manifest.json`.
 
 ## Run it

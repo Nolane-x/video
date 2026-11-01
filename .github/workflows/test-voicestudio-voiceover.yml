@@ -68,7 +68,7 @@ jobs:
       contents: read
     with:
       job_json: >-
-        {"schema_version":1,"job_id":"video-pr-integration-smoke","title":"Video repo reusable renderer integration","language":"vi","engine":"vieneu","voice_id":"vi-vieneu-v3turbo-adam-bua-87e364","segments":[{"id":"opening","text":"Xin chào. Đây là bài kiểm tra tích hợp giọng nói tiếng Việt từ VoiceStudio sang quy trình dựng video.","pause_ms_after":250},{"id":"closing","text":"Âm thanh đã được tạo, kiểm tra và chuẩn bị timeline để đưa vào dự án video.","pause_ms_after":0}]}
+        {"schema_version":1,"job_id":"video-pr-kokoro-integration","title":"Video repo Kokoro English renderer integration","language":"en","engine":"kokoro","voice_id":"en-kokoro-v1-af_heart","segments":[{"id":"opening","text":"Welcome back. Today, we are testing the English narration workflow from VoiceStudio into the video production pipeline.","pause_ms_after":250},{"id":"closing","text":"The voice has been rendered, mastered and packaged with a word-aligned timeline for editing.","pause_ms_after":0}]}
 
   verify-reusable-render:
     name: Verify cross-repo audio artifact and H2 timeline
@@ -107,6 +107,9 @@ jobs:
           assert audio["watermark"]["status"] == "verified"
           assert audio["checks"] == "passed"
           assert manifest["segment_count"] == len(manifest["segments"]) > 0
+          assert manifest["engine"] == "kokoro"
+          assert manifest["voice_id"] == "en-kokoro-v1-af_heart"
+          assert manifest["language"] == "en"
           assert (root / "captions.srt").is_file()
           assert (root / "captions.vtt").is_file()
           print(f"Verified {manifest['job_id']}: {audio['duration_seconds']}s, SHA-256 and AudioSeal passed")
