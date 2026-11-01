@@ -47,6 +47,13 @@ jobs:
           path: voice-source
           persist-credentials: false
 
+      - name: Validate VoiceStudio and video GitHub Actions workflows
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
+            .github/workflows/render-voicestudio-voiceover.yml \
+            .github/workflows/test-voicestudio-voiceover.yml \
+            voice-source/.github/workflows/render-video-narration.yml
+
   reusable-render-smoke:
     name: Call VoiceStudio read-only reusable renderer
     needs: test
@@ -119,9 +126,3 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Validate VoiceStudio and video GitHub Actions workflows
-        run: |
-          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
-            .github/workflows/render-voicestudio-voiceover.yml \
-            .github/workflows/test-voicestudio-voiceover.yml \
-            voice-source/.github/workflows/render-video-narration.yml
