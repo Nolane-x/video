@@ -614,8 +614,6 @@ const Comic1952 = () => {
  </AbsoluteFill>;
 };
 
-const Future3D
-
 const Future3D = () => {
   const f = useCurrentFrame();
   const scale = e(f, 0, 18, .88, 1.02);
@@ -645,8 +643,6 @@ const DotPoster = () => {
   <div style={{position:"absolute",left:"50%",top:28,transform:"translateX(-50%)",padding:"12px 58px 16px",background:"#fff8ec",border:"6px solid #fff8ec",clipPath:"polygon(0 0,100% 0,96% 100%,4% 100%)",textAlign:"center",color:"#111315",fontFamily:displayFont,fontSize:29,fontWeight:950,whiteSpace:"nowrap",boxShadow:"0 8px 0 rgba(0,0,0,.1)"}}>1965 <span style={{fontSize:24}}>Infinity dots</span></div>
  </AbsoluteFill>;
 };
-
-const GlitchPoster
 
 const GlitchPoster = () => {
   const f = useCurrentFrame();
@@ -852,8 +848,6 @@ const Comic1962=()=>{
   </div>
  </AbsoluteFill>;
 };
-
-const PixelGamePoster
 
 const PixelGamePoster=()=>{
  const f=useCurrentFrame(),jump=Math.sin(f/2.8)*10;
@@ -1102,28 +1096,31 @@ const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
 };
 
 const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) => {
-  const p = pop(frame, 30, 0, 75, 14);
-  const scale = .82 + p * .18;
-  return (
-    <AbsoluteFill style={{ background: "linear-gradient(115deg,#10131b 0%,#141b38 52%,#2a41c1 100%)", color: "#f4f6ff" }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(ellipse at 50% 50%,rgba(71,104,255,.4),transparent 50%),linear-gradient(90deg,transparent 49%,rgba(255,255,255,.08) 50%,transparent 51%)", backgroundSize: "100% 100%,50px 50px" }} />
-      <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", perspective: 1200 }}>
-        <div style={{
-          fontSize: 490,
-          lineHeight: .8,
-          fontFamily: displayFont,
-          fontWeight: 950,
-          letterSpacing: "-.12em",
-          color: "#eef0fa",
-          transform: "rotateX(" + (12 + Math.sin(frame / 7) * 3) + "deg) rotateY(-11deg) scale(" + scale + ")",
-          textShadow: "1px 1px 0 #c4cce9,3px 3px 0 #9ba9df,6px 6px 0 #7185d5,10px 10px 0 #4b63b5,15px 18px 0 #253c89,28px 36px 35px rgba(0,0,0,.55)",
-        }}>{value}</div>
-      </div>
-      <div style={{ position: "absolute", left: 40, bottom: 25, fontSize: 15, fontWeight: 850, color: "#aebcf8", letterSpacing: ".18em" }}>3 / 2 / 1 — THE MOMENT MOVES</div>
-    </AbsoluteFill>
-  );
+ const p=pop(frame,30,0,75,14),scale=.88+.12*p;
+ const isThree=value===3,isTwo=value===2;
+ const background=isThree?"#ecebe6":isTwo?"#1730ee":"#050609";
+ const numeralColor=isThree?"#050609":isTwo?"#f0f0ee":"#2637ef";
+ const shadows=isThree
+  ?"2px 2px 0 #b5b5b1,5px 5px 0 #858784,10px 11px 0 #656866,18px 22px 0 #3c3e42,30px 42px 36px rgba(0,0,0,.28)"
+  :isTwo
+  ?"2px 2px 0 #bfc2ca,5px 5px 0 #9297a3,10px 11px 0 #707583,18px 22px 0 #454b5a,28px 38px 36px rgba(0,0,0,.45)"
+  :"2px 2px 0 #6f7dff,6px 7px 0 #4858eb,12px 14px 0 #2837be,21px 25px 0 #161d71,34px 44px 40px rgba(0,0,0,.7)";
+ return <AbsoluteFill style={{background,color:"#fff",overflow:"hidden"}}>
+  {isThree?<div style={{position:"absolute",right:0,top:0,bottom:0,width:"31%",background:"#2438ed"}}/>:null}
+  {isTwo?<div style={{position:"absolute",right:0,top:0,bottom:0,width:"29%",background:"#05060b"}}/>:null}
+  {!isThree&&!isTwo?<div style={{position:"absolute",right:0,bottom:0,width:"31%",height:"38%",background:"#1533ef",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>:null}
+  <svg viewBox="0 0 1000 650" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:isThree?.52:.72}}>
+   <ellipse cx="500" cy="325" rx="365" ry="255" fill="none" stroke={isThree?"#a4a6a5":isTwo?"#d9d9ff":"#797bff"} strokeWidth="2"/>
+   <ellipse cx="500" cy="325" rx="340" ry="225" fill="none" stroke={isThree?"#fff":isTwo?"#aab6ff":"#cbccff"} strokeWidth="1.3" transform={"rotate("+(frame*1.2)+" 500 325)"}/>
+   {isThree?<path d="M0 325H1000" stroke="#a0a0a0" strokeWidth="1" opacity=".22"/>:null}
+  </svg>
+  <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) perspective(1200px) rotateX(8deg) rotateY(-9deg) scale("+scale+")",fontFamily:displayFont,fontSize:isThree?470:500,lineHeight:.78,fontWeight:1000,letterSpacing:"-.12em",color:numeralColor,textShadow:shadows}}>{value}</div>
+  <div style={{position:"absolute",left:34,top:"47%",fontFamily:"monospace",fontSize:14,fontWeight:900,letterSpacing:".12em",color:isThree?"#101214":isTwo?"#eff0ff":"#f3f3ff"}}>{isThree?"IGNITION SEQUENCE / 01":"IGNITION SEQUENCE / "+(isTwo?"02":"03")}</div>
+  <div style={{position:"absolute",right:35,top:"48%",fontFamily:"monospace",fontSize:13,fontWeight:850,letterSpacing:".16em",color:isThree?"#222":isTwo?"#eee":"#fff",textAlign:"right"}}>SNARE ROLL / {isThree?"1":isTwo?"2":"3"}</div>
+  <div style={{position:"absolute",right:35,bottom:35,display:"flex",gap:8}}>{[0,1,2].map(v=><div key={v} style={{width:24,height:6,background:v<=(isThree?0:isTwo?1:2)?"#fff":"rgba(255,255,255,.22)"}}/>)}</div>
+  {!isThree&&!isTwo?<div style={{position:"absolute",left:45,top:32,fontSize:17,fontWeight:900,letterSpacing:".2em",color:"#fff"}}>GO</div>:null}
+ </AbsoluteFill>;
 };
-
 
 const LaunchKitWindow=({frame,variant,countdown=-1}:{frame:number;variant:number;countdown?:number})=>{
  const {fps}=useVideoConfig(),p=pop(frame,fps,0,84,19);
