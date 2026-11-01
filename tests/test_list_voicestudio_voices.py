@@ -97,7 +97,10 @@ class VoiceCatalogSelectorTests(unittest.TestCase):
         rows = MODULE.select_voices(sample_manifest(), commercial_permitted_only=True)
         self.assertEqual(len(rows), 3)
         self.assertFalse(any("piper" in row["voice_id"] for row in rows))
-        self.assertEqual({row["commercial_use"] for row in rows}, upstream-model-card-permits-generated-audioS)
+        self.assertEqual(
+            {row["commercial_use"] for row in rows},
+            {"upstream-model-card-permits-generated-audio", "apache-2.0-model-and-voice-assets"},
+        )
 
     def test_combined_filter_and_limit_are_deterministic(self):
         rows = MODULE.select_voices(
