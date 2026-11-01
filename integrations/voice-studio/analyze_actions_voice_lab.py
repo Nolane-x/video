@@ -288,7 +288,7 @@ def write_markdown(report: dict[str, Any], destination: Path) -> None:
         report["methodology"]["limitations"],
         "Listener ratings and written notes are the selection evidence. Technical audio measurements are separate and do not improve the underlying voice model.",
     ])
-    destination.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+    destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -313,7 +313,7 @@ def main() -> int:
         )
         output = args.output or args.benchmark.parent / "voice-shortlist.json"
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         write_markdown(report, output.with_suffix(".md"))
     except Exception as exc:
         print(f"Actions voice shortlist failed: {type(exc).__name__}: {exc}", file=sys.stderr)
