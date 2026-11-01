@@ -90,158 +90,151 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.022;
- const brush=Array.from({length:146},(_,i)=>{
-  const x=(i*181)%2300-190,y=10+(i*131)%850,w=70+(i*79)%390,h=3+(i*13)%19;
-  const colors=["#fffdf2","#e8f5ef","#b7d9ed","#fff1df","#f2c4b3","#d5e7e9","#a5d0e7","#e8c9c1"];
-  return {x,y,w,h,angle:-33+(i%19)*3.1,color:colors[i%colors.length],opacity:.045+(i%7)*.014};
+ const drift=frame*.019;
+ const brush=Array.from({length:92},(_,i)=>{
+  const x=(i*211)%2260-160,y=40+(i*149)%760,w=75+(i*83)%360,h=2+(i*13)%15;
+  const colors=["#fffdf2","#eaf5f0","#b9d8e9","#fff1e2","#f4c7b6","#d8e9e8","#add4e6"];
+  return {x,y,w,h,angle:-39+(i%19)*4.1,color:colors[i%colors.length],opacity:.035+(i%6)*.011};
  });
- const pigment=Array.from({length:286},(_,i)=>({
-  x:(i*109)%2050-65,y:635+(i*173)%420,r:.8+(i%6)*.62,
-  color:["#fff9ed","#f4c7b5","#8fc5dd","#dcebe7","#edaa9e","#b7d9e5"][i%6],
-  opacity:.028+(i%7)*.015
+ const pigment=Array.from({length:244},(_,i)=>({
+  x:(i*127)%2050-60,y:640+(i*181)%405,r:.7+(i%5)*.7,
+  color:["#fff9ef","#f1c2ad","#8ec4dc","#dcebe6","#e9a39a"][i%5],
+  opacity:.025+(i%7)*.013
  }));
- const dabs=Array.from({length:38},(_,i)=>({
-  x:18+(i*97)%1120,y:704+(i*83)%215,
-  rx:9+(i*17)%47,ry:3+(i*11)%17,
-  angle:-42+(i%9)*8,
-  fill:["#fffaf0","#f4c7ad","#e8f1e9","#f0aaa0","#b7dbe6"][i%5],
-  opacity:.11+(i%5)*.045
+ const flecks=Array.from({length:56},(_,i)=>({
+  x:(i*89)%1060-20,y:716+(i*97)%196,
+  w:8+(i*13)%52,h:2+(i*7)%12,
+  angle:-55+(i%11)*10,
+  color:["#fffaf0","#f4cbb5","#d6e9e9","#f1a99d"][i%4],
+  opacity:.12+(i%4)*.055
  }));
- return <AbsoluteFill style={{background:"#73bce4",overflow:"hidden"}}>
+ return <AbsoluteFill style={{background:"#75bfe5",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v39" x1="0" y1="0" x2=".1" y2="1">
-     <stop stopColor="#55b0df"/>
-     <stop offset=".33" stopColor="#83c5e5"/>
-     <stop offset=".64" stopColor="#b9dce8"/>
-     <stop offset=".86" stopColor="#ead3c6"/>
-     <stop offset="1" stopColor="#f0c0aa"/>
+    <linearGradient id="wc-sky-v40" x1="0" y1="0" x2=".12" y2="1">
+     <stop stopColor="#58b2df"/>
+     <stop offset=".34" stopColor="#86c5e4"/>
+     <stop offset=".66" stopColor="#bddde6"/>
+     <stop offset=".87" stopColor="#ead4c7"/>
+     <stop offset="1" stopColor="#efc2ac"/>
     </linearGradient>
-    <linearGradient id="wc-streak-white-v39" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fffef4" stopOpacity=".03"/>
-     <stop offset=".25" stopColor="#fffff2" stopOpacity=".83"/>
-     <stop offset=".61" stopColor="#e1f1ef" stopOpacity=".53"/>
-     <stop offset="1" stopColor="#d9e9e9" stopOpacity=".02"/>
+    <linearGradient id="wc-wash-white-v40" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fffdf4" stopOpacity=".06"/>
+     <stop offset=".3" stopColor="#f9fff3" stopOpacity=".73"/>
+     <stop offset=".64" stopColor="#e4f1ee" stopOpacity=".42"/>
+     <stop offset="1" stopColor="#deeceb" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-streak-blue-v39" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#8ac8e5" stopOpacity=".04"/>
-     <stop offset=".36" stopColor="#d7edf0" stopOpacity=".57"/>
-     <stop offset=".72" stopColor="#f3f6ed" stopOpacity=".3"/>
-     <stop offset="1" stopColor="#fff4e7" stopOpacity=".01"/>
+    <linearGradient id="wc-wash-blue-v40" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#8bc8e5" stopOpacity=".02"/>
+     <stop offset=".4" stopColor="#c7e4ec" stopOpacity=".52"/>
+     <stop offset=".78" stopColor="#eaf4ef" stopOpacity=".25"/>
+     <stop offset="1" stopColor="#fff3e6" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-streak-peach-v39" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff4e5" stopOpacity=".01"/>
-     <stop offset=".36" stopColor="#f9d6c4" stopOpacity=".63"/>
-     <stop offset=".7" stopColor="#efaeb0" stopOpacity=".48"/>
-     <stop offset="1" stopColor="#f6e1d3" stopOpacity=".02"/>
+    <linearGradient id="wc-wash-peach-v40" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff4e5" stopOpacity=".02"/>
+     <stop offset=".4" stopColor="#f7d5c3" stopOpacity=".58"/>
+     <stop offset=".74" stopColor="#ecadae" stopOpacity=".41"/>
+     <stop offset="1" stopColor="#f6e1d2" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-cream-v39" x1="0" y1="0" x2=".3" y2="1">
-     <stop stopColor="#fffef5" stopOpacity=".99"/>
-     <stop offset=".45" stopColor="#fff3df" stopOpacity=".77"/>
-     <stop offset="1" stopColor="#f2c1aa" stopOpacity=".05"/>
+    <linearGradient id="wc-cloud-light-v40" x1="0" y1="0" x2=".35" y2="1">
+     <stop stopColor="#fffef5" stopOpacity=".96"/>
+     <stop offset=".43" stopColor="#fff2df" stopOpacity=".79"/>
+     <stop offset="1" stopColor="#edc0a9" stopOpacity=".04"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-peach-v39" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff1e0" stopOpacity=".1"/>
-     <stop offset=".4" stopColor="#f2b89c" stopOpacity=".8"/>
-     <stop offset=".78" stopColor="#e99ba0" stopOpacity=".48"/>
-     <stop offset="1" stopColor="#e6c8b9" stopOpacity=".03"/>
+    <linearGradient id="wc-cloud-coral-v40" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff1df" stopOpacity=".09"/>
+     <stop offset=".38" stopColor="#f2b99e" stopOpacity=".78"/>
+     <stop offset=".78" stopColor="#e79aa0" stopOpacity=".45"/>
+     <stop offset="1" stopColor="#e9c7b8" stopOpacity=".03"/>
     </linearGradient>
-    <linearGradient id="wc-hill-far-v39" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#3486a9"/>
-     <stop offset=".62" stopColor="#1e6c97"/>
+    <linearGradient id="wc-ridge-far-v40" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#347f9f"/>
+     <stop offset=".62" stopColor="#1a6891"/>
      <stop offset="1" stopColor="#145783"/>
     </linearGradient>
-    <linearGradient id="wc-hill-near-v39" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#135a84"/>
-     <stop offset=".58" stopColor="#0e4a75"/>
-     <stop offset="1" stopColor="#093c67"/>
+    <linearGradient id="wc-ridge-near-v40" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#13577f"/>
+     <stop offset=".58" stopColor="#0c4772"/>
+     <stop offset="1" stopColor="#083b66"/>
     </linearGradient>
-    <radialGradient id="wc-dawn-v39" cx="72%" cy="78%" r="58%">
-     <stop stopColor="#ffe8d4" stopOpacity=".45"/>
-     <stop offset=".55" stopColor="#f7d9c9" stopOpacity=".16"/>
-     <stop offset="1" stopColor="#f7d9c9" stopOpacity="0"/>
+    <radialGradient id="wc-dawn-v40" cx="73%" cy="77%" r="57%">
+     <stop stopColor="#ffe8d4" stopOpacity=".42"/>
+     <stop offset=".54" stopColor="#f7d9ca" stopOpacity=".14"/>
+     <stop offset="1" stopColor="#f7d9ca" stopOpacity="0"/>
     </radialGradient>
-    <filter id="wc-air-soft-v39"><feGaussianBlur stdDeviation="23"/></filter>
-    <filter id="wc-brush-soft-v39"><feGaussianBlur stdDeviation="5"/></filter>
-    <filter id="wc-brush-dry-v39">
-     <feTurbulence type="fractalNoise" baseFrequency=".016 .046" numOctaves="3" seed="127" result="dryNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="dryNoise" scale="26" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation="1.15"/>
+    <filter id="wc-wash-soft-v40"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="wc-wash-texture-v40">
+     <feTurbulence type="fractalNoise" baseFrequency=".008 .023" numOctaves="3" seed="151" result="broadNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="broadNoise" scale="34" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation="1.4"/>
     </filter>
-    <filter id="wc-edge-v39">
-     <feTurbulence type="fractalNoise" baseFrequency=".026 .052" numOctaves="2" seed="139" result="edgeNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="10" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation=".5"/>
+    <filter id="wc-cloud-edge-v40">
+     <feTurbulence type="fractalNoise" baseFrequency=".021 .047" numOctaves="2" seed="163" result="cloudNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="cloudNoise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation=".75"/>
     </filter>
-    <filter id="wc-pigment-v39">
-     <feTurbulence type="fractalNoise" baseFrequency=".092 .14" numOctaves="2" seed="61" result="pigmentNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    <filter id="wc-pigment-v40">
+     <feTurbulence type="fractalNoise" baseFrequency=".072 .12" numOctaves="2" seed="73" result="pigmentNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
-    <filter id="wc-paper-v39">
-     <feTurbulence type="fractalNoise" baseFrequency=".88" numOctaves="2" seed="47"/>
+    <filter id="wc-paper-v40">
+     <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="53"/>
      <feColorMatrix type="saturate" values="0"/>
     </filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v39)"/>
-   <rect width="1920" height="1080" fill="url(#wc-dawn-v39)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v40)"/>
+   <rect width="1920" height="1080" fill="url(#wc-dawn-v40)"/>
 
-   <g transform={"translate("+(-drift*.7)+",0)"} opacity=".9" filter="url(#wc-brush-dry-v39)">
-    <path d="M-180 356C46 263 173 226 338 183C509 138 654 93 830 83C1000 61 1148 18 1316 -32C1250 21 1188 88 1063 130C914 179 750 208 599 253C437 302 238 384 -180 505Z" fill="url(#wc-streak-white-v39)" opacity=".55"/>
-    <path d="M-170 390C28 307 187 274 353 213C508 164 683 132 818 116C977 96 1094 57 1203 22C1089 93 1000 140 874 169C701 211 540 258 388 310C210 372 38 425 -170 466Z" fill="url(#wc-streak-blue-v39)" opacity=".47"/>
-    <path d="M-120 387C57 307 178 276 339 225C490 178 641 155 796 132" fill="none" stroke="#fffdf3" strokeWidth="29" strokeLinecap="round" opacity=".4"/>
-    <path d="M-150 445C34 379 167 332 301 293C426 257 545 231 674 208" fill="none" stroke="#e0f0f0" strokeWidth="16" strokeLinecap="round" opacity=".53"/>
+   <g transform={"translate("+(-drift*.55)+",0)"} filter="url(#wc-wash-texture-v40)">
+    <path d="M-190 374C-104 326 14 281 153 238C270 202 352 193 478 144C589 102 718 72 842 28C774 103 673 157 562 202C448 248 322 275 202 331C72 390 -56 434 -190 505Z" fill="url(#wc-wash-white-v40)" opacity=".62"/>
+    <path d="M270 495C395 421 514 365 633 320C755 272 868 239 1002 194C925 270 838 305 760 346C650 405 535 438 428 493C372 520 314 539 270 550Z" fill="url(#wc-wash-blue-v40)" opacity=".35"/>
+    <path d="M900 275C1035 210 1165 168 1309 127C1450 82 1619 25 1814 -35C1693 56 1585 112 1460 162C1336 214 1209 248 1092 299C1015 331 955 343 900 355Z" fill="url(#wc-wash-peach-v40)" opacity=".72"/>
    </g>
-   <g transform={"translate("+(drift*.35)+",0)"} opacity=".83" filter="url(#wc-brush-dry-v39)">
-    <path d="M850 236C1033 180 1177 141 1340 94C1507 43 1688 6 1955 -67C1817 2 1731 55 1590 99C1452 144 1320 176 1188 224C1050 270 953 295 850 314Z" fill="url(#wc-streak-peach-v39)" opacity=".8"/>
-    <path d="M1070 215C1232 157 1381 128 1534 79C1673 34 1813 2 1990 -44" fill="none" stroke="#f7cbbd" strokeWidth="36" strokeLinecap="round" opacity=".42"/>
-    <path d="M1334 151C1488 105 1629 62 1779 17" fill="none" stroke="#fff0df" strokeWidth="19" strokeLinecap="round" opacity=".35"/>
+   <g transform={"translate("+(drift*.18)+",0)"} opacity=".42" filter="url(#wc-wash-soft-v40)">
+    <path d="M-100 445C110 354 238 325 391 272C520 226 655 207 794 163" fill="none" stroke="#fffef3" strokeWidth="25" strokeLinecap="round"/>
+    <path d="M620 380C762 315 897 282 1024 243" fill="none" stroke="#d9eef0" strokeWidth="29" strokeLinecap="round"/>
+    <path d="M1310 241C1453 192 1600 142 1736 91" fill="none" stroke="#fff0e3" strokeWidth="22" strokeLinecap="round"/>
    </g>
-   <g transform={"translate("+(drift*.18)+",0)"} opacity=".52" filter="url(#wc-brush-soft-v39)">
-    <path d="M-110 525C71 462 216 426 365 373C501 326 650 293 778 260" fill="none" stroke="#e1f1ed" strokeWidth="38" strokeLinecap="round"/>
-    <path d="M390 469C552 407 687 381 833 343S1116 280 1275 233" fill="none" stroke="#fff9ec" strokeWidth="24" strokeLinecap="round" opacity=".58"/>
-    <path d="M1030 496C1189 441 1331 411 1471 366S1745 291 1940 256" fill="none" stroke="#f2c4b7" strokeWidth="29" strokeLinecap="round" opacity=".4"/>
+   <g transform={"translate("+(drift*.12)+",0)"} opacity=".34">
+    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.27)+" "+(-p.h*1.3)+" "+(p.w*.7)+" "+(-p.h*.18)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
 
-   <g transform={"translate("+(-drift*.2)+",0)"} filter="url(#wc-edge-v39)">
-    <path d="M-75 824C-28 791 21 768 77 782C123 744 177 755 210 785C257 758 307 784 328 815C300 838 268 842 235 830C186 858 140 850 100 832C36 858 -24 848 -75 824Z" fill="url(#wc-cloud-cream-v39)" opacity=".88"/>
-    <path d="M-24 797C22 769 68 767 115 787C153 763 202 771 235 794" fill="none" stroke="#fffef4" strokeWidth="26" strokeLinecap="round" opacity=".56" filter="url(#wc-brush-soft-v39)"/>
-    <path d="M12 851C74 825 132 831 182 846" fill="none" stroke="#cce4e8" strokeWidth="17" strokeLinecap="round" opacity=".5"/>
+   <g transform={"translate("+(-drift*.17)+",0)"} filter="url(#wc-cloud-edge-v40)">
+    <path d="M-70 825C-33 797 5 780 52 790C99 752 147 766 178 793C218 774 263 787 289 817C267 845 229 847 193 833C148 858 105 850 67 833C12 853 -36 845 -70 825Z" fill="url(#wc-cloud-light-v40)" opacity=".88"/>
+    <path d="M-20 804C26 779 76 778 116 795" fill="none" stroke="#fffef5" strokeWidth="28" strokeLinecap="round" opacity=".56" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M35 853C98 826 157 831 205 849" fill="none" stroke="#c8e3e6" strokeWidth="15" strokeLinecap="round" opacity=".55"/>
 
-    <path d="M254 849C305 809 354 807 396 829C435 794 487 801 518 827C563 810 611 827 628 852C593 875 557 877 520 862C472 887 427 875 390 857C333 880 284 867 254 849Z" fill="url(#wc-cloud-cream-v39)" opacity=".8"/>
-    <path d="M310 823C360 801 413 806 456 826" fill="none" stroke="#fffaf0" strokeWidth="22" strokeLinecap="round" opacity=".56" filter="url(#wc-brush-soft-v39)"/>
-    <path d="M386 865C444 847 494 852 541 868" fill="none" stroke="#efb7a4" strokeWidth="18" strokeLinecap="round" opacity=".54"/>
+    <path d="M235 849C281 816 324 809 366 829C409 793 463 802 495 829C538 810 578 829 598 851C565 877 527 880 489 864C442 890 395 875 362 858C311 879 269 865 235 849Z" fill="url(#wc-cloud-light-v40)" opacity=".76"/>
+    <path d="M290 824C344 803 390 806 439 829" fill="none" stroke="#fffaf0" strokeWidth="24" strokeLinecap="round" opacity=".55" filter="url(#wc-wash-soft-v40)"/>
    </g>
 
-   <g transform={"translate("+(drift*.14)+",0)"} filter="url(#wc-edge-v39)">
-    <path d="M582 875C624 839 672 835 714 856C749 824 794 823 831 848C869 829 914 840 945 868C912 891 873 889 833 873C787 897 743 886 707 870C659 891 613 889 582 875Z" fill="url(#wc-cloud-peach-v39)" opacity=".8"/>
-    <path d="M622 850C670 831 718 837 759 856" fill="none" stroke="#fff9ee" strokeWidth="21" strokeLinecap="round" opacity=".57" filter="url(#wc-brush-soft-v39)"/>
-    <path d="M690 888C744 867 799 875 842 890" fill="none" stroke="#e89d8e" strokeWidth="13" strokeLinecap="round" opacity=".48"/>
-    <path d="M902 851C948 826 990 828 1032 847C1071 827 1110 839 1135 863C1098 884 1059 881 1020 865C982 883 939 871 902 851Z" fill="url(#wc-cloud-cream-v39)" opacity=".57"/>
+   <g transform={"translate("+(drift*.14)+",0)"} filter="url(#wc-cloud-edge-v40)">
+    <path d="M566 871C611 842 657 835 700 853C740 820 787 824 819 848C858 831 902 842 930 868C900 890 862 890 822 875C777 898 733 886 696 871C651 893 597 889 566 871Z" fill="url(#wc-cloud-coral-v40)" opacity=".82"/>
+    <path d="M611 849C661 832 707 836 752 856" fill="none" stroke="#fffaf0" strokeWidth="21" strokeLinecap="round" opacity=".58" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M684 888C739 866 794 874 838 890" fill="none" stroke="#e89e8f" strokeWidth="14" strokeLinecap="round" opacity=".48"/>
+    <path d="M880 850C924 827 971 830 1014 848C1055 829 1095 839 1119 863C1080 885 1042 881 1004 866C960 884 918 871 880 850Z" fill="url(#wc-cloud-light-v40)" opacity=".5"/>
    </g>
 
-   <g transform={"translate("+(drift*.13)+",0)"} opacity=".56" filter="url(#wc-air-soft-v39)">
-    <path d="M-70 781C100 733 238 751 355 779" fill="none" stroke="#ffe9d9" strokeWidth="51" strokeLinecap="round"/>
-    <path d="M250 807C402 758 535 783 651 808" fill="none" stroke="#f0bfb0" strokeWidth="38" strokeLinecap="round"/>
-    <path d="M589 826C730 780 865 800 998 827" fill="none" stroke="#fff1df" strokeWidth="32" strokeLinecap="round"/>
-    <path d="M1008 817C1168 777 1302 799 1427 825" fill="none" stroke="#f6ded0" strokeWidth="31" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.1)+",0)"} opacity=".5" filter="url(#wc-wash-soft-v40)">
+    <path d="M-45 781C111 739 237 751 358 782" fill="none" stroke="#f9e8d7" strokeWidth="45" strokeLinecap="round"/>
+    <path d="M280 805C411 768 531 781 653 808" fill="none" stroke="#f0c4b4" strokeWidth="34" strokeLinecap="round"/>
+    <path d="M617 824C752 785 864 800 980 829" fill="none" stroke="#fff0df" strokeWidth="28" strokeLinecap="round"/>
+    <path d="M1010 817C1154 780 1280 800 1395 828" fill="none" stroke="#f7ded0" strokeWidth="26" strokeLinecap="round"/>
    </g>
-   <g filter="url(#wc-pigment-v39)" opacity=".74">
-    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.22)+" "+(-p.h*1.1)+" "+(p.w*.76)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
-    {dabs.map((p,i)=><ellipse key={i} cx={p.x} cy={p.y} rx={p.rx} ry={p.ry} fill={p.fill} opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+   <g filter="url(#wc-pigment-v40)" opacity=".64">
+    {flecks.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.28)+" "+(-p.h*1.5)+" "+p.w+" 0"} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
     {pigment.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
    </g>
 
    <g transform={"translate("+(drift*.05)+",0)"}>
-    <path d="M-120 968C-13 947 98 925 205 914C323 902 415 883 526 879C635 874 751 897 851 919C958 941 1041 916 1138 903C1235 889 1320 879 1422 888C1546 899 1640 921 1751 914C1850 909 1947 899 2030 903V1080H-120Z" fill="url(#wc-hill-far-v39)" opacity=".9"/>
-    <path d="M-120 1004C9 984 133 963 253 954C357 946 452 963 563 980C668 996 772 971 872 973C1002 976 1111 995 1233 986C1366 976 1472 954 1596 958C1743 963 1869 947 2030 953V1080H-120Z" fill="url(#wc-hill-near-v39)"/>
-    <path d="M-100 969C42 941 139 926 230 927C332 928 412 944 504 952C603 960 683 953 766 960" fill="none" stroke="#72b8cc" strokeWidth="8" opacity=".24" filter="url(#wc-brush-soft-v39)"/>
-    <path d="M-35 1018C64 1001 118 996 196 998M541 1034C631 1022 698 1022 780 1030M1300 1027C1395 1015 1474 1018 1552 1025" fill="none" stroke="#76b7cc" strokeWidth="6" opacity=".2" filter="url(#wc-brush-soft-v39)"/>
+    <path d="M-120 968C-6 947 98 925 205 914C323 902 415 883 526 879C635 874 751 897 851 919C958 941 1041 916 1138 903C1235 889 1320 879 1422 888C1546 899 1640 921 1751 914C1850 909 1947 899 2030 903V1080H-120Z" fill="url(#wc-ridge-far-v40)" opacity=".9"/>
+    <path d="M-120 1004C9 984 133 963 253 954C357 946 452 963 563 980C668 996 772 971 872 973C1002 976 1111 995 1233 986C1366 976 1472 954 1596 958C1743 963 1869 947 2030 953V1080H-120Z" fill="url(#wc-ridge-near-v40)"/>
+    <path d="M-100 969C42 941 139 926 230 927C332 928 412 944 504 952C603 960 683 953 766 960" fill="none" stroke="#72b8cc" strokeWidth="8" opacity=".24" filter="url(#wc-wash-soft-v40)"/>
    </g>
-   <rect width="1920" height="1080" filter="url(#wc-paper-v39)" opacity=".085" style={{mixBlendMode:"soft-light"}}/>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v40)" opacity=".072" style={{mixBlendMode:"soft-light"}}/>
   </svg>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 47%,transparent 49%,rgba(247,230,216,.07) 100%)"}}/>
-  <Noise opacity={.016}/>
+  <Noise opacity={.013}/>
  </AbsoluteFill>;
 };
 
