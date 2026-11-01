@@ -32,6 +32,7 @@ The Full HD H2 master previously delivered in ChatGPT is noted in the manifest b
 
 ## Workflows
 - [Remotion render](.github/workflows/render-remotion.yml) — generates music/SFX, typechecks, renders, masters audio, validates metadata and uploads QA.
+- [VoiceStudio AI voice-over](.github/workflows/render-voicestudio-voiceover.yml) — opt-in, reusable GitHub Actions TTS for English/Vietnamese; uploads a verified 48 kHz PCM-24 WAV with SRT/VTT captions and provenance. See [usage guide](docs/VOICEOVER_WORKFLOW.md).
 - [Blender proof](.github/workflows/render-blender-preview.yml)
 - [H2 runtime package](.github/workflows/prepare-h2-runtime.yml)
 - [Video Showcase archive](.github/workflows/archive-video-showcase.yml) — creates a tagged Release with Remotion video and skill ZIP when the triggering render commit includes `[archive-video]`.
