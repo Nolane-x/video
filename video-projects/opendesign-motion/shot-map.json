@@ -1,13 +1,13 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v15",
+  "id": "opendesign-motion-reference-rebuild-v16",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "Source preview.mp4 decoded at native frame indices 0-1118. Final montage source cuts were inspected at exact frames 510, 512, 515, 518, 520, 523, 525, 528, 530, 535, 540, 545, 550, 555, 570.",
-    "constraints": "Match the observed source timing, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition, camera-like app tile and final lockup using independently authored graphics. Pixel identity is not claimed where source project layers/assets/fonts are unavailable."
+    "evidence": "Reference preview.mp4 decoded at 30fps, all frames indexed 0-1118. Native-size source frames checked across opening, gallery, each montage cut and launch/countdown states; boundaries cross-checked at matching frame numbers.",
+    "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts."
   },
   "output": {
     "durationFrames": 1119,
@@ -80,12 +80,16 @@
       "component": "PosterSequence",
       "posterBeats": [
         [
+          "GalleryExit",
+          2
+        ],
+        [
           "Comic1952",
-          14
+          4
         ],
         [
           "Comic1962",
-          15
+          16
         ],
         [
           "DotPoster",
@@ -96,12 +100,16 @@
           15
         ],
         [
+          "PixelGamePoster",
+          13
+        ],
+        [
           "WorldPoster",
-          15
+          5
         ],
         [
           "MindPoster",
-          15
+          14
         ],
         [
           "RingPoster",
@@ -109,27 +117,35 @@
         ],
         [
           "EditorialPosterGrid",
-          15
+          16
+        ],
+        [
+          "DepthField",
+          10
         ],
         [
           "EaseGreen",
-          15
+          5
+        ],
+        [
+          "InMetallic",
+          5
+        ],
+        [
+          "InPoster",
+          5
         ],
         [
           "EasePoster",
-          11
+          5
         ],
         [
           "OutPoster",
-          7
-        ],
-        [
-          "GreenGhostTransition",
-          7
+          10
         ],
         [
           "NeverPoster",
-          5
+          10
         ],
         [
           "LinearPoster",
@@ -141,31 +157,39 @@
         ],
         [
           "ClockPoster",
-          8
+          7
         ],
         [
           "StatsPoster",
-          12
+          8
         ],
         [
           "TogglePoster",
-          5
+          8
         ],
         [
           "MotionFilmsPoster",
-          10
+          8
         ],
         [
           "EyePoster",
-          5
+          8
         ],
         [
           "CoursesPoster",
-          15
+          8
+        ],
+        [
+          "Comic1962",
+          7
         ],
         [
           "Future3D",
-          15
+          8
+        ],
+        [
+          "NotText",
+          7
         ]
       ]
     },
@@ -219,11 +243,13 @@
     }
   ],
   "qualityGates": [
-    "12 contiguous root sections at 1920x1080, 30fps, 1119 decoded frames.",
-    "Montage 22 cut beats from frame316 through585 (269 frames), following exact native reference cuts.",
-    "Source frames510–515 green circle/icon transition; 515–523 hand-painted 1889 night-clock; 523–535 animated 80K/Day88 to 96K/Day138 Star History card; 535–540 white toggle; 540–550 painted Motion Films; 550–555 eye/4.7%; 555–570 Courses koala card; 570–585 metallic Future.",
-    "Source opening prompt/title/claim and gallery remain timed; exact Launch Film preview states and 3/2/fullscreen-1 countdown preserved.",
-    "The 1952 comic, 1962 pop art, 8-bit spectral pixel poster, WORLD/WIDE, MIND, circular type, kinetic typography and early montage cut sequence are independently authored.",
-    "Actions validator/typecheck/render/ffprobe/EBU R128/contact sheet checks all pass before reviewing similarity."
+    "12 contiguous root sections at 1920x1080, 30fps, 1119 frames.",
+    "28 exact-source montage beats across frames 316-585, 269 frames total.",
+    "Measured montage: gallery exit 316-318; comic 1952 318-322; comic 1962 322-338; dots 338-353; prism 353-368; pixel game 368-381; World/Wide 381-386; MIND 386-400; rings 400-430; editorial grid 430-446; particles 446-456; EASE 456-461; metallic IN 461-466; IN. 466-471; EASE 471-476; OUT 476-486; NEVER 486-496; LINEAR 496-511; green mark 511-516; clock 516-523; Star History 523-531; toggle 531-539; Motion Films 539-547; eye 547-555; Courses 555-563; comic 563-570; FUTURE 570-578; Not 578-585.",
+    "Gallery at 240-316 contains 30 distinct panels in 6x5 and fades the white open-source claim card over the montage of thumbnails from 240-255.",
+    "Star History is animated from 84K / Day111 to 96K / Day138; iris readout begins at 4.7%.",
+    "Launch Film preview states at 780/795/810/825/840; countdown 3/2/full-screen 1 begins at 855/870/885.",
+    "MORRO transition 897-933, rounded app/cube sequence 933-1050, end card 1050-1119.",
+    "Actions validates JSX/map identity, typecheck, render metadata, 1119 decoded frames, AAC, loudness and checksum. Artistic review still compares the final render to the same source-frame indices."
   ]
 }
