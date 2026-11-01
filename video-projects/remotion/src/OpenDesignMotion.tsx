@@ -415,59 +415,50 @@ const Comic1965 = () => {
 };
 
 const MindPoster = () => {
-  const f = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ ...full, background: "#2026ce", color: "#050b44" }}>
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(130deg,#2026ce 0%,#2528bb 44%,#151c70 100%)" }} />
-      <div style={{ position: "absolute", inset: 0, opacity: .26, backgroundImage: "linear-gradient(rgba(255,255,255,.36) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.36) 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
-      <div style={{ position: "absolute", left: -25, top: 80, opacity: .9, transform: "translateX(" + e(f, 0, 22, 70, -50) + "px)" }}>
-        <Word size={220} color="#0a124e">MIND MIND</Word>
-        <Word size={220} color="#0a124e">MIND MIND</Word>
-        <Word size={220} color="#0a124e">MIND MIND</Word>
-      </div>
-      <svg viewBox="0 0 820 820" width="780" height="780" style={{ position: "absolute", right: 180, top: 145, filter: "drop-shadow(0 30px 50px rgba(0,0,0,.24))", transform: "rotate(" + (f * 1.4) + "deg)" }}>
-        <defs>
-          <radialGradient id="mind-glass"><stop offset="0%" stopColor="#fff" /><stop offset="18%" stopColor="#bfd0ff" /><stop offset="45%" stopColor="#435bde" /><stop offset="70%" stopColor="#111b72" /><stop offset="100%" stopColor="#060b39" /></radialGradient>
-        </defs>
-        <circle cx="410" cy="410" r="330" fill="none" stroke="#8ba6ff" strokeOpacity=".35" strokeWidth="2" />
-        <circle cx="410" cy="410" r="255" fill="none" stroke="#a2b4ff" strokeOpacity=".55" strokeWidth="3" />
-        <circle cx="410" cy="410" r="172" fill="url(#mind-glass)" stroke="#e5ebff" strokeWidth="8" />
-        <circle cx="410" cy="410" r="118" fill="none" stroke="#c5d2ff" strokeOpacity=".7" strokeWidth="4" />
-        <circle cx="410" cy="410" r="66" fill="#0d174e" />
-        <circle cx="370" cy="355" r="33" fill="#fff" opacity=".8" />
-        {Array.from({ length: 32 }, (_, i) => <line key={i} x1="410" y1="220" x2="410" y2="160" stroke="#b8c9ff" strokeWidth="3" transform={"rotate(" + (i * 11.25) + " 410 410)"} />)}
-      </svg>
-      <div style={{ position: "absolute", left: 95, bottom: 76, color: "#e9edff", fontSize: 17, fontWeight: 900, letterSpacing: ".18em" }}>MIND / MATTER / MOTION</div>
-      <Noise opacity={0.055} />
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),rot=10+f*.9;
+ return <AbsoluteFill style={{...full,background:"#1b2be7",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 52% 48%,#3654ff,#1928d7 72%)"}}/>
+  <div style={{position:"absolute",inset:-50,display:"flex",flexDirection:"column",justifyContent:"space-around",transform:"translateX("+Math.sin(f/6)*16+"px)"}}>
+   {Array.from({length:5},(_,i)=><div key={i} style={{whiteSpace:"nowrap",fontFamily:displayFont,fontSize:230,fontWeight:950,letterSpacing:"-.11em",color:i%2===0?"#070a29":"transparent",WebkitTextStroke:i%2===0?"0":"2px rgba(6,10,36,.8)"}}>MIND / MIND / MIND</div>)}
+  </div>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs><linearGradient id="opd-mind-glass" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stopColor="#fff" stopOpacity=".85"/><stop offset="42%" stopColor="#b1d7ff" stopOpacity=".42"/><stop offset="100%" stopColor="#f5aaff" stopOpacity=".36"/></linearGradient></defs>
+   <g transform={"translate(960 545) rotate("+rot+")"}>
+    <path d="M0 -330L275 -120L210 235L-90 315L-300 60Z" fill="url(#opd-mind-glass)" stroke="#dceaff" strokeWidth="5"/>
+    <path d="M0 -330L-90 315L-300 60Z" fill="#c4e8ff" opacity=".3"/><path d="M0 -330L275 -120L210 235Z" fill="#fff" opacity=".24"/>
+    <path d="M-300 60L275 -120M-90 315L275 -120" stroke="#fff" strokeWidth="4" opacity=".72"/>
+    <path d="M-90 315L210 235L0 -330" fill="none" stroke="#eef7ff" strokeWidth="2" opacity=".65"/>
+   </g>
+   {Array.from({length:14},(_,i)=>{const a=i*Math.PI*2/14;const x=960+Math.cos(a)*390,y=545+Math.sin(a)*290;return <g key={i}><circle cx={x} cy={y} r={i%3===0?13:8} fill="#fff" opacity=".94"/><circle cx={x} cy={y} r="24" fill="none" stroke="#e5eeff" strokeOpacity=".25" strokeWidth="2"/></g>;})}
+  </svg>
+  <div style={{position:"absolute",left:42,bottom:36,color:"#fff",fontSize:20,fontWeight:950,letterSpacing:".13em"}}>MIND / MATERIAL / MOTION</div>
+  <div style={{position:"absolute",right:48,top:34,color:"#fff",fontSize:15,fontWeight:850,letterSpacing:".15em"}}>FTH/2B26 — THE FUTURE IS ALREADY HERE</div>
+  <div style={{position:"absolute",right:64,top:140,width:310,height:108,border:"1px solid rgba(255,255,255,.7)",background:"rgba(6,10,32,.72)",color:"#eef4ff",padding:14,boxSizing:"border-box",fontSize:13,fontFamily:"monospace",lineHeight:1.65}}>SPEC / 4K28<br/>MATERIAL / GLASS<br/>IOR / 1.48</div>
+ </AbsoluteFill>;
 };
 
 const RingPoster = () => {
-  const f = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ ...full, background: "#f7f6f0", color: "#101214" }}>
-      <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{ position: "absolute", inset: 0, transform: "rotate(" + (f * .18) + "deg)" }}>
-        <defs>
-          <path id="ringA" d="M960 540 m-635 0 a635 635 0 1 1 1270 0 a635 635 0 1 1 -1270 0" />
-          <path id="ringB" d="M960 540 m-520 0 a520 520 0 1 1 1040 0 a520 520 0 1 1 -1040 0" />
-          <path id="ringC" d="M960 540 m-405 0 a405 405 0 1 1 810 0 a405 405 0 1 1 -810 0" />
-          <path id="ringD" d="M960 540 m-293 0 a293 293 0 1 1 586 0 a293 293 0 1 1 -586 0" />
-          <path id="ringE" d="M960 540 m-183 0 a183 183 0 1 1 366 0 a183 183 0 1 1 -366 0" />
-        </defs>
-        {[635,520,405,293,183].map((r,i) => <circle key={r} cx="960" cy="540" r={r} fill="none" stroke="#111315" strokeWidth={i===0?5:3} />)}
-        <text fill="#111315" fontSize="83" fontWeight="950" letterSpacing="7"><textPath href="#ringA">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-        <text fill="#111315" fontSize="72" fontWeight="950" letterSpacing="6"><textPath href="#ringB">FUTURE IS ALREADY HERE · FUTURE IS ALREADY HERE ·</textPath></text>
-        <text fill="#111315" fontSize="59" fontWeight="950" letterSpacing="5"><textPath href="#ringC">THE FUTURE · THE FUTURE · THE FUTURE · THE FUTURE ·</textPath></text>
-        <text fill="#111315" fontSize="45" fontWeight="900" letterSpacing="4"><textPath href="#ringD">IS ALREADY HERE · IS ALREADY HERE · IS ALREADY HERE ·</textPath></text>
-        <text fill="#111315" fontSize="31" fontWeight="900" letterSpacing="3"><textPath href="#ringE">THE FUTURE IS NOW · THE FUTURE IS NOW · THE FUTURE IS NOW ·</textPath></text>
-        <circle cx="960" cy="540" r="126" fill="#111315" />
-        <text x="960" y="526" fill="#f7f6f0" textAnchor="middle" fontSize="39" fontWeight="950">FUTURE</text>
-        <text x="960" y="574" fill="#f7f6f0" textAnchor="middle" fontSize="31" fontWeight="850">IS NOW</text>
-      </svg>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{...full,background:"#030304",color:"#fff"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+(f*.15)+"deg)"}}>
+   <defs>
+    <path id="od-ring-a" d="M960 540m-640 0a640 640 0 1 1 1280 0a640 640 0 1 1 -1280 0"/>
+    <path id="od-ring-b" d="M960 540m-520 0a520 520 0 1 1 1040 0a1040 1040 0 1 1 -1040 0"/>
+    <path id="od-ring-c" d="M960 540m-405 0a405 405 0 1 1 810 0a810 810 0 1 1 -810 0"/>
+    <path id="od-ring-d" d="M960 540m-293 0a293 293 0 1 1 586 0a586 586 0 1 1 -586 0"/>
+    <path id="od-ring-e" d="M960 540m-183 0a183 183 0 1 1 366 0a366 366 0 1 1 -366 0"/>
+   </defs>
+   {[640,520,405,293,183].map((r,i)=><circle key={r} cx="960" cy="540" r={r} fill="none" stroke="#f4f4f2" strokeWidth={i===0?8:4}/>)}
+   <text fill="#fff" fontSize="81" fontWeight="950" letterSpacing="6"><textPath href="#od-ring-a">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
+   <text fill="#fff" fontSize="68" fontWeight="950" letterSpacing="5"><textPath href="#od-ring-b">THE FUTURE IS HERE · THE FUTURE IS HERE ·</textPath></text>
+   <text fill="#fff" fontSize="56" fontWeight="950" letterSpacing="4"><textPath href="#od-ring-c">THE FUTURE · THE FUTURE · THE FUTURE · THE FUTURE ·</textPath></text>
+   <text fill="#fff" fontSize="43" fontWeight="900" letterSpacing="3"><textPath href="#od-ring-d">IS ALREADY HERE · IS ALREADY HERE · IS ALREADY HERE ·</textPath></text>
+   <text fill="#fff" fontSize="31" fontWeight="900" letterSpacing="2"><textPath href="#od-ring-e">THE FUTURE IS NOW · THE FUTURE IS NOW · THE FUTURE IS NOW ·</textPath></text>
+   <circle cx="960" cy="540" r="116" fill="#fff"/><circle cx="960" cy="540" r="98" fill="#030304"/>
+  </svg>
+ </AbsoluteFill>;
 };
+
 const FutureCollage = () => (
   <AbsoluteFill style={{ ...full, background: "#111315", color: "#f6f5ef" }}>
     <div style={{ position: "absolute", inset: 35, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 14 }}>
@@ -548,29 +539,20 @@ const LinearPoster = () => {
 };
 
 const ClockPoster = () => {
-  const f = useCurrentFrame();
-  const rot = 22 + f * 1.5;
-  return (
-    <AbsoluteFill style={{ ...full, background: "#162d82", color: "#f3ce67" }}>
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#1c3b9a,#111d5e)" }} />
-      <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-        {Array.from({ length: 46 }, (_, i) => <path key={i} d={"M" + (i * 49 - 180) + " " + (170 + ((i * 67) % 730)) + " q 95 -34 180 " + ((i % 4) * 15 - 20)} fill="none" stroke={i % 2 ? "#5266bc" : "#2445a3"} strokeWidth={i % 3 ? 8 : 14} opacity=".42" />)}
-        <g transform={"translate(960 540) rotate(" + (f * 0.3) + ")"}>
-          <circle r="320" fill="#e2b84c" stroke="#f2d67b" strokeWidth="26" />
-          <circle r="280" fill="#1b348a" stroke="#c18a30" strokeWidth="18" />
-          <circle r="236" fill="none" stroke="#f8da7a" strokeWidth="8" strokeDasharray="3 15" />
-          <circle r="205" fill="#172764" stroke="#e9bf4b" strokeWidth="11" />
-          <path d="M-120 -210 Q0 -250 130 -200 M-190 135 Q0 240 180 130" fill="none" stroke="#f8d56c" strokeWidth="9" opacity=".6" />
-          <g transform={"rotate(" + rot + ")"}>
-            <path d="M0 -158 L22 24 L0 160 L-22 24Z" fill="#f7d45a" stroke="#8e6c2e" strokeWidth="10" />
-          </g>
-          <circle r="31" fill="#e9c34c" stroke="#fff0a0" strokeWidth="9" />
-        </g>
-      </svg>
-      <div style={{ position: "absolute", top: 60, left: 0, right: 0, textAlign: "center", fontSize: 24, fontWeight: 950, color: "#f3d47c", letterSpacing: ".16em" }}>1889</div>
-      <div style={{ position: "absolute", bottom: 70, left: 0, right: 0, textAlign: "center", fontSize: 18, fontWeight: 850, color: "#e6d7a4", letterSpacing: ".18em" }}>TIME IS A MATERIAL</div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),rotate=f*1.1;
+ return <AbsoluteFill style={{...full,background:"#152e86",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#2542a3,#111b5d)"}}/>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   {Array.from({length:80},(_,i)=><path key={i} d={"M"+((i*113)%1920)+" "+((i*97)%1080)+"q 80 -45 160 "+((i%5)*19-38)} stroke={i%3?"#5068bd":"#e1c46c"} strokeWidth={i%4?6:11} fill="none" opacity=".25"/>)}
+   <circle cx="960" cy="540" r="338" fill="#d9b34c" stroke="#f3d783" strokeWidth="27"/>
+   <circle cx="960" cy="540" r="294" fill="#1b368f" stroke="#ad8135" strokeWidth="16"/>
+   <circle cx="960" cy="540" r="244" fill="none" stroke="#f5d478" strokeWidth="7" strokeDasharray="4 16"/>
+   <circle cx="960" cy="540" r="195" fill="#192b71" stroke="#e9c65c" strokeWidth="11"/>
+   <g transform={"translate(960 540) rotate("+rotate+")"}><path d="M-90 -190L22 10L-40 30L-62 165Z" fill="#f8d975" stroke="#8d6e33" strokeWidth="7"/></g>
+   <circle cx="960" cy="540" r="31" fill="#eac75c" stroke="#fff0a0" strokeWidth="8"/>
+  </svg>
+  <div style={{position:"absolute",left:0,right:0,top:45,textAlign:"center",fontSize:39,fontWeight:950,color:"#f3d47c",letterSpacing:".16em"}}>1889</div>
+ </AbsoluteFill>;
 };
 
 const TogglePoster = () => {
@@ -772,9 +754,29 @@ const ClockComic=()=>{
  </AbsoluteFill>;
 };
 const LightSweep1973=()=>{
- const f=useCurrentFrame(),x=e(f,0,8,-700,1500);
- return <AbsoluteFill style={{...full,background:"#05070b"}}><div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 50%,#252936,#050608 65%)"}}/><Word size={300} color="#151a22" style={{position:"absolute",left:0,right:0,top:220,textAlign:"center"}}>1973</Word><div style={{position:"absolute",inset:0,transform:"translateX("+x+"px)",background:"linear-gradient(112deg,transparent 0 42%,rgba(255,255,255,.9) 49%,rgba(77,218,255,.8) 51%,rgba(255,87,191,.5) 54%,transparent 62%)",mixBlendMode:"screen"}}/><div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",width:225,height:225,borderRadius:60,background:"linear-gradient(145deg,#2d343d,#050607)",border:"4px solid #d6f4ff",display:"grid",placeItems:"center",boxShadow:"0 0 42px rgba(73,209,255,.4)"}}><OpenDesignSymbol size={188}/></div></AbsoluteFill>;
+ const f=useCurrentFrame(),ray=e(f,0,8,-80,1250);
+ return <AbsoluteFill style={{...full,background:"#030509",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 51% 51%,#182436,#030509 65%)"}}/>
+  <div style={{position:"absolute",left:55,bottom:24,fontFamily:displayFont,fontSize:265,fontWeight:950,color:"#161e2b",letterSpacing:"-.1em"}}>1973</div>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs>
+    <radialGradient id="opd1973lens"><stop offset="0%" stopColor="#172236"/><stop offset="36%" stopColor="#53627b"/><stop offset="63%" stopColor="#142132"/><stop offset="100%" stopColor="#03070d"/></radialGradient>
+    <linearGradient id="opd1973spectrum" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#fff"/><stop offset="14%" stopColor="#ffe77c"/><stop offset="27%" stopColor="#ff793e"/><stop offset="40%" stopColor="#f14dbd"/><stop offset="54%" stopColor="#856aff"/><stop offset="69%" stopColor="#43aaff"/><stop offset="84%" stopColor="#35eadc"/><stop offset="100%" stopColor="#fff"/></linearGradient>
+   </defs>
+   <path d="M0 540H670" stroke="#fff" strokeWidth="10" opacity=".96"/>
+   <path d="M0 520H670" stroke="#d3efff" strokeWidth="3" opacity=".8"/>
+   <circle cx="960" cy="540" r="260" fill="url(#opd1973lens)" stroke="#d7e6f6" strokeWidth="11"/>
+   <circle cx="960" cy="540" r="220" fill="none" stroke="#8caac4" strokeWidth="4" opacity=".58"/>
+   <circle cx="960" cy="540" r="185" fill="none" stroke="#fff" strokeWidth="3" opacity=".32"/>
+   <path d="M760 420Q960 250 1160 420" fill="none" stroke="#f4f6ff" strokeWidth="11" opacity=".36"/>
+   <path d="M840 430L1045 535L910 560L880 680Z" fill="#eff5ff" opacity=".95"/>
+   <circle cx="960" cy="540" r="27" fill="#0b111e" stroke="#fff" strokeWidth="4"/>
+   <path d={"M1210 440L"+(1920+ray)+" 230L"+(1920+ray)+" 850L1210 640Z"} fill="url(#opd1973spectrum)" opacity=".96"/>
+  </svg>
+  <div style={{position:"absolute",left:64,top:44,color:"#aab6c8",fontSize:15,fontWeight:900,letterSpacing:".2em"}}>OPTICAL MEDIA / LIGHT REFRACTION</div>
+ </AbsoluteFill>;
 };
+
 const MarioGamePoster=()=>{
  const f=useCurrentFrame();
  return <AbsoluteFill style={{...full,background:"#28a8e7"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><path d="M0 690L300 430L560 700L830 395L1120 700L1460 425L1740 700L1920 600V1080H0Z" fill="#718fd0"/><path d="M0 795L320 620L590 790L880 620L1190 805L1500 620L1920 790V1080H0Z" fill="#369a82"/><path d="M0 875H1920V1080H0Z" fill="#d19a42"/><path d="M0 950H1920" stroke="#fff0b9" strokeWidth="12" strokeDasharray="30 24"/>{Array.from({length:16},(_,i)=><g key={i} transform={"translate("+(i*120-40)+" "+(300+i%3*44)+")"}><rect width="80" height="26" rx="4" fill="#fff"/><rect x="12" y="8" width="56" height="10" fill="#d6ebf6"/></g>)}<g transform={"translate("+(850+Math.sin(f/7)*24)+" 545)"}><circle r="155" fill="#f7f0d4" stroke="#17202a" strokeWidth="16"/><circle r="120" fill="#2f8dda"/><path d="M-42 -60V60L70 0Z" fill="#fff"/></g></svg><div style={{position:"absolute",left:65,top:55,color:"#fff",fontSize:18,fontWeight:950,letterSpacing:".18em"}}>PIXEL WORLD / 1985</div></AbsoluteFill>;
