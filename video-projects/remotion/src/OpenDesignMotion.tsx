@@ -1274,20 +1274,28 @@ const ModelAgentScene=()=>{
   if(phase===0)return <div style={{position:"absolute",left:0,right:0,top:360,height:320,display:"flex",alignItems:"center",justifyContent:"center",opacity:.38+.62*e(f,0,5)}}>
    <Word size={186} color="#101113" weight={900} tracking={-.09}>Any</Word>
   </div>;
-  if(phase===1)return <div style={{position:"absolute",left:0,right:0,top:355,height:330,display:"flex",alignItems:"center",justifyContent:"center"}}>
-   <Word size={222} color="#101113" weight={900} tracking={-.09}>Any m</Word>
-   <div style={{width:136,height:136,display:"grid",placeItems:"center",marginLeft:-5,marginRight:-5,transform:"translateY("+Math.sin(f/8)*3+"px)"}}>
-    <div style={{transform:"scale(1.22)"}}><ProviderBadge index={f<29?1:f<39?4:f<49?5:f<59?3:6} frame={f}/></div>
-   </div>
-   <Word size={222} color="#101113" weight={900} tracking={-.09}>del.</Word>
-  </div>;
+  if(phase===1){
+   const reveal=e(f,4,9);
+   return <div style={{position:"absolute",left:0,right:0,top:355,height:330,display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <Word size={230} color="#101113" weight={900} tracking={-.09}>Any m</Word>
+    <div style={{width:136,height:136,display:"grid",placeItems:"center",marginLeft:-5,marginRight:-5,transform:"translateY("+Math.sin(f/8)*3+"px)"}}>
+     <div style={{transform:"scale(1.22)"}}><ProviderBadge index={f<29?1:f<39?4:f<49?5:f<59?3:6} frame={f}/></div>
+    </div>
+    <Word size={230} color="#101113" weight={900} tracking={-.09} style={{opacity:.14+.86*reveal,transform:"translateY("+((1-reveal)*14)+"px)"}}>del.</Word>
+   </div>;
+  }
   const count=phase===2?4:7;
-  return <div style={{position:"absolute",left:"10%",right:"10%",top:350,height:340,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-   <Word size={205} color="#101113" weight={900} tracking={-.09}>Any</Word>
-   <div style={{display:"flex",gap:phase===2?8:6,alignItems:"center",flex:"none"}}>
-    {Array.from({length:count},(_,i)=><ProviderBadge key={i} index={i} frame={f+i}/>)}
-   </div>
-   <Word size={205} color="#101113" weight={900} tracking={-.09}>agent.</Word>
+  const textSize=phase===2?210+30*(1-e(f,69,79)):210;
+  const rowTop=phase===2?358+12*e(f,69,79):370;
+  const rowOpacity=phase===3?1-orbitProgress:1;
+  const rowLift=phase===3?-12*orbitProgress:0;
+  const badges=Array.from({length:count},(_,i)=>phase===3
+   ? <div key={i} style={{width:92,height:92,marginLeft:i===0?0:-4,display:"grid",placeItems:"center",flex:"none"}}><div style={{transform:"scale(.88)"}}><ProviderBadge index={i} frame={f+i}/></div></div>
+   : <ProviderBadge key={i} index={i} frame={f+i}/>);
+  return <div style={{position:"absolute",left:"10%",right:"10%",top:rowTop,height:340,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,opacity:rowOpacity,transform:"translateY("+rowLift+"px)"}}>
+   <Word size={textSize} color="#101113" weight={900} tracking={-.09}>Any</Word>
+   <div style={{display:"flex",gap:phase===2?8:0,alignItems:"center",flex:"none"}}>{badges}</div>
+   <Word size={textSize} color="#101113" weight={900} tracking={-.09}>agent.</Word>
   </div>;
  };
  const BadgeOrbit=()=>(
@@ -1319,8 +1327,8 @@ const ModelAgentScene=()=>{
    <Sequence from={79} durationInFrames={20}><AbsoluteFill style={{...full,background:"#e3a97e"}}/></Sequence>
    <Sequence from={99} durationInFrames={10}><AbsoluteFill style={{...full,background:"#8eb897"}}/></Sequence>
    <Sequence from={109} durationInFrames={20}><AbsoluteFill style={{...full,background:"#bad2d4"}}/></Sequence>
-   <Sequence from={0} durationInFrames={9}><Phrase phase={0}/></Sequence>
-   <Sequence from={9} durationInFrames={60}><Phrase phase={1}/></Sequence>
+   <Sequence from={0} durationInFrames={4}><Phrase phase={0}/></Sequence>
+   <Sequence from={4} durationInFrames={65}><Phrase phase={1}/></Sequence>
    <Sequence from={69} durationInFrames={30}><Phrase phase={2}/></Sequence>
    <Sequence from={99} durationInFrames={30}>
     <Phrase phase={3}/>
@@ -1524,7 +1532,7 @@ const CountdownOne=({frame}:{frame:number})=>{
 const LaunchKitSequence=()=>{
  // The Launch Film page starts at source frame 770; preserve the original
  // local countdown/keyframe map by subtracting the nine-frame pre-roll.
- const frame=useCurrentFrame()-9;
+ const frame=useCurrentFrame()-10;
  if(frame>=112)return <CountdownOne frame={frame-112}/>;
  const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:4;
  const countdown=frame<76?-1:frame<91?3:frame<106?2:1;
@@ -1736,8 +1744,8 @@ export const OpenDesignMotion: React.FC = () => (
     <Sequence from={240} durationInFrames={76}><GalleryWall /></Sequence>
     <Sequence from={316} durationInFrames={269}><PosterSequence /></Sequence>
     <Sequence from={585} durationInFrames={56}><NotJustOpus /></Sequence>
-    <Sequence from={641} durationInFrames={129}><ModelAgentScene /></Sequence>
-    <Sequence from={770} durationInFrames={127}><LaunchKitSequence /></Sequence>
+    <Sequence from={641} durationInFrames={128}><ModelAgentScene /></Sequence>
+    <Sequence from={769} durationInFrames={128}><LaunchKitSequence /></Sequence>
     <Sequence from={897} durationInFrames={36}><MorroCubeIntro /></Sequence>
     <Sequence from={933} durationInFrames={117}><TexturedCube /></Sequence>
     <Sequence from={1050} durationInFrames={69}><FinalLockup /></Sequence>

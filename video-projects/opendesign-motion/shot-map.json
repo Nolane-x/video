@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v41",
+  "id": "opendesign-motion-reference-rebuild-v42",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -204,19 +204,24 @@
     {
       "id": "S08",
       "startFrame": 641,
-      "endFrame": 770,
+      "endFrame": 769,
       "startSeconds": 21.3667,
-      "endSeconds": 25.666666666666668,
+      "endSeconds": 25.633333333333333,
       "component": "ModelAgentScene",
       "referenceBeats": [
         {
           "frame": 641,
-          "visual": "Any appears alone, centered",
+          "visual": "Any appears alone, centered, and begins fading in",
+          "background": "#87bfdc"
+        },
+        {
+          "frame": 645,
+          "visual": "The model phrase begins typing after Any",
           "background": "#87bfdc"
         },
         {
           "frame": 650,
-          "visual": "Any model resolves with a provider mark replacing the o",
+          "visual": "Any model fully resolves, with the provider mark replacing the o",
           "background": "#87bfdc"
         },
         {
@@ -265,17 +270,17 @@
           "background": "#bad2d4"
         },
         {
-          "frame": 770,
-          "visual": "Launch Film interface takes over",
+          "frame": 769,
+          "visual": "Launch Film interface fades in, beginning its preview handoff",
           "background": "#f1ece5"
         }
       ]
     },
     {
       "id": "S09",
-      "startFrame": 770,
+      "startFrame": 769,
       "endFrame": 897,
-      "startSeconds": 25.666666666666668,
+      "startSeconds": 25.633333333333333,
       "endSeconds": 29.9,
       "component": "LaunchKitSequence"
     },
@@ -530,11 +535,15 @@
     },
     {
       "frame": 641,
-      "content": "Any enters alone, centered, on the pale blue field"
+      "content": "Any enters alone on the pale blue field"
+    },
+    {
+      "frame": 645,
+      "content": "Any model begins typing; the first provider mark sits in place of the o"
     },
     {
       "frame": 650,
-      "content": "Any model resolves with a circular provider mark replacing the o"
+      "content": "Any model resolves, centered, with a circular provider mark replacing the o"
     },
     {
       "frame": 660,
@@ -566,11 +575,15 @@
     },
     {
       "frame": 760,
-      "content": "Provider marks form a floating elliptical orbit, concentrated centre-right"
+      "content": "Provider marks form a floating elliptical orbit, with the Any/agent text cleared"
+    },
+    {
+      "frame": 769,
+      "content": "Launch Film interface begins its takeover of the capability section"
     },
     {
       "frame": 770,
-      "content": "Launch Film interface replaces the provider-orbit section"
+      "content": "Launch Film Preview and first mountain artwork are visible"
     },
     {
       "frame": 780,
