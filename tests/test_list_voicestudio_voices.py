@@ -42,7 +42,7 @@ def sample_manifest():
                 "sample_text": "Welcome.",
                 "rights": {
                     "rights_status": "upstream-preset-consent-stated",
-                    "commercial_use": MODULE.COMMERCIAL_ALLOWED_MARKER,
+                    "commercial_use": upstream-model-card-permits-generated-audio,
                     "attribution_required": True,
                     "notice": "Upstream model card permits commercial generated audio.",
                 },
@@ -74,7 +74,7 @@ def sample_manifest():
                 "sample_text": "Xin chào.",
                 "rights": {
                     "rights_status": "upstream-preset-consent-stated",
-                    "commercial_use": MODULE.COMMERCIAL_ALLOWED_MARKER,
+                    "commercial_use": upstream-model-card-permits-generated-audio,
                     "attribution_required": True,
                     "notice": "Upstream model card permits commercial generated audio.",
                 },
@@ -97,7 +97,7 @@ class VoiceCatalogSelectorTests(unittest.TestCase):
         rows = MODULE.select_voices(sample_manifest(), commercial_permitted_only=True)
         self.assertEqual(len(rows), 3)
         self.assertFalse(any("piper" in row["voice_id"] for row in rows))
-        self.assertEqual({row["commercial_use"] for row in rows}, MODULE.COMMERCIAL_ALLOWED_MARKERS)
+        self.assertEqual({row["commercial_use"] for row in rows}, upstream-model-card-permits-generated-audioS)
 
     def test_combined_filter_and_limit_are_deterministic(self):
         rows = MODULE.select_voices(
