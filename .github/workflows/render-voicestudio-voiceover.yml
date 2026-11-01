@@ -9,6 +9,7 @@ on:
         type: string
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -29,8 +30,13 @@ jobs:
     name: Verify WAV, captions and provenance
     needs: render-voiceover
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
+    env:
+      HF_HOME: ${{ runner.temp }}/voiceover-whisper-cache
     steps:
+      - name: Check out video repository tools
+        uses: actions/checkout@v7
+
       - name: Download the VoiceStudio render artifact
         uses: actions/download-artifact@v4
         with:
@@ -76,6 +82,18 @@ jobs:
               assert (root / name).is_file() and (root / name).stat().st_size > 0, name
           print(f"Verified {manifest['job_id']}: {audio['duration_seconds']:.2f}s, 48 kHz PCM-24, AudioSeal verified")
           PY
+
+      - name: Set up Python for ASR word alignment
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install pinned ASR aligner
+        run: python -m pip install --disable-pip-version-check "faster-whisper==1.2.1"
+
+      - name: Build H2-compatible line and word timeline
+        run: python tools/video/align_voicestudio_voiceover.py --artifact-dir voiceover-assets --model small
 
       - name: Upload video-ready voice-over package
         uses: actions/upload-artifact@v4
