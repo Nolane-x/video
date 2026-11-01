@@ -30,6 +30,17 @@ tests:
 - Uploads WAVs, audition pages and evidence reports as an Actions artifact.
   Artifacts are retained for 14 days.
 
+After listening, export `voice-human-ratings-all-scripts.json` from the
+combined page and commit it to
+`integrations/voice-studio/ratings/voice-human-ratings-all-scripts.json`.
+Then run **Actions → Voice Studio Actions human shortlist** and supply the
+completed benchmark run ID, exact artifact name and ratings path. That workflow
+downloads the original benchmark artifact, joins the ratings to its private
+identity map, requires a minimum number of reviewed dimensions, and uploads
+`voice-shortlist.json` plus a Markdown shortlist. The analysis itself runs on
+GitHub Actions; it does not require local Python or expose voice IDs during
+the listening session.
+
 Run it from GitHub: open **Actions → Voice Studio Actions CPU lab → Run
 workflow**. It also runs for changes to the voice-lab source on the integration
 branch and weekly on the default branch after merge.
