@@ -1450,12 +1450,12 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
  </div>;
- const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?yellow:blackMark;
  const blackSide=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/><path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/><path d="M127 90L180 164L165 198Z" fill="#d8dce0"/></svg>
  </div>;
- const dynamicSide=frame<27?blackSide:frame<55?clock:frame<72?clock:blackMark;
+ const dynamicFront=frame<27?portrait:frame<55?blackSide:frame<72?yellow:blackMark;
+ const dynamicSide=frame<27?blackSide:frame<55?blackSide:frame<72?clock:blackMark;
  return <div style={style}>
   {kind===0?dynamicFront:
    kind===1?(frame>=55&&frame<72?yellow:blackSide):
@@ -1470,7 +1470,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
  const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75);
- const rotateX=f<15?18-14*e(f,0,15):f<45?4+6*e(f,15,45):f<60?10-6*e(f,45,60):4-4*e(f,60,75);
+ const rotateX=f<15?18-14*e(f,0,15):f<45?4+18*e(f,15,45):f<60?22-14*e(f,45,60):8-8*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
