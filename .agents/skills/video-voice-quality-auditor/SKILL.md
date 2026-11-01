@@ -155,6 +155,17 @@ python integrations/voice-studio/analyze_voice_benchmark.py \
 
 Review rating coverage before comparing providers. The report includes per-dimension and provider means, with each eligible candidate weighted equally. A candidate needs at least 3 of 5 dimensions rated by default. ASR WER/CER remains a separate intelligibility proxy. Never interpret the average as a naturalness score or an ElevenLabs-equivalence percentage.
 
+For the four-script KorvaTTS CPU lab, use the combined page
+`voice-audition-all-scripts.html` and export
+`voice-human-ratings-all-scripts.json`. Commit that small ratings file under
+`integrations/voice-studio/ratings/`, then run
+`.github/workflows/voice-studio-actions-shortlist.yml` with the originating
+benchmark run ID and exact artifact name. This workflow downloads the original
+Actions evidence and runs `analyze_actions_voice_lab.py` on GitHub Actions.
+Only voices with full scenario coverage, zero technical audio errors and at
+least three human-rated dimensions enter the default shortlist. The score is a
+human preference summary, not an objective model-quality metric.
+
 ## Identity audit
 
 Review the `speaker_identity_audit` in `voice-quality-report.json`. A character with one `speaker_id` must keep one provider/engine/profile identity fingerprint. Any “drift” is a release blocker until the casting change is intentional and documented. “not_recorded” means a legacy/third-party report lacks a fingerprint; do not silently claim that it was consistent.
