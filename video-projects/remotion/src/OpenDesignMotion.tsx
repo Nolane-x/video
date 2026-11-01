@@ -1266,58 +1266,78 @@ const CountdownSequence = () => (
 
 
 const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:number})=>{
- const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:44,border:"3px solid rgba(255,255,255,.78)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.18),inset 0 -24px 38px rgba(0,0,0,.17)"};
+ const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:48,border:"3px solid rgba(255,255,255,.82)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.2),inset 0 -26px 42px rgba(0,0,0,.18)"};
  return <div style={style}>
-  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f4d9c7,#eabbaa 54%,#cf9886)"}}>
-   <div style={{position:"absolute",inset:18,border:"8px solid #fff0e1",borderRadius:28,boxShadow:"inset 0 0 0 3px rgba(82,54,42,.24)"}}/>
-   <div style={{position:"absolute",left:34,top:29,fontFamily:displayFont,fontSize:19,fontWeight:950,color:"#3a302c",letterSpacing:".1em"}}>MORRO / CAMERA</div>
-   <div style={{position:"absolute",left:56,right:56,top:88,bottom:74,borderRadius:24,background:"#f7eee4",border:"10px solid #66544b",boxShadow:"0 12px 0 rgba(91,53,39,.18),inset 0 0 0 4px #ddc4b5",display:"grid",placeItems:"center"}}>
-    <div style={{position:"relative",width:190,height:220,borderRadius:"48% 48% 38% 38%",background:"#27282b",border:"8px solid #e4c5ab",boxShadow:"0 8px 0 rgba(54,38,31,.25)"}}>
-     <div style={{position:"absolute",left:26,right:26,top:53,height:135,borderRadius:"48% 48% 42% 42%",background:"#dba17c",boxShadow:"inset 0 -9px 14px rgba(85,46,32,.17)"}}/>
-     <div style={{position:"absolute",left:29,right:29,top:34,height:58,borderRadius:"50% 50% 25% 25%",background:"#282321"}}/>
-     <div style={{position:"absolute",left:65,top:105,width:12,height:12,borderRadius:"50%",background:"#17191b",boxShadow:"48px 0 0 #17191b"}}/>
-     <div style={{position:"absolute",left:77,top:147,width:38,height:17,borderBottom:"5px solid #57372f",borderRadius:"50%"}}/>
-     <div style={{position:"absolute",left:42,right:42,bottom:0,height:42,background:"#397e78",borderRadius:"15px 15px 0 0"}}/>
-    </div>
+  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#e88d9e 0%,#f2c94f 22%,#f6d66c 72%,#d87f90 100%)"}}>
+   <div style={{position:"absolute",inset:18,border:"8px solid #fff3df",borderRadius:34,boxShadow:"inset 0 0 0 3px rgba(86,53,31,.27)"}}/>
+   <div style={{position:"absolute",left:22,top:19,fontFamily:displayFont,fontSize:20,fontWeight:950,color:"#352b2a",letterSpacing:".12em"}}>MORRO / 01</div>
+   <div style={{position:"absolute",left:52,right:52,top:72,bottom:61,borderRadius:"45% 45% 35% 35%",background:"#fff2dc",border:"9px solid #fff",boxShadow:"0 9px 0 rgba(80,49,33,.18),inset 0 0 0 5px #d9b58b",display:"grid",placeItems:"center"}}>
+    <svg viewBox="0 0 260 300" width="100%" height="100%">
+     <defs><linearGradient id="camPortrait-v20" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f0c49b"/><stop offset="1" stopColor="#c77f63"/></linearGradient></defs>
+     <rect width="260" height="300" fill="#f6e8ce"/>
+     <path d="M25 300Q30 213 86 188L175 187Q232 220 240 300Z" fill="#298b7b"/>
+     <ellipse cx="132" cy="146" rx="83" ry="104" fill="url(#camPortrait-v20)"/>
+     <path d="M48 133Q38 39 132 31Q228 37 218 134L184 94L144 81L93 100L63 153Z" fill="#40332f"/>
+     <path d="M57 119Q78 68 125 77Q172 69 209 116L197 63Q158 10 105 26Q43 41 57 119Z" fill="#292726"/>
+     <ellipse cx="102" cy="147" rx="8" ry="11" fill="#1b1c1d"/><ellipse cx="163" cy="147" rx="8" ry="11" fill="#1b1c1d"/>
+     <ellipse cx="88" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/><ellipse cx="179" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/>
+     <path d="M112 205Q135 221 157 203" stroke="#5c3932" strokeWidth="6" fill="none" strokeLinecap="round"/>
+     <path d="M14 297Q16 262 52 240L86 228L112 300M246 297Q241 252 209 236L176 226L155 300" fill="#e4b98e" opacity=".9"/>
+    </svg>
    </div>
-   <div style={{position:"absolute",right:38,top:33,width:43,height:43,borderRadius:12,background:"#fff5e8",border:"6px solid #94725c",boxShadow:"0 3px 0 rgba(65,45,35,.18)"}}/>
-   <div style={{position:"absolute",left:43,right:43,bottom:31,height:16,background:"rgba(48,40,38,.12)",borderRadius:5}}/>
+   <div style={{position:"absolute",right:35,top:35,width:48,height:50,borderRadius:9,background:"#fff8e8",border:"5px solid #94734f",display:"grid",placeItems:"center"}}><div style={{width:25,height:25,borderRadius:6,background:"#15191a",display:"grid",placeItems:"center",color:"#fff",fontSize:17}}>◉</div></div>
+   <div style={{position:"absolute",right:40,bottom:35,width:27,height:42,background:"#f6efe0",borderRadius:4}}><div style={{width:13,height:13,margin:"-7px auto",borderRadius:"50%",background:"#dd5d52"}}/></div>
+   <div style={{position:"absolute",left:0,right:0,bottom:0,height:38,background:"#44327c"}}/>
   </div>:
-  kind===1?<div style={{position:"absolute",inset:0,background:"#101317",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:30,border:"9px solid #e8eee9",borderRadius:44}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="111" fill="#090c11" stroke="#f7f7f1" strokeWidth="17"/><path d="M140 89L267 180L140 272Z" fill="#fff"/></svg>
+  kind===1?<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%">
+    <path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/>
+    <path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/>
+    <path d="M127 90L180 164L165 198Z" fill="#d8dce0"/>
+   </svg>
   </div>:
-  kind===2?<div style={{position:"absolute",inset:0,background:"#123e94"}}>
-   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(135deg,rgba(255,255,255,.1) 0 5px,transparent 5px 18px)"}}/>
-   <div style={{position:"absolute",left:40,right:40,top:38,bottom:38,borderRadius:"50%",background:"#e7c25d",border:"12px solid #f7e7a2",boxShadow:"0 0 0 10px #183777",display:"grid",placeItems:"center"}}>
-    <div style={{width:"73%",height:"73%",borderRadius:"50%",border:"15px solid #193b84",background:"#f8d56b",display:"grid",placeItems:"center"}}><svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M7 4L94 61L49 69L37 116Z" fill="#101214"/></svg></div>
+  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#101f69,#2349aa 47%,#101a61)",overflow:"hidden"}}>
+   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(118deg,rgba(255,255,255,.08) 0 3px,transparent 3px 11px),radial-gradient(circle at 22% 20%,rgba(255,255,255,.22),transparent 35%)"}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%">
+    <defs><radialGradient id="cubeClock-v20"><stop stopColor="#f9de85"/><stop offset=".68" stopColor="#dba945"/><stop offset="1" stopColor="#8c6029"/></radialGradient><filter id="cubeTexture-v20"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer></filter></defs>
+    <circle cx="180" cy="173" r="137" fill="url(#cubeClock-v20)" stroke="#f8e2a5" strokeWidth="13"/>
+    <circle cx="180" cy="173" r="111" fill="#183778" stroke="#d7b45d" strokeWidth="12"/>
+    <circle cx="180" cy="173" r="83" fill="none" stroke="#f6d879" strokeWidth="7"/>
+    <path d="M140 94L254 173L159 190L133 262Z" fill="#050915"/>
+    <path d="M140 94L183 165L159 190Z" fill="#fff1ad"/>
+    <rect width="360" height="360" filter="url(#cubeTexture-v20)" opacity=".55"/>
+    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
+   </svg>
+  </div>:
+  kind===3?<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
+   <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
+   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
+  </div>:
+  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f5edda,#e5d5b9)",color:"#17191c"}}>
+   <div style={{position:"absolute",inset:22,border:"8px solid #17191c"}}/>
+   <div style={{position:"absolute",left:36,top:30,fontFamily:"Georgia,serif",fontSize:24,fontWeight:800}}>1923</div>
+   <div style={{position:"absolute",left:34,right:34,top:84,bottom:95,background:"#f9f1de",border:"6px solid #ba984f",display:"grid",placeItems:"center"}}>
+    <svg viewBox="0 0 300 240" width="100%" height="100%"><circle cx="150" cy="120" r="92" fill="#d9b658" stroke="#fff0c5" strokeWidth="12"/><circle cx="150" cy="120" r="67" fill="#18336f" stroke="#9a7333" strokeWidth="9"/><path d="M137 61L213 119L146 139L128 187Z" fill="#f8de91"/></svg>
    </div>
-   <div style={{position:"absolute",left:0,right:0,bottom:15,textAlign:"center",fontSize:23,fontWeight:950,color:"#fff1b8",letterSpacing:".16em"}}>1889</div>
+   <div style={{position:"absolute",left:28,right:28,bottom:28,fontFamily:"Georgia,serif",fontSize:22,fontWeight:700,textAlign:"center"}}>TIME / IMAGE / MOTION</div>
   </div>:
-  kind===3?<div style={{position:"absolute",inset:0,background:"#89ec48"}}>
-   <div style={{position:"absolute",inset:22,border:"9px solid #101713",borderRadius:32}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M-30 290L100 140L183 230L286 65L390 210" stroke="#101713" strokeWidth="20" fill="none"/><circle cx="180" cy="180" r="80" fill="none" stroke="#f4ffe9" strokeWidth="12"/><path d="M140 140L235 180L145 225Z" fill="#101713"/></svg>
-  </div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"#f3e5d0"}}>
-   <div style={{position:"absolute",inset:32,border:"9px solid #17191c",borderRadius:24}}/>
-   <Word size={76} color="#141719" style={{position:"absolute",left:24,top:44}}>EASE</Word>
-   <div style={{position:"absolute",right:48,bottom:48,width:105,height:105,borderRadius:"50%",background:"#e45141",border:"11px solid #fff6e5"}}/>
-  </div>:
-  <div style={{position:"absolute",inset:0,background:"#e45c48",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
-   <Word size={72} color="#fff3db">OPEN</Word><Word size={70} color="#fff3db">DESIGN</Word>
-   <div style={{width:150,height:12,background:"#fff3db",marginTop:28}}/>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:25,border:"8px solid #e9eee8",borderRadius:33}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="118" fill="#080a0d" stroke="#fff" strokeWidth="13"/><path d="M140 90L270 180L140 270Z" fill="#fff"/></svg>
   </div>}
-  <div style={{position:"absolute",inset:0,borderRadius:42,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.34),transparent 31%,rgba(0,0,0,.14) 100%)"}}/>
+  <div style={{position:"absolute",inset:0,borderRadius:44,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.28),transparent 28%,rgba(0,0,0,.18) 100%)"}}/>
  </div>;
 };
 
 const ProjectCube=()=>{
  const f=useCurrentFrame();
- const rotateY=-32-120*e(f,0,126),rotateX=20+7*Math.sin(f/17),rotateZ=-3+Math.sin(f/18)*2;
- const scale=(.78+.22*e(f,0,18))*(1-.18*e(f,108,126)),size=530,z=size/2;
- return <AbsoluteFill style={{...full,background:"#f3f0e9"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 80%,rgba(25,27,31,.15),transparent 42%)"}}/>
-  <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1650,transform:"translate(-50%,-50%)"}}>
+ const rotateY=-90+270*e(f,0,87),rotateX=18+16*Math.sin(Math.min(1,f/87)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
+ const scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
+ return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1800,transform:"translate(-50%,-50%)"}}>
    <div style={{position:"absolute",inset:0,transformStyle:"preserve-3d",transform:"rotateX("+rotateX+"deg) rotateY("+rotateY+"deg) rotateZ("+rotateZ+"deg) scale("+scale+")"}}>
     <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/>
     <CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/>
@@ -1327,27 +1347,24 @@ const ProjectCube=()=>{
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
    </div>
   </div>
-  <div style={{position:"absolute",left:"50%",top:"80%",width:650,height:110,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.16)",filter:"blur(38px)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"81%",width:690,height:105,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.17)",filter:"blur(42px)"}}/>
  </AbsoluteFill>;
 };
 
 const MorroCubeIntro=()=>{
- const f=useCurrentFrame();
- const typeOut=1-e(f,12,25),shape=e(f,14,34);
- return <AbsoluteFill style={{...full,background:"#f2f1e9",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,opacity:typeOut,display:"flex",flexDirection:"column",justifyContent:"space-between",transform:"translateX("+(e(f,0,20,-18,8))+"px)"}}>
-   <Word size={330} color="#08090b" tracking={-.12}>MORRO</Word>
-   <Word size={330} color="#f2f1e9" tracking={-.12} style={{WebkitTextStroke:"3px #08090b"}}>MORRO</Word>
-   <Word size={330} color="#08090b" tracking={-.12}>MORRO</Word>
+ const f=useCurrentFrame(),typeOut=1-e(f,11,25),shape=e(f,13,34),settle=e(f,23,36);
+ return <AbsoluteFill style={{...full,background:"#f2f0e8",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,opacity:typeOut,display:"flex",flexDirection:"column",justifyContent:"space-between",transform:"translateX("+(e(f,0,24,-32,10))+"px)"}}>
+   <Word size={350} color="#090a0c" tracking={-.14}>MORRO</Word>
+   <Word size={350} color="#f2f0e8" tracking={-.14} style={{WebkitTextStroke:"3px #17191c"}}>MORRO</Word>
+   <Word size={350} color="#090a0c" tracking={-.14}>MORRO</Word>
   </div>
-  <div style={{position:"absolute",left:"50%",top:"50%",width:640,height:640,transform:"translate(-50%,-50%) scale("+(0.68+.28*shape)+")",opacity:shape}}>
-   <div style={{position:"absolute",inset:70,borderRadius:100,background:"#2035ed",boxShadow:"0 20px 0 #7a54bc,0 32px 0 #b58ae1",transform:"rotate(0deg)"}}/>
-   <div style={{position:"absolute",left:"36%",top:-10,width:180,height:670,background:"linear-gradient(90deg,#b38ddf,#f0c9ff 45%,#8e6bc8)",transform:"rotate(13deg) skewY(-8deg)",boxShadow:"16px 0 0 rgba(98,58,161,.35),-12px 0 0 rgba(255,255,255,.6)"}}/>
-   <div style={{position:"absolute",left:"52%",top:"30%",width:190,height:410,background:"linear-gradient(90deg,#ac7bd5,#e7b8f4,#7d5bb8)",transform:"rotate(13deg) skewY(-8deg)",boxShadow:"12px 0 0 rgba(98,58,161,.4)"}}/>
-  </div>
-  <div style={{position:"absolute",left:"50%",top:"50%",width:610,height:610,transform:"translate(-50%,-50%) scale("+(0.84+.16*e(f,25,36))+")",opacity:e(f,24,35),borderRadius:105,background:"linear-gradient(135deg,#1925ab,#070b2f 58%,#09114a)",boxShadow:"0 23px 50px rgba(0,0,0,.2)",overflow:"hidden"}}>
-   <div style={{position:"absolute",inset:0,background:"linear-gradient(125deg,rgba(255,255,255,.32),transparent 35%,rgba(0,0,0,.28))"}}/>
-   <svg viewBox="0 0 610 610" width="100%" height="100%"><path d="M140 70H458Q535 70 535 148V454Q535 535 455 535H160Q70 535 70 445V165Q70 70 140 70Z" fill="none" stroke="#fff" strokeWidth="12"/><circle cx="305" cy="303" r="151" fill="none" stroke="#fff" strokeWidth="14"/><circle cx="305" cy="303" r="119" fill="none" stroke="#a7c5ff" strokeWidth="7"/><path d="M251 180L400 290L322 301L287 416Z" fill="#fff"/></svg>
+  <div style={{position:"absolute",left:"50%",top:"49%",width:660,height:660,transform:"translate(-50%,-50%) perspective(1200px) rotateX(8deg) rotateY(-9deg) scale("+(0.7+.3*shape)+")",opacity:shape,transformStyle:"preserve-3d"}}>
+   <div style={{position:"absolute",inset:66,borderRadius:88,background:"linear-gradient(145deg,#2947ef,#101a91 62%,#070b4b)",boxShadow:"0 22px 0 #6841a8,0 35px 0 #b28bdb,0 52px 40px rgba(22,17,69,.22)",transform:"translateZ(-18px)"}}/>
+   <div style={{position:"absolute",left:"29%",top:"-2%",width:"23%",height:"105%",clipPath:"polygon(20% 0,100% 0,81% 100%,0 100%)",background:"linear-gradient(90deg,#8b62bd 0%,#d8b2f3 32%,#f0d2ff 53%,#a878cf 82%,#68449f 100%)",transform:"rotate(13deg) skewY(-8deg) translateZ(42px)",boxShadow:"18px 0 0 rgba(81,45,144,.3),-13px 0 0 rgba(255,255,255,.48)"}}/>
+   <div style={{position:"absolute",left:"47%",top:"22%",width:"27%",height:"74%",clipPath:"polygon(14% 0,100% 0,82% 100%,0 100%)",background:"linear-gradient(90deg,#a878d1,#f0cbff 42%,#bc8be7 76%,#704da9)",transform:"rotate(13deg) skewY(-8deg) translateZ(74px)",boxShadow:"15px 0 0 rgba(81,45,144,.32),-8px 0 0 rgba(255,255,255,.42)"}}/>
+   <div style={{position:"absolute",left:"45%",top:"42%",width:"10%",height:"42%",background:"linear-gradient(90deg,#6741a1,#e0b9f8,#9368c4)",transform:"rotate(13deg) skewY(-8deg) translateZ(92px)",opacity:.72}}/>
+   <div style={{position:"absolute",left:25,right:25,bottom:7,textAlign:"center",fontFamily:displayFont,fontSize:15,fontWeight:900,letterSpacing:".22em",color:"#d9d4f5",opacity:.45*(1-settle)}}>MORRO / FORM STUDY</div>
   </div>
  </AbsoluteFill>;
 };
@@ -1356,13 +1373,13 @@ const TexturedCube=()=> <ProjectCube />;
 
 const FinalLockup=()=>{
  const f=useCurrentFrame(),p=pop(f,30,0,78,18),fade=e(f,0,12);
- return <AbsoluteFill style={{...full,background:"#f5f4ed"}}>
-  <div style={{position:"absolute",left:0,right:0,top:255,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*16)+"px)",opacity:fade}}>
-   <div style={{width:164,height:164,borderRadius:34,background:"#101113",display:"grid",placeItems:"center",boxShadow:"0 14px 30px rgba(0,0,0,.12)"}}>
-    <svg viewBox="0 0 100 100" width="145" height="145"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
+ return <AbsoluteFill style={{...full,background:"#f5f4ed",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:0,right:0,top:190,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*18)+"px)",opacity:fade}}>
+   <div style={{width:210,height:210,borderRadius:46,background:"#101113",display:"grid",placeItems:"center",boxShadow:"0 16px 35px rgba(0,0,0,.13)"}}>
+    <svg viewBox="0 0 100 100" width="184" height="184"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
    </div>
-   <div style={{marginTop:42,fontFamily:displayFont,fontSize:64,fontWeight:950,color:"#14191b",letterSpacing:"-.075em"}}>OpenDesign Motion</div>
-   <div style={{marginTop:42,background:"#10313a",color:"#e7f3f2",borderRadius:23,padding:"9px 31px",fontSize:24,fontWeight:850,letterSpacing:".005em"}}><span style={{color:"#a0dcaa"}}>●</span> open-design.ai</div>
+   <div style={{marginTop:42,fontFamily:displayFont,fontSize:91,fontWeight:950,color:"#14191b",letterSpacing:"-.075em",whiteSpace:"nowrap"}}>OpenDesign Motion</div>
+   <div style={{marginTop:42,background:"#10313a",color:"#e7f3f2",borderRadius:25,padding:"13px 42px",fontSize:28,fontWeight:850,letterSpacing:".005em",boxShadow:"0 6px 15px rgba(16,49,58,.13)"}}><span style={{color:"#a0dcaa"}}>●</span> open-design.ai</div>
   </div>
  </AbsoluteFill>;
 };

@@ -1,13 +1,13 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v19",
+  "id": "opendesign-motion-reference-rebuild-v20",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns.",
-    "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts. V19 specifically reproduces the source timing at frames 496-516 and the eight discrete Star History labels at 523-530; the cube uses a reduced turn angle to expose multiple faces."
+    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns. V20 compared native source frames 897-1118 against the rendered candidate. The V19 sheet exposed a major MORRO logo/app-tile mismatch at frame 933, incorrect visible cube faces at frames 960/990/1020, and an undersized end card. These were rebuilt for V20.",
+    "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts. V19 specifically reproduces the source timing at frames 496-516 and the eight discrete Star History labels at 523-530; the cube uses a reduced turn angle to expose multiple faces. The camera tile must transition from layered MORRO geometry into an illustrated rounded camera cube with a front portrait face, black glyph/arrow side, blue clock/artwork face, lime EASE face and cream editorial face; end lockup must preserve a legible domain capsule."
   },
   "output": {
     "durationFrames": 1119,
@@ -255,7 +255,10 @@
     "Actions verifies source/map identity, typecheck, 1119 decoded frames, 1080p30 metadata, AAC stereo, loudness and checksum. These are technical gates; the rendered artifact still requires side-by-side visual and moving-sequence review.",
     "V19 typography timing: IN is visible at frame 496; LINEAR resolves by frame 500; green dot is present through frame 509; lime field and expanding ring begin at frame 510, with the inner ring/play mark clearly visible at frame 511; clock begins at frame 516.",
     "Star History exact frame values: 523=80K/Day88, 524=82K/Day96, 525=84K/Day104, 526=87K/Day111, 527=91K/Day119, 528=93K/Day126, 529=94K/Day132, 530=96K/Day138. The displayed values are indexed, not linearly interpolated.",
-    "Cube turn is constrained so the camera-screen face, play icon, clock artwork, green graphic and typography faces remain visible across frames 960-1020 rather than turning nearly face-on."
+    "Cube turn is constrained so the camera-screen face, play icon, clock artwork, green graphic and typography faces remain visible across frames 960-1020 rather than turning nearly face-on.",
+    "V20 MORRO transition: 897-933 is a typography-to-large-purple-ribbon mark transition on warm off-white; it must not switch to a small dark play-button tile at frame 933.",
+    "V20 rounded cube: camera portrait and black glyph faces are distinct; blue/gold clock artwork and lime EASE face are present; cube yaw makes a full three-quarter turn across frames 933-1050 so source-observed face changes occur instead of the same play face staying frontal.",
+    "V20 final end card: logo, OpenDesign Motion wordmark and open-design.ai capsule are scaled to the source visual hierarchy and remain visible through frame 1118."
   ],
   "visualAudit": [
     {
@@ -371,16 +374,40 @@
       "content": "green EASE launch preview"
     },
     {
+      "frame": 897,
+      "content": "MORRO stacked typographic field begins"
+    },
+    {
+      "frame": 925,
+      "content": "large purple extruded MORRO symbol dominates warm white field"
+    },
+    {
+      "frame": 933,
+      "content": "purple mark-to-rounded-camera-object transition"
+    },
+    {
+      "frame": 945,
+      "content": "rounded camera-like cube, black symbol side and portrait artwork"
+    },
+    {
       "frame": 960,
-      "content": "rotating camera-screen face with illustrated portrait"
+      "content": "portrait screen face front, black emblem on adjacent side"
     },
     {
       "frame": 990,
-      "content": "multiple cube faces visible during rotation"
+      "content": "blue/gold clock-art face and lime EASE face turn into view"
     },
     {
       "frame": 1020,
-      "content": "cube turns to reveal alternate graphic faces"
+      "content": "black symbol face and cream editorial face visible"
+    },
+    {
+      "frame": 1050,
+      "content": "isolated dark app mark for end-card transition"
+    },
+    {
+      "frame": 1118,
+      "content": "full logo, OpenDesign Motion wordmark and open-design.ai capsule"
     }
   ]
 }
