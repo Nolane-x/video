@@ -1181,22 +1181,32 @@ const ModelAgentScene=()=>{
 };
 
 const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
- if(variant===0)return <div style={{position:"absolute",inset:0,background:"#e9e1ce",overflow:"hidden"}}>
+ if(variant===0)return <div style={{position:"absolute",inset:0,background:"#e8e1d2",overflow:"hidden"}}>
   <svg viewBox="0 0 1000 650" width="100%" height="100%">
-   <defs><filter id="ink-grain-v18"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="4"/><feColorMatrix type="saturate" values="0"/></filter></defs>
-   <rect width="1000" height="650" fill="#eee6d4"/>
-   <path d="M0 375L95 265 160 310 260 175 335 300 435 202 520 318 630 190 710 296 830 182 925 295 1000 245V650H0Z" fill="#aaa99f"/>
-   <path d="M0 445L125 345 212 385 305 285 400 380 500 312 610 398 740 284 850 380 930 325 1000 365V650H0Z" fill="#858c88" opacity=".75"/>
-   <path d="M0 510L130 458 245 482 355 428 465 478 590 410 710 478 835 420 950 470 1000 455V650H0Z" fill="#727b77" opacity=".62"/>
-   <g transform={"translate(520 330) rotate("+(Math.sin(frame/22)*1.2)+")"}>
-    <circle r="195" fill="none" stroke="#111514" strokeWidth="48"/>
-    <circle r="167" fill="#eee6d4" stroke="#fff" strokeWidth="8"/>
-    <circle r="144" fill="none" stroke="#131716" strokeWidth="9"/>
-    <path d="M-50 -116L120 4L-18 28L-44 136Z" fill="#111514"/>
+   <defs>
+    <linearGradient id="ink-mtn-sky-v30" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#eee8d9"/><stop offset=".6" stopColor="#e3dfd1"/><stop offset="1" stopColor="#c8c9c0"/></linearGradient>
+    <filter id="ink-mtn-texture-v30"><feTurbulence type="fractalNoise" baseFrequency=".052" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="15"/></filter>
+    <filter id="ink-mtn-soft-v30"><feGaussianBlur stdDeviation="12"/></filter>
+   </defs>
+   <rect width="1000" height="650" fill="url(#ink-mtn-sky-v30)"/>
+   <g opacity=".7" filter="url(#ink-mtn-soft-v30)">
+    <path d="M-80 390L110 236L210 318L342 142L455 310L590 178L710 317L850 145L1010 304V650H-80Z" fill="#9c9d96"/>
+    <path d="M-50 470L130 332L260 418L384 264L520 425L650 292L802 438L925 310L1040 408V650H-50Z" fill="#777f7b" opacity=".75"/>
    </g>
-   <path d="M810 150Q860 190 925 140" stroke="#252a27" strokeWidth="9" fill="none"/><path d="M90 218q25 -22 49 0M160 225q19 -18 37 0" stroke="#242722" fill="none" strokeWidth="5"/>
-   <rect x="798" y="458" width="76" height="105" fill="#bd3c35"/><text x="836" y="520" textAnchor="middle" fontFamily="serif" fontSize="48" fill="#f9ead0">設</text>
-   <rect width="1000" height="650" filter="url(#ink-grain-v18)" opacity=".085"/>
+   <g filter="url(#ink-mtn-texture-v30)" opacity=".74">
+    <path d="M-50 390L105 244L210 318L338 151L454 312L583 190L709 322L853 155L1020 308V650H-50Z" fill="#b0afa5"/>
+    <path d="M-50 471L125 336L260 420L384 270L520 430L650 299L803 442L925 318L1040 420V650H-50Z" fill="#828985"/>
+    <path d="M-60 536L145 435L280 490L420 394L565 510L710 404L850 505L1005 430V650H-60Z" fill="#6e7b7b" opacity=".8"/>
+   </g>
+   <g transform={"translate(515 333) rotate("+(Math.sin(frame/22)*1.1)+")"}>
+    <path d="M-185 -20A188 188 0 1 1 -165 100" fill="none" stroke="#161a1a" strokeWidth="48" strokeLinecap="round"/>
+    <path d="M-148 -142A164 164 0 1 1 -126 93" fill="none" stroke="#f3ecdc" strokeWidth="10" strokeLinecap="round" opacity=".9"/>
+    <path d="M-47 -123L135 2L-13 35L-41 147Z" fill="#121616"/>
+   </g>
+   <path d="M25 192q32 -31 66 -7q24 -19 45 3M110 223q24 -18 45 0M820 155q25 -24 52 1M864 190q22 -18 43 0" stroke="#313735" strokeWidth="7" fill="none" opacity=".7"/>
+   <path d="M806 125q42 18 68 0l22 39q-42 38 -79 4Z" fill="#d6d0c0" opacity=".55"/>
+   <rect x="804" y="472" width="78" height="94" fill="#b93d34"/><text x="843" y="535" textAnchor="middle" fontFamily="serif" fontSize="42" fill="#f9ead0">設</text>
+   <g fill="none" stroke="#f9f5eb" strokeWidth="12" opacity=".22"><path d="M0 585q185 -28 360 10t350 -5t330 0"/><path d="M0 617q185 -26 360 8t350 -5t330 0"/></g>
   </svg>
  </div>;
  if(variant===1)return <div style={{position:"absolute",inset:0,background:"#e6d6ae",overflow:"hidden",color:"#151719"}}>
