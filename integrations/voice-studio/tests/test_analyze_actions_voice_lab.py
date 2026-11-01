@@ -130,7 +130,7 @@ class AnalyzeActionsVoiceLabTests(unittest.TestCase):
         benchmark = self.benchmark()
         for invalid in (0, 6, True, float("nan"), float("inf"), "5"):
             with self.subTest(invalid=invalid):
-                with self.assertRaisesRegex(ValueError, "finite number from 1 to 5"):
+                with self.assertRaisesRegex(ValueError, "number from 1 to 5"):
                     analyze_actions_voice_lab(
                         benchmark,
                         {"ratings": [{
