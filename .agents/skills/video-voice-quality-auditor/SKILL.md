@@ -144,7 +144,7 @@ other providers rendered audio.
 
 The provider benchmark is restartable. In blind mode it shuffles candidates reproducibly with `--blind-seed`, checkpoints after every candidate and resumes only when the saved audio file still matches its SHA-256 and remains inside the benchmark output directory. Failed candidates are retried. After changing a remote service/model revision or any synthesis setting not represented in the cache key, use `--no-resume` to force a fresh comparison.
 
-After listening, export the ratings JSON from the HTML page and join it to the benchmark's private identity map:
+After listening, export the ratings JSON from the HTML page and join it to the separate identity-map JSON in the benchmark artifact. The listening HTML omits IDs/names, but the report file in the same artifact does contain the mapping; do not inspect it until the blind ratings are submitted:
 
 ```bash
 python integrations/voice-studio/analyze_voice_benchmark.py \
