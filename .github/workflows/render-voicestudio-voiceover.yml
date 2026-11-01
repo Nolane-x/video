@@ -7,6 +7,10 @@ on:
         description: "VoiceStudio job JSON — see docs/VOICEOVER_WORKFLOW.md and schema"
         required: true
         type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/render-voicestudio-voiceover.yml"
 
 permissions:
   actions: read
@@ -23,8 +27,8 @@ jobs:
     permissions:
       contents: read
     with:
-      downstream_call: true
-      job_json: ${{ inputs.job_json }}
+      job_json: >-
+        ${{ inputs.job_json || '{"schema_version":1,"job_id":"pr-integration-vi","title":"VoiceStudio reusable workflow integration","language":"vi","engine":"vieneu","voice_id":"vi-vieneu-v3turbo-adam-bua-87e364","segments":[{"id":"intro","text":"Xin chào. Đây là bài kiểm tra tích hợp giọng đọc tiếng Việt cho quy trình dựng video.","pause_ms_after":250},{"id":"closing","text":"Giọng nói đã được tạo, kiểm tra và đóng gói cùng timeline để đưa vào dự án video.","pause_ms_after":0}]}' }}
 
   verify-and-stage:
     name: Verify WAV, captions and provenance
