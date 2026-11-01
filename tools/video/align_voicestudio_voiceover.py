@@ -33,7 +33,7 @@ def normalize_token(value: str) -> str:
 
 
 def tokens(text: str) -> list[str]:
-    return [match.group(0) for match in re.finditer(r"\S+", text, flags=re.UNICODE)]
+    return [match.group(0) for match in re.finditer(r"\S+", text, flags=re.UNICODE) if normalize_token(match.group(0))]
 
 
 def display_token(value: str) -> str:
