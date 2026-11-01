@@ -1,0 +1,86 @@
+name: Render AI voice-over with VoiceStudio
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_json:
+        description: "VoiceStudio job JSON — see docs/VOICEOVER_WORKFLOW.md and schema"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voicestudio-voiceover-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render-voiceover:
+    name: Generate voice-over on VoiceStudio Actions
+    uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
+    permissions:
+      contents: read
+    with:
+      downstream_call: true
+      job_json: ${{ inputs.job_json }}
+
+  verify-and-stage:
+    name: Verify WAV, captions and provenance
+    needs: render-voiceover
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download the VoiceStudio render artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voiceover-assets
+
+      - name: Install FFmpeg and ffprobe
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Validate master audio and delivery bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s voiceover-assets/narration.wav
+          test -s voiceover-assets/captions.srt
+          test -s voiceover-assets/captions.vtt
+          test -s voiceover-assets/transcript.txt
+          test -s voiceover-assets/manifest.json
+          ffprobe -v error -show_entries stream=codec_name,codec_type,sample_rate,channels,bits_per_sample,bits_per_raw_sample,sample_fmt -show_entries format=duration -of json voiceover-assets/narration.wav > voiceover-assets/ffprobe.json
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("voiceover-assets")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          probe = json.loads((root / "ffprobe.json").read_text(encoding="utf-8"))
+          audio = manifest["audio"]
+          stream = next(s for s in probe["streams"] if s.get("codec_type") == "audio")
+          assert stream["codec_name"] == "pcm_s24le", stream
+          assert stream["sample_rate"] == "48000", stream
+          assert stream["channels"] == 1, stream
+          assert int(stream.get("bits_per_raw_sample") or stream.get("bits_per_sample") or 0) == 24, stream
+          assert audio["sample_rate"] == 48000 and audio["channels"] == 1 and audio["subtype"] == "PCM_24", audio
+          digest = hashlib.sha256((root / "narration.wav").read_bytes()).hexdigest()
+          assert digest == audio["sha256"], "narration SHA-256 does not match VoiceStudio manifest"
+          assert audio["watermark"]["status"] == "verified", audio["watermark"]
+          assert audio["checks"] == "passed", audio
+          assert manifest["segment_count"] == len(manifest["segments"]) > 0
+          for name in manifest["captions"]:
+              assert (root / name).is_file() and (root / name).stat().st_size > 0, name
+          print(f"Verified {manifest['job_id']}: {audio['duration_seconds']:.2f}s, 48 kHz PCM-24, AudioSeal verified")
+          PY
+
+      - name: Upload video-ready voice-over package
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-voiceover-ready-${{ github.run_id }}
+          path: voiceover-assets/
+          if-no-files-found: error
+          retention-days: 30
