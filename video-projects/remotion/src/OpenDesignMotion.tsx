@@ -370,7 +370,7 @@ const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
   <div style={{position:"absolute",left:16,top:22,fontFamily:"Georgia,serif",fontSize:11}}>1923 / THE FUTURE</div>
   <div style={{position:"absolute",left:17,top:51,fontFamily:displayFont,fontSize:33,fontWeight:950,lineHeight:.88}}>open<br/>design</div>
   <div style={{position:"absolute",left:80,top:30,width:66,height:66,borderRadius:"50%",border:"7px solid #e64b45",display:"grid",placeItems:"center",color:"#111",fontSize:34}}>➤</div>
-  <div style={{position:"absolute",left:0,right:0,bottom:22,height:7,background:"#111"/><div style={{position:"absolute",left:0,bottom:16,width:163,height:3,background:"#111",transform:"rotate(-9deg)"}}/>
+  <div style={{position:"absolute",left:0,right:0,bottom:22,height:7,background:"#111"}}/><div style={{position:"absolute",left:0,bottom:16,width:163,height:3,background:"#111",transform:"rotate(-9deg)"}}/>
   <div style={{position:"absolute",right:13,bottom:9,width:34,height:20,background:"#3658aa"}}/>
  </div>;
  if(index===19)return <div style={{...common,background:"#050609",color:"#fff"}}>
