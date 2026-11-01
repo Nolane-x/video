@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     env:
-      HF_HOME: ${{ runner.temp }}/voiceover-whisper-cache
+      HF_HOME: /tmp/voiceover-whisper-cache
     steps:
       - name: Check out video repository tools
         uses: actions/checkout@v7
