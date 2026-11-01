@@ -404,10 +404,10 @@ const GalleryCard=({index,frame}:{index:number;frame:number})=>{
 
 const GalleryWall=({showClaim=true}:{showClaim?:boolean})=>{
  const f=useCurrentFrame(),p=pop(f,30,0,72,16);
- const pan=e(f,0,77,5,-34),ry=e(f,0,77,-1.5,-7),rz=e(f,0,77,.15,-.45);
- const order=Array.from({length:30},(_,i)=>i),claimOpacity=showClaim?1-e(f,0,15):0;
+ const pan=e(f,0,77,8,-76),ry=e(f,0,77,-1.5,-11.5),rz=e(f,0,77,.15,-.65);
+ const zoom=1.0+.28*e(f,36,77),order=Array.from({length:30},(_,i)=>i),claimOpacity=showClaim?1-e(f,0,15):0;
  return <AbsoluteFill style={{...full,background:"#f3f1e9",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:78,right:78,top:76,bottom:58,display:"grid",gridTemplateColumns:"repeat(6,263px)",gridTemplateRows:"repeat(5,148px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1750px) rotateY("+ry+"deg) rotateX(1.5deg) rotateZ("+rz+"deg) translateX("+pan+"px) translateY("+((1-p)*40)+"px) scale("+(0.965+.035*p)+")",transformOrigin:"center center"}}>
+  <div style={{position:"absolute",left:78,right:78,top:76,bottom:58,display:"grid",gridTemplateColumns:"repeat(6,263px)",gridTemplateRows:"repeat(5,148px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1450px) rotateY("+ry+"deg) rotateX(2.2deg) rotateZ("+rz+"deg) translateX("+pan+"px) translateY("+((1-p)*40)+"px) scale("+(0.965+.035*p)*zoom+")",transformOrigin:"center center"}}>
    {order.map((id,i)=><GalleryCard key={i} index={id} frame={f+i*2}/>)}
   </div>
   <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(180deg,rgba(255,255,255,.18),transparent 14%,transparent 85%,rgba(210,205,193,.12))"}}/>
@@ -418,8 +418,7 @@ const GalleryWall=({showClaim=true}:{showClaim?:boolean})=>{
   </div>
   <Noise opacity={.025}/>
  </AbsoluteFill>;
-}
-
+};
 
 const Comic1952 = () => {
  const f=useCurrentFrame(),sweep=e(f,0,4,-30,0);
@@ -448,26 +447,48 @@ const Comic1952 = () => {
 
 
 const Comic1962=()=>{
- const f=useCurrentFrame(),scale=.985+.015*e(f,0,15);
- return <AbsoluteFill style={{...full,background:"#f7efdb",overflow:"hidden",transform:"scale("+scale+")"}}>
-  <div style={{position:"absolute",inset:25,display:"grid",gridTemplateColumns:"18% 64% 18%",gridTemplateRows:"1fr 1fr",gap:10}}>
-   <div style={{background:"#f1cb42",border:"8px solid #17191b",display:"grid",placeItems:"center",fontFamily:displayFont,fontSize:30,fontWeight:1000,color:"#151719",writingMode:"vertical-rl",letterSpacing:".12em"}}>1962 · POP</div>
-   <div style={{gridColumn:"2",gridRow:"1 / span 2",position:"relative",background:"#77a8e7",border:"9px solid #17191b",overflow:"hidden"}}>
-    <div style={{position:"absolute",inset:-45,background:"repeating-conic-gradient(from -8deg at 50% 48%,#fff9e7 0deg 2.7deg,#73a5e4 2.7deg 9deg)"}}/>
-    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#2b66b6 0 4px,transparent 4.6px)",backgroundSize:"23px 23px",opacity:.55}}/>
-    <div style={{position:"absolute",left:"16%",top:"15%",width:"68%",height:"70%",borderRadius:"50%",background:"#f7d747",border:"10px solid #151719",boxShadow:"0 0 0 10px #fff7de"}}/>
-    <div style={{position:"absolute",left:"23%",top:"25%",width:"55%",height:"52%",borderRadius:"50%",background:"#e64335",border:"10px solid #151719",display:"grid",placeItems:"center",boxShadow:"inset 0 0 0 9px #f4d449"}}>
-     <div style={{width:"66%",height:"66%",borderRadius:"50%",background:"#fffdf0",border:"9px solid #151719",display:"grid",placeItems:"center"}}>
-      <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M8 4L94 62L49 67L37 116Z" fill="#101214"/></svg>
-     </div>
-    </div>
-    <div style={{position:"absolute",left:27,top:24,padding:"8px 18px",background:"#f7db47",border:"5px solid #151719",fontSize:23,fontWeight:1000,fontStyle:"italic",color:"#17191b",transform:"rotate(-2deg)"}}>MEANWHILE…</div>
-    <div style={{position:"absolute",right:25,top:22,textAlign:"right",fontFamily:displayFont,fontSize:54,fontWeight:1000,color:"#151719",lineHeight:.83}}>IN<br/>1962</div>
-    <div style={{position:"absolute",right:18,bottom:24,padding:"8px 26px",background:"#f7d747",border:"6px solid #151719",fontFamily:displayFont,fontSize:34,fontWeight:1000,color:"#e64335",clipPath:"polygon(50% 0,61% 18%,82% 4%,81% 29%,100% 39%,84% 56%,97% 78%,71% 74%,60% 100%,44% 82%,20% 98%,23% 70%,0 61%,18% 43%,7% 18%,37% 24%)"}}>CLICK!</div>
-    <div style={{position:"absolute",left:25,right:25,bottom:19,height:5,background:"#151719",opacity:.75}}/>
+ const f=useCurrentFrame(),pulse=1+Math.sin(f/4)*.003;
+ return <AbsoluteFill style={{...full,background:"#f4efe2",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:18,border:"8px solid #111315",display:"grid",gridTemplateColumns:"20% 1fr 20%",gridTemplateRows:"1fr 1fr",gap:9,background:"#111315",padding:0,boxSizing:"border-box"}}>
+   <div style={{position:"relative",gridColumn:1,gridRow:1,background:"#f5d33f",overflow:"hidden",border:"5px solid #111315"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#d9b832 0 3px,transparent 3.6px)",backgroundSize:"20px 20px",opacity:.58}}/>
+    <div style={{position:"absolute",left:"13%",top:"46%",fontFamily:"Arial Black,Arial,sans-serif",fontSize:40,fontStyle:"italic",fontWeight:1000,color:"#151719",transform:"rotate(-3deg)",whiteSpace:"nowrap"}}>ONE IDEA...</div>
    </div>
-   <div style={{background:"#f5d6df",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca4b6 2.3px,transparent 2.8px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:37,fontWeight:1000,color:"#17191b"}}>•••</div>
-   <div style={{background:"#f5d6df",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca4b6 2.3px,transparent 2.8px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:29,fontWeight:1000,color:"#17191b"}}>SFX!</div>
+   <div style={{position:"relative",gridColumn:1,gridRow:2,background:"#f7f0e8",overflow:"hidden",border:"5px solid #111315"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#dc9ca8 0 3px,transparent 3.6px)",backgroundSize:"21px 21px",opacity:.62}}/>
+   </div>
+   <div style={{position:"relative",gridColumn:3,gridRow:1,background:"#f7f0e8",overflow:"hidden",border:"5px solid #111315"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#dc9ca8 0 3px,transparent 3.6px)",backgroundSize:"21px 21px",opacity:.62}}/>
+    <div style={{position:"absolute",left:"28%",top:"43%",display:"flex",gap:30}}>{[0,1,2].map(i=><div key={i} style={{width:26,height:26,borderRadius:"50%",background:i===2?"#d8d6ce":"#151719"}}/>)}</div>
+   </div>
+   <div style={{position:"relative",gridColumn:3,gridRow:2,background:"#f5d33f",overflow:"hidden",border:"5px solid #111315"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#d9b832 0 3px,transparent 3.6px)",backgroundSize:"20px 20px",opacity:.52}}/>
+   </div>
+   <div style={{position:"relative",gridColumn:2,gridRow:"1 / span 2",overflow:"hidden",border:"6px solid #111315",background:"#75a7e8",transform:"scale("+pulse+")"}}>
+    <div style={{position:"absolute",inset:0,background:"repeating-conic-gradient(from -10deg at 50% 53%,#fff8eb 0deg 3deg,#76a8e8 3deg 8.4deg)"}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#3476c0 0 4.5px,transparent 5.3px)",backgroundSize:"25px 25px",opacity:.75}}/>
+    <svg viewBox="0 0 1000 1000" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+     <defs>
+      <pattern id="comic-yellow-dots-v29" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="4" fill="#fff4a7" opacity=".86"/></pattern>
+      <filter id="comic-shade-v29"><feGaussianBlur stdDeviation="8"/></filter>
+     </defs>
+     <circle cx="500" cy="520" r="380" fill="#f6d447" stroke="#111315" strokeWidth="8"/>
+     <circle cx="500" cy="520" r="365" fill="url(#comic-yellow-dots-v29)"/>
+     <path d="M306 276C360 225 445 215 525 220L682 220C762 220 796 263 796 341L796 657C796 733 746 782 670 782L334 782C255 782 213 736 213 664L213 393C213 333 245 299 306 276Z" fill="#e84131" stroke="#111315" strokeWidth="14"/>
+     <path d="M340 301C395 275 464 267 525 270L660 270C712 270 741 300 741 352L741 639C741 690 706 720 652 720L349 720C298 720 270 689 270 640L270 390C270 347 295 319 340 301Z" fill="none" stroke="#f5cf3b" strokeWidth="12"/>
+     <circle cx="500" cy="501" r="202" fill="#fff8e8" stroke="#111315" strokeWidth="13"/>
+     <circle cx="500" cy="501" r="186" fill="url(#comic-yellow-dots-v29)" opacity=".76"/>
+     <path d="M386 371L666 507L512 538L478 700Z" fill="#111315"/>
+     <path d="M393 382L642 505L508 524" fill="none" stroke="#d5dbe0" strokeWidth="5" opacity=".7"/>
+     {Array.from({length:46},(_,i)=>{const a=i*2.399963,r=282+(i%5)*15;return <circle key={i} cx={500+Math.cos(a)*r} cy={520+Math.sin(a)*r} r={3.5+(i%4)*1.4} fill="#111315" opacity=".32"/>;})}
+     <path d="M0 0H0" stroke="#111315"/>
+    </svg>
+    <div style={{position:"absolute",left:18,top:18,padding:"13px 24px",background:"#f7d747",border:"5px solid #111315",fontFamily:"Arial Black,Arial,sans-serif",fontSize:35,fontWeight:1000,fontStyle:"italic",color:"#111315",transform:"rotate(-1.5deg)",whiteSpace:"nowrap",boxShadow:"4px 5px 0 rgba(0,0,0,.18)"}}>MEANWHILE, IN 1962...</div>
+    <div style={{position:"absolute",right:24,top:15,textAlign:"right",fontFamily:"Arial Black,Arial,sans-serif",fontSize:57,lineHeight:.82,fontWeight:1000,color:"#111315",fontStyle:"italic",textShadow:"2px 2px 0 #f5d344"}}>1962<br/><span style={{fontSize:29}}>POP ART</span></div>
+    <div style={{position:"absolute",right:12,bottom:35,width:240,height:160,clipPath:"polygon(50% 0,60% 17%,80% 4%,78% 27%,100% 38%,83% 54%,96% 78%,71% 74%,60% 100%,43% 82%,18% 98%,22% 71%,0 62%,18% 43%,6% 18%,37% 24%)",background:"#f5d33f",border:"6px solid #111315",display:"grid",placeItems:"center",filter:"drop-shadow(4px 5px 0 rgba(0,0,0,.2))"}}>
+     <div style={{fontFamily:"Arial Black,Arial,sans-serif",fontSize:46,fontWeight:1000,fontStyle:"italic",color:"#e83f31",textShadow:"3px 3px 0 #111315, -1px -1px 0 #111315",transform:"rotate(-7deg)"}}>CLICK!</div>
+    </div>
+   </div>
   </div>
  </AbsoluteFill>;
 };
@@ -491,17 +512,28 @@ const Future3D = () => {
 };
 
 const DotPoster = () => {
- const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.012;
- return <AbsoluteFill style={{...full,background:"#e83f31",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#fff8ec 0 10px,transparent 10.7px)",backgroundSize:"40px 40px",backgroundPosition:"0 0"}}/>
-  <div style={{position:"absolute",left:"50%",top:"55%",width:540,height:540,marginLeft:-270,marginTop:-270,transform:"scale("+pulse+")",borderRadius:45,background:"#f6cc35",boxShadow:"0 0 0 10px #e83f31,0 0 0 16px rgba(20,20,20,.95)"}}>
-   <div style={{position:"absolute",inset:24,borderRadius:35,border:"8px solid #18191a",background:"#e83f31",backgroundImage:"radial-gradient(#fff8ec 0 7px,transparent 7.5px)",backgroundSize:"28px 28px",overflow:"hidden"}}>
-    <div style={{position:"absolute",inset:36,borderRadius:"50%",border:"9px solid #17191b",background:"rgba(233,61,48,.28)"}}/>
-    {Array.from({length:30},(_,i)=>{const a=i*Math.PI*2/30;return <circle key={i} cx={270+Math.cos(a)*220} cy={220+Math.sin(a)*220} r={i%3===0?7:5} fill="#17191b" opacity=".9"/>;})}
-    <svg viewBox="0 0 100 120" width="170" height="205" style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)"}}><path d="M8 5L94 60L52 67L38 115Z" fill="#101214"/></svg>
-   </div>
-  </div>
-  <div style={{position:"absolute",left:"50%",top:28,transform:"translateX(-50%)",padding:"12px 58px 16px",background:"#fff8ec",border:"6px solid #fff8ec",clipPath:"polygon(0 0,100% 0,96% 100%,4% 100%)",textAlign:"center",color:"#111315",fontFamily:displayFont,fontSize:29,fontWeight:950,whiteSpace:"nowrap",boxShadow:"0 8px 0 rgba(0,0,0,.1)"}}>1965 <span style={{fontSize:24}}>Infinity dots</span></div>
+ const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.008;
+ const dots=Array.from({length:19*31},(_,i)=>{
+  const row=Math.floor(i/31),col=i%31,seed=(i*37+13)%29;
+  return {x:col*64+((row%2)*18)+((seed%7)-3)*3,y:row*59+((seed%9)-4)*3,r:14+(seed%6)*2.2,op:.86+(seed%4)*.035};
+ });
+ const specks=Array.from({length:50},(_,i)=>{const a=i*2.399963,r=180+(i%7)*10;return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:3+(i%4)*2};});
+ return <AbsoluteFill style={{...full,background:"#e84434",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <rect width="1920" height="1080" fill="#e84434"/>
+   <g fill="#fff8ed">{dots.map((d,i)=><circle key={i} cx={d.x} cy={d.y} r={d.r} opacity={d.op}/>)}</g>
+   <g transform={"translate(960 580) scale("+pulse+") rotate(-2)"}>
+    <path d="M-238 -171C-184 -244 -70 -252 5 -240L171 -240Q248 -236 248 -153L248 167Q248 248 158 252L-175 252Q-254 248 -254 165L-254 -72Q-254 -132 -238 -171Z" fill="#f4c72f" stroke="#e84434" strokeWidth="9"/>
+    <path d="M-238 -171C-184 -244 -70 -252 5 -240L171 -240Q248 -236 248 -153L248 167Q248 248 158 252L-175 252Q-254 248 -254 165L-254 -72Q-254 -132 -238 -171Z" fill="none" stroke="#151719" strokeWidth="7" opacity=".9"/>
+    <g fill="#111315" opacity=".9">{specks.map((s,i)=><circle key={i} cx={s.x} cy={s.y} r={s.r}/>)}</g>
+    <path d="M-75 -94L135 30L18 61L-14 195Z" fill="#111315"/>
+    <path d="M-61 -77L118 31L14 50" fill="none" stroke="#fff5c9" strokeWidth="5" opacity=".38"/>
+   </g>
+   <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="#fff8ed"/>
+   <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="none" stroke="#f9f3e4" strokeWidth="7"/>
+   <text x="960" y="96" textAnchor="middle" fill="#111315" fontFamily="Arial Black,Arial,sans-serif" fontSize="74" fontWeight="1000">1965</text>
+   <text x="960" y="143" textAnchor="middle" fill="#111315" fontFamily="Arial, sans-serif" fontSize="34" fontWeight="900">Infinity dots</text>
+  </svg>
  </AbsoluteFill>;
 };
 
@@ -860,9 +892,9 @@ const MindPoster = () => {
 };
 
 const RingPoster = () => {
- const f=useCurrentFrame();
+ const f=useCurrentFrame(),zoom=1.88+0.035*Math.sin(f/7);
  return <AbsoluteFill style={{...full,background:"#030405",overflow:"hidden"}}>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+f*.12+"deg) scale(1.02)"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+f*.12+"deg) scale("+zoom+")"}}>
    <defs>
     <path id="ring-a-ci" d="M960 540m-470 0a470 470 0 1 1 940 0a470 470 0 1 1 -940 0"/>
     <path id="ring-b-ci" d="M960 540m-365 0a365 365 0 1 1 730 0a365 365 0 1 1 -730 0"/>
@@ -1161,24 +1193,24 @@ const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
  </div>;
 };
 
-const CountdownPrism=({width="54%",height="84%",scale=1}:{width?:string;height?:string;scale?:number})=>(
+const CountdownPrism=({width="45%",height="76%",scale=1}:{width?:string;height?:string;scale?:number})=>(
  <svg viewBox="0 0 600 760" width={width} height={height} style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) scale("+scale+")",overflow:"visible"}}>
   <defs>
-   <linearGradient id="countdown-prism-front-v28" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#344bff"/><stop offset=".55" stopColor="#202fe0"/><stop offset="1" stopColor="#101a98"/></linearGradient>
-   <linearGradient id="countdown-prism-top-v28" x1="0" x2="1"><stop stopColor="#d8dcff"/><stop offset=".58" stopColor="#929dff"/><stop offset="1" stopColor="#6c79f0"/></linearGradient>
-   <linearGradient id="countdown-prism-side-v28" x1="0" x2="1"><stop stopColor="#101c96"/><stop offset="1" stopColor="#080e55"/></linearGradient>
+   <linearGradient id="countdown-prism-front-v29" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#263cf5"/><stop offset=".56" stopColor="#1626d5"/><stop offset="1" stopColor="#111fb5"/></linearGradient>
+   <linearGradient id="countdown-prism-top-v29" x1="0" x2="1"><stop stopColor="#f0eaff"/><stop offset=".58" stopColor="#c1a8ff"/><stop offset="1" stopColor="#8c7df1"/></linearGradient>
+   <linearGradient id="countdown-prism-side-v29" x1="0" x2="1"><stop stopColor="#6874d9"/><stop offset=".34" stopColor="#2533a8"/><stop offset="1" stopColor="#111958"/></linearGradient>
+   <linearGradient id="countdown-prism-left-v29" x1="0" x2="1"><stop stopColor="#3549db"/><stop offset="1" stopColor="#101c7e"/></linearGradient>
   </defs>
-  <path d="M125 177L320 95L485 95L485 638L307 638L307 311L125 311Z" transform="translate(40 -24)" fill="#111c9e" opacity=".96"/>
-  <path d="M307 119L485 95L485 638L307 662Z" fill="url(#countdown-prism-side-v28)" stroke="#7180ec" strokeWidth="5"/>
-  <path d="M125 177L320 95L485 95L307 119Z" fill="url(#countdown-prism-top-v28)" stroke="#dce0ff" strokeWidth="5"/>
-  <path d="M125 177L307 119L307 662L125 720Z" fill="#1928ba" stroke="#6678ed" strokeWidth="5"/>
-  <path d="M125 177L320 95L485 95L485 638L307 662L125 720Z" fill="url(#countdown-prism-front-v28)" stroke="#5c70ff" strokeWidth="5"/>
-  <path d="M125 177L320 95L320 270L125 350Z" fill="#2537e8" opacity=".9"/>
-  <path d="M125 177L320 95L485 95L307 119Z" fill="url(#countdown-prism-top-v28)"/>
-  <path d="M307 119L485 95L485 638L307 662Z" fill="url(#countdown-prism-side-v28)"/>
-  <path d="M130 181L320 99L478 99" fill="none" stroke="#e0e4ff" strokeWidth="11" opacity=".88"/>
-  <path d="M475 102L475 625" stroke="#6f80e8" strokeWidth="7" opacity=".65"/>
-  <path d="M314 127L314 649" stroke="#5265ec" strokeWidth="4" opacity=".7"/>
+  <path d="M80 185L330 105L510 105L510 690L285 690L285 315L80 370Z" transform="translate(26 -5)" fill="#080f6a" opacity=".84"/>
+  <path d="M510 105L536 101L536 683L510 690Z" fill="url(#countdown-prism-side-v29)" stroke="#8d91f3" strokeWidth="4"/>
+  <path d="M285 315L311 307L311 690L285 690Z" fill="url(#countdown-prism-left-v29)" opacity=".85"/>
+  <path d="M80 185L330 105L510 105L536 101L353 138L95 220Z" fill="url(#countdown-prism-top-v29)" stroke="#9fa2ff" strokeWidth="3"/>
+  <path d="M80 185L330 105L510 105L510 690L285 690L285 315L80 370Z" fill="url(#countdown-prism-front-v29)" stroke="#5367ec" strokeWidth="5"/>
+  <path d="M80 185L330 105L330 135L95 220Z" fill="#f7f4ff"/>
+  <path d="M330 105L510 105L510 138L330 138Z" fill="#987cf1"/>
+  <path d="M506 112L506 682" stroke="#e5e6ff" strokeWidth="5" opacity=".75"/>
+  <path d="M291 322L291 681" stroke="#6375ff" strokeWidth="3" opacity=".52"/>
+  <path d="M84 189L84 367" stroke="#6377f5" strokeWidth="4" opacity=".8"/>
  </svg>
 );
 
@@ -1198,11 +1230,11 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
   {isOne?<div style={{position:"absolute",right:0,bottom:0,width:"31%",height:"38%",background:"#1533ef",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>:null}
   <svg viewBox="0 0 1000 650" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:isThree?.52:.72}}>
    <ellipse cx="500" cy="325" rx="365" ry="255" fill="none" stroke={isThree?"#a4a6a5":isTwo?"#d9d9ff":"#dd874d"} strokeWidth="2"/>
-   <ellipse cx="500" cy="325" rx="340" ry="225" fill="none" stroke={isThree?"#fff":isTwo?"#aab6ff":"#6678ff"} strokeWidth="1.7" transform={"rotate("+(frame*1.2)+" 500 325)"}/>
+   <ellipse cx="500" cy="325" rx="340" ry="225" fill="none" stroke={isThree?"#fff":isTwo?"#aab6ff":"#6678ff"} strokeWidth="1.7"/>
    {isThree?<path d="M0 325H1000" stroke="#a0a0a0" strokeWidth="1" opacity=".22"/>:null}
    {isOne?<path d="M150 290L830 470" stroke="#b9c5ff" strokeWidth="1" opacity=".48"/>:null}
   </svg>
-  {isOne?<CountdownPrism width="56%" height="90%" scale={.98+.04*p}/>:<div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) perspective(1200px) scale("+scale+")",fontFamily:displayFont,fontSize:isThree?470:500,lineHeight:.78,fontWeight:1000,letterSpacing:"-.12em",color:numeralColor,textShadow:shadows}}>{value}</div>}
+  {isOne?<CountdownPrism width="42%" height="74%" scale={.98+.04*p}/>:<div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) perspective(1200px) scale("+scale+")",fontFamily:displayFont,fontSize:isThree?470:500,lineHeight:.78,fontWeight:1000,letterSpacing:"-.12em",color:numeralColor,textShadow:shadows}}>{value}</div>}
   <div style={{position:"absolute",left:34,top:"47%",fontFamily:"monospace",fontSize:14,fontWeight:900,letterSpacing:".12em",color:isThree?"#101214":isTwo?"#eff0ff":"#f3f3ff"}}>{isThree?"IGNITION SEQUENCE / 01":"IGNITION SEQUENCE / "+(isTwo?"02":"03")}</div>
   <div style={{position:"absolute",right:35,top:"48%",fontFamily:"monospace",fontSize:13,fontWeight:850,letterSpacing:".16em",color:isThree?"#222":isTwo?"#eee":"#fff",textAlign:"right"}}>SNARE ROLL / {isThree?"1":isTwo?"2":"3"}</div>
   <div style={{position:"absolute",right:35,bottom:35,display:"flex",gap:8}}>{[0,1,2].map(v=><div key={v} style={{width:24,height:6,background:v<=(isThree?0:isTwo?1:2)?"#fff":"rgba(255,255,255,.22)"}}/>)}</div>
@@ -1211,20 +1243,31 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
 };
 
 const LaunchKitWindow=({frame,variant,countdown=-1}:{frame:number;variant:number;countdown?:number})=>{
- const {fps}=useVideoConfig(),p=pop(frame,fps,0,84,19),handoff=e(frame,106,111);
+ const handoff=e(frame,100,111),zoomExit=e(frame,100,106);
  const names=["Claude Opus 5.5","Claude Opus 5.5","Gemini","GLM","MiMo","DeepSeek V4.1","OpenDesign"];
  const name=names[variant%names.length];
  const symbols=["✣","✣","▶","Z","MiMo","🐳","◈"];
  const colors=["#df805b","#df805b","#151c30","#191919","#1d2328","#4879df","#293a92"];
+ const shellLeft=118*(1-zoomExit);
+ const shellRight=frame<106?118+265*zoomExit:0;
+ const shellTop=72*(1-zoomExit),shellBottom=80*(1-zoomExit),headerHeight=54*(1-zoomExit),shellRadius=24*(1-zoomExit);
+ const sidebarWidth=frame<106?586-86*zoomExit:frame<110?500-220*e(frame,106,110):280-84*e(frame,110,111);
+ const paneRight=frame<106?285*(1-zoomExit):frame<110?109*e(frame,106,110):109+16*e(frame,110,111);
+ const cardInset=frame<110?27:27*(1-e(frame,110,111));
+ const cardTop=frame<106?89+39*zoomExit:frame<110?128-116*e(frame,106,110):12-12*e(frame,110,111);
+ const cardBottom=frame<106?197:frame<110?197-197*e(frame,106,110):0;
+ const bubbleLeft=frame<106?242-182*zoomExit:60;
+ const bubbleTop=frame<106?45+27*zoomExit:72;
+ const composerHeight=164+47*zoomExit,composerBottom=36+134*zoomExit;
+ const previewLabelTop=44+36*zoomExit;
  return <AbsoluteFill style={{...full,background:"#f3f1ed"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 40%,#fff,#f1f0eb 72%)"}}/>
-  <div style={{position:"absolute",left:118,right:118,top:72,bottom:72,borderRadius:24,background:"#fff",border:"1px solid #e9e8e3",boxShadow:"0 28px 78px rgba(30,35,38,.15)",transform:"translateY("+((1-p)*44)+"px) scale("+(0.985+.015*p)*(1+.34*handoff)+")",transformOrigin:"70% 50%",overflow:"hidden"}}>
-   <div style={{position:"absolute",top:0,left:0,right:0,height:64,borderBottom:"1px solid #efeee9",display:"flex",alignItems:"center",padding:"0 28px",gap:14,background:"#fff"}}>{["#e5e5df","#e5e5df","#e5e5df"].map((c,i)=><div key={i} style={{width:15,height:15,borderRadius:"50%",background:c}}/>)}<div style={{marginLeft:14,fontSize:21,fontWeight:850,color:"#252a2d"}}>Launch film</div></div>
-   <div style={{position:"absolute",top:64,bottom:0,left:0,width:700,borderRight:"1px solid #efeee9",background:"#fff"}}>
-    <div style={{position:"absolute",left:260,top:52,width:340,minHeight:106,background:"#f0efec",color:"#222629",borderRadius:"25px 25px 5px 25px",padding:"19px 24px",fontSize:25,lineHeight:1.42,boxSizing:"border-box"}}>Make a 10s launch film<br/>for our app.</div>
-    <div style={{position:"absolute",left:38,right:36,bottom:36,height:164,border:"1px solid #e7e7e2",borderRadius:25,background:"#fff",padding:"19px 22px",boxSizing:"border-box",boxShadow:"0 3px 12px rgba(20,25,28,.04)"}}>
+  <div style={{position:"absolute",left:shellLeft,right:shellRight,top:shellTop,bottom:shellBottom,borderRadius:shellRadius,background:"#fff",border:"1px solid #e9e8e3",boxShadow:"0 28px 78px rgba(30,35,38,.15)",overflow:"hidden"}}>
+   <div style={{position:"absolute",top:0,left:0,right:0,height:headerHeight,borderBottom:"1px solid #efeee9",display:"flex",alignItems:"center",padding:"0 28px",gap:14,background:"#fff",opacity:1-zoomExit}}>{["#e5e5df","#e5e5df","#e5e5df"].map((c,i)=><div key={i} style={{width:15,height:15,borderRadius:"50%",background:c}}/>)}<div style={{marginLeft:14,fontSize:21,fontWeight:850,color:"#252a2d"}}>Launch film</div></div>
+   <div style={{position:"absolute",top:headerHeight,bottom:0,left:0,width:sidebarWidth,background:"#fff",opacity:1-e(frame,106,111),overflow:"hidden"}}>
+    <div style={{position:"absolute",left:bubbleLeft,top:bubbleTop,width:340+25*zoomExit,minHeight:96+16*zoomExit,background:"#f0efec",color:"#222629",borderRadius:"25px 25px 5px 25px",padding:"19px 24px",fontSize:25,lineHeight:1.42,boxSizing:"border-box"}}>Make a 10s launch film<br/>for our app.</div>
+    <div style={{position:"absolute",left:18,right:18,bottom:composerBottom,height:composerHeight,border:"1px solid #e7e7e2",borderRadius:25,background:"#fff",padding:"19px 22px",boxSizing:"border-box",boxShadow:"0 3px 12px rgba(20,25,28,.04)"}}>
      <div style={{color:"#434a4c",fontSize:21}}>Make it feel like a launch.</div>
-     <div style={{position:"absolute",left:22,bottom:18,display:"flex",alignItems:"center",gap:12}}>
+     <div style={{position:"absolute",left:18,bottom:18,display:"flex",alignItems:"center",gap:12}}>
       <div style={{width:48,height:48,borderRadius:"50%",border:"2px solid #e9e9e6",display:"grid",placeItems:"center",color:"#8c9290",fontSize:24}}>＋</div>
       <div style={{width:48,height:48,borderRadius:"50%",border:"2px solid #e9e9e6",display:"grid",placeItems:"center",color:"#8c9290",fontSize:23}}>◎</div>
       <div style={{background:"#e8f7e6",color:"#217c38",borderRadius:8,padding:"11px 18px",fontSize:20,fontWeight:900,whiteSpace:"nowrap"}}>▣ Motion</div>
@@ -1237,13 +1280,13 @@ const LaunchKitWindow=({frame,variant,countdown=-1}:{frame:number;variant:number
     </div>
     {variant!==0?<div style={{position:"absolute",left:350,top:520,fontSize:24,fontWeight:850,color:"#4b4f50",fontStyle:"italic"}}>{name}</div>:null}
    </div>
-   <div style={{position:"absolute",left:700,right:0,top:64,bottom:0,background:"#f6f5f1",padding:"24px 27px 27px",boxSizing:"border-box"}}>
-    <div style={{fontSize:22,color:"#777f81",fontWeight:850,marginBottom:18}}>Preview</div>
-    <div style={{position:"absolute",left:27,right:27,top:108,bottom:27,background:"#fff",borderRadius:20,border:"1px solid #e9e8e2",overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
+   <div style={{position:"absolute",left:sidebarWidth,right:paneRight,top:headerHeight,bottom:0,background:"#f6f5f1",padding:0,boxSizing:"border-box",zIndex:4,overflow:"hidden"}}>
+    <div style={{position:"absolute",left:27,top:previewLabelTop,fontSize:22,color:"#777f81",fontWeight:850,opacity:1-zoomExit}}>Preview</div>
+    <div style={{position:"absolute",left:cardInset,right:cardInset,top:cardTop,bottom:cardBottom,background:"#050609",borderRadius:20+22*handoff,border:"1px solid #e9e8e2",overflow:"hidden",boxShadow:handoff?"0 0 0 rgba(0,0,0,0)":"0 1px 3px rgba(0,0,0,.04)"}}>
      {countdown>=0?<CountdownArtwork value={countdown} frame={frame}/>:<PreviewArtwork variant={variant} frame={frame}/>}
-     <div style={{position:"absolute",left:22,top:18,display:"flex",alignItems:"center",gap:10,background:"rgba(255,255,255,.96)",borderRadius:30,padding:"10px 17px",color:"#30383b",fontSize:20,fontWeight:800,boxShadow:"0 5px 16px rgba(0,0,0,.1)"}}>
+     {countdown<0?<div style={{position:"absolute",left:22,top:18,display:"flex",alignItems:"center",gap:10,background:"rgba(255,255,255,.96)",borderRadius:30,padding:"10px 17px",color:"#30383b",fontSize:20,fontWeight:800,boxShadow:"0 5px 16px rgba(0,0,0,.1)",opacity:1-zoomExit}}>
       <span style={{color:"#8a8f91",fontWeight:600}}>Made with</span><span style={{width:34,height:34,borderRadius:8,background:colors[variant%7],color:"#fff",display:"grid",placeItems:"center",fontSize:21}}>{symbols[variant%7]}</span>{name}
-     </div>
+     </div>:null}
     </div>
    </div>
   </div>
@@ -1257,21 +1300,21 @@ const LaunchVariant = ({ variant, countdown = -1 }: { variant: number; countdown
 
 
 const CountdownOne=({frame}:{frame:number})=>{
- const p=e(frame,0,8),rotate=e(frame,0,12,-12,0);
+ const p=e(frame,0,8),rotate=e(frame,0,12,0,2);
  return <AbsoluteFill style={{...full,background:"#f2f0e9",color:"#f8f8f4",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"5.5%",right:"5.5%",top:"-1.5%",bottom:"-1.5%",borderRadius:42,background:"#050609",overflow:"hidden",boxShadow:"0 10px 45px rgba(0,0,0,.14)"}}>
-   <div style={{position:"absolute",right:0,bottom:0,width:"32%",height:"38%",background:"#2238ee",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>
-   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-    <ellipse cx="960" cy="585" rx="610" ry="215" fill="none" stroke="#df884c" strokeWidth="3" opacity=".94" transform={"rotate("+rotate+" 960 585)"}/>
-    <ellipse cx="960" cy="585" rx="520" ry="175" fill="none" stroke="#5a6dff" strokeWidth="3" opacity=".88" transform={"rotate("+(-rotate*1.4)+" 960 585)"}/>
-    <path d="M260 410L1540 760" stroke="#b9c5ff" strokeWidth="2" opacity=".42"/>
+  <div style={{position:"absolute",left:"6.1%",right:"6.25%",top:0,bottom:0,borderRadius:42,background:"#050609",overflow:"hidden",boxShadow:"0 10px 45px rgba(0,0,0,.14)"}}>
+   <div style={{position:"absolute",right:0,bottom:0,width:"28%",height:"38%",background:"#2238ee",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>
+   <svg viewBox="0 0 1668 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+    <ellipse cx="834" cy="550" rx="530" ry="165" fill="none" stroke="#df884c" strokeWidth="3" opacity=".94" transform={"rotate("+rotate+" 834 550)"}/>
+    <ellipse cx="834" cy="550" rx="478" ry="133" fill="none" stroke="#5a6dff" strokeWidth="3" opacity=".88" transform={"rotate("+(-rotate*.6)+" 834 550)"}/>
+    <path d="M360 410L1420 710" stroke="#b9c5ff" strokeWidth="2" opacity=".42"/>
    </svg>
-   <CountdownPrism width="34%" height="74%" scale={1.02+.035*p}/>
-   <div style={{position:"absolute",left:38,top:"39%",fontFamily:"monospace",fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#aeb9ff"}}>IGNITION SEQUENCE / 01</div>
-   <div style={{position:"absolute",left:38,top:"45%",fontFamily:displayFont,fontSize:76,fontWeight:1000,letterSpacing:"-.08em",color:"#fff"}}>GO</div>
-   <div style={{position:"absolute",left:42,top:"55%",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".16em",color:"#b7c2ff"}}>03 · 3/3<br/>0.500</div>
-   <div style={{position:"absolute",right:34,top:"39%",textAlign:"right",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".15em",color:"#c6cdff"}}>IGNITION SEQUENCE<br/>SNARE ROLL 3</div>
-   <div style={{position:"absolute",right:33,top:"46%",display:"flex",gap:7}}>{[0,1,2].map(i=><div key={i} style={{width:37,height:7,background:"#f4f5ff"}}/>)}</div>
+   <CountdownPrism width="34.5%" height="76%" scale={1.02+.025*p}/>
+   <div style={{position:"absolute",left:-14,top:"39%",fontFamily:"monospace",fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#aeb9ff"}}>IGNITION SEQUENCE / 01</div>
+   <div style={{position:"absolute",left:-12,top:"45%",fontFamily:displayFont,fontSize:76,fontWeight:1000,letterSpacing:"-.08em",color:"#fff"}}>GO</div>
+   <div style={{position:"absolute",left:-12,top:"55%",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".16em",color:"#b7c2ff"}}>03 · 3/3<br/>0.500</div>
+   <div style={{position:"absolute",right:10,top:"39%",textAlign:"right",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".15em",color:"#c6cdff"}}>IGNITION SEQUENCE<br/>SNARE ROLL 3</div>
+   <div style={{position:"absolute",right:10,top:"46%",display:"flex",gap:7}}>{[0,1,2].map(i=><div key={i} style={{width:37,height:7,background:"#f4f5ff"}}/>)}</div>
   </div>
  </AbsoluteFill>;
 };
@@ -1389,33 +1432,64 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
 };
 
 const MorroCubeIntro=()=>{
- const f=useCurrentFrame(),typeOut=1-e(f,11,25),shape=e(f,13,34),settle=e(f,23,36);
+ const f=useCurrentFrame(),typeOpacity=1-e(f,8,22),tile=e(f,2,16),blueTile=e(f,10,24),ribbon=e(f,6,18),tileFade=1-e(f,33,36);
+ const size=780-260*e(f,7,19);
+ const rows=[-112,178,468,758];
  return <AbsoluteFill style={{...full,background:"#f2f0e8",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,opacity:typeOut,display:"flex",flexDirection:"column",justifyContent:"space-between",transform:"translateX("+(e(f,0,24,-32,10))+"px)"}}>
-   <Word size={350} color="#090a0c" tracking={-.14}>MORRO</Word>
-   <Word size={350} color="#f2f0e8" tracking={-.14} style={{WebkitTextStroke:"3px #17191c"}}>MORRO</Word>
-   <Word size={350} color="#090a0c" tracking={-.14}>MORRO</Word>
+  <div style={{position:"absolute",inset:0,opacity:typeOpacity,overflow:"hidden"}}>
+   {rows.map((y,i)=><div key={i} style={{position:"absolute",left:-110,right:-110,top:y,height:290,display:"flex",alignItems:"center",width:"max-content",transform:"translateX("+(-f*7+(i%2?80:-20))+"px)",gap:14,opacity:i===0?.98:1}}>
+    {Array.from({length:5},(_,k)=><Word key={k} size={i%2===0?286:276} color={i%2===0?"#090a0c":"#f2f0e8"} weight={1000} tracking={-.13} style={i%2===0?{}:{WebkitTextStroke:"3px #151719",color:"transparent"}}>MORRO</Word>)}
+   </div>)}
+   <div style={{position:"absolute",right:90,top:118,width:290,borderTop:"1px solid #a9a8a0",borderBottom:"1px solid #a9a8a0",padding:"12px 0",fontFamily:"monospace",fontSize:15,fontWeight:900,letterSpacing:".14em",color:"#313438",lineHeight:1.8}}>SPEC / PRISM<br/>MATERIAL<br/>IOR<br/>ROUGH<br/>ROT/S</div>
   </div>
-  <div style={{position:"absolute",left:"50%",top:"49%",width:660,height:660,transform:"translate(-50%,-50%) perspective(1200px) rotateX(8deg) rotateY(-9deg) scale("+(0.7+.3*shape)+")",opacity:shape,transformStyle:"preserve-3d"}}>
-   <div style={{position:"absolute",inset:66,borderRadius:88,background:"linear-gradient(145deg,#2947ef,#101a91 62%,#070b4b)",boxShadow:"0 22px 0 #6841a8,0 35px 0 #b28bdb,0 52px 40px rgba(22,17,69,.22)",transform:"translateZ(-18px)"}}/>
-   <div style={{position:"absolute",left:"29%",top:"-2%",width:"23%",height:"105%",clipPath:"polygon(20% 0,100% 0,81% 100%,0 100%)",background:"linear-gradient(90deg,#8b62bd 0%,#d8b2f3 32%,#f0d2ff 53%,#a878cf 82%,#68449f 100%)",transform:"rotate(13deg) skewY(-8deg) translateZ(42px)",boxShadow:"18px 0 0 rgba(81,45,144,.3),-13px 0 0 rgba(255,255,255,.48)"}}/>
-   <div style={{position:"absolute",left:"47%",top:"22%",width:"27%",height:"74%",clipPath:"polygon(14% 0,100% 0,82% 100%,0 100%)",background:"linear-gradient(90deg,#a878d1,#f0cbff 42%,#bc8be7 76%,#704da9)",transform:"rotate(13deg) skewY(-8deg) translateZ(74px)",boxShadow:"15px 0 0 rgba(81,45,144,.32),-8px 0 0 rgba(255,255,255,.42)"}}/>
-   <div style={{position:"absolute",left:"45%",top:"42%",width:"10%",height:"42%",background:"linear-gradient(90deg,#6741a1,#e0b9f8,#9368c4)",transform:"rotate(13deg) skewY(-8deg) translateZ(92px)",opacity:.72}}/>
-   <div style={{position:"absolute",left:25,right:25,bottom:7,textAlign:"center",fontFamily:displayFont,fontSize:15,fontWeight:900,letterSpacing:".22em",color:"#d9d4f5",opacity:.45*(1-settle)}}>MORRO / FORM STUDY</div>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:size,height:size,transform:"translate(-50%,-50%) scale("+(0.86+.14*tile)+")",opacity:tile*tileFade,borderRadius:92,overflow:"hidden",background:"#f4f1e9",boxShadow:"0 22px 60px rgba(30,26,48,.08)"}}>
+   <div style={{position:"absolute",inset:0,opacity:1-blueTile,background:"#f5f2e9",overflow:"hidden"}}>
+    <div style={{position:"absolute",left:-50,top:-25,fontFamily:displayFont,fontSize:250,fontWeight:1000,letterSpacing:"-.13em",color:"#111315",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:-90,top:175,fontFamily:displayFont,fontSize:245,fontWeight:1000,letterSpacing:"-.14em",color:"transparent",WebkitTextStroke:"4px #22262a",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:20,top:365,fontFamily:displayFont,fontSize:250,fontWeight:1000,letterSpacing:"-.13em",color:"#171a1e",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:"42%",top:0,bottom:0,width:"58%",background:"rgba(235,231,221,.7)"}}/>
+   </div>
+   <div style={{position:"absolute",inset:0,opacity:blueTile,background:"#f3f1e8",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:"0 0 0 0",background:"#f3f1e8"}}/>
+    <div style={{position:"absolute",left:-80,top:-65,fontFamily:displayFont,fontSize:310,fontWeight:1000,letterSpacing:"-.13em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:-45,top:230,fontFamily:displayFont,fontSize:300,fontWeight:1000,letterSpacing:"-.14em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:90,bottom:-95,fontFamily:displayFont,fontSize:270,fontWeight:1000,letterSpacing:"-.12em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+   </div>
+   <svg viewBox="0 0 780 780" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:ribbon}}>
+    <defs>
+     <linearGradient id="morro-ribbon-a-v29" x1="0" x2="1" y1="0" y2="0"><stop stopColor="#9668bc"/><stop offset=".24" stopColor="#d8b4eb"/><stop offset=".53" stopColor="#f3d7ff"/><stop offset=".78" stopColor="#c38cda"/><stop offset="1" stopColor="#7950a7"/></linearGradient>
+     <linearGradient id="morro-ribbon-b-v29" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#efcffa"/><stop offset=".45" stopColor="#c995e3"/><stop offset=".8" stopColor="#9966c4"/><stop offset="1" stopColor="#71469e"/></linearGradient>
+    </defs>
+    <path d="M275 -35L445 -35L267 824L87 824Z" fill="#61438f" opacity=".35" transform="translate(20 14)"/>
+    <path d="M275 -35L445 -35L267 824L87 824Z" fill="url(#morro-ribbon-a-v29)" stroke="#e4c7f3" strokeWidth="5"/>
+    <path d="M445 -35L470 -35L292 824L267 824Z" fill="#744d9d" opacity=".7"/>
+    <path d="M532 142L710 74L510 760L326 760Z" fill="url(#morro-ribbon-b-v29)" stroke="#f0d6fa" strokeWidth="5"/>
+    <path d="M532 142L710 74L710 117L552 180Z" fill="#f5ddff"/>
+    <path d="M326 760L510 760L470 824L285 824Z" fill="#8053ac"/>
+    <path d="M410 292L518 250L460 484L352 526Z" fill="#b17bd1" stroke="#e5c5f4" strokeWidth="4"/>
+    <path d="M420 303L510 269" stroke="#fff1ff" strokeWidth="8" opacity=".7"/>
+   </svg>
   </div>
+  <div style={{position:"absolute",left:0,right:0,bottom:0,textAlign:"center",fontFamily:displayFont,fontSize:15,fontWeight:900,letterSpacing:".22em",color:"#d9d4f5",opacity:.45*(1-tileFade)}}>MORRO / FORM STUDY</div>
  </AbsoluteFill>;
 };
 
 const TexturedCube=()=>{
  const f=useCurrentFrame(),p=pop(f,30,0,12,4);
  if(f<12)return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"50%",top:"49%",width:330,height:330,transform:"translate(-50%,-50%) scale("+(0.82+.18*p)+")",borderRadius:54,background:"linear-gradient(145deg,#253fea,#0b1a94 62%,#060b55)",boxShadow:"0 17px 0 #5d45ae,0 27px 0 #a68bd8,0 40px 34px rgba(24,20,82,.2)",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:22,border:"5px solid rgba(255,255,255,.9)",borderRadius:37,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.24)"}}/>
-   <svg viewBox="0 0 240 240" width="270" height="270" style={{position:"relative"}}>
-    <circle cx="120" cy="120" r="85" fill="none" stroke="#f8f8f1" strokeWidth="15"/>
-    <circle cx="120" cy="120" r="65" fill="none" stroke="#9db9ff" strokeWidth="4" opacity=".8"/>
-    <path d="M83 57L183 120L99 137L78 194Z" fill="#fff"/>
+  <div style={{position:"absolute",left:"50%",top:"49%",width:520,height:520,transform:"translate(-50%,-50%) scale("+(0.92+.08*p)+")",borderRadius:76,overflow:"hidden",background:"linear-gradient(145deg,#284fee 0%,#1936bf 35%,#07131e 67%,#03070d 100%)",boxShadow:"0 18px 0 #5d45ae,0 29px 0 #a68bd8,0 44px 42px rgba(24,20,82,.22)"}}>
+   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 22% 9%,rgba(255,255,255,.82),transparent 31%),linear-gradient(120deg,rgba(75,141,255,.5),transparent 34%,rgba(3,8,13,.74) 70%,rgba(255,255,255,.2) 100%)"}}/>
+   <div style={{position:"absolute",left:"-8%",right:"-12%",top:"-10%",height:"48%",background:"linear-gradient(135deg,rgba(255,255,255,.36),rgba(73,126,255,.12) 46%,transparent 70%)",transform:"skewY(-12deg)",filter:"blur(12px)"}}/>
+   <svg viewBox="0 0 520 520" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+    <defs><linearGradient id="glossy-play-ring-v29" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff"/><stop offset=".5" stopColor="#dce3ef"/><stop offset="1" stopColor="#8b9dbb"/></linearGradient><filter id="glossy-soft-v29"><feGaussianBlur stdDeviation="8"/></filter></defs>
+    <path d="M85 82Q54 112 54 161V343Q54 418 129 418H324Q433 418 433 309V213Q433 90 309 82Z" fill="rgba(238,246,255,.17)" stroke="#f4f7ff" strokeWidth="15"/>
+    <circle cx="264" cy="250" r="112" fill="rgba(4,10,20,.46)" stroke="url(#glossy-play-ring-v29)" strokeWidth="17"/>
+    <circle cx="264" cy="250" r="91" fill="none" stroke="rgba(255,255,255,.56)" strokeWidth="3"/>
+    <path d="M227 171L352 248L231 332Z" fill="#08121d" stroke="#f5f7ff" strokeWidth="10" strokeLinejoin="round"/>
+    <path d="M102 108Q180 70 255 103" fill="none" stroke="#fff" strokeWidth="13" opacity=".68" strokeLinecap="round" filter="url(#glossy-soft-v29)"/>
+    <path d="M77 357Q190 405 353 375" fill="none" stroke="#68b8ff" strokeWidth="7" opacity=".45"/>
    </svg>
+   <div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,transparent 20%,rgba(255,255,255,.12) 46%,transparent 68%)"}}/>
   </div>
  </AbsoluteFill>;
  return <ProjectCube startAt={12}/>;
