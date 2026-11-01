@@ -143,6 +143,184 @@ def audit_candidate(case_root: Path, candidate: dict[str, Any]) -> dict[str, Any
     return row
 
 
+
+def write_cross_scenario_audition(
+    output_dir: Path,
+    report: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a blind page with every script grouped under the same voice."""
+    cases = report.get("cases") or []
+    if not cases:
+        raise ValueError("Cross-scenario audition requires at least one test case")
+
+    candidate_maps: dict[str, dict[str, dict[str, Any]]] = {}
+    for case in cases:
+        case_id = str(case.get("id") or "")
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,48}", case_id):
+            raise ValueError(f"Unsafe scenario ID in report: {case_id!r}")
+        rows = case.get("candidates")
+        if not isinstance(rows, list):
+            raise ValueError(f"Scenario {case_id} is missing its candidates list")
+        by_id: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            candidate_id = str(row.get("id") or "")
+            if not candidate_id or candidate_id in by_id:
+                raise ValueError(f"Scenario {case_id} has a missing or duplicate candidate ID")
+            by_id[candidate_id] = row
+        candidate_maps[case_id] = by_id
+
+    all_ids = sorted(set().union(*(set(rows) for rows in candidate_maps.values())))
+    first_rows = candidate_maps[cases[0]["id"]]
+    label_by_id: dict[str, str] = {}
+    used_labels: set[str] = set()
+    for candidate_id, row in first_rows.items():
+        label = str(row.get("blind_label") or "").strip()
+        if not re.fullmatch(r"Candidate [0-9]{2,}", label) or label in used_labels:
+            raise ValueError("First scenario must have unique blind Candidate NN labels")
+        label_by_id[candidate_id] = label
+        used_labels.add(label)
+
+    next_label = len(label_by_id) + 1
+    for candidate_id in all_ids:
+        if candidate_id not in label_by_id:
+            while f"Candidate {next_label:02d}" in used_labels:
+                next_label += 1
+            label_by_id[candidate_id] = f"Candidate {next_label:02d}"
+            used_labels.add(label_by_id[candidate_id])
+            next_label += 1
+
+    dimensions = [
+        ("naturalness", "Độ tự nhiên tổng thể"),
+        ("vietnamese", "Thanh điệu, phụ âm và độ rõ tiếng Việt"),
+        ("identity", "Độ nhất quán của cùng một giọng qua bốn kịch bản"),
+        ("expression", "Nhịp kể, ngắt nghỉ và biểu cảm ở đoạn dài"),
+        ("character_fit", "Mức phù hợp làm giọng nhân vật"),
+    ]
+    cards: list[str] = []
+    ready_tracks = 0
+    for candidate_id in sorted(all_ids, key=lambda value: label_by_id[value]):
+        label = label_by_id[candidate_id]
+        tracks: list[str] = []
+        for case in cases:
+            case_id = case["id"]
+            row = candidate_maps[case_id].get(candidate_id)
+            title = html.escape(str(case.get("title") or case_id))
+            if not row or row.get("status") != "ready" or not row.get("audio_file"):
+                tracks.append(
+                    f'<div class="track unavailable"><strong>{title}</strong>'
+                    '<p>Audio chưa sẵn sàng trong lần chạy này.</p></div>'
+                )
+                continue
+            try:
+                safe_audio_path(output_dir / "cases" / case_id, str(row["audio_file"]))
+            except (OSError, ValueError, FileNotFoundError):
+                tracks.append(
+                    f'<div class="track unavailable"><strong>{title}</strong>'
+                    '<p>Không thể xác minh file audio.</p></div>'
+                )
+                continue
+            relative = (Path("cases") / case_id / Path(row["audio_file"])).as_posix()
+            source = html.escape(relative, quote=True)
+            tracks.append(
+                f'<div class="track"><strong>{title}</strong>'
+                f'<audio controls preload="none" src="{source}"></audio></div>'
+            )
+            ready_tracks += 1
+
+        controls: list[str] = []
+        for key, title in dimensions:
+            options = ['<option value="">Chưa chấm</option>'] + [
+                f'<option value="{score}">{score} / 5</option>'
+                for score in range(1, 6)
+            ]
+            controls.append(
+                f'<label>{html.escape(title)}'
+                f'<select data-dimension="{html.escape(key, quote=True)}">{"".join(options)}</select></label>'
+            )
+        cards.append(
+            f'<article class="candidate" data-label="{html.escape(label, quote=True)}">'
+            f'<header><h2>{html.escape(label)}</h2><span>4 kịch bản</span></header>'
+            f'<div class="tracks">{"".join(tracks)}</div>'
+            f'<div class="ratings">{"".join(controls)}</div>'
+            '<label class="notes-label">Ghi chú nghe thử'
+            '<textarea data-notes rows="3" placeholder="Phát âm nào chưa tốt? Giọng có giữ được sắc thái và độ nhất quán không?"></textarea>'
+            '</label></article>'
+        )
+
+    page = r"""<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nolane — Blind voice comparison</title>
+<style>
+:root{color-scheme:dark;background:#10131a;color:#f0f2f7;font:15px system-ui,sans-serif}
+*{box-sizing:border-box}body{max-width:1120px;margin:28px auto;padding:0 18px}
+h1{font-size:27px;margin-bottom:8px}.intro{color:#aeb6c6;line-height:1.6}
+.candidate{background:#1b202b;border:1px solid #353d4d;border-radius:14px;padding:17px;margin:18px 0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h2{font-size:20px;margin:0}.tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:15px 0}
+.track{background:#131823;border-radius:9px;padding:12px;min-width:0}.track strong{font-size:13px}
+audio{width:100%;height:38px;margin-top:10px}.unavailable{opacity:.65;color:#e2b2a2}
+.ratings{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:16px 0}
+label{display:grid;gap:7px;font-size:13px;color:#cbd3e1}
+select,textarea{width:100%;background:#303544;color:white;border:1px solid #555d70;border-radius:7px;padding:8px;font:inherit}
+.notes-label textarea{min-height:75px;resize:vertical}
+.actions{position:sticky;bottom:12px;background:#171d28;border:1px solid #46536a;border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+button{background:#b9d4ff;color:#142033;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
+small{color:#aeb6c6}@media(max-width:560px){.actions{align-items:stretch;flex-direction:column}button{width:100%}}
+</style></head><body>
+<h1>So sánh giọng mù — đủ bốn kịch bản</h1>
+<p class="intro">Mỗi thẻ là một giọng ẩn danh; nghe đủ bốn mẫu trước khi chấm. Thứ tự được giữ cố định trong toàn bộ phiên nghe để bạn theo dõi độ nhất quán, nhưng tên giọng và nhà cung cấp không xuất hiện trên trang này. Chấm từ 1 đến 5 hoặc để trống; có thể ghi chú và xuất kết quả một phần.</p>
+<div id="cards">""" + "\n".join(cards) + r"""</div>
+<div class="actions"><small id="coverage">Chưa có điểm nào được nhập.</small><button id="export">Xuất ratings JSON</button></div>
+<script>
+const dimensions=["naturalness","vietnamese","identity","expression","character_fit"];
+function collectRatings(){
+  return [...document.querySelectorAll(".candidate")].map(card=>{
+    const ratings={};
+    card.querySelectorAll("select[data-dimension]").forEach(input=>{
+      if(input.value!=="") ratings[input.dataset.dimension]=Number(input.value);
+    });
+    return {candidate:card.dataset.label,ratings,notes:card.querySelector("[data-notes]").value.trim()};
+  });
+}
+function updateCoverage(){
+  const rows=collectRatings();
+  const rated=rows.filter(row=>Object.keys(row.ratings).length>0).length;
+  document.querySelector("#coverage").textContent =
+    String(rated)+"/"+rows.length+" giọng đã có ít nhất một điểm.";
+}
+document.querySelectorAll("select,textarea").forEach(input=>{
+  input.addEventListener("change",updateCoverage);
+  input.addEventListener("input",updateCoverage);
+});
+document.querySelector("#export").addEventListener("click",()=>{
+  const payload={schema_version:1,source:"nolane-actions-all-scripts-blind-audition",
+    rating_dimensions:dimensions,ratings:collectRatings()};
+  const blob=new Blob([JSON.stringify(payload,null,2)+"\n"],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.download="voice-human-ratings-all-scripts.json";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+});
+updateCoverage();
+</script></body></html>"""
+    destination = output_dir / "voice-audition-all-scripts.html"
+    destination.write_text(page, encoding="utf-8")
+    return {
+        "page": destination.name,
+        "candidate_count": len(all_ids),
+        "case_count": len(cases),
+        "ready_track_count": ready_tracks,
+        "rating_dimensions": [key for key, _ in dimensions],
+        "ratings_export": "voice-human-ratings-all-scripts.json",
+        "blind_identity_hidden": True,
+        "human_review_required": True,
+    }
+
 def write_index(output_dir: Path, report: dict[str, Any]) -> None:
     cards = []
     for case in report["cases"]:
@@ -153,7 +331,8 @@ def write_index(output_dir: Path, report: dict[str, Any]) -> None:
             f'<p>{case["ready"]}/{case["candidate_count"]} audio · '
             f'{case["technical_pass"]} technical pass · '
             f'{case["technical_warning"]} warnings · {case["technical_error"]} errors</p>'
-            f'<a href="cases/{cid}/index.html">Open blind audition</a></article>'
+            f'<a href="cases/{cid}/index.html">Nghe riêng kịch bản này</a></p>'
+            f'<p><a href="voice-audition-all-scripts.html">So sánh cùng một giọng qua đủ bốn kịch bản</a></p></article>'
         )
     doc = """<!doctype html>
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -212,8 +391,8 @@ def write_summary(output_dir: Path, report: dict[str, Any]) -> None:
             )
     lines.extend([
         "", "## Listening", "",
-        "Open index.html and follow each case link. Listen to each full sample before rating it.",
-        "The blind pages export subjective 1–5 ratings and written reviewer notes.",
+        "Open index.html for each test case or voice-audition-all-scripts.html to hear all four scripts grouped by the same anonymous voice.",
+        "The combined blind page exports one voice-human-ratings-all-scripts.json file with subjective 1–5 ratings and written reviewer notes.",
         "", "## Limits", "",
         "- This runs the ten released KorvaTTS presets; it does not create custom voices or clone people.",
         "- Audio engineering measurements do not grade pronunciation, emotion, acting or naturalness.",
@@ -371,6 +550,7 @@ def run_lab(
         "cases": case_results, "human_review_required": True,
         "naturalness_score": None, "elevenlabs_equivalence": None,
     }
+    report["cross_scenario_audition"] = write_cross_scenario_audition(output_dir, report)
     _write_json(output_dir / "actions-voice-lab.json", report)
     write_index(output_dir, report)
     write_summary(output_dir, report)
