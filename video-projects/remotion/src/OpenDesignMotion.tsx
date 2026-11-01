@@ -1224,10 +1224,10 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
 
 const LaunchKitWindow=({frame,variant,countdown=-1}:{frame:number;variant:number;countdown?:number})=>{
  const {fps}=useVideoConfig(),p=pop(frame,fps,0,84,19);
- const names=["Claude Opus 5.5","GPT-6-Astra","Gemini","MiMo","Cursor","Antigravity","Kilo Code"];
+ const names=["Claude Opus 5.5","Claude Opus 5.5","Gemini","GLM","MiMo","DeepSeek V4.1","OpenDesign"];
  const name=names[variant%names.length];
- const symbols=["✣","◉","➤","M","◆","▲","K"];
- const colors=["#df805b","#8c9bff","#222a39","#4b93a4","#111315","#6a54d5","#373c40"];
+ const symbols=["✣","✣","▶","Z","MiMo","🐳","◈"];
+ const colors=["#df805b","#df805b","#151c30","#191919","#1d2328","#4879df","#293a92"];
  return <AbsoluteFill style={{...full,background:"#f3f1ed"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 40%,#fff,#f1f0eb 72%)"}}/>
   <div style={{position:"absolute",left:118,right:118,top:72,bottom:72,borderRadius:24,background:"#fff",border:"1px solid #e9e8e3",boxShadow:"0 28px 78px rgba(30,35,38,.15)",transform:"translateY("+((1-p)*44)+"px) scale("+(0.985+.015*p)+")",overflow:"hidden"}}>
