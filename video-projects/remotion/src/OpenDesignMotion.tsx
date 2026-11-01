@@ -226,47 +226,29 @@ const BrandReveal = () => {
 
 const ClaimScene = () => {
   const f = useCurrentFrame();
-  const highlight = e(f, 17, 31);
-  const title = e(f, 3, 15);
-  const drift = e(f, 0, 50, 25, -20);
+  const title = e(f, 0, 12);
+  const marker = e(f, 6, 21);
   return (
-    <AbsoluteFill style={{ ...full, background: "#e9e5db" }}>
-      <div style={{
-        position: "absolute", inset: -40, opacity: .42,
-        display: "grid", gridTemplateColumns: "repeat(4,1fr)", gridTemplateRows: "repeat(3,1fr)",
-        gap: 17, transform: "perspective(1600px) rotateY(-7deg) translateX(" + drift + "px) scale(1.12)",
-        filter: "saturate(.78)",
-      }}>
-        {Array.from({ length: 12 }, (_, i) => (
-          <div key={i} style={{ position: "relative", minHeight: 140, overflow: "hidden", boxShadow: "0 10px 24px rgba(0,0,0,.12)" }}>
-            <GalleryPoster index={i} frame={f + i * 4} />
-          </div>
-        ))}
-      </div>
-      <div style={{
-        position: "absolute", left: 360, right: 360, top: 278, bottom: 260,
-        background: "rgba(255,255,255,.97)", boxShadow: "0 34px 90px rgba(40,45,44,.15)",
-        border: "1px solid rgba(255,255,255,.9)", borderRadius: 4,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        opacity: title, transform: "translateY(" + ((1 - title) * 38) + "px)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 17, whiteSpace: "nowrap" }}>
-          <Word size={83} weight={900}>The</Word>
+    <AbsoluteFill style={{ ...full, background: "#faf9f5", color: "#111315" }}>
+      <div style={{ position: "absolute", left: 0, right: 0, top: 315, display: "flex", flexDirection: "column", alignItems: "center", opacity: title, transform: "translateY(" + ((1-title)*28) + "px)" }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", whiteSpace: "nowrap", gap: 18 }}>
+          <Word size={104} color="#111315" tracking={-.065}>The</Word>
           <span style={{ position: "relative", display: "inline-block" }}>
-            <span style={{ position: "absolute", left: -7, right: -9, top: "56%", height: 54, background: "#b8eb50", transform: "scaleX(" + highlight + ") rotate(-1deg)", transformOrigin: "left center" }} />
-            <span style={{ position: "relative" }}><Word size={90} weight={950}>open-source</Word></span>
+            <span style={{ position: "absolute", left: -10, right: -12, top: "52%", height: 58, background: "#a8f05c", transform: "scaleX(" + marker + ") rotate(-.6deg)", transformOrigin: "left center" }} />
+            <span style={{ position: "relative" }}><Word size={104} color="#111315" tracking={-.065}>open-source</Word></span>
           </span>
         </div>
-        <Word size={84} weight={900}>alternative</Word>
-        <div style={{ marginTop: 23, display: "flex", alignItems: "center", gap: 10, color: "#8d8b86" }}>
-          <span style={{ fontSize: 27 }}>to</span>
-          <RadialMark frame={f} size={32} color="#e76c55" />
-          <span style={{ fontSize: 32, fontWeight: 850, color: "#202124", letterSpacing: "-.05em" }}>Claude Motion.</span>
+        <Word size={104} color="#111315" tracking={-.065}>alternative</Word>
+        <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 13, color: "#898985" }}>
+          <span style={{ fontSize: 26, fontWeight: 550 }}>to</span>
+          <RadialMark frame={f} size={31} color="#e97962" />
+          <span style={{ fontSize: 32, fontWeight: 850, color: "#1b1c1e", letterSpacing: "-.055em" }}>Claude Motion.</span>
         </div>
       </div>
     </AbsoluteFill>
   );
 };
+
 const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
   const common: React.CSSProperties = { position: "absolute", inset: 0, overflow: "hidden" };
   if (index === 0) return (
@@ -383,22 +365,27 @@ const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
 
 
 const GalleryCard=({index,frame}:{index:number;frame:number})=>{
- const drift=Math.sin((frame+index*13)/18)*5,rotation=(index%2?-1:1)*(1+Math.sin(frame/19+index)*.55);
- return <div style={{width:270,height:152,borderRadius:8,position:"relative",overflow:"hidden",transform:"translateY("+drift+"px) rotate("+rotation+"deg)",boxShadow:"0 16px 34px rgba(19,24,32,.18),0 2px 6px rgba(19,24,32,.1)",background:"#fff"}}><GalleryPoster index={index} frame={frame}/><div style={{position:"absolute",left:10,bottom:7,fontSize:7,fontWeight:950,letterSpacing:".2em",color:"rgba(20,25,30,.58)"}}>OD / 0{index+1}</div></div>;
-}
-
+ const drift=Math.sin((frame+index*11)/19)*3.2;
+ const rotation=(index%2?-1:1)*.22;
+ return <div style={{width:310,height:164,borderRadius:3,position:"relative",overflow:"hidden",transform:"translateY("+drift+"px) rotate("+rotation+"deg)",boxShadow:"0 8px 22px rgba(19,24,32,.13)",background:"#fff"}}>
+   <GalleryPoster index={index%12} frame={frame+index*3}/>
+   <div style={{position:"absolute",left:9,bottom:6,fontSize:7,fontWeight:900,letterSpacing:".16em",color:"rgba(20,25,30,.5)"}}>OD / {String(index+1).padStart(2,"0")}</div>
+ </div>;
+};
 
 const GalleryWall=()=>{
- const f=useCurrentFrame(),p=pop(f,30,0,72,17),pan=e(f,0,77,68,-180),rotation=e(f,0,77,8,-6);
- return <AbsoluteFill style={{...full,background:"#f1efe9"}}>
-  <div style={{position:"absolute",left:76,top:46,fontSize:16,fontWeight:950,letterSpacing:".2em",color:"#363b3e"}}>OPEN DESIGN / MOTION COLLECTION</div>
-  <div style={{position:"absolute",right:78,top:46,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#8a8f8e"}}>SELECTED WORKS / 2026</div>
-  <div style={{position:"absolute",left:76,top:115,width:1768,display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:14,transform:"perspective(1750px) rotateY("+rotation+"deg) rotateX(3deg) translateX("+pan+"px) translateY("+((1-p)*100)+"px) scale("+(0.9+p*.13)+")",transformOrigin:"center center"}}>
-   {Array.from({length:30},(_,i)=><GalleryCard key={i} index={i%12} frame={f+i*2}/>)}
-  </div><div style={{position:"absolute",bottom:49,right:82,fontSize:14,color:"#8a8f8e",letterSpacing:".18em",fontWeight:900}}>SCROLL TO EXPLORE ↘</div><Noise opacity={.045}/>
+ const f=useCurrentFrame(),p=pop(f,30,0,72,16);
+ const x=e(f,0,77,30,-110), ry=e(f,0,77,-8,-15), rz=e(f,0,77,.6,-1.1);
+ return <AbsoluteFill style={{...full,background:"#f4f1e9"}}>
+   <div style={{position:"absolute",left:80,right:80,top:74,bottom:64,display:"grid",gridTemplateColumns:"repeat(5,310px)",gridTemplateRows:"repeat(5,164px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1800px) rotateX(5deg) rotateY("+ry+"deg) rotateZ("+rz+"deg) translateX("+x+"px) translateY("+((1-p)*90)+"px) scale("+(0.92+.08*p)+")",transformOrigin:"center center"}}>
+    {Array.from({length:25},(_,i)=><GalleryCard key={i} index={[4,9,0,6,11,2,5,10,3,8,7,1,4,9,2,6,11,5,0,10,3,8,1,7,4][i]} frame={f+i*2}/>)}
+   </div>
+   <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(180deg,rgba(255,255,255,.16),transparent 18%,transparent 84%,rgba(210,205,193,.12))"}}/>
+   <Noise opacity={.035}/>
  </AbsoluteFill>;
 }
 
+const Comic1965
 
 const Comic1965 = () => {
   const f = useCurrentFrame();
@@ -812,35 +799,147 @@ const GreenTransition=()=>{const f=useCurrentFrame(),r=e(f,0,7,90,650);return <A
 
 
 
+const Comic1962=()=>{
+ const f=useCurrentFrame(),z=e(f,0,10,.98,1.02);
+ return <AbsoluteFill style={{...full,background:"#f7f0df",transform:"scale("+z+")"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 45%,#fff8e9,#e9dfc8)"}}/>
+  <div style={{position:"absolute",left:0,top:0,width:360,bottom:0,background:"#f5ce3d",borderRight:"9px solid #151515"}}/>
+  <div style={{position:"absolute",right:0,top:0,width:280,bottom:0,background:"#fbf7eb",borderLeft:"9px solid #151515",backgroundImage:"radial-gradient(#151515 1.5px,transparent 1.5px)",backgroundSize:"14px 14px"}}/>
+  <div style={{position:"absolute",left:390,right:300,top:0,bottom:0,background:"repeating-conic-gradient(from 0deg at 50% 50%,#f9eac9 0deg 5deg,#8eb8ed 5deg 10deg)",borderLeft:"9px solid #151515",borderRight:"9px solid #151515"}}/>
+  <div style={{position:"absolute",left:455,right:365,top:175,bottom:155,background:"#fff4d6",border:"12px solid #171719",clipPath:"polygon(0 0,100% 0,100% 100%,0 100%)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"51%",width:520,height:520,marginLeft:-260,marginTop:-260,borderRadius:"50%",background:"#efcf42",border:"16px solid #171719",boxShadow:"inset 0 0 0 15px #fbf6e8",display:"grid",placeItems:"center"}}>
+    <div style={{width:360,height:360,borderRadius:"50%",background:"#e64a37",border:"13px solid #171719",display:"grid",placeItems:"center",boxShadow:"inset 0 0 0 12px #f3d442"}}>
+      <PlayGlyph size={230} color="#111315"/>
+    </div>
+  </div>
+  <div style={{position:"absolute",left:0,right:0,top:54,textAlign:"center",fontSize:36,fontWeight:950,color:"#151515",letterSpacing:".05em"}}>MEANWHILE, IN 1962…</div>
+  <div style={{position:"absolute",right:310,bottom:104,padding:"10px 22px",background:"#f6d647",border:"7px solid #151515",fontSize:32,fontWeight:950,transform:"rotate(-8deg)"}}>CLICK!</div>
+  <div style={{position:"absolute",left:45,bottom:52,fontSize:23,fontWeight:950,letterSpacing:".13em"}}>ONE IDEA.</div>
+ </AbsoluteFill>;
+};
+
+const PixelGamePoster=()=>{
+ const f=useCurrentFrame(),jump=Math.sin(f/2.8)*10;
+ return <AbsoluteFill style={{...full,background:"#38b9f2",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(#38b9f2 0 62%,#80d85a 62% 100%)"}}/>
+  <div style={{position:"absolute",left:0,right:0,top:110,height:630,backgroundImage:"radial-gradient(#fff 0 3px,transparent 3px)",backgroundSize:"90px 90px",opacity:.35}}/>
+  <div style={{position:"absolute",left:90,top:100,fontSize:20,fontWeight:950,color:"#fff",letterSpacing:".18em"}}>SCORE 000100</div>
+  <div style={{position:"absolute",right:120,top:100,fontSize:20,fontWeight:950,color:"#fff",letterSpacing:".18em"}}>LEVEL 1965</div>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <path d="M0 800 Q260 690 490 810 T920 800 T1370 790 T1920 810V1080H0Z" fill="#54bd4b"/>
+   <path d="M0 900 Q300 810 580 890 T1110 900 T1600 875 T1920 920V1080H0Z" fill="#1c8c55"/>
+   {Array.from({length:8},(_,i)=><g key={i} transform={"translate("+(i*270-80)+" 0)"}><rect x="0" y="735" width="100" height="85" fill="#39a34b"/><rect x="25" y="685" width="50" height="50" fill="#48c85b"/><rect x="15" y="670" width="18" height="18" fill="#fff"/></g>)}
+   <g transform={"translate(960 "+(420+jump)+")"}><path d="M-85 10L0 -165L85 10L40 125H-40Z" fill="#f3d74a" stroke="#151515" strokeWidth="12"/><circle cx="0" cy="-20" r="46" fill="#fff" stroke="#151515" strokeWidth="10"/><path d="M-9 -53L28 -5L-9 25Z" fill="#151515"/></g>
+   <path d="M0 980H1920" stroke="#fff" strokeWidth="8" opacity=".7"/>
+  </svg>
+  <div style={{position:"absolute",left:120,bottom:70,fontSize:24,fontWeight:950,color:"#fff",letterSpacing:".15em"}}>PIXEL PLAY / 01</div>
+ </AbsoluteFill>;
+};
+
+const PortfolioFlash=()=>{
+ const f=useCurrentFrame();
+ const cards=[["#101217","#f4f2e8"],["#f5f0df","#17191c"],["#1d37bd","#fff"],["#111315","#fff"],["#d8edc7","#14221a"],["#252525","#f9f7ed"]];
+ return <AbsoluteFill style={{...full,background:"#f3f1e9"}}>
+  <div style={{position:"absolute",inset:0,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gridTemplateRows:"repeat(3,1fr)",gap:10,padding:26,transform:"scale("+(1+e(f,0,9)*.04)+") rotate(-.4deg)"}}>
+   {Array.from({length:12},(_,i)=><div key={i} style={{position:"relative",overflow:"hidden",background:cards[i%6][0],color:cards[i%6][1],display:"grid",placeItems:"center"}}>
+    {i%4===0?<Word size={92} color={cards[i%6][1]}>THE</Word>:i%4===1?<div style={{width:160,height:160,borderRadius:"50%",border:"16px solid "+cards[i%6][1],display:"grid",placeItems:"center"}}><OpenDesignSymbol size={108}/></div>:i%4===2?<Word size={74} color={cards[i%6][1]}>FUTURE</Word>:<svg viewBox="0 0 300 170" width="100%" height="100%"><path d="M10 85Q150 -20 290 85Q150 190 10 85Z" fill="none" stroke={cards[i%6][1]} strokeWidth="9"/><circle cx="150" cy="85" r="35" fill={cards[i%6][1]}/></svg>}
+    <div style={{position:"absolute",left:14,bottom:8,fontSize:10,fontWeight:900,letterSpacing:".2em"}}>MOTION / {String(i+1).padStart(2,"0")}</div>
+   </div>)}
+  </div>
+ </AbsoluteFill>;
+};
+
+const EditorialPosterGrid=()=>{
+ const cells=[["#fff","#111315","THE"],["#111315","#fff","FUTURE"],["#f8f6ef","#111315","IS"],["#f7f4e9","#111315","ALREADY"],["#f7f4e9","#111315","NOW"],["#17191c","#fff","HERE"]];
+ return <AbsoluteFill style={{...full,background:"#090a0c",padding:55,boxSizing:"border-box"}}>
+  <div style={{position:"absolute",inset:60,display:"grid",gridTemplateColumns:"1fr 1.1fr 1fr 1.1fr",gridTemplateRows:"1fr 1fr",gap:12}}>
+   <div style={{background:"#f5f3ed",display:"grid",placeItems:"center"}}><div style={{width:"100%",height:"100%",background:"repeating-linear-gradient(135deg,#111 0 10px,#f5f3ed 10px 22px)"}}/></div>
+   <div style={{background:"#f4f2e9",display:"grid",placeItems:"center"}}><Word size={95} color="#111315">THE</Word></div>
+   <div style={{background:"#16181c",display:"grid",placeItems:"center"}}><Word size={85} color="#fff">FUTURE</Word></div>
+   <div style={{background:"#f5f3ed",display:"grid",placeItems:"center"}}><svg viewBox="0 0 400 220" width="100%" height="100%"><circle cx="200" cy="110" r="83" stroke="#111" strokeWidth="8" fill="none"/>{Array.from({length:18},(_,i)=><line key={i} x1="200" y1="15" x2="200" y2="205" stroke="#111" strokeWidth="2" transform={"rotate("+(i*10)+" 200 110)"}/>)}</svg></div>
+   <div style={{background:"#f3f1e9",display:"grid",placeItems:"center"}}><Word size={120} color="#111315">IS</Word></div>
+   <div style={{background:"#17191d",display:"grid",placeItems:"center"}}><Word size={73} color="#fff">ALREADY</Word></div>
+   <div style={{background:"#f4f2e9",display:"grid",placeItems:"center"}}><Word size={72} color="#111315">NOW</Word></div>
+   <div style={{background:"#f7f5ef",display:"grid",placeItems:"center"}}><Word size={88} color="#111315">HERE</Word></div>
+  </div>
+  <div style={{position:"absolute",left:80,top:27,color:"#f5f3ed",fontSize:14,fontWeight:850,letterSpacing:".2em"}}>OPEN DESIGN / EDITORIAL WALL</div>
+ </AbsoluteFill>;
+};
+
+const DepthField=()=>{
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{...full,background:"#0a0b0d",color:"#fff"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%">
+   <defs><filter id="depth-blur"><feGaussianBlur stdDeviation="1.4"/></filter></defs>
+   {Array.from({length:520},(_,i)=>{
+    const a=i*2.399963, ring=180+(i%19)*10, wobble=Math.sin(f*.08+i*.23)*16;
+    const x=960+Math.cos(a)*(ring+wobble), y=540+Math.sin(a)*(ring*.62+wobble), z=Math.sin(a*2+f*.04);
+    const len=13+(i%7)*2;
+    return <line key={i} x1={x} y1={y} x2={x+Math.cos(a+z)*len} y2={y+Math.sin(a+z)*len} stroke={i%9===0?"#9cf15c":"#e8ebe8"} strokeWidth={i%5===0?3:2} opacity={.42+(i%6)*.08}/>;
+   })}
+   <ellipse cx="960" cy="540" rx="190" ry="125" fill="none" stroke="#8d9b96" strokeOpacity=".15" strokeWidth="1"/>
+  </svg>
+  <div style={{position:"absolute",left:70,top:56,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#d9ddda"}}>OPEN DESIGN MOTION REEL — 2026</div>
+  <div style={{position:"absolute",right:70,top:56,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#d9ddda"}}>05 — DEPTH</div>
+  <div style={{position:"absolute",left:70,bottom:64,fontSize:15,fontWeight:800,letterSpacing:".18em",color:"#8f9694"}}>128 BPM / BAR 7 OF 8</div>
+ </AbsoluteFill>;
+};
+
+const EaseGreen=()=>{
+ const f=useCurrentFrame(),x=e(f,0,9,65,0);
+ return <AbsoluteFill style={{...full,background:"#77ee43",color:"#101710"}}>
+  <div style={{position:"absolute",left:0,right:0,top:330,textAlign:"center",transform:"translateX("+x+"px)"}}><Word size={310} color="#101710" tracking={-.12}>EASE</Word></div>
+  <div style={{position:"absolute",left:27,top:31,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#16331c"}}>OPEN DESIGN MOTION REEL — 2026</div>
+  <div style={{position:"absolute",right:34,top:31,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#16331c"}}>06 — KINETIC TYPE</div>
+  <div style={{position:"absolute",left:28,right:28,bottom:26,height:2,background:"#173719",opacity:.6}}/>
+ </AbsoluteFill>;
+};
+
+const GreenCircleTransition=()=>{
+ const f=useCurrentFrame(),r=e(f,0,10,0,610),fade=1-e(f,8,10);
+ return <AbsoluteFill style={{...full,background:"#78eb48"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%"><circle cx="960" cy="540" r={r} fill="none" stroke="#b6ff93" strokeWidth="4" opacity={fade}/><circle cx="960" cy="540" r={r*.76} fill="none" stroke="#b6ff93" strokeWidth="2" opacity={fade}/><circle cx={1050+f*8} cy="740" r="7" fill="#121812"/></svg>
+  <div style={{position:"absolute",left:26,top:26,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#17371a"}}>07 — END</div>
+ </AbsoluteFill>;
+};
+
+const NotText=({fullText=false}:{fullText?:boolean})=>{
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{...full,background:"#090a0b",color:"#f5f5f0"}}>
+  <div style={{position:"absolute",left:0,right:0,top:430,textAlign:"center",transform:"scale("+(0.96+e(f,0,9)*.04)+")"}}><Word size={fullText?130:126} color="#f4f4f0" tracking={-.065}>{fullText?"Not just":"Not"}</Word></div>
+ </AbsoluteFill>;
+};
+
 const PosterSequence = () => (
   <AbsoluteFill style={full}>
-    <Sequence from={0} durationInFrames={13}><ClockComic /></Sequence>
-    <Sequence from={13} durationInFrames={13}><DotPoster /></Sequence>
-    <Sequence from={26} durationInFrames={8}><LightSweep1973 /></Sequence>
-    <Sequence from={34} durationInFrames={22}><MarioGamePoster /></Sequence>
-    <Sequence from={56} durationInFrames={13}><WorldPoster /></Sequence>
-    <Sequence from={69} durationInFrames={13}><MindPoster /></Sequence>
-    <Sequence from={82} durationInFrames={30}><RingPoster /></Sequence>
-    <Sequence from={112} durationInFrames={13}><PosterGrid /></Sequence>
-    <Sequence from={125} durationInFrames={8}><PointCloudPoster /></Sequence>
-    <Sequence from={133} durationInFrames={13}><EasePoster /></Sequence>
-    <Sequence from={146} durationInFrames={7}><InPoster /></Sequence>
-    <Sequence from={153} durationInFrames={7}><EasePoster /></Sequence>
-    <Sequence from={160} durationInFrames={13}><OutPoster /></Sequence>
-    <Sequence from={173} durationInFrames={13}><NeverPoster /></Sequence>
-    <Sequence from={186} durationInFrames={13}><LinearPoster /></Sequence>
-    <Sequence from={199} durationInFrames={7}><GreenTransition /></Sequence>
-    <Sequence from={206} durationInFrames={13}><ClockPoster /></Sequence>
-    <Sequence from={219} durationInFrames={7}><StatsPoster /></Sequence>
-    <Sequence from={226} durationInFrames={7}><TogglePoster /></Sequence>
-    <Sequence from={233} durationInFrames={8}><MotionFilmsPoster /></Sequence>
-    <Sequence from={241} durationInFrames={15}><EyePoster /></Sequence>
-    <Sequence from={256} durationInFrames={8}><KoalaPoster /></Sequence>
-    <Sequence from={264} durationInFrames={8}><Comic1952 /></Sequence>
-    <Sequence from={272} durationInFrames={7}><Future3D /></Sequence>
+    <Sequence from={0} durationInFrames={9}><Comic1952 /></Sequence>
+    <Sequence from={9} durationInFrames={10}><Comic1962 /></Sequence>
+    <Sequence from={19} durationInFrames={20}><DotPoster /></Sequence>
+    <Sequence from={39} durationInFrames={10}><LightSweep1973 /></Sequence>
+    <Sequence from={49} durationInFrames={10}><PixelGamePoster /></Sequence>
+    <Sequence from={59} durationInFrames={10}><PortfolioFlash /></Sequence>
+    <Sequence from={69} durationInFrames={10}><MindPoster /></Sequence>
+    <Sequence from={79} durationInFrames={30}><RingPoster /></Sequence>
+    <Sequence from={109} durationInFrames={20}><EditorialPosterGrid /></Sequence>
+    <Sequence from={129} durationInFrames={10}><DepthField /></Sequence>
+    <Sequence from={139} durationInFrames={10}><EaseGreen /></Sequence>
+    <Sequence from={149} durationInFrames={10}><EasePoster /></Sequence>
+    <Sequence from={159} durationInFrames={10}><OutPoster /></Sequence>
+    <Sequence from={169} durationInFrames={10}><NeverPoster /></Sequence>
+    <Sequence from={179} durationInFrames={10}><LinearPoster /></Sequence>
+    <Sequence from={189} durationInFrames={10}><GreenCircleTransition /></Sequence>
+    <Sequence from={199} durationInFrames={10}><ClockPoster /></Sequence>
+    <Sequence from={209} durationInFrames={10}><StatsPoster /></Sequence>
+    <Sequence from={219} durationInFrames={10}><MotionFilmsPoster /></Sequence>
+    <Sequence from={229} durationInFrames={10}><EyePoster /></Sequence>
+    <Sequence from={239} durationInFrames={10}><CoursesPoster /></Sequence>
+    <Sequence from={249} durationInFrames={10}><Future3D /></Sequence>
+    <Sequence from={259} durationInFrames={10}><NotText fullText={false}/></Sequence>
+    <Sequence from={269} durationInFrames={10}><NotText fullText={true}/></Sequence>
   </AbsoluteFill>
 );
 
+const NotJustOpus
 
 const NotJustOpus = () => {
   const f = useCurrentFrame();
