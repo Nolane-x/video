@@ -1161,9 +1161,30 @@ const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
  </div>;
 };
 
+const CountdownPrism=({width="54%",height="84%",scale=1}:{width?:string;height?:string;scale?:number})=>(
+ <svg viewBox="0 0 600 760" width={width} height={height} style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) scale("+scale+")",overflow:"visible"}}>
+  <defs>
+   <linearGradient id="countdown-prism-front-v28" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#344bff"/><stop offset=".55" stopColor="#202fe0"/><stop offset="1" stopColor="#101a98"/></linearGradient>
+   <linearGradient id="countdown-prism-top-v28" x1="0" x2="1"><stop stopColor="#d8dcff"/><stop offset=".58" stopColor="#929dff"/><stop offset="1" stopColor="#6c79f0"/></linearGradient>
+   <linearGradient id="countdown-prism-side-v28" x1="0" x2="1"><stop stopColor="#101c96"/><stop offset="1" stopColor="#080e55"/></linearGradient>
+  </defs>
+  <path d="M125 177L320 95L485 95L485 638L307 638L307 311L125 311Z" transform="translate(40 -24)" fill="#111c9e" opacity=".96"/>
+  <path d="M307 119L485 95L485 638L307 662Z" fill="url(#countdown-prism-side-v28)" stroke="#7180ec" strokeWidth="5"/>
+  <path d="M125 177L320 95L485 95L307 119Z" fill="url(#countdown-prism-top-v28)" stroke="#dce0ff" strokeWidth="5"/>
+  <path d="M125 177L307 119L307 662L125 720Z" fill="#1928ba" stroke="#6678ed" strokeWidth="5"/>
+  <path d="M125 177L320 95L485 95L485 638L307 662L125 720Z" fill="url(#countdown-prism-front-v28)" stroke="#5c70ff" strokeWidth="5"/>
+  <path d="M125 177L320 95L320 270L125 350Z" fill="#2537e8" opacity=".9"/>
+  <path d="M125 177L320 95L485 95L307 119Z" fill="url(#countdown-prism-top-v28)"/>
+  <path d="M307 119L485 95L485 638L307 662Z" fill="url(#countdown-prism-side-v28)"/>
+  <path d="M130 181L320 99L478 99" fill="none" stroke="#e0e4ff" strokeWidth="11" opacity=".88"/>
+  <path d="M475 102L475 625" stroke="#6f80e8" strokeWidth="7" opacity=".65"/>
+  <path d="M314 127L314 649" stroke="#5265ec" strokeWidth="4" opacity=".7"/>
+ </svg>
+);
+
 const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) => {
  const p=pop(frame,30,0,75,14),scale=.88+.12*p;
- const isThree=value===3,isTwo=value===2;
+ const isThree=value===3,isTwo=value===2,isOne=value===1;
  const background=isThree?"#ecebe6":isTwo?"#1730ee":"#050609";
  const numeralColor=isThree?"#050609":isTwo?"#f0f0ee":"#2637ef";
  const shadows=isThree
@@ -1174,13 +1195,14 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
  return <AbsoluteFill style={{background,color:"#fff",overflow:"hidden"}}>
   {isThree?<div style={{position:"absolute",right:0,top:0,bottom:0,width:"31%",background:"#2438ed"}}/>:null}
   {isTwo?<div style={{position:"absolute",right:0,top:0,bottom:0,width:"29%",background:"#05060b"}}/>:null}
-  {!isThree&&!isTwo?<div style={{position:"absolute",right:0,bottom:0,width:"31%",height:"38%",background:"#1533ef",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>:null}
+  {isOne?<div style={{position:"absolute",right:0,bottom:0,width:"31%",height:"38%",background:"#1533ef",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>:null}
   <svg viewBox="0 0 1000 650" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:isThree?.52:.72}}>
-   <ellipse cx="500" cy="325" rx="365" ry="255" fill="none" stroke={isThree?"#a4a6a5":isTwo?"#d9d9ff":"#797bff"} strokeWidth="2"/>
-   <ellipse cx="500" cy="325" rx="340" ry="225" fill="none" stroke={isThree?"#fff":isTwo?"#aab6ff":"#cbccff"} strokeWidth="1.3" transform={"rotate("+(frame*1.2)+" 500 325)"}/>
+   <ellipse cx="500" cy="325" rx="365" ry="255" fill="none" stroke={isThree?"#a4a6a5":isTwo?"#d9d9ff":"#dd874d"} strokeWidth="2"/>
+   <ellipse cx="500" cy="325" rx="340" ry="225" fill="none" stroke={isThree?"#fff":isTwo?"#aab6ff":"#6678ff"} strokeWidth="1.7" transform={"rotate("+(frame*1.2)+" 500 325)"}/>
    {isThree?<path d="M0 325H1000" stroke="#a0a0a0" strokeWidth="1" opacity=".22"/>:null}
+   {isOne?<path d="M150 290L830 470" stroke="#b9c5ff" strokeWidth="1" opacity=".48"/>:null}
   </svg>
-  <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) perspective(1200px) rotateX(8deg) rotateY(-9deg) scale("+scale+")",fontFamily:displayFont,fontSize:isThree?470:500,lineHeight:.78,fontWeight:1000,letterSpacing:"-.12em",color:numeralColor,textShadow:shadows}}>{value}</div>
+  {isOne?<CountdownPrism width="56%" height="90%" scale={.98+.04*p}/>:<div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) perspective(1200px) scale("+scale+")",fontFamily:displayFont,fontSize:isThree?470:500,lineHeight:.78,fontWeight:1000,letterSpacing:"-.12em",color:numeralColor,textShadow:shadows}}>{value}</div>}
   <div style={{position:"absolute",left:34,top:"47%",fontFamily:"monospace",fontSize:14,fontWeight:900,letterSpacing:".12em",color:isThree?"#101214":isTwo?"#eff0ff":"#f3f3ff"}}>{isThree?"IGNITION SEQUENCE / 01":"IGNITION SEQUENCE / "+(isTwo?"02":"03")}</div>
   <div style={{position:"absolute",right:35,top:"48%",fontFamily:"monospace",fontSize:13,fontWeight:850,letterSpacing:".16em",color:isThree?"#222":isTwo?"#eee":"#fff",textAlign:"right"}}>SNARE ROLL / {isThree?"1":isTwo?"2":"3"}</div>
   <div style={{position:"absolute",right:35,bottom:35,display:"flex",gap:8}}>{[0,1,2].map(v=><div key={v} style={{width:24,height:6,background:v<=(isThree?0:isTwo?1:2)?"#fff":"rgba(255,255,255,.22)"}}/>)}</div>
@@ -1189,14 +1211,14 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
 };
 
 const LaunchKitWindow=({frame,variant,countdown=-1}:{frame:number;variant:number;countdown?:number})=>{
- const {fps}=useVideoConfig(),p=pop(frame,fps,0,84,19);
+ const {fps}=useVideoConfig(),p=pop(frame,fps,0,84,19),handoff=e(frame,106,111);
  const names=["Claude Opus 5.5","Claude Opus 5.5","Gemini","GLM","MiMo","DeepSeek V4.1","OpenDesign"];
  const name=names[variant%names.length];
  const symbols=["✣","✣","▶","Z","MiMo","🐳","◈"];
  const colors=["#df805b","#df805b","#151c30","#191919","#1d2328","#4879df","#293a92"];
  return <AbsoluteFill style={{...full,background:"#f3f1ed"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 40%,#fff,#f1f0eb 72%)"}}/>
-  <div style={{position:"absolute",left:118,right:118,top:72,bottom:72,borderRadius:24,background:"#fff",border:"1px solid #e9e8e3",boxShadow:"0 28px 78px rgba(30,35,38,.15)",transform:"translateY("+((1-p)*44)+"px) scale("+(0.985+.015*p)+")",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:118,right:118,top:72,bottom:72,borderRadius:24,background:"#fff",border:"1px solid #e9e8e3",boxShadow:"0 28px 78px rgba(30,35,38,.15)",transform:"translateY("+((1-p)*44)+"px) scale("+(0.985+.015*p)*(1+.34*handoff)+")",transformOrigin:"70% 50%",overflow:"hidden"}}>
    <div style={{position:"absolute",top:0,left:0,right:0,height:64,borderBottom:"1px solid #efeee9",display:"flex",alignItems:"center",padding:"0 28px",gap:14,background:"#fff"}}>{["#e5e5df","#e5e5df","#e5e5df"].map((c,i)=><div key={i} style={{width:15,height:15,borderRadius:"50%",background:c}}/>)}<div style={{marginLeft:14,fontSize:21,fontWeight:850,color:"#252a2d"}}>Launch film</div></div>
    <div style={{position:"absolute",top:64,bottom:0,left:0,width:700,borderRight:"1px solid #efeee9",background:"#fff"}}>
     <div style={{position:"absolute",left:260,top:52,width:340,minHeight:106,background:"#f0efec",color:"#222629",borderRadius:"25px 25px 5px 25px",padding:"19px 24px",fontSize:25,lineHeight:1.42,boxSizing:"border-box"}}>Make a 10s launch film<br/>for our app.</div>
@@ -1236,17 +1258,24 @@ const LaunchVariant = ({ variant, countdown = -1 }: { variant: number; countdown
 
 const CountdownOne=({frame}:{frame:number})=>{
  const p=e(frame,0,8),rotate=e(frame,0,12,-12,0);
- return <AbsoluteFill style={{...full,background:"#050609",color:"#f8f8f4",overflow:"hidden"}}>
-  <div style={{position:"absolute",right:0,top:0,bottom:0,width:"32%",background:"#2238ee",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <ellipse cx="960" cy="585" rx="610" ry="215" fill="none" stroke="#4a5ce3" strokeWidth="3" opacity=".65" transform={"rotate("+rotate+" 960 585)"}/>
-   <ellipse cx="960" cy="585" rx="520" ry="175" fill="none" stroke="#a9b5ff" strokeWidth="1.5" opacity=".3" transform={"rotate("+(-rotate*1.4)+" 960 585)"}/>
-  </svg>
-  <div style={{position:"absolute",left:"50%",top:"47%",transform:"translate(-50%,-50%) perspective(1200px) scale("+(1.06+.05*p)+") rotateY(-9deg)",fontFamily:displayFont,fontSize:580,fontWeight:1000,lineHeight:.75,letterSpacing:"-.14em",color:"#eceff1",textShadow:"2px 2px 0 #b8c4d8,6px 6px 0 #8f9fba,12px 13px 0 #5d6f9d,22px 23px 0 #334b86,36px 39px 0 #182c62,55px 65px 42px rgba(0,0,0,.7)"}}>1</div>
-  <div style={{position:"absolute",left:42,top:40,fontFamily:"monospace",fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#aeb9ff"}}>GO</div>
-  <div style={{position:"absolute",right:45,top:"47%",textAlign:"right",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".15em",color:"#c6cdff"}}>READY / MAKE<br/>THE MOMENT MOVE</div>
+ return <AbsoluteFill style={{...full,background:"#f2f0e9",color:"#f8f8f4",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:"5.5%",right:"5.5%",top:"-1.5%",bottom:"-1.5%",borderRadius:42,background:"#050609",overflow:"hidden",boxShadow:"0 10px 45px rgba(0,0,0,.14)"}}>
+   <div style={{position:"absolute",right:0,bottom:0,width:"32%",height:"38%",background:"#2238ee",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>
+   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+    <ellipse cx="960" cy="585" rx="610" ry="215" fill="none" stroke="#df884c" strokeWidth="3" opacity=".94" transform={"rotate("+rotate+" 960 585)"}/>
+    <ellipse cx="960" cy="585" rx="520" ry="175" fill="none" stroke="#5a6dff" strokeWidth="3" opacity=".88" transform={"rotate("+(-rotate*1.4)+" 960 585)"}/>
+    <path d="M260 410L1540 760" stroke="#b9c5ff" strokeWidth="2" opacity=".42"/>
+   </svg>
+   <CountdownPrism width="34%" height="74%" scale={1.02+.035*p}/>
+   <div style={{position:"absolute",left:38,top:"39%",fontFamily:"monospace",fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#aeb9ff"}}>IGNITION SEQUENCE / 01</div>
+   <div style={{position:"absolute",left:38,top:"45%",fontFamily:displayFont,fontSize:76,fontWeight:1000,letterSpacing:"-.08em",color:"#fff"}}>GO</div>
+   <div style={{position:"absolute",left:42,top:"55%",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".16em",color:"#b7c2ff"}}>03 · 3/3<br/>0.500</div>
+   <div style={{position:"absolute",right:34,top:"39%",textAlign:"right",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".15em",color:"#c6cdff"}}>IGNITION SEQUENCE<br/>SNARE ROLL 3</div>
+   <div style={{position:"absolute",right:33,top:"46%",display:"flex",gap:7}}>{[0,1,2].map(i=><div key={i} style={{width:37,height:7,background:"#f4f5ff"}}/>)}</div>
+  </div>
  </AbsoluteFill>;
 };
+
 const LaunchKitSequence=()=>{
  const frame=useCurrentFrame();
  if(frame>=112)return <CountdownOne frame={frame-112}/>;

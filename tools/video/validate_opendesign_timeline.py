@@ -60,6 +60,11 @@ need(not missing, "components referenced by shot map / montage are missing: " + 
 
 need("if(frame>=112)return <CountdownOne frame={frame-112}/>" in source, "full-screen countdown must begin at source frame891")
 need("frame<76?-1:frame<91?3:frame<106?2:1" in source, "number 1 must remain inside the Launch Film preview at frame885")
+need("const CountdownPrism=" in source, "blue extruded countdown prism artwork is missing")
+need('isOne?<CountdownPrism width="56%" height="90%" scale={.98+.04*p}/>' in source, "countdown 1 Preview artwork is not source-scaled")
+need("handoff=e(frame,106,111)" in source and "1+.34*handoff" in source, "Preview-to-full-screen zoom handoff timing is missing")
+need('left:"5.5%",right:"5.5%",top:"-1.5%",bottom:"-1.5%"' in source, "rounded black takeover margins are missing")
+need('background:"#df884c"' in source and 'background:"#f2f0e9"' in source, "countdown takeover ring/card colours are missing")
 
 required=[
     "Launch film", "Make a 10s launch film", "for our app.",
