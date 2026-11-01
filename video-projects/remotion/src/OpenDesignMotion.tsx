@@ -130,7 +130,7 @@ const CloudSky = ({ frame }: { frame: number }) => {
     <path d="M420 548C597 477 725 481 895 508S1165 528 1314 467S1621 421 1795 461" fill="none" stroke="#f2d8ca" strokeWidth="30" strokeLinecap="round"/>
    </g>
    <g filter="url(#wc-mid-v35)" opacity=".32">
-    {strokes.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.3)+" "+(-p.h*1.5)+" "+(p.w*.68)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.3)+" "+(-p.h*1.5)+" "+(p.w*.68)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
    <g transform={"translate("+(drift*.08)+",0)"} opacity=".83">
     <path d="M-100 970C74 940 225 959 366 944C515 926 659 953 800 939C945 926 1092 955 1238 940C1377 924 1532 952 1681 931C1802 914 1900 925 2020 911V1080H-100Z" fill="#afccd0" opacity=".26" filter="url(#wc-soft-v35)"/>
