@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V38 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V39 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
@@ -12,7 +12,8 @@ The source-indexed timeline remains fixed; each revision below is recorded again
 - V35 removed the lingering continuous top wave line, retained more open blue sky, strengthened the irregular cream-white lower-left cloud mass, and added broad broken diagonal washes with peach/pink glazing and a low blue/teal shoreline. Its Actions render passed, but review at delivery size found the cloud bank still too diffuse and horizontal.
 - V36 passed validator, typecheck, Remotion render, FFmpeg mastering and decoded-frame/metadata QA in [Actions run 41315006194](https://github.com/Nolane-x/video/actions/runs/41315006194). Direct comparison of native frame 0 against `preview.mp4` showed the larger lower-left cloud mass and horizontal bands still differed materially from the original. V36 is preserved as a technical-pass candidate, not approved.
 - V37 passed all technical gates in [Actions run 41315724268](https://github.com/Nolane-x/video/actions/runs/41315724268), but frame 0/30 review still found repeated scallop-like clouds, an almost flat blue foreground band, an undersized title, over-advanced typing at frame 30 and a misplaced cursor.
-- V38 corrects those observed mismatches: irregular low cloud patches, two rolling blue ridge layers, a larger headline, source-timed typing (placeholder → Introducing → full prompt), and a cursor that travels from bottom-right to Submit. V38 is source-only until its Actions render completes.
+- V38 passed full CI and its native 0/30/60 frames were directly compared with the source. Headline size, typewriter cadence and cursor travel are now close to the reference. The painted sky is still too smooth, and the directory control is inside the white field rather than a separate translucent shelf.
+- V39 adds dry-brush displacement, stronger pigment/paper texture, richer low cloud paint and separates the translucent directory shelf. It keeps the source-timed typing and cursor choreography; its Actions render is still required.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.

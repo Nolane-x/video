@@ -90,156 +90,158 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.026;
- const brush=Array.from({length:118},(_,i)=>{
-  const x=(i*181)%2260-170,y=35+(i*137)%780,w=62+(i*67)%370,h=2+(i*11)%13;
-  const colors=["#f7fbf1","#eaf5f2","#b7d9ed","#fff2e2","#f5cbbb","#d5e7e8","#a8d1e8"];
-  return {x,y,w,h,angle:-32+(i%17)*3.2,color:colors[i%colors.length],opacity:.035+(i%6)*.012};
+ const drift=frame*.022;
+ const brush=Array.from({length:146},(_,i)=>{
+  const x=(i*181)%2300-190,y=10+(i*131)%850,w=70+(i*79)%390,h=3+(i*13)%19;
+  const colors=["#fffdf2","#e8f5ef","#b7d9ed","#fff1df","#f2c4b3","#d5e7e9","#a5d0e7","#e8c9c1"];
+  return {x,y,w,h,angle:-33+(i%19)*3.1,color:colors[i%colors.length],opacity:.045+(i%7)*.014};
  });
- const pigment=Array.from({length:210},(_,i)=>({
-  x:(i*113)%2040-60,y:690+(i*157)%300,r:.7+(i%5)*.58,
-  color:["#fff9ed","#f4c9b4","#8dc6dd","#d8e7e5","#f1ad9f"][i%5],
-  opacity:.025+(i%7)*.012
+ const pigment=Array.from({length:286},(_,i)=>({
+  x:(i*109)%2050-65,y:635+(i*173)%420,r:.8+(i%6)*.62,
+  color:["#fff9ed","#f4c7b5","#8fc5dd","#dcebe7","#edaa9e","#b7d9e5"][i%6],
+  opacity:.028+(i%7)*.015
+ }));
+ const dabs=Array.from({length:38},(_,i)=>({
+  x:18+(i*97)%1120,y:704+(i*83)%215,
+  rx:9+(i*17)%47,ry:3+(i*11)%17,
+  angle:-42+(i%9)*8,
+  fill:["#fffaf0","#f4c7ad","#e8f1e9","#f0aaa0","#b7dbe6"][i%5],
+  opacity:.11+(i%5)*.045
  }));
  return <AbsoluteFill style={{background:"#73bce4",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v38" x1="0" y1="0" x2=".1" y2="1">
-     <stop stopColor="#57b1df"/>
-     <stop offset=".36" stopColor="#80c3e5"/>
-     <stop offset=".68" stopColor="#b6dce8"/>
-     <stop offset=".87" stopColor="#e9d3c5"/>
-     <stop offset="1" stopColor="#efc2ad"/>
+    <linearGradient id="wc-sky-v39" x1="0" y1="0" x2=".1" y2="1">
+     <stop stopColor="#55b0df"/>
+     <stop offset=".33" stopColor="#83c5e5"/>
+     <stop offset=".64" stopColor="#b9dce8"/>
+     <stop offset=".86" stopColor="#ead3c6"/>
+     <stop offset="1" stopColor="#f0c0aa"/>
     </linearGradient>
-    <linearGradient id="wc-air-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#e8f7f0" stopOpacity=".12"/>
-     <stop offset=".45" stopColor="#d8ebeb" stopOpacity=".12"/>
-     <stop offset=".82" stopColor="#f4c9bd" stopOpacity=".24"/>
-     <stop offset="1" stopColor="#ffe9d4" stopOpacity=".08"/>
+    <linearGradient id="wc-streak-white-v39" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fffef4" stopOpacity=".03"/>
+     <stop offset=".25" stopColor="#fffff2" stopOpacity=".83"/>
+     <stop offset=".61" stopColor="#e1f1ef" stopOpacity=".53"/>
+     <stop offset="1" stopColor="#d9e9e9" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-streak-white-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fffdf2" stopOpacity=".04"/>
-     <stop offset=".26" stopColor="#f8fff4" stopOpacity=".78"/>
-     <stop offset=".61" stopColor="#e6f4f1" stopOpacity=".48"/>
-     <stop offset="1" stopColor="#d8e8e8" stopOpacity=".02"/>
+    <linearGradient id="wc-streak-blue-v39" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#8ac8e5" stopOpacity=".04"/>
+     <stop offset=".36" stopColor="#d7edf0" stopOpacity=".57"/>
+     <stop offset=".72" stopColor="#f3f6ed" stopOpacity=".3"/>
+     <stop offset="1" stopColor="#fff4e7" stopOpacity=".01"/>
     </linearGradient>
-    <linearGradient id="wc-streak-blue-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#8bc9e8" stopOpacity=".03"/>
-     <stop offset=".36" stopColor="#d7edf2" stopOpacity=".55"/>
-     <stop offset=".72" stopColor="#edf5eb" stopOpacity=".3"/>
-     <stop offset="1" stopColor="#fff4e7" stopOpacity=".02"/>
+    <linearGradient id="wc-streak-peach-v39" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff4e5" stopOpacity=".01"/>
+     <stop offset=".36" stopColor="#f9d6c4" stopOpacity=".63"/>
+     <stop offset=".7" stopColor="#efaeb0" stopOpacity=".48"/>
+     <stop offset="1" stopColor="#f6e1d3" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-streak-peach-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff4e5" stopOpacity=".02"/>
-     <stop offset=".38" stopColor="#f7d3c2" stopOpacity=".54"/>
-     <stop offset=".73" stopColor="#efb4ad" stopOpacity=".35"/>
-     <stop offset="1" stopColor="#f6e0d3" stopOpacity=".02"/>
+    <linearGradient id="wc-cloud-cream-v39" x1="0" y1="0" x2=".3" y2="1">
+     <stop stopColor="#fffef5" stopOpacity=".99"/>
+     <stop offset=".45" stopColor="#fff3df" stopOpacity=".77"/>
+     <stop offset="1" stopColor="#f2c1aa" stopOpacity=".05"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-cream-v38" x1="0" y1="0" x2=".3" y2="1">
-     <stop stopColor="#fffef3" stopOpacity=".96"/>
-     <stop offset=".48" stopColor="#fff1dc" stopOpacity=".7"/>
-     <stop offset="1" stopColor="#f0c1aa" stopOpacity=".04"/>
+    <linearGradient id="wc-cloud-peach-v39" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff1e0" stopOpacity=".1"/>
+     <stop offset=".4" stopColor="#f2b89c" stopOpacity=".8"/>
+     <stop offset=".78" stopColor="#e99ba0" stopOpacity=".48"/>
+     <stop offset="1" stopColor="#e6c8b9" stopOpacity=".03"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-peach-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff1e1" stopOpacity=".12"/>
-     <stop offset=".4" stopColor="#f3b99d" stopOpacity=".74"/>
-     <stop offset=".78" stopColor="#e99da0" stopOpacity=".43"/>
-     <stop offset="1" stopColor="#e6c8b8" stopOpacity=".04"/>
+    <linearGradient id="wc-hill-far-v39" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#3486a9"/>
+     <stop offset=".62" stopColor="#1e6c97"/>
+     <stop offset="1" stopColor="#145783"/>
     </linearGradient>
-    <linearGradient id="wc-hill-far-v38" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#438eb0"/>
-     <stop offset=".62" stopColor="#236f9a"/>
-     <stop offset="1" stopColor="#155a86"/>
+    <linearGradient id="wc-hill-near-v39" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#135a84"/>
+     <stop offset=".58" stopColor="#0e4a75"/>
+     <stop offset="1" stopColor="#093c67"/>
     </linearGradient>
-    <linearGradient id="wc-hill-near-v38" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#17668f"/>
-     <stop offset=".55" stopColor="#104f7d"/>
-     <stop offset="1" stopColor="#0b416f"/>
-    </linearGradient>
-    <linearGradient id="wc-hill-light-v38" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#73b9ce" stopOpacity=".52"/>
-     <stop offset="1" stopColor="#296e9d" stopOpacity=".04"/>
-    </linearGradient>
-    <radialGradient id="wc-dawn-v38" cx="70%" cy="78%" r="57%">
-     <stop stopColor="#ffe7d4" stopOpacity=".42"/>
-     <stop offset=".55" stopColor="#f9d9ca" stopOpacity=".14"/>
-     <stop offset="1" stopColor="#f9d9ca" stopOpacity="0"/>
+    <radialGradient id="wc-dawn-v39" cx="72%" cy="78%" r="58%">
+     <stop stopColor="#ffe8d4" stopOpacity=".45"/>
+     <stop offset=".55" stopColor="#f7d9c9" stopOpacity=".16"/>
+     <stop offset="1" stopColor="#f7d9c9" stopOpacity="0"/>
     </radialGradient>
-    <filter id="wc-air-soft-v38"><feGaussianBlur stdDeviation="24"/></filter>
-    <filter id="wc-stroke-soft-v38"><feGaussianBlur stdDeviation="8"/></filter>
-    <filter id="wc-stroke-crisp-v38"><feGaussianBlur stdDeviation="2.1"/></filter>
-    <filter id="wc-edge-v38">
-     <feTurbulence type="fractalNoise" baseFrequency=".022 .038" numOctaves="2" seed="113" result="edgeNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation=".45"/>
+    <filter id="wc-air-soft-v39"><feGaussianBlur stdDeviation="23"/></filter>
+    <filter id="wc-brush-soft-v39"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="wc-brush-dry-v39">
+     <feTurbulence type="fractalNoise" baseFrequency=".016 .046" numOctaves="3" seed="127" result="dryNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="dryNoise" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation="1.15"/>
     </filter>
-    <filter id="wc-pigment-v38">
-     <feTurbulence type="fractalNoise" baseFrequency=".08 .11" numOctaves="2" seed="59" result="pigmentNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    <filter id="wc-edge-v39">
+     <feTurbulence type="fractalNoise" baseFrequency=".026 .052" numOctaves="2" seed="139" result="edgeNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation=".5"/>
     </filter>
-    <filter id="wc-paper-v38">
-     <feTurbulence type="fractalNoise" baseFrequency=".83" numOctaves="2" seed="41"/>
+    <filter id="wc-pigment-v39">
+     <feTurbulence type="fractalNoise" baseFrequency=".092 .14" numOctaves="2" seed="61" result="pigmentNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wc-paper-v39">
+     <feTurbulence type="fractalNoise" baseFrequency=".88" numOctaves="2" seed="47"/>
      <feColorMatrix type="saturate" values="0"/>
     </filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v38)"/>
-   <rect width="1920" height="1080" fill="url(#wc-air-v38)"/>
-   <rect width="1920" height="1080" fill="url(#wc-dawn-v38)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v39)"/>
+   <rect width="1920" height="1080" fill="url(#wc-dawn-v39)"/>
 
-   <g transform={"translate("+(-drift*.6)+",0)"} opacity=".82">
-    <path d="M-150 355C42 272 172 230 318 183C492 129 648 121 820 95C1002 68 1147 45 1312 -18C1195 79 1054 125 910 161C722 209 566 224 409 279C249 336 91 390 -150 472Z" fill="url(#wc-streak-white-v38)" opacity=".53" filter="url(#wc-air-soft-v38)"/>
-    <path d="M-110 392C83 299 216 268 364 216C521 161 679 151 832 123C977 96 1097 69 1238 20" fill="none" stroke="#f9fff5" strokeWidth="34" strokeLinecap="round" opacity=".34" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M-90 423C104 330 231 295 372 245C523 191 654 178 807 145" fill="none" stroke="#d6edf1" strokeWidth="13" strokeLinecap="round" opacity=".52"/>
-    <path d="M-130 447C81 371 218 328 347 289C497 244 616 231 756 198" fill="none" stroke="#fffdf1" strokeWidth="7" strokeLinecap="round" opacity=".62" filter="url(#wc-stroke-crisp-v38)"/>
-    <path d="M880 250C1057 194 1202 157 1352 110C1501 66 1651 38 1831 -35" fill="none" stroke="url(#wc-streak-peach-v38)" strokeWidth="62" strokeLinecap="round" opacity=".65" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M1035 224C1194 170 1338 137 1483 94S1740 35 1910 -28" fill="none" stroke="#ffd9c6" strokeWidth="19" strokeLinecap="round" opacity=".42" filter="url(#wc-stroke-soft-v38)"/>
+   <g transform={"translate("+(-drift*.7)+",0)"} opacity=".9" filter="url(#wc-brush-dry-v39)">
+    <path d="M-180 356C46 263 173 226 338 183C509 138 654 93 830 83C1000 61 1148 18 1316 -32C1250 21 1188 88 1063 130C914 179 750 208 599 253C437 302 238 384 -180 505Z" fill="url(#wc-streak-white-v39)" opacity=".55"/>
+    <path d="M-170 390C28 307 187 274 353 213C508 164 683 132 818 116C977 96 1094 57 1203 22C1089 93 1000 140 874 169C701 211 540 258 388 310C210 372 38 425 -170 466Z" fill="url(#wc-streak-blue-v39)" opacity=".47"/>
+    <path d="M-120 387C57 307 178 276 339 225C490 178 641 155 796 132" fill="none" stroke="#fffdf3" strokeWidth="29" strokeLinecap="round" opacity=".4"/>
+    <path d="M-150 445C34 379 167 332 301 293C426 257 545 231 674 208" fill="none" stroke="#e0f0f0" strokeWidth="16" strokeLinecap="round" opacity=".53"/>
    </g>
-   <g transform={"translate("+(drift*.22)+",0)"} opacity=".52">
-    <path d="M-120 525C36 464 172 417 317 374C444 337 568 321 696 289" fill="none" stroke="url(#wc-streak-blue-v38)" strokeWidth="32" strokeLinecap="round" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M420 425C566 374 698 344 835 318S1116 260 1262 216" fill="none" stroke="#fff7e9" strokeWidth="18" strokeLinecap="round" opacity=".28" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M1300 456C1452 410 1601 368 1740 324" fill="none" stroke="#e9d9d0" strokeWidth="16" strokeLinecap="round" opacity=".2" filter="url(#wc-stroke-soft-v38)"/>
+   <g transform={"translate("+(drift*.35)+",0)"} opacity=".83" filter="url(#wc-brush-dry-v39)">
+    <path d="M850 236C1033 180 1177 141 1340 94C1507 43 1688 6 1955 -67C1817 2 1731 55 1590 99C1452 144 1320 176 1188 224C1050 270 953 295 850 314Z" fill="url(#wc-streak-peach-v39)" opacity=".8"/>
+    <path d="M1070 215C1232 157 1381 128 1534 79C1673 34 1813 2 1990 -44" fill="none" stroke="#f7cbbd" strokeWidth="36" strokeLinecap="round" opacity=".42"/>
+    <path d="M1334 151C1488 105 1629 62 1779 17" fill="none" stroke="#fff0df" strokeWidth="19" strokeLinecap="round" opacity=".35"/>
    </g>
-
-   <g transform={"translate("+(-drift*.18)+",0)"} filter="url(#wc-edge-v38)">
-    <path d="M-60 831C2 789 56 779 112 796C160 758 224 764 254 797C299 781 343 800 358 827C321 854 272 855 232 839C179 870 123 854 83 839C25 861 -21 854 -60 831Z" fill="url(#wc-cloud-cream-v38)" opacity=".75"/>
-    <path d="M-12 813C41 783 95 783 139 804C180 776 227 782 261 805" fill="none" stroke="#fffef2" strokeWidth="29" strokeLinecap="round" opacity=".48" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M34 849C108 825 166 833 222 849" fill="none" stroke="#e9f3ed" strokeWidth="16" strokeLinecap="round" opacity=".48" filter="url(#wc-stroke-crisp-v38)"/>
-
-    <path d="M306 852C344 822 385 814 426 831C456 799 507 798 535 828C578 811 624 828 643 853C607 879 571 881 534 865C493 891 447 874 413 860C367 878 330 870 306 852Z" fill="url(#wc-cloud-cream-v38)" opacity=".7"/>
-    <path d="M350 828C405 807 454 809 496 828" fill="none" stroke="#fffaf0" strokeWidth="22" strokeLinecap="round" opacity=".5" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M445 866C495 849 547 855 589 869" fill="none" stroke="#f2bfa9" strokeWidth="17" strokeLinecap="round" opacity=".44" filter="url(#wc-stroke-crisp-v38)"/>
+   <g transform={"translate("+(drift*.18)+",0)"} opacity=".52" filter="url(#wc-brush-soft-v39)">
+    <path d="M-110 525C71 462 216 426 365 373C501 326 650 293 778 260" fill="none" stroke="#e1f1ed" strokeWidth="38" strokeLinecap="round"/>
+    <path d="M390 469C552 407 687 381 833 343S1116 280 1275 233" fill="none" stroke="#fff9ec" strokeWidth="24" strokeLinecap="round" opacity=".58"/>
+    <path d="M1030 496C1189 441 1331 411 1471 366S1745 291 1940 256" fill="none" stroke="#f2c4b7" strokeWidth="29" strokeLinecap="round" opacity=".4"/>
    </g>
 
-   <g transform={"translate("+(drift*.15)+",0)"} filter="url(#wc-edge-v38)">
-    <path d="M586 872C633 847 674 842 719 858C753 830 797 828 834 850C879 828 924 839 950 867C916 888 872 888 834 873C785 896 739 884 704 870C655 890 615 887 586 872Z" fill="url(#wc-cloud-peach-v38)" opacity=".72"/>
-    <path d="M624 856C676 841 724 843 768 861" fill="none" stroke="#fff9ee" strokeWidth="19" strokeLinecap="round" opacity=".5" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M706 884C762 866 809 873 853 886" fill="none" stroke="#e99b8d" strokeWidth="13" strokeLinecap="round" opacity=".4" filter="url(#wc-stroke-crisp-v38)"/>
-    <path d="M890 854C939 828 984 829 1027 848C1064 828 1107 838 1129 865C1086 886 1048 878 1018 864C975 888 928 875 890 854Z" fill="url(#wc-cloud-cream-v38)" opacity=".48"/>
+   <g transform={"translate("+(-drift*.2)+",0)"} filter="url(#wc-edge-v39)">
+    <path d="M-75 824C-28 791 21 768 77 782C123 744 177 755 210 785C257 758 307 784 328 815C300 838 268 842 235 830C186 858 140 850 100 832C36 858 -24 848 -75 824Z" fill="url(#wc-cloud-cream-v39)" opacity=".88"/>
+    <path d="M-24 797C22 769 68 767 115 787C153 763 202 771 235 794" fill="none" stroke="#fffef4" strokeWidth="26" strokeLinecap="round" opacity=".56" filter="url(#wc-brush-soft-v39)"/>
+    <path d="M12 851C74 825 132 831 182 846" fill="none" stroke="#cce4e8" strokeWidth="17" strokeLinecap="round" opacity=".5"/>
+
+    <path d="M254 849C305 809 354 807 396 829C435 794 487 801 518 827C563 810 611 827 628 852C593 875 557 877 520 862C472 887 427 875 390 857C333 880 284 867 254 849Z" fill="url(#wc-cloud-cream-v39)" opacity=".8"/>
+    <path d="M310 823C360 801 413 806 456 826" fill="none" stroke="#fffaf0" strokeWidth="22" strokeLinecap="round" opacity=".56" filter="url(#wc-brush-soft-v39)"/>
+    <path d="M386 865C444 847 494 852 541 868" fill="none" stroke="#efb7a4" strokeWidth="18" strokeLinecap="round" opacity=".54"/>
    </g>
 
-   <g transform={"translate("+(drift*.12)+",0)"} opacity=".46" filter="url(#wc-air-soft-v38)">
-    <path d="M-50 778C112 744 233 743 354 770" fill="none" stroke="#f8e8d7" strokeWidth="49" strokeLinecap="round"/>
-    <path d="M300 796C421 763 528 773 640 801" fill="none" stroke="#f2c4b4" strokeWidth="36" strokeLinecap="round"/>
-    <path d="M620 816C754 780 863 793 982 822" fill="none" stroke="#fff0de" strokeWidth="31" strokeLinecap="round"/>
-    <path d="M1040 812C1188 781 1291 794 1404 822" fill="none" stroke="#f8e0d2" strokeWidth="28" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.14)+",0)"} filter="url(#wc-edge-v39)">
+    <path d="M582 875C624 839 672 835 714 856C749 824 794 823 831 848C869 829 914 840 945 868C912 891 873 889 833 873C787 897 743 886 707 870C659 891 613 889 582 875Z" fill="url(#wc-cloud-peach-v39)" opacity=".8"/>
+    <path d="M622 850C670 831 718 837 759 856" fill="none" stroke="#fff9ee" strokeWidth="21" strokeLinecap="round" opacity=".57" filter="url(#wc-brush-soft-v39)"/>
+    <path d="M690 888C744 867 799 875 842 890" fill="none" stroke="#e89d8e" strokeWidth="13" strokeLinecap="round" opacity=".48"/>
+    <path d="M902 851C948 826 990 828 1032 847C1071 827 1110 839 1135 863C1098 884 1059 881 1020 865C982 883 939 871 902 851Z" fill="url(#wc-cloud-cream-v39)" opacity=".57"/>
    </g>
-   <g filter="url(#wc-pigment-v38)" opacity=".56">
-    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.24)+" "+(-p.h*1.3)+" "+(p.w*.72)+" "+(-p.h*.16)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+
+   <g transform={"translate("+(drift*.13)+",0)"} opacity=".56" filter="url(#wc-air-soft-v39)">
+    <path d="M-70 781C100 733 238 751 355 779" fill="none" stroke="#ffe9d9" strokeWidth="51" strokeLinecap="round"/>
+    <path d="M250 807C402 758 535 783 651 808" fill="none" stroke="#f0bfb0" strokeWidth="38" strokeLinecap="round"/>
+    <path d="M589 826C730 780 865 800 998 827" fill="none" stroke="#fff1df" strokeWidth="32" strokeLinecap="round"/>
+    <path d="M1008 817C1168 777 1302 799 1427 825" fill="none" stroke="#f6ded0" strokeWidth="31" strokeLinecap="round"/>
+   </g>
+   <g filter="url(#wc-pigment-v39)" opacity=".74">
+    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.22)+" "+(-p.h*1.1)+" "+(p.w*.76)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+    {dabs.map((p,i)=><ellipse key={i} cx={p.x} cy={p.y} rx={p.rx} ry={p.ry} fill={p.fill} opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
     {pigment.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
    </g>
 
-   <g transform={"translate("+(drift*.055)+",0)"}>
-    <path d="M-120 977C-6 954 97 929 198 922C318 911 392 922 492 927C606 932 691 909 792 913C903 918 994 938 1105 930C1218 920 1321 897 1446 905C1571 913 1696 890 1818 895C1900 899 1962 905 2030 902V1080H-120Z" fill="url(#wc-hill-far-v38)" opacity=".9"/>
-    <path d="M-120 1005C2 989 126 969 241 962C355 955 446 974 560 983C671 991 777 969 881 972C1009 976 1116 994 1234 986C1357 978 1478 956 1592 960C1742 965 1869 948 2030 952V1080H-120Z" fill="url(#wc-hill-light-v38)" opacity=".5"/>
-    <path d="M-120 1022C-2 996 97 974 197 971C305 968 370 1001 478 1010C578 1018 663 1001 761 1007C870 1014 959 1029 1069 1015C1188 1000 1294 1011 1404 1012C1538 1014 1637 990 1751 989C1857 988 1954 996 2030 991V1080H-120Z" fill="url(#wc-hill-near-v38)"/>
-    <path d="M-90 979C55 952 135 938 220 939C314 939 383 958 472 966C565 974 641 958 735 960" fill="none" stroke="#79b8ca" strokeWidth="8" opacity=".2" filter="url(#wc-stroke-soft-v38)"/>
-    <path d="M-40 1018C54 1004 112 998 178 1000M542 1031C632 1021 699 1021 780 1029M1306 1024C1399 1015 1471 1017 1540 1023" fill="none" stroke="#7bb7c8" strokeWidth="5" opacity=".18" filter="url(#wc-stroke-soft-v38)"/>
+   <g transform={"translate("+(drift*.05)+",0)"}>
+    <path d="M-120 968C-13 947 98 925 205 914C323 902 415 883 526 879C635 874 751 897 851 919C958 941 1041 916 1138 903C1235 889 1320 879 1422 888C1546 899 1640 921 1751 914C1850 909 1947 899 2030 903V1080H-120Z" fill="url(#wc-hill-far-v39)" opacity=".9"/>
+    <path d="M-120 1004C9 984 133 963 253 954C357 946 452 963 563 980C668 996 772 971 872 973C1002 976 1111 995 1233 986C1366 976 1472 954 1596 958C1743 963 1869 947 2030 953V1080H-120Z" fill="url(#wc-hill-near-v39)"/>
+    <path d="M-100 969C42 941 139 926 230 927C332 928 412 944 504 952C603 960 683 953 766 960" fill="none" stroke="#72b8cc" strokeWidth="8" opacity=".24" filter="url(#wc-brush-soft-v39)"/>
+    <path d="M-35 1018C64 1001 118 996 196 998M541 1034C631 1022 698 1022 780 1030M1300 1027C1395 1015 1474 1018 1552 1025" fill="none" stroke="#76b7cc" strokeWidth="6" opacity=".2" filter="url(#wc-brush-soft-v39)"/>
    </g>
-
-   <rect width="1920" height="1080" filter="url(#wc-paper-v38)" opacity=".052" style={{mixBlendMode:"soft-light"}}/>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v39)" opacity=".085" style={{mixBlendMode:"soft-light"}}/>
   </svg>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 47%,transparent 49%,rgba(247,230,216,.07) 100%)"}}/>
-  <Noise opacity={.01}/>
+  <Noise opacity={.016}/>
  </AbsoluteFill>;
 };
 
@@ -258,17 +260,19 @@ const OpeningScene = () => {
    </div>
   </div>
   <div style={{position:"absolute",top:350,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
-  <div style={{position:"absolute",left:290,right:290,top:390,height:330,background:"rgba(255,255,255,.94)",border:"1px solid rgba(255,255,255,.99)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
+  <div style={{position:"absolute",left:290,right:290,top:390,height:330,background:"rgba(255,255,255,.48)",border:"1px solid rgba(255,255,255,.82)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
+  <div style={{position:"absolute",left:0,right:0,top:0,height:278,background:"rgba(255,255,255,.97)",borderRadius:24,boxShadow:"0 12px 30px rgba(49,82,91,.06)"}}/>
    <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:38,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
     {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
     {typing?<span style={{display:"inline-block",width:2,height:34,background:count<text.length?"#313a3d":"transparent",verticalAlign:"middle",marginLeft:4}}/>:null}
    </div>
-   <div style={{position:"absolute",bottom:23,left:38,display:"flex",alignItems:"center",gap:18}}>
+   <div style={{position:"absolute",bottom:52,left:38,display:"flex",alignItems:"center",gap:18}}>
     <div style={{fontSize:22,color:"#9ca5a4"}}>＋</div><div style={{fontSize:22,color:"#9ca5a4"}}>◉</div>
     <div style={{background:"#d9f5d9",color:"#26763d",padding:"8px 17px",borderRadius:7,fontSize:17,fontWeight:850}}>✦ Motion design</div>
-    <div style={{fontSize:15,color:"#899493"}}>Working directory⌄</div>
+    
    </div>
-   <div style={{position:"absolute",right:31,bottom:22,display:"flex",gap:9,alignItems:"center"}}>
+   <div style={{position:"absolute",left:38,bottom:10,fontSize:15,color:"#899493"}}>▱ Working directory⌄</div>
+   <div style={{position:"absolute",right:31,bottom:52,display:"flex",gap:9,alignItems:"center"}}>
     <span style={{width:10,height:10,borderRadius:"50%",background:"#67d46c"}}/><span style={{width:10,height:10,borderRadius:"50%",background:"#5b72dc"}}/>
     <div style={{width:58,height:58,borderRadius:"50%",background:"#12191b",display:"grid",placeItems:"center",transform:"scale("+(1-pressed*.09)+")",boxShadow:"0 4px 14px rgba(20,30,31,.22)"}}>
      <svg viewBox="0 0 30 30" width="27" height="27"><path d="M5 15H24M16 6L25 15L16 24" fill="none" stroke="#75e44c" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
