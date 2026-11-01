@@ -22,8 +22,13 @@ tests:
   and long-form documentary narration. That is 40 WAV samples per full run.
 - Probes every WAV with FFprobe/FFmpeg, verifies SHA-256, and records duration,
   sample rate, channels, codec, RMS, peak, clipping and silence signals.
-- Exports blind listening pages, machine-readable reports and an Actions
-  artifact containing WAVs and QA evidence. Artifacts are retained for 14 days.
+- Exports per-script blind listening pages plus one combined page that
+  groups all four scenarios under the same anonymous voice, with a single
+  rating form and notes field per candidate. The combined page exports
+  `voice-human-ratings-all-scripts.json`; the private identity map stays in
+  `actions-voice-lab.json`.
+- Uploads WAVs, audition pages and evidence reports as an Actions artifact.
+  Artifacts are retained for 14 days.
 
 Run it from GitHub: open **Actions → Voice Studio Actions CPU lab → Run
 workflow**. It also runs for changes to the voice-lab source on the integration
