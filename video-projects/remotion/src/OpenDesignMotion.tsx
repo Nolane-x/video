@@ -544,7 +544,6 @@ const GreenGhostTransition=()=>{
  </AbsoluteFill>;
 };
 
-const NeverPoster
 
 const NeverPoster = () => (
  <AbsoluteFill style={{...full,background:"#d7f7ae",color:"#101713",overflow:"hidden"}}>
@@ -697,7 +696,6 @@ const Future3D = () => {
  </AbsoluteFill>;
 };
 
-const DotPoster
 
 const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.012;
@@ -859,7 +857,6 @@ const LightSweep1973=()=>{
  </AbsoluteFill>;
 };
 
-const PixelGamePoster
 
 const PixelGamePoster=()=>{
  const f=useCurrentFrame(),jump=Math.sin(f/3)*7;
@@ -898,7 +895,6 @@ const PixelGamePoster=()=>{
  </AbsoluteFill>;
 };
 
-const PortfolioFlash
 
 const PortfolioFlash=()=>{
  const f=useCurrentFrame();
@@ -1288,7 +1284,6 @@ const LaunchKitSequence=()=>{
  return <LaunchKitWindow frame={frame} variant={variant} countdown={countdown}/>;
 };
 
-const CountdownSequence
 
 const CountdownSequence = () => (
   <AbsoluteFill style={full}>
