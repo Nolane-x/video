@@ -320,7 +320,9 @@ updateCoverage();
         "ready_track_count": ready_tracks,
         "rating_dimensions": [key for key, _ in dimensions],
         "ratings_export": "voice-human-ratings-all-scripts.json",
-        "blind_identity_hidden": True,
+        "candidate_identity_in_html": False,
+        "identity_map_file": "actions-voice-lab.json",
+        "identity_map_in_artifact": True,
         "human_review_required": True,
     }
 
