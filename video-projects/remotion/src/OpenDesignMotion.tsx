@@ -914,7 +914,6 @@ const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) =>
   return (
     <AbsoluteFill style={{ background: "linear-gradient(115deg,#10131b 0%,#141b38 52%,#2a41c1 100%)", color: "#f4f6ff" }}>
       <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(ellipse at 50% 50%,rgba(71,104,255,.4),transparent 50%),linear-gradient(90deg,transparent 49%,rgba(255,255,255,.08) 50%,transparent 51%)", backgroundSize: "100% 100%,50px 50px" }} />
-      <div style={{ position: "absolute", top: 28, left: 40, fontSize: 16, fontWeight: 900, letterSpacing: ".18em", color: "#dce1ff" }}>OPEN DESIGN / LAUNCH COUNTDOWN</div>
       <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", perspective: 1200 }}>
         <div style={{
           fontSize: 490,
