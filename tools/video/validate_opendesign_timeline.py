@@ -16,7 +16,7 @@ for s in shots:
  need(s["startFrame"]==cursor,s["id"]+" is not contiguous"); need(s["endFrame"]>s["startFrame"],s["id"]+" is empty"); cursor=s["endFrame"]
 need(cursor==1119,"root timeline must end at frame 1119")
 beats=next(s for s in shots if s["id"]=="S06")["posterBeats"]
-need(len(beats)==22,"expected 22 source-matched poster beats"); need(sum(b[1] for b in beats)==269,"poster beat duration must total 269")
+need(len(beats)==28,"expected 28 native-frame montage cuts"); need(sum(b[1] for b in beats)==269,"poster beat duration must total 269")
 block=source.split("const PosterSequence =",1)[1].split("\nconst ",1)[0]
 actual=[(int(a),int(b),c) for a,b,c in re.findall(r"<Sequence from=\{(\d+)\} durationInFrames=\{(\d+)\}><([A-Za-z0-9]+)",block)]
 expected=[]; frame=0
@@ -26,7 +26,7 @@ root=source.split("export const OpenDesignMotion",1)[1]
 actualRoot=[(int(a),int(b),c) for a,b,c in re.findall(r"<Sequence from=\{(\d+)\} durationInFrames=\{(\d+)\}><([A-Za-z0-9]+)",root)]
 expectedRoot=[(s["startFrame"],s["endFrame"]-s["startFrame"],s["component"]) for s in shots]
 need(actualRoot==expectedRoot,"root JSX differs from shot map")
-for x in ["Launch film","Make a 10s launch film","for our app.","DeepSeek V4.1","Claude Opus 5.5","MorroCubeIntro","CountdownOne","InPoster","TogglePoster","WorldPoster","Comic1962=","ClockPoster","StatsPoster","CoursesPoster","MotionFilmsPoster","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962=","const DotPoster","const GreenGhostTransition","const EaseGreen","const OutPoster","const LinearPoster","const ClockPoster","const EyePoster","const Future3D"]:
+for x in ["Launch film","Make a 10s launch film","for our app.","DeepSeek V4.1","Claude Opus 5.5","MorroCubeIntro","CountdownOne","InPoster","TogglePoster","WorldPoster","Comic1962=","ClockPoster","StatsPoster","CoursesPoster","MotionFilmsPoster","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962=","const DotPoster","const GreenGhostTransition","const EaseGreen","const OutPoster","const LinearPoster","const ClockPoster","const EyePoster","const Future3D","const InMetallic","const InPoster","GalleryPoster index={index%30}","count=Math.round(84+12*progress)","day=Math.round(111+27*progress)","4.7%"]:
  need(x in source,"missing required source token: "+x)
 need("BPM=114.84375" in score,"score BPM does not match source tempo")
-print("PASS: V15 12 source-indexed sections / 22 measured poster cuts / 1119 frames / animated Star History / painted Motion Films / Courses / exact launch preview and countdown / MORRO tile / end card")
+print("PASS: V16 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card
