@@ -1319,6 +1319,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
  </div>;
  const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?yellow:blackMark;
+ const dynamicSide=frame<27?blackSide:frame<55?clock:frame<72?yellow:blackMark;
  const blackSide=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/><path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/><path d="M127 90L180 164L165 198Z" fill="#d8dce0"/></svg>
@@ -1326,7 +1327,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
  return <div style={style}>
   {kind===0?dynamicFront:
    kind===1?(frame>=55&&frame<72?yellow:blackSide):
-   kind===2?yellow:
+   kind===2?dynamicSide:
    kind===3?clock:
    kind===4?ease:
    (frame>=55&&frame<72?yellow:blackMark)}
@@ -1337,7 +1338,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
  const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75);
- const rotateX=f<15?18-14*e(f,0,15):f<45?4-59*e(f,15,45):f<60?-55+25*e(f,45,60):-30+30*e(f,60,75);
+ const rotateX=f<15?18-14*e(f,0,15):f<45?4+56*e(f,15,45):f<60?60-25*e(f,45,60):35-35*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
@@ -1350,8 +1351,8 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
     <CubeFace kind={4} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
    </div>
-   <div style={{position:"absolute",left:"5%",right:"5%",top:"83%",height:"18%",transform:"rotateX(90deg) translateZ("+(-z*.74)+"px)",opacity:e(f,38,42)*(1-e(f,54,58)),borderRadius:28,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",border:"9px solid #eaffd7",boxShadow:"0 10px 0 rgba(25,85,20,.18)",display:"grid",placeItems:"center"}}>
-    <Word size={92} color="#101713" tracking={-.13}>EASE</Word>
+   <div style={{position:"absolute",left:"18%",right:"18%",top:"76%",height:"13%",transform:"translateZ("+(z+4)+"px) perspective(1100px) rotateX(38deg)",transformOrigin:"center top",opacity:e(f,38,42)*(1-e(f,54,58)),clipPath:"polygon(0 0,100% 0,92% 100%,8% 100%)",background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",border:"4px solid #eaffd7",boxShadow:"0 6px 0 rgba(25,85,20,.18)",display:"grid",placeItems:"center"}}>
+    <Word size={48} color="#101713" tracking={-.13}>EASE</Word>
    </div>
   </div>
   <div style={{position:"absolute",left:"50%",top:"81%",width:690,height:105,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.17)",filter:"blur(42px)"}}/>
