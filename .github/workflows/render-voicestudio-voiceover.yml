@@ -19,7 +19,7 @@ concurrency:
 jobs:
   render-voiceover:
     name: Generate voice-over on VoiceStudio Actions
-    uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@main
     permissions:
       contents: read
     with:
