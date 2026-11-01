@@ -623,7 +623,7 @@ const ClockPoster = () => {
 };
 
 const StatsPoster=()=>{
- const f=useCurrentFrame(),progress=e(f,0,9),count=Math.round(80+16*progress),day=Math.round(88+50*progress);
+ const f=useCurrentFrame(),progress=e(f,0,7),count=Math.round(84+12*progress),day=Math.round(111+27*progress);
  const tipY=465-345*progress;
  return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c7e8e4 0%,#cdeae0 39%,#f3c7b7 62%,#60bec3 100%)",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
@@ -664,7 +664,7 @@ const TogglePoster = () => {
 };
 
 const EyePoster = () => {
- const f=useCurrentFrame(),blink=f<6?e(f,0,6,.08,1):f>12?1-e(f,12,16,0,.88):1;
+ const f=useCurrentFrame(),percentage=(4.7+1.4*e(f,0,7)).toFixed(1),blink=f<6?e(f,0,6,.08,1):f>12?1-e(f,12,16,0,.88):1;
  return <AbsoluteFill style={{...full,background:"#03040a",color:"#fff",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 49%,#101534,#03040a 72%)"}}/>
   <svg viewBox="0 0 1600 720" width="100%" height="78%" style={{position:"absolute",left:0,top:"8%"}}>
@@ -680,7 +680,7 @@ const EyePoster = () => {
    <circle cx="745" cy="288" r="46" fill="#fff" opacity=".8" filter="url(#eye-soft-v13)"/><circle cx="745" cy="288" r="22" fill="#fff"/>
    <path d="M70 360Q800 -25 1530 360" fill="none" stroke="#a6aaff" strokeWidth="6" opacity=".55"/>
   </svg>
-  <div style={{position:"absolute",right:115,bottom:68,fontSize:43,fontWeight:950,letterSpacing:"-.04em",color:"#f5f5f5"}}>3.7%</div>
+  <div style={{position:"absolute",right:115,bottom:68,fontSize:43,fontWeight:950,letterSpacing:"-.04em",color:"#f5f5f5"}}>{percentage}%</div>
   <div style={{position:"absolute",left:92,bottom:76,fontSize:15,fontWeight:900,letterSpacing:".19em",color:"#8c95ba"}}>ATTENTION / OPTICS</div>
  </AbsoluteFill>;
 };
