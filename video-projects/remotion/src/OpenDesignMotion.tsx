@@ -353,6 +353,106 @@ const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
       </svg>
     </div>
   );
+  if (index === 11) return (
+    <div style={{...common,background:"linear-gradient(160deg,#d9f2e9,#e8f5e7 55%,#8fc7d8)"}}>
+      <Word size={51} color="#14191b" style={{position:"absolute",left:16,top:30}}>100K</Word>
+      <div style={{position:"absolute",left:15,right:12,bottom:18,height:75,background:"rgba(255,255,255,.92)",borderRadius:5,boxShadow:"0 4px 12px rgba(0,0,0,.08)"}}>
+       <svg viewBox="0 0 240 75" width="100%" height="100%"><path d="M8 64C40 60 56 46 83 43S128 27 157 23S201 8 231 5" fill="none" stroke="#d26c58" strokeWidth="4"/><circle cx="231" cy="5" r="4" fill="#6bc16e"/></svg>
+      </div>
+    </div>
+  );
+  if (index === 12) return (
+    <div style={{...common,background:"#080a12",color:"#fff"}}>
+      <div style={{position:"absolute",inset:"12% 18%",borderRadius:8,background:"#1826ad",boxShadow:"0 0 26px rgba(53,69,230,.35)"}}>
+       <div style={{position:"absolute",inset:12,border:"1px solid rgba(255,255,255,.3)"}}/>
+       <div style={{position:"absolute",left:"25%",top:"17%",width:"50%",height:"65%",background:"#3433dc",boxShadow:"0 14px 24px rgba(0,0,0,.35)",transform:"perspective(300px) rotateY(-17deg)"}}/>
+      </div>
+      <div style={{position:"absolute",left:10,bottom:8,fontSize:9,letterSpacing:".2em",fontWeight:900}}>MOTION / PREVIEW</div>
+    </div>
+  );
+  if (index === 13) return (
+    <div style={{...common,background:"#fff",color:"#17191b"}}>
+      <div style={{position:"absolute",left:16,top:17,fontSize:25,fontWeight:850}}>Got something</div>
+      <div style={{position:"absolute",left:16,top:50,fontSize:21,color:"#6c7278"}}>to create?</div>
+      <svg viewBox="0 0 180 150" width="130" height="110" style={{position:"absolute",right:4,bottom:-5}}>
+       <ellipse cx="88" cy="130" rx="65" ry="14" fill="#ddd"/><circle cx="88" cy="68" r="47" fill="#bfc2c2"/><circle cx="47" cy="37" r="21" fill="#a9adad"/><circle cx="129" cy="37" r="21" fill="#a9adad"/><circle cx="70" cy="67" r="5" fill="#161719"/><circle cx="105" cy="67" r="5" fill="#161719"/><ellipse cx="88" cy="86" rx="10" ry="13" fill="#333"/><path d="M74 101Q88 112 103 101" fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+  if (index === 14) return (
+    <div style={{...common,background:"#d9bf93"}}>
+      <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(0deg,rgba(90,63,34,.05) 0 2px,transparent 2px 8px)"}}/>
+      <div style={{position:"absolute",left:"18%",top:"13%",width:"64%",height:"73%",background:"#fffdf2",boxShadow:"0 8px 18px rgba(50,35,18,.2)",transform:"rotate(-3deg)",display:"grid",placeItems:"center",fontFamily:"Georgia,serif",fontSize:24,color:"#303946"}}>OpenDesign,<br/>what if…</div>
+      <div style={{position:"absolute",right:36,bottom:-18,width:13,height:130,background:"#65b8a0",transform:"rotate(28deg)",borderRadius:5}}/>
+      <div style={{position:"absolute",right:27,bottom:78,width:25,height:24,background:"#e6a36a",transform:"rotate(28deg)"}}/>
+    </div>
+  );
+  if (index === 15) return (
+    <div style={{...common,background:"#347bd7"}}>
+      <svg viewBox="0 0 150 160" width="110" height="120" style={{position:"absolute",left:0,bottom:0}}>
+       <ellipse cx="75" cy="150" rx="55" ry="12" fill="#164b9a"/><circle cx="75" cy="66" r="43" fill="#ddd"/><circle cx="38" cy="35" r="18" fill="#c5c9c9"/><circle cx="112" cy="35" r="18" fill="#c5c9c9"/><circle cx="58" cy="66" r="5" fill="#111"/><circle cx="92" cy="66" r="5" fill="#111"/><ellipse cx="75" cy="84" rx="9" ry="12" fill="#303030"/>
+      </svg>
+      <div style={{position:"absolute",right:22,top:24,width:98,height:120,background:"#fff",borderRadius:4,transform:"rotate(4deg)",display:"grid",placeItems:"center",boxShadow:"0 4px 8px rgba(0,0,0,.18)"}}>
+       <div style={{width:66,height:58,background:"#11151c",clipPath:"polygon(50% 0,100% 28%,50% 57%,0 28%)"}}/><div style={{position:"absolute",bottom:12,fontSize:13,fontWeight:900,color:"#272a2d"}}>Courses</div>
+      </div>
+    </div>
+  );
+  if (index === 16) return (
+    <div style={{...common,background:"#d7efe1",color:"#25342e"}}>
+      <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(160deg,rgba(255,255,255,.18) 0 3px,transparent 4px 16px)"}}/>
+      <div style={{position:"absolute",left:26,top:20,right:26,height:96,background:"#fff8e7",borderRadius:3,boxShadow:"0 4px 14px rgba(0,0,0,.12)",display:"grid",placeItems:"center"}}>
+       <div style={{fontFamily:"Georgia,serif",fontSize:22}}>a little wonder.</div><div style={{width:27,height:28,background:"#e68162",borderRadius:5,marginTop:-22}}/>
+      </div>
+      <div style={{position:"absolute",left:0,right:0,bottom:8,textAlign:"center",fontSize:18,fontWeight:900}}>websites</div>
+      <div style={{position:"absolute",right:12,bottom:28,width:38,height:28,borderRadius:9,background:"#111",display:"grid",placeItems:"center",color:"#fff"}}>●</div>
+    </div>
+  );
+  if (index === 17) return (
+    <div style={{...common,background:"#efaec0",color:"#202326"}}>
+      <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(0deg,rgba(255,255,255,.12) 0 2px,transparent 2px 11px)"}}/>
+      <div style={{position:"absolute",left:"34%",top:13,width:"42%",height:"75%",background:"#fff3dd",boxShadow:"0 6px 10px rgba(0,0,0,.15)",transform:"rotate(4deg)",padding:7,boxSizing:"border-box"}}>
+       <div style={{fontSize:12,fontWeight:950}}>MAKE</div><div style={{fontSize:9}}>something</div>
+       <div style={{position:"absolute",left:18,top:38,fontSize:47,color:"#e07b55"}}>✿</div><div style={{position:"absolute",bottom:13,left:10,fontSize:10,fontWeight:800}}>wonderful.</div>
+      </div>
+      <div style={{position:"absolute",left:0,right:0,bottom:4,textAlign:"center",fontSize:18,fontWeight:900}}>posters</div>
+    </div>
+  );
+  if (index === 18) return (
+    <div style={{...common,background:"#090b10",color:"#fff"}}>
+      <div style={{position:"absolute",left:17,top:35,fontSize:24,fontFamily:"Georgia,serif"}}>You create.</div><div style={{position:"absolute",left:17,top:76,fontSize:17,color:"#aaa"}}>We handle the rest.</div>
+      <svg viewBox="0 0 130 150" width="115" height="130" style={{position:"absolute",right:0,bottom:-6}}>
+       <circle cx="68" cy="57" r="39" fill="#babebe"/><circle cx="35" cy="27" r="18" fill="#9fa4a4"/><circle cx="101" cy="27" r="18" fill="#9fa4a4"/><circle cx="54" cy="55" r="4" fill="#111"/><circle cx="81" cy="55" r="4" fill="#111"/><ellipse cx="68" cy="72" rx="8" ry="9" fill="#222"/><path d="M22 140Q25 90 68 90Q113 90 116 140Z" fill="#d6d6d1"/>
+      </svg>
+    </div>
+  );
+  if (index === 19) return (
+    <div style={{...common,background:"#fff",color:"#30383c"}}>
+      <div style={{position:"absolute",left:16,top:13,fontSize:11,fontWeight:900}}>The ways we grow from A to B.</div>
+      {Array.from({length:4},(_,i)=><div key={i} style={{position:"absolute",left:20,right:20,top:42+i*25,height:1,background:"#e7e9e8"}}/>)}
+      {Array.from({length:4},(_,i)=><div key={i} style={{position:"absolute",right:21,top:37+i*25,width:13,height:13,borderRadius:"50%",background:"#80d28a",boxShadow:"0 0 0 3px #e7f7e9"}}/>)}
+    </div>
+  );
+  if (index === 20) return (
+    <div style={{...common,background:"#101216",color:"#fff"}}>
+      <div style={{position:"absolute",left:14,top:12,fontSize:10,letterSpacing:".15em"}}>MOTION / FILM</div>
+      <Word size={45} color="#f4f1e7" style={{position:"absolute",left:14,top:46}}>FUTURE</Word>
+      <div style={{position:"absolute",right:18,bottom:18,width:86,height:64,border:"4px solid #faf7eb"}}/>
+    </div>
+  );
+  if (index === 21) return (
+    <div style={{...common,background:"#7be84a",color:"#101710"}}>
+      <Word size={37} color="#101710" style={{position:"absolute",left:12,top:36}}>OPEN</Word>
+      <Word size={37} color="#101710" style={{position:"absolute",left:12,top:76}}>DESIGN</Word>
+      <div style={{position:"absolute",right:12,top:14,fontSize:10,fontWeight:900}}>SHOWREEL</div>
+    </div>
+  );
+  if (index === 22) return (
+    <div style={{...common,background:"#fff",display:"grid",placeItems:"center"}}>
+      <div style={{width:90,height:42,borderRadius:30,background:"#e8e9e7",boxShadow:"inset 0 2px 5px rgba(0,0,0,.12)"}}>
+       <div style={{margin:4,width:34,height:34,borderRadius:"50%",background:"#fff",boxShadow:"0 3px 6px rgba(0,0,0,.12)",transform:"translateX("+(frame%20>10?48:0)+"px)"}}/>
+      </div>
+    </div>
+  );
   return (
     <div style={{ ...common, background: "#171c28", color: "#fff" }}>
       <Word size={69} color="#fff" style={{ position: "absolute", left: 22, top: 20 }}>FUTURE</Word>
@@ -365,23 +465,23 @@ const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
 
 
 const GalleryCard=({index,frame}:{index:number;frame:number})=>{
- const drift=Math.sin((frame+index*11)/19)*3.2;
- const rotation=(index%2?-1:1)*.22;
- return <div style={{width:310,height:164,borderRadius:3,position:"relative",overflow:"hidden",transform:"translateY("+drift+"px) rotate("+rotation+"deg)",boxShadow:"0 8px 22px rgba(19,24,32,.13)",background:"#fff"}}>
-   <GalleryPoster index={index%12} frame={frame+index*3}/>
-   <div style={{position:"absolute",left:9,bottom:6,fontSize:7,fontWeight:900,letterSpacing:".16em",color:"rgba(20,25,30,.5)"}}>OD / {String(index+1).padStart(2,"0")}</div>
+ const drift=Math.sin((frame+index*11)/19)*2.8;
+ const rotation=(index%2?-1:1)*.18;
+ return <div style={{width:263,height:148,borderRadius:5,position:"relative",overflow:"hidden",transform:"translateY("+drift+"px) rotate("+rotation+"deg)",boxShadow:"0 6px 18px rgba(19,24,32,.12)",background:"#fff"}}>
+  <GalleryPoster index={index%23} frame={frame+index*2}/>
  </div>;
 };
 
 const GalleryWall=()=>{
  const f=useCurrentFrame(),p=pop(f,30,0,72,16);
- const x=e(f,0,77,30,-110), ry=e(f,0,77,-8,-15), rz=e(f,0,77,.6,-1.1);
- return <AbsoluteFill style={{...full,background:"#f4f1e9"}}>
-   <div style={{position:"absolute",left:80,right:80,top:74,bottom:64,display:"grid",gridTemplateColumns:"repeat(5,310px)",gridTemplateRows:"repeat(5,164px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1800px) rotateX(5deg) rotateY("+ry+"deg) rotateZ("+rz+"deg) translateX("+x+"px) translateY("+((1-p)*90)+"px) scale("+(0.92+.08*p)+")",transformOrigin:"center center"}}>
-    {Array.from({length:25},(_,i)=><GalleryCard key={i} index={[4,9,0,6,11,2,5,10,3,8,7,1,4,9,2,6,11,5,0,10,3,8,1,7,4][i]} frame={f+i*2}/>)}
-   </div>
-   <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(180deg,rgba(255,255,255,.16),transparent 18%,transparent 84%,rgba(210,205,193,.12))"}}/>
-   <Noise opacity={.035}/>
+ const pan=e(f,0,77,5,-34),ry=e(f,0,77,-1.5,-7),rz=e(f,0,77,.15,-.45);
+ const order=[12,13,11,2,13,11,2,9,21,22,15,14,2,5,4,19,15,14,19,16,3,7,20,19,18,17,12,3,16,17];
+ return <AbsoluteFill style={{...full,background:"#f3f1e9",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:78,right:78,top:76,bottom:58,display:"grid",gridTemplateColumns:"repeat(6,263px)",gridTemplateRows:"repeat(5,148px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1750px) rotateY("+ry+"deg) rotateX(1.5deg) rotateZ("+rz+"deg) translateX("+pan+"px) translateY("+((1-p)*40)+"px) scale("+(0.965+.035*p)+")",transformOrigin:"center center"}}>
+   {order.map((id,i)=><GalleryCard key={i} index={id} frame={f+i*2}/>)}
+  </div>
+  <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(180deg,rgba(255,255,255,.18),transparent 14%,transparent 85%,rgba(210,205,193,.12))"}}/>
+  <Noise opacity={.025}/>
  </AbsoluteFill>;
 }
 
