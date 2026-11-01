@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from actions_voice_lab import load_suite, master_candidates, run_lab, safe_audio_path
+from actions_voice_lab import (\n    load_suite, master_candidates, run_lab, safe_audio_path,\n    write_cross_scenario_audition,\n)
 
 
 class ActionsVoiceLabTests(unittest.TestCase):
@@ -38,6 +38,78 @@ class ActionsVoiceLabTests(unittest.TestCase):
             path.write_text(json.dumps(data), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Duplicate benchmark case ID"):
                 load_suite(path)
+
+    def test_cross_scenario_audition_groups_all_scripts_and_hides_voice_identity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cases = []
+            for index, case_id in enumerate(
+                ("tones-phonemes", "code-switch", "numbers-and-proper-nouns", "documentary-longform"),
+                1,
+            ):
+                case_root = root / "cases" / case_id
+                (case_root / "audio").mkdir(parents=True)
+                candidates = []
+                for candidate_index, candidate_id in enumerate(("private-voice-a", "private-voice-b"), 1):
+                    filename = f"{candidate_index:03d}-Candidate-{candidate_index:02d}.wav"
+                    (case_root / "audio" / filename).write_bytes(b"RIFF" + b"audio-data")
+                    candidates.append({
+                        "id": candidate_id,
+                        "name": f"PRIVATE NAME {candidate_index}",
+                        "blind_label": f"Candidate {candidate_index:02d}",
+                        "status": "ready",
+                        "audio_file": f"audio/{filename}",
+                    })
+                cases.append({
+                    "id": case_id,
+                    "title": f"Scenario {index}",
+                    "text": "Xin chào Việt Nam.",
+                    "candidates": candidates,
+                })
+
+            result = write_cross_scenario_audition(root, {"cases": cases})
+            page = (root / result["page"]).read_text(encoding="utf-8")
+            self.assertEqual(result["candidate_count"], 2)
+            self.assertEqual(result["case_count"], 4)
+            self.assertEqual(result["ready_track_count"], 8)
+            self.assertTrue(result["blind_identity_hidden"])
+            self.assertIn("Candidate 01", page)
+            self.assertIn("Candidate 02", page)
+            self.assertIn("voice-human-ratings-all-scripts.json", page)
+            self.assertIn("data-dimension=\"vietnamese\"", page)
+            self.assertIn("Scenario 4", page)
+            self.assertEqual(page.count("<audio controls"), 8)
+            self.assertNotIn("private-voice-a", page)
+            self.assertNotIn("PRIVATE NAME", page)
+
+    def test_cross_scenario_audition_marks_missing_or_unsafe_samples_unavailable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            case_root = root / "cases" / "tones-phonemes"
+            (case_root / "audio").mkdir(parents=True)
+            valid = case_root / "audio" / "001-Candidate-01.wav"
+            valid.write_bytes(b"RIFF" + b"valid-audio")
+            cases = [{
+                "id": "tones-phonemes",
+                "title": "Thanh điệu",
+                "text": "Xin chào",
+                "candidates": [
+                    {
+                        "id": "voice-good", "blind_label": "Candidate 01",
+                        "status": "ready", "audio_file": "audio/001-Candidate-01.wav",
+                    },
+                    {
+                        "id": "voice-unsafe", "blind_label": "Candidate 02",
+                        "status": "ready", "audio_file": "../../outside.wav",
+                    },
+                ],
+            }]
+            result = write_cross_scenario_audition(root, {"cases": cases})
+            page = (root / result["page"]).read_text(encoding="utf-8")
+            self.assertEqual(result["ready_track_count"], 1)
+            self.assertEqual(page.count("Không thể xác minh file audio."), 1)
+            self.assertNotIn("../../outside.wav", page)
+            self.assertNotIn("voice-unsafe", page)
 
     def test_plan_only_does_not_load_models_or_call_providers(self):
         suite_path = (
