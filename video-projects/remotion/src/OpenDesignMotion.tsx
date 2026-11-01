@@ -90,116 +90,89 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
-  const drift = frame * 0.28;
-  return (
-    <AbsoluteFill style={{ background: "linear-gradient(180deg,#68afe1 0%,#98cce5 35%,#d6e6e4 61%,#edcbbd 100%)" }}>
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 51% 37%,rgba(255,255,255,.58),transparent 52%),linear-gradient(115deg,rgba(255,245,223,.16),transparent 45%,rgba(255,255,255,.22))" }} />
-      <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <defs>
-          <linearGradient id="sky-cloud" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity=".86" />
-            <stop offset="100%" stopColor="#fff" stopOpacity=".12" />
-          </linearGradient>
-          <filter id="sky-soft-cloud"><feGaussianBlur stdDeviation="18" /></filter>
-          <filter id="sky-haze"><feGaussianBlur stdDeviation="44" /></filter>
-        </defs>
-        <g opacity=".52" filter="url(#sky-haze)" transform={"translate(" + (drift * -0.55) + ",0)"}>
-          <path d="M-100 260 C80 125 245 135 360 245 C505 110 675 150 765 265 C905 140 1100 165 1190 282 C1340 165 1480 175 1600 270 C1740 150 1900 160 2020 290 L2020 490 L-100 490Z" fill="#fff" />
-          <path d="M-180 610 C20 485 205 512 330 620 C485 485 630 495 790 640 C940 490 1115 515 1235 625 C1370 525 1550 520 1680 640 C1800 545 1940 560 2060 650 L2060 820 L-180 820Z" fill="#fff1e5" />
-        </g>
-        <g opacity=".66" filter="url(#sky-soft-cloud)" transform={"translate(" + drift + ",0)"}>
-          <path d="M-80 310 C60 205 180 200 310 295 C430 160 595 160 710 290 C850 188 1000 212 1105 310 C1270 196 1445 204 1545 322 C1705 205 1860 245 2000 350 L2000 435 L-80 435Z" fill="url(#sky-cloud)" />
-          <path d="M-120 740 C20 640 175 632 305 720 C430 605 590 610 710 738 C860 620 1040 635 1150 745 C1315 638 1460 640 1590 754 C1740 654 1900 672 2030 780 L2030 875 L-120 875Z" fill="#fff7ef" opacity=".7" />
-        </g>
-        <path d="M0 810 C230 792 350 812 515 806 C740 800 840 825 1030 812 C1270 792 1385 808 1560 798 C1710 790 1810 808 1920 795 L1920 910 L0 910Z" fill="#7eb5bf" opacity=".25" />
-        <path d="M0 845 C260 812 395 858 590 832 C810 804 965 850 1160 827 C1365 802 1555 840 1730 822 C1810 814 1870 820 1920 816 L1920 1080 L0 1080Z" fill="url(#sky-cloud)" opacity=".52" />
-        <path d="M0 1005 C180 968 325 1003 495 982 C690 960 810 1004 995 981 C1190 954 1320 990 1510 971 C1700 952 1805 984 1920 961 L1920 1080 L0 1080Z" fill="#e8bfb2" opacity=".38" />
-      </svg>
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 65%,rgba(244,220,207,.46))" }} />
-      <Noise opacity={0.055} />
-    </AbsoluteFill>
-  );
+ const drift=frame*.22;
+ return <AbsoluteFill style={{background:"linear-gradient(180deg,#82bce4 0%,#b9d6e2 37%,#e8d9d4 69%,#e8bda9 100%)",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs>
+    <linearGradient id="oil-cloud-light" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff" stopOpacity=".93"/><stop offset="1" stopColor="#f6ede3" stopOpacity=".05"/></linearGradient>
+    <linearGradient id="oil-cloud-warm" x1="0" x2="1"><stop stopColor="#f4c6a5" stopOpacity=".05"/><stop offset=".5" stopColor="#fff3df" stopOpacity=".75"/><stop offset="1" stopColor="#f6bba5" stopOpacity=".08"/></linearGradient>
+    <filter id="oil-soft-22"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="oil-soft-8"><feGaussianBlur stdDeviation="8"/></filter>
+   </defs>
+   <g transform={"translate("+(-drift)+",0)"} opacity=".7" filter="url(#oil-soft-22)">
+    <path d="M-80 220C90 80 280 115 405 220C535 92 715 100 825 229C940 105 1110 125 1218 240C1390 105 1568 140 1680 244C1810 150 1970 165 2060 275L2060 415L-80 430Z" fill="url(#oil-cloud-light)"/>
+    <path d="M-90 500C60 410 200 425 330 520C470 390 615 390 750 535C880 407 1050 415 1180 520C1320 405 1480 420 1605 545C1750 435 1900 465 2050 560L2050 705L-90 720Z" fill="#f9e9d9" opacity=".76"/>
+    <path d="M-60 690C100 580 250 600 380 700C505 600 685 605 810 725C965 595 1120 610 1250 710C1400 600 1585 620 1705 725C1835 640 1965 650 2045 755L2045 850L-60 860Z" fill="url(#oil-cloud-warm)"/>
+   </g>
+   <g transform={"translate("+(drift*.55)+",0)"} filter="url(#oil-soft-8)" fill="none" strokeLinecap="round">
+    <path d="M-80 310C180 180 375 200 565 286S900 355 1110 260S1520 205 1745 293S1950 300 2070 265" stroke="#fff" strokeWidth="22" opacity=".55"/>
+    <path d="M-55 365C170 270 350 282 525 352S835 400 1040 324S1430 270 1630 345S1900 352 2050 320" stroke="#a6cde2" strokeWidth="17" opacity=".36"/>
+    <path d="M-80 580C150 490 320 500 515 578S900 620 1100 525S1490 490 1690 568S1940 570 2080 540" stroke="#fff4e4" strokeWidth="30" opacity=".62"/>
+    <path d="M-70 720C190 620 420 640 625 710S1010 770 1210 680S1570 650 1760 715S1970 710 2070 685" stroke="#f0d1c8" strokeWidth="26" opacity=".5"/>
+   </g>
+   <path d="M0 867C170 838 280 860 430 852C580 844 700 874 850 859C1030 840 1160 871 1345 846C1535 822 1690 860 1810 835L1920 842L1920 1080H0Z" fill="#5e9eb8" opacity=".24"/>
+   <path d="M0 943C180 915 310 952 470 932C630 912 755 951 910 929C1080 903 1235 945 1390 916C1580 884 1760 930 1920 898L1920 1080H0Z" fill="#2f79a3" opacity=".55"/>
+   <path d="M0 1018C165 986 320 1017 505 1002C690 988 820 1022 1000 1002C1170 983 1320 1014 1510 989C1705 965 1815 1008 1920 982L1920 1080H0Z" fill="#1e6f96" opacity=".52"/>
+  </svg>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 63%,rgba(248,204,185,.25))"}}/>
+  <Noise opacity={.028}/>
+ </AbsoluteFill>;
 };
 
 const OpeningScene = () => {
-  const f = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const card = pop(f, fps, 4, 80, 22);
-  const text = "Introducing OpenDesign Motion";
-  const count = Math.floor(e(f, 17, 64, 0, text.length));
-  const pressed = e(f, 76, 82);
-  const cursor = e(f, 48, 76, 0, 1);
-  return (
-    <AbsoluteFill style={full}>
-      <CloudSky frame={f} />
-      <div style={{ position: "absolute", top: 82, left: 0, right: 0, display: "flex", justifyContent: "center", alignItems: "center", color: "#1e292c" }}>
-        <div style={{ fontFamily: "Georgia,serif", fontSize: 76, fontWeight: 700, letterSpacing: "-.05em", position: "relative", zIndex: 2 }}>
-          Let’s create <span style={{ position: "relative", display: "inline-block" }}>
-            <span style={{ position: "absolute", left: -5, right: -8, top: "55%", height: 30, background: "#b7e95a", transform: "rotate(-1.2deg)" }} />
-            <span style={{ position: "relative" }}>Motion design</span>
-          </span>
-        </div>
-      </div>
-      <div style={{ position: "absolute", top: 184, left: 0, right: 0, textAlign: "center", color: "rgba(35,52,58,.68)", fontSize: 14, letterSpacing: ".09em", fontWeight: 600 }}>
-        Good work starts here
-      </div>
-      <div style={{
-        position: "absolute",
-        left: 325,
-        right: 325,
-        top: 565,
-        height: 210,
-        background: "rgba(255,255,255,.91)",
-        border: "1px solid rgba(255,255,255,.98)",
-        borderRadius: 23,
-        boxShadow: "0 27px 75px rgba(49,82,91,.18),0 4px 16px rgba(40,72,82,.09)",
-        backdropFilter: "blur(22px)",
-        transform: "translateY(" + ((1 - card) * 95) + "px) scale(" + (0.96 + 0.04 * card - pressed * 0.012) + ")",
-        opacity: e(f, 4, 15),
-        padding: "31px 38px",
-        boxSizing: "border-box",
-      }}>
-        <div style={{ color: "#8c9798", fontSize: 14, fontWeight: 850, letterSpacing: ".17em", marginBottom: 23 }}>CREATE A MOTION DESIGN</div>
-        <div style={{ color: "#252c30", fontSize: 36, fontWeight: 550, letterSpacing: "-.035em", minHeight: 40 }}>
-          {text.slice(0, count)}
-          <span style={{ display: "inline-block", width: 2, height: 29, background: count < text.length ? "#313a3d" : "transparent", verticalAlign: "middle", marginLeft: 3 }} />
-        </div>
-        <div style={{ position: "absolute", bottom: 20, left: 38, display: "flex", alignItems: "center", gap: 18 }}>
-          <div style={{ fontSize: 13, color: "#9ca5a4" }}>◉</div>
-          <div style={{ fontSize: 13, color: "#9ca5a4" }}>⌁</div>
-          <div style={{ background: "#d9f5d9", color: "#26763d", padding: "7px 15px", borderRadius: 7, fontSize: 14, fontWeight: 850 }}>✦ Motion design</div>
-          <div style={{ fontSize: 13, color: "#8e9998" }}>Working directory</div>
-        </div>
-        <div style={{ position: "absolute", right: 32, bottom: 24, width: 48, height: 48, borderRadius: "50%", background: "#12191b", display: "grid", placeItems: "center", transform: "scale(" + (1 - pressed * .09) + ")", boxShadow: "0 4px 14px rgba(20,30,31,.22)" }}>
-          <svg viewBox="0 0 30 30" width="23" height="23"><path d="M5 15H24M16 6L25 15L16 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </div>
-      </div>
-      <div style={{ position: "absolute", top: 785, left: 620 + cursor * 640, width: 29, height: 38, filter: "drop-shadow(0 3px 3px rgba(0,0,0,.3))" }}>
-        <svg viewBox="0 0 30 40" width="29" height="38"><path d="M2 2L2 33L10 25L17 38L23 35L16 22L28 22Z" fill="#fff" stroke="#262b2d" strokeWidth="2" strokeLinejoin="round" /></svg>
-      </div>
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 74, textAlign: "center", color: "#edf4f4", fontSize: 16, fontWeight: 750, letterSpacing: ".22em", textShadow: "0 2px 12px rgba(20,55,72,.32)" }}>
-        IDEAS IN MOTION / 01
-      </div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame();
+ const text="Introducing OpenDesign Motion";
+ const count=Math.floor(e(f,15,64,0,text.length));
+ const pressed=e(f,76,82);
+ const cursor=e(f,48,76,0,1);
+ const typing=f>=15;
+ return <AbsoluteFill style={full}>
+  <CloudSky frame={f}/>
+  <div style={{position:"absolute",top:225,left:0,right:0,display:"flex",justifyContent:"center",alignItems:"center",color:"#19272c"}}>
+   <div style={{fontFamily:"Georgia,serif",fontSize:82,fontWeight:700,letterSpacing:"-.055em",position:"relative",whiteSpace:"nowrap"}}>
+    Let’s create <span style={{position:"relative",display:"inline-block"}}><span style={{position:"absolute",left:-5,right:-8,top:"55%",height:31,background:"#b6e65e",transform:"rotate(-1deg)"}}/><span style={{position:"relative"}}>Motion design</span></span>
+   </div>
+  </div>
+  <div style={{position:"absolute",top:345,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
+  <div style={{position:"absolute",left:330,right:330,top:438,height:286,background:"rgba(255,255,255,.94)",border:"1px solid rgba(255,255,255,.99)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
+   <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:35,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
+    {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
+    {typing?<span style={{display:"inline-block",width:2,height:34,background:count<text.length?"#313a3d":"transparent",verticalAlign:"middle",marginLeft:4}}/>:null}
+   </div>
+   <div style={{position:"absolute",bottom:23,left:38,display:"flex",alignItems:"center",gap:18}}>
+    <div style={{fontSize:22,color:"#9ca5a4"}}>＋</div><div style={{fontSize:22,color:"#9ca5a4"}}>◉</div>
+    <div style={{background:"#d9f5d9",color:"#26763d",padding:"8px 17px",borderRadius:7,fontSize:17,fontWeight:850}}>✦ Motion design</div>
+    <div style={{fontSize:15,color:"#899493"}}>Working directory⌄</div>
+   </div>
+   <div style={{position:"absolute",right:31,bottom:22,display:"flex",gap:9,alignItems:"center"}}>
+    <span style={{width:10,height:10,borderRadius:"50%",background:"#67d46c"}}/><span style={{width:10,height:10,borderRadius:"50%",background:"#5b72dc"}}/>
+    <div style={{width:58,height:58,borderRadius:"50%",background:"#12191b",display:"grid",placeItems:"center",transform:"scale("+(1-pressed*.09)+")",boxShadow:"0 4px 14px rgba(20,30,31,.22)"}}>
+     <svg viewBox="0 0 30 30" width="27" height="27"><path d="M5 15H24M16 6L25 15L16 24" fill="none" stroke="#75e44c" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </div>
+   </div>
+  </div>
+  <div style={{position:"absolute",top:760,left:730+cursor*520,width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
+   <svg viewBox="0 0 30 40" width="29" height="38"><path d="M2 2L2 33L10 25L17 38L23 35L16 22L28 22Z" fill="#fff" stroke="#262b2d" strokeWidth="2" strokeLinejoin="round"/></svg>
+  </div>
+ </AbsoluteFill>;
 };
 
 const HeroTitle = () => {
-  const f = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = pop(f, fps, 0, 74, 17);
-  const opacity = fadeOut(f, 45, 9);
-  return (
-    <AbsoluteFill style={full}>
-      <CloudSky frame={f + 110} />
-      <div style={{ position: "absolute", top: 116, left: 0, right: 0, textAlign: "center", opacity: e(f, 0, 12), color: "#fff", fontSize: 18, fontWeight: 800, letterSpacing: ".28em", textShadow: "0 2px 10px rgba(0,0,0,.12)" }}>INTRODUCING</div>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 306, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, transform: "translateY(" + ((1 - p) * 160) + "px) scale(" + (0.88 + p * 0.12) + ")", opacity }}>
-        <Word size={106} color="#fff" tracking={-0.075} weight={900} style={{ textShadow: "0 3px 0 rgba(67,94,109,.18),0 14px 30px rgba(40,68,78,.12)" }}>OpenDesign</Word>
-        <Word size={222} color="#fff" tracking={-0.095} weight={950} style={{ textShadow: "0 4px 0 rgba(67,94,109,.2),0 17px 28px rgba(40,68,78,.12)" }}>MOTION</Word>
-      </div>
-      <div style={{ position: "absolute", bottom: 94, left: 0, right: 0, textAlign: "center", color: "#fff", fontSize: 18, fontWeight: 800, letterSpacing: ".25em", opacity: fadeOut(f, 45, 8), textShadow: "0 2px 12px rgba(0,0,0,.14)" }}>A NEW CREATIVE WORKFLOW</div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),p=pop(f,30,0,44,12),opacity=fadeOut(f,48,9);
+ const letters=["M","O","T","I","O","N"];
+ return <AbsoluteFill style={full}>
+  <CloudSky frame={f+100}/>
+  <div style={{position:"absolute",top:190,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontStyle:"italic",fontSize:30,fontWeight:650,color:"#fff",opacity:e(f,0,6),textShadow:"0 2px 12px rgba(0,0,0,.12)"}}>Introducing</div>
+  <div style={{position:"absolute",top:300,left:0,right:0,textAlign:"center",fontFamily:displayFont,fontSize:119,fontWeight:850,letterSpacing:"-.07em",color:"#fff",opacity,transform:"translateY("+((1-p)*45)+"px)",textShadow:"0 2px 0 #d7e5e5,0 4px 0 #b7d0d5,0 7px 0 #8fb4c2,0 11px 0 #6695aa,0 16px 23px rgba(22,69,91,.26)"}}>OpenDesign</div>
+  <div style={{position:"absolute",left:0,right:0,top:440,height:300,display:"flex",justifyContent:"center",alignItems:"center",gap:0,opacity,transform:"translateY("+((1-p)*60)+"px) scale("+(0.9+.1*p)+")",perspective:1200}}>
+   {letters.map((ch,i)=>{
+    const lag=i*2.1,enter=e(f,lag,lag+14),swing=Math.sin((f-lag)*.18)*5;
+    const colors=["#fff","#fff","#fff","#f8f1e8","#fff","#fff"];
+    return <div key={i} style={{fontFamily:displayFont,fontSize:320,fontWeight:1000,letterSpacing:"-.11em",lineHeight:.85,color:colors[i],transform:"translateY("+(1-enter)*(-180+swing*7)+"px) translateX("+(i===3?0:0)+"px) rotateY("+(i===3?-18:0)+"deg) rotateX("+(i===3?8:0)+"deg)",textShadow:"1px 1px 0 #e0e7e8,3px 4px 0 #b6cbd2,6px 7px 0 #8eafbb,10px 12px 0 #5e8ba0,16px 20px 0 #345d75,24px 31px 33px rgba(25,62,83,.3)",marginLeft:i===0?0:-12}}>{ch}</div>;
+   })}
+  </div>
+  <div style={{position:"absolute",left:0,right:0,bottom:89,textAlign:"center",color:"#fff",fontSize:18,fontWeight:800,letterSpacing:".24em",opacity:fadeOut(f,47,7),textShadow:"0 2px 12px rgba(0,0,0,.16)"}}>A NEW CREATIVE WORKFLOW</div>
+ </AbsoluteFill>;
 };
 
 const BrandReveal = () => {
@@ -225,28 +198,24 @@ const BrandReveal = () => {
 };
 
 const ClaimScene = () => {
-  const f = useCurrentFrame();
-  const title = e(f, 0, 12);
-  const marker = e(f, 6, 21);
-  return (
-    <AbsoluteFill style={{ ...full, background: "#faf9f5", color: "#111315" }}>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 315, display: "flex", flexDirection: "column", alignItems: "center", opacity: title, transform: "translateY(" + ((1-title)*28) + "px)" }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", whiteSpace: "nowrap", gap: 18 }}>
-          <Word size={104} color="#111315" tracking={-.065}>The</Word>
-          <span style={{ position: "relative", display: "inline-block" }}>
-            <span style={{ position: "absolute", left: -10, right: -12, top: "52%", height: 58, background: "#a8f05c", transform: "scaleX(" + marker + ") rotate(-.6deg)", transformOrigin: "left center" }} />
-            <span style={{ position: "relative" }}><Word size={104} color="#111315" tracking={-.065}>open-source</Word></span>
-          </span>
-        </div>
-        <Word size={104} color="#111315" tracking={-.065}>alternative</Word>
-        <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 13, color: "#898985" }}>
-          <span style={{ fontSize: 26, fontWeight: 550 }}>to</span>
-          <RadialMark frame={f} size={31} color="#e97962" />
-          <span style={{ fontSize: 32, fontWeight: 850, color: "#1b1c1e", letterSpacing: "-.055em" }}>Claude Motion.</span>
-        </div>
-      </div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame();
+ const title=e(f,0,8),alt=e(f,13,22),marker=e(f,3,13);
+ return <AbsoluteFill style={{...full,background:"#faf9f5",color:"#111315"}}>
+  <div style={{position:"absolute",left:0,right:0,top:292,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-title)*23)+"px)"}}>
+   <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",whiteSpace:"nowrap",gap:22,opacity:title}}>
+    <Word size={168} color="#111315" tracking={-.085}>The</Word>
+    <span style={{position:"relative",display:"inline-block"}}>
+     <span style={{position:"absolute",left:-13,right:-18,top:"53%",height:80,background:"#a1ef4d",transform:"scaleX("+marker+") rotate(-.7deg)",transformOrigin:"left center"}}/>
+     <span style={{position:"relative"}}><Word size={168} color="#111315" tracking={-.085}>open-source</Word></span>
+    </span>
+   </div>
+   <div style={{marginTop:-4,opacity:alt,transform:"translateY("+((1-alt)*25)+"px)"}}><Word size={164} color="#111315" tracking={-.085}>alternative</Word></div>
+   <div style={{marginTop:48,display:"flex",alignItems:"center",gap:16,color:"#898985",opacity:e(f,3,13)}}>
+    <span style={{fontSize:39,fontWeight:550}}>to</span><RadialMark frame={f} size={47} color="#e97962"/>
+    <span style={{fontSize:54,fontWeight:850,color:"#1b1c1e",letterSpacing:"-.06em"}}>Claude Motion.</span>
+   </div>
+  </div>
+ </AbsoluteFill>;
 };
 
 const GalleryPoster = ({ index, frame }: { index: number; frame: number }) => {
