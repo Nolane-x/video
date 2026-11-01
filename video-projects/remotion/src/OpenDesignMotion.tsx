@@ -90,131 +90,154 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.045;
- const brush=Array.from({length:76},(_,i)=>{
-  const x=(i*197)%2200-130,y=235+(i*139)%690,w=70+(i*73)%300,h=3+(i*11)%18;
-  const palette=["#fffaf0","#eaf4ee","#c1deeb","#f8d9c8","#f1bcae","#a7cde0","#e6e9df","#d6e3e2"];
-  return {x,y,w,h,angle:-36+(i%13)*5.5,color:palette[i%palette.length],opacity:.035+(i%6)*.012};
+ const drift=frame*.032;
+ const brush=Array.from({length:104},(_,i)=>{
+  const x=(i*193)%2280-180;
+  const y=82+(i*127)%620;
+  const w=64+(i*71)%360;
+  const h=2+(i*13)%13;
+  const palette=["#f7fbf2","#e1f1f4","#a8d4eb","#fff0df","#f4c8b8","#d3e6e8","#b7d9e9"];
+  return {x,y,w,h,angle:-28+(i%15)*3.8,color:palette[i%palette.length],opacity:.035+(i%7)*.013};
  });
- const pigment=Array.from({length:132},(_,i)=>({
-  x:(i*83)%2040-40,
-  y:520+(i*197)%490,
-  r:1+(i%5)*.72,
-  color:["#fffaf1","#f3d7c7","#8bb8cf","#e5c0b5"][i%4],
-  opacity:.035+(i%5)*.014
+ const specks=Array.from({length:168},(_,i)=>({
+  x:(i*109)%2050-55,
+  y:150+(i*173)%790,
+  r:.7+(i%4)*.55,
+  color:["#fffaf0","#dcecf0","#f3cabb","#8dc6e1"][i%4],
+  opacity:.025+(i%6)*.012
  }));
- return <AbsoluteFill style={{background:"#8ac5e4",overflow:"hidden"}}>
+ return <AbsoluteFill style={{background:"#75bde4",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v36" x1="0" x2="0" y1="0" y2="1">
-     <stop stopColor="#66b4e3"/>
-     <stop offset=".28" stopColor="#92c9e4"/>
-     <stop offset=".52" stopColor="#c8e0e3"/>
-     <stop offset=".73" stopColor="#e8d6cb"/>
-     <stop offset="1" stopColor="#e8bba9"/>
+    <linearGradient id="wc-sky-v37" x1="0" y1="0" x2=".12" y2="1">
+     <stop stopColor="#58b2e0"/>
+     <stop offset=".34" stopColor="#82c5e5"/>
+     <stop offset=".63" stopColor="#b9dce7"/>
+     <stop offset=".84" stopColor="#eacfc0"/>
+     <stop offset="1" stopColor="#f0bda9"/>
     </linearGradient>
-    <linearGradient id="wc-wash-cool-v36" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#f7fbf3" stopOpacity=".06"/>
-     <stop offset=".28" stopColor="#e4f3ed" stopOpacity=".52"/>
-     <stop offset=".58" stopColor="#b9d9e8" stopOpacity=".34"/>
-     <stop offset="1" stopColor="#fff3e5" stopOpacity=".03"/>
+    <linearGradient id="wc-sky-wash-v37" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fffdf2" stopOpacity=".03"/>
+     <stop offset=".38" stopColor="#e9f5f0" stopOpacity=".33"/>
+     <stop offset=".68" stopColor="#d3e8e9" stopOpacity=".24"/>
+     <stop offset="1" stopColor="#f3d3c7" stopOpacity=".06"/>
     </linearGradient>
-    <linearGradient id="wc-wash-warm-v36" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff4e5" stopOpacity=".04"/>
-     <stop offset=".34" stopColor="#f8d8c5" stopOpacity=".55"/>
-     <stop offset=".72" stopColor="#eab9b3" stopOpacity=".3"/>
-     <stop offset="1" stopColor="#d7e5e3" stopOpacity=".03"/>
+    <linearGradient id="wc-blue-streak-v37" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#f7fcf4" stopOpacity=".08"/>
+     <stop offset=".24" stopColor="#f9fbf1" stopOpacity=".66"/>
+     <stop offset=".57" stopColor="#dceff1" stopOpacity=".44"/>
+     <stop offset="1" stopColor="#ffffff" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-bank-v36" x1="0" y1="0" x2=".18" y2="1">
-     <stop stopColor="#fffef5" stopOpacity=".97"/>
-     <stop offset=".42" stopColor="#fff8ed" stopOpacity=".88"/>
-     <stop offset=".77" stopColor="#f6dfd2" stopOpacity=".52"/>
-     <stop offset="1" stopColor="#eec9bd" stopOpacity=".08"/>
+    <linearGradient id="wc-peach-streak-v37" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff4e6" stopOpacity=".02"/>
+     <stop offset=".38" stopColor="#f8d8c4" stopOpacity=".48"/>
+     <stop offset=".72" stopColor="#efaeb0" stopOpacity=".34"/>
+     <stop offset="1" stopColor="#f6e6d8" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-light-v36" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#ffffff" stopOpacity=".86"/>
-     <stop offset=".66" stopColor="#fffdf5" stopOpacity=".28"/>
-     <stop offset="1" stopColor="#f5e0d4" stopOpacity="0"/>
+    <linearGradient id="wc-cloud-v37" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#fffdf0" stopOpacity=".9"/>
+     <stop offset=".46" stopColor="#fff2dc" stopOpacity=".63"/>
+     <stop offset="1" stopColor="#f3bfae" stopOpacity=".04"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-warm-v36" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff0df" stopOpacity=".2"/>
-     <stop offset=".38" stopColor="#f4c7b4" stopOpacity=".74"/>
-     <stop offset=".78" stopColor="#ddaeb0" stopOpacity=".42"/>
-     <stop offset="1" stopColor="#c6dce0" stopOpacity=".03"/>
+    <linearGradient id="wc-cloud-blue-v37" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#f8fcf3" stopOpacity=".72"/>
+     <stop offset=".6" stopColor="#c8e2e7" stopOpacity=".48"/>
+     <stop offset="1" stopColor="#eabeb2" stopOpacity=".08"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-shadow-v36" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#b4cbd2" stopOpacity=".05"/>
-     <stop offset=".48" stopColor="#a5bac8" stopOpacity=".28"/>
-     <stop offset="1" stopColor="#d7aaa8" stopOpacity=".2"/>
+    <linearGradient id="wc-cloud-peach-v37" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff0de" stopOpacity=".08"/>
+     <stop offset=".43" stopColor="#f3bc9f" stopOpacity=".62"/>
+     <stop offset=".78" stopColor="#e99ca0" stopOpacity=".36"/>
+     <stop offset="1" stopColor="#e7c9bb" stopOpacity=".02"/>
     </linearGradient>
-    <radialGradient id="wc-sunwash-v36" cx="72%" cy="76%" r="58%">
-     <stop stopColor="#fff0dc" stopOpacity=".55"/>
-     <stop offset=".48" stopColor="#f7d9ca" stopOpacity=".19"/>
-     <stop offset="1" stopColor="#fff0dc" stopOpacity="0"/>
+    <linearGradient id="wc-horizon-v37" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#1a759d"/>
+     <stop offset=".55" stopColor="#105e89"/>
+     <stop offset="1" stopColor="#0c507c"/>
+    </linearGradient>
+    <linearGradient id="wc-water-v37" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#3d9abf"/>
+     <stop offset=".5" stopColor="#277da7"/>
+     <stop offset="1" stopColor="#185f8a"/>
+    </linearGradient>
+    <radialGradient id="wc-sun-haze-v37" cx="73%" cy="78%" r="59%">
+     <stop stopColor="#ffe8d5" stopOpacity=".54"/>
+     <stop offset=".52" stopColor="#f7d9ca" stopOpacity=".16"/>
+     <stop offset="1" stopColor="#f7d9ca" stopOpacity="0"/>
     </radialGradient>
-    <filter id="wc-haze-v36"><feGaussianBlur stdDeviation="36"/></filter>
-    <filter id="wc-soft-v36"><feGaussianBlur stdDeviation="18"/></filter>
-    <filter id="wc-mid-v36"><feGaussianBlur stdDeviation="7"/></filter>
-    <filter id="wc-edge-v36">
-     <feTurbulence type="fractalNoise" baseFrequency=".012 .024" numOctaves="2" seed="83" result="cloudNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="cloudNoise" scale="24" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation="1.25"/>
+    <filter id="wc-haze-v37"><feGaussianBlur stdDeviation="25"/></filter>
+    <filter id="wc-soft-v37"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="wc-mid-v37"><feGaussianBlur stdDeviation="4.5"/></filter>
+    <filter id="wc-edge-v37">
+     <feTurbulence type="fractalNoise" baseFrequency=".016 .035" numOctaves="2" seed="101" result="edgeNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation=".85"/>
     </filter>
-    <filter id="wc-pigment-v36">
-     <feTurbulence type="fractalNoise" baseFrequency=".045 .07" numOctaves="2" seed="29" result="pigmentNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    <filter id="wc-pigment-v37">
+     <feTurbulence type="fractalNoise" baseFrequency=".07 .095" numOctaves="2" seed="43" result="pigmentNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
-    <filter id="wc-paper-v36">
-     <feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="2" seed="31" result="paperNoise"/>
-     <feColorMatrix in="paperNoise" type="saturate" values="0"/>
+    <filter id="wc-paper-v37">
+     <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="37"/>
+     <feColorMatrix type="saturate" values="0"/>
     </filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v36)"/>
-   <rect width="1920" height="1080" fill="url(#wc-sunwash-v36)"/>
-   <g transform={"translate("+(-drift*.72)+",0)"} filter="url(#wc-haze-v36)" opacity=".55">
-    <path d="M-180 360C44 216 183 197 356 232C514 111 700 101 845 164C1017 76 1162 106 1295 188C1440 105 1598 145 1738 220C1878 203 1982 253 2120 335C1935 376 1799 354 1639 395C1472 452 1332 416 1200 365C1044 440 907 394 768 350C613 453 456 417 320 370C150 457 6 443 -180 360Z" fill="url(#wc-wash-cool-v36)"/>
-    <path d="M260 570C426 445 585 422 724 445C883 359 1037 365 1161 421C1294 355 1467 376 1582 441C1709 407 1842 444 1994 534C1787 600 1625 576 1483 555C1323 624 1195 596 1061 552C889 625 735 588 612 551C489 605 361 612 260 570Z" fill="url(#wc-wash-warm-v36)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v37)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-wash-v37)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sun-haze-v37)"/>
+
+   <g transform={"translate("+(-drift*.45)+",0)"} opacity=".5" filter="url(#wc-haze-v37)">
+    <path d="M-180 420C15 330 193 265 370 251C568 176 750 157 928 170C1112 104 1291 95 1454 125C1641 60 1810 74 2110 8" fill="none" stroke="url(#wc-blue-streak-v37)" strokeWidth="118" strokeLinecap="round"/>
+    <path d="M-170 490C94 348 300 300 486 285C685 203 863 198 1026 195C1216 123 1394 128 1538 122C1712 70 1874 47 2070 -8" fill="none" stroke="#dceff1" strokeWidth="46" strokeLinecap="round" opacity=".5"/>
+    <path d="M490 448C728 370 919 314 1091 286C1283 230 1442 207 1594 195C1748 157 1890 143 2070 92" fill="none" stroke="url(#wc-peach-streak-v37)" strokeWidth="104" strokeLinecap="round"/>
    </g>
-   <g transform={"translate("+(drift*.2)+",0)"} opacity=".3" filter="url(#wc-soft-v36)">
-    <path d="M-100 185C72 95 202 100 325 145C450 83 571 87 679 131C804 83 933 94 1037 148C1150 115 1277 143 1350 204" fill="none" stroke="#e7f4f0" strokeWidth="66" strokeLinecap="round"/>
-    <path d="M1110 330C1217 263 1327 272 1424 305C1530 250 1665 272 1745 325" fill="none" stroke="#f8eee3" strokeWidth="48" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.28)+",0)"} opacity=".62">
+    <path d="M-160 477C76 329 277 293 440 240C624 174 785 159 946 131C1121 104 1289 80 1448 51" fill="none" stroke="#f6fbf4" strokeWidth="62" strokeLinecap="round" opacity=".13" filter="url(#wc-soft-v37)"/>
+    <path d="M-180 466C67 331 284 284 459 221C635 157 806 149 982 116C1150 91 1301 68 1460 35" fill="none" stroke="#fffaf0" strokeWidth="23" strokeLinecap="round" opacity=".3" filter="url(#wc-mid-v37)"/>
+    <path d="M-80 526C126 408 283 372 444 321C600 270 769 238 914 217" fill="none" stroke="#c9e5ee" strokeWidth="17" strokeLinecap="round" opacity=".3"/>
+    <path d="M760 315C955 255 1121 225 1280 202S1598 151 1790 96" fill="none" stroke="#fff6e9" strokeWidth="27" strokeLinecap="round" opacity=".24" filter="url(#wc-mid-v37)"/>
+    <path d="M980 390C1170 314 1350 295 1510 248S1780 201 1990 151" fill="none" stroke="#f3c2b7" strokeWidth="34" strokeLinecap="round" opacity=".3" filter="url(#wc-soft-v37)"/>
    </g>
-   <g transform={"translate("+(-drift)+",0)"} filter="url(#wc-soft-v36)" opacity=".62">
-    <path d="M-180 748C-70 682 40 670 142 705C238 612 358 598 444 655C526 573 644 586 706 654C799 621 897 671 917 748C1018 751 1081 812 1064 890C943 934 840 900 761 866C675 927 564 910 493 871C392 936 275 908 214 857C104 898 -39 865 -180 748Z" fill="#e7e8df"/>
+   <g transform={"translate("+(drift*.18)+",0)"} opacity=".48" filter="url(#wc-soft-v37)">
+    <path d="M-100 675C95 591 240 548 382 536C512 484 656 478 793 453" fill="none" stroke="#f4f8ec" strokeWidth="30" strokeLinecap="round"/>
+    <path d="M1280 350C1410 305 1532 267 1648 260S1850 230 2020 175" fill="none" stroke="#fff6ec" strokeWidth="42" strokeLinecap="round"/>
+    <path d="M1310 405C1448 348 1576 332 1702 300S1894 272 2030 220" fill="none" stroke="#edc4bc" strokeWidth="25" strokeLinecap="round"/>
    </g>
-   <g transform={"translate("+(drift*.22)+",0)"} filter="url(#wc-edge-v36)">
-    <path d="M-180 925C-136 872 -78 844 -14 863C15 811 74 776 137 791C154 724 214 675 279 705C318 628 391 594 459 632C502 573 587 583 629 641C691 624 746 654 768 704C827 692 879 730 896 787C950 820 974 884 948 956C865 1002 785 997 710 963C644 1006 565 994 505 960C432 1003 348 989 290 947C214 982 125 964 70 931C-18 962 -113 952 -180 925Z" fill="url(#wc-cloud-bank-v36)" opacity=".96"/>
-    <path d="M-120 886C-51 841 16 831 83 851C135 795 203 781 262 811C326 741 393 728 451 768C506 715 583 723 621 775C687 759 739 795 759 846C815 859 842 900 833 944C744 964 663 950 604 927C524 965 447 941 387 907C302 948 220 923 166 896C85 925 8 916 -56 897Z" fill="#fffdf4" opacity=".54" filter="url(#wc-mid-v36)"/>
-    <path d="M45 824C91 768 150 759 199 789C244 724 308 712 357 752C401 698 469 692 510 738C560 725 613 758 630 806C551 828 493 810 440 795C377 844 311 822 269 806C192 844 112 845 45 824Z" fill="url(#wc-cloud-light-v36)" opacity=".72" filter="url(#wc-mid-v36)"/>
-    <path d="M365 873C412 812 475 799 531 824C586 777 649 783 694 826C749 790 817 802 848 850C906 849 945 886 952 927C871 954 803 939 752 914C682 953 604 930 559 908C488 934 420 912 365 873Z" fill="#fffaf0" opacity=".57" filter="url(#wc-mid-v36)"/>
-    <path d="M-110 948C-27 906 48 908 112 932C184 891 253 897 312 930C387 912 450 925 510 961" fill="none" stroke="#f6cdb9" strokeWidth="68" strokeLinecap="round" opacity=".31" filter="url(#wc-soft-v36)"/>
-    <path d="M76 963C170 923 244 932 317 955C386 927 460 939 525 970" fill="none" stroke="#fffdf3" strokeWidth="37" strokeLinecap="round" opacity=".48" filter="url(#wc-mid-v36)"/>
+
+   <g transform={"translate("+(-drift*.2)+",0)"} filter="url(#wc-edge-v37)">
+    <path d="M-100 848C-56 812 -6 798 40 815C73 770 117 755 157 780C196 742 244 744 276 778C317 762 360 783 375 815C334 842 296 846 257 832C208 866 159 854 120 837C67 870 12 875 -100 848Z" fill="url(#wc-cloud-v37)" opacity=".85"/>
+    <path d="M-45 884C18 846 75 847 128 864C173 832 227 835 265 861C306 844 352 855 379 885C328 909 280 908 239 891C179 921 123 909 81 889C28 909 -13 903 -45 884Z" fill="url(#wc-cloud-blue-v37)" opacity=".62" filter="url(#wc-mid-v37)"/>
+    <path d="M236 890C272 849 316 833 359 851C398 811 450 812 484 842C525 821 567 837 587 866C550 894 509 896 473 880C428 910 376 898 340 881C303 906 265 906 236 890Z" fill="url(#wc-cloud-v37)" opacity=".72"/>
+    <path d="M360 922C430 881 490 885 542 905C597 864 657 873 700 904C752 881 804 895 826 926C759 955 704 946 658 925C603 954 548 946 505 925C451 945 398 939 360 922Z" fill="url(#wc-cloud-peach-v37)" opacity=".72" filter="url(#wc-mid-v37)"/>
+    <path d="M-90 915C-15 885 39 887 96 903C154 884 212 892 269 916" fill="none" stroke="#fff7e9" strokeWidth="35" strokeLinecap="round" opacity=".4" filter="url(#wc-soft-v37)"/>
    </g>
-   <g transform={"translate("+(drift*.16)+",0)"} filter="url(#wc-edge-v36)">
-    <path d="M600 939C668 872 747 858 816 889C869 828 950 814 1016 858C1077 806 1165 813 1210 868C1289 839 1362 858 1403 911C1485 904 1546 940 1578 987C1473 1023 1397 1002 1336 977C1268 1015 1192 1001 1136 973C1051 1011 967 990 912 961C830 989 732 981 600 939Z" fill="url(#wc-cloud-warm-v36)" opacity=".8"/>
-    <path d="M822 900C888 852 948 856 1000 885C1052 843 1121 843 1169 884C1227 855 1290 876 1322 912C1260 939 1202 927 1157 911C1093 946 1035 925 991 907C924 935 872 924 822 900Z" fill="#fff0df" opacity=".32" filter="url(#wc-mid-v36)"/>
-    <path d="M1276 850C1334 789 1405 780 1466 817C1525 768 1600 777 1642 822C1711 793 1782 815 1815 862C1765 901 1695 892 1649 875C1588 910 1514 888 1473 867C1400 895 1332 882 1276 850Z" fill="#fff3e5" opacity=".36" filter="url(#wc-soft-v36)"/>
+   <g transform={"translate("+(drift*.3)+",0)"} filter="url(#wc-edge-v37)" opacity=".7">
+    <path d="M700 912C746 879 796 881 831 900C868 865 917 860 952 887C987 861 1037 870 1064 901C1022 929 984 929 950 913C910 939 867 930 832 914C782 936 738 930 700 912Z" fill="#fff4e5" opacity=".5"/>
+    <path d="M920 939C988 900 1055 909 1106 929C1172 891 1235 901 1276 931C1329 909 1383 923 1408 951C1342 971 1287 962 1241 944C1186 972 1129 965 1088 945C1028 966 970 958 920 939Z" fill="url(#wc-cloud-peach-v37)" opacity=".6"/>
    </g>
-   <g filter="url(#wc-soft-v36)" opacity=".38">
-    <path d="M635 652C740 588 834 587 930 621C1025 573 1124 578 1195 615" fill="none" stroke="#eaf4ed" strokeWidth="35" strokeLinecap="round"/>
-    <path d="M1120 706C1220 648 1316 660 1396 690" fill="none" stroke="#f7dfd0" strokeWidth="27" strokeLinecap="round"/>
-    <path d="M144 552C240 496 326 505 398 540" fill="none" stroke="#eaf3ec" strokeWidth="24" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.22)+",0)"} opacity=".4" filter="url(#wc-soft-v37)">
+    <path d="M-80 780C82 738 181 737 292 756S493 775 614 735" fill="none" stroke="#fff2df" strokeWidth="45" strokeLinecap="round"/>
+    <path d="M250 812C390 769 525 779 650 800S870 804 1000 767" fill="none" stroke="#f2bcae" strokeWidth="34" strokeLinecap="round"/>
+    <path d="M1015 818C1126 778 1248 783 1350 806" fill="none" stroke="#fff4e8" strokeWidth="26" strokeLinecap="round"/>
    </g>
-   <g filter="url(#wc-mid-v36)" opacity=".29">
-    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.3)+" "+(-p.h*1.4)+" "+(p.w*.68)+" "+(-p.h*.18)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+
+   <g filter="url(#wc-mid-v37)" opacity=".3">
+    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.28)+" "+(-p.h*1.2)+" "+(p.w*.7)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
-   <g filter="url(#wc-pigment-v36)" opacity=".55">
-    {pigment.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
+   <g filter="url(#wc-pigment-v37)" opacity=".42">
+    {specks.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
    </g>
-   <g transform={"translate("+(drift*.07)+",0)"} opacity=".84">
-    <path d="M-100 983C78 958 204 977 361 960C512 944 651 974 813 954C959 936 1111 974 1266 952C1404 933 1548 968 1691 948C1829 930 1921 945 2020 928V1080H-100Z" fill="#b7d0d1" opacity=".34" filter="url(#wc-soft-v36)"/>
-    <path d="M-100 1003C57 986 189 1005 343 987C499 970 650 1008 800 989C961 968 1103 1003 1251 985C1403 966 1545 1002 1694 982C1819 967 1929 981 2020 966V1080H-100Z" fill="#76a5b4" opacity=".42"/>
-    <path d="M-100 1037C76 1015 221 1034 375 1018C530 1001 684 1037 837 1019C987 1002 1136 1037 1283 1017C1435 999 1584 1034 1732 1014C1854 999 1940 1011 2020 998V1080H-100Z" fill="#356f91" opacity=".46"/>
+
+   <g transform={"translate("+(drift*.055)+",0)"}>
+    <path d="M-110 1037C33 1018 154 991 277 987C391 978 465 1017 563 1025C689 1035 761 1010 870 1015C1035 1021 1142 1038 1281 1022C1435 1005 1550 1012 1699 1009C1814 1005 1920 1014 2030 1008V1080H-110Z" fill="url(#wc-water-v37)" opacity=".8"/>
+    <path d="M-110 1017C16 995 146 971 267 967C358 961 428 1002 528 1009C622 1015 703 1005 792 1009C915 1016 1003 1019 1118 1010C1248 1001 1373 1011 1494 1004C1660 994 1807 1001 2030 992V1080H-110Z" fill="url(#wc-horizon-v37)"/>
+    <path d="M-110 1002C31 982 157 954 264 958C348 962 411 1000 505 1003C586 1006 679 995 767 1000" fill="none" stroke="#4fa5c5" strokeWidth="10" opacity=".28" filter="url(#wc-soft-v37)"/>
+    <path d="M40 1033C153 1021 233 1021 333 1030M620 1039C719 1030 814 1032 907 1038M1240 1030C1343 1023 1456 1028 1540 1036" fill="none" stroke="#88bfd0" strokeWidth="5" opacity=".19" filter="url(#wc-mid-v37)"/>
    </g>
-   <rect width="1920" height="1080" filter="url(#wc-paper-v36)" opacity=".055" style={{mixBlendMode:"soft-light"}}/>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v37)" opacity=".045" style={{mixBlendMode:"soft-light"}}/>
   </svg>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 48%,transparent 45%,rgba(242,224,212,.12) 100%)"}}/>
-  <Noise opacity={.012}/>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 46%,transparent 48%,rgba(247,231,217,.08) 100%)"}}/>
+  <Noise opacity={.01}/>
  </AbsoluteFill>;
 };
 

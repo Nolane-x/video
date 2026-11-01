@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V36 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V37 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
@@ -10,7 +10,8 @@ V30 follows full-frame inspection of V29's render and exact source frame pairs. 
 
 ### Opening and gallery
 - V35 removed the lingering continuous top wave line, retained more open blue sky, strengthened the irregular cream-white lower-left cloud mass, and added broad broken diagonal washes with peach/pink glazing and a low blue/teal shoreline. Its Actions render passed, but review at delivery size found the cloud bank still too diffuse and horizontal.
-- V36 source candidate strengthens asymmetric overlapping cloud volumes, separates white/cool highlights from warm underpainting, adds broken mid-sky wisps and stronger pigment/paper texture, while keeping the title-safe sky and low blue horizon. The V36 source has been committed; its Actions render and visual review are the next gate.
+- V36 passed validator, typecheck, Remotion render, FFmpeg mastering and decoded-frame/metadata QA in [Actions run 41315006194](https://github.com/Nolane-x/video/actions/runs/41315006194). Direct comparison of native frame 0 against `preview.mp4` showed the larger lower-left cloud mass and horizontal bands still differed materially from the original. V36 is preserved as a technical-pass candidate, not approved.
+- V37 changes the art direction based on that comparison: open blue sky, long broken diagonal wisps, warm diagonal glaze, small low cloud islands, and a dark irregular hill/waterline. Its source candidate awaits a fresh Actions render and visual review.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.
