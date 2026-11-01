@@ -219,7 +219,10 @@ def write_cross_scenario_audition(
                     '<p>Không thể xác minh file audio.</p></div>'
                 )
                 continue
-            relative = (Path("cases") / case_id / Path(row["audio_file"])).as_posix()
+            case_root = (output_dir / "cases" / case_id).resolve()
+            verified_audio = safe_audio_path(case_root, str(row["audio_file"]))
+            audio_relative = verified_audio.relative_to(case_root).as_posix()
+            relative = (Path("cases") / case_id / audio_relative).as_posix()
             source = html.escape(relative, quote=True)
             tracks.append(
                 f'<div class="track"><strong>{title}</strong>'
@@ -239,7 +242,7 @@ def write_cross_scenario_audition(
             )
         cards.append(
             f'<article class="candidate" data-label="{html.escape(label, quote=True)}">'
-            f'<header><h2>{html.escape(label)}</h2><span>4 kịch bản</span></header>'
+            f'<header><h2>{html.escape(label)}</h2><span>{len(cases)} kịch bản</span></header>'
             f'<div class="tracks">{"".join(tracks)}</div>'
             f'<div class="ratings">{"".join(controls)}</div>'
             '<label class="notes-label">Ghi chú nghe thử'
@@ -331,7 +334,7 @@ def write_index(output_dir: Path, report: dict[str, Any]) -> None:
             f'<p>{case["ready"]}/{case["candidate_count"]} audio · '
             f'{case["technical_pass"]} technical pass · '
             f'{case["technical_warning"]} warnings · {case["technical_error"]} errors</p>'
-            f'<a href="cases/{cid}/index.html">Nghe riêng kịch bản này</a></p>'
+            f'<p><a href="cases/{cid}/index.html">Nghe riêng kịch bản này</a></p>'
             f'<p><a href="voice-audition-all-scripts.html">So sánh cùng một giọng qua đủ bốn kịch bản</a></p></article>'
         )
     doc = """<!doctype html>
