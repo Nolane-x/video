@@ -212,6 +212,7 @@ jobs:
               "integrations/voice-studio/provider_voice_benchmark.py",
               "integrations/voice-studio/analyze_voice_benchmark.py",
               "integrations/voice-studio/analyze_actions_voice_lab.py",
+              "integrations/voice-studio/ratings/README.md",
               "integrations/voice-studio/actions_voice_lab.py",
               ".github/workflows/voice-studio-actions-shortlist.yml",
               "integrations/voice-studio/actions_voice_project.py",
