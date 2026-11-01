@@ -12,8 +12,10 @@ Start with the full integration guide:
 Production audio render/QA runs are orchestrated by
 [Voice Studio Actions CPU lab](../.github/workflows/voice-studio-actions-lab.yml).
 It renders ten KorvaTTS Vietnamese presets across four scripts, performs
-FFprobe/FFmpeg checks, and uploads WAVs, blind audition pages and reports as a
-GitHub Actions artifact. No local workstation is required for this baseline.
+FFprobe/FFmpeg checks, and uploads WAVs, per-script listening pages, a combined
+all-scripts blind audition (one card per anonymous voice), and evidence reports
+as a GitHub Actions artifact. The combined page exports one listener-ratings
+JSON file for later cast selection. No local workstation is required.
 
 For actual video narration, the separate
 [Voice Studio Actions production renderer](../.github/workflows/voice-studio-actions-project.yml)
