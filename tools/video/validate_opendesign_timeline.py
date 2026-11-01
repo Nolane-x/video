@@ -26,7 +26,7 @@ root=source.split("export const OpenDesignMotion",1)[1]
 actualRoot=[(int(a),int(b),c) for a,b,c in re.findall(r"<Sequence from=\{(\d+)\} durationInFrames=\{(\d+)\}><([A-Za-z0-9]+)",root)]
 expectedRoot=[(s["startFrame"],s["endFrame"]-s["startFrame"],s["component"]) for s in shots]
 need(actualRoot==expectedRoot,"root JSX differs from shot map")
-for x in ["Launch film","Make a 10s launch film","for our app.","DeepSeek V4.1","Claude Opus 5.5","MorroCubeIntro","CountdownOne","InPoster","TogglePoster","PixelGamePoster","DepthField","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962","const DotPoster","const GreenGhostTransition","const EaseGreen","const OutPoster","const LinearPoster","const ClockPoster","const EyePoster","const Future3D"]:
+for x in ["Launch film","Make a 10s launch film","for our app.","DeepSeek V4.1","Claude Opus 5.5","MorroCubeIntro","CountdownOne","InPoster","TogglePoster","PixelGamePoster","DepthField","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962=","const DotPoster","const GreenGhostTransition","const EaseGreen","const OutPoster","const LinearPoster","const ClockPoster","const EyePoster","const Future3D"]:
  need(x in source,"missing required source token: "+x)
 need("BPM=114.84375" in score,"score BPM does not match source tempo")
 print("PASS: V13 12 source-indexed sections / 20 measured poster cuts / 1119 frames / five preview states / 3-2-fullscreen-1 countdown / MORRO tile / end card")
