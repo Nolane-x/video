@@ -20,7 +20,10 @@ MANIFEST_URL = (
     "https://github.com/Nolane-x/VoiceStudio/releases/download/"
     "voice-library-latest/manifest.json"
 )
-COMMERCIAL_ALLOWED_MARKERS = frozenset({\n    "upstream-model-card-permits-generated-audio",\n    "apache-2.0-model-and-voice-assets",\n})
+COMMERCIAL_ALLOWED_MARKERS = frozenset({
+    "upstream-model-card-permits-generated-audio",
+    "apache-2.0-model-and-voice-assets",
+})
 
 
 def read_manifest(path: str | None, timeout: float = 30.0) -> dict[str, Any]:
