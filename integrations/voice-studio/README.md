@@ -31,8 +31,14 @@ tests:
   Artifacts are retained for 14 days.
 
 After listening, export `voice-human-ratings-all-scripts.json` from the
-combined page and commit it to
+combined page and review the file before committing it to
 `integrations/voice-studio/ratings/voice-human-ratings-all-scripts.json`.
+**This repository is public:** the ratings and written listener notes you
+commit will be public too. Do not include personal details, reference audio,
+consent documents, credentials or anything you do not wish to publish. Full
+instructions and the privacy checklist are in
+`integrations/voice-studio/ratings/README.md`.
+
 Then run **Actions → Voice Studio Actions human shortlist** and supply the
 completed benchmark run ID, exact artifact name and ratings path. That workflow
 downloads the original benchmark artifact, joins the ratings to its private
