@@ -90,48 +90,54 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.11,breath=1+.006*Math.sin(frame/19);
- const wash=Array.from({length:36},(_,i)=>{
-  const x=(i*257)%2060-70,y=70+(i*137)%560,w=110+(i*43)%260,h=24+(i*19)%74;
-  const tone=i%4===0?"#fff8ee":i%4===1?"#e2f0f2":i%4===2?"#c6dfe9":"#f5d2c4";
-  return {x,y,w,h,angle:((i%7)-3)*5,tone,opacity:.09+(i%5)*.025};
+ const drift=frame*.075,breath=1+.004*Math.sin(frame/23);
+ const strokes=Array.from({length:52},(_,i)=>{
+  const x=(i*193)%2100-90,y=95+(i*131)%795,w=90+(i*71)%290,h=7+(i*23)%32;
+  const palette=["#fff9ec","#e8f2f1","#c5e0eb","#f8d8c6","#f4c6b8","#aacbda"];
+  return {x,y,w,h,angle:-23+(i%9)*5,color:palette[i%palette.length],opacity:.045+(i%6)*.018};
  });
- return <AbsoluteFill style={{background:"#80bce3",overflow:"hidden"}}>
+ return <AbsoluteFill style={{background:"#83bfe3",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#70b8e5"/><stop offset=".36" stopColor="#a9d1e5"/><stop offset=".64" stopColor="#e6dcd2"/><stop offset=".83" stopColor="#f0c5b2"/><stop offset="1" stopColor="#d9ad9f"/></linearGradient>
-    <linearGradient id="wc-high-cloud-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fffdf4" stopOpacity=".82"/><stop offset=".46" stopColor="#fff8ef" stopOpacity=".52"/><stop offset="1" stopColor="#ecf2ed" stopOpacity=".12"/></linearGradient>
-    <linearGradient id="wc-cool-cloud-v33" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#e7f1f3" stopOpacity=".84"/><stop offset=".53" stopColor="#bedbe6" stopOpacity=".52"/><stop offset="1" stopColor="#9fc9da" stopOpacity=".08"/></linearGradient>
-    <linearGradient id="wc-warm-cloud-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff0df" stopOpacity=".12"/><stop offset=".45" stopColor="#f7d1bd" stopOpacity=".54"/><stop offset="1" stopColor="#f0b9a5" stopOpacity=".12"/></linearGradient>
-    <filter id="wc-edge-v33"><feTurbulence type="fractalNoise" baseFrequency=".012 .031" numOctaves="3" seed="22" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="21" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="wc-soft-v33"><feGaussianBlur stdDeviation="28"/></filter>
-    <filter id="wc-grain-v33"><feTurbulence type="fractalNoise" baseFrequency=".58" numOctaves="2" seed="7"/><feColorMatrix type="saturate" values="0"/></filter>
+    <linearGradient id="wc-sky-v34" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#6db5e2"/><stop offset=".31" stopColor="#9bc9e3"/><stop offset=".58" stopColor="#d9e6e3"/><stop offset=".76" stopColor="#f3d8c8"/><stop offset="1" stopColor="#e9bda9"/></linearGradient>
+    <linearGradient id="wc-blue-wash-v34" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#5eaddb" stopOpacity=".05"/><stop offset=".35" stopColor="#d7e9ed" stopOpacity=".55"/><stop offset=".72" stopColor="#f8f3e9" stopOpacity=".24"/><stop offset="1" stopColor="#a8d0e2" stopOpacity=".02"/></linearGradient>
+    <linearGradient id="wc-cloud-cream-v34" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff9ed" stopOpacity=".8"/><stop offset=".48" stopColor="#f8eadb" stopOpacity=".47"/><stop offset="1" stopColor="#f2d6c8" stopOpacity=".04"/></linearGradient>
+    <linearGradient id="wc-cloud-peach-v34" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff1df" stopOpacity=".12"/><stop offset=".4" stopColor="#f4c7b2" stopOpacity=".58"/><stop offset=".76" stopColor="#dbaeb0" stopOpacity=".3"/><stop offset="1" stopColor="#d2dfe1" stopOpacity=".06"/></linearGradient>
+    <filter id="wc-paint-edge-v34"><feTurbulence type="fractalNoise" baseFrequency=".009 .021" numOctaves="3" seed="31" result="grain"/><feDisplacementMap in="SourceGraphic" in2="grain" scale="25" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="wc-soft-v34"><feGaussianBlur stdDeviation="34"/></filter>
+    <filter id="wc-soft-tight-v34"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="wc-paper-v34"><feTurbulence type="fractalNoise" baseFrequency=".68" numOctaves="2" seed="15"/><feColorMatrix type="saturate" values="0"/></filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v33)"/>
-   <g transform={"translate("+(-drift)+",0) scale("+breath+")"} filter="url(#wc-soft-v33)" opacity=".82">
-    <path d="M-180 236C-115 128 4 90 115 118C185 36 323 22 418 90C505 12 657 36 710 125C821 53 962 70 1035 164C1137 65 1282 44 1370 129C1482 33 1630 51 1715 143C1810 85 1955 113 2090 216L2090 388C1944 335 1812 358 1682 318C1562 389 1403 364 1306 317C1188 398 1034 378 938 317C812 400 664 377 563 312C431 382 278 376 188 314C68 366 -62 348 -180 326Z" fill="url(#wc-high-cloud-v33)"/>
-    <path d="M-120 427C-25 331 91 319 192 353C275 261 401 264 489 340C609 264 734 284 809 357C912 267 1044 274 1136 358C1242 267 1378 271 1470 365C1586 273 1720 282 1812 367C1924 324 2018 352 2100 422L2100 552C1962 512 1845 524 1725 490C1594 552 1462 539 1355 493C1231 560 1092 546 1000 493C877 561 737 540 644 493C512 562 374 542 278 492C153 536 22 518 -120 507Z" fill="url(#wc-cool-cloud-v33)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v34)"/>
+   <g transform={"translate("+(-drift)+",0) scale("+breath+")"} opacity=".68">
+    <path d="M-150 360C-30 300 44 227 166 226C282 167 397 153 497 177C632 106 788 91 911 121C1032 76 1171 80 1283 124C1404 58 1561 65 1654 132C1776 91 1910 122 2070 198L2020 336C1896 276 1792 291 1699 263C1588 311 1466 298 1372 252C1237 309 1122 279 1021 237C902 305 774 288 671 242C531 301 409 292 310 258C191 317 50 319 -150 360Z" fill="url(#wc-blue-wash-v34)" filter="url(#wc-soft-v34)"/>
+    <path d="M-160 288C-45 252 37 186 152 180C265 126 379 118 478 144C596 84 748 70 856 103C964 65 1092 64 1200 100C1310 49 1448 55 1543 109C1650 70 1779 79 1940 151" fill="none" stroke="#f8f5e9" strokeWidth="112" strokeLinecap="round" opacity=".3" filter="url(#wc-soft-v34)"/>
+    <path d="M-120 404C56 336 169 283 304 295C436 230 577 218 684 250C823 189 955 189 1068 226C1196 173 1335 185 1447 236C1575 191 1734 209 1980 302" fill="none" stroke="#cbe3e9" strokeWidth="73" strokeLinecap="round" opacity=".42" filter="url(#wc-soft-v34)"/>
    </g>
-   <g transform={"translate("+(drift*.36)+",0)"} filter="url(#wc-edge-v33)" opacity=".76">
-    <path d="M-110 275C-84 215 7 191 83 220C122 165 203 157 260 195C317 144 415 152 457 209C534 159 631 180 662 235C740 194 833 216 869 280C812 345 737 352 665 323C590 382 490 369 425 324C344 365 266 355 214 319C134 365 32 346 -110 333Z" fill="#f4f7f0" opacity=".65"/>
-    <path d="M720 230C767 165 858 156 922 198C978 126 1081 125 1140 183C1210 124 1305 147 1349 206C1439 156 1523 179 1569 235C1647 186 1752 209 1812 276C1755 349 1666 353 1594 315C1512 370 1419 356 1363 319C1279 371 1182 359 1124 318C1033 361 945 345 896 306C823 345 748 315 720 230Z" fill="#fff8eb" opacity=".53"/>
-    <path d="M-80 500C-22 442 59 437 118 468C184 414 269 416 330 464C398 415 497 420 540 475C616 445 705 462 752 515C681 570 602 583 535 550C461 596 380 585 326 548C241 596 152 578 101 540C23 574 -39 553 -80 500Z" fill="#e4eff1" opacity=".5"/>
-    <path d="M1120 490C1174 427 1256 427 1318 467C1377 414 1476 426 1526 481C1592 439 1682 446 1725 498C1794 455 1882 471 1960 538C1886 597 1805 599 1736 565C1657 611 1574 597 1519 561C1438 604 1353 585 1306 551C1230 587 1153 557 1120 490Z" fill="#fff3e4" opacity=".48"/>
+   <g transform={"translate("+(drift*.22)+",0)"} filter="url(#wc-soft-v34)" opacity=".83">
+    <path d="M-125 780C-86 700 -18 660 74 677C121 618 220 605 284 649C350 606 446 631 477 694C558 675 631 704 666 763C733 766 782 820 805 888C716 952 628 945 552 902C475 967 374 946 313 907C225 959 132 925 82 891C4 921 -72 885 -125 780Z" fill="url(#wc-cloud-cream-v34)"/>
+    <path d="M-55 817C9 750 72 745 144 757C214 702 296 718 352 766C426 727 496 752 535 799C609 793 670 830 705 889C626 942 536 928 478 895C409 943 322 925 262 891C188 927 100 909 52 876C-1 895 -35 864 -55 817Z" fill="#f5c9b5" opacity=".44"/>
+    <path d="M300 853C368 759 471 741 554 772C641 721 755 733 823 795C893 759 998 782 1042 845C1122 834 1202 872 1250 929C1158 979 1067 957 1002 927C917 979 824 954 765 917C690 957 596 937 550 906C460 944 367 925 300 853Z" fill="url(#wc-cloud-peach-v34)"/>
+    <path d="M786 825C854 767 927 761 1006 783C1080 737 1175 747 1236 791C1302 755 1387 777 1438 825C1515 815 1599 851 1647 903C1569 958 1480 946 1411 915C1342 954 1256 943 1198 911C1115 948 1022 923 969 893C886 920 819 886 786 825Z" fill="#f7e3d7" opacity=".34"/>
+    <path d="M1170 862C1236 810 1305 800 1377 824C1451 774 1556 787 1606 830C1686 785 1786 806 1832 859C1896 845 1966 877 2045 927L2020 1010C1928 976 1861 982 1792 950C1709 997 1608 972 1558 941C1475 988 1381 960 1324 929C1252 959 1195 922 1170 862Z" fill="#f1c6b3" opacity=".26"/>
    </g>
-   <g filter="url(#wc-soft-v33)" opacity=".55">
-    {wash.map((p,i)=><ellipse key={i} cx={p.x} cy={p.y} rx={p.w/2} ry={p.h/2} fill={p.tone} opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+   <g filter="url(#wc-paint-edge-v34)" opacity=".62">
+    <path d="M-170 246C5 186 111 119 246 141C350 88 471 88 567 132C707 66 853 58 959 98C1095 52 1230 62 1332 111C1470 49 1595 76 1700 124C1830 87 1967 119 2100 183" fill="none" stroke="#fff9ec" strokeWidth="33" strokeLinecap="round"/>
+    <path d="M-80 448C72 388 174 340 295 351C413 294 538 296 645 338C748 292 883 287 982 321C1104 281 1228 288 1326 333C1445 292 1577 316 1681 365" fill="none" stroke="#f0f4ef" strokeWidth="19" strokeLinecap="round" opacity=".54"/>
+    <path d="M-50 518C96 466 202 438 319 455C440 409 560 411 663 449" fill="none" stroke="#b7dbe7" strokeWidth="12" strokeLinecap="round" opacity=".48"/>
    </g>
-   <g transform={"translate("+(drift*.22)+",0)"} fill="none" strokeLinecap="round" filter="url(#wc-soft-v33)">
-    <path d="M-80 675C115 575 245 602 390 660S680 741 858 660S1192 590 1372 653S1730 720 2010 624" stroke="#fff0df" strokeWidth="49" opacity=".32"/>
-    <path d="M-90 755C120 681 260 696 390 742S690 818 882 747S1220 681 1390 743S1724 797 2010 711" stroke="#f3c7b1" strokeWidth="62" opacity=".35"/>
-    <path d="M-80 835C180 770 337 785 480 830S800 881 980 831S1322 778 1506 833S1790 865 2010 797" stroke="#f9e3d5" strokeWidth="43" opacity=".29"/>
+   <g filter="url(#wc-soft-tight-v34)" opacity=".34">
+    {strokes.map((p,i)=><path key={i} d={"M"+(p.x)+" "+(p.y)+" q "+(p.w*.28)+" "+(-p.h)+" "+(p.w*.62)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
-   <path d="M0 920C190 886 321 914 480 896C647 878 799 922 967 900C1125 879 1300 914 1466 895C1642 875 1790 902 1920 884V1080H0Z" fill="#9bbfca" opacity=".3"/>
-   <path d="M0 968C185 934 338 961 490 948C658 932 804 975 971 952C1128 934 1282 963 1450 944C1619 925 1786 954 1920 936V1080H0Z" fill="#6598b0" opacity=".44"/>
-   <path d="M0 1020C180 990 330 1016 488 1003C650 989 817 1022 980 1008C1150 991 1316 1018 1490 1001C1650 985 1800 1007 1920 993V1080H0Z" fill="#356f93" opacity=".55"/>
-   <rect width="1920" height="1080" filter="url(#wc-grain-v33)" opacity=".06" style={{mixBlendMode:"soft-light"}}/>
+   <g transform={"translate("+(drift*.08)+",0)"} opacity=".78">
+    <path d="M-80 974C114 925 263 957 421 940C577 920 709 952 840 939C995 924 1125 951 1265 939C1433 922 1593 944 1740 925C1823 914 1884 920 1995 908V1080H-80Z" fill="#a9cad0" opacity=".24" filter="url(#wc-soft-v34)"/>
+    <path d="M-80 1014C93 990 243 1006 392 992C542 976 665 1009 800 995C927 982 1049 1009 1196 992C1356 975 1488 1006 1640 988C1776 973 1880 985 1995 973V1080H-80Z" fill="#5d94ae" opacity=".36"/>
+    <path d="M-80 1039C95 1016 241 1031 386 1019C531 1004 678 1037 819 1022C970 1006 1112 1037 1261 1020C1414 1004 1572 1035 1712 1018C1826 1003 1914 1015 1995 1004V1080H-80Z" fill="#2a668e" opacity=".47"/>
+    <path d="M-40 1011C124 985 229 999 345 987C450 975 567 986 656 1003C752 1021 856 1003 955 992" fill="none" stroke="#ecdbcb" strokeWidth="13" opacity=".22" filter="url(#wc-soft-tight-v34)"/>
+   </g>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v34)" opacity=".045" style={{mixBlendMode:"soft-light"}}/>
   </svg>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 52%,rgba(255,214,195,.09))"}}/>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 57% 49%,transparent 42%,rgba(246,225,212,.12) 100%)"}}/>
   <Noise opacity={.012}/>
  </AbsoluteFill>;
 };
@@ -151,7 +157,7 @@ const OpeningScene = () => {
    </div>
   </div>
   <div style={{position:"absolute",top:345,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
-  <div style={{position:"absolute",left:330,right:330,top:438,height:286,background:"rgba(255,255,255,.94)",border:"1px solid rgba(255,255,255,.99)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
+  <div style={{position:"absolute",left:290,right:290,top:390,height:330,background:"rgba(255,255,255,.94)",border:"1px solid rgba(255,255,255,.99)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
    <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:35,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
     {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
     {typing?<span style={{display:"inline-block",width:2,height:34,background:count<text.length?"#313a3d":"transparent",verticalAlign:"middle",marginLeft:4}}/>:null}
@@ -179,16 +185,16 @@ const HeroTitle = () => {
  const letters=["M","O","T","I","O","N"];
  return <AbsoluteFill style={full}>
   <CloudSky frame={f+100}/>
-  <div style={{position:"absolute",top:190,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontStyle:"italic",fontSize:30,fontWeight:650,color:"#fff",opacity:e(f,0,6),textShadow:"0 2px 12px rgba(0,0,0,.12)"}}>Introducing</div>
-  <div style={{position:"absolute",top:300,left:0,right:0,textAlign:"center",fontFamily:displayFont,fontSize:119,fontWeight:850,letterSpacing:"-.07em",color:"#fff",opacity,transform:"translateY("+((1-p)*45)+"px)",textShadow:"0 2px 0 #d7e5e5,0 4px 0 #b7d0d5,0 7px 0 #8fb4c2,0 11px 0 #6695aa,0 16px 23px rgba(22,69,91,.26)"}}>OpenDesign</div>
+  <div style={{position:"absolute",top:190,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontStyle:"italic",fontSize:40,fontWeight:650,color:"#fff",opacity:e(f,0,6),textShadow:"0 2px 12px rgba(0,0,0,.12)"}}>Introducing</div>
+  <div style={{position:"absolute",top:300,left:0,right:0,textAlign:"center",fontFamily:displayFont,fontSize:132,fontWeight:850,letterSpacing:"-.07em",color:"#fff",opacity,transform:"translateY("+((1-p)*45)+"px)",textShadow:"0 2px 0 #d7e5e5,0 4px 0 #b7d0d5,0 7px 0 #8fb4c2,0 11px 0 #6695aa,0 16px 23px rgba(22,69,91,.26)"}}>OpenDesign</div>
   <div style={{position:"absolute",left:0,right:0,top:440,height:300,display:"flex",justifyContent:"center",alignItems:"center",gap:0,opacity,transform:"translateY("+((1-p)*60)+"px) scale("+(0.9+.1*p)+")",perspective:1200}}>
    {letters.map((ch,i)=>{
     const lag=i*2.1,enter=e(f,lag,lag+14),swing=Math.sin((f-lag)*.18)*5;
     const colors=["#fff","#fff","#fff","#f8f1e8","#fff","#fff"];
-    return <div key={i} style={{fontFamily:displayFont,fontSize:294,fontWeight:1000,letterSpacing:"-.075em",lineHeight:.85,color:colors[i],transform:"translateY("+(1-enter)*(-180+swing*7)+"px) translateX("+(i===3?0:0)+"px) rotateY("+(i===3?-18:0)+"deg) rotateX("+(i===3?8:0)+"deg)",textShadow:"1px 1px 0 #e0e7e8,3px 4px 0 #b6cbd2,6px 7px 0 #8eafbb,10px 12px 0 #5e8ba0,16px 20px 0 #345d75,24px 31px 33px rgba(25,62,83,.3)",marginLeft:i===0?0:-6}}>{ch}</div>;
+    return <div key={i} style={{fontFamily:displayFont,fontSize:370,fontWeight:1000,letterSpacing:"-.02em",lineHeight:.85,color:colors[i],transform:"translateY("+(1-enter)*(-180+swing*7)+"px) translateX("+(i===3?0:0)+"px) rotateY("+(i===3?-18:0)+"deg) rotateX("+(i===3?8:0)+"deg)",textShadow:"1px 1px 0 #e0e7e8,3px 4px 0 #b6cbd2,6px 7px 0 #8eafbb,10px 12px 0 #5e8ba0,16px 20px 0 #345d75,24px 31px 33px rgba(25,62,83,.3)",marginLeft:i===0?0:-6}}>{ch}</div>;
    })}
   </div>
-  <div style={{position:"absolute",left:0,right:0,bottom:89,textAlign:"center",color:"#fff",fontSize:18,fontWeight:800,letterSpacing:".24em",opacity:fadeOut(f,47,7),textShadow:"0 2px 12px rgba(0,0,0,.16)"}}>A NEW CREATIVE WORKFLOW</div>
+  
  </AbsoluteFill>;
 };
 
