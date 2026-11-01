@@ -80,13 +80,20 @@ Each package contains:
 - `build-summary.txt` and `video-voice-assets.zip`
 
 Download `video-voiceover-ready-<run_id>` from the successful Actions run.
-For the H2 kit, copy `narration.wav` to the target project's
-`timeline/voice.wav`; use the manifest's segment timings and the SRT/VTT
-captions when placing lines. The historic `prep_voice.py` path expects
-`blocks.json`, `lines.json` and `words.json`; those are not synthesized by
-this first integration. Do not fabricate word-level alignment from subtitle
-timings. Use a dedicated forced-alignment/ASR pass before any project feature
-that needs word-by-word animation.
+It includes `h2-timeline.zip`. Extract that ZIP into the H2 project root; it
+contains the expected `timeline/voice.wav`, `blocks.json`, `lines.json`,
+`words.json`, transcript and alignment report. The WAV is copied byte-for-byte
+from VoiceStudio, so its watermark and original checksum are preserved.
+
+The video Action runs `faster-whisper small` on CPU to produce ASR-assisted
+word timestamps for the H2 player and `draft_shots.py`. Check
+`timeline/alignment-report.json` before relying on word-synchronous captions
+or lip motion: unmatched words are interpolated and explicitly labelled.
+These timestamps are not phoneme-level forced alignment. Review the full
+audio, inspect the alignment coverage and manually correct any low-confidence
+or mistimed phrases before final render. For precision-critical word animation,
+use a dedicated forced aligner or human-reviewed corrections rather than
+assuming all ASR timestamps are exact.
 
 ## Quality and release gate
 
