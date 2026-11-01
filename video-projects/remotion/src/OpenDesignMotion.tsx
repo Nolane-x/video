@@ -606,25 +606,25 @@ const EyePoster = () => {
 };
 
 const Comic1952 = () => {
-  const f = useCurrentFrame();
-  const zig = e(f, 0, 22, -60, 0);
-  return (
-    <AbsoluteFill style={{ ...full, background: "#f6d948" }}>
-      <div style={{ position: "absolute", inset: 80, border: "9px solid #121315", background: "#fff4db", display: "grid", gridTemplateColumns: "1fr 2.2fr 1fr", gridTemplateRows: "1fr 1fr", gap: 12, padding: 12, boxSizing: "border-box" }}>
-        <div style={{ background: "#f7f2e7", border: "5px solid #131517", padding: 18 }}><Word size={33} color="#141619">ONE</Word><Word size={33} color="#141619">IDEA.</Word></div>
-        <div style={{ gridRow: "span 2", position: "relative", overflow: "hidden", background: "repeating-conic-gradient(#fff 0deg 5deg,#78a3e8 5deg 10deg)" }}>
-          <div style={{ position: "absolute", inset: 80, background: "#f2ce41", borderRadius: "50%", border: "8px solid #111" }} />
-          <div style={{ position: "absolute", left: "20%", top: "17%", width: "60%", height: "66%", border: "14px solid #111", borderRadius: "50%", background: "#e64b37", display: "grid", placeItems: "center" }}><div style={{ width: "63%", height: "63%", borderRadius: "50%", background: "#fff", display: "grid", placeItems: "center" }}><PlayGlyph size={128} color="#101114" /></div></div>
-          <svg viewBox="0 0 500 250" width="100%" height="100%" style={{ position: "absolute", left: 0, top: 0, transform: "translateX(" + zig + "px)" }}><path d="M0 0 L500 250 M0 60 L440 280" stroke="#141517" strokeWidth="13" /></svg>
-          <div style={{ position: "absolute", bottom: 20, right: 18, padding: "9px 17px", background: "#f7d743", border: "5px solid #131517", fontSize: 24, fontWeight: 950, transform: "rotate(-8deg)" }}>CLICK!</div>
-        </div>
-        <div style={{ background: "#f7f2e7", border: "5px solid #131517", display: "grid", placeItems: "center", fontSize: 38, fontWeight: 950 }}>•••</div>
-        <div style={{ background: "#f7f2e7", border: "5px solid #131517", display: "grid", placeItems: "center", fontSize: 18, fontWeight: 950 }}>SFX / 02</div>
-        <div style={{ background: "#f7f2e7", border: "5px solid #131517", display: "grid", placeItems: "center", fontSize: 18, fontWeight: 950 }}>CUT / OUT</div>
-      </div>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 27, textAlign: "center", fontSize: 18, fontWeight: 950, letterSpacing: ".2em" }}>1952 / CUT-OUTS</div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),n=e(f,0,2);
+ return <AbsoluteFill style={{...full,background:"#f1e7d2",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,display:"grid",gridTemplateColumns:"1fr 1.12fr 1fr"}}>
+   <div style={{position:"relative",background:"#d64c8f",borderRight:"9px solid #17191b"}}>
+    <div style={{position:"absolute",left:46,top:65,fontFamily:"Georgia,serif",fontSize:35,fontWeight:900,color:"#ffe7d1"}}>1952</div>
+    <svg viewBox="0 0 570 1080" width="100%" height="100%"><path d="M50 760L400 215L530 315L180 865Z" fill="#f4d74a" stroke="#151719" strokeWidth="18"/><path d="M5 500L310 120L415 200L115 580Z" fill="#f8e7c9" stroke="#151719" strokeWidth="14"/><path d="M135 905L470 430" stroke="#17191b" strokeWidth="28"/><circle cx="170" cy="340" r="82" fill="#fff1dc" stroke="#141719" strokeWidth="13"/><path d="M160 262L245 365L150 415Z" fill="#283e97"/></svg>
+   </div>
+   <div style={{position:"relative",background:"#f8f1df",display:"grid",placeItems:"center",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:45,border:"8px solid #151719",background:"repeating-linear-gradient(135deg,#f5e7cf 0 22px,#9fb8e4 22px 25px)"}}/>
+    <div style={{position:"absolute",width:520,height:520,borderRadius:"50%",background:"#f5d447",border:"15px solid #161719",boxShadow:"inset 0 0 0 14px #fff5dc"}}/>
+    <div style={{position:"absolute",width:350,height:350,borderRadius:"50%",background:"#e44e39",border:"15px solid #161719",display:"grid",placeItems:"center"}}><div style={{width:200,height:200,borderRadius:"50%",background:"#fff",border:"12px solid #141719",display:"grid",placeItems:"center"}}><svg viewBox="0 0 100 120" width="180" height="210"><path d="M8 5L91 64L48 70L35 115Z" fill="#111315"/></svg></div></div>
+    <div style={{position:"absolute",top:25,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontSize:32,fontWeight:900,color:"#23346d"}}>Cut-outs / 1952</div>
+   </div>
+   <div style={{position:"relative",background:"#168c86",borderLeft:"9px solid #17191b"}}>
+    <div style={{position:"absolute",right:35,top:60,fontFamily:"Georgia,serif",fontSize:30,fontWeight:900,color:"#f7ecd6"}}>FORM</div>
+    <svg viewBox="0 0 570 1080" width="100%" height="100%"><path d="M-30 360L360 810L515 670L120 225Z" fill="#f2c83d" stroke="#141719" strokeWidth="18"/><path d="M40 800L430 270" stroke="#f4ecda" strokeWidth="31"/><path d="M150 875L530 350" stroke="#111315" strokeWidth="18"/><circle cx="380" cy="220" r="100" fill="#f2d84e" stroke="#17191b" strokeWidth="14"/><circle cx="380" cy="220" r="48" fill="#df4a89"/></svg>
+   </div>
+  </div>
+ </AbsoluteFill>;
 };
 
 const Future3D = () => {
@@ -643,17 +643,18 @@ const Future3D = () => {
 
 
 const DotPoster = () => {
-  const f = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ ...full, background: "#e43c31", color: "#171719" }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(#fff 0 6px,transparent 6px)", backgroundSize: "31px 31px", opacity: .82 }} />
-      <div style={{ position: "absolute", inset: 72, background: "#ffda43", border: "10px solid #171719", borderRadius: 4, transform: "rotate(" + (Math.sin(f/8)*.8) + "deg)" }} />
-      <div style={{ position: "absolute", left: "50%", top: "50%", width: 600, height: 600, marginLeft: -300, marginTop: -300, border: "26px solid #171719", borderRadius: "50%", background: "#ec4c37", display: "grid", placeItems: "center", boxShadow: "inset 0 0 0 20px #f8db44" }}>
-        <div style={{ width: 365, height: 365, border: "13px solid #171719", borderRadius: "50%", background: "#fff", display: "grid", placeItems: "center" }}><PlayGlyph size={250} color="#111315" /></div>
-      </div>
-      <div style={{ position: "absolute", top: 58, left: 0, right: 0, textAlign: "center", background: "#fff", padding: "10px 0", fontSize: 27, fontWeight: 950, letterSpacing: ".13em" }}>1965 / INFINITY DOTS</div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),r=314+Math.sin(f/4)*2;
+ return <AbsoluteFill style={{...full,background:"#e63d32",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#fff 0 7px,transparent 7px)",backgroundSize:"31px 31px"}}/>
+  <div style={{position:"absolute",left:"50%",top:"52%",width:r*2,height:r*2,marginLeft:-r,marginTop:-r,borderRadius:"50%",background:"#f7d343",border:"10px solid #17191a"}}>
+   <div style={{position:"absolute",inset:52,borderRadius:"50%",background:"#df4434",border:"17px solid #17191a",boxShadow:"inset 0 0 0 18px #f5d446"}}>
+    <div style={{position:"absolute",inset:43,borderRadius:"50%",background:"#fff",border:"8px solid #17191a",display:"grid",placeItems:"center"}}>
+     <svg viewBox="0 0 100 120" width="155" height="180"><path d="M12 7L91 63L50 68L37 115Z" fill="#111315"/></svg>
+    </div>
+   </div>
+  </div>
+  <div style={{position:"absolute",top:25,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontSize:35,fontWeight:900,color:"#111315"}}>1965 / INFINITY DOTS</div>
+ </AbsoluteFill>;
 };
 
 const GlitchPoster = () => {
