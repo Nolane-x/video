@@ -1333,7 +1333,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
- const rotateY=f<15?-90+38*e(f,0,15):f<45?-52+139*e(f,15,45):87+93*e(f,45,75);
+ const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75);
  const rotateX=18+44*Math.sin(Math.min(1,f/75)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
  const scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
@@ -1343,8 +1343,8 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
     <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/>
     <CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={2} frame={f} transform={"rotateY(-90deg) translateZ("+z+"px)"}/>
-    <CubeFace kind={3} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
-    <CubeFace kind={4} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={3} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={4} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
    </div>
   </div>
