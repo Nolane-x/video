@@ -544,14 +544,6 @@ const GreenGhostTransition=()=>{
  </AbsoluteFill>;
 };
 
-const InPoster=()=>{
- const f=useCurrentFrame(),p=e(f,0,8);
- return <AbsoluteFill style={{...full,background:"#07090c",color:"#fff"}}>
-  <div style={{position:"absolute",left:"50%",top:252,transform:"translateX(-50%) scale("+(0.88+.12*p)+")",fontFamily:displayFont,fontSize:430,fontWeight:1000,letterSpacing:"-.13em",whiteSpace:"nowrap",color:"#f5f5f0",textShadow:"0 7px 0 #bfc3bf,0 13px 0 #747c7c,0 22px 22px rgba(0,0,0,.42)"}}>IN<span style={{color:"#b9ed4a"}}>.</span></div>
-  <div style={{position:"absolute",left:70,bottom:65,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#9ea5a7"}}>MOTION / IN</div>
- </AbsoluteFill>;
-};
-
 const NeverPoster
 
 const NeverPoster = () => (
