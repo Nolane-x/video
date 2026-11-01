@@ -402,10 +402,10 @@ const GalleryCard=({index,frame}:{index:number;frame:number})=>{
  </div>;
 };
 
-const GalleryWall=()=>{
+const GalleryWall=({showClaim=true}:{showClaim?:boolean})=>{
  const f=useCurrentFrame(),p=pop(f,30,0,72,16);
  const pan=e(f,0,77,5,-34),ry=e(f,0,77,-1.5,-7),rz=e(f,0,77,.15,-.45);
- const order=Array.from({length:30},(_,i)=>i),claimOpacity=1-e(f,0,15);
+ const order=Array.from({length:30},(_,i)=>i),claimOpacity=showClaim?1-e(f,0,15):0;
  return <AbsoluteFill style={{...full,background:"#f3f1e9",overflow:"hidden"}}>
   <div style={{position:"absolute",left:78,right:78,top:76,bottom:58,display:"grid",gridTemplateColumns:"repeat(6,263px)",gridTemplateRows:"repeat(5,148px)",gap:13,justifyContent:"center",alignContent:"center",transform:"perspective(1750px) rotateY("+ry+"deg) rotateX(1.5deg) rotateZ("+rz+"deg) translateX("+pan+"px) translateY("+((1-p)*40)+"px) scale("+(0.965+.035*p)+")",transformOrigin:"center center"}}>
    {order.map((id,i)=><GalleryCard key={i} index={id} frame={f+i*2}/>)}
@@ -823,7 +823,7 @@ const InPoster=()=>{
 
 const PosterSequence = () => (
  <AbsoluteFill style={full}>
-  <Sequence from={0} durationInFrames={2}><GalleryWall /></Sequence>
+  <Sequence from={0} durationInFrames={2}><GalleryWall showClaim={false}/></Sequence>
   <Sequence from={2} durationInFrames={4}><Comic1952 /></Sequence>
   <Sequence from={6} durationInFrames={16}><Comic1962 /></Sequence>
   <Sequence from={22} durationInFrames={15}><DotPoster /></Sequence>
