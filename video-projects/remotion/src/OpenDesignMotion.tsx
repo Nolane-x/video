@@ -1434,14 +1434,16 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <div style={{position:"absolute",inset:16,border:"9px solid #e4bb54",boxShadow:"inset 0 0 0 3px #fff7d9"}}/>
   <div style={{position:"absolute",left:25,right:25,top:22,height:35,background:"#ebcf75",border:"3px solid #26272a",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 12px",fontFamily:"monospace",fontSize:15,fontWeight:900}}><span>100K</span><span>✳ OPEN DESIGN</span></div>
   <div style={{position:"absolute",left:18,right:18,top:72,bottom:55,display:"grid",placeItems:"center",background:"#eff8f0",border:"4px solid #202627",overflow:"hidden"}}>
+   <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,#3e9e69 2.1px,transparent 2.8px)",backgroundSize:"13px 13px",opacity:.3}}/>
    <svg viewBox="0 0 360 260" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-    <defs><pattern id="stars-grid-v30" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M14 0H0V14" stroke="#9bcdb5" strokeWidth="1" fill="none" opacity=".7"/></pattern></defs>
-    <rect width="360" height="260" fill="url(#stars-grid-v30)"/>
-    <path d="M0 205L360 64" stroke="#b1dbc4" strokeWidth="2" opacity=".7"/>
+    <defs><pattern id="stars-grid-v31" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M14 0H0V14" stroke="#9bcdb5" strokeWidth="1" fill="none" opacity=".7"/><circle cx="7" cy="7" r="2.5" fill="#5ab67f" opacity=".55"/></pattern></defs>
+    <rect width="360" height="260" fill="url(#stars-grid-v31)"/>
+    <path d="M0 205L360 64" stroke="#b1dbc4" strokeWidth="3" opacity=".8"/>
     <path d="M20 0V260M340 0V260" stroke="#d0e9da" strokeWidth="3"/>
+    <path d="M0 224L360 80" stroke="#56bd85" strokeWidth="12" opacity=".12"/>
    </svg>
-   <div style={{position:"relative",fontFamily:displayFont,fontSize:104,fontWeight:1000,letterSpacing:"-.12em",color:"#141c1a",textShadow:"3px 3px 0 #b6dfc9"}}>100K</div>
-   <div style={{position:"absolute",left:0,right:0,bottom:19,textAlign:"center",fontFamily:"monospace",fontSize:13,fontWeight:950,letterSpacing:".18em",color:"#245a42"}}>GITHUB STARS / THE FUTURE</div>
+   <div style={{position:"relative",fontFamily:displayFont,fontSize:140,fontWeight:1000,letterSpacing:"-.13em",color:"#111b15",textShadow:"4px 4px 0 #9dd4b5,8px 8px 0 rgba(66,145,99,.35)"}}>100K</div>
+   <div style={{position:"absolute",left:0,right:0,bottom:18,textAlign:"center",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".2em",color:"#245a42"}}>GITHUB STARS</div>
   </div>
   <div style={{position:"absolute",left:12,right:12,bottom:11,textAlign:"center",fontSize:15,fontWeight:900,letterSpacing:".15em",color:"#476c5c"}}>OPEN DESIGN / 100K</div>
  </div>;
@@ -1470,7 +1472,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
  const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75);
- const rotateX=f<15?18-14*e(f,0,15):f<45?4+18*e(f,15,45):f<60?22-14*e(f,45,60):8-8*e(f,60,75);
+ const rotateX=f<15?18-14*e(f,0,15):f<45?4-26*e(f,15,45):f<60?-22+14*e(f,45,60):-8+8*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
@@ -1492,42 +1494,48 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
 };
 
 const MorroCubeIntro=()=>{
- const f=useCurrentFrame(),typeOpacity=1-e(f,8,22),tile=e(f,2,16),blueTile=e(f,10,24),ribbon=e(f,6,18),tileFade=1-e(f,33,36);
- const size=780-260*e(f,7,19);
+ const f=useCurrentFrame();
+ const typeOpacity=1-e(f,4,9),tile=e(f,3,8),blueTile=e(f,8,16),ribbon=e(f,10,17),tileFade=1-e(f,34,36);
+ const size=1120-400*e(f,8,18);
  const rows=[-112,178,468,758];
  return <AbsoluteFill style={{...full,background:"#f2f0e8",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,opacity:typeOpacity,overflow:"hidden"}}>
-   {rows.map((y,i)=><div key={i} style={{position:"absolute",left:-110,right:-110,top:y,height:290,display:"flex",alignItems:"center",width:"max-content",transform:"translateX("+(-f*7+(i%2?80:-20))+"px)",gap:14,opacity:i===0?.98:1}}>
+   {rows.map((y,i)=><div key={i} style={{position:"absolute",left:-110,right:-110,top:y,height:290,display:"flex",alignItems:"center",width:"max-content",transform:"translateX("+(-f*7+(i%2?80:-20))+"px)",gap:14}}>
     {Array.from({length:5},(_,k)=><Word key={k} size={i%2===0?286:276} color={i%2===0?"#090a0c":"#f2f0e8"} weight={1000} tracking={-.13} style={i%2===0?{}:{WebkitTextStroke:"3px #151719",color:"transparent"}}>MORRO</Word>)}
    </div>)}
    <div style={{position:"absolute",right:90,top:118,width:290,borderTop:"1px solid #a9a8a0",borderBottom:"1px solid #a9a8a0",padding:"12px 0",fontFamily:"monospace",fontSize:15,fontWeight:900,letterSpacing:".14em",color:"#313438",lineHeight:1.8}}>SPEC / PRISM<br/>MATERIAL<br/>IOR<br/>ROUGH<br/>ROT/S</div>
   </div>
-  <div style={{position:"absolute",left:"50%",top:"50%",width:size,height:size,transform:"translate(-50%,-50%) scale("+(0.86+.14*tile)+")",opacity:tile*tileFade,borderRadius:92,overflow:"hidden",background:"#f4f1e9",boxShadow:"0 22px 60px rgba(30,26,48,.08)"}}>
+  <div style={{position:"absolute",left:"50%",top:"49%",width:520,height:410,transform:"translate(-50%,-50%) perspective(1000px) rotateY(-15deg) rotateX(9deg) scale("+(0.72+.28*e(f,0,8))+")",opacity:e(f,0,1)*(1-e(f,7,10)),transformStyle:"preserve-3d",pointerEvents:"none"}}>
+   <div style={{position:"absolute",left:95,top:8,width:300,height:190,clipPath:"polygon(18% 0,100% 0,84% 100%,0 100%)",background:"linear-gradient(135deg,#f4f3eb,#bfc8c7 55%,#8b9998)",border:"4px solid rgba(58,72,71,.45)",transform:"translateZ(30px)",boxShadow:"18px 10px 0 rgba(40,50,52,.13)"}}/>
+   <div style={{position:"absolute",left:60,top:160,width:360,height:190,clipPath:"polygon(0 0,100% 0,78% 100%,17% 100%)",background:"linear-gradient(145deg,#eceee8,#bac4c1 50%,#6d7c7a)",border:"4px solid rgba(58,72,71,.4)",transform:"translateZ(80px)",boxShadow:"12px 16px 0 rgba(40,50,52,.17)"}}/>
+   <div style={{position:"absolute",left:177,top:78,width:145,height:260,clipPath:"polygon(50% 0,100% 18%,84% 100%,16% 100%,0 18%)",background:"linear-gradient(90deg,#c3ccca,#f4f2e9 45%,#798987)",transform:"translateZ(120px) rotate(7deg)",border:"4px solid rgba(54,66,65,.3)"}}/>
+  </div>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:size,height:size,transform:"translate(-50%,-50%) scale("+(0.98+.02*tile)+")",opacity:tile*tileFade,borderRadius:58,overflow:"hidden",background:"#f4f1e9",boxShadow:"0 30px 80px rgba(30,26,48,.15)"}}>
    <div style={{position:"absolute",inset:0,opacity:1-blueTile,background:"#f5f2e9",overflow:"hidden"}}>
-    <div style={{position:"absolute",left:-50,top:-25,fontFamily:displayFont,fontSize:250,fontWeight:1000,letterSpacing:"-.13em",color:"#111315",whiteSpace:"nowrap"}}>MORRO</div>
-    <div style={{position:"absolute",left:-90,top:175,fontFamily:displayFont,fontSize:245,fontWeight:1000,letterSpacing:"-.14em",color:"transparent",WebkitTextStroke:"4px #22262a",whiteSpace:"nowrap"}}>MORRO</div>
-    <div style={{position:"absolute",left:20,top:365,fontFamily:displayFont,fontSize:250,fontWeight:1000,letterSpacing:"-.13em",color:"#171a1e",whiteSpace:"nowrap"}}>MORRO</div>
-    <div style={{position:"absolute",left:"42%",top:0,bottom:0,width:"58%",background:"rgba(235,231,221,.7)"}}/>
+    <div style={{position:"absolute",left:-90,top:-30,fontFamily:displayFont,fontSize:310,fontWeight:1000,letterSpacing:"-.14em",color:"#111315",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:-160,top:205,fontFamily:displayFont,fontSize:306,fontWeight:1000,letterSpacing:"-.14em",color:"transparent",WebkitTextStroke:"5px #22262a",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:-15,top:465,fontFamily:displayFont,fontSize:310,fontWeight:1000,letterSpacing:"-.14em",color:"#171a1e",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:"43%",top:0,bottom:0,width:"57%",background:"rgba(235,231,221,.72)"}}/>
    </div>
    <div style={{position:"absolute",inset:0,opacity:blueTile,background:"#f3f1e8",overflow:"hidden"}}>
-    <div style={{position:"absolute",inset:"0 0 0 0",background:"#f3f1e8"}}/>
-    <div style={{position:"absolute",left:-80,top:-65,fontFamily:displayFont,fontSize:310,fontWeight:1000,letterSpacing:"-.13em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
-    <div style={{position:"absolute",left:-45,top:230,fontFamily:displayFont,fontSize:300,fontWeight:1000,letterSpacing:"-.14em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
-    <div style={{position:"absolute",left:90,bottom:-95,fontFamily:displayFont,fontSize:270,fontWeight:1000,letterSpacing:"-.12em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",inset:0,background:"#f3f1e8"}}/>
+    <div style={{position:"absolute",left:-140,top:-115,fontFamily:displayFont,fontSize:420,fontWeight:1000,letterSpacing:"-.16em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:-100,top:250,fontFamily:displayFont,fontSize:400,fontWeight:1000,letterSpacing:"-.16em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
+    <div style={{position:"absolute",left:30,bottom:-150,fontFamily:displayFont,fontSize:390,fontWeight:1000,letterSpacing:"-.16em",color:"#2439e9",whiteSpace:"nowrap"}}>MORRO</div>
    </div>
-   <svg viewBox="0 0 780 780" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:ribbon}}>
+   <svg viewBox="0 0 1120 1120" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:ribbon}}>
     <defs>
-     <linearGradient id="morro-ribbon-a-v29" x1="0" x2="1" y1="0" y2="0"><stop stopColor="#9668bc"/><stop offset=".24" stopColor="#d8b4eb"/><stop offset=".53" stopColor="#f3d7ff"/><stop offset=".78" stopColor="#c38cda"/><stop offset="1" stopColor="#7950a7"/></linearGradient>
-     <linearGradient id="morro-ribbon-b-v29" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#efcffa"/><stop offset=".45" stopColor="#c995e3"/><stop offset=".8" stopColor="#9966c4"/><stop offset="1" stopColor="#71469e"/></linearGradient>
+     <linearGradient id="morro-ribbon-a-v31" x1="0" x2="1" y1="0" y2="0"><stop stopColor="#9668bc"/><stop offset=".24" stopColor="#d8b4eb"/><stop offset=".53" stopColor="#f3d7ff"/><stop offset=".78" stopColor="#c38cda"/><stop offset="1" stopColor="#7950a7"/></linearGradient>
+     <linearGradient id="morro-ribbon-b-v31" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#efcffa"/><stop offset=".45" stopColor="#c995e3"/><stop offset=".8" stopColor="#9966c4"/><stop offset="1" stopColor="#71469e"/></linearGradient>
     </defs>
-    <path d="M275 -35L445 -35L267 824L87 824Z" fill="#61438f" opacity=".35" transform="translate(20 14)"/>
-    <path d="M275 -35L445 -35L267 824L87 824Z" fill="url(#morro-ribbon-a-v29)" stroke="#e4c7f3" strokeWidth="5"/>
-    <path d="M445 -35L470 -35L292 824L267 824Z" fill="#744d9d" opacity=".7"/>
-    <path d="M532 142L710 74L510 760L326 760Z" fill="url(#morro-ribbon-b-v29)" stroke="#f0d6fa" strokeWidth="5"/>
-    <path d="M532 142L710 74L710 117L552 180Z" fill="#f5ddff"/>
-    <path d="M326 760L510 760L470 824L285 824Z" fill="#8053ac"/>
-    <path d="M410 292L518 250L460 484L352 526Z" fill="#b17bd1" stroke="#e5c5f4" strokeWidth="4"/>
-    <path d="M420 303L510 269" stroke="#fff1ff" strokeWidth="8" opacity=".7"/>
+    <path d="M390 -55L635 -55L380 1175L124 1175Z" fill="#61438f" opacity=".35" transform="translate(24 16)"/>
+    <path d="M390 -55L635 -55L380 1175L124 1175Z" fill="url(#morro-ribbon-a-v31)" stroke="#e4c7f3" strokeWidth="7"/>
+    <path d="M635 -55L671 -55L416 1175L380 1175Z" fill="#744d9d" opacity=".74"/>
+    <path d="M765 205L1015 105L735 1095L480 1095Z" fill="url(#morro-ribbon-b-v31)" stroke="#f0d6fa" strokeWidth="7"/>
+    <path d="M765 205L1015 105L1015 165L793 255Z" fill="#f5ddff"/>
+    <path d="M480 1095L735 1095L678 1175L416 1175Z" fill="#8053ac"/>
+    <path d="M585 450L736 390L654 720L502 780Z" fill="#b17bd1" stroke="#e5c5f4" strokeWidth="6"/>
+    <path d="M600 470L725 418" stroke="#fff1ff" strokeWidth="11" opacity=".7"/>
    </svg>
   </div>
   <div style={{position:"absolute",left:0,right:0,bottom:0,textAlign:"center",fontFamily:displayFont,fontSize:15,fontWeight:900,letterSpacing:".22em",color:"#d9d4f5",opacity:.45*(1-tileFade)}}>MORRO / FORM STUDY</div>
