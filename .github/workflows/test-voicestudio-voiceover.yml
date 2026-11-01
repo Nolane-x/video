@@ -41,7 +41,7 @@ jobs:
       contents: read
     with:
       job_json: >-
-        {"schema_version":1,"job_id":"video-pr-integration-smoke","title":"Video repo reusable renderer integration","language":"vi","engine":"vieneu","voice_id":"vi-vieneu-v3turbo-adam-bua-87e364","segments":[{"id":"opening","text":"Xin chào. Đây là bài kiểm tra tích hợp giọng nói tiếng Việt từ VoiceStudio sang quy trình video.","pause_ms_after":250},{"id":"closing","text":"Âm thanh đã được tạo, kiểm tra và chuẩn bị timeline cho dự án video.","pause_ms_after":0}}
+        {"schema_version":1,"job_id":"video-pr-integration-smoke","title":"Video repo reusable renderer integration","language":"vi","engine":"vieneu","voice_id":"vi-vieneu-v3turbo-adam-bua-87e364","segments":[{"id":"opening","text":"Xin chào. Đây là bài kiểm tra tích hợp giọng nói tiếng Việt từ VoiceStudio sang quy trình video.","pause_ms_after":250},{"id":"closing","text":"Âm thanh đã được tạo, kiểm tra và chuẩn bị timeline cho dự án video.","pause_ms_after":0}]}
 
   verify-reusable-render:
     name: Verify cross-repo audio artifact and H2 timeline
