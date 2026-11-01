@@ -1,13 +1,13 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v10",
+  "id": "opendesign-motion-reference-rebuild-v11",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "Reference MP4 probed and decoded by exact frame index (0-1118). Frame-indexed contact sheets and selected native-size frames reviewed across all 12 sections, including montage and Launch Film preview states.",
-    "constraints": "Match original frame order, timing, type scale, typography, artwork motifs, interface proportions, provider/icon choreography, camera movement and cube choreography. Use independently authored art; do not claim pixel-identical reconstruction without source assets."
+    "evidence": "The supplied preview.mp4 was decoded at native frame indices 0-1118. Scene cuts and the Launch Film preview states were checked using native-size captures; the montage timings now follow the measured reference cut frames rather than rounded time samples.",
+    "constraints": "Match the observed source timing, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition, camera-like app tile and final lockup using independently authored graphics. Pixel identity is not claimed where source project layers/assets/fonts are unavailable."
   },
   "output": {
     "durationFrames": 1119,
@@ -42,66 +42,66 @@
     {
       "id": "S02",
       "startFrame": 83,
-      "endFrame": 173,
+      "endFrame": 140,
       "startSeconds": 2.7667,
-      "endSeconds": 5.7667,
+      "endSeconds": 4.6667,
       "component": "HeroTitle"
     },
     {
       "id": "S03",
-      "startFrame": 173,
-      "endFrame": 209,
-      "startSeconds": 5.7667,
-      "endSeconds": 6.9667,
+      "startFrame": 140,
+      "endFrame": 170,
+      "startSeconds": 4.6667,
+      "endSeconds": 5.6667,
       "component": "BrandReveal"
     },
     {
       "id": "S04",
-      "startFrame": 209,
-      "endFrame": 244,
-      "startSeconds": 6.9667,
-      "endSeconds": 8.1333,
+      "startFrame": 170,
+      "endFrame": 240,
+      "startSeconds": 5.6667,
+      "endSeconds": 8,
       "component": "ClaimScene"
     },
     {
       "id": "S05",
-      "startFrame": 244,
-      "endFrame": 321,
-      "startSeconds": 8.1333,
-      "endSeconds": 10.7,
+      "startFrame": 240,
+      "endFrame": 316,
+      "startSeconds": 8,
+      "endSeconds": 10.5333,
       "component": "GalleryWall"
     },
     {
       "id": "S06",
-      "startFrame": 321,
-      "endFrame": 600,
-      "startSeconds": 10.7,
-      "endSeconds": 20,
+      "startFrame": 316,
+      "endFrame": 585,
+      "startSeconds": 10.5333,
+      "endSeconds": 19.5,
       "component": "PosterSequence",
       "posterBeats": [
         [
           "Comic1952",
-          9
+          13
         ],
         [
           "Comic1962",
-          10
+          16
         ],
         [
           "DotPoster",
-          20
+          8
         ],
         [
           "LightSweep1973",
-          10
+          15
         ],
         [
           "PixelGamePoster",
-          10
+          13
         ],
         [
           "PortfolioFlash",
-          10
+          9
         ],
         [
           "MindPoster",
@@ -113,75 +113,59 @@
         ],
         [
           "EditorialPosterGrid",
-          20
-        ],
-        [
-          "DepthField",
-          10
+          24
         ],
         [
           "EaseGreen",
-          10
-        ],
-        [
-          "EasePoster",
-          10
+          22
         ],
         [
           "OutPoster",
-          10
+          7
+        ],
+        [
+          "GreenGhostTransition",
+          7
         ],
         [
           "NeverPoster",
-          10
+          5
         ],
         [
           "LinearPoster",
-          10
+          15
         ],
         [
           "GreenCircleTransition",
-          10
-        ],
-        [
-          "ClockPoster",
-          10
+          13
         ],
         [
           "StatsPoster",
-          10
+          16
         ],
         [
           "MotionFilmsPoster",
-          10
+          11
         ],
         [
           "EyePoster",
-          10
+          5
         ],
         [
           "CoursesPoster",
-          10
+          15
         ],
         [
           "Future3D",
-          10
-        ],
-        [
-          "NotText",
-          10
-        ],
-        [
-          "NotText",
-          10
+          15
         ]
       ]
     },
     {
       "id": "S07",
-      "startFrame": 600,
+      "startFrame": 585,
       "endFrame": 641,
-      "startSeconds": 20,
+      "startSeconds": 19.5,
       "endSeconds": 21.3667,
       "component": "NotJustOpus"
     },
@@ -196,43 +180,42 @@
     {
       "id": "S09",
       "startFrame": 779,
-      "endFrame": 895,
+      "endFrame": 897,
       "startSeconds": 25.9667,
-      "endSeconds": 29.8333,
+      "endSeconds": 29.9,
       "component": "LaunchKitSequence"
     },
     {
       "id": "S10",
-      "startFrame": 895,
+      "startFrame": 897,
       "endFrame": 933,
-      "startSeconds": 29.8333,
+      "startSeconds": 29.9,
       "endSeconds": 31.1,
       "component": "MorroCubeIntro"
     },
     {
       "id": "S11",
       "startFrame": 933,
-      "endFrame": 1059,
+      "endFrame": 1050,
       "startSeconds": 31.1,
-      "endSeconds": 35.3,
+      "endSeconds": 35,
       "component": "TexturedCube"
     },
     {
       "id": "S12",
-      "startFrame": 1059,
+      "startFrame": 1050,
       "endFrame": 1119,
-      "startSeconds": 35.3,
+      "startSeconds": 35,
       "endSeconds": 37.3,
       "component": "FinalLockup"
     }
   ],
   "qualityGates": [
-    "Reference analysed by exact decoded frame index; no timestamp-rounding assumptions.",
-    "12 contiguous root sections through frame 1119 at 30fps.",
-    "24 montage beats in exact observed order across 279 frames; frame timing cross-checked against source.",
-    "Gallery uses 5x5 wall composition; montage includes comic, dots, prism, pixel-game, portfolio, mind, rings, editorial grid, particle depth, easing, clock, 96K report, motion films, eye, Courses and Future.",
-    "Any model / Any agent use inline provider medallions and source-like transitions.",
-    "Launch film outer window, pane proportions, prompt composer and 7 individual preview artworks follow sampled source states.",
-    "Single six-face rotating 3D cube and end card; Actions validator, typecheck, 1119-frame verification and audio metadata required."
+    "Root cut map: S01 0-83; S02 83-140; S03 140-170; S04 170-240; S05 240-316; S06 316-585; S07 585-641; S08 641-779; S09 779-897; S10 897-933; S11 933-1050; S12 1050-1119.",
+    "20 poster beats in measured order and duration across 269 frames; include 13-frame 1952 comic, 16-frame 1962 comic, 8-frame infinity dots, 15-frame prism, 22-frame EASE, 7-frame OUT, 5-frame NEVER, 16-frame growth card, 5-frame eye and 15-frame Courses/Future.",
+    "Growth card progresses from 80K / Day 88 to 96K / Day 138 while its Star History line advances.",
+    "Launch UI: five preview states at source frames 780, 795, 810, 825, and 840; countdown 3/2/GO starts at 855/870/885 inside preview.",
+    "MORRO typography + transparent prism transitions through the purple extruded mark into the camera-like rounded app tile.",
+    "Actions verifies exact root and nested frame maps, typecheck, 1119 decoded frames, H.264/AAC format, loudness and review contact sheets."
   ]
 }
