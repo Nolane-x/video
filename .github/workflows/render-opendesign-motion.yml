@@ -78,7 +78,7 @@ jobs:
           assert video is not None and audio is not None, "missing audio/video stream"
           assert (video.get("width"), video.get("height")) == (1920, 1080), f"wrong size: {video}"
           assert video.get("r_frame_rate") == "30/1", f"wrong frame rate: {video.get('r_frame_rate')}"
-assert int(video.get("nb_read_frames", 0)) == 1119, f"wrong decoded frame count: {video.get('nb_read_frames')}"
+          assert int(video.get("nb_read_frames", 0)) == 1119, f"wrong decoded frame count: {video.get('nb_read_frames')}"
           assert audio.get("codec_name") == "aac", f"wrong audio codec: {audio.get('codec_name')}"
           assert audio.get("sample_rate") == "48000" and audio.get("channels") == 2, "wrong audio format"
           assert abs(duration - 37.3) < 0.12, f"wrong duration: {duration:.3f}s"
