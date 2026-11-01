@@ -17,6 +17,7 @@ on:
       - ".github/workflows/test-voicestudio-voiceover.yml"
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -45,6 +46,78 @@ jobs:
           ref: main
           path: voice-source
           persist-credentials: false
+
+  reusable-render-smoke:
+    name: Call VoiceStudio read-only reusable renderer
+    needs: test
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@main
+    permissions:
+      contents: read
+    with:
+      job_json: >-
+        {"schema_version":1,"job_id":"video-pr-integration-smoke","title":"Video repo reusable renderer integration","language":"vi","engine":"vieneu","voice_id":"vi-vieneu-v3turbo-adam-bua-87e364","segments":[{"id":"opening","text":"Xin chào. Đây là bài kiểm tra tích hợp giọng nói tiếng Việt từ VoiceStudio sang quy trình dựng video.","pause_ms_after":250},{"id":"closing","text":"Âm thanh đã được tạo, kiểm tra và chuẩn bị timeline để đưa vào dự án video.","pause_ms_after":0}]}
+
+  verify-reusable-render:
+    name: Verify cross-repo audio artifact and H2 timeline
+    needs: reusable-render-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      HF_HOME: /tmp/video-voiceover-whisper-cache
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voiceover-assets
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Verify the VoiceStudio master and manifest
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("voiceover-assets")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          audio = manifest["audio"]
+          digest = hashlib.sha256()
+          with (root / "narration.wav").open("rb") as handle:
+              for block in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(block)
+          assert digest.hexdigest() == audio["sha256"]
+          assert audio["sample_rate"] == 48000
+          assert audio["channels"] == 1
+          assert audio["subtype"] == "PCM_24"
+          assert audio["watermark"]["status"] == "verified"
+          assert audio["checks"] == "passed"
+          assert manifest["segment_count"] == len(manifest["segments"]) > 0
+          assert (root / "captions.srt").is_file()
+          assert (root / "captions.vtt").is_file()
+          print(f"Verified {manifest['job_id']}: {audio['duration_seconds']}s, SHA-256 and AudioSeal passed")
+          PY
+      - name: Install the pinned CPU word aligner
+        run: python -m pip install --disable-pip-version-check "faster-whisper==1.2.1"
+      - name: Build and check the H2 timeline bundle
+        run: |
+          python -m py_compile tools/video/align_voicestudio_voiceover.py
+          python tests/test_voicestudio_voiceover_alignment.py
+          python tools/video/align_voicestudio_voiceover.py --artifact-dir voiceover-assets --model small
+          test -s voiceover-assets/h2-timeline.zip
+          test -s voiceover-assets/h2-timeline/timeline/voice.wav
+          test -s voiceover-assets/h2-timeline/timeline/blocks.json
+          test -s voiceover-assets/h2-timeline/timeline/lines.json
+          test -s voiceover-assets/h2-timeline/timeline/words.json
+          test -s voiceover-assets/h2-timeline/alignment-report.json
+      - name: Upload reusable TTS integration smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-voiceover-integration-smoke-${{ github.run_id }}
+          path: voiceover-assets/
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Validate VoiceStudio and video GitHub Actions workflows
         run: |
