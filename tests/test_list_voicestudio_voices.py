@@ -15,7 +15,7 @@ SPEC.loader.exec_module(MODULE)
 def sample_manifest():
     return {
         "built_at": "2026-11-01T00:00:00+00:00",
-        "counts": {"en": 929, "vi": 25, "unique_voice_identities": 929},
+        "counts": {"en": 933, "vi": 25, "unique_voice_identities": 933},
         "voices": [
             {
                 "id": "en-piper-libritts-high-0000",
@@ -45,6 +45,23 @@ def sample_manifest():
                     "commercial_use": MODULE.COMMERCIAL_ALLOWED_MARKER,
                     "attribution_required": True,
                     "notice": "Upstream model card permits commercial generated audio.",
+                },
+            },
+            {
+                "id": "en-kokoro-v1-af_heart",
+                "display_name": "English (US) · Heart · Grade A",
+                "language": "en",
+                "engine": "Kokoro-82M 0.9.4",
+                "sample_rate": 24000,
+                "duration_seconds": 8.0,
+                "sample_text": "Welcome.",
+                "upstream_quality_grade": "A",
+                "quality_grade_source": "Kokoro upstream VOICES.md",
+                "rights": {
+                    "rights_status": "upstream-apache-2.0-model-voice-assets",
+                    "commercial_use": "apache-2.0-model-and-voice-assets",
+                    "attribution_required": True,
+                    "notice": "Apache-2.0 model and packaged voice assets; upstream grade is subjective."
                 },
             },
             {
@@ -78,9 +95,9 @@ class VoiceCatalogSelectorTests(unittest.TestCase):
 
     def test_commercial_filter_excludes_piper_restricted_evidence(self):
         rows = MODULE.select_voices(sample_manifest(), commercial_permitted_only=True)
-        self.assertEqual(len(rows), 2)
+        self.assertEqual(len(rows), 3)
         self.assertFalse(any("piper" in row["voice_id"] for row in rows))
-        self.assertTrue(all(row["commercial_use"] == MODULE.COMMERCIAL_ALLOWED_MARKER for row in rows))
+        self.assertEqual({row["commercial_use"] for row in rows}, MODULE.COMMERCIAL_ALLOWED_MARKERS)
 
     def test_combined_filter_and_limit_are_deterministic(self):
         rows = MODULE.select_voices(
@@ -92,6 +109,13 @@ class VoiceCatalogSelectorTests(unittest.TestCase):
         )
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["voice_id"], "en-vieneu-v3turbo-adam-123456")
+
+    def test_kokoro_engine_and_upstream_grade_are_exposed(self):
+        rows = MODULE.select_voices(sample_manifest(), language="en", engine="kokoro")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["voice_id"], "en-kokoro-v1-af_heart")
+        self.assertEqual(rows[0]["upstream_quality_grade"], "A")
+        self.assertEqual(rows[0]["quality_grade_source"], "Kokoro upstream VOICES.md")
 
     def test_empty_manifest_selection_is_empty_not_fabricated(self):
         self.assertEqual(MODULE.select_voices({"voices": []}), [])
