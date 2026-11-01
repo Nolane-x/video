@@ -1,152 +1,60 @@
 #!/usr/bin/env python3
-"""Generate an original beat-led score for the OpenDesign Motion study.
-
-Uses Python's standard library only. It deliberately does not sample or reuse
-the soundtrack embedded in the user's reference video.
-"""
+"""Generate an original layered score at the source-measured pulse; no reference samples."""
 from __future__ import annotations
-
-import argparse
-import math
-import os
-import wave
+import argparse,math,os,wave
 from array import array
 from pathlib import Path
-
-SR = 48_000
-DURATION = 37.3
-BPM = 115.0
-TAU = math.tau
-
-
-def smoothstep(x: float) -> float:
-    x = max(0.0, min(1.0, x))
-    return x * x * (3.0 - 2.0 * x)
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out", default="public/audio/opendesign-motion-score.wav")
-    args = parser.parse_args()
-
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    frames = int(DURATION * SR)
-    left = array("h")
-    right = array("h")
-
-    # A bright, modern tech pulse: D-minor colour with suspended upper notes.
-    scale = [146.83, 174.61, 220.00, 261.63, 293.66, 349.23, 392.00, 440.00]
-    beat_seconds = 60.0 / BPM
-    transition_times = [0.0, 3.0, 4.5, 5.5, 7.5, 10.5, 19.5, 21.0, 25.5, 30.5, 32.5, 35.3]
-
-    # Pre-compute transition swells and UI ticks so each frame remains deterministic.
-    cues = []
-    for cue in transition_times:
-        cues.append((cue, 0.42, "whoosh"))
-    for beat in range(int(DURATION / beat_seconds) + 1):
-        t = beat * beat_seconds
-        cues.append((t, 0.10, "kick"))
-        if beat % 4 in (1, 3):
-            cues.append((t, 0.16, "clap"))
-        if beat % 2 == 1:
-            cues.append((t, 0.07, "tick"))
-
-    # Event windows indexed by integer sample, avoiding a search through every cue.
-    starts: dict[int, list[tuple[int, str]]] = {}
-    for t, duration, kind in cues:
-        start = max(0, int(t * SR))
-        length = max(1, int(duration * SR))
-        starts.setdefault(start, []).append((length, kind))
-
-    active: list[list[float | int | str]] = []
-    for i in range(frames):
-        t = i / SR
-
-        # Bring the groove in immediately, with a short controlled fade.
-        fade_in = smoothstep(t / 0.16)
-        fade_out = smoothstep((DURATION - t) / 0.65)
-        master = min(fade_in, fade_out) * 0.74
-
-        if i in starts:
-            for length, kind in starts[i]:
-                active.append([length, 0, kind])
-
-        # Harmonic bed slowly changes every four bars to keep a clear arc.
-        bar = int(t / (beat_seconds * 4.0))
-        chord_roots = [73.42, 65.41, 87.31, 98.00, 73.42]
-        root = chord_roots[min(len(chord_roots) - 1, bar // 4)]
-        pad = (
-            math.sin(TAU * root * t) * 0.040
-            + math.sin(TAU * root * 1.5 * t + 0.4) * 0.020
-            + math.sin(TAU * root * 2.0 * t + 0.8) * 0.012
-        )
-        step = int(t / (beat_seconds / 2.0))
-        note = scale[(step + (step // 8)) % len(scale)]
-        pulse = 0.5 + 0.5 * math.sin(TAU * (1.0 / (beat_seconds * 2.0)) * t)
-        arp_env = 0.22 + 0.18 * pulse
-        arp = (
-            math.sin(TAU * note * t) * 0.040
-            + math.sin(TAU * note * 2.0 * t + 0.2) * 0.012
-        ) * arp_env
-
-        beat_phase = (t / beat_seconds) % 1.0
-        kick_env = math.exp(-beat_phase * 22.0) if beat_phase < 0.24 else 0.0
-        kick_freq = 53.0 - beat_phase * 48.0
-        kick = math.sin(TAU * kick_freq * t) * kick_env * 0.15
-
-        # A tight offbeat hat texture, intentionally quieter than the kick.
-        eighth_phase = (t / (beat_seconds / 2.0)) % 1.0
-        hat_env = math.exp(-eighth_phase * 55.0) if eighth_phase < 0.09 else 0.0
-        hat = math.sin(TAU * 7_200.0 * t) * hat_env * 0.012
-
-        hit = 0.0
-        keep = []
-        for event in active:
-            length, age, kind = int(event[0]), int(event[1]), str(event[2])
-            x = age / SR
-            if age < length:
-                if kind == "whoosh":
-                    q = x / (length / SR)
-                    env = math.sin(math.pi * q) ** 1.4
-                    wavelet = math.sin(TAU * (170.0 + 520.0 * q) * x)
-                    hit += env * wavelet * 0.035
-                elif kind == "kick":
-                    env = math.exp(-x * 27.0)
-                    hit += math.sin(TAU * (76.0 - 26.0 * x) * x) * env * 0.075
-                elif kind == "clap":
-                    env = math.exp(-x * 31.0)
-                    noise = math.sin(TAU * 1_913.0 * x) * math.sin(TAU * 2_771.0 * x)
-                    hit += noise * env * 0.035
-                elif kind == "tick":
-                    env = math.exp(-x * 62.0)
-                    hit += math.sin(TAU * 2_100.0 * x) * env * 0.018
-                event[1] = age + 1
-                keep.append(event)
-        active = keep
-
-        mono = (pad + arp + kick + hat + hit) * master
-        # Tiny stereo decorrelation keeps the mix centred and mono-compatible.
-        l = max(-0.92, min(0.92, mono + 0.0015 * math.sin(TAU * 0.17 * t)))
-        r = max(-0.92, min(0.92, mono - 0.0015 * math.sin(TAU * 0.17 * t)))
-        left.append(int(l * 32767))
-        right.append(int(r * 32767))
-
-    interleaved = array("h")
-    for l, r in zip(left, right):
-        interleaved.append(l)
-        interleaved.append(r)
-    if os.sys.byteorder != "little":
-        interleaved.byteswap()
-
-    with wave.open(str(out), "wb") as wav:
-        wav.setnchannels(2)
-        wav.setsampwidth(2)
-        wav.setframerate(SR)
-        wav.writeframes(interleaved.tobytes())
-
-    print(f"Generated original score: {out} ({DURATION:.1f}s, {BPM:.0f} BPM, {SR} Hz stereo; reference-aligned original composition)")
-
-
-if __name__ == "__main__":
-    main()
+SR=48000
+DURATION=37.3
+BPM=114.84375
+TAU=math.tau
+SCALE=[146.83,174.61,196,220,261.63,293.66,349.23,392]
+CHORDS=[(73.42,87.31,110,130.81),(58.27,69.3,87.31,103.83),(65.41,82.41,98,130.81),(65.41,78,98,116.54)]
+CUES=[0,2.767,5.767,6.967,8.133,10.7,20,21.367,25.967,29.833,31.1,35.3]
+def clamp(x,a=0.,b=1.): return max(a,min(b,x))
+def smooth(x):
+ x=clamp(x); return x*x*(3-2*x)
+def main():
+ p=argparse.ArgumentParser(); p.add_argument("--out",default="public/audio/opendesign-motion-score.wav"); out=Path(p.parse_args().out); out.parent.mkdir(parents=True,exist_ok=True)
+ total=int(DURATION*SR); beat=60/BPM; sixteenth=beat/4
+ left=array("h"); right=array("h"); cues=[(int(t*SR),int(.34*SR)) for t in CUES]; ci=0; active=[]
+ roots=[0,1,2,3,0,2,1,3,0,2]; phrase=[0,2,4,5,3,2,6,4,5,3,1,4,7,5,3,2]
+ for i in range(total):
+  t=i/SR; pos=t/beat; bi=int(pos); phase=pos-bi; bar=int(t/(beat*4)); chord=CHORDS[roots[min(9,bar//2)]]
+  section=.62 if t<4.5 else 1.
+  if 18.9<=t<20.9: section*=.18
+  elif 20.9<=t<21.5: section*=.45
+  master=min(smooth(t/.18),smooth((DURATION-t)/.8))*section*.76
+  pad=0.
+  for k,freq in enumerate(chord):
+   amp=(.031,.024,.018,.011)[k]; detune=1+(k-1.5)*.0009
+   pad+=math.sin(TAU*freq*detune*t+k*.44)*amp+math.sin(TAU*freq*2.003*t+k*.83)*amp*.15
+  pad*=1+.012*math.sin(TAU*.19*t)
+  st=int(t/sixteenth); age=(t/sixteenth-st)*sixteenth; note=SCALE[phrase[st%16]]
+  arp=(math.sin(TAU*note*t)*.052+math.sin(TAU*note*2*t+.2)*.015)*math.exp(-age*7.8)*(1 if st%4 in (0,2,3) else .55)
+  bassEnv=math.exp(-phase*4) if bi%4 in (0,2) else .35*math.exp(-phase*3.2)
+  bass=(math.sin(TAU*chord[0]*.5*t)*.115+math.sin(TAU*chord[0]*t)*.025)*bassEnv
+  kick=0.
+  if bi%4 in (0,2) and phase<.34:
+   a=phase*beat; env=math.exp(-a*28); kick=math.sin(TAU*(73-42*a)*a)*env*.23+math.sin(TAU*180*a)*math.exp(-a*90)*.045
+  snare=0.
+  if bi%4 in (1,3) and phase<.42:
+   a=phase*beat; env=math.exp(-a*34); noise=math.sin(TAU*1931*a)*math.sin(TAU*2741*a); snare=noise*env*.082+math.sin(TAU*194*a)*env*.027
+  eighth=(t/(beat/2))%1; hat=0.
+  if eighth<.115:
+   a=eighth*beat/2; noise=math.sin(TAU*7103*a)*math.sin(TAU*9137*a); hat=noise*math.exp(-a*(170 if bi%2 else 120))*.031
+  if ci<len(cues) and i>=cues[ci][0]: active.append([cues[ci][1],0]); ci+=1
+  whoosh=0.; keep=[]
+  for item in active:
+   length,age2=item
+   if age2<length:
+    q=age2/length; whoosh+=math.sin(TAU*(180+570*q)*(age2/SR))*math.sin(math.pi*q)**1.35*.045; item[1]+=1; keep.append(item)
+  active=keep; mono=(pad+arp+bass+kick+snare+hat+whoosh)*master; stereo=.006*math.sin(TAU*.13*t)
+  left.append(int(clamp(mono+stereo,-.93,.93)*32767)); right.append(int(clamp(mono-stereo,-.93,.93)*32767))
+ inter=array("h")
+ for l,r in zip(left,right): inter.append(l); inter.append(r)
+ if os.sys.byteorder!="little": inter.byteswap()
+ with wave.open(str(out),"wb") as w: w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(inter.tobytes())
+ print(f"Generated original layered score: {out}; 37.3s; {BPM:.5f} BPM; 48kHz stereo")
+ print("Arrangement: restrained opening / rhythmic build / 19-21s low-energy reset / end resolve")
+if __name__=="__main__": main()

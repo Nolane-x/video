@@ -9,6 +9,7 @@ on:
       - "video-projects/opendesign-motion/**"
       - ".agents/skills/motion-graphics-production/**"
       - "tools/video/generate_opendesign_score.py"
+      - "tools/video/validate_opendesign_timeline.py"
       - ".github/workflows/render-opendesign-motion.yml"
   workflow_dispatch:
 
@@ -47,6 +48,9 @@ jobs:
       - name: Generate original beat-led soundtrack
         run: python ../../tools/video/generate_opendesign_score.py --out public/audio/opendesign-motion-score.wav
 
+      - name: Validate reference timeline
+        run: python ../../tools/video/validate_opendesign_timeline.py
+
       - name: Typecheck project
         run: npm run typecheck
 
@@ -63,7 +67,7 @@ jobs:
 
       - name: Validate master and create review sheets
         run: |
-          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json out/opendesign-motion.mp4 | tee out/metadata.json
+          ffprobe -v error -count_frames -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels,nb_read_frames -of json out/opendesign-motion.mp4 | tee out/metadata.json
           python - <<'PY'
           import json
           with open("out/metadata.json", encoding="utf-8") as f:
@@ -74,10 +78,11 @@ jobs:
           assert video is not None and audio is not None, "missing audio/video stream"
           assert (video.get("width"), video.get("height")) == (1920, 1080), f"wrong size: {video}"
           assert video.get("r_frame_rate") == "30/1", f"wrong frame rate: {video.get('r_frame_rate')}"
+assert int(video.get("nb_read_frames", 0)) == 1119, f"wrong decoded frame count: {video.get('nb_read_frames')}"
           assert audio.get("codec_name") == "aac", f"wrong audio codec: {audio.get('codec_name')}"
           assert audio.get("sample_rate") == "48000" and audio.get("channels") == 2, "wrong audio format"
           assert abs(duration - 37.3) < 0.12, f"wrong duration: {duration:.3f}s"
-          print(f"Validated {duration:.3f}s | 1920x1080 | 30fps | AAC stereo 48kHz")
+          print(f"Validated {duration:.3f}s | 1920x1080 | 30fps | 1119 frames | AAC stereo 48kHz")
           PY
           ffmpeg -hide_banner -loglevel error -y -i out/opendesign-motion.mp4 -vf "fps=1,scale=480:-1,tile=5x8:padding=12:margin=12" -frames:v 1 out/contact-sheet-1fps.jpg
           ffmpeg -hide_banner -loglevel error -y -i out/opendesign-motion.mp4 -vf "fps=2,scale=360:-1,tile=5x15:padding=10:margin=10" -frames:v 1 out/contact-sheet-2fps.jpg
@@ -111,5 +116,6 @@ jobs:
             video-projects/remotion/out/audio-loudness.txt
             video-projects/remotion/out/SHA256SUMS.txt
             video-projects/opendesign-motion/shot-map.json
+            video-projects/opendesign-motion/README.md
           if-no-files-found: error
           retention-days: 90
