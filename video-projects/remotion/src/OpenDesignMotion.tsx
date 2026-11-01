@@ -999,35 +999,37 @@ const CoursesPoster=()=>{
 
 const PosterSequence = () => (
  <AbsoluteFill style={full}>
-  <Sequence from={0} durationInFrames={13}><Comic1952 /></Sequence>
-  <Sequence from={13} durationInFrames={16}><Comic1962 /></Sequence>
-  <Sequence from={29} durationInFrames={8}><DotPoster /></Sequence>
-  <Sequence from={37} durationInFrames={15}><LightSweep1973 /></Sequence>
-  <Sequence from={52} durationInFrames={13}><PixelGamePoster /></Sequence>
-  <Sequence from={65} durationInFrames={9}><PortfolioFlash /></Sequence>
-  <Sequence from={74} durationInFrames={10}><MindPoster /></Sequence>
-  <Sequence from={84} durationInFrames={30}><RingPoster /></Sequence>
-  <Sequence from={114} durationInFrames={24}><EditorialPosterGrid /></Sequence>
-  <Sequence from={138} durationInFrames={22}><EaseGreen /></Sequence>
-  <Sequence from={160} durationInFrames={7}><OutPoster /></Sequence>
-  <Sequence from={167} durationInFrames={7}><GreenGhostTransition /></Sequence>
-  <Sequence from={174} durationInFrames={5}><NeverPoster /></Sequence>
+  <Sequence from={0} durationInFrames={14}><Comic1952 /></Sequence>
+  <Sequence from={14} durationInFrames={15}><Comic1962 /></Sequence>
+  <Sequence from={29} durationInFrames={15}><DotPoster /></Sequence>
+  <Sequence from={44} durationInFrames={15}><LightSweep1973 /></Sequence>
+  <Sequence from={59} durationInFrames={15}><PixelGamePoster /></Sequence>
+  <Sequence from={74} durationInFrames={15}><MindPoster /></Sequence>
+  <Sequence from={89} durationInFrames={25}><RingPoster /></Sequence>
+  <Sequence from={114} durationInFrames={20}><EditorialPosterGrid /></Sequence>
+  <Sequence from={134} durationInFrames={11}><DepthField /></Sequence>
+  <Sequence from={145} durationInFrames={7}><EaseGreen /></Sequence>
+  <Sequence from={152} durationInFrames={8}><OutPoster /></Sequence>
+  <Sequence from={160} durationInFrames={7}><GreenGhostTransition /></Sequence>
+  <Sequence from={167} durationInFrames={12}><InPoster /></Sequence>
   <Sequence from={179} durationInFrames={15}><LinearPoster /></Sequence>
-  <Sequence from={194} durationInFrames={13}><GreenCircleTransition /></Sequence>
-  <Sequence from={207} durationInFrames={16}><StatsPoster /></Sequence>
-  <Sequence from={223} durationInFrames={11}><MotionFilmsPoster /></Sequence>
-  <Sequence from={234} durationInFrames={5}><EyePoster /></Sequence>
-  <Sequence from={239} durationInFrames={15}><CoursesPoster /></Sequence>
+  <Sequence from={194} durationInFrames={5}><GreenCircleTransition /></Sequence>
+  <Sequence from={199} durationInFrames={8}><ClockPoster /></Sequence>
+  <Sequence from={207} durationInFrames={16}><TogglePoster /></Sequence>
+  <Sequence from={223} durationInFrames={16}><EyePoster /></Sequence>
+  <Sequence from={239} durationInFrames={15}><Comic1952 /></Sequence>
   <Sequence from={254} durationInFrames={15}><Future3D /></Sequence>
  </AbsoluteFill>
 );
 
 const NotJustOpus = () => {
- const f=useCurrentFrame(),p=pop(f,30,1,110,16),shift=e(f,0,24,70,0);
+ const f=useCurrentFrame(),p=pop(f,30,1,50,12),show=e(f,14,21),shift=e(f,0,18,28,0);
  return <AbsoluteFill style={{...full,background:"#08090b",color:"#fff"}}>
-  <div style={{position:"absolute",left:0,right:0,top:355,display:"flex",justifyContent:"center",alignItems:"center",gap:20,transform:"translateX("+shift+"px) scale("+(0.94+.06*p)+")"}}>
-   <Word size={133} color="#f5f4f0" tracking={-.075}>Not just</Word>
-   <div style={{background:"#e98e78",color:"#111315",padding:"12px 32px 22px",borderRadius:24,transform:"rotate(-1deg)",boxShadow:"0 13px 0 rgba(0,0,0,.2)"}}><Word size={129} color="#111315" tracking={-.075}>Opus 5.5.</Word></div>
+  <div style={{position:"absolute",left:0,right:0,top:365,display:"flex",justifyContent:"center",alignItems:"center",gap:22,transform:"translateX("+shift+"px) scale("+(0.92+.08*p)+")"}}>
+   <Word size={150} color="#f5f4f0" tracking={-.08}>Not just</Word>
+   <div style={{background:"#e98e78",color:"#111315",padding:"12px 34px 19px",borderRadius:22,transform:"rotate(-1deg) scale("+(0.85+.15*show)+")",opacity:show,boxShadow:"0 12px 0 rgba(0,0,0,.2)"}}>
+    <Word size={142} color="#111315" tracking={-.08}>Opus 5.5.</Word>
+   </div>
   </div>
  </AbsoluteFill>;
 };
@@ -1105,21 +1107,74 @@ const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
    <rect x="780" y="445" width="78" height="94" fill="#c53d32"/><text x="819" y="502" textAnchor="middle" fontFamily="serif" fontSize="43" fill="#f7e8d4">設</text>
   </svg>
  </div>;
- if(variant===1)return <div style={{position:"absolute",inset:0,background:"#f1e5c8",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:"7% 5%",borderTop:"8px solid #c99a36",borderBottom:"8px solid #c99a36",background:"repeating-linear-gradient(0deg,rgba(135,102,50,.04) 0 2px,transparent 2px 9px)"}}/>
-  <div style={{position:"absolute",left:"2%",top:"24%",width:"24%",height:"56%",fontFamily:"Georgia,serif",fontWeight:700,fontSize:22,lineHeight:1.5,color:"#28221a",overflow:"hidden"}}>et lux in tenebris signum apertum ab initio erat idea et forma et forma et lux in tenebris</div>
-  <div style={{position:"absolute",right:"2%",top:"24%",width:"23%",height:"56%",fontFamily:"Georgia,serif",fontWeight:700,fontSize:22,lineHeight:1.5,color:"#28221a",overflow:"hidden"}}>idea et idea erat forma forma facta est lux in lucet designum omnibus ab initio erat forma</div>
-  <div style={{position:"absolute",left:"27%",right:"26%",top:"25%",bottom:"17%",background:"#1549a0",border:"8px solid #c79935",boxShadow:"inset 0 0 0 7px #142f6d"}}>
-   <div style={{position:"absolute",inset:18,backgroundImage:"radial-gradient(#d9edff 1.6px,transparent 1.6px)",backgroundSize:"29px 29px"}}/>
-   <div style={{position:"absolute",left:"50%",top:"50%",width:300,height:300,marginLeft:-150,marginTop:-150,borderRadius:"50%",border:"30px solid #dba83d",background:"#2355ab",boxShadow:"inset 0 0 0 13px #f2cf71",display:"grid",placeItems:"center"}}><svg viewBox="0 0 100 100" width="190" height="190"><path d="M22 8L87 55L48 58L41 96Z" fill="#b83224" stroke="#f6d58b" strokeWidth="4"/></svg></div>
-  </div>
-  <div style={{position:"absolute",left:0,right:0,top:"10%",textAlign:"center",color:"#a64035",fontFamily:"Georgia,serif"}}><div style={{fontSize:40,fontWeight:900}}>1290</div><div style={{fontSize:24}}>Gothic illumination</div></div>
+ if(variant===1)return <div style={{position:"absolute",inset:0,background:"#1232df",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 45%,#455cf7,#1029c8 68%,#0b1d84)"}}/>
+  <svg viewBox="0 0 1000 650" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <path d="M0 520Q200 480 400 520T800 500T1000 520V650H0Z" fill="#2038b9"/>
+   <path d="M0 580Q250 535 500 588T1000 570V650H0Z" fill="#101e88"/>
+   <path d="M95 180L905 115L905 260L95 325Z" fill="#ffffff" opacity=".12"/>
+   <path d="M110 448L885 387" stroke="#8aa4ff" strokeWidth="3" opacity=".5"/>
+  </svg>
+  <div style={{position:"absolute",left:"-6%",right:"-6%",top:"23%",textAlign:"center",fontFamily:displayFont,fontSize:225,fontWeight:1000,letterSpacing:"-.115em",lineHeight:.95,color:"#edf1ff",textShadow:"1px 1px 0 #bec9ee,4px 5px 0 #899de0,8px 10px 0 #5b74cd,14px 17px 0 #334db1,23px 28px 0 #20378b,33px 45px 32px rgba(0,0,0,.34)"}}>FUTURE</div>
+  <div style={{position:"absolute",left:0,right:0,top:"65%",fontSize:39,fontWeight:900,textAlign:"center",letterSpacing:".06em",color:"#fff",textShadow:"0 4px 18px rgba(0,0,0,.28)"}}>IS ALREADY HERE.</div>
+  <div style={{position:"absolute",left:20,top:15,fontSize:14,color:"#dce5ff",fontWeight:900,letterSpacing:".16em"}}>FUTURE / 03</div>
  </div>;
- if(variant===2)return <div style={{position:"absolute",inset:0,background:"#83ec45",overflow:"hidden"}}><div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(0,0,0,.08) 1px,transparent 1px)",backgroundSize:"100% 12px"}}/><div style={{position:"absolute",top:"27%",left:"-7%",width:"114%",textAlign:"center",fontFamily:displayFont,fontSize:118,fontWeight:950,letterSpacing:"-.09em",lineHeight:1.15,color:"#11160e",textShadow:"7px 7px 0 rgba(25,40,15,.28)"}}>OPEN<br/>DESIGN</div><div style={{position:"absolute",right:24,top:16,fontSize:12,color:"#284b20",fontWeight:900}}>SHOWREEL / OPEN</div><div style={{position:"absolute",left:0,right:0,top:"49%",height:2,background:"#11190d",opacity:.5}}/></div>;
- if(variant===3)return <div style={{position:"absolute",inset:0,background:"#090a0c",overflow:"hidden"}}><svg viewBox="0 0 1000 650" width="100%" height="100%">{Array.from({length:20},(_,i)=><path key={i} d={"M"+(-120+i*68)+" -20 C"+(60+i*34)+" 130 "+(-40+i*50)+" 370 "+(180+i*39)+" 670"} stroke="#fff" strokeWidth="31" fill="none" strokeLinecap="round"/>)}</svg></div>;
- if(variant===4)return <div style={{position:"absolute",inset:0,background:"#83ed43",overflow:"hidden"}}><div style={{position:"absolute",left:"-6%",right:"-8%",top:"31%",textAlign:"center",fontFamily:displayFont,fontWeight:950,fontSize:210,letterSpacing:"-.12em",color:"#12170e",textShadow:"10px 11px 0 rgba(36,58,18,.26)"}}>EASE</div><div style={{position:"absolute",left:22,right:22,bottom:28,height:2,background:"#1b3314",opacity:.55}}/><div style={{position:"absolute",left:22,bottom:37,fontSize:12,color:"#1b3314"}}>66 FPS</div><div style={{position:"absolute",right:22,bottom:37,fontSize:12,color:"#1b3314"}}>128 BPM</div></div>;
- if(variant===5)return <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,#f2f1ea 0 52%,#1746d6 52% 100%)",overflow:"hidden"}}><div style={{position:"absolute",left:38,top:50,fontSize:19,fontWeight:950,color:"#111315",letterSpacing:".16em"}}>CREATIVE / 03</div><div style={{position:"absolute",left:"12%",top:"22%",fontSize:390,fontWeight:950,fontFamily:displayFont,color:"#151719",letterSpacing:"-.12em",textShadow:"9px 11px 0 rgba(0,0,0,.16)"}}>3</div><div style={{position:"absolute",right:44,bottom:42,color:"#fff",fontSize:18,fontWeight:900,letterSpacing:".2em"}}>READY / MOTION</div></div>;
- return <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#f2f0e8,#fff)",overflow:"hidden"}}><div style={{position:"absolute",inset:0,display:"grid",placeItems:"center",fontSize:430,fontWeight:950,color:"#111315",fontFamily:displayFont,textShadow:"12px 14px 0 rgba(0,0,0,.15)"}}>3</div></div>;
+
+if(variant===2)return <div style={{position:"absolute",inset:0,background:"#1468e7",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(150deg,#2d80f7,#1456c9)"}}/>
+  <div style={{position:"absolute",left:40,bottom:-25,width:420,height:590}}>
+   <svg viewBox="0 0 420 590" width="100%" height="100%">
+    <path d="M40 570Q0 440 60 340Q10 180 95 105Q180 15 300 95Q405 168 365 310Q415 425 380 570Z" fill="#f0f0e8" stroke="#15191c" strokeWidth="10"/>
+    <path d="M53 175Q25 56 145 39Q250 0 351 100L380 205Q320 122 260 142Q155 170 53 175Z" fill="#15181a"/>
+    <path d="M75 290Q40 240 67 180Q115 125 162 185Q195 240 165 315Q127 355 75 290Z" fill="#171a1d"/>
+    <path d="M260 293Q238 215 273 174Q330 123 366 188Q394 255 348 312Q299 351 260 293Z" fill="#171a1d"/>
+    <circle cx="117" cy="235" r="10" fill="#fff"/><circle cx="315" cy="235" r="10" fill="#fff"/>
+    <ellipse cx="215" cy="320" rx="34" ry="40" fill="#6d7276"/>
+    <path d="M180 394Q215 425 249 394" stroke="#25292c" strokeWidth="9" fill="none" strokeLinecap="round"/>
+    <path d="M130 470Q213 405 300 470L350 590H75Z" fill="#15191d"/>
+   </svg>
+  </div>
+  <div style={{position:"absolute",right:35,top:120,width:420,height:450,borderRadius:20,background:"#fff",boxShadow:"0 14px 36px rgba(0,0,0,.2)",padding:28,boxSizing:"border-box"}}>
+   <div style={{display:"flex",justifyContent:"space-between",fontSize:18,fontFamily:"monospace",color:"#777"}}><span>// course</span><span>01</span></div>
+   <svg viewBox="0 0 300 220" width="100%" height="220" style={{marginTop:20}}>
+    <path d="M28 168L150 43L272 168Z" fill="#e7ecf0" stroke="#141719" strokeWidth="8"/><path d="M28 168L150 112L272 168" stroke="#141719" strokeWidth="7" fill="none"/><circle cx="150" cy="107" r="28" fill="#ebad47"/>
+   </svg>
+   <div style={{fontSize:46,fontWeight:950,color:"#17191c"}}>Courses</div><div style={{fontSize:26,color:"#92989a",marginTop:5}}>$149</div>
+  </div>
+  <div style={{position:"absolute",left:25,top:25,color:"#d8e9ff",fontSize:15,fontWeight:900,letterSpacing:".16em"}}>02 — ANYTHING</div>
+ </div>;
+
+if(variant===3)return <div style={{position:"absolute",inset:0,background:"#d7f0df",overflow:"hidden",color:"#172d24"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#e9f6e8,#f7f0dc 55%,#abdcca)"}}/>
+  <div style={{position:"absolute",left:55,right:55,top:38,bottom:35,background:"#fff9ed",boxShadow:"0 16px 40px rgba(27,72,55,.15)",borderRadius:4,padding:42,boxSizing:"border-box"}}>
+   <div style={{display:"flex",justifyContent:"space-between",fontSize:17,letterSpacing:".12em",fontWeight:850,color:"#71867b"}}><span>OPEN STUDIO</span><span>ABOUT · WORK · CONTACT</span></div>
+   <div style={{position:"absolute",left:42,top:155,fontFamily:"Georgia,serif",fontSize:84,fontWeight:500,lineHeight:.98,letterSpacing:"-.06em"}}>a little<br/>wonder.</div>
+   <div style={{position:"absolute",left:45,top:365,width:275,height:56,background:"#89cda7",display:"grid",placeItems:"center",fontSize:20,fontWeight:850,color:"#153a2a"}}>Explore the studio →</div>
+   <div style={{position:"absolute",right:65,top:125,width:310,height:310,display:"grid",placeItems:"center"}}>
+    <div style={{width:190,height:190,borderRadius:"50%",background:"#f0b66d",boxShadow:"0 0 0 24px #b7dec6,0 0 0 48px #f1d5ad",display:"grid",placeItems:"center"}}>
+     <svg viewBox="0 0 100 100" width="170" height="170">{Array.from({length:8},(_,i)=><ellipse key={i} cx="50" cy="22" rx="12" ry="25" fill="#e77765" transform={"rotate("+(i*45)+" 50 50)"}/>)}<circle cx="50" cy="50" r="12" fill="#f6e4a2"/></svg>
+    </div>
+   </div>
+   <div style={{position:"absolute",left:43,bottom:28,fontSize:15,color:"#87948b",fontWeight:700}}>DESIGN THAT FEELS LIKE YOU.</div>
+  </div>
+ </div>;
+
+if(variant===4)return <div style={{position:"absolute",inset:0,background:"#eee6d3",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(0deg,rgba(122,100,64,.035) 0 2px,transparent 2px 7px)"}}/>
+  <div style={{position:"absolute",left:"20%",top:"9%",width:"60%",height:"82%",background:"#fff8e9",boxShadow:"0 12px 30px rgba(75,55,36,.18)",border:"5px solid #c8b891"}}>
+   <div style={{position:"absolute",left:20,top:18,fontFamily:"Georgia,serif",fontSize:23,color:"#7b6a4f"}}>OPEN DESIGN</div>
+   <div style={{position:"absolute",left:0,right:0,top:74,textAlign:"center",fontFamily:"Georgia,serif",fontSize:42,fontWeight:700,color:"#1a3127"}}>a book of<br/>possibilities</div>
+   <div style={{position:"absolute",left:"50%",top:"51%",width:220,height:220,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"#df9a79",border:"9px solid #fff",boxShadow:"0 0 0 5px #274d78"}}>
+    <div style={{position:"absolute",left:54,top:71,width:25,height:28,borderRadius:"50%",background:"#1b2225",boxShadow:"82px 0 0 #1b2225"}}/>
+    <div style={{position:"absolute",left:80,top:118,width:45,height:25,borderBottom:"7px solid #1c2526",borderRadius:"50%"}}/>
+    <div style={{position:"absolute",left:23,top:0,width:174,height:54,background:"#3a2927",borderRadius:"50% 50% 10% 10%"}}/>
+   </div>
+   <div style={{position:"absolute",left:35,right:35,bottom:25,height:8,background:"#d0b990"}}/>
+  </div>
+ </div>;
+
+
+return <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#f2f0e8,#fff)",overflow:"hidden"}}><div style={{position:"absolute",inset:0,display:"grid",placeItems:"center",fontSize:430,fontWeight:950,color:"#111315",fontFamily:displayFont,textShadow:"12px 14px 0 rgba(0,0,0,.15)"}}>3</div></div>;
 };
 
 const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) => {
@@ -1195,12 +1250,28 @@ const LaunchVariant = ({ variant, countdown = -1 }: { variant: number; countdown
 };
 
 
+const CountdownOne=({frame}:{frame:number})=>{
+ const p=e(frame,0,8),rotate=e(frame,0,12,-12,0);
+ return <AbsoluteFill style={{...full,background:"#050609",color:"#f8f8f4",overflow:"hidden"}}>
+  <div style={{position:"absolute",right:0,top:0,bottom:0,width:"32%",background:"#2238ee",clipPath:"polygon(100% 0,100% 100%,0 100%)"}}/>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <ellipse cx="960" cy="585" rx="610" ry="215" fill="none" stroke="#4a5ce3" strokeWidth="3" opacity=".65" transform={"rotate("+rotate+" 960 585)"}/>
+   <ellipse cx="960" cy="585" rx="520" ry="175" fill="none" stroke="#a9b5ff" strokeWidth="1.5" opacity=".3" transform={"rotate("+(-rotate*1.4)+" 960 585)"}/>
+  </svg>
+  <div style={{position:"absolute",left:"50%",top:"47%",transform:"translate(-50%,-50%) perspective(1200px) scale("+(1.06+.05*p)+") rotateY(-9deg)",fontFamily:displayFont,fontSize:580,fontWeight:1000,lineHeight:.75,letterSpacing:"-.14em",color:"#eceff1",textShadow:"2px 2px 0 #b8c4d8,6px 6px 0 #8f9fba,12px 13px 0 #5d6f9d,22px 23px 0 #334b86,36px 39px 0 #182c62,55px 65px 42px rgba(0,0,0,.7)"}}>1</div>
+  <div style={{position:"absolute",left:42,top:40,fontFamily:"monospace",fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#aeb9ff"}}>GO</div>
+  <div style={{position:"absolute",right:45,top:"47%",textAlign:"right",fontFamily:"monospace",fontSize:14,fontWeight:850,letterSpacing:".15em",color:"#c6cdff"}}>READY / MAKE<br/>THE MOMENT MOVE</div>
+ </AbsoluteFill>;
+};
 const LaunchKitSequence=()=>{
  const frame=useCurrentFrame();
- const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:frame<75?4:frame<76?5:frame<91?5:frame<106?5:6;
- const countdown=frame<76?-1:frame<91?3:frame<106?2:1;
+ if(frame>=106)return <CountdownOne frame={frame-106}/>;
+ const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:4;
+ const countdown=frame<76?-1:frame<91?3:2;
  return <LaunchKitWindow frame={frame} variant={variant} countdown={countdown}/>;
 };
+
+const CountdownSequence
 
 const CountdownSequence = () => (
   <AbsoluteFill style={full}>
