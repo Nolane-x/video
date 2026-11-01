@@ -1,19 +1,19 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V23)
+# OpenDesign Motion — frame-indexed reference reconstruction (V24)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
 This is an independently authored Remotion/SVG/CSS reconstruction, not the original editable project. Source-specific fonts and original layered artwork are unavailable; no pixel-identical claim is made.
 
-## V23 cube alignment
+## V24 correction: frame-locked camera object surfaces
 
-V22 corrected the cube-local clock after the separate 12-frame logo tile, and assigned the clock, 100K and EASE artwork to distinct faces. V23 adjusts the yaw landmarks and swaps the top/underside CSS face normals to align the source camera-angle changes:
-- frame 933–944: standalone rounded-square blue emblem;
-- frame 945 / cube local f0: camera cube begins at -90° yaw;
-- frame 960 / local f15: +38° yaw; portrait screen is intended to face camera, black emblem on adjacent side;
-- frame 990 / local f45: +87° yaw; blue/gold clock face above, lime EASE underside below;
-- frame 1005 / local f60: +133° yaw; yellow 100K side face moves into view;
-- frame 1020 / local f75: +180° yaw; black glyph face dominates;
-- frame 1050: transition to the final logo lockup.
+V23's side-by-side review showed that the physical cube model still put the wrong artwork on the front surface at frames 960/990/1005. V24 adds a deterministic front-surface artwork sequence tied to the cube-local frame while preserving the 3D camera turn:
+- source frame 933–944: separate blue emblem tile;
+- frame 960 / local f15: portrait artwork front, camera pitch near level, black symbol adjacent;
+- frame 990 / local f45: blue/gold 1889 clock artwork front, pitch negative, lime EASE underside plane visible;
+- frame 1005 / local f60: yellow 100K editorial artwork front during the turn;
+- frame 1020 / local f75: black glyph artwork front again.
+
+The green EASE underside plane is animated between local f38 and f54 (source frames 983–999) to match the short window in which it is visible under the clock face. This is a controlled reconstruction of the source's rapidly changing camera-object surfaces, rather than relying solely on an approximate CSS face-normal guess.
 
 ## Verified content carried forward
 
@@ -21,7 +21,7 @@ V22 corrected the cube-local clock after the separate 12-frame logo tile, and as
 - Eye readout at frame 547: 3.7%.
 - Typography transition: frame496 IN, frame498 LINEAR reveal, frame500 LINEAR with green dot, frame510 green ring transition, frame511 inner ring/play mark, frame516 clock.
 - Launch Film preview states at 780/795/810/825/840: ink-wash mountain/play emblem; printed 1962 compass/comic panel; green OPEN DESIGN typography; black/white squiggle field; green EASE typography.
-- MORRO transition resolves into the large purple extruded symbol before the separate app-logo tile.
+- MORRO transition resolves into the large purple extruded symbol before the separate app emblem.
 
 ## Timeline
 
@@ -43,4 +43,4 @@ V22 corrected the cube-local clock after the separate 12-frame logo tile, and as
 
 Render only through `.github/workflows/render-opendesign-motion.yml`. Actions validates the timeline and source map, typechecks TypeScript, renders 1080p30, masters audio with FFmpeg, validates frame count/metadata/audio loudness, computes checksums and produces 1fps/2fps contact sheets.
 
-A successful workflow proves technical validity, not artistic similarity. Compare the candidate at frames 933/945/960/975/990/1005/1020/1050/1080/1118 and watch the full moving sequence.
+A successful workflow proves technical validity, not artistic similarity. Compare the V24 candidate at source frames 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118 and watch the full moving sequence.

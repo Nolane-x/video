@@ -1267,66 +1267,69 @@ const CountdownSequence = () => (
 
 const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:number})=>{
  const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:48,border:"3px solid rgba(255,255,255,.82)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.2),inset 0 -26px 42px rgba(0,0,0,.18)"};
+ const blackMark=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
+  <div style={{position:"absolute",inset:25,border:"8px solid #e9eee8",borderRadius:33}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="118" fill="#080a0d" stroke="#fff" strokeWidth="13"/><path d="M140 90L270 180L140 270Z" fill="#fff"/></svg>
+ </div>;
+ const portrait=<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#e88d9e 0%,#f2c94f 22%,#f6d66c 72%,#d87f90 100%)"}}>
+  <div style={{position:"absolute",inset:18,border:"8px solid #fff3df",borderRadius:34,boxShadow:"inset 0 0 0 3px rgba(86,53,31,.27)"}}/>
+  <div style={{position:"absolute",left:22,top:19,fontFamily:displayFont,fontSize:20,fontWeight:950,color:"#352b2a",letterSpacing:".12em"}}>MORRO / 01</div>
+  <div style={{position:"absolute",left:52,right:52,top:72,bottom:61,borderRadius:"45% 45% 35% 35%",background:"#fff2dc",border:"9px solid #fff",boxShadow:"0 9px 0 rgba(80,49,33,.18),inset 0 0 0 5px #d9b58b",display:"grid",placeItems:"center"}}>
+   <svg viewBox="0 0 260 300" width="100%" height="100%">
+    <defs><linearGradient id="camPortrait-v24" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f0c49b"/><stop offset="1" stopColor="#c77f63"/></linearGradient></defs>
+    <rect width="260" height="300" fill="#f6e8ce"/>
+    <path d="M25 300Q30 213 86 188L175 187Q232 220 240 300Z" fill="#298b7b"/>
+    <ellipse cx="132" cy="146" rx="83" ry="104" fill="url(#camPortrait-v24)"/>
+    <path d="M48 133Q38 39 132 31Q228 37 218 134L184 94L144 81L93 100L63 153Z" fill="#40332f"/>
+    <path d="M57 119Q78 68 125 77Q172 69 209 116L197 63Q158 10 105 26Q43 41 57 119Z" fill="#292726"/>
+    <ellipse cx="102" cy="147" rx="8" ry="11" fill="#1b1c1d"/><ellipse cx="163" cy="147" rx="8" ry="11" fill="#1b1c1d"/>
+    <ellipse cx="88" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/><ellipse cx="179" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/>
+    <path d="M112 205Q135 221 157 203" stroke="#5c3932" strokeWidth="6" fill="none" strokeLinecap="round"/>
+    <path d="M14 297Q16 262 52 240L86 228L112 300M246 297Q241 252 209 236L176 226L155 300" fill="#e4b98e" opacity=".9"/>
+   </svg>
+  </div>
+  <div style={{position:"absolute",right:35,top:35,width:48,height:50,borderRadius:9,background:"#fff8e8",border:"5px solid #94734f",display:"grid",placeItems:"center"}}><div style={{width:25,height:25,borderRadius:6,background:"#15191a",display:"grid",placeItems:"center",color:"#fff",fontSize:17}}>◉</div></div>
+  <div style={{position:"absolute",right:40,bottom:35,width:27,height:42,background:"#f6efe0",borderRadius:4}}><div style={{width:13,height:13,margin:"-7px auto",borderRadius:"50%",background:"#dd5d52"}}/></div>
+  <div style={{position:"absolute",left:0,right:0,bottom:0,height:38,background:"#44327c"}}/>
+ </div>;
+ const clock=<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#101f69,#2349aa 47%,#101a61)",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(118deg,rgba(255,255,255,.08) 0 3px,transparent 3px 11px),radial-gradient(circle at 22% 20%,rgba(255,255,255,.22),transparent 35%)"}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%">
+   <defs><radialGradient id="cubeClock-v24"><stop stopColor="#f9de85"/><stop offset=".68" stopColor="#dba945"/><stop offset="1" stopColor="#8c6029"/></radialGradient><filter id="cubeTexture-v24"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer></filter></defs>
+   <circle cx="180" cy="173" r="137" fill="url(#cubeClock-v24)" stroke="#f8e2a5" strokeWidth="13"/>
+   <circle cx="180" cy="173" r="111" fill="#183778" stroke="#d7b45d" strokeWidth="12"/>
+   <circle cx="180" cy="173" r="83" fill="none" stroke="#f6d879" strokeWidth="7"/>
+   <path d="M140 94L254 173L159 190L133 262Z" fill="#050915"/>
+   <path d="M140 94L183 165L159 190Z" fill="#fff1ad"/>
+   <rect width="360" height="360" filter="url(#cubeTexture-v24)" opacity=".55"/>
+   <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
+  </svg>
+ </div>;
+ const yellow=<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:22,border:"8px solid #191a1c",boxShadow:"inset 0 0 0 4px #f8e5b4"}}/>
+  <div style={{position:"absolute",left:30,top:25,fontFamily:"Georgia,serif",fontSize:23,fontWeight:800}}>100K</div>
+  <div style={{position:"absolute",left:28,right:28,top:74,bottom:90,background:"#f8f1de",border:"7px solid #191a1c",display:"grid",placeItems:"center",transform:"rotate(-2deg)"}}>
+   <svg viewBox="0 0 300 230" width="100%" height="100%"><circle cx="150" cy="115" r="90" fill="#e0b64d" stroke="#fff1bf" strokeWidth="12"/><circle cx="150" cy="115" r="65" fill="#132b6e" stroke="#9c7336" strokeWidth="10"/><path d="M130 52L219 113L144 134L124 180Z" fill="#f6dd93"/></svg>
+  </div>
+  <div style={{position:"absolute",left:25,right:25,bottom:27,fontFamily:"Georgia,serif",fontSize:20,fontWeight:800,textAlign:"center"}}>THE FUTURE / 100K</div>
+ </div>;
+ const ease=<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
+  <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
+  <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
+  <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
+ </div>;
+ const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?yellow:blackMark;
+ const blackSide=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
+  <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/><path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/><path d="M127 90L180 164L165 198Z" fill="#d8dce0"/></svg>
+ </div>;
  return <div style={style}>
-  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#e88d9e 0%,#f2c94f 22%,#f6d66c 72%,#d87f90 100%)"}}>
-   <div style={{position:"absolute",inset:18,border:"8px solid #fff3df",borderRadius:34,boxShadow:"inset 0 0 0 3px rgba(86,53,31,.27)"}}/>
-   <div style={{position:"absolute",left:22,top:19,fontFamily:displayFont,fontSize:20,fontWeight:950,color:"#352b2a",letterSpacing:".12em"}}>MORRO / 01</div>
-   <div style={{position:"absolute",left:52,right:52,top:72,bottom:61,borderRadius:"45% 45% 35% 35%",background:"#fff2dc",border:"9px solid #fff",boxShadow:"0 9px 0 rgba(80,49,33,.18),inset 0 0 0 5px #d9b58b",display:"grid",placeItems:"center"}}>
-    <svg viewBox="0 0 260 300" width="100%" height="100%">
-     <defs><linearGradient id="camPortrait-v20" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f0c49b"/><stop offset="1" stopColor="#c77f63"/></linearGradient></defs>
-     <rect width="260" height="300" fill="#f6e8ce"/>
-     <path d="M25 300Q30 213 86 188L175 187Q232 220 240 300Z" fill="#298b7b"/>
-     <ellipse cx="132" cy="146" rx="83" ry="104" fill="url(#camPortrait-v20)"/>
-     <path d="M48 133Q38 39 132 31Q228 37 218 134L184 94L144 81L93 100L63 153Z" fill="#40332f"/>
-     <path d="M57 119Q78 68 125 77Q172 69 209 116L197 63Q158 10 105 26Q43 41 57 119Z" fill="#292726"/>
-     <ellipse cx="102" cy="147" rx="8" ry="11" fill="#1b1c1d"/><ellipse cx="163" cy="147" rx="8" ry="11" fill="#1b1c1d"/>
-     <ellipse cx="88" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/><ellipse cx="179" cy="183" rx="17" ry="10" fill="#e88b91" opacity=".7"/>
-     <path d="M112 205Q135 221 157 203" stroke="#5c3932" strokeWidth="6" fill="none" strokeLinecap="round"/>
-     <path d="M14 297Q16 262 52 240L86 228L112 300M246 297Q241 252 209 236L176 226L155 300" fill="#e4b98e" opacity=".9"/>
-    </svg>
-   </div>
-   <div style={{position:"absolute",right:35,top:35,width:48,height:50,borderRadius:9,background:"#fff8e8",border:"5px solid #94734f",display:"grid",placeItems:"center"}}><div style={{width:25,height:25,borderRadius:6,background:"#15191a",display:"grid",placeItems:"center",color:"#fff",fontSize:17}}>◉</div></div>
-   <div style={{position:"absolute",right:40,bottom:35,width:27,height:42,background:"#f6efe0",borderRadius:4}}><div style={{width:13,height:13,margin:"-7px auto",borderRadius:"50%",background:"#dd5d52"}}/></div>
-   <div style={{position:"absolute",left:0,right:0,bottom:0,height:38,background:"#44327c"}}/>
-  </div>:
-  kind===1?<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%">
-    <path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/>
-    <path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/>
-    <path d="M127 90L180 164L165 198Z" fill="#d8dce0"/>
-   </svg>
-  </div>:
-  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
-   <div style={{position:"absolute",inset:22,border:"8px solid #191a1c",boxShadow:"inset 0 0 0 4px #f8e5b4"}}/>
-   <div style={{position:"absolute",left:30,top:25,fontFamily:"Georgia,serif",fontSize:23,fontWeight:800}}>100K</div>
-   <div style={{position:"absolute",left:28,right:28,top:74,bottom:90,background:"#f8f1de",border:"7px solid #191a1c",display:"grid",placeItems:"center",transform:"rotate(-2deg)"}}>
-    <svg viewBox="0 0 300 230" width="100%" height="100%"><circle cx="150" cy="115" r="90" fill="#e0b64d" stroke="#fff1bf" strokeWidth="12"/><circle cx="150" cy="115" r="65" fill="#132b6e" stroke="#9c7336" strokeWidth="10"/><path d="M130 52L219 113L144 134L124 180Z" fill="#f6dd93"/></svg>
-   </div>
-   <div style={{position:"absolute",left:25,right:25,bottom:27,fontFamily:"Georgia,serif",fontSize:20,fontWeight:800,textAlign:"center"}}>THE FUTURE / 100K</div>
-  </div>:
-  kind===3?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#101f69,#2349aa 47%,#101a61)",overflow:"hidden"}}>
-   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(118deg,rgba(255,255,255,.08) 0 3px,transparent 3px 11px),radial-gradient(circle at 22% 20%,rgba(255,255,255,.22),transparent 35%)"}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%">
-    <defs><radialGradient id="cubeClock-v22"><stop stopColor="#f9de85"/><stop offset=".68" stopColor="#dba945"/><stop offset="1" stopColor="#8c6029"/></radialGradient><filter id="cubeTexture-v22"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer></filter></defs>
-    <circle cx="180" cy="173" r="137" fill="url(#cubeClock-v22)" stroke="#f8e2a5" strokeWidth="13"/>
-    <circle cx="180" cy="173" r="111" fill="#183778" stroke="#d7b45d" strokeWidth="12"/>
-    <circle cx="180" cy="173" r="83" fill="none" stroke="#f6d879" strokeWidth="7"/>
-    <path d="M140 94L254 173L159 190L133 262Z" fill="#050915"/>
-    <path d="M140 94L183 165L159 190Z" fill="#fff1ad"/>
-    <rect width="360" height="360" filter="url(#cubeTexture-v22)" opacity=".55"/>
-    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
-   </svg>
-  </div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
-   <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
-   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
-  </div>:
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:25,border:"8px solid #e9eee8",borderRadius:33}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="118" fill="#080a0d" stroke="#fff" strokeWidth="13"/><path d="M140 90L270 180L140 270Z" fill="#fff"/></svg>
-  </div>}
+  {kind===0?dynamicFront:
+   kind===1?(frame>=55&&frame<72?yellow:blackSide):
+   kind===2?yellow:
+   kind===3?clock:
+   kind===4?ease:
+   (frame>=55&&frame<72?yellow:blackMark)}
   <div style={{position:"absolute",inset:0,borderRadius:44,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.28),transparent 28%,rgba(0,0,0,.18) 100%)"}}/>
  </div>;
 };
@@ -1334,8 +1337,8 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
  const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75);
- const rotateX=18+44*Math.sin(Math.min(1,f/75)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
- const scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
+ const rotateX=f<15?18-14*e(f,0,15):f<45?4-59*e(f,15,45):f<60?-55+25*e(f,45,60):-30+30*e(f,60,75);
+ const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
   <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1800,transform:"translate(-50%,-50%)"}}>
@@ -1346,6 +1349,9 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
     <CubeFace kind={3} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={4} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
+   </div>
+   <div style={{position:"absolute",left:"5%",right:"5%",top:"83%",height:"18%",transform:"rotateX(90deg) translateZ("+(-z*.74)+"px)",opacity:e(f,38,42)*(1-e(f,54,58)),borderRadius:28,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",border:"9px solid #eaffd7",boxShadow:"0 10px 0 rgba(25,85,20,.18)",display:"grid",placeItems:"center"}}>
+    <Word size={92} color="#101713" tracking={-.13}>EASE</Word>
    </div>
   </div>
   <div style={{position:"absolute",left:"50%",top:"81%",width:690,height:105,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.17)",filter:"blur(42px)"}}/>
