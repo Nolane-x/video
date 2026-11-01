@@ -1315,15 +1315,15 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
    <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
   </div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f5edda,#e5d5b9)",color:"#17191c"}}>
-   <div style={{position:"absolute",inset:22,border:"8px solid #17191c"}}/>
-   <div style={{position:"absolute",left:36,top:30,fontFamily:"Georgia,serif",fontSize:24,fontWeight:800}}>1923</div>
-   <div style={{position:"absolute",left:34,right:34,top:84,bottom:95,background:"#f9f1de",border:"6px solid #ba984f",display:"grid",placeItems:"center"}}>
-    <svg viewBox="0 0 300 240" width="100%" height="100%"><circle cx="150" cy="120" r="92" fill="#d9b658" stroke="#fff0c5" strokeWidth="12"/><circle cx="150" cy="120" r="67" fill="#18336f" stroke="#9a7333" strokeWidth="9"/><path d="M137 61L213 119L146 139L128 187Z" fill="#f8de91"/></svg>
+  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
+   <div style={{position:"absolute",inset:22,border:"8px solid #191a1c",boxShadow:"inset 0 0 0 4px #f8e5b4"}}/>
+   <div style={{position:"absolute",left:30,top:25,fontFamily:"Georgia,serif",fontSize:23,fontWeight:800}}>100K</div>
+   <div style={{position:"absolute",left:28,right:28,top:74,bottom:90,background:"#f8f1de",border:"7px solid #191a1c",display:"grid",placeItems:"center",transform:"rotate(-2deg)"}}>
+    <svg viewBox="0 0 300 230" width="100%" height="100%"><circle cx="150" cy="115" r="90" fill="#e0b64d" stroke="#fff1bf" strokeWidth="12"/><circle cx="150" cy="115" r="65" fill="#132b6e" stroke="#9c7336" strokeWidth="10"/><path d="M130 52L219 113L144 134L124 180Z" fill="#f6dd93"/></svg>
    </div>
-   <div style={{position:"absolute",left:28,right:28,bottom:28,fontFamily:"Georgia,serif",fontSize:22,fontWeight:700,textAlign:"center"}}>TIME / IMAGE / MOTION</div>
+   <div style={{position:"absolute",left:25,right:25,bottom:27,fontFamily:"Georgia,serif",fontSize:20,fontWeight:800,textAlign:"center"}}>THE FUTURE / 100K</div>
   </div>:
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
    <div style={{position:"absolute",inset:25,border:"8px solid #e9eee8",borderRadius:33}}/>
    <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="118" fill="#080a0d" stroke="#fff" strokeWidth="13"/><path d="M140 90L270 180L140 270Z" fill="#fff"/></svg>
   </div>}
@@ -1331,9 +1331,10 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
  </div>;
 };
 
-const ProjectCube=()=>{
- const f=useCurrentFrame();
- const rotateY=-90+270*e(f,0,87),rotateX=18+16*Math.sin(Math.min(1,f/87)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
+const ProjectCube=({startAt=0}:{startAt?:number})=>{
+ const f=Math.max(0,useCurrentFrame()-startAt);
+ const rotateY=f<12?-90+38*e(f,0,12):f<27?-52:f<57?-52+139*e(f,27,57):87+93*e(f,57,87);
+ const rotateX=18+20*Math.sin(Math.min(1,f/87)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
  const scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
@@ -1369,17 +1370,30 @@ const MorroCubeIntro=()=>{
  </AbsoluteFill>;
 };
 
-const TexturedCube=()=> <ProjectCube />;
+const TexturedCube=()=>{
+ const f=useCurrentFrame(),p=pop(f,30,0,12,4);
+ if(f<12)return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:"50%",top:"49%",width:330,height:330,transform:"translate(-50%,-50%) scale("+(0.82+.18*p)+")",borderRadius:54,background:"linear-gradient(145deg,#253fea,#0b1a94 62%,#060b55)",boxShadow:"0 17px 0 #5d45ae,0 27px 0 #a68bd8,0 40px 34px rgba(24,20,82,.2)",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:22,border:"5px solid rgba(255,255,255,.9)",borderRadius:37,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.24)"}}/>
+   <svg viewBox="0 0 240 240" width="270" height="270" style={{position:"relative"}}>
+    <circle cx="120" cy="120" r="85" fill="none" stroke="#f8f8f1" strokeWidth="15"/>
+    <circle cx="120" cy="120" r="65" fill="none" stroke="#9db9ff" strokeWidth="4" opacity=".8"/>
+    <path d="M83 57L183 120L99 137L78 194Z" fill="#fff"/>
+   </svg>
+  </div>
+ </AbsoluteFill>;
+ return <ProjectCube startAt={12}/>;
+};
 
 const FinalLockup=()=>{
  const f=useCurrentFrame(),p=pop(f,30,0,78,18),fade=e(f,0,12);
- return <AbsoluteFill style={{...full,background:"#f5f4ed",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:0,right:0,top:190,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*18)+"px)",opacity:fade}}>
-   <div style={{width:210,height:210,borderRadius:46,background:"#101113",display:"grid",placeItems:"center",boxShadow:"0 16px 35px rgba(0,0,0,.13)"}}>
-    <svg viewBox="0 0 100 100" width="184" height="184"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
+ return <AbsoluteFill style={{...full,background:"#f5f4ed"}}>
+  <div style={{position:"absolute",left:0,right:0,top:255,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*16)+"px)",opacity:fade}}>
+   <div style={{width:164,height:164,borderRadius:34,background:"#101113",display:"grid",placeItems:"center"}}>
+    <svg viewBox="0 0 100 100" width="145" height="145"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
    </div>
-   <div style={{marginTop:42,fontFamily:displayFont,fontSize:91,fontWeight:950,color:"#14191b",letterSpacing:"-.075em",whiteSpace:"nowrap"}}>OpenDesign Motion</div>
-   <div style={{marginTop:42,background:"#10313a",color:"#e7f3f2",borderRadius:25,padding:"13px 42px",fontSize:28,fontWeight:850,letterSpacing:".005em",boxShadow:"0 6px 15px rgba(16,49,58,.13)"}}><span style={{color:"#a0dcaa"}}>●</span> open-design.ai</div>
+   <div style={{marginTop:42,fontFamily:displayFont,fontSize:64,fontWeight:950,color:"#14191b",letterSpacing:"-.075em"}}>OpenDesign Motion</div>
+   <div style={{marginTop:42,background:"#10313a",color:"#e7f3f2",borderRadius:23,padding:"9px 31px",fontSize:24,fontWeight:850,letterSpacing:".005em"}}><span style={{color:"#a0dcaa"}}>●</span> open-design.ai</div>
   </div>
  </AbsoluteFill>;
 };
