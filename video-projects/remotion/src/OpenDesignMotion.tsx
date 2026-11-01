@@ -1172,27 +1172,52 @@ const CountdownSequence = () => (
 
 
 const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:number})=>{
- const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:31,border:"2px solid rgba(255,255,255,.7)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.16),inset 0 -18px 32px rgba(0,0,0,.16)"};
+ const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:44,border:"2px solid rgba(255,255,255,.74)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.17),inset 0 -18px 32px rgba(0,0,0,.13)"};
  return <div style={style}>
-  {kind===0?<div style={{position:"absolute",inset:0,background:"#101416",display:"grid",placeItems:"center"}}><OpenDesignSymbol size={205}/></div>:
-  kind===1?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#142fb5,#09104f)"}}><Word size={58} color="#fff" style={{position:"absolute",left:22,top:38}}>FUTURE</Word><Word size={39} color="#b9ed4a" style={{position:"absolute",left:24,top:103}}>IS HERE</Word></div>:
-  kind===2?<div style={{position:"absolute",inset:0,background:"#f2d44f"}}><svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="136" fill="#e8a942" stroke="#22272c" strokeWidth="14"/><circle cx="180" cy="180" r="107" fill="#f7edd1" stroke="#5a503f" strokeWidth="8"/><path d={"M180 180L"+(180+Math.cos(frame*.06)*82)+" "+(180+Math.sin(frame*.06)*82)} stroke="#1e252b" strokeWidth="14"/></svg></div>:
-  kind===3?<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#a3ec70,#68a94f)"}}><Word size={61} color="#142019" style={{position:"absolute",left:18,top:27}}>OPEN</Word><Word size={61} color="#142019" style={{position:"absolute",left:18,top:90}}>DESIGN</Word></div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"#e7a17e"}}><div style={{position:"absolute",left:37,top:28,width:178,height:250,borderRadius:"50%",background:"#f8eed9"}}/><div style={{position:"absolute",left:76,top:80,width:100,height:142,borderRadius:"48%",background:"#8e969e"}}/></div>:
-  <div style={{position:"absolute",inset:0,background:"#a9ed5d"}}><Word size={81} color="#172019" style={{position:"absolute",left:18,top:45}}>EASE</Word><div style={{position:"absolute",left:24,right:24,bottom:34,height:5,background:"#172019"}}/></div>}
-  <div style={{position:"absolute",inset:0,borderRadius:29,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.44),transparent 32%,rgba(0,0,0,.18) 100%)"}}/>
+  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,#e77d8d 0 14%,#e9bb47 14% 86%,#df7b8b 86% 100%)"}}>
+   <div style={{position:"absolute",left:0,right:0,top:0,height:"18%",background:"#e8be47"}}/>
+   <div style={{position:"absolute",left:35,right:35,top:35,bottom:52,borderRadius:"50%",background:"#efe6cb",border:"14px solid #fff6e6",boxShadow:"0 9px 0 rgba(80,52,22,.18),inset 0 0 0 8px #c7a06a",display:"grid",placeItems:"center"}}>
+    <div style={{position:"relative",width:205,height:220,borderRadius:"48% 48% 43% 43%",background:"#dba27d",overflow:"hidden",boxShadow:"inset 0 -12px 18px rgba(83,43,28,.15)"}}>
+     <div style={{position:"absolute",left:0,top:0,width:205,height:75,background:"#392d27",borderRadius:"50% 50% 25% 25%"}}/>
+     <div style={{position:"absolute",left:16,top:48,width:48,height:145,background:"#44332d",borderRadius:"30px 25px 18px 22px"}}/><div style={{position:"absolute",right:16,top:48,width:48,height:145,background:"#44332d",borderRadius:"25px 30px 22px 18px"}}/>
+     <div style={{position:"absolute",left:60,top:105,width:16,height:20,borderRadius:"50%",background:"#181715",boxShadow:"70px 0 0 #181715"}}/>
+     <div style={{position:"absolute",left:48,top:143,width:28,height:18,borderRadius:"50%",background:"#ed9994",opacity:.78,boxShadow:"82px 0 0 #ed9994"}}/>
+     <div style={{position:"absolute",left:88,top:148,width:30,height:18,borderBottom:"5px solid #4d2822",borderRadius:"50%"}}/>
+     <div style={{position:"absolute",left:55,right:55,bottom:0,height:54,background:"#178778",clipPath:"polygon(0 0,100% 0,100% 100%,0 100%)"}}/>
+    </div>
+   </div>
+   <div style={{position:"absolute",right:25,top:22,width:52,height:62,background:"#fff",display:"grid",placeItems:"center",boxShadow:"0 3px 7px rgba(0,0,0,.12)"}}><div style={{width:33,height:33,borderRadius:8,background:"#111",display:"grid",placeItems:"center",color:"#fff",fontSize:22}}>◉</div></div>
+   <div style={{position:"absolute",right:20,bottom:42,width:26,height:37,background:"#f3f0db",borderRadius:4}}><div style={{position:"absolute",left:8,top:-18,width:12,height:20,borderRadius:"50%",background:"#da4a54"}}/></div>
+   <div style={{position:"absolute",left:0,right:0,bottom:0,height:48,background:"#342a78"}}/>
+  </div>:
+  kind===1?<div style={{position:"absolute",inset:0,background:"#111315",display:"grid",placeItems:"center"}}><svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M120 30Q42 30 42 110V250Q42 322 118 322H242Q318 322 318 242V117Q318 42 242 42Z" fill="#fff"/><circle cx="180" cy="180" r="104" fill="#111315" stroke="#fff" strokeWidth="14"/><path d="M137 87L246 177L162 190L151 272Z" fill="#fff"/></svg></div>:
+  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#ee8fa3,#eac54c 48%,#4b3c9a)"}}><Word size={70} color="#151719" style={{position:"absolute",left:24,top:34}}>MORRO</Word><div style={{position:"absolute",inset:70,border:"10px solid rgba(255,255,255,.8)",borderRadius:34}}/><div style={{position:"absolute",right:30,bottom:25,width:78,height:78,borderRadius:"50%",background:"#f7eed7"}}/></div>:
+  kind===3?<div style={{position:"absolute",inset:0,background:"#1748c7"}}><svg viewBox="0 0 360 360" width="100%" height="100%">{Array.from({length:10},(_,i)=><path key={i} d={"M"+(i*42-60)+" 0L"+(i*35+90)+" 360"} stroke="#d9e6ff" strokeWidth="6" opacity=".55"/>)}<circle cx="180" cy="180" r="105" fill="#e8edff" opacity=".9"/><path d="M120 160L180 115L235 184L180 248Z" fill="#292e4b"/></svg></div>:
+  kind===4?<div style={{position:"absolute",inset:0,background:"#f3e7cd"}}><div style={{position:"absolute",inset:25,border:"8px solid #151718"}}/><Word size={68} color="#121719" style={{position:"absolute",left:22,top:55}}>EASE</Word><div style={{position:"absolute",right:30,bottom:30,width:100,height:100,borderRadius:"50%",background:"#e44f43"}}/></div>:
+  <div style={{position:"absolute",inset:0,background:"#d34e3b"}}><Word size={72} color="#fff1db" style={{position:"absolute",left:22,top:36}}>OPEN</Word><Word size={62} color="#fff1db" style={{position:"absolute",left:22,top:112}}>DESIGN</Word><div style={{position:"absolute",right:28,bottom:26,width:92,height:92,border:"11px solid #fff",borderRadius:"50%"}}/></div>}
+  <div style={{position:"absolute",inset:0,borderRadius:42,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.34),transparent 31%,rgba(0,0,0,.12) 100%)"}}/>
  </div>;
 };
 const ProjectCube=()=>{
- const f=useCurrentFrame(),rotateY=-34-360*e(f,0,116)-e(f,116,126),rotateX=23*(1-e(f,105,126)),rotateZ=-5+Math.sin(f/18)*3;
- const scale=(.68+.32*e(f,0,18))*(1-.35*e(f,108,126)),size=360,z=size/2;
- return <AbsoluteFill style={{...full,background:"linear-gradient(145deg,#f8f7f2,#e9e9e3 58%,#d8dedf)"}}>
-  <div style={{position:"absolute",left:"50%",top:"82%",width:520,height:84,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(24,30,38,.17)",filter:"blur(28px)"}}/>
-  <div style={{position:"absolute",left:"50%",top:"48%",width:size,height:size,perspective:1100,transform:"translate(-50%,-50%)"}}><div style={{position:"absolute",inset:0,transformStyle:"preserve-3d",transform:"rotateX("+rotateX+"deg) rotateY("+rotateY+"deg) rotateZ("+rotateZ+"deg) scale("+scale+")"}}>
-   <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/><CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/><CubeFace kind={2} frame={f} transform={"rotateY(-90deg) translateZ("+z+"px)"}/><CubeFace kind={3} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/><CubeFace kind={4} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/><CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
-  </div></div>
+ const f=useCurrentFrame();
+ const rotateY=-28-300*e(f,0,126),rotateX=18+5*Math.sin(f/17),rotateZ=-3+Math.sin(f/18)*2;
+ const scale=(.72+.28*e(f,0,18))*(1-.2*e(f,108,126)),size=470,z=size/2;
+ return <AbsoluteFill style={{...full,background:"#f3f0e9"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 80%,rgba(25,27,31,.12),transparent 42%)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1450,transform:"translate(-50%,-50%)"}}>
+   <div style={{position:"absolute",inset:0,transformStyle:"preserve-3d",transform:"rotateX("+rotateX+"deg) rotateY("+rotateY+"deg) rotateZ("+rotateZ+"deg) scale("+scale+")"}}>
+    <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/>
+    <CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={2} frame={f} transform={"rotateY(-90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={3} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={4} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
+   </div>
+  </div>
+  <div style={{position:"absolute",left:"50%",top:"80%",width:600,height:95,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.13)",filter:"blur(36px)"}}/>
  </AbsoluteFill>;
 };
+
 const MorroCubeIntro=()=>{
  const f=useCurrentFrame(),p=e(f,0,35);
  return <AbsoluteFill style={{...full,background:"#f5f4ed",overflow:"hidden"}}>
