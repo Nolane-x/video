@@ -20,7 +20,7 @@ MANIFEST_URL = (
     "https://github.com/Nolane-x/VoiceStudio/releases/download/"
     "voice-library-latest/manifest.json"
 )
-COMMERCIAL_ALLOWED_MARKER = "upstream-model-card-permits-generated-audio"
+COMMERCIAL_ALLOWED_MARKERS = frozenset({\n    "upstream-model-card-permits-generated-audio",\n    "apache-2.0-model-and-voice-assets",\n})
 
 
 def read_manifest(path: str | None, timeout: float = 30.0) -> dict[str, Any]:
@@ -65,7 +65,7 @@ def select_voices(
         if not engine_matches(voice, engine):
             continue
         rights = voice.get("rights") or {}
-        if commercial_permitted_only and rights.get("commercial_use") != COMMERCIAL_ALLOWED_MARKER:
+        if commercial_permitted_only and rights.get("commercial_use") not in COMMERCIAL_ALLOWED_MARKERS:
             continue
         rows.append({
             "voice_id": voice.get("id", ""),
@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", help="local manifest.json; defaults to the latest VoiceStudio release")
     parser.add_argument("--language", choices=["all", "en", "vi"], default="all")
-    parser.add_argument("--engine", choices=["all", "piper", "vieneu"], default="all")
+    parser.add_argument("--engine", choices=["all", "piper", "vieneu", "kokoro"], default="all")
     parser.add_argument(
         "--commercial-permitted-only",
         action="store_true",
