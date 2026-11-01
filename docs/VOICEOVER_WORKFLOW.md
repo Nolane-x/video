@@ -16,6 +16,22 @@ The video repository then downloads and verifies the result.
 No Electron app, local model install, self-hosted GPU, paid voice API or binary
 audio commit is required.
 
+## Inspect available voices before rendering
+
+The video AI can read the latest published voice manifest through this helper.
+It returns canonical IDs and preserves each source's rights notice:
+
+```bash
+python tools/video/list_voicestudio_voices.py --language vi --commercial-permitted-only
+python tools/video/list_voicestudio_voices.py --language en --engine vieneu --json
+```
+
+Use the exact `voice_id` in the resulting record when constructing the job
+JSON. The commercial-permission filter selects only manifest rows carrying
+the upstream VieNeu generated-audio permission statement; it does not replace
+reviewing original terms and attribution. For an offline copy, pass
+`--manifest path/to/manifest.json`.
+
 ## Run it
 
 Open **Actions → Render AI voice-over with VoiceStudio → Run workflow** and

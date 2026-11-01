@@ -6,6 +6,8 @@ on:
     paths:
       - "tools/video/align_voicestudio_voiceover.py"
       - "tests/test_voicestudio_voiceover_alignment.py"
+      - "tools/video/list_voicestudio_voices.py"
+      - "tests/test_list_voicestudio_voices.py"
       - ".github/workflows/render-voicestudio-voiceover.yml"
       - ".github/workflows/test-voicestudio-voiceover.yml"
   push:
@@ -13,6 +15,8 @@ on:
     paths:
       - "tools/video/align_voicestudio_voiceover.py"
       - "tests/test_voicestudio_voiceover_alignment.py"
+      - "tools/video/list_voicestudio_voices.py"
+      - "tests/test_list_voicestudio_voices.py"
       - ".github/workflows/render-voicestudio-voiceover.yml"
       - ".github/workflows/test-voicestudio-voiceover.yml"
 
@@ -33,6 +37,8 @@ jobs:
         run: |
           python -m py_compile tools/video/align_voicestudio_voiceover.py
           python tests/test_voicestudio_voiceover_alignment.py
+          python -m py_compile tools/video/list_voicestudio_voices.py
+          python tests/test_list_voicestudio_voices.py
 
       - name: Set up Go for actionlint
         uses: actions/setup-go@v6
