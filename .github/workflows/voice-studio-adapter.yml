@@ -8,6 +8,7 @@ on:
       - "integrations/voice-studio/**"
       - ".agents/skills/video-voice-*/*"
       - ".github/workflows/voice-studio-adapter.yml"
+      - ".github/workflows/package-video-skill.yml"
       - ".github/workflows/voice-studio-headless-smoke.yml"
       - ".github/workflows/voice-studio-actions-lab.yml"
       - ".github/workflows/voice-studio-actions-project.yml"
@@ -48,6 +49,8 @@ jobs:
           test -f integrations/voice-studio/analyze_actions_voice_lab.py
           test -f integrations/voice-studio/tests/test_analyze_actions_voice_lab.py
           test -f integrations/voice-studio/ratings/README.md
+          grep -q '"integrations/voice-studio/ratings/README.md"' .github/workflows/package-video-skill.yml
+          grep -q 'voice-studio-actions-shortlist.yml' .github/workflows/package-video-skill.yml
           test -f .github/workflows/voice-studio-actions-shortlist.yml
           test -f integrations/voice-studio/analyze_actions_voice_lab.py
           test -f integrations/voice-studio/tests/test_analyze_actions_voice_lab.py
