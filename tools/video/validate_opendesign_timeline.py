@@ -61,12 +61,12 @@ need(not missing, "components referenced by shot map / montage are missing: " + 
 need("if(frame>=112)return <CountdownOne frame={frame-112}/>" in source, "full-screen countdown must begin at source frame891")
 need("frame<76?-1:frame<91?3:frame<106?2:1" in source, "number 1 must remain inside the Launch Film preview at frame885")
 need("const CountdownPrism=" in source, "blue extruded countdown prism artwork is missing")
-need("wc-edge-v37" in source and "wc-paper-v37" in source, "V37 watercolor brush edges and paper-grain treatment are missing")
-need("wc-cloud-v37" in source and "wc-cloud-peach-v37" in source and "wc-horizon-v37" in source, "V37 low watercolor cloud clusters and blue hill horizon are missing")
+need("wc-edge-v38" in source and "wc-paper-v38" in source and "wc-pigment-v38" in source, "V38 watercolor edge, paper-grain and pigment treatment are missing")
+need("wc-cloud-cream-v38" in source and "wc-cloud-peach-v38" in source and "wc-hill-near-v38" in source and "wc-hill-far-v38" in source, "V38 low cloud islands and layered irregular blue hills are missing")
 need("left:290,right:290,top:390,height:330" in source, "V34 prompt card source proportions are missing")
 need('fontSize:370,fontWeight:1000,letterSpacing:"-.02em"' in source, "V34 MOTION letter scale and tracking are missing")
 need("fontSize:132,fontWeight:850" in source and 'fontSize:40,fontWeight:650,color:"#fff"' in source, "V34 OpenDesign/Introducing title hierarchy is missing")
-need("wc-blue-streak-v37" in source and "wc-peach-streak-v37" in source and "wc-pigment-v37" in source, "V37 diagonal painterly sky strokes and pigment texture are missing")
+need("wc-streak-white-v38" in source and "wc-streak-blue-v38" in source and "wc-streak-peach-v38" in source, "V38 broken diagonal sky strokes are missing")
 need("source1973-spectrum-v30" in source, "V30 rainbow optical dispersion is missing")
 need("M-132 178V-72C-132 -205 132 -205 132 -72V178" in source, "V30 gold pixel-game portal is missing")
 need("mind-prism-v30" in source, "V30 translucent MIND polyhedron is missing")
@@ -131,3 +131,7 @@ need("durationInFrames={14}><LinearPoster" in source and "from={194} durationInF
 need("MORRO / 01" in source, "illustrated camera cube face artwork is missing")
 
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")
+
+need('fontSize:100,fontWeight:700,letterSpacing:"-.055em"' in source, "V38 opening headline scale is missing")
+need("Math.round(Math.max(0,Math.min(1,(f-14)/46))*text.length)" in source, "V38 typed prompt must match the 0/30/60-frame cadence")
+need("left:1875-305*e(f,42,60)" in source and "top:955-275*e(f,42,60)" in source, "V38 cursor motion must travel from the bottom-right edge to the submit control")

@@ -90,153 +90,155 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.032;
- const brush=Array.from({length:104},(_,i)=>{
-  const x=(i*193)%2280-180;
-  const y=82+(i*127)%620;
-  const w=64+(i*71)%360;
-  const h=2+(i*13)%13;
-  const palette=["#f7fbf2","#e1f1f4","#a8d4eb","#fff0df","#f4c8b8","#d3e6e8","#b7d9e9"];
-  return {x,y,w,h,angle:-28+(i%15)*3.8,color:palette[i%palette.length],opacity:.035+(i%7)*.013};
+ const drift=frame*.026;
+ const brush=Array.from({length:118},(_,i)=>{
+  const x=(i*181)%2260-170,y=35+(i*137)%780,w=62+(i*67)%370,h=2+(i*11)%13;
+  const colors=["#f7fbf1","#eaf5f2","#b7d9ed","#fff2e2","#f5cbbb","#d5e7e8","#a8d1e8"];
+  return {x,y,w,h,angle:-32+(i%17)*3.2,color:colors[i%colors.length],opacity:.035+(i%6)*.012};
  });
- const specks=Array.from({length:168},(_,i)=>({
-  x:(i*109)%2050-55,
-  y:150+(i*173)%790,
-  r:.7+(i%4)*.55,
-  color:["#fffaf0","#dcecf0","#f3cabb","#8dc6e1"][i%4],
-  opacity:.025+(i%6)*.012
+ const pigment=Array.from({length:210},(_,i)=>({
+  x:(i*113)%2040-60,y:690+(i*157)%300,r:.7+(i%5)*.58,
+  color:["#fff9ed","#f4c9b4","#8dc6dd","#d8e7e5","#f1ad9f"][i%5],
+  opacity:.025+(i%7)*.012
  }));
- return <AbsoluteFill style={{background:"#75bde4",overflow:"hidden"}}>
+ return <AbsoluteFill style={{background:"#73bce4",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v37" x1="0" y1="0" x2=".12" y2="1">
-     <stop stopColor="#58b2e0"/>
-     <stop offset=".34" stopColor="#82c5e5"/>
-     <stop offset=".63" stopColor="#b9dce7"/>
-     <stop offset=".84" stopColor="#eacfc0"/>
-     <stop offset="1" stopColor="#f0bda9"/>
+    <linearGradient id="wc-sky-v38" x1="0" y1="0" x2=".1" y2="1">
+     <stop stopColor="#57b1df"/>
+     <stop offset=".36" stopColor="#80c3e5"/>
+     <stop offset=".68" stopColor="#b6dce8"/>
+     <stop offset=".87" stopColor="#e9d3c5"/>
+     <stop offset="1" stopColor="#efc2ad"/>
     </linearGradient>
-    <linearGradient id="wc-sky-wash-v37" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fffdf2" stopOpacity=".03"/>
-     <stop offset=".38" stopColor="#e9f5f0" stopOpacity=".33"/>
-     <stop offset=".68" stopColor="#d3e8e9" stopOpacity=".24"/>
-     <stop offset="1" stopColor="#f3d3c7" stopOpacity=".06"/>
+    <linearGradient id="wc-air-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#e8f7f0" stopOpacity=".12"/>
+     <stop offset=".45" stopColor="#d8ebeb" stopOpacity=".12"/>
+     <stop offset=".82" stopColor="#f4c9bd" stopOpacity=".24"/>
+     <stop offset="1" stopColor="#ffe9d4" stopOpacity=".08"/>
     </linearGradient>
-    <linearGradient id="wc-blue-streak-v37" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#f7fcf4" stopOpacity=".08"/>
-     <stop offset=".24" stopColor="#f9fbf1" stopOpacity=".66"/>
-     <stop offset=".57" stopColor="#dceff1" stopOpacity=".44"/>
-     <stop offset="1" stopColor="#ffffff" stopOpacity=".02"/>
+    <linearGradient id="wc-streak-white-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fffdf2" stopOpacity=".04"/>
+     <stop offset=".26" stopColor="#f8fff4" stopOpacity=".78"/>
+     <stop offset=".61" stopColor="#e6f4f1" stopOpacity=".48"/>
+     <stop offset="1" stopColor="#d8e8e8" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-peach-streak-v37" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff4e6" stopOpacity=".02"/>
-     <stop offset=".38" stopColor="#f8d8c4" stopOpacity=".48"/>
-     <stop offset=".72" stopColor="#efaeb0" stopOpacity=".34"/>
-     <stop offset="1" stopColor="#f6e6d8" stopOpacity=".02"/>
+    <linearGradient id="wc-streak-blue-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#8bc9e8" stopOpacity=".03"/>
+     <stop offset=".36" stopColor="#d7edf2" stopOpacity=".55"/>
+     <stop offset=".72" stopColor="#edf5eb" stopOpacity=".3"/>
+     <stop offset="1" stopColor="#fff4e7" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-v37" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#fffdf0" stopOpacity=".9"/>
-     <stop offset=".46" stopColor="#fff2dc" stopOpacity=".63"/>
-     <stop offset="1" stopColor="#f3bfae" stopOpacity=".04"/>
+    <linearGradient id="wc-streak-peach-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff4e5" stopOpacity=".02"/>
+     <stop offset=".38" stopColor="#f7d3c2" stopOpacity=".54"/>
+     <stop offset=".73" stopColor="#efb4ad" stopOpacity=".35"/>
+     <stop offset="1" stopColor="#f6e0d3" stopOpacity=".02"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-blue-v37" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#f8fcf3" stopOpacity=".72"/>
-     <stop offset=".6" stopColor="#c8e2e7" stopOpacity=".48"/>
-     <stop offset="1" stopColor="#eabeb2" stopOpacity=".08"/>
+    <linearGradient id="wc-cloud-cream-v38" x1="0" y1="0" x2=".3" y2="1">
+     <stop stopColor="#fffef3" stopOpacity=".96"/>
+     <stop offset=".48" stopColor="#fff1dc" stopOpacity=".7"/>
+     <stop offset="1" stopColor="#f0c1aa" stopOpacity=".04"/>
     </linearGradient>
-    <linearGradient id="wc-cloud-peach-v37" x1="0" y1="0" x2="1" y2="1">
-     <stop stopColor="#fff0de" stopOpacity=".08"/>
-     <stop offset=".43" stopColor="#f3bc9f" stopOpacity=".62"/>
-     <stop offset=".78" stopColor="#e99ca0" stopOpacity=".36"/>
-     <stop offset="1" stopColor="#e7c9bb" stopOpacity=".02"/>
+    <linearGradient id="wc-cloud-peach-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff1e1" stopOpacity=".12"/>
+     <stop offset=".4" stopColor="#f3b99d" stopOpacity=".74"/>
+     <stop offset=".78" stopColor="#e99da0" stopOpacity=".43"/>
+     <stop offset="1" stopColor="#e6c8b8" stopOpacity=".04"/>
     </linearGradient>
-    <linearGradient id="wc-horizon-v37" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#1a759d"/>
-     <stop offset=".55" stopColor="#105e89"/>
-     <stop offset="1" stopColor="#0c507c"/>
+    <linearGradient id="wc-hill-far-v38" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#438eb0"/>
+     <stop offset=".62" stopColor="#236f9a"/>
+     <stop offset="1" stopColor="#155a86"/>
     </linearGradient>
-    <linearGradient id="wc-water-v37" x1="0" y1="0" x2="0" y2="1">
-     <stop stopColor="#3d9abf"/>
-     <stop offset=".5" stopColor="#277da7"/>
-     <stop offset="1" stopColor="#185f8a"/>
+    <linearGradient id="wc-hill-near-v38" x1="0" y1="0" x2="0" y2="1">
+     <stop stopColor="#17668f"/>
+     <stop offset=".55" stopColor="#104f7d"/>
+     <stop offset="1" stopColor="#0b416f"/>
     </linearGradient>
-    <radialGradient id="wc-sun-haze-v37" cx="73%" cy="78%" r="59%">
-     <stop stopColor="#ffe8d5" stopOpacity=".54"/>
-     <stop offset=".52" stopColor="#f7d9ca" stopOpacity=".16"/>
-     <stop offset="1" stopColor="#f7d9ca" stopOpacity="0"/>
+    <linearGradient id="wc-hill-light-v38" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#73b9ce" stopOpacity=".52"/>
+     <stop offset="1" stopColor="#296e9d" stopOpacity=".04"/>
+    </linearGradient>
+    <radialGradient id="wc-dawn-v38" cx="70%" cy="78%" r="57%">
+     <stop stopColor="#ffe7d4" stopOpacity=".42"/>
+     <stop offset=".55" stopColor="#f9d9ca" stopOpacity=".14"/>
+     <stop offset="1" stopColor="#f9d9ca" stopOpacity="0"/>
     </radialGradient>
-    <filter id="wc-haze-v37"><feGaussianBlur stdDeviation="25"/></filter>
-    <filter id="wc-soft-v37"><feGaussianBlur stdDeviation="12"/></filter>
-    <filter id="wc-mid-v37"><feGaussianBlur stdDeviation="4.5"/></filter>
-    <filter id="wc-edge-v37">
-     <feTurbulence type="fractalNoise" baseFrequency=".016 .035" numOctaves="2" seed="101" result="edgeNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation=".85"/>
+    <filter id="wc-air-soft-v38"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="wc-stroke-soft-v38"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="wc-stroke-crisp-v38"><feGaussianBlur stdDeviation="2.1"/></filter>
+    <filter id="wc-edge-v38">
+     <feTurbulence type="fractalNoise" baseFrequency=".022 .038" numOctaves="2" seed="113" result="edgeNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation=".45"/>
     </filter>
-    <filter id="wc-pigment-v37">
-     <feTurbulence type="fractalNoise" baseFrequency=".07 .095" numOctaves="2" seed="43" result="pigmentNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    <filter id="wc-pigment-v38">
+     <feTurbulence type="fractalNoise" baseFrequency=".08 .11" numOctaves="2" seed="59" result="pigmentNoise"/>
+     <feDisplacementMap in="SourceGraphic" in2="pigmentNoise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
-    <filter id="wc-paper-v37">
-     <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="37"/>
+    <filter id="wc-paper-v38">
+     <feTurbulence type="fractalNoise" baseFrequency=".83" numOctaves="2" seed="41"/>
      <feColorMatrix type="saturate" values="0"/>
     </filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v37)"/>
-   <rect width="1920" height="1080" fill="url(#wc-sky-wash-v37)"/>
-   <rect width="1920" height="1080" fill="url(#wc-sun-haze-v37)"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v38)"/>
+   <rect width="1920" height="1080" fill="url(#wc-air-v38)"/>
+   <rect width="1920" height="1080" fill="url(#wc-dawn-v38)"/>
 
-   <g transform={"translate("+(-drift*.45)+",0)"} opacity=".5" filter="url(#wc-haze-v37)">
-    <path d="M-180 420C15 330 193 265 370 251C568 176 750 157 928 170C1112 104 1291 95 1454 125C1641 60 1810 74 2110 8" fill="none" stroke="url(#wc-blue-streak-v37)" strokeWidth="118" strokeLinecap="round"/>
-    <path d="M-170 490C94 348 300 300 486 285C685 203 863 198 1026 195C1216 123 1394 128 1538 122C1712 70 1874 47 2070 -8" fill="none" stroke="#dceff1" strokeWidth="46" strokeLinecap="round" opacity=".5"/>
-    <path d="M490 448C728 370 919 314 1091 286C1283 230 1442 207 1594 195C1748 157 1890 143 2070 92" fill="none" stroke="url(#wc-peach-streak-v37)" strokeWidth="104" strokeLinecap="round"/>
+   <g transform={"translate("+(-drift*.6)+",0)"} opacity=".82">
+    <path d="M-150 355C42 272 172 230 318 183C492 129 648 121 820 95C1002 68 1147 45 1312 -18C1195 79 1054 125 910 161C722 209 566 224 409 279C249 336 91 390 -150 472Z" fill="url(#wc-streak-white-v38)" opacity=".53" filter="url(#wc-air-soft-v38)"/>
+    <path d="M-110 392C83 299 216 268 364 216C521 161 679 151 832 123C977 96 1097 69 1238 20" fill="none" stroke="#f9fff5" strokeWidth="34" strokeLinecap="round" opacity=".34" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M-90 423C104 330 231 295 372 245C523 191 654 178 807 145" fill="none" stroke="#d6edf1" strokeWidth="13" strokeLinecap="round" opacity=".52"/>
+    <path d="M-130 447C81 371 218 328 347 289C497 244 616 231 756 198" fill="none" stroke="#fffdf1" strokeWidth="7" strokeLinecap="round" opacity=".62" filter="url(#wc-stroke-crisp-v38)"/>
+    <path d="M880 250C1057 194 1202 157 1352 110C1501 66 1651 38 1831 -35" fill="none" stroke="url(#wc-streak-peach-v38)" strokeWidth="62" strokeLinecap="round" opacity=".65" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M1035 224C1194 170 1338 137 1483 94S1740 35 1910 -28" fill="none" stroke="#ffd9c6" strokeWidth="19" strokeLinecap="round" opacity=".42" filter="url(#wc-stroke-soft-v38)"/>
    </g>
-   <g transform={"translate("+(drift*.28)+",0)"} opacity=".62">
-    <path d="M-160 477C76 329 277 293 440 240C624 174 785 159 946 131C1121 104 1289 80 1448 51" fill="none" stroke="#f6fbf4" strokeWidth="62" strokeLinecap="round" opacity=".13" filter="url(#wc-soft-v37)"/>
-    <path d="M-180 466C67 331 284 284 459 221C635 157 806 149 982 116C1150 91 1301 68 1460 35" fill="none" stroke="#fffaf0" strokeWidth="23" strokeLinecap="round" opacity=".3" filter="url(#wc-mid-v37)"/>
-    <path d="M-80 526C126 408 283 372 444 321C600 270 769 238 914 217" fill="none" stroke="#c9e5ee" strokeWidth="17" strokeLinecap="round" opacity=".3"/>
-    <path d="M760 315C955 255 1121 225 1280 202S1598 151 1790 96" fill="none" stroke="#fff6e9" strokeWidth="27" strokeLinecap="round" opacity=".24" filter="url(#wc-mid-v37)"/>
-    <path d="M980 390C1170 314 1350 295 1510 248S1780 201 1990 151" fill="none" stroke="#f3c2b7" strokeWidth="34" strokeLinecap="round" opacity=".3" filter="url(#wc-soft-v37)"/>
-   </g>
-   <g transform={"translate("+(drift*.18)+",0)"} opacity=".48" filter="url(#wc-soft-v37)">
-    <path d="M-100 675C95 591 240 548 382 536C512 484 656 478 793 453" fill="none" stroke="#f4f8ec" strokeWidth="30" strokeLinecap="round"/>
-    <path d="M1280 350C1410 305 1532 267 1648 260S1850 230 2020 175" fill="none" stroke="#fff6ec" strokeWidth="42" strokeLinecap="round"/>
-    <path d="M1310 405C1448 348 1576 332 1702 300S1894 272 2030 220" fill="none" stroke="#edc4bc" strokeWidth="25" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.22)+",0)"} opacity=".52">
+    <path d="M-120 525C36 464 172 417 317 374C444 337 568 321 696 289" fill="none" stroke="url(#wc-streak-blue-v38)" strokeWidth="32" strokeLinecap="round" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M420 425C566 374 698 344 835 318S1116 260 1262 216" fill="none" stroke="#fff7e9" strokeWidth="18" strokeLinecap="round" opacity=".28" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M1300 456C1452 410 1601 368 1740 324" fill="none" stroke="#e9d9d0" strokeWidth="16" strokeLinecap="round" opacity=".2" filter="url(#wc-stroke-soft-v38)"/>
    </g>
 
-   <g transform={"translate("+(-drift*.2)+",0)"} filter="url(#wc-edge-v37)">
-    <path d="M-100 848C-56 812 -6 798 40 815C73 770 117 755 157 780C196 742 244 744 276 778C317 762 360 783 375 815C334 842 296 846 257 832C208 866 159 854 120 837C67 870 12 875 -100 848Z" fill="url(#wc-cloud-v37)" opacity=".85"/>
-    <path d="M-45 884C18 846 75 847 128 864C173 832 227 835 265 861C306 844 352 855 379 885C328 909 280 908 239 891C179 921 123 909 81 889C28 909 -13 903 -45 884Z" fill="url(#wc-cloud-blue-v37)" opacity=".62" filter="url(#wc-mid-v37)"/>
-    <path d="M236 890C272 849 316 833 359 851C398 811 450 812 484 842C525 821 567 837 587 866C550 894 509 896 473 880C428 910 376 898 340 881C303 906 265 906 236 890Z" fill="url(#wc-cloud-v37)" opacity=".72"/>
-    <path d="M360 922C430 881 490 885 542 905C597 864 657 873 700 904C752 881 804 895 826 926C759 955 704 946 658 925C603 954 548 946 505 925C451 945 398 939 360 922Z" fill="url(#wc-cloud-peach-v37)" opacity=".72" filter="url(#wc-mid-v37)"/>
-    <path d="M-90 915C-15 885 39 887 96 903C154 884 212 892 269 916" fill="none" stroke="#fff7e9" strokeWidth="35" strokeLinecap="round" opacity=".4" filter="url(#wc-soft-v37)"/>
-   </g>
-   <g transform={"translate("+(drift*.3)+",0)"} filter="url(#wc-edge-v37)" opacity=".7">
-    <path d="M700 912C746 879 796 881 831 900C868 865 917 860 952 887C987 861 1037 870 1064 901C1022 929 984 929 950 913C910 939 867 930 832 914C782 936 738 930 700 912Z" fill="#fff4e5" opacity=".5"/>
-    <path d="M920 939C988 900 1055 909 1106 929C1172 891 1235 901 1276 931C1329 909 1383 923 1408 951C1342 971 1287 962 1241 944C1186 972 1129 965 1088 945C1028 966 970 958 920 939Z" fill="url(#wc-cloud-peach-v37)" opacity=".6"/>
-   </g>
-   <g transform={"translate("+(drift*.22)+",0)"} opacity=".4" filter="url(#wc-soft-v37)">
-    <path d="M-80 780C82 738 181 737 292 756S493 775 614 735" fill="none" stroke="#fff2df" strokeWidth="45" strokeLinecap="round"/>
-    <path d="M250 812C390 769 525 779 650 800S870 804 1000 767" fill="none" stroke="#f2bcae" strokeWidth="34" strokeLinecap="round"/>
-    <path d="M1015 818C1126 778 1248 783 1350 806" fill="none" stroke="#fff4e8" strokeWidth="26" strokeLinecap="round"/>
+   <g transform={"translate("+(-drift*.18)+",0)"} filter="url(#wc-edge-v38)">
+    <path d="M-60 831C2 789 56 779 112 796C160 758 224 764 254 797C299 781 343 800 358 827C321 854 272 855 232 839C179 870 123 854 83 839C25 861 -21 854 -60 831Z" fill="url(#wc-cloud-cream-v38)" opacity=".75"/>
+    <path d="M-12 813C41 783 95 783 139 804C180 776 227 782 261 805" fill="none" stroke="#fffef2" strokeWidth="29" strokeLinecap="round" opacity=".48" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M34 849C108 825 166 833 222 849" fill="none" stroke="#e9f3ed" strokeWidth="16" strokeLinecap="round" opacity=".48" filter="url(#wc-stroke-crisp-v38)"/>
+
+    <path d="M306 852C344 822 385 814 426 831C456 799 507 798 535 828C578 811 624 828 643 853C607 879 571 881 534 865C493 891 447 874 413 860C367 878 330 870 306 852Z" fill="url(#wc-cloud-cream-v38)" opacity=".7"/>
+    <path d="M350 828C405 807 454 809 496 828" fill="none" stroke="#fffaf0" strokeWidth="22" strokeLinecap="round" opacity=".5" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M445 866C495 849 547 855 589 869" fill="none" stroke="#f2bfa9" strokeWidth="17" strokeLinecap="round" opacity=".44" filter="url(#wc-stroke-crisp-v38)"/>
    </g>
 
-   <g filter="url(#wc-mid-v37)" opacity=".3">
-    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.28)+" "+(-p.h*1.2)+" "+(p.w*.7)+" "+(-p.h*.2)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+   <g transform={"translate("+(drift*.15)+",0)"} filter="url(#wc-edge-v38)">
+    <path d="M586 872C633 847 674 842 719 858C753 830 797 828 834 850C879 828 924 839 950 867C916 888 872 888 834 873C785 896 739 884 704 870C655 890 615 887 586 872Z" fill="url(#wc-cloud-peach-v38)" opacity=".72"/>
+    <path d="M624 856C676 841 724 843 768 861" fill="none" stroke="#fff9ee" strokeWidth="19" strokeLinecap="round" opacity=".5" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M706 884C762 866 809 873 853 886" fill="none" stroke="#e99b8d" strokeWidth="13" strokeLinecap="round" opacity=".4" filter="url(#wc-stroke-crisp-v38)"/>
+    <path d="M890 854C939 828 984 829 1027 848C1064 828 1107 838 1129 865C1086 886 1048 878 1018 864C975 888 928 875 890 854Z" fill="url(#wc-cloud-cream-v38)" opacity=".48"/>
    </g>
-   <g filter="url(#wc-pigment-v37)" opacity=".42">
-    {specks.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
+
+   <g transform={"translate("+(drift*.12)+",0)"} opacity=".46" filter="url(#wc-air-soft-v38)">
+    <path d="M-50 778C112 744 233 743 354 770" fill="none" stroke="#f8e8d7" strokeWidth="49" strokeLinecap="round"/>
+    <path d="M300 796C421 763 528 773 640 801" fill="none" stroke="#f2c4b4" strokeWidth="36" strokeLinecap="round"/>
+    <path d="M620 816C754 780 863 793 982 822" fill="none" stroke="#fff0de" strokeWidth="31" strokeLinecap="round"/>
+    <path d="M1040 812C1188 781 1291 794 1404 822" fill="none" stroke="#f8e0d2" strokeWidth="28" strokeLinecap="round"/>
+   </g>
+   <g filter="url(#wc-pigment-v38)" opacity=".56">
+    {brush.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.24)+" "+(-p.h*1.3)+" "+(p.w*.72)+" "+(-p.h*.16)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+    {pigment.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
    </g>
 
    <g transform={"translate("+(drift*.055)+",0)"}>
-    <path d="M-110 1037C33 1018 154 991 277 987C391 978 465 1017 563 1025C689 1035 761 1010 870 1015C1035 1021 1142 1038 1281 1022C1435 1005 1550 1012 1699 1009C1814 1005 1920 1014 2030 1008V1080H-110Z" fill="url(#wc-water-v37)" opacity=".8"/>
-    <path d="M-110 1017C16 995 146 971 267 967C358 961 428 1002 528 1009C622 1015 703 1005 792 1009C915 1016 1003 1019 1118 1010C1248 1001 1373 1011 1494 1004C1660 994 1807 1001 2030 992V1080H-110Z" fill="url(#wc-horizon-v37)"/>
-    <path d="M-110 1002C31 982 157 954 264 958C348 962 411 1000 505 1003C586 1006 679 995 767 1000" fill="none" stroke="#4fa5c5" strokeWidth="10" opacity=".28" filter="url(#wc-soft-v37)"/>
-    <path d="M40 1033C153 1021 233 1021 333 1030M620 1039C719 1030 814 1032 907 1038M1240 1030C1343 1023 1456 1028 1540 1036" fill="none" stroke="#88bfd0" strokeWidth="5" opacity=".19" filter="url(#wc-mid-v37)"/>
+    <path d="M-120 977C-6 954 97 929 198 922C318 911 392 922 492 927C606 932 691 909 792 913C903 918 994 938 1105 930C1218 920 1321 897 1446 905C1571 913 1696 890 1818 895C1900 899 1962 905 2030 902V1080H-120Z" fill="url(#wc-hill-far-v38)" opacity=".9"/>
+    <path d="M-120 1005C2 989 126 969 241 962C355 955 446 974 560 983C671 991 777 969 881 972C1009 976 1116 994 1234 986C1357 978 1478 956 1592 960C1742 965 1869 948 2030 952V1080H-120Z" fill="url(#wc-hill-light-v38)" opacity=".5"/>
+    <path d="M-120 1022C-2 996 97 974 197 971C305 968 370 1001 478 1010C578 1018 663 1001 761 1007C870 1014 959 1029 1069 1015C1188 1000 1294 1011 1404 1012C1538 1014 1637 990 1751 989C1857 988 1954 996 2030 991V1080H-120Z" fill="url(#wc-hill-near-v38)"/>
+    <path d="M-90 979C55 952 135 938 220 939C314 939 383 958 472 966C565 974 641 958 735 960" fill="none" stroke="#79b8ca" strokeWidth="8" opacity=".2" filter="url(#wc-stroke-soft-v38)"/>
+    <path d="M-40 1018C54 1004 112 998 178 1000M542 1031C632 1021 699 1021 780 1029M1306 1024C1399 1015 1471 1017 1540 1023" fill="none" stroke="#7bb7c8" strokeWidth="5" opacity=".18" filter="url(#wc-stroke-soft-v38)"/>
    </g>
-   <rect width="1920" height="1080" filter="url(#wc-paper-v37)" opacity=".045" style={{mixBlendMode:"soft-light"}}/>
+
+   <rect width="1920" height="1080" filter="url(#wc-paper-v38)" opacity=".052" style={{mixBlendMode:"soft-light"}}/>
   </svg>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 46%,transparent 48%,rgba(247,231,217,.08) 100%)"}}/>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 47%,transparent 49%,rgba(247,230,216,.07) 100%)"}}/>
   <Noise opacity={.01}/>
  </AbsoluteFill>;
 };
@@ -244,20 +246,20 @@ const CloudSky = ({ frame }: { frame: number }) => {
 const OpeningScene = () => {
  const f=useCurrentFrame();
  const text="Introducing OpenDesign Motion";
- const count=Math.floor(e(f,15,64,0,text.length));
+ const count=Math.min(text.length,Math.round(Math.max(0,Math.min(1,(f-14)/46))*text.length));
  const pressed=e(f,76,82);
  const cursor=e(f,48,76,0,1);
  const typing=f>=15;
  return <AbsoluteFill style={full}>
   <CloudSky frame={f}/>
   <div style={{position:"absolute",top:225,left:0,right:0,display:"flex",justifyContent:"center",alignItems:"center",color:"#19272c"}}>
-   <div style={{fontFamily:"Georgia,serif",fontSize:82,fontWeight:700,letterSpacing:"-.055em",position:"relative",whiteSpace:"nowrap"}}>
+   <div style={{fontFamily:"Georgia,serif",fontSize:100,fontWeight:700,letterSpacing:"-.055em",position:"relative",whiteSpace:"nowrap"}}>
     Let’s create <span style={{position:"relative",display:"inline-block"}}><span style={{position:"absolute",left:-5,right:-8,top:"55%",height:31,background:"#b6e65e",transform:"rotate(-1deg)"}}/><span style={{position:"relative"}}>Motion design</span></span>
    </div>
   </div>
-  <div style={{position:"absolute",top:345,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
+  <div style={{position:"absolute",top:350,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
   <div style={{position:"absolute",left:290,right:290,top:390,height:330,background:"rgba(255,255,255,.94)",border:"1px solid rgba(255,255,255,.99)",borderRadius:24,boxShadow:"0 27px 75px rgba(49,82,91,.2),0 4px 16px rgba(40,72,82,.09)",backdropFilter:"blur(20px)",transform:"translateY("+((1-pop(f,30,0,80,18))*55)+"px) scale("+(0.99+.01*pop(f,30,0,80,18)-pressed*.008)+")",padding:"36px 38px",boxSizing:"border-box"}}>
-   <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:35,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
+   <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:38,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
     {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
     {typing?<span style={{display:"inline-block",width:2,height:34,background:count<text.length?"#313a3d":"transparent",verticalAlign:"middle",marginLeft:4}}/>:null}
    </div>
@@ -273,7 +275,7 @@ const OpeningScene = () => {
     </div>
    </div>
   </div>
-  <div style={{position:"absolute",top:760,left:730+cursor*520,width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
+  <div style={{position:"absolute",top:955-275*e(f,42,60),left:1875-305*e(f,42,60),width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
    <svg viewBox="0 0 30 40" width="29" height="38"><path d="M2 2L2 33L10 25L17 38L23 35L16 22L28 22Z" fill="#fff" stroke="#262b2d" strokeWidth="2" strokeLinejoin="round"/></svg>
   </div>
  </AbsoluteFill>;
