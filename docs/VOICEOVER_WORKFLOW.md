@@ -8,7 +8,8 @@ character dialogue or spoken explanation.
 ## What it does
 
 The video repository sends a structured JSON narration job to the public
-`Nolane-x/VoiceStudio` reusable GitHub Actions workflow. VoiceStudio performs
+`Nolane-x/VoiceStudio` reusable GitHub Actions workflow
+([read-only render entry point](https://github.com/Nolane-x/VoiceStudio/blob/main/.github/workflows/render-video-narration.yml)). VoiceStudio performs
 CPU/ONNX synthesis, audio mastering, provenance marking and post-write checks.
 The video repository then downloads and verifies the result.
 
