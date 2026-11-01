@@ -8,7 +8,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from actions_voice_lab import (\n    load_suite, master_candidates, run_lab, safe_audio_path,\n    write_cross_scenario_audition,\n)
+from actions_voice_lab import (
+    load_suite, master_candidates, run_lab, safe_audio_path,
+    write_cross_scenario_audition,
+)
 
 
 class ActionsVoiceLabTests(unittest.TestCase):
