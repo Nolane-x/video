@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v40",
+  "id": "opendesign-motion-reference-rebuild-v41",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -204,16 +204,78 @@
     {
       "id": "S08",
       "startFrame": 641,
-      "endFrame": 779,
+      "endFrame": 770,
       "startSeconds": 21.3667,
-      "endSeconds": 25.9667,
-      "component": "ModelAgentScene"
+      "endSeconds": 25.666666666666668,
+      "component": "ModelAgentScene",
+      "referenceBeats": [
+        {
+          "frame": 641,
+          "visual": "Any appears alone, centered",
+          "background": "#87bfdc"
+        },
+        {
+          "frame": 650,
+          "visual": "Any model resolves with a provider mark replacing the o",
+          "background": "#87bfdc"
+        },
+        {
+          "frame": 660,
+          "visual": "Any model holds on peach",
+          "background": "#e3a97e"
+        },
+        {
+          "frame": 680,
+          "visual": "Any model holds on green",
+          "background": "#8eb897"
+        },
+        {
+          "frame": 690,
+          "visual": "Any model holds on pale teal",
+          "background": "#b5d0d3"
+        },
+        {
+          "frame": 705,
+          "visual": "Cut back to pale blue before the agent phrase",
+          "background": "#87bfdc"
+        },
+        {
+          "frame": 710,
+          "visual": "Any agent enters with a compact provider-logo row",
+          "background": "#87bfdc"
+        },
+        {
+          "frame": 720,
+          "visual": "Provider row holds on peach",
+          "background": "#e3a97e"
+        },
+        {
+          "frame": 740,
+          "visual": "Expanded seven-mark provider row",
+          "background": "#8eb897"
+        },
+        {
+          "frame": 750,
+          "visual": "Provider marks begin converging toward an orbit",
+          "background": "#bad2d4"
+        },
+        {
+          "frame": 760,
+          "visual": "Provider marks form an elliptical orbit",
+          "background": "#bad2d4"
+        },
+        {
+          "frame": 770,
+          "visual": "Launch Film interface takes over",
+          "background": "#f1ece5"
+        }
+      ]
     },
     {
       "id": "S09",
-      "startFrame": 779,
+      "startFrame": 770,
       "endFrame": 897,
-      "startSeconds": 25.9667,
+      "startSeconds": 25.666666666666668,
       "endSeconds": 29.9,
       "component": "LaunchKitSequence"
     },
@@ -302,6 +364,62 @@
     "V40 low cloud paint should be irregular and discontinuous, with cream highlights and coral underpainting; the bottom ridgeline must stay low and rolling."
   ],
   "visualAudit": [
+    {
+      "frame": 0,
+      "content": "V35 output review: the opening has open blue sky and a low blue shoreline, but its lower-left cloud mass blends into a broad diffuse horizontal band at delivery size. V36 separates the cloud silhouette, cool highlights and warm underpainting."
+    },
+    {
+      "frame": 0,
+      "content": "Native reference frame 0: bright blue/cyan open sky, broad diagonal white/blue brush wisps in the upper half, pink/peach diagonal glazing toward the right, low scattered cream/coral cloud clusters, and a dark navy/teal hill ridge along the bottom."
+    },
+    {
+      "frame": 0,
+      "content": "V37 defect: lower sky clouds repeat as rounded scallops and merge into a pale band; the foreground hill becomes a nearly flat blue strip. V38 target uses separate irregular painted islands and two rolling ridge layers."
+    },
+    {
+      "frame": 0,
+      "content": "V38 review: headline and source-timed cursor/typing now closely match the preview; the sky remains too clean and cloud washes too smooth. V39 strengthens organic dry-brush edges, paper grain and uneven pigment deposits."
+    },
+    {
+      "frame": 0,
+      "content": "V39 output has stronger texture but too many parallel upper-sky streaks. V40 reduces the marks to a few broad broken washes with varied contours and lower contrast, closer to the reference's soft watercolor brushwork."
+    },
+    {
+      "frame": 30,
+      "content": "V36 opening target: keep the headline and prompt UI against clear blue negative space; cloud detail stays concentrated below and to the left, with broken wisps rather than continuous horizontal strokes."
+    },
+    {
+      "frame": 30,
+      "content": "V37 target keeps diagonal upper-sky brushwork and a mostly open blue middle; clouds remain low and discontinuous so the title and prompt UI stay legible."
+    },
+    {
+      "frame": 30,
+      "content": "Reference frame30 shows only the typed word 'Introducing' and the cursor remains at the lower-right edge; V38 keys the typewriter and pointer to this state."
+    },
+    {
+      "frame": 30,
+      "content": "V39 retains the source's partial typed word 'Introducing' and bottom-right pointer position while preserving the translucent directory shelf below the main white field."
+    },
+    {
+      "frame": 30,
+      "content": "V40 preserves the V38/V39 source timing: placeholder at start, 'Introducing' around frame30, while cursor remains near bottom-right."
+    },
+    {
+      "frame": 60,
+      "content": "Reference prompt card remains centered above warm low cloud islands; dark blue hill silhouette stays close to the bottom edge, not a grey horizontal band."
+    },
+    {
+      "frame": 60,
+      "content": "Reference frame60 shows full 'Introducing OpenDesign Motion' text and the pointer over the black submit button; V38 reaches both states at this beat."
+    },
+    {
+      "frame": 60,
+      "content": "V39 retains the complete prompt and places the cursor tip over the submit arrow, matching the reference's final prompt action beat."
+    },
+    {
+      "frame": 60,
+      "content": "V40 preserves full prompt and cursor-to-submit beat; directory shelf remains separate and translucent."
+    },
     {
       "frame": 300,
       "content": "30-card project wall with deeper perspective and diagonal crop"
@@ -412,15 +530,51 @@
     },
     {
       "frame": 641,
-      "content": "Any enters alone on the pale blue field"
+      "content": "Any enters alone, centered, on the pale blue field"
+    },
+    {
+      "frame": 650,
+      "content": "Any model resolves with a circular provider mark replacing the o"
+    },
+    {
+      "frame": 660,
+      "content": "Any model holds through the peach background cut"
+    },
+    {
+      "frame": 680,
+      "content": "Any model holds through the green background cut"
+    },
+    {
+      "frame": 690,
+      "content": "Any model holds through the pale teal background cut"
     },
     {
       "frame": 700,
-      "content": "Any model. resolves with provider badge replacing the o"
+      "content": "Centered Any model remains legible with the provider mark in the word"
+    },
+    {
+      "frame": 710,
+      "content": "Any agent enters with a compact row of provider marks"
+    },
+    {
+      "frame": 720,
+      "content": "Any agent and provider marks hold on the peach field"
+    },
+    {
+      "frame": 740,
+      "content": "The provider row expands to seven marks"
+    },
+    {
+      "frame": 760,
+      "content": "Provider marks form a floating elliptical orbit, concentrated centre-right"
+    },
+    {
+      "frame": 770,
+      "content": "Launch Film interface replaces the provider-orbit section"
     },
     {
       "frame": 780,
-      "content": "ink-wash mountain scene and imperfect dark circular play emblem inside Launch Film Preview"
+      "content": "Ink-wash mountain scene and imperfect dark circular play emblem inside Launch Film Preview"
     },
     {
       "frame": 795,
@@ -509,62 +663,6 @@
     {
       "frame": 1118,
       "content": "large square mark, prominent OpenDesign Motion wordmark and legible open-design.ai domain capsule"
-    },
-    {
-      "frame": 0,
-      "content": "V35 output review: the opening has open blue sky and a low blue shoreline, but its lower-left cloud mass blends into a broad diffuse horizontal band at delivery size. V36 separates the cloud silhouette, cool highlights and warm underpainting."
-    },
-    {
-      "frame": 30,
-      "content": "V36 opening target: keep the headline and prompt UI against clear blue negative space; cloud detail stays concentrated below and to the left, with broken wisps rather than continuous horizontal strokes."
-    },
-    {
-      "frame": 0,
-      "content": "Native reference frame 0: bright blue/cyan open sky, broad diagonal white/blue brush wisps in the upper half, pink/peach diagonal glazing toward the right, low scattered cream/coral cloud clusters, and a dark navy/teal hill ridge along the bottom."
-    },
-    {
-      "frame": 30,
-      "content": "V37 target keeps diagonal upper-sky brushwork and a mostly open blue middle; clouds remain low and discontinuous so the title and prompt UI stay legible."
-    },
-    {
-      "frame": 60,
-      "content": "Reference prompt card remains centered above warm low cloud islands; dark blue hill silhouette stays close to the bottom edge, not a grey horizontal band."
-    },
-    {
-      "frame": 0,
-      "content": "V37 defect: lower sky clouds repeat as rounded scallops and merge into a pale band; the foreground hill becomes a nearly flat blue strip. V38 target uses separate irregular painted islands and two rolling ridge layers."
-    },
-    {
-      "frame": 30,
-      "content": "Reference frame30 shows only the typed word 'Introducing' and the cursor remains at the lower-right edge; V38 keys the typewriter and pointer to this state."
-    },
-    {
-      "frame": 60,
-      "content": "Reference frame60 shows full 'Introducing OpenDesign Motion' text and the pointer over the black submit button; V38 reaches both states at this beat."
-    },
-    {
-      "frame": 0,
-      "content": "V38 review: headline and source-timed cursor/typing now closely match the preview; the sky remains too clean and cloud washes too smooth. V39 strengthens organic dry-brush edges, paper grain and uneven pigment deposits."
-    },
-    {
-      "frame": 30,
-      "content": "V39 retains the source's partial typed word 'Introducing' and bottom-right pointer position while preserving the translucent directory shelf below the main white field."
-    },
-    {
-      "frame": 60,
-      "content": "V39 retains the complete prompt and places the cursor tip over the submit arrow, matching the reference's final prompt action beat."
-    },
-    {
-      "frame": 0,
-      "content": "V39 output has stronger texture but too many parallel upper-sky streaks. V40 reduces the marks to a few broad broken washes with varied contours and lower contrast, closer to the reference's soft watercolor brushwork."
-    },
-    {
-      "frame": 30,
-      "content": "V40 preserves the V38/V39 source timing: placeholder at start, 'Introducing' around frame30, while cursor remains near bottom-right."
-    },
-    {
-      "frame": 60,
-      "content": "V40 preserves full prompt and cursor-to-submit beat; directory shelf remains separate and translucent."
     }
   ]
 }

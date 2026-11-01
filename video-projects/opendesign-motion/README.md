@@ -1,10 +1,12 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V40 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V41 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
 This is an independently authored Remotion/SVG/CSS reconstruction, not the original editable project. Original editable layers/fonts are unavailable, so pixel identity is not claimed.
 
 ## Current focus: reference-led visual corrections across the whole film
+
+Latest authored revision: V41. Latest technically verified render remains V40 / Actions #99 until the V41 workflow completes.
 
 The source-indexed timeline remains fixed; each revision below is recorded against actual rendered frames and the supplied native preview.
 
@@ -14,7 +16,8 @@ The source-indexed timeline remains fixed; each revision below is recorded again
 - V37 passed all technical gates in [Actions run 41315724268](https://github.com/Nolane-x/video/actions/runs/41315724268), but frame 0/30 review still found repeated scallop-like clouds, an almost flat blue foreground band, an undersized title, over-advanced typing at frame 30 and a misplaced cursor.
 - V38 passed full CI and its native 0/30/60 frames were directly compared with the source. Headline size, typewriter cadence and cursor travel are now close to the reference. The painted sky is still too smooth, and the directory control is inside the white field rather than a separate translucent shelf.
 - V39 passed all CI gates and restored the translucent directory shelf. Its dry-brush texture improved the paint surface, but review found too many parallel high-contrast upper-sky lines.
-- V40 reduces the upper-sky marks to a few broad irregular watercolor washes, while retaining the source-timed 0/30/60 typing and cursor choreography plus the separate directory shelf. V40 awaits render/visual QA.
+- V40 reduces the upper-sky marks to a few broad irregular watercolor washes, while retaining the source-timed 0/30/60 typing and cursor choreography plus the separate directory shelf. Render [#99](https://github.com/Nolane-x/video/actions/runs/41318630418) passed the 1,119-frame, 1080p/30fps, audio and checksum gates; V40 remains a technical candidate pending full watch-through.
+- V41 corrects the capability-to-Launch handoff using native source frames 641–778: “Any” is centered at 641, “Any model” resolves by 650, the background cuts at 660/680/690/705/720/740/750, “Any agent” enters at 710, the provider marks form an orbit by 760, and Launch Film begins at 770. The Launch pre-roll subtracts nine local frames so the 855/870/885 countdown beats and 891 full-screen transition remain locked to the original. This revision requires a new Actions render and frame comparison.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.
@@ -49,8 +52,8 @@ Key source-frame checks: 0/30/60 (opening); 300/330/345/353/368/386/420 (project
 - 240–316: project wall
 - 316–585: 28-cut source-indexed poster montage
 - 585–641: Not just Opus 5.5
-- 641–779: Any model / Any agent
-- 779–897: Launch Film interface, preview zoom and countdown
+- 641–770: Any model / Any agent
+- 770–897: Launch Film interface, preview zoom and countdown
 - 897–933: MORRO typography/collage/ribbon/app-tile transition
 - 933–1050: illustrated rounded camera cube
 - 1050–1119: OpenDesign Motion end card

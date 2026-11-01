@@ -1269,31 +1269,66 @@ const ProviderBadge=({index,frame=0}:{index:number;frame?:number})=>{
 };
 const ModelAgentScene=()=>{
  const f=useCurrentFrame();
+ const orbitProgress=e(f,109,119);
  const Phrase=({phase}:{phase:number})=>{
-  if(phase===0)return <div style={{position:"absolute",left:"8%",right:0,top:370,height:280,display:"flex",alignItems:"center"}}>
-   <Word size={186} color="#101113" tracking={-.09} style={{opacity:e(f,0,17)}}>Any</Word>
+  if(phase===0)return <div style={{position:"absolute",left:0,right:0,top:360,height:320,display:"flex",alignItems:"center",justifyContent:"center",opacity:.38+.62*e(f,0,5)}}>
+   <Word size={186} color="#101113" weight={900} tracking={-.09}>Any</Word>
   </div>;
-  if(phase===1)return <div style={{position:"absolute",left:"8%",right:0,top:370,height:280,display:"flex",alignItems:"center"}}>
-   <Word size={174} color="#101113" tracking={-.09}>Any m</Word>
-   <div style={{width:104,height:104,borderRadius:"50%",background:"#fff",border:"7px solid #111827",display:"grid",placeItems:"center",marginLeft:-5,marginRight:-5,transform:"translateY("+Math.sin(f/8)*3+"px)",boxShadow:"0 8px 25px rgba(0,0,0,.14)"}}><ProviderBadge index={1} frame={f}/></div>
-   <Word size={174} color="#101113" tracking={-.09}>del.</Word>
-  </div>;
-  return <div style={{position:"absolute",left:0,right:0,top:360,height:310,display:"flex",alignItems:"center",justifyContent:"center",gap:phase===2?18:12}}>
-   <Word size={166} color="#101113" tracking={-.09}>Any</Word>
-   <div style={{display:"flex",gap:phase===2?12:8,alignItems:"center"}}>
-    {(phase===2?[0,1,2,3]:[0,1,2,3,4,5,6]).map(v=><ProviderBadge key={v} index={v} frame={f}/>)}
+  if(phase===1)return <div style={{position:"absolute",left:0,right:0,top:355,height:330,display:"flex",alignItems:"center",justifyContent:"center"}}>
+   <Word size={222} color="#101113" weight={900} tracking={-.09}>Any m</Word>
+   <div style={{width:136,height:136,display:"grid",placeItems:"center",marginLeft:-5,marginRight:-5,transform:"translateY("+Math.sin(f/8)*3+"px)"}}>
+    <div style={{transform:"scale(1.22)"}}><ProviderBadge index={f<29?1:f<39?4:f<49?5:f<59?3:6} frame={f}/></div>
    </div>
-   <Word size={166} color="#101113" tracking={-.09}>agent.</Word>
+   <Word size={222} color="#101113" weight={900} tracking={-.09}>del.</Word>
+  </div>;
+  const count=phase===2?4:7;
+  return <div style={{position:"absolute",left:"10%",right:"10%",top:350,height:340,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+   <Word size={205} color="#101113" weight={900} tracking={-.09}>Any</Word>
+   <div style={{display:"flex",gap:phase===2?8:6,alignItems:"center",flex:"none"}}>
+    {Array.from({length:count},(_,i)=><ProviderBadge key={i} index={i} frame={f+i}/>)}
+   </div>
+   <Word size={205} color="#101113" weight={900} tracking={-.09}>agent.</Word>
   </div>;
  };
- return <AbsoluteFill style={full}>
-  <Sequence from={0} durationInFrames={26}><AbsoluteFill style={{background:"#8fc5dd"}}><Phrase phase={0}/></AbsoluteFill></Sequence>
-  <Sequence from={26} durationInFrames={52}><AbsoluteFill style={{background:"#acd7e5"}}><Phrase phase={1}/></AbsoluteFill></Sequence>
-  <Sequence from={78} durationInFrames={30}><AbsoluteFill style={{background:"#dfa77f"}}><Phrase phase={2}/></AbsoluteFill></Sequence>
-  <Sequence from={108} durationInFrames={30}><AbsoluteFill style={{background:"#bfdccf"}}><Phrase phase={3}/></AbsoluteFill></Sequence>
+ const BadgeOrbit=()=>(
+  <div style={{position:"absolute",inset:0,opacity:orbitProgress,pointerEvents:"none"}}>
+   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+    <ellipse cx="1195" cy="585" rx="238" ry="158" fill="none" stroke="rgba(255,255,255,.66)" strokeWidth="6" strokeDasharray="24 18" transform={"rotate(-14 1195 585)"}/>
+    <ellipse cx="1195" cy="585" rx="204" ry="132" fill="none" stroke="rgba(255,255,255,.30)" strokeWidth="3" transform={"rotate(18 1195 585)"}/>
+   </svg>
+   {Array.from({length:11},(_,i)=>{
+    const angle=(i/11)*Math.PI*2+(f-109)*.075;
+    const x=1195+Math.cos(angle)*230;
+    const y=585+Math.sin(angle)*153;
+    const depth=.72+.34*((Math.sin(angle)+1)/2);
+    const rotation=Math.sin(angle)*11;
+    return <div key={i} style={{position:"absolute",left:x,top:y,width:104,height:104,marginLeft:-52,marginTop:-52,transform:"scale("+depth+") rotate("+rotation+"deg)",zIndex:Math.round(depth*100),filter:"drop-shadow(0 18px 22px rgba(28,44,43,.16))"}}>
+     <ProviderBadge index={i} frame={f+i*2}/>
+    </div>;
+   })}
+  </div>
+ );
+ const fade=1-e(f,125,129);
+ return <AbsoluteFill style={{...full,background:"#f1ece5"}}>
+  <div style={{position:"absolute",inset:0,opacity:fade}}>
+   <Sequence from={0} durationInFrames={19}><AbsoluteFill style={{...full,background:"#87bfdc"}}/></Sequence>
+   <Sequence from={19} durationInFrames={20}><AbsoluteFill style={{...full,background:"#e3a97e"}}/></Sequence>
+   <Sequence from={39} durationInFrames={10}><AbsoluteFill style={{...full,background:"#8eb897"}}/></Sequence>
+   <Sequence from={49} durationInFrames={15}><AbsoluteFill style={{...full,background:"#b5d0d3"}}/></Sequence>
+   <Sequence from={64} durationInFrames={15}><AbsoluteFill style={{...full,background:"#87bfdc"}}/></Sequence>
+   <Sequence from={79} durationInFrames={20}><AbsoluteFill style={{...full,background:"#e3a97e"}}/></Sequence>
+   <Sequence from={99} durationInFrames={10}><AbsoluteFill style={{...full,background:"#8eb897"}}/></Sequence>
+   <Sequence from={109} durationInFrames={20}><AbsoluteFill style={{...full,background:"#bad2d4"}}/></Sequence>
+   <Sequence from={0} durationInFrames={9}><Phrase phase={0}/></Sequence>
+   <Sequence from={9} durationInFrames={60}><Phrase phase={1}/></Sequence>
+   <Sequence from={69} durationInFrames={30}><Phrase phase={2}/></Sequence>
+   <Sequence from={99} durationInFrames={30}>
+    <Phrase phase={3}/>
+    <BadgeOrbit/>
+   </Sequence>
+  </div>
  </AbsoluteFill>;
 };
-
 const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
  if(variant===0)return <div style={{position:"absolute",inset:0,background:"#e8e1d2",overflow:"hidden"}}>
   <svg viewBox="0 0 1000 650" width="100%" height="100%">
@@ -1487,7 +1522,9 @@ const CountdownOne=({frame}:{frame:number})=>{
 };
 
 const LaunchKitSequence=()=>{
- const frame=useCurrentFrame();
+ // The Launch Film page starts at source frame 770; preserve the original
+ // local countdown/keyframe map by subtracting the nine-frame pre-roll.
+ const frame=useCurrentFrame()-9;
  if(frame>=112)return <CountdownOne frame={frame-112}/>;
  const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:4;
  const countdown=frame<76?-1:frame<91?3:frame<106?2:1;
@@ -1699,8 +1736,8 @@ export const OpenDesignMotion: React.FC = () => (
     <Sequence from={240} durationInFrames={76}><GalleryWall /></Sequence>
     <Sequence from={316} durationInFrames={269}><PosterSequence /></Sequence>
     <Sequence from={585} durationInFrames={56}><NotJustOpus /></Sequence>
-    <Sequence from={641} durationInFrames={138}><ModelAgentScene /></Sequence>
-    <Sequence from={779} durationInFrames={118}><LaunchKitSequence /></Sequence>
+    <Sequence from={641} durationInFrames={129}><ModelAgentScene /></Sequence>
+    <Sequence from={770} durationInFrames={127}><LaunchKitSequence /></Sequence>
     <Sequence from={897} durationInFrames={36}><MorroCubeIntro /></Sequence>
     <Sequence from={933} durationInFrames={117}><TexturedCube /></Sequence>
     <Sequence from={1050} durationInFrames={69}><FinalLockup /></Sequence>
