@@ -42,7 +42,7 @@ def sample_manifest():
                 "sample_text": "Welcome.",
                 "rights": {
                     "rights_status": "upstream-preset-consent-stated",
-                    "commercial_use": upstream-model-card-permits-generated-audio,
+                    "commercial_use": "upstream-model-card-permits-generated-audio",
                     "attribution_required": True,
                     "notice": "Upstream model card permits commercial generated audio.",
                 },
@@ -74,7 +74,7 @@ def sample_manifest():
                 "sample_text": "Xin chào.",
                 "rights": {
                     "rights_status": "upstream-preset-consent-stated",
-                    "commercial_use": upstream-model-card-permits-generated-audio,
+                    "commercial_use": "upstream-model-card-permits-generated-audio",
                     "attribution_required": True,
                     "notice": "Upstream model card permits commercial generated audio.",
                 },
