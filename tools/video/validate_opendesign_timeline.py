@@ -73,7 +73,7 @@ for token in required:
 audit = data.get("visualAudit", [])
 need(any(item.get("frame") == 523 and item.get("content") == "80K / Day 88" for item in audit), "frame 523 must record 80K / Day 88")
 need(any(item.get("frame") == 510 and "ring transition" in item.get("content", "") for item in audit), "frame 510 ring transition observation is missing")
-need(any(item.get("frame") == 933 and "camera-object transition" in item.get("content", "") for item in audit), "frame 933 cube transition observation is missing")
+need(any(item.get("frame") == 933 and "rounded-square emblem" in item.get("content", "") for item in audit), "frame 933 standalone logo-tile observation is missing")
 need(any(item.get("frame") == 1118 and "domain capsule" in item.get("content", "") for item in audit), "frame 1118 branded end card observation is missing")
 need(any(item.get("frame") == 547 and "3.7%" in item.get("content", "") for item in audit), "frame 547 must record 3.7%")
 need("const counts=[80,82,84,87,91,93,94,96]" in source, "Star History source value sequence is missing")
