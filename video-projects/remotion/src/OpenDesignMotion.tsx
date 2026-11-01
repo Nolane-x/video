@@ -1319,11 +1319,11 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
  </div>;
  const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?yellow:blackMark;
- const dynamicSide=frame<27?blackSide:frame<55?clock:frame<72?yellow:blackMark;
  const blackSide=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#07090d,#15171a 60%,#030405)",display:"grid",placeItems:"center"}}>
   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/><path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/><path d="M127 90L180 164L165 198Z" fill="#d8dce0"/></svg>
  </div>;
+ const dynamicSide=frame<27?blackSide:frame<55?clock:frame<72?yellow:blackMark;
  return <div style={style}>
   {kind===0?dynamicFront:
    kind===1?(frame>=55&&frame<72?yellow:blackSide):
