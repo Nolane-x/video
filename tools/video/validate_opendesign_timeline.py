@@ -83,7 +83,7 @@ need("squiggle-preview-v18" in source, "black/white squiggle launch preview is m
 need("f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75)" in source, "camera cube face order / rotation timing is missing")
 need("if(f<12)return <AbsoluteFill" in source, "separate app-mark lead-in is missing")
 need("THE FUTURE / 100K" in source, "yellow 100K cube face is missing")
-need("cubeClock-v22" in source, "blue/gold clock face must be on the top surface")
+need("cubeClock-v24" in source, "blue/gold clock face must be on the top surface")
 need("rotateX=f<15?18-14*e(f,0,15):f<45?4-59*e(f,15,45):f<60?-55+25*e(f,45,60):-30+30*e(f,60,75)" in source, "V24 cube pitch landmarks are missing")
 need("const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?yellow:blackMark" in source, "V24 source-indexed camera panel sequence is missing")
 need("opacity:e(f,38,42)*(1-e(f,54,58))" in source, "V24 lime underside EASE panel timing is missing")
