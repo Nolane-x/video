@@ -535,14 +535,24 @@ const InPoster = () => {
 };
 
 const GreenGhostTransition=()=>{
- const f=useCurrentFrame(),x=e(f,0,7,-180,80);
- return <AbsoluteFill style={{...full,background:"#d8f6ad",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:90,bottom:-90,fontFamily:displayFont,fontSize:680,fontWeight:950,lineHeight:.8,color:"#158324",transform:"translateX("+x+"px)",letterSpacing:"-.15em",textShadow:"12px 0 0 rgba(36,155,53,.35),24px 0 0 rgba(36,155,53,.25),36px 0 0 rgba(36,155,53,.15)"}}>N</div>
-  <div style={{position:"absolute",left:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>OPEN DESIGN / MOTION REEL — 2026</div>
-  <div style={{position:"absolute",right:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>06 — KINETIC TYPE</div>
-  <div style={{position:"absolute",left:26,right:26,bottom:24,height:2,background:"#274b26",opacity:.45}}/>
+ const f=useCurrentFrame(),ghost=e(f,0,7,1,.12);
+ return <AbsoluteFill style={{...full,background:"#caff9e",color:"#101510",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:-65,top:270,fontFamily:displayFont,fontSize:670,fontWeight:1000,lineHeight:.8,letterSpacing:"-.16em",color:"#218a2a",opacity:ghost,transform:"translateX("+e(f,0,7,-100,0)+"px)"}}>I</div>
+  <div style={{position:"absolute",left:230,top:260,fontFamily:displayFont,fontSize:660,fontWeight:1000,lineHeight:.8,letterSpacing:"-.15em",color:"#2b9f33",opacity:ghost*.55,transform:"translateX("+e(f,0,7,90,0)+"px)"}}>N</div>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,rgba(255,255,255,.2),transparent 40%,rgba(255,255,255,.16))"}}/>
+  <div style={{position:"absolute",left:28,top:26,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#2b552b"}}>OPEN DESIGN / MOTION REEL — 2026</div>
  </AbsoluteFill>;
 };
+
+const InPoster=()=>{
+ const f=useCurrentFrame(),p=e(f,0,8);
+ return <AbsoluteFill style={{...full,background:"#07090c",color:"#fff"}}>
+  <div style={{position:"absolute",left:"50%",top:252,transform:"translateX(-50%) scale("+(0.88+.12*p)+")",fontFamily:displayFont,fontSize:430,fontWeight:1000,letterSpacing:"-.13em",whiteSpace:"nowrap",color:"#f5f5f0",textShadow:"0 7px 0 #bfc3bf,0 13px 0 #747c7c,0 22px 22px rgba(0,0,0,.42)"}}>IN<span style={{color:"#b9ed4a"}}>.</span></div>
+  <div style={{position:"absolute",left:70,bottom:65,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#9ea5a7"}}>MOTION / IN</div>
+ </AbsoluteFill>;
+};
+
+const NeverPoster
 
 const NeverPoster = () => (
  <AbsoluteFill style={{...full,background:"#d7f7ae",color:"#101713",overflow:"hidden"}}>
@@ -568,19 +578,31 @@ const LinearPoster = () => {
 };
 
 const ClockPoster = () => {
- const f=useCurrentFrame(),rotate=f*1.1;
- return <AbsoluteFill style={{...full,background:"#152e86",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#2542a3,#111b5d)"}}/>
+ const f=useCurrentFrame(),turn=f*1.05;
+ return <AbsoluteFill style={{...full,background:"#243f93",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 51% 48%,#314fbb,#142d78 70%,#10245e)"}}/>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   {Array.from({length:80},(_,i)=><path key={i} d={"M"+((i*113)%1920)+" "+((i*97)%1080)+"q 80 -45 160 "+((i%5)*19-38)} stroke={i%3?"#5068bd":"#e1c46c"} strokeWidth={i%4?6:11} fill="none" opacity=".25"/>)}
-   <circle cx="960" cy="540" r="338" fill="#d9b34c" stroke="#f3d783" strokeWidth="27"/>
-   <circle cx="960" cy="540" r="294" fill="#1b368f" stroke="#ad8135" strokeWidth="16"/>
-   <circle cx="960" cy="540" r="244" fill="none" stroke="#f5d478" strokeWidth="7" strokeDasharray="4 16"/>
-   <circle cx="960" cy="540" r="195" fill="#192b71" stroke="#e9c65c" strokeWidth="11"/>
-   <g transform={"translate(960 540) rotate("+rotate+")"}><path d="M-90 -190L22 10L-40 30L-62 165Z" fill="#f8d975" stroke="#8d6e33" strokeWidth="7"/></g>
-   <circle cx="960" cy="540" r="31" fill="#eac75c" stroke="#fff0a0" strokeWidth="8"/>
+   {Array.from({length:44},(_,i)=>{
+    const x=(i*173)%1920,y=(i*107)%1080;
+    return <path key={i} d={"M"+x+" "+y+"q 100 -48 185 8q -90 25 -135 54"} fill="none" stroke={i%3===0?"#6484d7":"#526dbd"} strokeWidth={i%4===0?13:7} opacity=".42"/>;
+   })}
+   <path d="M0 0Q90 120 130 240Q170 360 115 520Q170 690 105 850Q70 955 0 1080Z" fill="#10234c"/>
+   <path d="M35 0Q95 190 54 340Q25 510 90 680Q120 850 45 1080" fill="none" stroke="#20406b" strokeWidth="55"/>
+   <g transform="translate(960 530)">
+    <circle r="340" fill="#e2c36a" stroke="#f4dd94" strokeWidth="18"/>
+    <circle r="298" fill="#1c347d" stroke="#91672f" strokeWidth="17"/>
+    <circle r="252" fill="none" stroke="#f8e4a2" strokeWidth="8"/>
+    <circle r="220" fill="#203b8c" stroke="#d3ab4f" strokeWidth="10"/>
+    {Array.from({length:24},(_,i)=><path key={i} d="M0 -285L0 -258" stroke="#f3d67a" strokeWidth="10" transform={"rotate("+(i*15)+" 0 0)"}/>)}
+    <g transform={"rotate("+turn+")"}><path d="M-22 -178L28 -12L-12 8Z" fill="#f4d26c" stroke="#fff0b0" strokeWidth="5"/></g>
+    <circle r="24" fill="#efce67" stroke="#fff0a5" strokeWidth="6"/>
+   </g>
+   <path d="M0 900Q170 830 280 900T550 900" fill="none" stroke="#e2d7bb" strokeWidth="7" opacity=".55"/>
+   <path d="M1640 950L1740 680L1850 950Z" fill="#1a295e"/>
+   <path d="M1680 950L1740 750L1815 950Z" fill="#263c7e"/>
   </svg>
-  <div style={{position:"absolute",left:0,right:0,top:45,textAlign:"center",fontSize:39,fontWeight:950,color:"#f3d47c",letterSpacing:".16em"}}>1889</div>
+  <div style={{position:"absolute",left:0,right:0,top:32,textAlign:"center",fontFamily:"Georgia,serif",fontSize:42,fontWeight:900,color:"#f5df9a"}}>1889</div>
+  <div style={{position:"absolute",left:0,right:0,top:82,textAlign:"center",fontFamily:"Georgia,serif",fontSize:22,fontStyle:"italic",color:"#e6d5a0"}}>keep the wonder turning</div>
  </AbsoluteFill>;
 };
 
@@ -598,21 +620,24 @@ const TogglePoster = () => {
 };
 
 const EyePoster = () => {
- const f=useCurrentFrame();
- const blink=f<7?e(f,0,7,.15,1):f>17?1-e(f,17,22,0,.85):1;
- return <AbsoluteFill style={{...full,background:"#080a12",color:"#fff"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 50%,#1d2867 0%,#090c1b 60%)"}}/>
-  <svg viewBox="0 0 1400 650" width="1320" height="620" style={{position:"absolute",left:"50%",top:"47%",transform:"translate(-50%,-50%)"}}>
-   <defs><radialGradient id="iris-gradient-v10"><stop offset="0%" stopColor="#080a15"/><stop offset="21%" stopColor="#18276e"/><stop offset="51%" stopColor="#485ef8"/><stop offset="76%" stopColor="#202e89"/><stop offset="100%" stopColor="#080a15"/></radialGradient><filter id="iris-glow-v10"><feGaussianBlur stdDeviation="8"/></filter></defs>
-   <path d="M75 325Q700 0 1325 325Q700 650 75 325Z" fill="#151c46" stroke="#9eacff" strokeWidth="8"/>
-   <path d={"M90 325Q700 "+(325-265*blink)+" 1310 325Q700 "+(325+265*blink)+" 90 325Z"} fill="#f5f3ed"/>
-   <circle cx="700" cy="325" r="210" fill="url(#iris-gradient-v10)" stroke="#8c9bff" strokeWidth="13"/>
-   {Array.from({length:64},(_,i)=><path key={i} d="M700 118L700 250" stroke={i%2?"#9cb1ff":"#435be3"} strokeWidth={i%4?4:8} opacity=".78" transform={"rotate("+(i*5.625)+" 700 325)"}/>)}
-   <circle cx="700" cy="325" r="105" fill="#03050b" stroke="#7188ff" strokeWidth="8"/>
-   <circle cx="650" cy="265" r="34" fill="#fff" opacity=".88" filter="url(#iris-glow-v10)"/><circle cx="650" cy="265" r="18" fill="#fff"/>
+ const f=useCurrentFrame(),blink=f<6?e(f,0,6,.08,1):f>12?1-e(f,12,16,0,.88):1;
+ return <AbsoluteFill style={{...full,background:"#03040a",color:"#fff",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 49%,#101534,#03040a 72%)"}}/>
+  <svg viewBox="0 0 1600 720" width="100%" height="78%" style={{position:"absolute",left:0,top:"8%"}}>
+   <defs>
+    <radialGradient id="eye-iris-v13"><stop offset="0" stopColor="#050916"/><stop offset=".2" stopColor="#0e1c73"/><stop offset=".44" stopColor="#4a4cff"/><stop offset=".65" stopColor="#4034b9"/><stop offset=".85" stopColor="#172d80"/><stop offset="1" stopColor="#070915"/></radialGradient>
+    <filter id="eye-soft-v13"><feGaussianBlur stdDeviation="13"/></filter>
+   </defs>
+   <path d="M70 360Q800 -25 1530 360Q800 745 70 360Z" fill="#101638" stroke="#5961d9" strokeWidth="8"/>
+   <path d={"M82 360Q800 "+(360-270*blink)+" 1518 360Q800 "+(360+270*blink)+" 82 360Z"} fill="#251f80"/>
+   <ellipse cx="800" cy="360" rx="525" ry="250" fill="url(#eye-iris-v13)" stroke="#7774ed" strokeWidth="13"/>
+   {Array.from({length:120},(_,i)=><path key={i} d="M800 115L800 212" stroke={i%3?"#8394ff":"#d5a7ff"} strokeWidth={i%4?3:6} opacity=".65" transform={"rotate("+(i*3)+" 800 360)"}/>)}
+   <circle cx="800" cy="360" r="145" fill="#03050d" stroke="#7e84ff" strokeWidth="8"/>
+   <circle cx="745" cy="288" r="46" fill="#fff" opacity=".8" filter="url(#eye-soft-v13)"/><circle cx="745" cy="288" r="22" fill="#fff"/>
+   <path d="M70 360Q800 -25 1530 360" fill="none" stroke="#a6aaff" strokeWidth="6" opacity=".55"/>
   </svg>
-  <div style={{position:"absolute",left:120,bottom:75,fontSize:32,fontWeight:950,letterSpacing:"-.04em"}}>4.7%</div>
-  <div style={{position:"absolute",right:125,bottom:83,color:"#8793c9",fontSize:16,fontWeight:850,letterSpacing:".18em"}}>A STUDY IN FOCUS</div>
+  <div style={{position:"absolute",right:115,bottom:68,fontSize:43,fontWeight:950,letterSpacing:"-.04em",color:"#f5f5f5"}}>3.7%</div>
+  <div style={{position:"absolute",left:92,bottom:76,fontSize:15,fontWeight:900,letterSpacing:".19em",color:"#8c95ba"}}>ATTENTION / OPTICS</div>
  </AbsoluteFill>;
 };
 
@@ -643,19 +668,19 @@ const Comic1952 = () => {
 };
 
 const Future3D = () => {
-  const f = useCurrentFrame();
-  const scale = e(f, 0, 18, .88, 1.02);
-  return (
-    <AbsoluteFill style={{ ...full, background: "radial-gradient(ellipse at 50% 48%,#344de5,#192a9e 67%,#111b66 100%)", color: "#fff" }}>
-      <div style={{ position: "absolute", inset: 0, opacity: .28, backgroundImage: "linear-gradient(rgba(255,255,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.22) 1px,transparent 1px)", backgroundSize: "78px 78px", transform: "perspective(600px) rotateX(61deg) translateY(350px)" }} />
-      <div style={{ position: "absolute", top: 250, left: 0, right: 0, textAlign: "center", transform: "scale(" + scale + ")" }}>
-        <div style={{ fontSize: 260, lineHeight: .84, fontWeight: 950, letterSpacing: "-.1em", color: "#e8ecff", textShadow: "1px 1px 0 #a5b2ec,3px 3px 0 #7b8edf,7px 7px 0 #5264bd,12px 12px 0 #283e98,22px 28px 35px rgba(0,0,0,.35)" }}>FUTURE</div>
-        <div style={{ marginTop: 30, fontSize: 50, fontWeight: 850, letterSpacing: ".04em", color: "#fff", textShadow: "0 4px 20px rgba(0,0,0,.25)" }}>IS ALREADY HERE.</div>
-      </div>
-    </AbsoluteFill>
-  );
+ const f=useCurrentFrame(),p=e(f,0,15);
+ return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 48%,#314de8,#10249b 72%,#07176c)",color:"#fff",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs><linearGradient id="future-metal-v13" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff"/><stop offset=".28" stopColor="#c9d1d7"/><stop offset=".52" stopColor="#f8f8f5"/><stop offset=".78" stopColor="#99a6ba"/><stop offset="1" stopColor="#f4f4ed"/></linearGradient></defs>
+   {Array.from({length:28},(_,i)=><path key={i} d={"M"+(i*78)+" 0L"+(i*78+450)+" 1080"} stroke="#9eb4ff" strokeWidth="1" opacity=".12"/>)}
+   <path d="M0 845Q400 770 800 850T1600 830T1920 845" stroke="#9db4ff" strokeWidth="2" fill="none" opacity=".3"/>
+  </svg>
+  <div style={{position:"absolute",left:-20,right:-20,top:265,transform:"translateY("+(1-p)*50+"px)",textAlign:"center",fontFamily:displayFont,fontSize:320,fontWeight:1000,letterSpacing:"-.11em",color:"url(#future-metal-v13)",background:"linear-gradient(180deg,#fff,#c7d0d7 40%,#fff 55%,#8d9caf 83%,#f9f8f2)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #8b9caa) drop-shadow(0 8px 0 #4a5c9a) drop-shadow(0 17px 0 #1d337c) drop-shadow(0 29px 26px rgba(0,0,0,.3)"}}>FUTURE</div>
+  <div style={{position:"absolute",left:0,right:0,top:658,fontSize:57,fontWeight:900,letterSpacing:".025em",textAlign:"center",color:"#fff",textShadow:"0 4px 20px rgba(0,0,0,.28)"}}>IS ALREADY HERE.</div>
+ </AbsoluteFill>;
 };
 
+const DotPoster
 
 const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.012;
@@ -787,111 +812,76 @@ const ClockComic=()=>{
  </AbsoluteFill>;
 };
 const LightSweep1973=()=>{
- const f=useCurrentFrame(),ray=e(f,0,8,-80,1250);
- return <AbsoluteFill style={{...full,background:"#030509",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 51% 51%,#182436,#030509 65%)"}}/>
-  <div style={{position:"absolute",left:55,bottom:24,fontFamily:displayFont,fontSize:265,fontWeight:950,color:"#161e2b",letterSpacing:"-.1em"}}>1973</div>
+ const f=useCurrentFrame(),beam=e(f,0,13,-300,0);
+ return <AbsoluteFill style={{...full,background:"#030507",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 48%,#07131a,#020306 70%)"}}/>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <radialGradient id="opd1973lens"><stop offset="0%" stopColor="#172236"/><stop offset="36%" stopColor="#53627b"/><stop offset="63%" stopColor="#142132"/><stop offset="100%" stopColor="#03070d"/></radialGradient>
-    <linearGradient id="opd1973spectrum" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#fff"/><stop offset="14%" stopColor="#ffe77c"/><stop offset="27%" stopColor="#ff793e"/><stop offset="40%" stopColor="#f14dbd"/><stop offset="54%" stopColor="#856aff"/><stop offset="69%" stopColor="#43aaff"/><stop offset="84%" stopColor="#35eadc"/><stop offset="100%" stopColor="#fff"/></linearGradient>
+    <linearGradient id="dispersion-spectrum-v13" x1="0" x2="1" y1="0" y2="0"><stop stopColor="#fff"/><stop offset=".15" stopColor="#ffe6a1"/><stop offset=".34" stopColor="#ff6a29"/><stop offset=".49" stopColor="#ff3a79"/><stop offset=".65" stopColor="#a33cff"/><stop offset=".82" stopColor="#386dff"/><stop offset="1" stopColor="#52f3dc"/></linearGradient>
+    <radialGradient id="play-glass-v13"><stop offset="0" stopColor="#315e5b"/><stop offset=".55" stopColor="#174c51"/><stop offset=".85" stopColor="#18303c"/><stop offset="1" stopColor="#0b111b"/></radialGradient>
+    <filter id="prism-glow-v13"><feGaussianBlur stdDeviation="18"/></filter>
    </defs>
-   <path d="M0 540H670" stroke="#fff" strokeWidth="10" opacity=".96"/>
-   <path d="M0 520H670" stroke="#d3efff" strokeWidth="3" opacity=".8"/>
-   <circle cx="960" cy="540" r="260" fill="url(#opd1973lens)" stroke="#d7e6f6" strokeWidth="11"/>
-   <circle cx="960" cy="540" r="220" fill="none" stroke="#8caac4" strokeWidth="4" opacity=".58"/>
-   <circle cx="960" cy="540" r="185" fill="none" stroke="#fff" strokeWidth="3" opacity=".32"/>
-   <path d="M760 420Q960 250 1160 420" fill="none" stroke="#f4f6ff" strokeWidth="11" opacity=".36"/>
-   <path d="M840 430L1045 535L910 560L880 680Z" fill="#eff5ff" opacity=".95"/>
-   <circle cx="960" cy="540" r="27" fill="#0b111e" stroke="#fff" strokeWidth="4"/>
-   <path d={"M1210 440L"+(1920+ray)+" 230L"+(1920+ray)+" 850L1210 640Z"} fill="url(#opd1973spectrum)" opacity=".96"/>
+   <path d="M0 540L695 540" stroke="#fff" strokeWidth="9" opacity=".86"/>
+   <path d="M0 540L695 540" stroke="#a4edff" strokeWidth="25" opacity=".22" filter="url(#prism-glow-v13)"/>
+   <path d="M1190 465L1920 230V850L1190 615Z" fill="url(#dispersion-spectrum-v13)" opacity=".97"/>
+   <path d="M1175 492L1920 310V755L1175 590Z" fill="url(#dispersion-spectrum-v13)" opacity=".55" filter="url(#prism-glow-v13)"/>
+   <circle cx="960" cy="540" r="250" fill="#071016" stroke="#d7e9ed" strokeWidth="7"/>
+   <circle cx="960" cy="540" r="231" fill="url(#play-glass-v13)" stroke="#8cb1b0" strokeWidth="3"/>
+   <circle cx="960" cy="540" r="210" fill="none" stroke="#f8d36d" strokeWidth="8" opacity=".95"/>
+   <circle cx="960" cy="540" r="198" fill="none" stroke="#9cd4d5" strokeWidth="3" opacity=".75"/>
+   <path d="M840 366Q970 270 1090 373" stroke="#fff" strokeWidth="13" fill="none" opacity=".22"/>
+   <path d="M900 390Q820 465 858 655" stroke="#fff" strokeWidth="8" fill="none" opacity=".13"/>
+   <path d="M900 430L1105 545L914 644Z" fill="#fff" stroke="#e6f0ea" strokeWidth="3"/>
+   <path d="M900 430L1105 545L914 644Z" fill="#fff" opacity=".12" filter="url(#prism-glow-v13)"/>
+   <circle cx="824" cy="328" r="12" fill="#fff"/><circle cx="1090" cy="714" r="10" fill="#fff"/>
+   <path d="M815 320L826 300L836 320" stroke="#fff" strokeWidth="3" fill="none"/>
+   <path d="M1077 704L1090 685L1103 705" stroke="#fff" strokeWidth="3" fill="none"/>
+   <text x="10" y="855" fontFamily="Arial,sans-serif" fontSize="230" fontWeight="200" fill="none" stroke="#4b5963" strokeWidth="3" opacity=".56">1973</text>
   </svg>
-  <div style={{position:"absolute",left:64,top:44,color:"#aab6c8",fontSize:15,fontWeight:900,letterSpacing:".2em"}}>OPTICAL MEDIA / LIGHT REFRACTION</div>
+  <div style={{position:"absolute",left:55,top:42,fontSize:19,color:"#b9c4c8",fontWeight:850,letterSpacing:".14em"}}>OPTICS · DISPERSION OF WHITE LIGHT</div>
  </AbsoluteFill>;
 };
 
-const MarioGamePoster=()=>{
- const f=useCurrentFrame();
- return <AbsoluteFill style={{...full,background:"#28a8e7"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><path d="M0 690L300 430L560 700L830 395L1120 700L1460 425L1740 700L1920 600V1080H0Z" fill="#718fd0"/><path d="M0 795L320 620L590 790L880 620L1190 805L1500 620L1920 790V1080H0Z" fill="#369a82"/><path d="M0 875H1920V1080H0Z" fill="#d19a42"/><path d="M0 950H1920" stroke="#fff0b9" strokeWidth="12" strokeDasharray="30 24"/>{Array.from({length:16},(_,i)=><g key={i} transform={"translate("+(i*120-40)+" "+(300+i%3*44)+")"}><rect width="80" height="26" rx="4" fill="#fff"/><rect x="12" y="8" width="56" height="10" fill="#d6ebf6"/></g>)}<g transform={"translate("+(850+Math.sin(f/7)*24)+" 545)"}><circle r="155" fill="#f7f0d4" stroke="#17202a" strokeWidth="16"/><circle r="120" fill="#2f8dda"/><path d="M-42 -60V60L70 0Z" fill="#fff"/></g></svg><div style={{position:"absolute",left:65,top:55,color:"#fff",fontSize:18,fontWeight:950,letterSpacing:".18em"}}>PIXEL WORLD / 1985</div></AbsoluteFill>;
-};
-const PosterGrid=()=><AbsoluteFill style={{...full,background:"#f2f1ec"}}><div style={{position:"absolute",inset:16,display:"grid",gridTemplateColumns:"1.1fr 1.1fr 1fr 1.6fr",gridTemplateRows:"1fr 1fr 1fr",gap:10}}><div style={{background:"#17191e",display:"grid",placeItems:"center"}}><Word size={90} color="#fff">THE</Word></div><div style={{background:"#fff",display:"grid",placeItems:"center"}}><Word size={92}>FUTURE</Word></div><div style={{background:"#17191e",display:"grid",placeItems:"center"}}><Word size={110} color="#fff">IS</Word></div><div style={{gridRow:"span 2",background:"repeating-radial-gradient(circle,#16191c 0 5px,#efeee9 6px 18px)",display:"grid",placeItems:"center"}}><OpenDesignSymbol size={220}/></div><div style={{background:"#f5d64a",display:"grid",placeItems:"center"}}><Word size={120}>NOW</Word></div><div style={{background:"#20232a",display:"grid",placeItems:"center"}}><Word size={95} color="#fff">HERE.</Word></div><div style={{background:"#1e39d4",display:"grid",placeItems:"center"}}><Word size={85} color="#fff">MAKE</Word></div><div style={{background:"#a5ed62",display:"grid",placeItems:"center"}}><Word size={78}>MOVE</Word></div><div style={{background:"#e6e4dc",display:"grid",placeItems:"center"}}><Word size={65}>MOTION</Word></div></div></AbsoluteFill>;
-const PointCloudPoster=()=>{
- const f=useCurrentFrame(),points=Array.from({length:300},(_,i)=>{const z=1-2*(i+.5)/300,a=i*2.399963+f*.018,r=Math.sqrt(1-z*z),x=r*Math.cos(a),d=r*Math.sin(a),p=4.8/(5.2-d*.45);return{x:960+x*380*p,y:520+z*250*p,r:1.6+(d+1)*2,a:.25+(d+1)*.32}});
- return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 50%,#252b32,#050608 66%)"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><ellipse cx="960" cy="520" rx="390" ry="272" fill="none" stroke="#a3b1b0" strokeOpacity=".22" strokeWidth="2"/>{points.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={i%7===0?"#b9ed4a":"#e8efed"} opacity={p.a}/>)}</svg><div style={{position:"absolute",top:50,left:88,color:"#8d9998",fontSize:16,fontWeight:900,letterSpacing:".2em"}}>DEPTH / POINTS / MOTION</div></AbsoluteFill>;
-};
-const StatsPoster=()=>{
- const f=useCurrentFrame(),progress=e(f,0,15),count=Math.round(80+16*progress),day=Math.round(88+50*progress);
- const y=470-330*progress;
- return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c5e6e1 0%,#c9ebe0 42%,#f0cbb8 65%,#71c8c5 100%)",overflow:"hidden"}}>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 650Q170 592 340 664T690 660T1050 676T1410 640T1740 674T1920 650V1080H0Z" fill="#6cc9bd" opacity=".76"/>
-   <path d="M0 820Q195 750 390 830T800 812T1220 845T1600 808T1920 842V1080H0Z" fill="#f2cdb2" opacity=".68"/>
-   <path d="M0 935Q230 875 430 934T840 923T1280 947T1700 914T1920 937V1080H0Z" fill="#4db9bb" opacity=".55"/>
-   {Array.from({length:26},(_,i)=><path key={i} d={"M"+(i*77)+" "+(704+(i%5)*22)+"q 55 -25 105 4"} stroke="#fff5e8" strokeWidth="7" fill="none" opacity=".44"/>)}
-  </svg>
-  <div style={{position:"absolute",left:78,top:245,fontFamily:displayFont,fontSize:254,fontWeight:950,color:"#111315",letterSpacing:"-.12em",textShadow:"0 6px 10px rgba(0,0,0,.16)"}}>{count}K</div>
-  <div style={{position:"absolute",left:263,top:500,fontSize:54,fontWeight:850,color:"#343b38"}}>Day {day}</div>
-  <div style={{position:"absolute",left:665,top:80,width:1180,height:900,borderRadius:28,background:"#fff",padding:"70px 70px 54px",boxSizing:"border-box",boxShadow:"0 18px 55px rgba(37,85,92,.13)"}}>
-   <div style={{textAlign:"center",fontSize:36,fontWeight:900,color:"#202326",marginBottom:48}}>◉ Star History</div>
-   <div style={{position:"absolute",left:110,top:175,fontSize:20,fontWeight:800,color:"#45494b"}}>nexu-io/open-design</div>
-   <svg viewBox="0 0 1040 560" width="100%" height="560">
-    {[0,1,2,3,4].map(v=><g key={v}><line x1="82" x2="1010" y1={80+v*105} y2={80+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="12" y={87+v*105} fontSize="22" fill="#4a4e50">{100-v*20}K</text></g>)}
-    <path d={"M82 500C120 465 135 330 210 280S315 225 375 203S530 150 610 125S760 95 855 "+y+"L930 "+(y-25)} stroke="#c94d3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
-    <circle cx="930" cy={y-25} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
-    <text x="82" y="535" fontSize="20" fill="#303638">May</text><text x="270" y="535" fontSize="20" fill="#303638">June</text><text x="455" y="535" fontSize="20" fill="#303638">July</text><text x="645" y="535" fontSize="20" fill="#303638">August</text><text x="835" y="535" fontSize="20" fill="#303638">September</text><text x="960" y="535" fontSize="20" fill="#303638">October</text>
-   </svg>
-   <div style={{position:"absolute",left:78,bottom:23,fontSize:18,color:"#737a79"}}>GitHub stars</div>
-  </div>
- </AbsoluteFill>;
-};
-
-const KoalaPoster=()=><AbsoluteFill style={{...full,background:"linear-gradient(120deg,#2a8bd1,#144a9a)",color:"#fff"}}><div style={{position:"absolute",left:330,top:190,width:430,height:540,borderRadius:220,background:"#f5ead0",transform:"rotate(-5deg)"}}><svg viewBox="0 0 430 540" width="100%" height="100%"><ellipse cx="82" cy="165" rx="70" ry="90" fill="#818b94"/><ellipse cx="348" cy="165" rx="70" ry="90" fill="#818b94"/><ellipse cx="215" cy="255" rx="155" ry="170" fill="#9099a1"/><ellipse cx="215" cy="298" rx="120" ry="100" fill="#f2efe6"/><circle cx="160" cy="246" r="16" fill="#151a1d"/><circle cx="270" cy="246" r="16" fill="#151a1d"/><ellipse cx="215" cy="300" rx="42" ry="57" fill="#20262c"/><path d="M180 365Q215 392 250 365" stroke="#252a2c" strokeWidth="10" fill="none"/></svg></div><div style={{position:"absolute",right:270,top:195,width:450,height:650,background:"#fff",color:"#182431",borderRadius:20,padding:38,boxSizing:"border-box",boxShadow:"0 24px 55px rgba(0,0,0,.22)"}}><div style={{fontSize:21,fontWeight:950,letterSpacing:".1em"}}>COURSES / 2026</div><div style={{marginTop:34,height:250,borderRadius:14,background:"linear-gradient(135deg,#f2dfba,#e4a27b,#83b9cb)"}}/><div style={{marginTop:34,fontSize:48,fontWeight:950,lineHeight:.95}}>Learn to create.</div><div style={{marginTop:25,fontSize:18,color:"#7e8991"}}>A new way to make ideas move.</div></div></AbsoluteFill>;
-const GreenTransition=()=>{const f=useCurrentFrame(),r=e(f,0,7,90,650);return <AbsoluteFill style={{...full,background:"#b7ee5b"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><circle cx="960" cy="540" r={r} fill="none" stroke="#efffd4" strokeWidth="3"/><circle cx="960" cy="540" r={r*.7} fill="none" stroke="#efffd4" strokeWidth="2"/></svg><Word size={420} color="#142016" style={{position:"absolute",left:0,right:0,top:300,textAlign:"center"}}>OUT.</Word></AbsoluteFill>;};
-
-
-
-const Comic1962=()=>{
- const f=useCurrentFrame(),scale=1+e(f,0,16)*.012;
- return <AbsoluteFill style={{...full,background:"#fbf5e9",transform:"scale("+scale+")",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:26,display:"grid",gridTemplateColumns:"20% 60% 20%",gridTemplateRows:"1fr 1fr",gap:10}}>
-   <div style={{background:"#ffdd3d",border:"8px solid #17191b",display:"grid",placeItems:"center",fontFamily:displayFont,fontSize:34,fontWeight:950,color:"#17191b",fontStyle:"italic"}}>ONE IDEA…</div>
-   <div style={{gridColumn:"2",gridRow:"1 / span 2",position:"relative",overflow:"hidden",border:"9px solid #17191b",background:"#76a5e4"}}>
-    <div style={{position:"absolute",inset:-40,background:"repeating-conic-gradient(from -6deg at 50% 48%,#fff 0deg 2.5deg,#6c9cdd 2.5deg 9deg)"}}/>
-    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#3977c4 0 4px,transparent 4.4px)",backgroundSize:"24px 24px",opacity:.65}}/>
-    <div style={{position:"absolute",left:"14%",top:"13%",width:"72%",height:"74%",borderRadius:"50%",background:"#ffe25b",boxShadow:"0 0 0 8px rgba(255,255,255,.65)"}}/>
-    <div style={{position:"absolute",left:"23%",top:"25%",width:"55%",height:"55%",borderRadius:"34% 43% 36% 38%",background:"#ed3c2d",border:"9px solid #151719",boxShadow:"inset 0 0 0 8px rgba(20,20,20,.22)",display:"grid",placeItems:"center"}}>
-     <div style={{width:"72%",height:"72%",borderRadius:"50%",background:"#fff",border:"7px solid #151719",backgroundImage:"radial-gradient(#71a0dc 0 3px,transparent 3.5px)",backgroundSize:"20px 20px",display:"grid",placeItems:"center"}}>
-      <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M8 5L92 59L53 69L38 115Z" fill="#090b0d"/></svg>
-     </div>
-    </div>
-    <div style={{position:"absolute",left:25,top:24,padding:"8px 18px",background:"#ffdf36",border:"5px solid #17191b",fontSize:25,fontWeight:950,fontStyle:"italic",color:"#17191b"}}>MEANWHILE, IN 1962…</div>
-    <div style={{position:"absolute",right:30,top:22,textAlign:"right",fontFamily:displayFont,fontSize:54,fontWeight:950,color:"#101214",lineHeight:.85}}>1962<div style={{fontSize:20,fontStyle:"italic"}}>POP ART</div></div>
-    <div style={{position:"absolute",right:16,bottom:28,padding:"10px 24px",background:"#ffdf37",border:"6px solid #17191b",clipPath:"polygon(50% 0,60% 18%,80% 5%,82% 30%,100% 36%,84% 54%,98% 75%,70% 73%,60% 100%,45% 81%,22% 96%,22% 70%,0 60%,19% 42%,8% 20%,36% 24%)",fontSize:37,fontWeight:950,fontStyle:"italic",color:"#ed392d",textShadow:"2px 2px #111"}}>CLICK!</div>
-   </div>
-   <div style={{background:"#fae7eb",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca9b6 2px,transparent 2.5px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:42,fontWeight:950}}>•••</div>
-   <div style={{background:"#fae7eb",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca9b6 2px,transparent 2.5px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:26,fontWeight:950}}>SFX</div>
-   <div style={{background:"#ffdd3d",border:"8px solid #17191b",display:"grid",placeItems:"center",fontSize:26,fontWeight:950}}>CUT / OUT</div>
-  </div>
- </AbsoluteFill>;
-};
+const PixelGamePoster
 
 const PixelGamePoster=()=>{
- const f=useCurrentFrame(),jump=Math.sin(f/2.8)*10;
- return <AbsoluteFill style={{...full,background:"#38b9f2",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(#38b9f2 0 62%,#80d85a 62% 100%)"}}/>
-  <div style={{position:"absolute",left:0,right:0,top:110,height:630,backgroundImage:"radial-gradient(#fff 0 3px,transparent 3px)",backgroundSize:"90px 90px",opacity:.35}}/>
-  <div style={{position:"absolute",left:90,top:100,fontSize:20,fontWeight:950,color:"#fff",letterSpacing:".18em"}}>SCORE 000100</div>
-  <div style={{position:"absolute",right:120,top:100,fontSize:20,fontWeight:950,color:"#fff",letterSpacing:".18em"}}>LEVEL 1965</div>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 800 Q260 690 490 810 T920 800 T1370 790 T1920 810V1080H0Z" fill="#54bd4b"/>
-   <path d="M0 900 Q300 810 580 890 T1110 900 T1600 875 T1920 920V1080H0Z" fill="#1c8c55"/>
-   {Array.from({length:8},(_,i)=><g key={i} transform={"translate("+(i*270-80)+" 0)"}><rect x="0" y="735" width="100" height="85" fill="#39a34b"/><rect x="25" y="685" width="50" height="50" fill="#48c85b"/><rect x="15" y="670" width="18" height="18" fill="#fff"/></g>)}
-   <g transform={"translate(960 "+(420+jump)+")"}><path d="M-85 10L0 -165L85 10L40 125H-40Z" fill="#f3d74a" stroke="#151515" strokeWidth="12"/><circle cx="0" cy="-20" r="46" fill="#fff" stroke="#151515" strokeWidth="10"/><path d="M-9 -53L28 -5L-9 25Z" fill="#151515"/></g>
-   <path d="M0 980H1920" stroke="#fff" strokeWidth="8" opacity=".7"/>
+ const f=useCurrentFrame(),jump=Math.sin(f/3)*7;
+ return <AbsoluteFill style={{...full,background:"#2eaef0",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,shapeRendering:"crispEdges"}}>
+   <rect width="1920" height="1080" fill="#36b8f5"/>
+   <path d="M0 585L160 565L260 520L355 574L520 450L690 584L840 490L990 585L1150 440L1330 575L1490 485L1650 582L1800 500L1920 555V850H0Z" fill="#829be9" stroke="#5f7dd8" strokeWidth="9"/>
+   <path d="M0 685L130 620L300 700L440 575L615 695L770 595L940 700L1100 578L1270 700L1430 605L1630 690L1800 590L1920 660V890H0Z" fill="#6a8ae4"/>
+   <path d="M0 815L120 725L320 800L490 710L690 810L900 718L1090 810L1290 720L1510 815L1740 730L1920 805V1080H0Z" fill="#43b4e9"/>
+   <g fill="#fff6da">
+    <path d="M55 245h70v16H55zM75 230h40v15H75zM1280 185h85v16h-85zM1305 169h48v16h-48zM470 410h50v12h-50z"/>
+   </g>
+   <g transform="translate(90 690)">
+    <rect x="0" y="80" width="320" height="90" fill="#b78b2d" stroke="#64451a" strokeWidth="10"/>
+    <rect x="0" y="68" width="320" height="30" fill="#50c13c"/><rect x="0" y="68" width="320" height="13" fill="#90ed3b"/>
+    <rect x="30" y="109" width="20" height="20" fill="#573d1e"/><rect x="115" y="139" width="20" height="17" fill="#573d1e"/><rect x="240" y="114" width="18" height="19" fill="#573d1e"/>
+    <path d="M123 63L145 10L168 63Z" fill="#e94e35"/><rect x="136" y="-5" width="24" height="26" fill="#e94e35"/>
+   </g>
+   <g transform={"translate(1535 "+(620+jump)+")"}>
+    <ellipse cx="0" cy="140" rx="145" ry="70" fill="#1b9c37"/><rect x="-23" y="100" width="46" height="245" fill="#8b5428"/>
+    <circle cx="-65" cy="20" r="85" fill="#3cba3e"/><circle cx="30" cy="-10" r="91" fill="#57cf39"/><circle cx="112" cy="44" r="71" fill="#209b36"/>
+    <path d="M-110 -60L-80 -135L-40 -75L-5 -147L30 -65L80 -118L111 -46" fill="#76df42"/>
+   </g>
+   <path d="M0 910H1920V1080H0Z" fill="#e2b65f"/><path d="M0 910H1920" stroke="#ffe08b" strokeWidth="12"/>
+   {Array.from({length:90},(_,i)=><rect key={i} x={(i*97)%1920} y={945+(i%4)*30} width="13" height="11" fill="#a6772d" opacity=".75"/>)}
+   <g transform={"translate(960 "+(515+jump)+")"}>
+    <path d="M-194 -126L-156 -194L-40 -224L94 -205L181 -128L215 -6L182 142L106 211L-114 214L-194 137L-220 16Z" fill="#d9a631" stroke="#111315" strokeWidth="17"/>
+    <path d="M-164 -119L-130 -160L-36 -190L91 -174L153 -115L181 -4L151 121L88 174L-102 176L-157 118L-183 11Z" fill="#35aef0" stroke="#111315" strokeWidth="12"/>
+    <path d="M-73 -92L98 -3L-53 111Z" fill="#fff" stroke="#111315" strokeWidth="8"/>
+    <path d="M-220 20L-188 -10M190 -16L216 20" stroke="#f5d45b" strokeWidth="16"/>
+   </g>
   </svg>
-  <div style={{position:"absolute",left:120,bottom:70,fontSize:24,fontWeight:950,color:"#fff",letterSpacing:".15em"}}>PIXEL PLAY / 01</div>
+  <div style={{position:"absolute",left:100,top:68,fontFamily:"monospace",fontSize:38,fontWeight:950,color:"#fff",lineHeight:1.03,textShadow:"2px 2px #3374b2"}}>SCORE<br/>000250</div>
+  <div style={{position:"absolute",left:"50%",top:72,transform:"translateX(-50%)",fontFamily:"monospace",fontSize:39,fontWeight:950,color:"#fff",textAlign:"center",lineHeight:1.03,textShadow:"2px 2px #3374b2"}}>YEAR<br/>1985</div>
+  <div style={{position:"absolute",right:115,top:70,fontFamily:"monospace",fontSize:37,fontWeight:950,color:"#fff",textAlign:"right",lineHeight:1.03,textShadow:"2px 2px #3374b2"}}>LIVES<br/>❤️ ❤️ ❤️</div>
  </AbsoluteFill>;
 };
+
+const PortfolioFlash
 
 const PortfolioFlash=()=>{
  const f=useCurrentFrame();
@@ -925,30 +915,41 @@ const EditorialPosterGrid=()=>{
 
 const DepthField=()=>{
  const f=useCurrentFrame();
- return <AbsoluteFill style={{...full,background:"#0a0b0d",color:"#fff"}}>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%">
-   <defs><filter id="depth-blur"><feGaussianBlur stdDeviation="1.4"/></filter></defs>
-   {Array.from({length:520},(_,i)=>{
-    const a=i*2.399963, ring=180+(i%19)*10, wobble=Math.sin(f*.08+i*.23)*16;
-    const x=960+Math.cos(a)*(ring+wobble), y=540+Math.sin(a)*(ring*.62+wobble), z=Math.sin(a*2+f*.04);
-    const len=13+(i%7)*2;
-    return <line key={i} x1={x} y1={y} x2={x+Math.cos(a+z)*len} y2={y+Math.sin(a+z)*len} stroke={i%9===0?"#9cf15c":"#e8ebe8"} strokeWidth={i%5===0?3:2} opacity={.42+(i%6)*.08}/>;
+ return <AbsoluteFill style={{...full,background:"#090a0c",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs><radialGradient id="particle-vortex-core"><stop offset="0" stopColor="#050607"/><stop offset=".54" stopColor="#050607"/><stop offset="1" stopColor="#192021" stopOpacity="0"/></radialGradient><filter id="particle-glow-v13"><feGaussianBlur stdDeviation="2.1"/></filter></defs>
+   {Array.from({length:1150},(_,i)=>{
+    const u=i/1150,a=i*2.39996323+f*.008,phi=Math.acos(1-2*u),radius=175+58*Math.sin(phi*3.4)+14*Math.sin(i*.37+f*.045);
+    const x=960+Math.cos(a)*radius*Math.sin(phi)*1.18;
+    const y=540+Math.sin(a)*radius*Math.sin(phi)*.9;
+    const z=Math.cos(phi),len=4+(i%5)*2.8;
+    const dx=Math.cos(a+phi*.4)*len,dy=Math.sin(a+phi*.4)*len;
+    const bright=i%11===0||i%17===0;
+    return <line key={i} x1={x} y1={y} x2={x+dx} y2={y+dy} stroke={bright?"#a2e86b":"#e2e7e3"} strokeWidth={bright?3.2:1.8} opacity={.24+(1-u)*.5} />;
    })}
-   <ellipse cx="960" cy="540" rx="190" ry="125" fill="none" stroke="#8d9b96" strokeOpacity=".15" strokeWidth="1"/>
+   {Array.from({length:120},(_,i)=>{
+    const a=i*2.39996+f*.012,r=120+(i%13)*7;
+    return <circle key={"p"+i} cx={960+Math.cos(a)*r*1.4} cy={540+Math.sin(a)*r*.85} r={i%9===0?3.5:1.9} fill={i%7===0?"#9bed5d":"#fff"} opacity=".55"/>;
+   })}
+   <ellipse cx="960" cy="540" rx="305" ry="225" fill="none" stroke="#a8b7b0" strokeOpacity=".12" strokeWidth="2" strokeDasharray="2 12"/>
+   <ellipse cx="960" cy="540" rx="185" ry="135" fill="url(#particle-vortex-core)"/>
   </svg>
-  <div style={{position:"absolute",left:70,top:56,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#d9ddda"}}>OPEN DESIGN MOTION REEL — 2026</div>
-  <div style={{position:"absolute",right:70,top:56,fontSize:15,fontWeight:900,letterSpacing:".2em",color:"#d9ddda"}}>05 — DEPTH</div>
-  <div style={{position:"absolute",left:70,bottom:64,fontSize:15,fontWeight:800,letterSpacing:".18em",color:"#8f9694"}}>128 BPM / BAR 7 OF 8</div>
+  <div style={{position:"absolute",inset:0,border:"1px solid rgba(235,240,238,.45)",margin:25}}/>
+  <div style={{position:"absolute",left:60,top:45,fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#d7dedc"}}>OPEN DESIGN / MOTION REEL</div>
+  <div style={{position:"absolute",right:60,top:45,fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#d7dedc"}}>05 — DEPTH</div>
+  <div style={{position:"absolute",left:60,bottom:45,fontSize:13,fontWeight:850,letterSpacing:".17em",color:"#89928f"}}>128 BPM / BAR 7 OF 8</div>
  </AbsoluteFill>;
 };
 
 const EaseGreen=()=>{
- const f=useCurrentFrame(),x=e(f,0,9,65,0);
- return <AbsoluteFill style={{...full,background:"#77ee43",color:"#101710"}}>
-  <div style={{position:"absolute",left:0,right:0,top:330,textAlign:"center",transform:"translateX("+x+"px)"}}><Word size={310} color="#101710" tracking={-.12}>EASE</Word></div>
-  <div style={{position:"absolute",left:27,top:31,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#16331c"}}>OPEN DESIGN MOTION REEL — 2026</div>
-  <div style={{position:"absolute",right:34,top:31,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#16331c"}}>06 — KINETIC TYPE</div>
-  <div style={{position:"absolute",left:28,right:28,bottom:26,height:2,background:"#173719",opacity:.6}}/>
+ const f=useCurrentFrame(),shift=e(f,0,7,70,0);
+ return <AbsoluteFill style={{...full,background:"#a6f75c",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:"-4%",right:"-4%",top:278,textAlign:"center",transform:"translateX("+shift+"px)"}}>
+   <Word size={430} color="#111713" tracking={-.14} style={{textShadow:"0 5px 0 rgba(26,61,27,.25)"}}>EASE</Word>
+  </div>
+  <div style={{position:"absolute",left:30,top:28,fontSize:14,fontWeight:900,letterSpacing:".19em",color:"#273e20"}}>OPEN DESIGN / MOTION REEL — 2026</div>
+  <div style={{position:"absolute",right:30,top:28,fontSize:14,fontWeight:900,letterSpacing:".19em",color:"#273e20"}}>06 — EASE / 128 BPM</div>
+  <div style={{position:"absolute",left:28,right:28,bottom:28,height:2,background:"#1d371c",opacity:.6}}/>
  </AbsoluteFill>;
 };
 
