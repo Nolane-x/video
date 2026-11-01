@@ -11,6 +11,7 @@ Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/
 - Never claim a program ran unless its command/workflow log proves it. Distinguish code written, build passed, render succeeded, and visual QA passed.
 - A successful export is only a technical gate. Inspect every scene in contact sheets and actual moving frames around contact/action/recovery.
 - Save storyboard JSON, asset provenance, contact sheets, audio measurements, render metadata, QA report and handoff.
+- Synthetic voice-over is opt-in. When explicitly requested, use `.github/workflows/render-voicestudio-voiceover.yml` and read `docs/VOICEOVER_WORKFLOW.md`; don't wire TTS into normal render commits by default. Review the full WAV before publishing, and don't fabricate word-level alignment from SRT cues.
 - Preserve the last known-good master. Don't overwrite it before the next render passes QA.
 - Do not commit secrets, API keys, copyrighted reference footage, or assets without redistribution rights.
 

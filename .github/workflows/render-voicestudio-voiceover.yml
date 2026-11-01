@@ -1,0 +1,112 @@
+name: Render AI voice-over with VoiceStudio
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_json:
+        description: "VoiceStudio job JSON — see docs/VOICEOVER_WORKFLOW.md and schema"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: voicestudio-voiceover-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render-voiceover:
+    name: Generate voice-over on VoiceStudio Actions
+    uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
+    permissions:
+      contents: read
+    with:
+      downstream_call: true
+      job_json: ${{ inputs.job_json }}
+
+  verify-and-stage:
+    name: Verify WAV, captions and provenance
+    needs: render-voiceover
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      HF_HOME: ${{ runner.temp }}/voiceover-whisper-cache
+    steps:
+      - name: Check out video repository tools
+        uses: actions/checkout@v7
+
+      - name: Download the VoiceStudio render artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voiceover-assets
+
+      - name: Install FFmpeg and ffprobe
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Validate master audio and delivery bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s voiceover-assets/narration.wav
+          test -s voiceover-assets/captions.srt
+          test -s voiceover-assets/captions.vtt
+          test -s voiceover-assets/transcript.txt
+          test -s voiceover-assets/manifest.json
+          ffprobe -v error -show_entries stream=codec_name,codec_type,sample_rate,channels,bits_per_sample,bits_per_raw_sample,sample_fmt -show_entries format=duration -of json voiceover-assets/narration.wav > voiceover-assets/ffprobe.json
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("voiceover-assets")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          probe = json.loads((root / "ffprobe.json").read_text(encoding="utf-8"))
+          audio = manifest["audio"]
+          stream = next(s for s in probe["streams"] if s.get("codec_type") == "audio")
+          assert stream["codec_name"] == "pcm_s24le", stream
+          assert stream["sample_rate"] == "48000", stream
+          assert stream["channels"] == 1, stream
+          assert int(stream.get("bits_per_raw_sample") or stream.get("bits_per_sample") or 0) == 24, stream
+          assert audio["sample_rate"] == 48000 and audio["channels"] == 1 and audio["subtype"] == "PCM_24", audio
+          digest = hashlib.sha256()
+          with (root / "narration.wav").open("rb") as handle:
+              for block in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(block)
+          assert digest.hexdigest() == audio["sha256"], "narration SHA-256 does not match VoiceStudio manifest"
+          probed_duration = float(probe["format"]["duration"])
+          assert abs(probed_duration - float(audio["duration_seconds"])) < 0.05, (probed_duration, audio["duration_seconds"])
+          assert audio["watermark"]["status"] == "verified", audio["watermark"]
+          assert audio["checks"] == "passed", audio
+          assert manifest["segment_count"] == len(manifest["segments"]) > 0
+          for name in manifest["captions"]:
+              assert (root / name).is_file() and (root / name).stat().st_size > 0, name
+          print(f"Verified {manifest['job_id']}: {audio['duration_seconds']:.2f}s, 48 kHz PCM-24, AudioSeal verified")
+          PY
+
+      - name: Set up Python for ASR word alignment
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Test ASR word-timeline adapter
+        run: |
+          python -m py_compile tools/video/align_voicestudio_voiceover.py
+          python tests/test_voicestudio_voiceover_alignment.py
+      - name: Install pinned ASR aligner
+        run: python -m pip install --disable-pip-version-check "faster-whisper==1.2.1"
+
+      - name: Build H2-compatible line and word timeline
+        run: python tools/video/align_voicestudio_voiceover.py --artifact-dir voiceover-assets --model small
+
+      - name: Upload video-ready voice-over package
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-voiceover-ready-${{ github.run_id }}
+          path: voiceover-assets/
+          if-no-files-found: error
+          retention-days: 30
