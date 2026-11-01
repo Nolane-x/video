@@ -80,6 +80,8 @@ def select_voices(
             "sample_text": voice.get("sample_text", ""),
             "rights_status": rights.get("rights_status", "unknown"),
             "commercial_use": rights.get("commercial_use", "not-stated"),
+            "upstream_quality_grade": voice.get("upstream_quality_grade"),
+            "quality_grade_source": voice.get("quality_grade_source"),
             "attribution_required": rights.get("attribution_required"),
             "notice": rights.get("notice", ""),
         })
