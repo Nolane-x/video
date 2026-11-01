@@ -64,7 +64,7 @@ need("const CountdownPrism=" in source, "blue extruded countdown prism artwork i
 need('isOne?<CountdownPrism width="56%" height="90%" scale={.98+.04*p}/>' in source, "countdown 1 Preview artwork is not source-scaled")
 need("handoff=e(frame,106,111)" in source and "1+.34*handoff" in source, "Preview-to-full-screen zoom handoff timing is missing")
 need('left:"5.5%",right:"5.5%",top:"-1.5%",bottom:"-1.5%"' in source, "rounded black takeover margins are missing")
-need('background:"#df884c"' in source and 'background:"#f2f0e9"' in source, "countdown takeover ring/card colours are missing")
+need('stroke="#df884c"' in source and 'stroke="#5a6dff"' in source and 'background:"#f2f0e9"' in source, "countdown takeover ring/card colours are missing")
 
 required=[
     "Launch film", "Make a 10s launch film", "for our app.",
