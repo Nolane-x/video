@@ -527,22 +527,26 @@ const GlitchPoster = () => {
 };
 
 const WorldPoster = () => {
-  const f = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ ...full, background: "#1227bb", color: "#f7f7f0" }}>
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 70% 42%,rgba(119,157,255,.45),transparent 42%),linear-gradient(130deg,#182bcb,#07106a)" }} />
-      <div style={{ position: "absolute", inset: 0, opacity: .28, backgroundImage: "repeating-linear-gradient(0deg,transparent 0 44px,rgba(255,255,255,.18) 45px 47px)" }} />
-      <div style={{ position: "absolute", left: 80, top: 140, transform: "translateX("+(Math.sin(f/6)*9)+"px)" }}>
-        <Word size={235} color="#fff" tracking={-.1}>WORLD</Word>
-        <Word size={235} color="#f8f6e8" tracking={-.1}>WIDE.</Word>
-      </div>
-      <div style={{ position: "absolute", right: 200, top: 210, width: 420, height: 420, border: "13px solid #9bffff", borderRadius: "50%", boxShadow: "0 0 65px rgba(91,255,255,.55)" }}>
-        <div style={{ position: "absolute", inset: 54, border: "5px solid rgba(255,255,255,.85)", borderRadius: "50%" }} />
-        <div style={{ position: "absolute", inset: 130, background: "#13cbd1", borderRadius: "50%" }} />
-      </div>
-      <div style={{ position: "absolute", left: 88, bottom: 80, color: "#9befff", fontSize: 18, fontWeight: 900, letterSpacing: ".2em" }}>ONE WORLD / MANY IDEAS</div>
-    </AbsoluteFill>
-  );
+ const panels=[
+  ["#101820","MOTION","MOTION / 01"],["#efe6d4","OPEN","OPEN STUDIO"],["#1844bf","WORLD","GLOBAL / 24"],["#ed573f","PLAY","FORM STUDY"],
+  ["#151719","◉","OPTICAL"],["#88ed4d","EASE","NATURAL MOTION"],["#16368e","FUTURE","IS ALREADY"],["#f0d15a","1952","CUT-OUTS"],
+  ["#f5f2e9","TYPE","EDITORIAL"],["#183d38","FILMS","LAUNCH"],["#e5a5bc","POSTER","GRAPHIC"],["#090b11","3D","OBJECT"]
+ ];
+ return <AbsoluteFill style={{...full,background:"#101319",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 45%,#35405a,#0b0e14 72%)"}}/>
+  <div style={{position:"absolute",left:150,right:150,top:94,bottom:104,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gridTemplateRows:"repeat(3,1fr)",gap:20,transform:"perspective(1500px) rotateY(-7deg) rotateX(2deg) rotateZ(-1deg)",filter:"drop-shadow(0 32px 35px rgba(0,0,0,.42))"}}>
+   {panels.map((p,i)=><div key={i} style={{position:"relative",background:p[0],border:"3px solid rgba(255,255,255,.72)",overflow:"hidden",boxShadow:"0 8px 18px rgba(0,0,0,.28)"}}>
+    <div style={{position:"absolute",inset:0,opacity:.22,backgroundImage:"repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.28) 15px 17px)"}}/>
+    {i%4===0?<div style={{position:"absolute",inset:"18%",border:"9px solid rgba(255,255,255,.8)",borderRadius:"50%",boxShadow:"0 0 0 12px rgba(255,255,255,.12)"}}/>:null}
+    {i%4===1?<div style={{position:"absolute",left:"15%",right:"15%",top:"18%",height:"64%",background:"repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0 4px,transparent 5px 13px)"}}/>:null}
+    {i%4===2?<div style={{position:"absolute",right:"9%",top:"8%",width:"36%",height:"75%",border:"7px solid rgba(255,255,255,.65)",borderRadius:"50%"}}/>:null}
+    {i%4===3?<div style={{position:"absolute",left:"12%",top:"17%",width:"75%",height:"63%",border:"5px solid rgba(20,20,20,.28)",transform:"rotate(-7deg)"}}/>:null}
+    <div style={{position:"absolute",left:16,top:13,fontFamily:displayFont,fontSize:Math.min(62,p[1].length>7?34:58),fontWeight:1000,color:"#fff",letterSpacing:"-.06em",textShadow:"0 3px 9px rgba(0,0,0,.35)"}}>{p[1]}</div>
+    <div style={{position:"absolute",left:17,right:17,bottom:13,fontSize:12,fontWeight:850,letterSpacing:".16em",color:"rgba(255,255,255,.82)"}}>{p[2]}</div>
+   </div>)}
+  </div>
+  <div style={{position:"absolute",left:154,top:44,fontSize:16,fontWeight:900,letterSpacing:".2em",color:"#c8cfdb"}}>SELECTED WORK / OPEN DESIGN</div>
+ </AbsoluteFill>;
 };
 
 const MorroPoster = () => (
@@ -557,22 +561,22 @@ const MorroPoster = () => (
   </AbsoluteFill>
 );
 
-const OutPoster = () => (
-  <AbsoluteFill style={{ ...full, background: "#00851e", color: "#f9fff4" }}>
-    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 44%,rgba(255,255,255,.1),transparent 48%)" }} />
-    <div style={{ position: "absolute", left: 0, right: 0, top: 235, textAlign: "center" }}>
-      <Word size={420} color="#fff" tracking={-.14}>OUT<span style={{ color: "#b9ed4a" }}>.</span></Word>
-    </div>
-    <div style={{ position: "absolute", left: 95, bottom: 80, fontSize: 18, fontWeight: 900, letterSpacing: ".2em", color: "#c5f1c1" }}>EASING / DIRECTION / FEEL</div>
-  </AbsoluteFill>
-);
+const OutPoster = () => {
+ const f=useCurrentFrame(),dx=e(f,0,9,28,0);
+ return <AbsoluteFill style={{ ...full, background: "#08731f", color: "#f9fff4",overflow:"hidden" }}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 45%,#168d30,#006719 74%,#004b15)"}}/>
+  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+(dx-35)+"px)",opacity:.38,filter:"blur(10px)"}}><Word size={620} color="#fff" tracking={-.16}>OUT</Word></div>
+  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+dx+"px)"}}><Word size={620} color="#fff" tracking={-.16} style={{textShadow:"0 0 22px rgba(255,255,255,.15)"}}>OUT</Word></div>
+  <div style={{position:"absolute",left:"-2%",right:"-2%",top:222,textAlign:"center",transform:"translateX("+(dx+24)+"px)",opacity:.18,filter:"blur(5px)"}}><Word size={620} color="#fff" tracking={-.16}>OUT</Word></div>
+ </AbsoluteFill>;
+};
 
 const EasePoster = () => {
- const f=useCurrentFrame(),shift=e(f,0,13,30,0);
- return <AbsoluteFill style={{...full,background:"#f6f5ef",color:"#111813",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"-4%",right:"-4%",top:270,transform:"translateX("+shift+"px)",textAlign:"center",fontFamily:displayFont,fontSize:330,fontWeight:950,letterSpacing:"-.14em",color:"#9beb48",textShadow:"2px 2px 0 #77bf36,5px 5px 0 #5c9b2f,9px 9px 0 #3f712a,15px 18px 22px rgba(35,65,23,.25)"}}>EASE</div>
-  <div style={{position:"absolute",left:80,bottom:75,fontSize:17,fontWeight:900,letterSpacing:".18em",color:"#777e75"}}>MAKE IT FEEL RIGHT</div>
-  <svg viewBox="0 0 700 300" width="620" height="265" style={{position:"absolute",right:70,bottom:100}}><path d="M15 270C105 270 120 35 680 20" stroke="#9beb48" strokeWidth="13" fill="none" strokeLinecap="round"/><path d="M15 270C105 270 120 35 680 20" stroke="#1d2c18" strokeWidth="3" fill="none" strokeDasharray="10 18"/></svg>
+ const f=useCurrentFrame(),shift=e(f,0,10,48,0);
+ return <AbsoluteFill style={{...full,background:"#f5f5ef",color:"#111813",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#fff 0%,#f4f6ee 100%)"}}/>
+  <div style={{position:"absolute",left:"-6%",right:"-6%",top:238,transform:"translateX("+shift+"px)",textAlign:"center",fontFamily:displayFont,fontSize:575,fontWeight:1000,letterSpacing:"-.15em",color:"#07832b",textShadow:"3px 2px 0 #0b6f2a,7px 6px 0 #075c24,13px 13px 24px rgba(0,60,15,.22)"}}>EASE</div>
+  <div style={{position:"absolute",left:72,top:42,fontSize:14,fontWeight:900,letterSpacing:".2em",color:"#8c978d"}}>EASE / NATURAL MOTION</div>
  </AbsoluteFill>;
 };
 
@@ -624,33 +628,34 @@ const ClockComic=()=>{
  </AbsoluteFill>;
 };
 const LightSweep1973=()=>{
- const f=useCurrentFrame();
- const palette=["#f9e6c8","#e9d55b","#e84e36","#4299ab","#3277ad","#e3b03c","#242a32","#a0cdd2"];
- return <AbsoluteFill style={{...full,background:"#030407",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 30% 52%,#151b21,#020305 62%)"}}/>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" shapeRendering="crispEdges" style={{position:"absolute",inset:0}}>
-   {Array.from({length:45*25},(_,i)=>{
-    const x=i%45,y=Math.floor(i/45),px=x*42,py=y*43;
-    const cx=15,cy=12.5,dist=Math.hypot(x-cx,y-cy);
-    let color=null,op=.95;
-    if(dist<5.2&&dist>4.1)color="#d2a93c";
-    else if(dist<4.1&&dist>3.3)color="#151b21";
-    else if(dist<3.3&&dist>2.2)color="#3e705b";
-    else if(dist<2.2&&dist>1.2)color="#e0dfc9";
-    else if(dist<=1.2)color="#0b1319";
-    if(x>20&&y>=11&&y<=14){
-     const bands=["#f1d13d","#ee573c","#db3389","#8944cb","#3b75e9","#34c6c4"];
-     color=bands[Math.min(5,Math.floor((y-11)*1.5))];op=.92;
-    }
-    if(x>20&&y===10&&x%4===0)color="#fff";
-    if(!color)return null;
-    return <rect key={i} x={px} y={py} width="42" height="43" fill={color} opacity={op}/>;
-   })}
-   <path d="M0 540H790" stroke="#fff" strokeWidth="3" opacity=".15"/>
-   <path d="M790 470L820 485L820 595L790 610Z" fill="#f1d13d"/>
+ const f=useCurrentFrame(),beam=e(f,0,14,-260,260);
+ return <AbsoluteFill style={{...full,background:"#030508",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 43% 48%,#18212a 0%,#080c12 42%,#020305 78%)"}}/>
+  <div style={{position:"absolute",left:"-2%",bottom:30,fontFamily:"Georgia,serif",fontSize:190,fontWeight:500,color:"#89929a",opacity:.19,letterSpacing:"-.08em"}}>1973</div>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs>
+    <radialGradient id="source1973-orb" cx="34%" cy="26%" r="78%"><stop stopColor="#f2fff0"/><stop offset=".28" stopColor="#9cc8c1"/><stop offset=".55" stopColor="#254f58"/><stop offset="1" stopColor="#06121a"/></radialGradient>
+    <linearGradient id="source1973-beam" x1="0" x2="1"><stop stopColor="#fff" stopOpacity="0"/><stop offset=".36" stopColor="#eafffb" stopOpacity=".96"/><stop offset=".55" stopColor="#ecfbff" stopOpacity=".9"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></linearGradient>
+    <pattern id="source1973-dots" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="5" fill="#f05c44"/></pattern>
+    <filter id="source1973-glow"><feGaussianBlur stdDeviation="24"/></filter>
+   </defs>
+   <path d="M1120 -100L1535 1180" stroke="#fff" strokeWidth="170" opacity=".22" filter="url(#source1973-glow)"/>
+   <path d="M1075 -100L1490 1180" stroke="url(#source1973-beam)" strokeWidth="86" opacity=".9"/>
+   <path d="M1010 -100L1425 1180" stroke="#f6ffff" strokeWidth="7" opacity=".9"/>
+   <path d="M1120 -100L1535 1180" stroke="#8bc8ff" strokeWidth="3" opacity=".65"/>
+   <circle cx="925" cy="545" r="185" fill="#071018" stroke="#d6ede6" strokeWidth="7"/>
+   <circle cx="925" cy="545" r="165" fill="url(#source1973-orb)" stroke="#b2d9cd" strokeWidth="5"/>
+   <circle cx="925" cy="545" r="139" fill="none" stroke="#fff" strokeWidth="2" opacity=".58"/>
+   <circle cx="925" cy="545" r="111" fill="none" stroke="#94e1d0" strokeWidth="3" opacity=".55"/>
+   <path d="M874 435L1050 545L895 570L868 682Z" fill="#f5f3d9" stroke="#f9ffff" strokeWidth="6" opacity=".95"/>
+   <path d="M885 452L1015 543L901 557Z" fill="#17312c"/>
+   <path d="M0 820L550 650L785 740" stroke="#9fa9ad" strokeWidth="2" opacity=".24" fill="none"/>
+   <rect x="1570" y="0" width="350" height="1080" fill="url(#source1973-dots)" opacity=".94"/>
+   <path d="M1540 0H1572V1080H1540Z" fill="#fff" opacity=".78"/>
+   {Array.from({length:21},(_,i)=><path key={i} d={"M"+(1595+i*17)+" 0L"+(1595+i*17)+" 1080"} stroke="#ffb08e" strokeWidth="1" opacity=".18"/>)}
   </svg>
-  <div style={{position:"absolute",left:55,top:38,fontSize:15,fontWeight:900,letterSpacing:".16em",color:"#6b7883"}}>PIXEL LIGHT / 08-BIT COLOUR</div>
-  <div style={{position:"absolute",right:60,bottom:45,fontSize:13,fontWeight:850,letterSpacing:".18em",color:"#67737a"}}>SIGNAL → SPECTRUM</div>
+  <div style={{position:"absolute",left:56,top:42,fontSize:18,color:"#9eabb5",fontWeight:850,letterSpacing:".2em"}}>OPTICAL STUDY / 1973</div>
+  <div style={{position:"absolute",right:56,bottom:42,fontSize:15,color:"#f2b09c",fontWeight:850,letterSpacing:".19em"}}>LIGHT / COLOUR / MOTION</div>
  </AbsoluteFill>;
 };
 
@@ -723,57 +728,64 @@ const EditorialPosterGrid=()=>{
 };
 
 const DepthField=()=>{
- const f=useCurrentFrame();
- return <AbsoluteFill style={{...full,background:"#090a0c",overflow:"hidden"}}>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <defs><radialGradient id="particle-vortex-core"><stop offset="0" stopColor="#050607"/><stop offset=".54" stopColor="#050607"/><stop offset="1" stopColor="#192021" stopOpacity="0"/></radialGradient><filter id="particle-glow-v13"><feGaussianBlur stdDeviation="2.1"/></filter></defs>
-   {Array.from({length:1150},(_,i)=>{
-    const u=i/1150,a=i*2.39996323+f*.008,phi=Math.acos(1-2*u),radius=175+58*Math.sin(phi*3.4)+14*Math.sin(i*.37+f*.045);
-    const x=960+Math.cos(a)*radius*Math.sin(phi)*1.18;
-    const y=540+Math.sin(a)*radius*Math.sin(phi)*.9;
-    const z=Math.cos(phi),len=4+(i%5)*2.8;
-    const dx=Math.cos(a+phi*.4)*len,dy=Math.sin(a+phi*.4)*len;
-    const bright=i%11===0||i%17===0;
-    return <line key={i} x1={x} y1={y} x2={x+dx} y2={y+dy} stroke={bright?"#a2e86b":"#e2e7e3"} strokeWidth={bright?3.2:1.8} opacity={.24+(1-u)*.5} />;
-   })}
-   {Array.from({length:120},(_,i)=>{
-    const a=i*2.39996+f*.012,r=120+(i%13)*7;
-    return <circle key={"p"+i} cx={960+Math.cos(a)*r*1.4} cy={540+Math.sin(a)*r*.85} r={i%9===0?3.5:1.9} fill={i%7===0?"#9bed5d":"#fff"} opacity=".55"/>;
-   })}
-   <ellipse cx="960" cy="540" rx="305" ry="225" fill="none" stroke="#a8b7b0" strokeOpacity=".12" strokeWidth="2" strokeDasharray="2 12"/>
-   <ellipse cx="960" cy="540" rx="185" ry="135" fill="url(#particle-vortex-core)"/>
-  </svg>
-  <div style={{position:"absolute",inset:0,border:"1px solid rgba(235,240,238,.45)",margin:25}}/>
-  <div style={{position:"absolute",left:60,top:45,fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#d7dedc"}}>OPEN DESIGN / MOTION REEL</div>
-  <div style={{position:"absolute",right:60,top:45,fontSize:16,fontWeight:900,letterSpacing:".18em",color:"#d7dedc"}}>05 — DEPTH</div>
-  <div style={{position:"absolute",left:60,bottom:45,fontSize:13,fontWeight:850,letterSpacing:".17em",color:"#89928f"}}>128 BPM / BAR 7 OF 8</div>
+ const f=useCurrentFrame(),rot=f*1.8;
+ return <AbsoluteFill style={{...full,background:"#e9e8e2",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:0,top:0,bottom:0,width:54,background:"#c7c8c4",borderRight:"1px solid #aeb2b0"}}/>
+  <div style={{position:"absolute",left:54,right:58,top:52,bottom:55,borderRadius:24,background:"#f8f8f4",border:"1px solid #bfc3c0",boxShadow:"0 24px 60px rgba(17,23,26,.16)",overflow:"hidden"}}>
+   <div style={{position:"absolute",left:0,right:0,top:0,height:52,background:"#eceeea",borderBottom:"1px solid #cdd0cc",display:"flex",alignItems:"center",paddingLeft:26,gap:11}}>
+    {["#d7aaa4","#d9c17e","#a9c8a9"].map((c,i)=><div key={i} style={{width:12,height:12,borderRadius:"50%",background:c}}/>)}<div style={{marginLeft:16,fontSize:15,fontWeight:800,color:"#6b7373",letterSpacing:".08em"}}>FIELD / PARTICLE MOTION</div>
+   </div>
+   <div style={{position:"absolute",left:30,right:30,top:80,bottom:28,borderRadius:15,background:"#07090d",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 51%,#1a1f25,#080a0e 56%,#030407)"}}/>
+    <svg viewBox="0 0 1680 820" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+     <defs><radialGradient id="particle-core-v18"><stop stopColor="#e8f5ec" stopOpacity=".9"/><stop offset=".18" stopColor="#8daea0" stopOpacity=".38"/><stop offset="1" stopColor="#030508" stopOpacity="0"/></radialGradient><filter id="particle-blur-v18"><feGaussianBlur stdDeviation="6"/></filter></defs>
+     <g transform={"translate(840 410) rotate("+rot+")"}>
+      {Array.from({length:520},(_,i)=>{
+       const a=i*2.399963,rad=32+Math.sqrt(i)*14+(i%9)*3;
+       const x=Math.cos(a)*rad*1.2,y=Math.sin(a)*rad*.74;
+       const size=1.4+(i%7)*.42,opacity=.18+(i%8)*.075;
+       return <circle key={i} cx={x} cy={y} r={size} fill={i%11===0?"#d7eee1":"#bac5c2"} opacity={opacity}/>;
+      })}
+      <ellipse cx="0" cy="0" rx="360" ry="185" fill="none" stroke="#a7b9b3" strokeWidth="2" opacity=".14"/>
+      <ellipse cx="0" cy="0" rx="295" ry="150" fill="none" stroke="#d9eee2" strokeWidth="1.5" opacity=".2" transform="rotate(-28)"/>
+     </g>
+     <ellipse cx="840" cy="410" rx="270" ry="220" fill="url(#particle-core-v18)" filter="url(#particle-blur-v18)" opacity=".5"/>
+     <path d="M215 410H1465M840 105V715" stroke="#dce7e0" strokeWidth="1" opacity=".1"/>
+    </svg>
+    <div style={{position:"absolute",left:28,top:24,color:"#d0d7d5",fontSize:13,fontWeight:800,letterSpacing:".2em"}}>VORTEX / 001</div>
+    <div style={{position:"absolute",right:28,bottom:24,color:"#a3b1ad",fontSize:12,fontWeight:800,letterSpacing:".17em"}}>PARTICLE FIELD — LIVE</div>
+   </div>
+  </div>
+  <div style={{position:"absolute",right:14,top:90,bottom:90,width:26,background:"#c7c9c5",borderRadius:14,boxShadow:"inset 0 1px 4px rgba(0,0,0,.18)"}}/>
  </AbsoluteFill>;
 };
 
 const EaseGreen=()=>{
- const f=useCurrentFrame(),shift=e(f,0,7,70,0);
- return <AbsoluteFill style={{...full,background:"#a6f75c",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"-4%",right:"-4%",top:278,textAlign:"center",transform:"translateX("+shift+"px)"}}>
-   <Word size={430} color="#111713" tracking={-.14} style={{textShadow:"0 5px 0 rgba(26,61,27,.25)"}}>EASE</Word>
-  </div>
-  <div style={{position:"absolute",left:30,top:28,fontSize:14,fontWeight:900,letterSpacing:".19em",color:"#273e20"}}>OPEN DESIGN / MOTION REEL — 2026</div>
-  <div style={{position:"absolute",right:30,top:28,fontSize:14,fontWeight:900,letterSpacing:".19em",color:"#273e20"}}>06 — EASE / 128 BPM</div>
-  <div style={{position:"absolute",left:28,right:28,bottom:28,height:2,background:"#1d371c",opacity:.6}}/>
+ const f=useCurrentFrame(),shift=e(f,0,7,95,0),ghost=1-e(f,1,8);
+ return <AbsoluteFill style={{...full,background:"#8ff04e",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(115deg,#9af55f,#82e846 60%,#a7f77b)"}}/>
+  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+(shift-34)+"px)",opacity:.24*ghost,filter:"blur(8px)"}}><Word size={600} color="#101512" tracking={-.15}>EASE</Word></div>
+  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px)",filter:"blur(.25px)"}}><Word size={600} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
+  <div style={{position:"absolute",left:36,top:30,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#2e5427"}}>EASING / MOTION STUDY</div>
  </AbsoluteFill>;
 };
 
 const GreenCircleTransition=()=>{
- const f=useCurrentFrame(),r=e(f,0,10,0,610),fade=1-e(f,8,10);
- return <AbsoluteFill style={{...full,background:"#78eb48"}}>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%"><circle cx="960" cy="540" r={r} fill="none" stroke="#b6ff93" strokeWidth="4" opacity={fade}/><circle cx="960" cy="540" r={r*.76} fill="none" stroke="#b6ff93" strokeWidth="2" opacity={fade}/><circle cx={1050+f*8} cy="740" r="7" fill="#121812"/></svg>
-  <div style={{position:"absolute",left:26,top:26,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#17371a"}}>07 — END</div>
+ const f=useCurrentFrame(),r=e(f,0,5,0,440),fade=1-e(f,4,5);
+ return <AbsoluteFill style={{...full,background:"#8df04e",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%">
+   <circle cx="960" cy="540" r={r} fill="none" stroke="#f3ffe9" strokeWidth="4" opacity={fade}/>
+   <circle cx="960" cy="540" r={r*.86} fill="none" stroke="#f3ffe9" strokeWidth="2" opacity={fade*.78}/>
+   <circle cx="960" cy="540" r={r*.72} fill="none" stroke="#d5ffc0" strokeWidth="2" opacity={fade*.64}/>
+   <g transform={"translate(960 540) rotate("+(-12+f*7)+") scale("+(.65+.1*f)+")"}><rect x="-28" y="-28" width="56" height="56" rx="9" fill="#111715"/><path d="M-9 -16L17 0L-9 16Z" fill="#f4f7eb"/></g>
+  </svg>
  </AbsoluteFill>;
 };
 
 const NotText=({fullText=false}:{fullText?:boolean})=>{
  const f=useCurrentFrame();
- return <AbsoluteFill style={{...full,background:"#090a0b",color:"#f5f5f0"}}>
-  <div style={{position:"absolute",left:0,right:0,top:430,textAlign:"center",transform:"scale("+(0.96+e(f,0,9)*.04)+")"}}><Word size={fullText?130:126} color="#f4f4f0" tracking={-.065}>{fullText?"Not just":"Not"}</Word></div>
+ return <AbsoluteFill style={{...full,background:"#090a0b",color:"#333537"}}>
+  <div style={{position:"absolute",left:0,right:0,top:424,textAlign:"center",transform:"scale("+(0.97+e(f,0,9)*.03)+")",opacity:.76}}><Word size={fullText?130:132} color="#343638" tracking={-.07}>{fullText?"Not just":"Not"}</Word></div>
  </AbsoluteFill>;
 };
 
@@ -807,39 +819,38 @@ const CoursesPoster=()=>{
 };
 
 const InMetallic=()=>{
- const f=useCurrentFrame(),rise=e(f,0,5,28,0);
+ const f=useCurrentFrame(),rise=e(f,0,5,45,0),trail=1-e(f,0,8);
+ const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:570,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.8,whiteSpace:"nowrap" as const};
  return <AbsoluteFill style={{...full,background:"#08090b",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 55%,#26292d,#08090b 67%)"}}/>
-  <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:390,fontWeight:1000,letterSpacing:"-.13em",lineHeight:.8,background:"linear-gradient(180deg,#fff 0%,#cfd3d6 22%,#686f76 46%,#f7f8f8 55%,#858b90 78%,#fff 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #999fa3) drop-shadow(0 9px 0 #555c62) drop-shadow(0 18px 24px rgba(0,0,0,.7)"}}>IN</div>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 52%,#22282e,#08090b 70%)"}}/>
+  <div style={{...type,color:"#8b939a",transform:"translate(-50%,-50%) translate(-95px,14px)",opacity:.3*trail,filter:"blur(13px)"}}>IN</div>
+  <div style={{...type,color:"#737b83",transform:"translate(-50%,-50%) translate(-43px,8px)",opacity:.4*trail,filter:"blur(5px)"}}>IN</div>
+  <div style={{...type,background:"linear-gradient(180deg,#fff 0%,#cfd5d9 18%,#5d666f 38%,#f5f7f8 49%,#8e979f 72%,#f8f8f6 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #abb3ba) drop-shadow(0 10px 0 #545c64) drop-shadow(0 22px 25px rgba(0,0,0,.82)"}}>IN</div>
+  <div style={{position:"absolute",left:80,bottom:54,fontSize:14,color:"#747c84",letterSpacing:".2em",fontWeight:850}}>IN / METALLIC TYPE</div>
  </AbsoluteFill>;
 };
+
 const InPoster=()=>{
- const f=useCurrentFrame(),dot=.92+.08*Math.sin(f/2);
+ const f=useCurrentFrame(),dot=.9+.1*Math.sin(f/2);
  return <AbsoluteFill style={{...full,background:"#07080b",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:0,right:0,top:360,textAlign:"center",fontFamily:displayFont,fontSize:315,fontWeight:1000,letterSpacing:"-.11em",color:"#f5f5f1"}}>IN.</div>
-  <div style={{position:"absolute",left:"58%",top:560,width:27,height:27,borderRadius:"50%",background:"#9ceb51",boxShadow:"0 0 22px rgba(156,235,81,.38)",transform:"scale("+dot+")"}}/>
+  <div style={{position:"absolute",left:"-3%",right:"-3%",top:245,textAlign:"center",fontFamily:displayFont,fontSize:510,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.9,color:"#f6f6f1",textShadow:"0 4px 0 rgba(255,255,255,.12)"}}>IN.</div>
+  <div style={{position:"absolute",left:"58.1%",top:535,width:47,height:47,borderRadius:"50%",background:"#9ceb51",boxShadow:"0 0 34px rgba(156,235,81,.5)",transform:"scale("+dot+")"}}/>
  </AbsoluteFill>;
 };
 
 const MindPoster = () => {
- const f=useCurrentFrame(),rot=f*1.1;
- return <AbsoluteFill style={{...full,background:"#1b2be4",color:"#fff",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 48%,#4057ff 0%,#1b2be4 56%,#101b9c 100%)"}}/>
-  <div style={{position:"absolute",left:-28,right:-20,top:85,display:"flex",flexDirection:"column",gap:6,transform:"translateX("+Math.sin(f/6)*12+"px)"}}>
-   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
-   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
-   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
+ const f=useCurrentFrame(),shift=Math.sin(f/5)*10;
+ return <AbsoluteFill style={{...full,background:"#192be4",color:"#060816",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(125deg,#263cf2,#1723cb 60%,#101b9a)"}}/>
+  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(255,255,255,.17) 1.5px,transparent 2px)",backgroundSize:"22px 22px",opacity:.35}}/>
+  <div style={{position:"absolute",left:-28,right:-22,top:80,transform:"translateX("+shift+"px)"}}>
+   <Word size={230} color="#080b18" tracking={-.11}>MIND MIND</Word>
+   <Word size={230} color="#111a6a" tracking={-.11} style={{WebkitTextStroke:"2px rgba(240,242,255,.72)"}}>MIND MIND</Word>
+   <Word size={230} color="#090d20" tracking={-.11}>MIND MIND</Word>
+   <Word size={230} color="#0e174f" tracking={-.11} style={{WebkitTextStroke:"2px rgba(240,242,255,.42)"}}>MIND MIND</Word>
   </div>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <defs><linearGradient id="mind-prism-ci" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f7fbff" stopOpacity=".83"/><stop offset=".38" stopColor="#92caff" stopOpacity=".6"/><stop offset=".72" stopColor="#efb5ff" stopOpacity=".48"/><stop offset="1" stopColor="#fff" stopOpacity=".22"/></linearGradient></defs>
-   <g transform={"translate(960 550) rotate("+rot+")"}>
-    <path d="M0 -315L265 -110L190 240L-90 305L-275 52Z" fill="url(#mind-prism-ci)" stroke="#e4efff" strokeWidth="6"/>
-    <path d="M0 -315L-90 305L-275 52Z" fill="#c6e7ff" opacity=".38"/><path d="M0 -315L265 -110L190 240Z" fill="#fff" opacity=".2"/>
-    <path d="M-275 52L265 -110M-90 305L265 -110" stroke="#fff" strokeWidth="3" opacity=".48"/>
-   </g>
-   <rect x="76" y="74" width="1768" height="932" fill="none" stroke="#b9c9ff" strokeOpacity=".3" strokeWidth="2"/>
-  </svg>
-  <div style={{position:"absolute",left:95,bottom:64,fontSize:18,fontWeight:900,letterSpacing:".18em",color:"#e7edff"}}>MIND / MATERIAL STUDY</div>
+  <div style={{position:"absolute",left:76,top:35,fontSize:15,fontWeight:900,letterSpacing:".19em",color:"#d8dcff"}}>MIND / TYPOGRAPHIC SYSTEM</div>
+  <div style={{position:"absolute",right:80,bottom:48,fontSize:15,fontWeight:900,letterSpacing:".17em",color:"#d8dcff"}}>IDEAS IN MOTION / 04</div>
  </AbsoluteFill>;
 };
 
@@ -863,91 +874,118 @@ const RingPoster = () => {
  </AbsoluteFill>;
 };
 
-const NeverPoster = () => (
- <AbsoluteFill style={{...full,background:"#d8f6ad",color:"#101713",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(120deg,#e5f8c4,#c9ed91)"}}/>
-  <Word size={355} color="#111713" tracking={-.13} style={{position:"absolute",left:"-3%",right:"-3%",top:330,textAlign:"center"}}>NEVER</Word>
-  <div style={{position:"absolute",left:28,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>OPEN DESIGN / MOTION REEL</div>
-  <div style={{position:"absolute",right:28,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>06 — TYPE</div>
-  <div style={{position:"absolute",left:28,right:28,bottom:24,height:2,background:"#274b26",opacity:.45}}/>
- </AbsoluteFill>
-);
+const NeverPoster = () => {
+ const f=useCurrentFrame(),shift=e(f,0,9,26,0);
+ return <AbsoluteFill style={{...full,background:"#c8f7a6",color:"#101713",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(110deg,#d5f9b9,#c3f59b 62%,#ddfbc5)"}}/>
+  <div style={{position:"absolute",left:"-2%",right:"-2%",top:305,textAlign:"center",display:"flex",justifyContent:"center",alignItems:"baseline",gap:2,transform:"translateX("+shift+"px)"}}>
+   {"NEVER".split("").map((ch,i)=><span key={i} style={{fontFamily:displayFont,fontSize:510-(i===2?30:0),fontWeight:1000,letterSpacing:"-.13em",color:"#111713",transform:"translateY("+(i===0?26:i===1?0:i===2?-80:i===3?-104:-20)+"px) skewX("+(i===2?-9:0)+"deg)",textShadow:"0 5px 0 rgba(15,35,16,.2)"}}>{ch}</span>)}
+  </div>
+  <div style={{position:"absolute",left:28,top:27,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#446138"}}>NEVER / TYPE IN MOTION</div>
+ </AbsoluteFill>;
+};
 
 const LinearPoster = () => {
- const f=useCurrentFrame(),pos=e(f,0,14);
- return <AbsoluteFill style={{...full,background:"#111315",color:"#fff"}}>
-  <Word size={275} color="#f6f6f0" tracking={-.12} style={{position:"absolute",left:"-4%",right:"-4%",top:335,textAlign:"center"}}>LINEAR</Word>
+ const f=useCurrentFrame(),pos=e(f,0,14),trail=1-e(f,0,9);
+ return <AbsoluteFill style={{...full,background:"#090b0e",color:"#fff",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:"-5%",right:"-5%",top:310,textAlign:"center",transform:"translateX("+(-88*trail)+"px)",opacity:.32*trail,filter:"blur(12px)"}}><Word size={445} color="#dfe3e7" tracking={-.16}>LINEAR</Word></div>
+  <div style={{position:"absolute",left:"-5%",right:"-5%",top:310,textAlign:"center",transform:"translateX("+(-25*trail)+"px)"}}><Word size={445} color="#f1f2f0" tracking={-.16} style={{textShadow:"0 5px 0 #aeb4b8,0 13px 0 #646c73"}}>LINEAR</Word></div>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d={"M160 850C"+(300+pos*30)+" 850 "+(410+pos*40)+" 205 1760 180"} stroke="#b9ed4a" strokeWidth="8" fill="none" strokeLinecap="round"/>
-   <path d="M160 870H1760" stroke="#fff" strokeWidth="2" opacity=".25"/>
-   {[0,1,2,3,4].map(i=><circle key={i} cx={160+i*400} cy={850-i*150} r="9" fill="#b9ed4a"/>)}
+   <path d={"M80 850C"+(260+pos*35)+" 850 "+(440+pos*50)+" 205 1810 180"} stroke="#e8edf0" strokeWidth="3" fill="none" opacity=".28"/>
+   <path d="M80 870H1840" stroke="#fff" strokeWidth="2" opacity=".13"/>
   </svg>
-  <div style={{position:"absolute",left:80,bottom:65,fontSize:18,fontWeight:900,letterSpacing:".18em",color:"#b9ed4a"}}>LINEAR / NOT THE SAME AS NATURAL</div>
  </AbsoluteFill>;
 };
 
 const ClockPoster = () => {
- const f=useCurrentFrame(),angle=f*12;
- return <AbsoluteFill style={{...full,background:"#162d82",overflow:"hidden",color:"#f3d47c"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 50%,#29479e,#101b59 72%)"}}/>
+ const f=useCurrentFrame(),angle=f*7;
+ return <AbsoluteFill style={{...full,background:"#172c77",overflow:"hidden",color:"#f3d47c"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <circle cx="960" cy="535" r="350" fill="#dcb746" stroke="#f3d47c" strokeWidth="22"/>
-   <circle cx="960" cy="535" r="305" fill="#17317e" stroke="#b98636" strokeWidth="18"/>
-   <circle cx="960" cy="535" r="242" fill="none" stroke="#f5d77a" strokeWidth="6" strokeDasharray="5 18"/>
-   <circle cx="960" cy="535" r="178" fill="#18316f" stroke="#f1c55c" strokeWidth="8"/>
-   <g transform={"translate(960 535) rotate("+angle+")"}><path d="M-17 -145L20 -145L12 6L-11 6Z" fill="#f7d66a"/><path d="M0 2L130 72L14 22Z" fill="#f7d66a"/></g>
-   <circle cx="960" cy="535" r="25" fill="#e9c34c" stroke="#fff0a0" strokeWidth="7"/>
-   {Array.from({length:60},(_,i)=>{const a=i*Math.PI*2/60;return <line key={i} x1={960+Math.cos(a)*315} y1={535+Math.sin(a)*315} x2={960+Math.cos(a)*330} y2={535+Math.sin(a)*330} stroke="#f8dfa0" strokeWidth={i%5===0?8:3}/>;})}
+   <defs>
+    <radialGradient id="clock-sea-v18"><stop stopColor="#25468a"/><stop offset=".65" stopColor="#123071"/><stop offset="1" stopColor="#061847"/></radialGradient>
+    <linearGradient id="clock-gold-v18" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff1aa"/><stop offset=".24" stopColor="#d8a53b"/><stop offset=".5" stopColor="#f8d77a"/><stop offset=".78" stopColor="#9b6725"/><stop offset="1" stopColor="#f5d27b"/></linearGradient>
+    <filter id="clock-rough-v18"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="3" seed="9"/><feColorMatrix type="saturate" values="0"/><feBlend in="SourceGraphic" mode="multiply"/></filter>
+   </defs>
+   <rect width="1920" height="1080" fill="url(#clock-sea-v18)"/>
+   {Array.from({length:42},(_,i)=><path key={i} d={"M"+(-60+(i%7)*300)+" "+(i*29%1080)+"q 95 -85 180 8t 180 5"} fill="none" stroke={i%3===0?"#4b75a9":"#6c8fba"} strokeWidth={i%4===0?18:9} opacity=".24"/>)}
+   <g transform={"translate(960 538) rotate("+angle+")"}>
+    {Array.from({length:24},(_,i)=><path key={i} d="M0 -355L-32 -294L0 -278L32 -294Z" fill="url(#clock-gold-v18)" stroke="#805b2b" strokeWidth="3" transform={"rotate("+(i*15)+")"}/>)}
+    <circle r="329" fill="url(#clock-gold-v18)" stroke="#fbe7a0" strokeWidth="14"/>
+    <circle r="298" fill="#173b83" stroke="#8b622c" strokeWidth="17"/>
+    <circle r="269" fill="none" stroke="#edca68" strokeWidth="5"/>
+    <circle r="240" fill="#123477" stroke="#d6a94d" strokeWidth="10"/>
+    <circle r="218" fill="none" stroke="#f9df8e" strokeWidth="4" strokeDasharray="5 13"/>
+    <circle r="182" fill="#173578" stroke="#e8be5e" strokeWidth="8"/>
+    {Array.from({length:60},(_,i)=><g key={i} transform={"rotate("+(i*6)+")"}><line x1="0" y1="-300" x2="0" y2={i%5===0?-265:-281} stroke="#f9e7a6" strokeWidth={i%5===0?9:3}/></g>)}
+    <path d="M-19 -178L19 -178L10 14L-10 14Z" fill="url(#clock-gold-v18)" stroke="#694b24" strokeWidth="4"/>
+    <path d="M0 4L152 88L9 27Z" fill="#efcc70" stroke="#805d30" strokeWidth="4"/>
+    <circle r="28" fill="#e8bd5b" stroke="#fff1b6" strokeWidth="8"/>
+   </g>
+   <circle cx="960" cy="538" r="390" fill="none" stroke="#e8bd64" strokeWidth="3" opacity=".5"/>
+   <path d="M0 1005Q250 920 510 1005T1020 995T1540 1008T1920 990" stroke="#a7c3df" strokeWidth="5" fill="none" opacity=".24"/>
   </svg>
-  <div style={{position:"absolute",left:0,right:0,top:45,textAlign:"center",fontFamily:displayFont,fontSize:39,fontWeight:950,letterSpacing:".17em"}}>1889 / MOTION OF TIME</div>
+  <div style={{position:"absolute",left:0,right:0,top:32,textAlign:"center",fontFamily:"Georgia,serif",fontSize:37,fontWeight:700,letterSpacing:".2em",color:"#f1d78d",textShadow:"0 3px 8px rgba(0,0,0,.5)"}}>1889</div>
  </AbsoluteFill>;
 };
 
 const StatsPoster = () => {
- const f=useCurrentFrame(),progress=e(f,0,7),count=Math.round(84+12*progress),day=Math.round(111+27*progress),y=485-340*progress;
- return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c6e8e3,#c0e8d9 43%,#edcbb8 66%,#7bcac6)",overflow:"hidden"}}>
+ const f=useCurrentFrame(),progress=e(f,0,7),count=Math.round(80+16*progress),day=Math.round(88+50*progress),y=486-346*progress;
+ return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c7e9e4 0%,#bde6dc 48%,#f0d6c5 70%,#66c2bd 100%)",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 690Q220 620 420 690T840 685T1250 700T1660 680T1920 690V1080H0Z" fill="#65c5bb" opacity=".72"/>
-   <path d="M0 850Q200 780 390 850T820 835T1260 865T1650 830T1920 855V1080H0Z" fill="#f0c6a9" opacity=".6"/>
+   <path d="M0 680Q220 605 430 680T850 685T1250 672T1660 684T1920 670V1080H0Z" fill="#71c5bf" opacity=".74"/>
+   <path d="M0 835Q190 760 390 835T820 828T1260 848T1650 822T1920 840V1080H0Z" fill="#f0cbb2" opacity=".62"/>
+   <path d="M0 950Q230 885 460 950T930 942T1400 950T1920 930V1080H0Z" fill="#4fb6b1" opacity=".38"/>
   </svg>
-  <div style={{position:"absolute",left:70,top:245,fontFamily:displayFont,fontSize:250,fontWeight:1000,color:"#111315",letterSpacing:"-.12em"}}>{count}K</div>
-  <div style={{position:"absolute",left:245,top:500,fontSize:52,fontWeight:850,color:"#343b38"}}>Day {day}</div>
-  <div style={{position:"absolute",left:665,top:80,width:1180,height:900,borderRadius:28,background:"#fff",padding:"62px 66px 48px",boxSizing:"border-box",boxShadow:"0 18px 55px rgba(37,85,92,.13)"}}>
-   <div style={{textAlign:"center",fontSize:36,fontWeight:900,color:"#202326",marginBottom:42}}>◉ Star History</div>
-   <div style={{position:"absolute",left:105,top:165,fontSize:20,fontWeight:800,color:"#45494b"}}>nexu-io/open-design</div>
-   <svg viewBox="0 0 1040 560" width="100%" height="560">
-    {[0,1,2,3,4].map(v=><g key={v}><line x1="82" x2="1010" y1={80+v*105} y2={80+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="12" y={87+v*105} fontSize="22" fill="#4a4e50">{100-v*20}K</text></g>)}
-    <path d={"M82 500C120 465 135 330 210 280S315 225 375 203S530 150 610 125S760 95 855 "+y+"L930 "+(y-25)} stroke="#c94d3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
-    <circle cx="930" cy={y-25} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
-    <text x="82" y="535" fontSize="20" fill="#303638">May</text><text x="270" y="535" fontSize="20" fill="#303638">June</text><text x="455" y="535" fontSize="20" fill="#303638">July</text><text x="645" y="535" fontSize="20" fill="#303638">August</text><text x="835" y="535" fontSize="20" fill="#303638">September</text><text x="960" y="535" fontSize="20" fill="#303638">October</text>
+  <div style={{position:"absolute",left:70,top:245,fontFamily:displayFont,fontSize:270,fontWeight:1000,color:"#111315",letterSpacing:"-.13em",lineHeight:.86}}>{count}K</div>
+  <div style={{position:"absolute",left:85,top:525,fontSize:49,fontWeight:850,color:"#303a39"}}>Day {day}</div>
+  <div style={{position:"absolute",left:770,top:145,width:1010,height:750,borderRadius:13,background:"#fff",padding:"34px 42px 30px",boxSizing:"border-box",boxShadow:"0 14px 44px rgba(37,85,92,.16)"}}>
+   <div style={{fontSize:23,fontWeight:900,color:"#202326",marginBottom:17}}>★ Star History</div>
+   <div style={{fontSize:17,fontWeight:750,color:"#45494b",marginBottom:15}}>nexu-io / open-design</div>
+   <svg viewBox="0 0 920 590" width="100%" height="590">
+    {[0,1,2,3,4].map(v=><g key={v}><line x1="70" x2="880" y1={65+v*105} y2={65+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="8" y={72+v*105} fontSize="20" fill="#4a4e50">{100-v*20}K</text></g>)}
+    <path d={"M70 515C135 488 150 390 215 340S302 300 365 260S500 208 555 170S690 110 775 "+y+"L850 "+(y-24)} stroke="#cb4b3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
+    <circle cx="850" cy={y-24} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
+    <text x="70" y="555" fontSize="18" fill="#303638">May</text><text x="230" y="555" fontSize="18" fill="#303638">June</text><text x="390" y="555" fontSize="18" fill="#303638">July</text><text x="545" y="555" fontSize="18" fill="#303638">August</text><text x="700" y="555" fontSize="18" fill="#303638">September</text>
    </svg>
-   <div style={{position:"absolute",left:75,bottom:23,fontSize:18,color:"#737a79"}}>GitHub stars</div>
+   <div style={{position:"absolute",left:40,bottom:17,fontSize:15,color:"#737a79"}}>GitHub stars</div>
   </div>
  </AbsoluteFill>;
 };
 
 const TogglePoster = () => {
  const f=useCurrentFrame(),on=e(f,0,4);
- return <AbsoluteFill style={{...full,background:"#f5f5f0",color:"#151719"}}>
-  <div style={{position:"absolute",left:360,top:220,width:1200,height:640,borderRadius:30,background:"#fff",boxShadow:"0 25px 75px rgba(0,0,0,.13)",padding:"70px 80px",boxSizing:"border-box"}}>
-   <div style={{fontSize:50,fontWeight:900}}>Motion preferences</div>
-   <div style={{marginTop:58,fontSize:29,color:"#737978"}}>Enable natural motion</div>
-   <div style={{position:"absolute",left:78,right:78,top:258,height:2,background:"#e7e9e7"}}/>
-   <div style={{position:"absolute",left:78,right:78,top:315,fontSize:27,color:"#343a3b"}}>Reduce unnecessary movement</div>
-   <div style={{position:"absolute",right:85,top:306,width:146,height:72,borderRadius:40,background:"#20252a",padding:7,boxSizing:"border-box"}}>
-    <div style={{width:58,height:58,borderRadius:"50%",background:"#fff",transform:"translateX("+(54*on)+"px)",boxShadow:"0 3px 8px rgba(0,0,0,.2)"}}/>
-   </div>
-   <div style={{position:"absolute",left:78,bottom:55,fontSize:19,color:"#8b9290",letterSpacing:".1em"}}>ACCESSIBILITY / SYSTEM</div>
+ return <AbsoluteFill style={{...full,background:"#f1f0eb",color:"#151719",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:172,height:88,transform:"translate(-50%,-50%)",borderRadius:48,background:"#deded9",boxShadow:"inset 0 3px 9px rgba(0,0,0,.13),0 3px 9px rgba(0,0,0,.08)",padding:8,boxSizing:"border-box"}}>
+   <div style={{position:"absolute",left:8,top:8,width:72,height:72,borderRadius:"50%",background:"#fff",transform:"translateX("+(76*on)+"px)",boxShadow:"0 3px 9px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.8)"}}/>
+   <div style={{position:"absolute",right:28,top:36,width:7,height:7,borderRadius:"50%",background:"#969995",opacity:.45}}/>
   </div>
  </AbsoluteFill>;
 };
 
-const EyePoster = () => (
- <AbsoluteFill style={full}>
-  <GlitchPoster/>
-  <div style={{position:"absolute",left:100,bottom:75,fontFamily:displayFont,fontSize:31,fontWeight:950,color:"#eaf3ff"}}>4.7%</div>
- </AbsoluteFill>
-);
+const EyePoster = () => {
+ const f=useCurrentFrame(),blink=1-.06*Math.max(0,Math.sin(f/5)) ;
+ return <AbsoluteFill style={{...full,background:"#030508",overflow:"hidden",color:"#edf3ff"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs>
+    <radialGradient id="iris-v18"><stop stopColor="#050914"/><stop offset=".17" stopColor="#141f79"/><stop offset=".45" stopColor="#2867ed"/><stop offset=".72" stopColor="#6d92ff"/><stop offset="1" stopColor="#101c50"/></radialGradient>
+    <radialGradient id="eye-white-v18"><stop stopColor="#fff"/><stop offset=".85" stopColor="#dae2ee"/><stop offset="1" stopColor="#8b9bb6"/></radialGradient>
+    <clipPath id="eye-clip-v18"><path d="M150 540Q960 55 1770 540Q960 1025 150 540Z"/></clipPath>
+   </defs>
+   <path d="M150 540Q960 55 1770 540Q960 1025 150 540Z" fill="url(#eye-white-v18)" stroke="#d8e2ff" strokeWidth="7"/>
+   <g clipPath="url(#eye-clip-v18)">
+    <rect x="120" y="60" width="1680" height="960" fill="#e9f0fa"/>
+    <circle cx="960" cy="540" r={275*blink} fill="url(#iris-v18)" stroke="#101d55" strokeWidth="12"/>
+    {Array.from({length:120},(_,i)=><path key={i} d={"M960 540L"+(960+Math.cos(i*Math.PI*2/120)*260)+" "+(540+Math.sin(i*Math.PI*2/120)*260)} stroke={i%3===0?"#9fb6ff":"#4b75e9"} strokeWidth={i%4===0?5:2} opacity=".56"/>)}
+    <circle cx="960" cy="540" r="116" fill="#03060d" stroke="#07102a" strokeWidth="14"/>
+    <circle cx="915" cy="476" r="33" fill="#fff" opacity=".86"/><circle cx="1000" cy="600" r="12" fill="#b8d2ff" opacity=".74"/>
+    <path d="M160 540Q960 55 1760 540" stroke="#f8fbff" strokeWidth="8" fill="none"/>
+    <path d="M160 540Q960 1025 1760 540" stroke="#7187b2" strokeWidth="7" fill="none"/>
+   </g>
+   <path d="M150 540Q960 55 1770 540Q960 1025 150 540Z" fill="none" stroke="#a5b9dc" strokeWidth="4"/>
+  </svg>
+  <div style={{position:"absolute",left:0,right:0,bottom:42,textAlign:"center",fontSize:35,fontWeight:850,color:"#dce8ff",letterSpacing:".12em"}}>3.7%</div>
+ </AbsoluteFill>;
+};
 
 const PosterSequence = () => (
  <AbsoluteFill style={full}>
@@ -1053,90 +1091,59 @@ const ModelAgentScene=()=>{
 
 
 const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
- if(variant===0)return <div style={{position:"absolute",inset:0,background:"#eee5cf",overflow:"hidden"}}>
+ if(variant===0)return <div style={{position:"absolute",inset:0,background:"#e9e1ce",overflow:"hidden"}}>
   <svg viewBox="0 0 1000 650" width="100%" height="100%">
-   <defs><filter id="paper-grain"><feTurbulence type="fractalNoise" baseFrequency=".65" numOctaves="3" seed="7"/><feColorMatrix type="saturate" values="0"/></filter><filter id="mountain-soft"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
-   <rect width="1000" height="650" fill="#eee5cf"/><rect width="1000" height="650" filter="url(#paper-grain)" opacity=".12"/>
-   <text x="500" y="88" fontFamily="Georgia" fontSize="74" textAnchor="middle" fill="#1c1a15">100</text><text x="500" y="126" fontFamily="serif" fontSize="25" textAnchor="middle" fill="#28231c">宋 · 水墨</text>
-   <path d="M0 390L100 315 155 344 225 245 290 350 375 270 445 340 510 235 595 330 690 255 765 350 835 267 900 335 1000 285V650H0Z" fill="#c5c0b3" opacity=".8" filter="url(#mountain-soft)"/>
-   <path d="M0 450L95 400 155 424 250 344 330 420 415 360 500 430 580 355 675 430 770 365 855 433 930 374 1000 420V650H0Z" fill="#a9a69e" opacity=".65"/>
-   <path d="M0 510L115 465 190 493 290 430 375 480 480 430 560 485 670 425 755 485 850 440 945 490 1000 470V650H0Z" fill="#8d908c" opacity=".52"/>
-   <g transform={"translate(500 350) rotate("+(Math.sin(frame/30)*1.5)+")"} fill="none" stroke="#181815" strokeWidth="12" strokeLinecap="round">
-    <path d="M-205 110C-240 -40 -150 -160 8 -160C170 -160 240 -33 198 95" strokeWidth="22" opacity=".95"/><path d="M-192 120C-225 -27 -136 -140 6 -144C145 -145 219 -26 185 89" strokeWidth="5" opacity=".85"/><path d="M-176 110C-205 -14 -125 -122 7 -125C130 -126 195 -15 171 77" strokeWidth="5" opacity=".75"/>
-    <path d="M-5 -65L78 6L-5 78Z" fill="#161715" stroke="none" transform="rotate(-22)"/>
+   <defs><filter id="ink-grain-v18"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="4"/><feColorMatrix type="saturate" values="0"/></filter></defs>
+   <rect width="1000" height="650" fill="#eee6d4"/>
+   <path d="M0 375L95 265 160 310 260 175 335 300 435 202 520 318 630 190 710 296 830 182 925 295 1000 245V650H0Z" fill="#aaa99f"/>
+   <path d="M0 445L125 345 212 385 305 285 400 380 500 312 610 398 740 284 850 380 930 325 1000 365V650H0Z" fill="#858c88" opacity=".75"/>
+   <path d="M0 510L130 458 245 482 355 428 465 478 590 410 710 478 835 420 950 470 1000 455V650H0Z" fill="#727b77" opacity=".62"/>
+   <g transform={"translate(520 330) rotate("+(Math.sin(frame/22)*1.2)+")"}>
+    <circle r="195" fill="none" stroke="#111514" strokeWidth="48"/>
+    <circle r="167" fill="#eee6d4" stroke="#fff" strokeWidth="8"/>
+    <circle r="144" fill="none" stroke="#131716" strokeWidth="9"/>
+    <path d="M-50 -116L120 4L-18 28L-44 136Z" fill="#111514"/>
    </g>
-   <path d="M820 140Q880 190 940 145" stroke="#23221c" strokeWidth="8" fill="none"/><path d="M60 235q22 -22 45 0M125 245q18 -18 36 0" stroke="#24211b" fill="none" strokeWidth="4"/>
-   <rect x="780" y="445" width="78" height="94" fill="#c53d32"/><text x="819" y="502" textAnchor="middle" fontFamily="serif" fontSize="43" fill="#f7e8d4">設</text>
+   <path d="M810 150Q860 190 925 140" stroke="#252a27" strokeWidth="9" fill="none"/><path d="M90 218q25 -22 49 0M160 225q19 -18 37 0" stroke="#242722" fill="none" strokeWidth="5"/>
+   <rect x="798" y="458" width="76" height="105" fill="#bd3c35"/><text x="836" y="520" textAnchor="middle" fontFamily="serif" fontSize="48" fill="#f9ead0">設</text>
+   <rect width="1000" height="650" filter="url(#ink-grain-v18)" opacity=".085"/>
   </svg>
  </div>;
- if(variant===1)return <div style={{position:"absolute",inset:0,background:"#1232df",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 45%,#455cf7,#1029c8 68%,#0b1d84)"}}/>
-  <svg viewBox="0 0 1000 650" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 520Q200 480 400 520T800 500T1000 520V650H0Z" fill="#2038b9"/>
-   <path d="M0 580Q250 535 500 588T1000 570V650H0Z" fill="#101e88"/>
-   <path d="M95 180L905 115L905 260L95 325Z" fill="#ffffff" opacity=".12"/>
-   <path d="M110 448L885 387" stroke="#8aa4ff" strokeWidth="3" opacity=".5"/>
-  </svg>
-  <div style={{position:"absolute",left:"-6%",right:"-6%",top:"23%",textAlign:"center",fontFamily:displayFont,fontSize:225,fontWeight:1000,letterSpacing:"-.115em",lineHeight:.95,color:"#edf1ff",textShadow:"1px 1px 0 #bec9ee,4px 5px 0 #899de0,8px 10px 0 #5b74cd,14px 17px 0 #334db1,23px 28px 0 #20378b,33px 45px 32px rgba(0,0,0,.34)"}}>FUTURE</div>
-  <div style={{position:"absolute",left:0,right:0,top:"65%",fontSize:39,fontWeight:900,textAlign:"center",letterSpacing:".06em",color:"#fff",textShadow:"0 4px 18px rgba(0,0,0,.28)"}}>IS ALREADY HERE.</div>
-  <div style={{position:"absolute",left:20,top:15,fontSize:14,color:"#dce5ff",fontWeight:900,letterSpacing:".16em"}}>FUTURE / 03</div>
- </div>;
-
-if(variant===2)return <div style={{position:"absolute",inset:0,background:"#1468e7",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(150deg,#2d80f7,#1456c9)"}}/>
-  <div style={{position:"absolute",left:40,bottom:-25,width:420,height:590}}>
-   <svg viewBox="0 0 420 590" width="100%" height="100%">
-    <path d="M40 570Q0 440 60 340Q10 180 95 105Q180 15 300 95Q405 168 365 310Q415 425 380 570Z" fill="#f0f0e8" stroke="#15191c" strokeWidth="10"/>
-    <path d="M53 175Q25 56 145 39Q250 0 351 100L380 205Q320 122 260 142Q155 170 53 175Z" fill="#15181a"/>
-    <path d="M75 290Q40 240 67 180Q115 125 162 185Q195 240 165 315Q127 355 75 290Z" fill="#171a1d"/>
-    <path d="M260 293Q238 215 273 174Q330 123 366 188Q394 255 348 312Q299 351 260 293Z" fill="#171a1d"/>
-    <circle cx="117" cy="235" r="10" fill="#fff"/><circle cx="315" cy="235" r="10" fill="#fff"/>
-    <ellipse cx="215" cy="320" rx="34" ry="40" fill="#6d7276"/>
-    <path d="M180 394Q215 425 249 394" stroke="#25292c" strokeWidth="9" fill="none" strokeLinecap="round"/>
-    <path d="M130 470Q213 405 300 470L350 590H75Z" fill="#15191d"/>
-   </svg>
-  </div>
-  <div style={{position:"absolute",right:35,top:120,width:420,height:450,borderRadius:20,background:"#fff",boxShadow:"0 14px 36px rgba(0,0,0,.2)",padding:28,boxSizing:"border-box"}}>
-   <div style={{display:"flex",justifyContent:"space-between",fontSize:18,fontFamily:"monospace",color:"#777"}}><span>// course</span><span>01</span></div>
-   <svg viewBox="0 0 300 220" width="100%" height="220" style={{marginTop:20}}>
-    <path d="M28 168L150 43L272 168Z" fill="#e7ecf0" stroke="#141719" strokeWidth="8"/><path d="M28 168L150 112L272 168" stroke="#141719" strokeWidth="7" fill="none"/><circle cx="150" cy="107" r="28" fill="#ebad47"/>
-   </svg>
-   <div style={{fontSize:46,fontWeight:950,color:"#17191c"}}>Courses</div><div style={{fontSize:26,color:"#92989a",marginTop:5}}>$149</div>
-  </div>
-  <div style={{position:"absolute",left:25,top:25,color:"#d8e9ff",fontSize:15,fontWeight:900,letterSpacing:".16em"}}>02 — ANYTHING</div>
- </div>;
-
-if(variant===3)return <div style={{position:"absolute",inset:0,background:"#d7f0df",overflow:"hidden",color:"#172d24"}}>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#e9f6e8,#f7f0dc 55%,#abdcca)"}}/>
-  <div style={{position:"absolute",left:55,right:55,top:38,bottom:35,background:"#fff9ed",boxShadow:"0 16px 40px rgba(27,72,55,.15)",borderRadius:4,padding:42,boxSizing:"border-box"}}>
-   <div style={{display:"flex",justifyContent:"space-between",fontSize:17,letterSpacing:".12em",fontWeight:850,color:"#71867b"}}><span>OPEN STUDIO</span><span>ABOUT · WORK · CONTACT</span></div>
-   <div style={{position:"absolute",left:42,top:155,fontFamily:"Georgia,serif",fontSize:84,fontWeight:500,lineHeight:.98,letterSpacing:"-.06em"}}>a little<br/>wonder.</div>
-   <div style={{position:"absolute",left:45,top:365,width:275,height:56,background:"#89cda7",display:"grid",placeItems:"center",fontSize:20,fontWeight:850,color:"#153a2a"}}>Explore the studio →</div>
-   <div style={{position:"absolute",right:65,top:125,width:310,height:310,display:"grid",placeItems:"center"}}>
-    <div style={{width:190,height:190,borderRadius:"50%",background:"#f0b66d",boxShadow:"0 0 0 24px #b7dec6,0 0 0 48px #f1d5ad",display:"grid",placeItems:"center"}}>
-     <svg viewBox="0 0 100 100" width="170" height="170">{Array.from({length:8},(_,i)=><ellipse key={i} cx="50" cy="22" rx="12" ry="25" fill="#e77765" transform={"rotate("+(i*45)+" 50 50)"}/>)}<circle cx="50" cy="50" r="12" fill="#f6e4a2"/></svg>
+ if(variant===1)return <div style={{position:"absolute",inset:0,background:"#e6d6ae",overflow:"hidden",color:"#151719"}}>
+  <div style={{position:"absolute",inset:14,border:"7px solid #273e72",background:"#f6e9c9",boxShadow:"inset 0 0 0 5px #fff7e9"}}>
+   <div style={{position:"absolute",left:24,top:20,fontFamily:"Georgia,serif",fontSize:22,fontWeight:800}}>THE MOTION CHRONICLE</div>
+   <div style={{position:"absolute",right:25,top:18,fontSize:15,fontWeight:900,letterSpacing:".15em"}}>ISSUE 1962</div>
+   <div style={{position:"absolute",left:28,top:83,width:220,bottom:35,fontFamily:"Georgia,serif",fontSize:17,lineHeight:1.3,color:"#353a39",overflow:"hidden"}}>The moving image becomes a new language. Forms collide, colour breaks open, and a simple symbol begins to travel through time.</div>
+   <div style={{position:"absolute",right:28,top:75,width:690,height:500,border:"8px solid #243d7d",background:"#f6d04b",overflow:"hidden",boxShadow:"0 7px 0 #b18a43"}}>
+    <div style={{position:"absolute",inset:-60,background:"repeating-conic-gradient(from 4deg at 50% 50%,#f9ebc8 0deg 2deg,#76a9d8 2deg 8deg)"}}/>
+    <div style={{position:"absolute",left:"16%",top:"10%",width:"68%",height:"80%",borderRadius:"50%",background:"#f4d34b",border:"14px solid #151719",boxShadow:"0 0 0 10px #f8e9c4"}}>
+     <div style={{position:"absolute",inset:"14%",borderRadius:"50%",background:"#da4137",border:"12px solid #111820",display:"grid",placeItems:"center"}}>
+      <div style={{width:"78%",height:"78%",borderRadius:"50%",background:"#f7e8c4",border:"12px solid #3159a4",display:"grid",placeItems:"center"}}>
+       <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M7 5L94 61L48 68L36 116Z" fill="#101214"/></svg>
+      </div>
+     </div>
     </div>
+    <div style={{position:"absolute",left:24,top:17,background:"#f5d247",border:"4px solid #151719",padding:"8px 13px",fontSize:19,fontWeight:1000,transform:"rotate(-3deg)"}}>CLICK!</div>
    </div>
-   <div style={{position:"absolute",left:43,bottom:28,fontSize:15,color:"#87948b",fontWeight:700}}>DESIGN THAT FEELS LIKE YOU.</div>
   </div>
  </div>;
-
-if(variant===4)return <div style={{position:"absolute",inset:0,background:"#eee6d3",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(0deg,rgba(122,100,64,.035) 0 2px,transparent 2px 7px)"}}/>
-  <div style={{position:"absolute",left:"20%",top:"9%",width:"60%",height:"82%",background:"#fff8e9",boxShadow:"0 12px 30px rgba(75,55,36,.18)",border:"5px solid #c8b891"}}>
-   <div style={{position:"absolute",left:20,top:18,fontFamily:"Georgia,serif",fontSize:23,color:"#7b6a4f"}}>OPEN DESIGN</div>
-   <div style={{position:"absolute",left:0,right:0,top:74,textAlign:"center",fontFamily:"Georgia,serif",fontSize:42,fontWeight:700,color:"#1a3127"}}>a book of<br/>possibilities</div>
-   <div style={{position:"absolute",left:"50%",top:"51%",width:220,height:220,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"#df9a79",border:"9px solid #fff",boxShadow:"0 0 0 5px #274d78"}}>
-    <div style={{position:"absolute",left:54,top:71,width:25,height:28,borderRadius:"50%",background:"#1b2225",boxShadow:"82px 0 0 #1b2225"}}/>
-    <div style={{position:"absolute",left:80,top:118,width:45,height:25,borderBottom:"7px solid #1c2526",borderRadius:"50%"}}/>
-    <div style={{position:"absolute",left:23,top:0,width:174,height:54,background:"#3a2927",borderRadius:"50% 50% 10% 10%"}}/>
-   </div>
-   <div style={{position:"absolute",left:35,right:35,bottom:25,height:8,background:"#d0b990"}}/>
-  </div>
+ if(variant===2)return <div style={{position:"absolute",inset:0,background:"#82ee44",overflow:"hidden",color:"#090d08"}}>
+  <div style={{position:"absolute",left:0,top:0,fontSize:18,fontWeight:900,letterSpacing:".18em",padding:"24px 28px"}}>OPEN DESIGN / MOTION</div>
+  <div style={{position:"absolute",left:"-3%",right:"-3%",top:"27%",textAlign:"center",fontFamily:displayFont,fontSize:205,fontWeight:1000,letterSpacing:"-.105em",lineHeight:.9,color:"#050806"}}>OPEN<br/>DESIGN</div>
+  <div style={{position:"absolute",left:30,bottom:25,fontSize:17,fontWeight:900,letterSpacing:".16em"}}>A NEW WAY TO CREATE</div>
+  <div style={{position:"absolute",right:36,bottom:28,width:84,height:84,borderRadius:"50%",border:"7px solid #101914"}}/>
  </div>;
-
-
-return <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#f2f0e8,#fff)",overflow:"hidden"}}><div style={{position:"absolute",inset:0,display:"grid",placeItems:"center",fontSize:430,fontWeight:950,color:"#111315",fontFamily:displayFont,textShadow:"12px 14px 0 rgba(0,0,0,.15)"}}>3</div></div>;
+ if(variant===3)return <div style={{position:"absolute",inset:0,background:"#050607",overflow:"hidden"}}>
+  <svg viewBox="0 0 1000 650" width="100%" height="100%">
+   <defs><pattern id="squiggle-preview-v18" width="120" height="84" patternUnits="userSpaceOnUse"><path d="M-20 42C0 2 40 2 60 42S120 82 140 42" fill="none" stroke="#f3f3ed" strokeWidth="16" strokeLinecap="round"/></pattern></defs>
+   <rect width="1000" height="650" fill="#050607"/><rect width="1000" height="650" fill="url(#squiggle-preview-v18)"/>
+   <path d="M0 0H1000V650H0Z" fill="none" stroke="#fff" strokeWidth="8" opacity=".45"/>
+  </svg>
+ </div>;
+ return <div style={{position:"absolute",inset:0,background:"#88f047",overflow:"hidden",color:"#090d08"}}>
+  <div style={{position:"absolute",left:"-9%",right:"-9%",top:"24%",textAlign:"center",fontFamily:displayFont,fontSize:280,fontWeight:1000,letterSpacing:"-.15em",color:"#080d08",transform:"translateX("+(Math.sin(frame/4)*13)+"px)",textShadow:"0 5px 0 rgba(16,49,15,.2)"}}>EASE</div>
+  <div style={{position:"absolute",left:26,top:20,fontSize:15,fontWeight:900,letterSpacing:".18em"}}>NATURAL MOTION / 05</div>
+ </div>;
 };
 
 const CountdownArtwork = ({ value, frame }: { value: number; frame: number }) => {
@@ -1244,32 +1251,44 @@ const CountdownSequence = () => (
 
 
 const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:number})=>{
- const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:44,border:"2px solid rgba(255,255,255,.74)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.17),inset 0 -18px 32px rgba(0,0,0,.13)"};
+ const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:44,border:"3px solid rgba(255,255,255,.78)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.18),inset 0 -24px 38px rgba(0,0,0,.17)"};
  return <div style={style}>
-  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,#e77d8d 0 14%,#e9bb47 14% 86%,#df7b8b 86% 100%)"}}>
-   <div style={{position:"absolute",left:0,right:0,top:0,height:"18%",background:"#e8be47"}}/>
-   <div style={{position:"absolute",left:35,right:35,top:35,bottom:52,borderRadius:"50%",background:"#efe6cb",border:"14px solid #fff6e6",boxShadow:"0 9px 0 rgba(80,52,22,.18),inset 0 0 0 8px #c7a06a",display:"grid",placeItems:"center"}}>
-    <div style={{position:"relative",width:205,height:220,borderRadius:"48% 48% 43% 43%",background:"#dba27d",overflow:"hidden",boxShadow:"inset 0 -12px 18px rgba(83,43,28,.15)"}}>
-     <div style={{position:"absolute",left:0,top:0,width:205,height:75,background:"#392d27",borderRadius:"50% 50% 25% 25%"}}/>
-     <div style={{position:"absolute",left:16,top:48,width:48,height:145,background:"#44332d",borderRadius:"30px 25px 18px 22px"}}/><div style={{position:"absolute",right:16,top:48,width:48,height:145,background:"#44332d",borderRadius:"25px 30px 22px 18px"}}/>
-     <div style={{position:"absolute",left:60,top:105,width:16,height:20,borderRadius:"50%",background:"#181715",boxShadow:"70px 0 0 #181715"}}/>
-     <div style={{position:"absolute",left:48,top:143,width:28,height:18,borderRadius:"50%",background:"#ed9994",opacity:.78,boxShadow:"82px 0 0 #ed9994"}}/>
-     <div style={{position:"absolute",left:88,top:148,width:30,height:18,borderBottom:"5px solid #4d2822",borderRadius:"50%"}}/>
-     <div style={{position:"absolute",left:55,right:55,bottom:0,height:54,background:"#178778",clipPath:"polygon(0 0,100% 0,100% 100%,0 100%)"}}/>
-    </div>
+  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f7d66a,#cf9c37 48%,#f4d16a)"}}>
+   <div style={{position:"absolute",inset:18,border:"8px solid #fff0bc",borderRadius:28,boxShadow:"inset 0 0 0 3px rgba(82,54,18,.3)"}}/>
+   <div style={{position:"absolute",left:65,top:54,width:230,height:230,borderRadius:"50%",background:"#10151c",border:"14px solid #fff1ba",boxShadow:"0 10px 0 #725127,inset 0 0 0 8px #354358",display:"grid",placeItems:"center"}}>
+    <div style={{width:142,height:142,borderRadius:"50%",background:"radial-gradient(circle at 32% 27%,#7ac5df,#1a3e61 46%,#050a11 72%)",border:"11px solid #d5bc71",boxShadow:"inset 0 0 0 6px #0b1118"}}><div style={{margin:30,width:25,height:25,borderRadius:"50%",background:"#fff",opacity:.78}}/></div>
    </div>
-   <div style={{position:"absolute",right:25,top:22,width:52,height:62,background:"#fff",display:"grid",placeItems:"center",boxShadow:"0 3px 7px rgba(0,0,0,.12)"}}><div style={{width:33,height:33,borderRadius:8,background:"#111",display:"grid",placeItems:"center",color:"#fff",fontSize:22}}>◉</div></div>
-   <div style={{position:"absolute",right:20,bottom:42,width:26,height:37,background:"#f3f0db",borderRadius:4}}><div style={{position:"absolute",left:8,top:-18,width:12,height:20,borderRadius:"50%",background:"#da4a54"}}/></div>
-   <div style={{position:"absolute",left:0,right:0,bottom:0,height:48,background:"#342a78"}}/>
+   <div style={{position:"absolute",right:47,top:54,width:64,height:58,background:"#fff8e8",border:"7px solid #9c773f",borderRadius:12}}><div style={{width:28,height:28,margin:8,background:"#171d26",borderRadius:7}}/></div>
+   <div style={{position:"absolute",left:55,bottom:43,fontFamily:displayFont,fontSize:28,fontWeight:950,color:"#24252a",letterSpacing:".12em"}}>MORRO / 01</div>
   </div>:
-  kind===1?<div style={{position:"absolute",inset:0,background:"#111315",display:"grid",placeItems:"center"}}><svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M120 30Q42 30 42 110V250Q42 322 118 322H242Q318 322 318 242V117Q318 42 242 42Z" fill="#fff"/><circle cx="180" cy="180" r="104" fill="#111315" stroke="#fff" strokeWidth="14"/><path d="M137 87L246 177L162 190L151 272Z" fill="#fff"/></svg></div>:
-  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#ee8fa3,#eac54c 48%,#4b3c9a)"}}><Word size={70} color="#151719" style={{position:"absolute",left:24,top:34}}>MORRO</Word><div style={{position:"absolute",inset:70,border:"10px solid rgba(255,255,255,.8)",borderRadius:34}}/><div style={{position:"absolute",right:30,bottom:25,width:78,height:78,borderRadius:"50%",background:"#f7eed7"}}/></div>:
-  kind===3?<div style={{position:"absolute",inset:0,background:"#1748c7"}}><svg viewBox="0 0 360 360" width="100%" height="100%">{Array.from({length:10},(_,i)=><path key={i} d={"M"+(i*42-60)+" 0L"+(i*35+90)+" 360"} stroke="#d9e6ff" strokeWidth="6" opacity=".55"/>)}<circle cx="180" cy="180" r="105" fill="#e8edff" opacity=".9"/><path d="M120 160L180 115L235 184L180 248Z" fill="#292e4b"/></svg></div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"#f3e7cd"}}><div style={{position:"absolute",inset:25,border:"8px solid #151718"}}/><Word size={68} color="#121719" style={{position:"absolute",left:22,top:55}}>EASE</Word><div style={{position:"absolute",right:30,bottom:30,width:100,height:100,borderRadius:"50%",background:"#e44f43"}}/></div>:
-  <div style={{position:"absolute",inset:0,background:"#d34e3b"}}><Word size={72} color="#fff1db" style={{position:"absolute",left:22,top:36}}>OPEN</Word><Word size={62} color="#fff1db" style={{position:"absolute",left:22,top:112}}>DESIGN</Word><div style={{position:"absolute",right:28,bottom:26,width:92,height:92,border:"11px solid #fff",borderRadius:"50%"}}/></div>}
-  <div style={{position:"absolute",inset:0,borderRadius:42,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.34),transparent 31%,rgba(0,0,0,.12) 100%)"}}/>
+  kind===1?<div style={{position:"absolute",inset:0,background:"#101317",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:30,border:"9px solid #e8eee9",borderRadius:44}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="180" r="111" fill="#090c11" stroke="#f7f7f1" strokeWidth="17"/><path d="M140 89L267 180L140 272Z" fill="#fff"/></svg>
+  </div>:
+  kind===2?<div style={{position:"absolute",inset:0,background:"#123e94"}}>
+   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(135deg,rgba(255,255,255,.1) 0 5px,transparent 5px 18px)"}}/>
+   <div style={{position:"absolute",left:40,right:40,top:38,bottom:38,borderRadius:"50%",background:"#e7c25d",border:"12px solid #f7e7a2",boxShadow:"0 0 0 10px #183777",display:"grid",placeItems:"center"}}>
+    <div style={{width:"73%",height:"73%",borderRadius:"50%",border:"15px solid #193b84",background:"#f8d56b",display:"grid",placeItems:"center"}}><svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M7 4L94 61L49 69L37 116Z" fill="#101214"/></svg></div>
+   </div>
+   <div style={{position:"absolute",left:0,right:0,bottom:15,textAlign:"center",fontSize:23,fontWeight:950,color:"#fff1b8",letterSpacing:".16em"}}>1889</div>
+  </div>:
+  kind===3?<div style={{position:"absolute",inset:0,background:"#89ec48"}}>
+   <div style={{position:"absolute",inset:22,border:"9px solid #101713",borderRadius:32}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M-30 290L100 140L183 230L286 65L390 210" stroke="#101713" strokeWidth="20" fill="none"/><circle cx="180" cy="180" r="80" fill="none" stroke="#f4ffe9" strokeWidth="12"/><path d="M140 140L235 180L145 225Z" fill="#101713"/></svg>
+  </div>:
+  kind===4?<div style={{position:"absolute",inset:0,background:"#f3e5d0"}}>
+   <div style={{position:"absolute",inset:32,border:"9px solid #17191c",borderRadius:24}}/>
+   <Word size={76} color="#141719" style={{position:"absolute",left:24,top:44}}>EASE</Word>
+   <div style={{position:"absolute",right:48,bottom:48,width:105,height:105,borderRadius:"50%",background:"#e45141",border:"11px solid #fff6e5"}}/>
+  </div>:
+  <div style={{position:"absolute",inset:0,background:"#e45c48",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+   <Word size={72} color="#fff3db">OPEN</Word><Word size={70} color="#fff3db">DESIGN</Word>
+   <div style={{width:150,height:12,background:"#fff3db",marginTop:28}}/>
+  </div>}
+  <div style={{position:"absolute",inset:0,borderRadius:42,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.34),transparent 31%,rgba(0,0,0,.14) 100%)"}}/>
  </div>;
 };
+
 const ProjectCube=()=>{
  const f=useCurrentFrame();
  const rotateY=-28-300*e(f,0,126),rotateX=18+5*Math.sin(f/17),rotateZ=-3+Math.sin(f/18)*2;
@@ -1316,12 +1335,12 @@ const TexturedCube=()=> <ProjectCube />;
 const FinalLockup=()=>{
  const f=useCurrentFrame(),p=pop(f,30,0,78,18),fade=e(f,0,12);
  return <AbsoluteFill style={{...full,background:"#f5f4ed"}}>
-  <div style={{position:"absolute",left:0,right:0,top:250,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*24)+"px)",opacity:fade}}>
-   <div style={{width:230,height:230,borderRadius:48,background:"#101113",display:"grid",placeItems:"center"}}>
-    <svg viewBox="0 0 100 100" width="206" height="206"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
+  <div style={{position:"absolute",left:0,right:0,top:255,display:"flex",flexDirection:"column",alignItems:"center",transform:"translateY("+((1-p)*16)+"px)",opacity:fade}}>
+   <div style={{width:164,height:164,borderRadius:34,background:"#101113",display:"grid",placeItems:"center",boxShadow:"0 14px 30px rgba(0,0,0,.12)"}}>
+    <svg viewBox="0 0 100 100" width="145" height="145"><path d="M26 10H72C86 10 92 17 92 31V70C92 85 83 92 68 92H28C14 92 8 84 8 70V30C8 17 14 10 26 10Z" fill="#fff"/><circle cx="52" cy="49" r="31" fill="#111315"/><path d="M38 25L70 49L47 52L42 74Z" fill="#fff"/></svg>
    </div>
-   <div style={{marginTop:64,fontFamily:displayFont,fontSize:84,fontWeight:950,color:"#14191b",letterSpacing:"-.075em"}}>OpenDesign Motion</div>
-   <div style={{marginTop:74,background:"#10313a",color:"#e7f3f2",borderRadius:26,padding:"12px 42px",fontSize:31,fontWeight:850,letterSpacing:".005em"}}><span style={{color:"#a0dcaa"}}>•</span> open-design.ai</div>
+   <div style={{marginTop:42,fontFamily:displayFont,fontSize:64,fontWeight:950,color:"#14191b",letterSpacing:"-.075em"}}>OpenDesign Motion</div>
+   <div style={{marginTop:42,background:"#10313a",color:"#e7f3f2",borderRadius:23,padding:"9px 31px",fontSize:24,fontWeight:850,letterSpacing:".005em"}}><span style={{color:"#a0dcaa"}}>●</span> open-design.ai</div>
   </div>
  </AbsoluteFill>;
 };

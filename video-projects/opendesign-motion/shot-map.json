@@ -1,12 +1,12 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v16",
+  "id": "opendesign-motion-reference-rebuild-v18",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "Reference preview.mp4 decoded at 30fps, all frames indexed 0-1118. Native-size source frames checked across opening, gallery, each montage cut and launch/countdown states; boundaries cross-checked at matching frame numbers.",
+    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840.",
     "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts."
   },
   "output": {
@@ -244,12 +244,112 @@
   ],
   "qualityGates": [
     "12 contiguous root sections at 1920x1080, 30fps, 1119 frames.",
-    "28 exact-source montage beats across frames 316-585, 269 frames total.",
-    "Measured montage: gallery exit 316-318; comic 1952 318-322; comic 1962 322-338; dots 338-353; prism 353-368; pixel game 368-381; World/Wide 381-386; MIND 386-400; rings 400-430; editorial grid 430-446; particles 446-456; EASE 456-461; metallic IN 461-466; IN. 466-471; EASE 471-476; OUT 476-486; NEVER 486-496; LINEAR 496-511; green mark 511-516; clock 516-523; Star History 523-531; toggle 531-539; Motion Films 539-547; eye 547-555; Courses 555-563; comic 563-570; FUTURE 570-578; Not 578-585.",
-    "Gallery at 240-316 contains 30 distinct panels in 6x5 and fades the white open-source claim card over the montage of thumbnails from 240-255.",
-    "Star History is animated from 84K / Day111 to 96K / Day138; iris readout begins at 4.7%.",
-    "Launch Film preview states at 780/795/810/825/840; countdown 3/2/full-screen 1 begins at 855/870/885.",
-    "MORRO transition 897-933, rounded app/cube sequence 933-1050, end card 1050-1119.",
-    "Actions validates JSX/map identity, typecheck, render metadata, 1119 decoded frames, AAC, loudness and checksum. Artistic review still compares the final render to the same source-frame indices."
+    "28 source-indexed montage beats across frames 316-585, 269 frames total; component order and exact nested boundaries are validated against this map.",
+    "Native-frame visual observations: frame 353 optical logo and diagonal light beam over dark field with red halftone; frame 368 pixel-game landscape; frame 381 portfolio/project wall; frame 386 repeated MIND type; frame 400 concentric circular typography; frame 446 particle vortex inside a dark app viewport.",
+    "Kinetic typography source sequence: EASE 456-461; metallic IN 461-466; IN. 466-471; green EASE 471-476; OUT 476-486; NEVER 486-496; LINEAR 496-511; green circular mark 511-516.",
+    "Clock poster 516-523 is ornate gold clock over painted blue texture. StatsPoster is verified frame-by-frame: 523=80K/Day88, 524=82K/Day96, 525=84K/Day104, 526=87K/Day111, 527=91K/Day119, 528=93K/Day126, 529=94K/Day132, 530=96K/Day138.",
+    "Toggle at 531-539 is a small isolated switch on a neutral background; eye at 547-555 is a blue iris on black with 3.7% readout.",
+    "Gallery at 240-316 contains 30 distinct panels in 6x5 and fades the open-source claim card over the thumbnail wall.",
+    "Launch Film preview states at 780/795/810/825/840 were individually sampled: ink-wash mountain/play emblem; printed 1962 compass/comic panel; bright green OPEN DESIGN typography; black/white squiggle pattern; bright green EASE typography. Countdown 3/2/full-screen 1 begins at 855/870/885.",
+    "MORRO transition 897-933, rounded camera-like cube/app tile sequence 933-1050, end card 1050-1119.",
+    "Actions verifies source/map identity, typecheck, 1119 decoded frames, 1080p30 metadata, AAC stereo, loudness and checksum. These are technical gates; the rendered artifact still requires side-by-side visual and moving-sequence review."
+  ],
+  "visualAudit": [
+    {
+      "frame": 353,
+      "content": "1973 optical emblem / diagonal light beam / red halftone"
+    },
+    {
+      "frame": 368,
+      "content": "pixel-game landscape"
+    },
+    {
+      "frame": 381,
+      "content": "portfolio project wall"
+    },
+    {
+      "frame": 386,
+      "content": "repeated MIND typographic field"
+    },
+    {
+      "frame": 400,
+      "content": "concentric circular typography"
+    },
+    {
+      "frame": 446,
+      "content": "particle vortex inside dark interface viewport"
+    },
+    {
+      "frame": 456,
+      "content": "oversized EASE on bright green"
+    },
+    {
+      "frame": 461,
+      "content": "metallic IN with motion trail"
+    },
+    {
+      "frame": 466,
+      "content": "white IN. with green dot"
+    },
+    {
+      "frame": 471,
+      "content": "oversized green EASE on light background"
+    },
+    {
+      "frame": 476,
+      "content": "white OUT with horizontal ghosting on deep green"
+    },
+    {
+      "frame": 486,
+      "content": "staggered NEVER on light lime"
+    },
+    {
+      "frame": 496,
+      "content": "LINEAR typographic transition"
+    },
+    {
+      "frame": 516,
+      "content": "ornate gold clock on painted blue"
+    },
+    {
+      "frame": 523,
+      "content": "80K / Day 88"
+    },
+    {
+      "frame": 530,
+      "content": "96K / Day 138"
+    },
+    {
+      "frame": 531,
+      "content": "isolated minimal toggle"
+    },
+    {
+      "frame": 547,
+      "content": "blue iris / 3.7%"
+    },
+    {
+      "frame": 780,
+      "content": "ink-wash mountain launch preview"
+    },
+    {
+      "frame": 795,
+      "content": "printed compass/comic launch preview"
+    },
+    {
+      "frame": 810,
+      "content": "green OPEN DESIGN launch preview"
+    },
+    {
+      "frame": 825,
+      "content": "black-white squiggle launch preview"
+    },
+    {
+      "frame": 840,
+      "content": "green EASE launch preview"
+    },
+    {
+      "frame": 990,
+      "content": "rotating multi-face camera-like object"
+    }
   ]
 }

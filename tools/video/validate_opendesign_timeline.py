@@ -61,12 +61,22 @@ need(not missing, "components referenced by shot map / montage are missing: " + 
 required=[
     "Launch film", "Make a 10s launch film", "for our app.",
     "DeepSeek V4.1", "Claude Opus 5.5", "CountdownOne",
-    "GalleryPoster index={index%30}", "count=Math.round(84+12*progress)",
-    "day=Math.round(111+27*progress)", "4.7%", "open-design.ai",
-    "rotateY(180deg)", "BPM=114.84375"
+    "GalleryPoster index={index%30}", "count=Math.round(80+16*progress)",
+    "day=Math.round(88+50*progress)", "3.7%", "open-design.ai",
+    "rotateY(180deg)", "squiggle-preview-v18", "BPM=114.84375"
 ]
 for token in required:
     haystack=score if token == "BPM=114.84375" else source
     need(token in haystack, "missing required source token: " + token)
+
+# Lock source-observed values and preview art against silent regressions.
+audit = data.get("visualAudit", [])
+need(any(item.get("frame") == 523 and item.get("content") == "80K / Day 88" for item in audit), "frame 523 must record 80K / Day 88")
+need(any(item.get("frame") == 547 and "3.7%" in item.get("content", "") for item in audit), "frame 547 must record 3.7%")
+need("count=Math.round(80+16*progress)" in source, "Star History must start at 80K")
+need("day=Math.round(88+50*progress)" in source, "Star History must start at Day 88")
+need("3.7%" in source and "4.7%" not in source, "eye readout must match 3.7%")
+need("squiggle-preview-v18" in source, "black/white squiggle launch preview is missing")
+need("MORRO / 01" in source, "camera/lens cube face artwork is missing")
 
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")
