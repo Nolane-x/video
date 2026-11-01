@@ -44,6 +44,11 @@ jobs:
           test -f .github/workflows/voice-studio-actions-lab.yml
           test -f .github/workflows/voice-studio-actions-project.yml
           test -f integrations/voice-studio/actions_voice_lab.py
+          test -f integrations/voice-studio/analyze_actions_voice_lab.py
+          test -f integrations/voice-studio/tests/test_analyze_actions_voice_lab.py
+          test -f .github/workflows/voice-studio-actions-shortlist.yml
+          grep -q 'actions/download-artifact@v7' .github/workflows/voice-studio-actions-shortlist.yml
+          grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-shortlist.yml
           test -f integrations/voice-studio/actions_voice_project.py
           test -f integrations/voice-studio/caption_delivery.py
           test -f integrations/voice-studio/tests/test_caption_delivery.py
@@ -65,6 +70,8 @@ jobs:
           grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-project.yml
           grep -q 'voice-studio-actions-lab.yml' .github/workflows/package-video-skill.yml
           grep -q 'voice-studio-actions-project.yml' .github/workflows/package-video-skill.yml
+          grep -q 'voice-studio-actions-shortlist.yml' .github/workflows/package-video-skill.yml
+          grep -q '"integrations/voice-studio/analyze_actions_voice_lab.py"' .github/workflows/package-video-skill.yml
           grep -q 'actions/upload-artifact@v7' .github/workflows/voice-studio-actions-lab.yml
           test -f .agents/skills/video-voice-design-director/SKILL.md
           test -f .agents/skills/video-character-voice-casting-engineer/SKILL.md
