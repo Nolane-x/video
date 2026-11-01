@@ -1,0 +1,10 @@
+{
+  "repository": "Nolane-x/VoiceStudio",
+  "url": "https://github.com/Nolane-x/VoiceStudio",
+  "parent": "debpalash/VoiceStudio",
+  "license": "AGPL-3.0",
+  "commit": "faa5294359f23c911972ffe6d27785c50c67097b",
+  "role": "pinned voice-studio application submodule",
+  "model_weights_included": false,
+  "nested_submodules_initialized": false
+}

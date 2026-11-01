@@ -42,6 +42,25 @@ Large video masters should be kept as Release assets, not ordinary Git blobs. Th
 
 The active private H2 plugin is v1.1.0: [Open h2-selfimprove-studio](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). Its current release ID, CI evidence, checksum and base-source/overlay distinction are documented in [docs/CHATGPT_PLUGIN.md](docs/CHATGPT_PLUGIN.md). The native H2 kit remains distinct from the repo's Remotion renderer.
 
+## Voice Studio and narration
+
+The full [Nolane VoiceStudio fork](https://github.com/Nolane-x/VoiceStudio) is
+pinned under `vendor/VoiceStudio/` as an independent AGPL-3.0 submodule.
+The video repo adds a lightweight multi-provider adapter for saved VoiceStudio
+profiles/archetypes, KorvaTTS, Google Cloud TTS and ElevenLabs.
+
+- [Voice Studio integration guide](docs/VOICE_STUDIO.md)
+- [Provider adapters, voice casting and H2 handoff](integrations/voice-studio/README.md)
+- [Original Vietnamese synthetic voice set](integrations/voice-studio/examples/vietnamese-original-voice-set.json)
+- [Stable Vietnamese documentary cast](integrations/voice-studio/examples/vietnamese-documentary.json)
+- [Repeatable Vietnamese pronunciation benchmark](integrations/voice-studio/examples/vietnamese-pronunciation-benchmark.txt)
+- [Voice profile factory, blind audition and audio QA](integrations/voice-studio/README.md)
+- [Voice design director skill](.agents/skills/video-voice-design-director/SKILL.md)
+- [Character voice casting skill](.agents/skills/video-character-voice-casting-engineer/SKILL.md)
+- [Voice quality auditor skill](.agents/skills/video-voice-quality-auditor/SKILL.md)
+
+The integration can create reusable fictional voice-design profiles in VoiceStudio, audition saved profiles blindly with a common script, lock a cast by speaker_id, resume failed audio batches and run technical/ASR QA. It does not add weights or output audio to Git. Model rights and real-speaker consent remain separate gates.
+
 ## Downloads and current reference
 
 - **[Download the portable Video Production Master ZIP](video-library/video-production-master-skill.zip)** — reusable agent skill, cross-agent entrypoints, project/source map, tool inventory, state/handoff, Remotion source, storyboard and the archived reference render.
