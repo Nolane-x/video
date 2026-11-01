@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V13)
+# OpenDesign Motion — frame-indexed reference reconstruction (V14)
 
 Reference profile: 37.312s, 1920×1080, 30fps. Output target: 1,119 frames at 37.300s, 1920×1080, H.264 with AAC stereo 48kHz.
 
@@ -10,7 +10,7 @@ Timeline is frame-indexed at 30fps:
 - 140–170: Claude Motion mark reveal
 - 170–240: open-source claim
 - 240–316: tilted portfolio wall
-- 316–585: 20-cut source-frame montage (269 frames)
+- 316–585: 19-cut source-frame montage (269 frames)
 - 585–641: Not just Opus 5.5
 - 641–779: Any model / Any agent
 - 779–897: Launch film interface; source preview cuts at 780/795/810/825/840 and countdown 3/2 at 855/870, full-screen 1 at 885
