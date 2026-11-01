@@ -25,8 +25,9 @@ tests:
 - Exports per-script blind listening pages plus one combined page that
   groups all four scenarios under the same anonymous voice, with a single
   rating form and notes field per candidate. The combined page exports
-  `voice-human-ratings-all-scripts.json`; the private identity map stays in
-  `actions-voice-lab.json`.
+  `voice-human-ratings-all-scripts.json`. The HTML omits voice names and IDs;
+  `actions-voice-lab.json` in the same artifact retains the identity map.
+  Do not open that report until after exporting the listener ratings.
 - Uploads WAVs, audition pages and evidence reports as an Actions artifact.
   Artifacts are retained for 14 days.
 
@@ -41,11 +42,13 @@ instructions and the privacy checklist are in
 
 Then run **Actions → Voice Studio Actions human shortlist** and supply the
 completed benchmark run ID, exact artifact name and ratings path. That workflow
-downloads the original benchmark artifact, joins the ratings to its private
-identity map, requires a minimum number of reviewed dimensions, and uploads
+downloads the original benchmark artifact, joins ratings to the separate
+identity-map JSON, requires a minimum number of reviewed dimensions, and uploads
 `voice-shortlist.json` plus a Markdown shortlist. The analysis itself runs on
-GitHub Actions; it does not require local Python or expose voice IDs during
-the listening session.
+GitHub Actions; it does not require local Python. The listening HTML itself
+does not render voice IDs, but the original benchmark artifact contains a
+separate identity-map JSON that should only be inspected after ratings are
+exported.
 
 Run it from GitHub: open **Actions → Voice Studio Actions CPU lab → Run
 workflow**. It also runs for changes to the voice-lab source on the integration
@@ -307,8 +310,9 @@ a configured local ASR engine in VoiceStudio. Rate naturalness, Vietnamese
 clarity/tones, identity, expressiveness and character fit from 1–5, then click
 **Export human ratings JSON**. The page also captures per-candidate listener
 notes; these are preserved in the analysis output. Once you have exported the
-ratings file, join it to the private candidate identity map and calculate
-provider-level summaries:
+ratings file, join it to the separate identity-map JSON in the benchmark
+artifact and calculate provider-level summaries. Do not inspect the mapping
+file until the blind listening session is complete:
 
 ```bash
 python integrations/voice-studio/analyze_voice_benchmark.py \\
