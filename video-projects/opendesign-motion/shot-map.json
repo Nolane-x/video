@@ -1,12 +1,12 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v13",
+  "id": "opendesign-motion-reference-rebuild-v14",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "Source preview.mp4 decoded frame-by-frame at 30fps, 0-1118. V13 was compared to the source at exact native frame indices. Cut boundaries and montage/preview state changes are mapped to the source frames rather than rounded second samples.",
+    "evidence": "The reference MP4 was decoded at native frame indices 0-1118 and cut boundaries were inspected with native-size frame captures, including montage source frames 322, 345, 360, 375, 390, 405, 435, 450, 454, 468, 476, 483, 490, 495, 510, 525, 540, 555 and 570.",
     "constraints": "Match the observed source timing, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition, camera-like app tile and final lockup using independently authored graphics. Pixel identity is not claimed where source project layers/assets/fonts are unavailable."
   },
   "output": {
@@ -96,7 +96,7 @@
           15
         ],
         [
-          "PixelGamePoster",
+          "WorldPoster",
           15
         ],
         [
@@ -105,51 +105,47 @@
         ],
         [
           "RingPoster",
-          25
+          30
         ],
         [
           "EditorialPosterGrid",
-          20
-        ],
-        [
-          "DepthField",
-          11
+          15
         ],
         [
           "EaseGreen",
-          7
+          15
+        ],
+        [
+          "EasePoster",
+          11
         ],
         [
           "OutPoster",
-          8
+          7
         ],
         [
           "GreenGhostTransition",
           7
         ],
         [
-          "InPoster",
-          12
+          "NeverPoster",
+          5
         ],
         [
           "LinearPoster",
           15
         ],
         [
-          "GreenCircleTransition",
-          5
-        ],
-        [
           "ClockPoster",
-          8
+          15
         ],
         [
           "TogglePoster",
-          16
+          15
         ],
         [
           "EyePoster",
-          16
+          15
         ],
         [
           "Comic1952",
@@ -211,12 +207,13 @@
     }
   ],
   "qualityGates": [
-    "12 contiguous root sections at 1920x1080, 30fps and 1119 decoded frames.",
-    "Montage: 20 exact frame ranges from 316 to 585; comic 1952/1962, dots, prism, pixel game, MIND, rings, poster grid, point cloud, EASE, OUT, IN, LINEAR, green transition, painterly clock, minimal toggle, iris, repeat comic and metallic FUTURE.",
-    "The poster edit matches the reference boundary samples: 330,345,360,375,390,405,430,450,461,468,476,483,495,510,515,523,539,555,570,585.",
-    "Opening composer is visible on frame 0 with the original prompt placeholder, then types Introducing OpenDesign Motion; title/claim typography matches the source scale and reveal timing.",
-    "Launch UI starts at frame 779; preview artwork states occur at 780,795,810,825,840; preview countdown 3 at 855, 2 at 870; full-screen 1 at 885-896.",
-    "MORRO typography-to-app-tile transition and 3D camera-like icon remain aligned to the source; the final lockup is held through frame 1118.",
-    "Run Actions timeline validator, TypeScript typecheck, Remotion render, ffprobe 1119-frame/AAC verification, EBU R128 and contact-sheet QA."
+    "12 contiguous root sections, 1119 decoded frames at 30fps.",
+    "V14 montage contains 19 source-observed cuts over 269 frames: 1952 comic, 1962 comic, 1965 dots, pixel-art spectrum, WORLD/WIDE, MIND, circular typography, poster grid, EASE, EASE transition, OUT, green transition, NEVER, LINEAR, painted clock, toggle, eye, repeated comic and metallic FUTURE.",
+    "Exact observed cut points include source frames 316,330,345,360,375,390,405,435,450,465,476,483,490,495,510,525,540,555,570,585.",
+    "1952 comic uses central blue radial burst, white/yellow/red circular center, broken red arc, black halftone and yellow lightning zigzag; outer quadrants use yellow/pink halftone.",
+    "Source 360 optic is pixelated 8-bit object with a horizontal rainbow beam; source 375 is the WORLD/WIDE poster, not the platform game.",
+    "Source EASE→OUT→NEVER→LINEAR sequence and clock/toggle/eye cuts follow the captured source frame indices.",
+    "Opening prompt/title/claim, five Launch Film preview states, 3-2-fullscreen-1 countdown, MORRO tile and final brand lockup remain covered by source-specific checks.",
+    "Actions validator, typecheck, 1119-frame render, ffprobe/AAC, loudness and contact sheets all pass."
   ]
 }
