@@ -1249,9 +1249,9 @@ const CountdownOne=({frame}:{frame:number})=>{
 };
 const LaunchKitSequence=()=>{
  const frame=useCurrentFrame();
- if(frame>=106)return <CountdownOne frame={frame-106}/>;
+ if(frame>=112)return <CountdownOne frame={frame-112}/>;
  const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:4;
- const countdown=frame<76?-1:frame<91?3:2;
+ const countdown=frame<76?-1:frame<91?3:frame<106?2:1;
  return <LaunchKitWindow frame={frame} variant={variant} countdown={countdown}/>;
 };
 

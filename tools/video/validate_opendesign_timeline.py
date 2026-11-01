@@ -58,6 +58,9 @@ for name,_duration in beats:
         missing.append(name)
 need(not missing, "components referenced by shot map / montage are missing: " + ", ".join(sorted(set(missing))))
 
+need("if(frame>=112)return <CountdownOne frame={frame-112}/>" in source, "full-screen countdown must begin at source frame891")
+need("frame<76?-1:frame<91?3:frame<106?2:1" in source, "number 1 must remain inside the Launch Film preview at frame885")
+
 required=[
     "Launch film", "Make a 10s launch film", "for our app.",
     "DeepSeek V4.1", "Claude Opus 5.5", "CountdownOne",

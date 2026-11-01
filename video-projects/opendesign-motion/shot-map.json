@@ -1,12 +1,12 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v26",
+  "id": "opendesign-motion-reference-rebuild-v27",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns. V20 compared native source frames 897-1118 against the rendered candidate. The V19 sheet exposed a major MORRO logo/app-tile mismatch at frame 933, incorrect visible cube faces at frames 960/990/1020, and an undersized end card. These were rebuilt for V20. V21 compared V20 frame-pairs at 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118. V20 exposed the camera portrait at frame945 but brought the blue clock face forward at frame960; V21 uses an explicit three-stage yaw curve and a separate app-logo tile before cube entry. V22 corrects the cube's time origin after the 12-frame logo lead-in: cube-local frame 15 aligns to source frame960 portrait, frame45 to source frame990 blue clock top/green underside, and frame75 to source frame1020 black glyph face. The six face assignments now place the blue clock on top, green EASE underneath and yellow 100K editorial on the side. V23 adjusts yaw so cube-local frame15 (source frame960) places the portrait panel front-facing, and reverses the CSS top/bottom face transforms so the blue clock and green EASE surfaces can be read as top/underside at source frame990. V24 inspects the cube at native frames 960/990/1005/1020 after V23 showed the main portrait/clock/stats surfaces on the wrong faces. The front panel is now keyed by cube-local frame: portrait f15, blue clock f45, 100K f60, black glyph f75. Pitch falls from near-flat at f15 to negative at f45 so the independent lime EASE underside is visible. V25 compares V24 exact frames and retains the source-indexed main-front artwork sequence. At frame990 V24's oversized green panel hid too much of the clock; V25 reduces EASE to a narrow lower-edge folded strip, keeps the blue clock as the primary face, and animates the adjacent side from black (f<27) to blue clock detail (27-54), then yellow 100K (55-71). V26 regresses neither V24's strong frame960/1005 matching nor the V25 front-surface timing; it restores a shallow camera pitch after V25 SSIM fell by ~0.019/0.020/0.030 at 960/990/1005. The clock remains dominant on frame990, with the green EASE reduced to a 10%-height lower fold.",
+    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns. V20 compared native source frames 897-1118 against the rendered candidate. The V19 sheet exposed a major MORRO logo/app-tile mismatch at frame 933, incorrect visible cube faces at frames 960/990/1020, and an undersized end card. These were rebuilt for V20. V21 compared V20 frame-pairs at 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118. V20 exposed the camera portrait at frame945 but brought the blue clock face forward at frame960; V21 uses an explicit three-stage yaw curve and a separate app-logo tile before cube entry. V22 corrects the cube's time origin after the 12-frame logo lead-in: cube-local frame 15 aligns to source frame960 portrait, frame45 to source frame990 blue clock top/green underside, and frame75 to source frame1020 black glyph face. The six face assignments now place the blue clock on top, green EASE underneath and yellow 100K editorial on the side. V23 adjusts yaw so cube-local frame15 (source frame960) places the portrait panel front-facing, and reverses the CSS top/bottom face transforms so the blue clock and green EASE surfaces can be read as top/underside at source frame990. V24 inspects the cube at native frames 960/990/1005/1020 after V23 showed the main portrait/clock/stats surfaces on the wrong faces. The front panel is now keyed by cube-local frame: portrait f15, blue clock f45, 100K f60, black glyph f75. Pitch falls from near-flat at f15 to negative at f45 so the independent lime EASE underside is visible. V25 compares V24 exact frames and retains the source-indexed main-front artwork sequence. At frame990 V24's oversized green panel hid too much of the clock; V25 reduces EASE to a narrow lower-edge folded strip, keeps the blue clock as the primary face, and animates the adjacent side from black (f<27) to blue clock detail (27-54), then yellow 100K (55-71). V26 regresses neither V24's strong frame960/1005 matching nor the V25 front-surface timing; it restores a shallow camera pitch after V25 SSIM fell by ~0.019/0.020/0.030 at 960/990/1005. The clock remains dominant on frame990, with the green EASE reduced to a 10%-height lower fold. V27 rechecks source frames 880-896 individually: countdown 3 occupies the preview window at 855-869, countdown 2 at 870-884, countdown 1 remains inside the Launch Film preview at 885-890, and the full-screen countdown transition begins at frame891 before MORRO at frame897.",
     "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts. V19 specifically reproduces the source timing at frames 496-516 and the eight discrete Star History labels at 523-530; the cube uses a reduced turn angle to expose multiple faces. The camera tile must transition from layered MORRO geometry into an illustrated rounded camera cube with a front portrait face, black glyph/arrow side, blue clock/artwork face, lime EASE face and cream editorial face; end lockup must preserve a legible domain capsule."
   },
   "output": {
@@ -271,7 +271,9 @@
     "V25 camera front: portrait at cube-local f15/source960; blue/gold clock is dominant main face at f45/source990; yellow 100K front at f60/source1005; black glyph returns at f75/source1020.",
     "V25 EASE underside is a narrow folded lower-edge strip from local f38–54 (source frames983–999), not a large green panel covering the clock. Adjacent side surface is black at f15, clock-blue at f45 and yellow 100K at f60.",
     "V26 frame landmarks: source frame960 portrait front and black side at near-level pitch; frame990 blue/gold clock front with blue graphic side and narrow EASE fold along the lower edge; frame1005 yellow 100K main panel with blue side; frame1020 black glyph front.",
-    "V26 camera pitch remains shallow: cube-local f15≈4°, f45≈10°, f60≈4°, f75≈0°. EASE fold stays at top84%, height10%, not across the clock face."
+    "V26 camera pitch remains shallow: cube-local f15≈4°, f45≈10°, f60≈4°, f75≈0°. EASE fold stays at top84%, height10%, not across the clock face.",
+    "V27 countdown UI boundary: frames 885–890 keep the number 1 inside the Launch Film Preview pane; full-screen CountdownOne starts at source frame891 (LaunchKitSequence local frame112), not frame885.",
+    "Launch Film countdown values remain 3 at frame855, 2 at frame870, 1-in-preview at frame885, and full-screen 1 beginning frame891."
   ],
   "visualAudit": [
     {
@@ -385,6 +387,18 @@
     {
       "frame": 840,
       "content": "green EASE launch preview"
+    },
+    {
+      "frame": 885,
+      "content": "number 1 in the Launch Film Preview pane; outer app/window UI still visible"
+    },
+    {
+      "frame": 890,
+      "content": "Preview pane expands during the countdown handoff"
+    },
+    {
+      "frame": 891,
+      "content": "full-screen extruded 1 countdown begins"
     },
     {
       "frame": 897,
