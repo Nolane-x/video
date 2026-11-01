@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V42 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V43 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
@@ -6,7 +6,7 @@ This is an independently authored Remotion/SVG/CSS reconstruction, not the origi
 
 ## Current focus: reference-led visual corrections across the whole film
 
-Latest authored revision: V42. Latest technically verified render is V41 / Actions #100; V42 awaits its own Actions render and visual review.
+Latest authored revision: V43. Latest technically verified render remains V41 / Actions #100 pending the V43 render.
 
 The source-indexed timeline remains fixed; each revision below is recorded against actual rendered frames and the supplied native preview.
 
@@ -18,7 +18,7 @@ The source-indexed timeline remains fixed; each revision below is recorded again
 - V39 passed all CI gates and restored the translucent directory shelf. Its dry-brush texture improved the paint surface, but review found too many parallel high-contrast upper-sky lines.
 - V40 reduces the upper-sky marks to a few broad irregular watercolor washes, while retaining the source-timed 0/30/60 typing and cursor choreography plus the separate directory shelf. Render [#99](https://github.com/Nolane-x/video/actions/runs/41318630418) passed the 1,119-frame, 1080p/30fps, audio and checksum gates; V40 remains a technical candidate pending full watch-through.
 - V41 rendered successfully in [Actions #100](https://github.com/Nolane-x/video/actions/runs/41320461921). Native-frame review tightened S08 colors and the Any/model/agent order, but found the model type-on starts at frame645, the text must clear as the logo orbit forms at760, and Launch Film begins at769.
-- V42 starts the model type-on at645 and resolves by650, scales/positions the capability words against native frame bounds, replaces the logo row with the orbit by760, and starts Launch Film at769. Its ten-frame pre-roll preserves the established 855/870/885 countdown and 891 full-screen handoff. A new Actions render is required.
+- V42 introduced the model type-on at645, dynamic capability typography, the provider-orbit replacement and Launch Film at769. Actions #101 stopped at a stale validator string that still expected V41's static layout; no render was produced. V43 updates that guard to assert the V42 dynamic layout. The ten-frame pre-roll still preserves the 855/870/885 countdown and 891 full-screen handoff.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.

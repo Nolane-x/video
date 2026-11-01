@@ -67,7 +67,7 @@ need("<Sequence from={0} durationInFrames={4}><Phrase phase={0}/></Sequence>" in
 need("<Sequence from={4} durationInFrames={65}><Phrase phase={1}/></Sequence>" in source, "Any model type-on must start at source frame645 and resolve by 650")
 need("<Sequence from={69} durationInFrames={30}><Phrase phase={2}/></Sequence>" in source, "Any agent must enter at source frame710")
 need("<Sequence from={99} durationInFrames={30}>" in source and "const orbitProgress=e(f,109,119)" in source, "provider logos must form the reference-timed orbit by source frame760")
-need('left:"10%",right:"10%",top:350' in source and "Word size={205}" in source, "Any agent typography must span the source layout")
+need('left:"10%",right:"10%",top:rowTop' in source and "const textSize=phase===2?210+30*(1-e(f,69,79)):210" in source, "Any agent typography must span the source layout")
 need("if(frame>=112)return <CountdownOne frame={frame-112}/>" in source, "full-screen countdown must begin at source frame891")
 need("frame<76?-1:frame<91?3:frame<106?2:1" in source, "number 1 must remain inside the Launch Film preview at frame885")
 need("const CountdownPrism=" in source, "blue extruded countdown prism artwork is missing")
