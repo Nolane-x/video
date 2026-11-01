@@ -1,13 +1,13 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v7",
+  "id": "opendesign-motion-reference-rebuild-v10",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "Supplied MP4 probed directly; chronological contact sheets, 1fps/2fps sheets and native-size Launch film UI frame reviewed.",
-    "constraints": "Recreate original timing, order, typography, poster motifs, UI geometry and cube choreography with original artwork; no source-frame backgrounds or soundtrack reuse."
+    "evidence": "Reference MP4 probed and decoded by exact frame index (0-1118). Frame-indexed contact sheets and selected native-size frames reviewed across all 12 sections, including montage and Launch Film preview states.",
+    "constraints": "Match original frame order, timing, type scale, typography, artwork motifs, interface proportions, provider/icon choreography, camera movement and cube choreography. Use independently authored art; do not claim pixel-identical reconstruction without source assets."
   },
   "output": {
     "durationFrames": 1119,
@@ -80,100 +80,100 @@
       "component": "PosterSequence",
       "posterBeats": [
         [
-          "ClockComic",
-          13
+          "Comic1952",
+          9
+        ],
+        [
+          "Comic1962",
+          10
         ],
         [
           "DotPoster",
-          13
+          20
         ],
         [
           "LightSweep1973",
-          8
+          10
         ],
         [
-          "MarioGamePoster",
-          22
+          "PixelGamePoster",
+          10
         ],
         [
-          "WorldPoster",
-          13
+          "PortfolioFlash",
+          10
         ],
         [
           "MindPoster",
-          13
+          10
         ],
         [
           "RingPoster",
           30
         ],
         [
-          "PosterGrid",
-          13
+          "EditorialPosterGrid",
+          20
         ],
         [
-          "PointCloudPoster",
-          8
+          "DepthField",
+          10
         ],
         [
-          "EasePoster",
-          13
-        ],
-        [
-          "InPoster",
-          7
+          "EaseGreen",
+          10
         ],
         [
           "EasePoster",
-          7
+          10
         ],
         [
           "OutPoster",
-          13
+          10
         ],
         [
           "NeverPoster",
-          13
+          10
         ],
         [
           "LinearPoster",
-          13
+          10
         ],
         [
-          "GreenTransition",
-          7
+          "GreenCircleTransition",
+          10
         ],
         [
           "ClockPoster",
-          13
+          10
         ],
         [
           "StatsPoster",
-          7
-        ],
-        [
-          "TogglePoster",
-          7
+          10
         ],
         [
           "MotionFilmsPoster",
-          8
+          10
         ],
         [
           "EyePoster",
-          15
+          10
         ],
         [
-          "KoalaPoster",
-          8
-        ],
-        [
-          "Comic1952",
-          8
+          "CoursesPoster",
+          10
         ],
         [
           "Future3D",
-          7
+          10
+        ],
+        [
+          "NotText",
+          10
+        ],
+        [
+          "NotText",
+          10
         ]
       ]
     },
@@ -227,11 +227,12 @@
     }
   ],
   "qualityGates": [
-    "12 contiguous sections through frame 1119.",
-    "24 poster beats in order across 279 frames.",
-    "Launch film frame stays fixed during preview changes; countdown remains inside preview.",
-    "One single six-face 3D cube.",
-    "End card includes black mark, OpenDesign Motion and open-design.ai.",
-    "Actions validator, typecheck, 1119-frame verification, loudness and contact sheets required."
+    "Reference analysed by exact decoded frame index; no timestamp-rounding assumptions.",
+    "12 contiguous root sections through frame 1119 at 30fps.",
+    "24 montage beats in exact observed order across 279 frames; frame timing cross-checked against source.",
+    "Gallery uses 5x5 wall composition; montage includes comic, dots, prism, pixel-game, portfolio, mind, rings, editorial grid, particle depth, easing, clock, 96K report, motion films, eye, Courses and Future.",
+    "Any model / Any agent use inline provider medallions and source-like transitions.",
+    "Launch film outer window, pane proportions, prompt composer and 7 individual preview artworks follow sampled source states.",
+    "Single six-face rotating 3D cube and end card; Actions validator, typecheck, 1119-frame verification and audio metadata required."
   ]
 }
