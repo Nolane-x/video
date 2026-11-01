@@ -108,6 +108,13 @@ const CloudSky = ({ frame }: { frame: number }) => {
   color:["#fffaf0","#f4cbb5","#d6e9e9","#f1a99d"][i%4],
   opacity:.12+(i%4)*.055
  }));
+ const lowerPaint=Array.from({length:132},(_,i)=>({
+  x:(i*173)%2100-90,y:722+(i*139)%275,
+  w:26+(i*89)%188,h:4+(i*31)%25,
+  angle:-38+(i%17)*5,
+  color:["#fff8e7","#f7e0cb","#f1b9a8","#e8a59b","#c5dfe2","#a9d4df","#f6c98f"][i%7],
+  opacity:.055+(i%6)*.027
+ }));
  return <AbsoluteFill style={{background:"#75bfe5",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
@@ -147,6 +154,12 @@ const CloudSky = ({ frame }: { frame: number }) => {
      <stop offset=".78" stopColor="#e79aa0" stopOpacity=".45"/>
      <stop offset="1" stopColor="#e9c7b8" stopOpacity=".03"/>
     </linearGradient>
+    <linearGradient id="wc-paint-glaze-v41" x1="0" y1="0" x2="1" y2="1">
+     <stop stopColor="#fff7e7" stopOpacity=".88"/>
+     <stop offset=".35" stopColor="#f5d6c5" stopOpacity=".7"/>
+     <stop offset=".72" stopColor="#e6b5af" stopOpacity=".42"/>
+     <stop offset="1" stopColor="#d7e8e4" stopOpacity=".04"/>
+    </linearGradient>
     <linearGradient id="wc-ridge-far-v40" x1="0" y1="0" x2="0" y2="1">
      <stop stopColor="#347f9f"/>
      <stop offset=".62" stopColor="#1a6891"/>
@@ -165,13 +178,13 @@ const CloudSky = ({ frame }: { frame: number }) => {
     <filter id="wc-wash-soft-v40"><feGaussianBlur stdDeviation="20"/></filter>
     <filter id="wc-wash-texture-v40">
      <feTurbulence type="fractalNoise" baseFrequency=".008 .023" numOctaves="3" seed="151" result="broadNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="broadNoise" scale="34" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation="1.4"/>
+     <feDisplacementMap in="SourceGraphic" in2="broadNoise" scale="48" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation="2.4"/>
     </filter>
     <filter id="wc-cloud-edge-v40">
      <feTurbulence type="fractalNoise" baseFrequency=".021 .047" numOctaves="2" seed="163" result="cloudNoise"/>
-     <feDisplacementMap in="SourceGraphic" in2="cloudNoise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
-     <feGaussianBlur stdDeviation=".75"/>
+     <feDisplacementMap in="SourceGraphic" in2="cloudNoise" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+     <feGaussianBlur stdDeviation="1.5"/>
     </filter>
     <filter id="wc-pigment-v40">
      <feTurbulence type="fractalNoise" baseFrequency=".072 .12" numOctaves="2" seed="73" result="pigmentNoise"/>
@@ -200,38 +213,39 @@ const CloudSky = ({ frame }: { frame: number }) => {
    </g>
 
    <g transform={"translate("+(-drift*.17)+",0)"} filter="url(#wc-cloud-edge-v40)">
-    <path d="M-70 825C-33 797 5 780 52 790C99 752 147 766 178 793C218 774 263 787 289 817C267 845 229 847 193 833C148 858 105 850 67 833C12 853 -36 845 -70 825Z" fill="url(#wc-cloud-light-v40)" opacity=".88"/>
-    <path d="M-20 804C26 779 76 778 116 795" fill="none" stroke="#fffef5" strokeWidth="28" strokeLinecap="round" opacity=".56" filter="url(#wc-wash-soft-v40)"/>
-    <path d="M35 853C98 826 157 831 205 849" fill="none" stroke="#c8e3e6" strokeWidth="15" strokeLinecap="round" opacity=".55"/>
-
-    <path d="M235 849C281 816 324 809 366 829C409 793 463 802 495 829C538 810 578 829 598 851C565 877 527 880 489 864C442 890 395 875 362 858C311 879 269 865 235 849Z" fill="url(#wc-cloud-light-v40)" opacity=".76"/>
-    <path d="M290 824C344 803 390 806 439 829" fill="none" stroke="#fffaf0" strokeWidth="24" strokeLinecap="round" opacity=".55" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M-100 858C-64 818 -12 811 35 818C58 780 101 760 141 779C182 739 224 765 241 796C287 772 328 795 337 825C384 816 429 839 443 867C398 884 355 879 314 868C269 902 208 890 166 873C105 905 10 888 -100 858Z" fill="url(#wc-cloud-light-v40)" opacity=".74"/>
+    <path d="M-40 818C35 784 96 786 157 813C206 833 246 830 295 816" fill="none" stroke="#fffdf2" strokeWidth="43" strokeLinecap="round" opacity=".34" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M-14 869C70 842 118 850 183 870C238 888 288 877 352 852" fill="none" stroke="#d4e8e3" strokeWidth="19" strokeLinecap="round" opacity=".46" filter="url(#wc-wash-texture-v40)"/>
+    <path d="M82 790C130 772 175 778 215 801" fill="none" stroke="#fff9e7" strokeWidth="22" strokeLinecap="round" opacity=".5" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M260 900C331 871 385 877 451 895" fill="none" stroke="#f0c3aa" strokeWidth="31" strokeLinecap="round" opacity=".58" filter="url(#wc-wash-soft-v40)"/>
    </g>
 
    <g transform={"translate("+(drift*.14)+",0)"} filter="url(#wc-cloud-edge-v40)">
-    <path d="M566 871C611 842 657 835 700 853C740 820 787 824 819 848C858 831 902 842 930 868C900 890 862 890 822 875C777 898 733 886 696 871C651 893 597 889 566 871Z" fill="url(#wc-cloud-coral-v40)" opacity=".82"/>
-    <path d="M611 849C661 832 707 836 752 856" fill="none" stroke="#fffaf0" strokeWidth="21" strokeLinecap="round" opacity=".58" filter="url(#wc-wash-soft-v40)"/>
-    <path d="M684 888C739 866 794 874 838 890" fill="none" stroke="#e89e8f" strokeWidth="14" strokeLinecap="round" opacity=".48"/>
-    <path d="M880 850C924 827 971 830 1014 848C1055 829 1095 839 1119 863C1080 885 1042 881 1004 866C960 884 918 871 880 850Z" fill="url(#wc-cloud-light-v40)" opacity=".5"/>
+    <path d="M420 895C479 854 526 837 581 856C633 815 686 824 718 850C768 822 812 842 827 873C870 860 912 878 932 907C875 919 828 911 784 895C737 926 677 916 630 897C564 926 482 920 420 895Z" fill="url(#wc-cloud-coral-v40)" opacity=".66"/>
+    <path d="M450 868C519 840 575 846 627 873C675 895 725 888 773 861" fill="none" stroke="#fff4e7" strokeWidth="32" strokeLinecap="round" opacity=".42" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M546 924C618 893 687 899 742 920C797 939 859 924 919 898" fill="none" stroke="#e89e91" strokeWidth="21" strokeLinecap="round" opacity=".55" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M753 852C814 820 870 834 911 860C953 829 1009 847 1037 874C1083 865 1125 884 1142 908C1089 920 1039 912 1003 894C951 920 884 907 844 886Z" fill="url(#wc-cloud-light-v40)" opacity=".44"/>
    </g>
 
-   <g transform={"translate("+(drift*.1)+",0)"} opacity=".5" filter="url(#wc-wash-soft-v40)">
-    <path d="M-45 781C111 739 237 751 358 782" fill="none" stroke="#f9e8d7" strokeWidth="45" strokeLinecap="round"/>
-    <path d="M280 805C411 768 531 781 653 808" fill="none" stroke="#f0c4b4" strokeWidth="34" strokeLinecap="round"/>
-    <path d="M617 824C752 785 864 800 980 829" fill="none" stroke="#fff0df" strokeWidth="28" strokeLinecap="round"/>
-    <path d="M1010 817C1154 780 1280 800 1395 828" fill="none" stroke="#f7ded0" strokeWidth="26" strokeLinecap="round"/>
+   <g transform={"translate("+(drift*.1)+",0)"} opacity=".54" filter="url(#wc-wash-soft-v40)">
+    <path d="M-95 760C50 731 178 765 307 783C429 800 526 793 634 816" fill="none" stroke="#f6e8d7" strokeWidth="52" strokeLinecap="round"/>
+    <path d="M285 816C414 778 537 794 657 824C742 846 816 843 900 816" fill="none" stroke="#f2c4b1" strokeWidth="38" strokeLinecap="round"/>
+    <path d="M788 855C929 817 1058 829 1173 857C1284 884 1394 866 1511 827" fill="none" stroke="#fff0df" strokeWidth="33" strokeLinecap="round"/>
+    <path d="M1315 831C1450 789 1579 802 1705 835C1788 855 1870 840 1988 792" fill="none" stroke="#f5d2c1" strokeWidth="31" strokeLinecap="round"/>
    </g>
-   <g filter="url(#wc-pigment-v40)" opacity=".64">
+   <g filter="url(#wc-pigment-v40)" opacity=".72">
     {flecks.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.w*.28)+" "+(-p.h*1.5)+" "+p.w+" 0"} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
+    {lowerPaint.map((p,i)=><path key={"lower-"+i} d={"M"+p.x+" "+p.y+"q "+(p.w*.32)+" "+(-p.h*1.4)+" "+p.w+" "+(p.h*.14)} fill="none" stroke={p.color} strokeWidth={p.h} strokeLinecap="round" opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
     {pigment.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={p.color} opacity={p.opacity}/>)}
    </g>
 
    <g transform={"translate("+(drift*.05)+",0)"}>
-    <path d="M-120 968C-6 947 98 925 205 914C323 902 415 883 526 879C635 874 751 897 851 919C958 941 1041 916 1138 903C1235 889 1320 879 1422 888C1546 899 1640 921 1751 914C1850 909 1947 899 2030 903V1080H-120Z" fill="url(#wc-ridge-far-v40)" opacity=".9"/>
-    <path d="M-120 1004C9 984 133 963 253 954C357 946 452 963 563 980C668 996 772 971 872 973C1002 976 1111 995 1233 986C1366 976 1472 954 1596 958C1743 963 1869 947 2030 953V1080H-120Z" fill="url(#wc-ridge-near-v40)"/>
-    <path d="M-100 969C42 941 139 926 230 927C332 928 412 944 504 952C603 960 683 953 766 960" fill="none" stroke="#72b8cc" strokeWidth="8" opacity=".24" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M-120 1018C-8 1003 90 990 194 993C305 997 387 1015 493 1018C602 1020 694 1005 804 1001C913 997 1024 1009 1136 1017C1248 1025 1363 1004 1473 996C1601 986 1727 1000 1820 1009C1904 1017 1971 1012 2030 1005V1080H-120Z" fill="url(#wc-ridge-far-v40)" opacity=".86"/>
+    <path d="M-120 1042C0 1025 113 1015 234 1019C345 1022 450 1040 559 1044C672 1048 785 1027 898 1025C1015 1023 1123 1035 1240 1041C1360 1047 1474 1027 1590 1022C1720 1018 1852 1032 2030 1025V1080H-120Z" fill="url(#wc-ridge-near-v40)"/>
+    <path d="M-90 1007C42 988 159 983 267 997C366 1009 433 1027 522 1031" fill="none" stroke="#75bed0" strokeWidth="11" opacity=".32" filter="url(#wc-wash-soft-v40)"/>
+    <path d="M735 1014C839 997 942 1002 1040 1018C1147 1035 1248 1034 1344 1017" fill="none" stroke="#3d8da5" strokeWidth="7" opacity=".28" filter="url(#wc-wash-soft-v40)"/>
    </g>
-   <rect width="1920" height="1080" filter="url(#wc-paper-v40)" opacity=".072" style={{mixBlendMode:"soft-light"}}/>
+   <rect width="1920" height="1080" filter="url(#wc-paper-v40)" opacity=".12" style={{mixBlendMode:"soft-light"}}/>
   </svg>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 47%,transparent 49%,rgba(247,230,216,.07) 100%)"}}/>
   <Noise opacity={.013}/>
@@ -241,7 +255,10 @@ const CloudSky = ({ frame }: { frame: number }) => {
 const OpeningScene = () => {
  const f=useCurrentFrame();
  const text="Introducing OpenDesign Motion";
- const count=Math.min(text.length,Math.round(Math.max(0,Math.min(1,(f-14)/46))*text.length));
+ const introLength="Introducing".length;
+ const firstPhaseCount=Math.round(Math.max(0,Math.min(1,(f-14)/16))*introLength);
+ const finalPhaseCount=introLength+Math.round(Math.max(0,Math.min(1,(f-30)/30))*(text.length-introLength));
+ const count=f<30?firstPhaseCount:finalPhaseCount;
  const pressed=e(f,76,82);
  const cursor=e(f,48,76,0,1);
  const typing=f>=15;
@@ -249,7 +266,7 @@ const OpeningScene = () => {
   <CloudSky frame={f}/>
   <div style={{position:"absolute",top:225,left:0,right:0,display:"flex",justifyContent:"center",alignItems:"center",color:"#19272c"}}>
    <div style={{fontFamily:"Georgia,serif",fontSize:100,fontWeight:700,letterSpacing:"-.055em",position:"relative",whiteSpace:"nowrap"}}>
-    Let’s create <span style={{position:"relative",display:"inline-block"}}><span style={{position:"absolute",left:-5,right:-8,top:"55%",height:31,background:"#b6e65e",transform:"rotate(-1deg)"}}/><span style={{position:"relative"}}>Motion design</span></span>
+    Let’s create <span style={{position:"relative",display:"inline-block"}}><span style={{position:"absolute",left:-5,right:-8,top:"55%",height:31,background:"#b6e65e",transform:"rotate(-1deg)"}}/><span style={{position:"relative"}}>Motion design</span><span style={{position:"absolute",right:-8,top:"-2%",height:"95%",width:5,background:"#5cda4c"}}/></span>
    </div>
   </div>
   <div style={{position:"absolute",top:350,left:0,right:0,textAlign:"center",color:"rgba(35,52,58,.68)",fontSize:18,letterSpacing:".06em",fontWeight:550}}>Good work starts here</div>
@@ -257,7 +274,7 @@ const OpeningScene = () => {
   <div style={{position:"absolute",left:0,right:0,top:0,height:278,background:"rgba(255,255,255,.97)",borderRadius:24,boxShadow:"0 12px 30px rgba(49,82,91,.06)"}}/>
    <div style={{position:"relative",color:typing?"#263033":"#a2a9a8",fontSize:38,fontWeight:480,letterSpacing:"-.035em",minHeight:52,whiteSpace:"nowrap"}}>
     {typing?text.slice(0,count):"Create a Motion design: Motion graphics, art and product"}
-    {typing?<span style={{display:"inline-block",width:2,height:34,background:count<text.length?"#313a3d":"transparent",verticalAlign:"middle",marginLeft:4}}/>:null}
+    {typing?<span style={{display:"inline-block",width:2,height:34,background:count<introLength?"#313a3d":"#5cda4c",verticalAlign:"middle",marginLeft:4}}/>:null}
    </div>
    <div style={{position:"absolute",bottom:52,left:38,display:"flex",alignItems:"center",gap:18}}>
     <div style={{fontSize:22,color:"#9ca5a4"}}>＋</div><div style={{fontSize:22,color:"#9ca5a4"}}>◉</div>
@@ -272,7 +289,7 @@ const OpeningScene = () => {
     </div>
    </div>
   </div>
-  <div style={{position:"absolute",top:955-275*e(f,42,60),left:1875-305*e(f,42,60),width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
+  <div style={{position:"absolute",top:955-397*e(f,42,60),left:1875-525*e(f,42,60),width:29,height:38,filter:"drop-shadow(0 3px 3px rgba(0,0,0,.3))"}}>
    <svg viewBox="0 0 30 40" width="29" height="38"><path d="M2 2L2 33L10 25L17 38L23 35L16 22L28 22Z" fill="#fff" stroke="#262b2d" strokeWidth="2" strokeLinejoin="round"/></svg>
   </div>
  </AbsoluteFill>;

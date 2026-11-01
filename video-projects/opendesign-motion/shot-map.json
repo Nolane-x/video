@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v42",
+  "id": "opendesign-motion-reference-rebuild-v44",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -371,59 +371,15 @@
   "visualAudit": [
     {
       "frame": 0,
-      "content": "V35 output review: the opening has open blue sky and a low blue shoreline, but its lower-left cloud mass blends into a broad diffuse horizontal band at delivery size. V36 separates the cloud silhouette, cool highlights and warm underpainting."
-    },
-    {
-      "frame": 0,
-      "content": "Native reference frame 0: bright blue/cyan open sky, broad diagonal white/blue brush wisps in the upper half, pink/peach diagonal glazing toward the right, low scattered cream/coral cloud clusters, and a dark navy/teal hill ridge along the bottom."
-    },
-    {
-      "frame": 0,
-      "content": "V37 defect: lower sky clouds repeat as rounded scallops and merge into a pale band; the foreground hill becomes a nearly flat blue strip. V38 target uses separate irregular painted islands and two rolling ridge layers."
-    },
-    {
-      "frame": 0,
-      "content": "V38 review: headline and source-timed cursor/typing now closely match the preview; the sky remains too clean and cloud washes too smooth. V39 strengthens organic dry-brush edges, paper grain and uneven pigment deposits."
-    },
-    {
-      "frame": 0,
-      "content": "V39 output has stronger texture but too many parallel upper-sky streaks. V40 reduces the marks to a few broad broken washes with varied contours and lower contrast, closer to the reference's soft watercolor brushwork."
+      "content": "Opening title with green insertion caret, placeholder prompt, watercolor sky and low painterly cloud bands"
     },
     {
       "frame": 30,
-      "content": "V36 opening target: keep the headline and prompt UI against clear blue negative space; cloud detail stays concentrated below and to the left, with broken wisps rather than continuous horizontal strokes."
-    },
-    {
-      "frame": 30,
-      "content": "V37 target keeps diagonal upper-sky brushwork and a mostly open blue middle; clouds remain low and discontinuous so the title and prompt UI stay legible."
-    },
-    {
-      "frame": 30,
-      "content": "Reference frame30 shows only the typed word 'Introducing' and the cursor remains at the lower-right edge; V38 keys the typewriter and pointer to this state."
-    },
-    {
-      "frame": 30,
-      "content": "V39 retains the source's partial typed word 'Introducing' and bottom-right pointer position while preserving the translucent directory shelf below the main white field."
-    },
-    {
-      "frame": 30,
-      "content": "V40 preserves the V38/V39 source timing: placeholder at start, 'Introducing' around frame30, while cursor remains near bottom-right."
+      "content": "Prompt field fully types Introducing; caret remains green and pointer stays in lower-right travel position"
     },
     {
       "frame": 60,
-      "content": "Reference prompt card remains centered above warm low cloud islands; dark blue hill silhouette stays close to the bottom edge, not a grey horizontal band."
-    },
-    {
-      "frame": 60,
-      "content": "Reference frame60 shows full 'Introducing OpenDesign Motion' text and the pointer over the black submit button; V38 reaches both states at this beat."
-    },
-    {
-      "frame": 60,
-      "content": "V39 retains the complete prompt and places the cursor tip over the submit arrow, matching the reference's final prompt action beat."
-    },
-    {
-      "frame": 60,
-      "content": "V40 preserves full prompt and cursor-to-submit beat; directory shelf remains separate and translucent."
+      "content": "Prompt field reads Introducing OpenDesign Motion with green caret and pointer tip on the submit control"
     },
     {
       "frame": 300,
