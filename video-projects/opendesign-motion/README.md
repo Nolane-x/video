@@ -1,22 +1,20 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V21)
+# OpenDesign Motion — frame-indexed reference reconstruction (V22)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
 This is an independently authored Remotion/SVG/CSS reconstruction, not the original editable project. Source-specific fonts and original layered artwork are unavailable; no pixel-identical claim is made.
 
-## V21 fixes after V20 source-frame review
+## V22 correction: cube timing and face assignment
 
-V20's cube still revealed the portrait face at frame 945 instead of holding it for source frame 960, then brought the blue clock face forward too early. V21 now stages the end sequence as:
-- frames 933–944: separate blue rounded-square emblem tile;
-- frame 945: rounded camera cube begins to rotate;
-- frame 960: portrait screen is the intended front face, black emblem on the adjacent side;
-- frame 975: three-quarter blue/black/lime composition;
-- frame 990: blue/gold clock surface with lime underside;
-- frame 1005: yellow 100K editorial face;
-- frame 1020: black emblem face and cream editorial side;
-- frame 1050 onward: end-card logo and wordmark.
+V21 added the separate emblem tile before the camera cube, but its cube animation incorrectly restarted its keyframe clock after the 12-frame lead-in. V22 keeps the logo tile at frames 933–944 and uses the cube-local clock so source timing aligns:
+- frame 945, cube local frame 0: cube enters;
+- frame 960, local frame 15: portrait face forward, black glyph on adjacent side;
+- frame 990, local frame 45: blue/gold clock top and lime EASE underside;
+- frame 1005, local frame 60: yellow 100K editorial side;
+- frame 1020, local frame 75: black glyph face forward, editorial face adjacent;
+- frame 1050: move to the final brand lockup.
 
-The V20 enlarged end card was slightly less similar in the exact-frame comparison, so V21 restores the previous smaller group sizing while preserving the enlarged V20 MORRO purple symbol.
+The six graphic surfaces are now assigned by physical orientation: portrait front, black symbol side, yellow 100K side, blue clock top, green EASE underside and black symbol rear. The 3D pitch is increased through the middle of the turn so both top and underside surfaces can read.
 
 ## Verified content carried forward
 
@@ -24,6 +22,7 @@ The V20 enlarged end card was slightly less similar in the exact-frame compariso
 - Eye readout at frame 547: 3.7%.
 - Typography transition: frame496 IN, frame498 LINEAR reveal, frame500 LINEAR with green dot, frame510 green ring transition, frame511 inner ring/play mark, frame516 clock.
 - Launch Film preview states at 780/795/810/825/840: ink-wash mountain/play emblem; printed 1962 compass/comic panel; green OPEN DESIGN typography; black/white squiggle field; green EASE typography.
+- MORRO transition: repeated type resolves into a large purple extruded ribbon mark before the app emblem.
 
 ## Timeline
 
@@ -45,4 +44,4 @@ The V20 enlarged end card was slightly less similar in the exact-frame compariso
 
 Render only through `.github/workflows/render-opendesign-motion.yml`. Actions validates the timeline and source map, typechecks TypeScript, renders 1080p30, masters audio with FFmpeg, validates frame count/metadata/audio loudness, computes checksums and produces 1fps/2fps contact sheets.
 
-A successful workflow proves technical validity, not artistic similarity. The rendered MP4 must still be compared with the supplied reference at identical native frame indices and watched as a moving sequence. Key V21 frame checks are 933/945/960/975/990/1005/1020/1050/1118.
+A successful workflow proves technical validity, not artistic similarity. Compare the rendered MP4 with the supplied reference at native frame indices 933/945/960/975/990/1005/1020/1050/1118 and watch the complete sequence for motion and transitions.

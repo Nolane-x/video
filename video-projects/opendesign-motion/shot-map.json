@@ -1,12 +1,12 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v21",
+  "id": "opendesign-motion-reference-rebuild-v22",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns. V20 compared native source frames 897-1118 against the rendered candidate. The V19 sheet exposed a major MORRO logo/app-tile mismatch at frame 933, incorrect visible cube faces at frames 960/990/1020, and an undersized end card. These were rebuilt for V20. V21 compared V20 frame-pairs at 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118. V20 exposed the camera portrait at frame945 but brought the blue clock face forward at frame960; V21 uses an explicit three-stage yaw curve and a separate app-logo tile before cube entry.",
+    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns. V20 compared native source frames 897-1118 against the rendered candidate. The V19 sheet exposed a major MORRO logo/app-tile mismatch at frame 933, incorrect visible cube faces at frames 960/990/1020, and an undersized end card. These were rebuilt for V20. V21 compared V20 frame-pairs at 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118. V20 exposed the camera portrait at frame945 but brought the blue clock face forward at frame960; V21 uses an explicit three-stage yaw curve and a separate app-logo tile before cube entry. V22 corrects the cube's time origin after the 12-frame logo lead-in: cube-local frame 15 aligns to source frame960 portrait, frame45 to source frame990 blue clock top/green underside, and frame75 to source frame1020 black glyph face. The six face assignments now place the blue clock on top, green EASE underneath and yellow 100K editorial on the side.",
     "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts. V19 specifically reproduces the source timing at frames 496-516 and the eight discrete Star History labels at 523-530; the cube uses a reduced turn angle to expose multiple faces. The camera tile must transition from layered MORRO geometry into an illustrated rounded camera cube with a front portrait face, black glyph/arrow side, blue clock/artwork face, lime EASE face and cream editorial face; end lockup must preserve a legible domain capsule."
   },
   "output": {
@@ -261,7 +261,9 @@
     "V20 final end card: logo, OpenDesign Motion wordmark and open-design.ai capsule are scaled to the source visual hierarchy and remain visible through frame 1118.",
     "V21 frame plan: frames 933–944 hold a standalone blue rounded-square emblem, then the camera cube begins at frame 945.",
     "V21 cube face order: portrait screen is the intended front face at frame 960; blue/gold clock and lime EASE surfaces rotate into the three-quarter view by frame 990; the printed 100K/yellow editorial face appears near frame1005; black glyph and cream editorial faces dominate by frame1020.",
-    "V21 retains the V19-sized end lockup while keeping MORRO's enlarged purple mark from V20; source visual comparison decides final sizing rather than assumption."
+    "V21 retains the V19-sized end lockup while keeping MORRO's enlarged purple mark from V20; source visual comparison decides final sizing rather than assumption.",
+    "V22 cube-local timing accounts for the 12-frame app-logo lead-in: frame945 local f=0 begins the cube, frame960 local f=15 reveals portrait, frame990 local f=45 reveals blue clock top with green EASE underside, frame1005 local f=60 reveals yellow 100K side face, and frame1020 local f=75 turns to the black glyph face.",
+    "Cube face orientation: kind0 portrait front; kind1 black glyph side; kind2 yellow 100K editorial side; kind3 blue/gold clock top; kind4 lime EASE underside; kind5 black glyph rear/front during the last turn."
   ],
   "visualAudit": [
     {
@@ -394,7 +396,7 @@
     },
     {
       "frame": 960,
-      "content": "portrait screen face should be front-facing with black glyph side"
+      "content": "portrait screen front face with black glyph on adjacent side"
     },
     {
       "frame": 975,
@@ -402,15 +404,15 @@
     },
     {
       "frame": 990,
-      "content": "blue/gold clock surface with lime EASE underside"
+      "content": "blue/gold clock top and lime EASE underside visible together"
     },
     {
       "frame": 1005,
-      "content": "yellow 100K editorial face rotates into view"
+      "content": "yellow 100K editorial side face visible"
     },
     {
       "frame": 1020,
-      "content": "black glyph face with cream editorial side"
+      "content": "black glyph face front with editorial face adjacent"
     },
     {
       "frame": 1050,

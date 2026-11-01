@@ -1297,31 +1297,31 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
     <path d="M127 90L180 164L165 198Z" fill="#d8dce0"/>
    </svg>
   </div>:
-  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#101f69,#2349aa 47%,#101a61)",overflow:"hidden"}}>
-   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(118deg,rgba(255,255,255,.08) 0 3px,transparent 3px 11px),radial-gradient(circle at 22% 20%,rgba(255,255,255,.22),transparent 35%)"}}/>
-   <svg viewBox="0 0 360 360" width="100%" height="100%">
-    <defs><radialGradient id="cubeClock-v20"><stop stopColor="#f9de85"/><stop offset=".68" stopColor="#dba945"/><stop offset="1" stopColor="#8c6029"/></radialGradient><filter id="cubeTexture-v20"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer></filter></defs>
-    <circle cx="180" cy="173" r="137" fill="url(#cubeClock-v20)" stroke="#f8e2a5" strokeWidth="13"/>
-    <circle cx="180" cy="173" r="111" fill="#183778" stroke="#d7b45d" strokeWidth="12"/>
-    <circle cx="180" cy="173" r="83" fill="none" stroke="#f6d879" strokeWidth="7"/>
-    <path d="M140 94L254 173L159 190L133 262Z" fill="#050915"/>
-    <path d="M140 94L183 165L159 190Z" fill="#fff1ad"/>
-    <rect width="360" height="360" filter="url(#cubeTexture-v20)" opacity=".55"/>
-    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
-   </svg>
-  </div>:
-  kind===3?<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
-   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
-   <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
-   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
-  </div>:
-  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
+  kind===2?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f0d17c,#e8b953 48%,#fff0c6)",color:"#17191c",overflow:"hidden"}}>
    <div style={{position:"absolute",inset:22,border:"8px solid #191a1c",boxShadow:"inset 0 0 0 4px #f8e5b4"}}/>
    <div style={{position:"absolute",left:30,top:25,fontFamily:"Georgia,serif",fontSize:23,fontWeight:800}}>100K</div>
    <div style={{position:"absolute",left:28,right:28,top:74,bottom:90,background:"#f8f1de",border:"7px solid #191a1c",display:"grid",placeItems:"center",transform:"rotate(-2deg)"}}>
     <svg viewBox="0 0 300 230" width="100%" height="100%"><circle cx="150" cy="115" r="90" fill="#e0b64d" stroke="#fff1bf" strokeWidth="12"/><circle cx="150" cy="115" r="65" fill="#132b6e" stroke="#9c7336" strokeWidth="10"/><path d="M130 52L219 113L144 134L124 180Z" fill="#f6dd93"/></svg>
    </div>
    <div style={{position:"absolute",left:25,right:25,bottom:27,fontFamily:"Georgia,serif",fontSize:20,fontWeight:800,textAlign:"center"}}>THE FUTURE / 100K</div>
+  </div>:
+  kind===3?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#101f69,#2349aa 47%,#101a61)",overflow:"hidden"}}>
+   <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(118deg,rgba(255,255,255,.08) 0 3px,transparent 3px 11px),radial-gradient(circle at 22% 20%,rgba(255,255,255,.22),transparent 35%)"}}/>
+   <svg viewBox="0 0 360 360" width="100%" height="100%">
+    <defs><radialGradient id="cubeClock-v22"><stop stopColor="#f9de85"/><stop offset=".68" stopColor="#dba945"/><stop offset="1" stopColor="#8c6029"/></radialGradient><filter id="cubeTexture-v22"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer></filter></defs>
+    <circle cx="180" cy="173" r="137" fill="url(#cubeClock-v22)" stroke="#f8e2a5" strokeWidth="13"/>
+    <circle cx="180" cy="173" r="111" fill="#183778" stroke="#d7b45d" strokeWidth="12"/>
+    <circle cx="180" cy="173" r="83" fill="none" stroke="#f6d879" strokeWidth="7"/>
+    <path d="M140 94L254 173L159 190L133 262Z" fill="#050915"/>
+    <path d="M140 94L183 165L159 190Z" fill="#fff1ad"/>
+    <rect width="360" height="360" filter="url(#cubeTexture-v22)" opacity=".55"/>
+    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
+   </svg>
+  </div>:
+  kind===4?<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
+   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
+   <Word size={102} color="#101713" tracking={-.13} style={{position:"absolute",left:-8,right:-8,top:112,textAlign:"center"}}>EASE</Word>
+   <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0,opacity:.8}}><path d="M-20 300L100 165L175 235L300 40L385 182" fill="none" stroke="#f3ffe9" strokeWidth="12"/><circle cx="180" cy="180" r="112" fill="none" stroke="#173b19" strokeWidth="5"/></svg>
   </div>:
   <div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#111316,#030405)",display:"grid",placeItems:"center"}}>
    <div style={{position:"absolute",inset:25,border:"8px solid #e9eee8",borderRadius:33}}/>
@@ -1333,8 +1333,8 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
- const rotateY=f<12?-90+38*e(f,0,12):f<27?-52:f<57?-52+139*e(f,27,57):87+93*e(f,57,87);
- const rotateX=18+20*Math.sin(Math.min(1,f/87)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
+ const rotateY=f<15?-90+38*e(f,0,15):f<45?-52+139*e(f,15,45):87+93*e(f,45,75);
+ const rotateX=18+44*Math.sin(Math.min(1,f/75)*Math.PI),rotateZ=-4+2*Math.sin(f/18);
  const scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
