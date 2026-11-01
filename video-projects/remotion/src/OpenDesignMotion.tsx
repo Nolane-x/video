@@ -474,17 +474,21 @@ const Comic1962=()=>{
 
 const Future3D = () => {
  const f=useCurrentFrame(),p=e(f,0,15);
- return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 48%,#314de8,#10249b 72%,#07176c)",color:"#fff",overflow:"hidden"}}>
+ const title={position:"absolute" as const,left:-40,right:-40,top:245,textAlign:"center" as const,fontFamily:displayFont,fontSize:380,fontWeight:1000,letterSpacing:"-.105em",lineHeight:.9,whiteSpace:"nowrap" as const};
+ return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 48%,#3755f0,#142aa6 72%,#07176c)",color:"#fff",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <defs><linearGradient id="future-metal-v13" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff"/><stop offset=".28" stopColor="#c9d1d7"/><stop offset=".52" stopColor="#f8f8f5"/><stop offset=".78" stopColor="#99a6ba"/><stop offset="1" stopColor="#f4f4ed"/></linearGradient></defs>
-   {Array.from({length:28},(_,i)=><path key={i} d={"M"+(i*78)+" 0L"+(i*78+450)+" 1080"} stroke="#9eb4ff" strokeWidth="1" opacity=".12"/>)}
+   <defs><pattern id="future-dots-v19" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="3" fill="#a9bdff" opacity=".6"/></pattern></defs>
+   <rect x="0" y="560" width="1920" height="520" fill="url(#future-dots-v19)" opacity=".25"/>
+   {Array.from({length:35},(_,i)=><path key={i} d={"M"+(i*58)+" 0L"+(i*58+430)+" 1080"} stroke="#b4c4ff" strokeWidth="1" opacity=".13"/>)}
    <path d="M0 845Q400 770 800 850T1600 830T1920 845" stroke="#9db4ff" strokeWidth="2" fill="none" opacity=".3"/>
   </svg>
-  <div style={{position:"absolute",left:-20,right:-20,top:265,transform:"translateY("+(1-p)*50+"px)",textAlign:"center",fontFamily:displayFont,fontSize:320,fontWeight:1000,letterSpacing:"-.11em",color:"url(#future-metal-v13)",background:"linear-gradient(180deg,#fff,#c7d0d7 40%,#fff 55%,#8d9caf 83%,#f9f8f2)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #8b9caa) drop-shadow(0 8px 0 #4a5c9a) drop-shadow(0 17px 0 #1d337c) drop-shadow(0 29px 26px rgba(0,0,0,.3)"}}>FUTURE</div>
-  <div style={{position:"absolute",left:0,right:0,top:658,fontSize:57,fontWeight:900,letterSpacing:".025em",textAlign:"center",color:"#fff",textShadow:"0 4px 20px rgba(0,0,0,.28)"}}>IS ALREADY HERE.</div>
+  <div style={{...title,transform:"translateY("+((1-p)*50+54)+"px)",color:"#0b1c70",textShadow:"0 7px 0 #0c1b69,0 17px 0 #0b1855,0 28px 0 #0a1547,0 40px 25px rgba(0,0,0,.4)"}}>FUTURE</div>
+  <div style={{...title,transform:"translateY("+((1-p)*50+29)+"px)",color:"#3456d6",textShadow:"0 4px 0 #1a339e,0 10px 0 #142b87,0 18px 0 #112477"}}>FUTURE</div>
+  <div style={{...title,transform:"translateY("+(1-p)*50+"px)",background:"linear-gradient(180deg,#fff 0%,#ced7df 23%,#f8f8f5 42%,#899bb5 63%,#f6f6f1 76%,#9eacc0 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #8194b0) drop-shadow(0 11px 0 #334c9e) drop-shadow(0 24px 25px rgba(0,0,0,.35)"}}>FUTURE</div>
+  <div style={{position:"absolute",left:0,right:0,top:655,fontSize:62,fontWeight:950,letterSpacing:".04em",textAlign:"center",color:"#fff",textShadow:"0 4px 20px rgba(0,0,0,.28)"}}>IS ALREADY</div>
+  <div style={{position:"absolute",left:0,right:0,top:740,fontSize:31,fontWeight:850,letterSpacing:".38em",textAlign:"center",color:"#c4d1ff"}}>HERE.</div>
  </AbsoluteFill>;
 };
-
 
 const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.012;
@@ -771,13 +775,14 @@ const EaseGreen=()=>{
 };
 
 const GreenCircleTransition=()=>{
- const f=useCurrentFrame(),r=e(f,0,5,0,440),fade=1-e(f,4,5);
+ const f=useCurrentFrame(),r=420-70*e(f,0,1),fade=1-e(f,5,6);
  return <AbsoluteFill style={{...full,background:"#8df04e",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%">
-   <circle cx="960" cy="540" r={r} fill="none" stroke="#f3ffe9" strokeWidth="4" opacity={fade}/>
-   <circle cx="960" cy="540" r={r*.86} fill="none" stroke="#f3ffe9" strokeWidth="2" opacity={fade*.78}/>
-   <circle cx="960" cy="540" r={r*.72} fill="none" stroke="#d5ffc0" strokeWidth="2" opacity={fade*.64}/>
-   <g transform={"translate(960 540) rotate("+(-12+f*7)+") scale("+(.65+.1*f)+")"}><rect x="-28" y="-28" width="56" height="56" rx="9" fill="#111715"/><path d="M-9 -16L17 0L-9 16Z" fill="#f4f7eb"/></g>
+   <circle cx="960" cy="540" r={430} fill="none" stroke="#eaffdf" strokeWidth="3" opacity=".58"/>
+   <circle cx="960" cy="540" r={r} fill="none" stroke="#f5ffed" strokeWidth="4" opacity={fade}/>
+   <circle cx="960" cy="540" r={r*.78} fill="none" stroke="#e7ffda" strokeWidth="2" opacity={fade*.78}/>
+   <g transform={"translate(960 540) rotate(-12)"}><rect x="-24" y="-24" width="48" height="48" rx="9" fill="#111713"/><path d="M-8 -15L15 0L-8 15Z" fill="#eef7e9"/></g>
+   <circle cx="1120" cy="752" r="5" fill="#111713"/>
   </svg>
  </AbsoluteFill>;
 };
@@ -820,12 +825,12 @@ const CoursesPoster=()=>{
 
 const InMetallic=()=>{
  const f=useCurrentFrame(),rise=e(f,0,5,45,0),trail=1-e(f,0,8);
- const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:570,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.8,whiteSpace:"nowrap" as const};
+ const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:545,fontWeight:1000,letterSpacing:"-.045em",lineHeight:.8,whiteSpace:"nowrap" as const};
  return <AbsoluteFill style={{...full,background:"#08090b",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 52%,#22282e,#08090b 70%)"}}/>
   <div style={{...type,color:"#8b939a",transform:"translate(-50%,-50%) translate(-95px,14px)",opacity:.3*trail,filter:"blur(13px)"}}>IN</div>
   <div style={{...type,color:"#737b83",transform:"translate(-50%,-50%) translate(-43px,8px)",opacity:.4*trail,filter:"blur(5px)"}}>IN</div>
-  <div style={{...type,background:"linear-gradient(180deg,#fff 0%,#cfd5d9 18%,#5d666f 38%,#f5f7f8 49%,#8e979f 72%,#f8f8f6 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #abb3ba) drop-shadow(0 10px 0 #545c64) drop-shadow(0 22px 25px rgba(0,0,0,.82)"}}>IN</div>
+  <div style={{...type,background:"linear-gradient(180deg,#fff 0%,#cfd5d9 18%,#5d666f 38%,#f5f7f8 49%,#8e979f 72%,#f8f8f6 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #abb3ba) drop-shadow(0 10px 0 #545c64) drop-shadow(0 22px 25px rgba(0,0,0,.82))"}}>IN</div>
   <div style={{position:"absolute",left:80,bottom:54,fontSize:14,color:"#747c84",letterSpacing:".2em",fontWeight:850}}>IN / METALLIC TYPE</div>
  </AbsoluteFill>;
 };
@@ -861,15 +866,17 @@ const RingPoster = () => {
    <defs>
     <path id="ring-a-ci" d="M960 540m-470 0a470 470 0 1 1 940 0a470 470 0 1 1 -940 0"/>
     <path id="ring-b-ci" d="M960 540m-365 0a365 365 0 1 1 730 0a365 365 0 1 1 -730 0"/>
-    <path id="ring-c-ci" d="M960 540m-260 0a260 260 0 1 1 520 0a260 260 0 1 1 -520 0"/>
+    <path id="ring-c-ci" d="M960 540m-260 0a260 260 0 1 1 520 0a520 520 0 1 1 -520 0"/>
+    <path id="ring-d-ci" d="M960 540m-165 0a165 165 0 1 1 330 0a330 330 0 1 1 -330 0"/>
    </defs>
-   <circle cx="960" cy="540" r="470" fill="none" stroke="#f7f7f2" strokeWidth="6"/>
-   <circle cx="960" cy="540" r="365" fill="none" stroke="#f7f7f2" strokeWidth="4"/>
-   <circle cx="960" cy="540" r="260" fill="none" stroke="#f7f7f2" strokeWidth="4"/>
-   <text fill="#fff" fontSize="64" fontWeight="950" letterSpacing="5"><textPath href="#ring-a-ci">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-   <text fill="#fff" fontSize="48" fontWeight="950" letterSpacing="4"><textPath href="#ring-b-ci">MOTION DESIGN / OPEN DESIGN / FUTURE IS HERE ·</textPath></text>
-   <text fill="#fff" fontSize="34" fontWeight="950" letterSpacing="3"><textPath href="#ring-c-ci">THE FUTURE · THE FUTURE · THE FUTURE ·</textPath></text>
-   <circle cx="960" cy="540" r="134" fill="#fff"/><circle cx="960" cy="540" r="112" fill="#030405"/>
+   <circle cx="960" cy="540" r="470" fill="none" stroke="#f7f7f2" strokeWidth="5"/>
+   <circle cx="960" cy="540" r="365" fill="none" stroke="#f7f7f2" strokeWidth="3"/>
+   <circle cx="960" cy="540" r="260" fill="none" stroke="#f7f7f2" strokeWidth="3"/>
+   <text fill="#fff" fontSize="80" fontFamily="Arial, sans-serif" fontWeight="1000" letterSpacing="5"><textPath href="#ring-a-ci">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
+   <text fill="#fff" fontSize="66" fontFamily="Arial, sans-serif" fontWeight="1000" letterSpacing="4"><textPath href="#ring-b-ci">MOTION DESIGN / OPEN DESIGN / FUTURE IS HERE ·</textPath></text>
+   <text fill="#fff" fontSize="54" fontFamily="Arial, sans-serif" fontWeight="1000" letterSpacing="3"><textPath href="#ring-c-ci">THE FUTURE · THE FUTURE · THE FUTURE ·</textPath></text>
+   <text fill="#fff" fontSize="39" fontFamily="Arial, sans-serif" fontWeight="1000" letterSpacing="2"><textPath href="#ring-d-ci">OPEN DESIGN / OPEN DESIGN /</textPath></text>
+   <circle cx="960" cy="540" r="116" fill="#fff"/><circle cx="960" cy="540" r="92" fill="#030405"/>
   </svg>
  </AbsoluteFill>;
 };
@@ -886,14 +893,17 @@ const NeverPoster = () => {
 };
 
 const LinearPoster = () => {
- const f=useCurrentFrame(),pos=e(f,0,14),trail=1-e(f,0,9);
- return <AbsoluteFill style={{...full,background:"#090b0e",color:"#fff",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"-5%",right:"-5%",top:310,textAlign:"center",transform:"translateX("+(-88*trail)+"px)",opacity:.32*trail,filter:"blur(12px)"}}><Word size={445} color="#dfe3e7" tracking={-.16}>LINEAR</Word></div>
-  <div style={{position:"absolute",left:"-5%",right:"-5%",top:310,textAlign:"center",transform:"translateX("+(-25*trail)+"px)"}}><Word size={445} color="#f1f2f0" tracking={-.16} style={{textShadow:"0 5px 0 #aeb4b8,0 13px 0 #646c73"}}>LINEAR</Word></div>
-  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d={"M80 850C"+(260+pos*35)+" 850 "+(440+pos*50)+" 205 1810 180"} stroke="#e8edf0" strokeWidth="3" fill="none" opacity=".28"/>
-   <path d="M80 870H1840" stroke="#fff" strokeWidth="2" opacity=".13"/>
-  </svg>
+ const f=useCurrentFrame(),resolve=e(f,0,2),dot=e(f,2,4),ghost=1-e(f,0,5);
+ const common={position:"absolute" as const,left:"-4%",right:"-4%",top:305,textAlign:"center" as const,fontFamily:displayFont,fontWeight:1000,letterSpacing:"-.12em",lineHeight:.9};
+ return <AbsoluteFill style={{...full,background:"#0b0d10",color:"#f5f6f3",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 48%,#171b20,#080a0c 70%)"}}/>
+  <div style={{position:"absolute",left:48,top:30,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#7e8589"}}>OPEN DESIGN / MOTION SYSTEM</div>
+  <div style={{position:"absolute",right:48,top:30,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#7e8589"}}>DIRECTION / LINEAR</div>
+  <div style={{...common,fontSize:600,transform:"translateX(-65px)",opacity:(1-resolve)*.45*ghost,filter:"blur(10px)"}}><Word size={600} color="#fff" tracking={-.12}>IN</Word></div>
+  <div style={{...common,fontSize:600,transform:"translateX(-28px)",opacity:1-resolve,filter:"blur(1.5px)"}}><Word size={600} color="#f4f5f4" tracking={-.12}>IN</Word></div>
+  <div style={{...common,fontSize:560,opacity:resolve,transform:"translateX("+(10*(1-resolve))+"px)"}}><Word size={560} color="#f4f5f2" tracking={-.12}>LINEAR.</Word></div>
+  <div style={{position:"absolute",left:"72.3%",top:525,width:30,height:30,borderRadius:"50%",background:"#a3ef4d",opacity:dot,boxShadow:"0 0 20px rgba(163,239,77,.25)"}}/>
+  <div style={{position:"absolute",left:48,right:48,bottom:31,height:2,background:"#5d6569",opacity:.28}}/>
  </AbsoluteFill>;
 };
 
@@ -929,25 +939,30 @@ const ClockPoster = () => {
 };
 
 const StatsPoster = () => {
- const f=useCurrentFrame(),progress=e(f,0,7),count=Math.round(80+16*progress),day=Math.round(88+50*progress),y=486-346*progress;
- return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c7e9e4 0%,#bde6dc 48%,#f0d6c5 70%,#66c2bd 100%)",overflow:"hidden"}}>
+ const f=useCurrentFrame();
+ const counts=[80,82,84,87,91,93,94,96],days=[88,96,104,111,119,126,132,138];
+ const index=Math.max(0,Math.min(7,Math.round(f))),count=counts[index],day=days[index],y=590-5.25*count;
+ return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#bfe9e5 0%,#b9e8de 45%,#e9d5bd 70%,#70c6bd 100%)",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 680Q220 605 430 680T850 685T1250 672T1660 684T1920 670V1080H0Z" fill="#71c5bf" opacity=".74"/>
-   <path d="M0 835Q190 760 390 835T820 828T1260 848T1650 822T1920 840V1080H0Z" fill="#f0cbb2" opacity=".62"/>
-   <path d="M0 950Q230 885 460 950T930 942T1400 950T1920 930V1080H0Z" fill="#4fb6b1" opacity=".38"/>
+   <path d="M0 675Q170 610 360 678T720 680T1100 675T1510 680T1920 670V1080H0Z" fill="#69c4bd" opacity=".72"/>
+   <path d="M0 810Q190 750 375 817T760 817T1150 810T1510 825T1920 800V1080H0Z" fill="#f0cfb3" opacity=".67"/>
+   <path d="M0 935Q205 870 430 934T870 938T1300 925T1700 944T1920 925V1080H0Z" fill="#49b5b2" opacity=".45"/>
+   {Array.from({length:22},(_,i)=><path key={i} d={"M"+(i*105-80)+" 700q 55 -25 105 0t 105 0"} fill="none" stroke="#f1f4e4" strokeWidth="5" opacity=".2"/>)}
   </svg>
-  <div style={{position:"absolute",left:70,top:245,fontFamily:displayFont,fontSize:270,fontWeight:1000,color:"#111315",letterSpacing:"-.13em",lineHeight:.86}}>{count}K</div>
-  <div style={{position:"absolute",left:85,top:525,fontSize:49,fontWeight:850,color:"#303a39"}}>Day {day}</div>
-  <div style={{position:"absolute",left:770,top:145,width:1010,height:750,borderRadius:13,background:"#fff",padding:"34px 42px 30px",boxSizing:"border-box",boxShadow:"0 14px 44px rgba(37,85,92,.16)"}}>
-   <div style={{fontSize:23,fontWeight:900,color:"#202326",marginBottom:17}}>★ Star History</div>
-   <div style={{fontSize:17,fontWeight:750,color:"#45494b",marginBottom:15}}>nexu-io / open-design</div>
-   <svg viewBox="0 0 920 590" width="100%" height="590">
-    {[0,1,2,3,4].map(v=><g key={v}><line x1="70" x2="880" y1={65+v*105} y2={65+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="8" y={72+v*105} fontSize="20" fill="#4a4e50">{100-v*20}K</text></g>)}
-    <path d={"M70 515C135 488 150 390 215 340S302 300 365 260S500 208 555 170S690 110 775 "+y+"L850 "+(y-24)} stroke="#cb4b3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
-    <circle cx="850" cy={y-24} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
-    <text x="70" y="555" fontSize="18" fill="#303638">May</text><text x="230" y="555" fontSize="18" fill="#303638">June</text><text x="390" y="555" fontSize="18" fill="#303638">July</text><text x="545" y="555" fontSize="18" fill="#303638">August</text><text x="700" y="555" fontSize="18" fill="#303638">September</text>
+  <div style={{position:"absolute",left:47,top:255,fontFamily:displayFont,fontSize:275,fontWeight:1000,color:"#111315",letterSpacing:"-.13em",lineHeight:.86,textShadow:"0 4px 0 rgba(0,0,0,.06)"}}>{count}K</div>
+  <div style={{position:"absolute",left:65,top:535,fontSize:51,fontWeight:850,color:"#303a39"}}>Day {day}</div>
+  <div style={{position:"absolute",left:650,top:94,width:1200,height:850,borderRadius:16,background:"#fff",padding:"38px 43px 26px",boxSizing:"border-box",boxShadow:"0 15px 45px rgba(37,85,92,.16)"}}>
+   <div style={{textAlign:"center",fontSize:27,fontWeight:900,color:"#202326",marginBottom:17}}>◉ Star History</div>
+   <div style={{position:"absolute",left:48,top:87,fontSize:18,fontWeight:750,color:"#45494b"}}>nexu-io / open-design</div>
+   <svg viewBox="0 0 1040 590" width="100%" height="590">
+    {[0,1,2,3,4].map(v=><g key={v}><line x1="70" x2="985" y1={65+v*105} y2={65+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="8" y={72+v*105} fontSize="21" fill="#4a4e50">{100-v*20}K</text></g>)}
+    <path d={"M70 575C98 490 132 350 210 300S360 225 455 205S660 175 900 "+y} stroke="#cb4b3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
+    <circle cx="900" cy={y} r="13" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
+    <text x="70" y="560" fontSize="19" fill="#303638">May</text><text x="245" y="560" fontSize="19" fill="#303638">June</text><text x="415" y="560" fontSize="19" fill="#303638">July</text><text x="585" y="560" fontSize="19" fill="#303638">August</text><text x="750" y="560" fontSize="19" fill="#303638">September</text><text x="900" y="560" fontSize="19" fill="#303638">October</text>
+    <text x="5" y="35" fontSize="16" fill="#535a5b">GitHub Stars</text>
+    <text x="520" y="585" textAnchor="middle" fontSize="16" fill="#535a5b">Date</text>
    </svg>
-   <div style={{position:"absolute",left:40,bottom:17,fontSize:15,color:"#737a79"}}>GitHub stars</div>
+   <div style={{position:"absolute",right:25,bottom:12,fontSize:15,color:"#737a79"}}>★ star-history.com</div>
   </div>
  </AbsoluteFill>;
 };
@@ -955,9 +970,9 @@ const StatsPoster = () => {
 const TogglePoster = () => {
  const f=useCurrentFrame(),on=e(f,0,4);
  return <AbsoluteFill style={{...full,background:"#f1f0eb",color:"#151719",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"50%",top:"50%",width:172,height:88,transform:"translate(-50%,-50%)",borderRadius:48,background:"#deded9",boxShadow:"inset 0 3px 9px rgba(0,0,0,.13),0 3px 9px rgba(0,0,0,.08)",padding:8,boxSizing:"border-box"}}>
-   <div style={{position:"absolute",left:8,top:8,width:72,height:72,borderRadius:"50%",background:"#fff",transform:"translateX("+(76*on)+"px)",boxShadow:"0 3px 9px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.8)"}}/>
-   <div style={{position:"absolute",right:28,top:36,width:7,height:7,borderRadius:"50%",background:"#969995",opacity:.45}}/>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:190,height:98,transform:"translate(-50%,-50%)",borderRadius:52,background:"#deded9",boxShadow:"inset 0 3px 9px rgba(0,0,0,.13),0 3px 9px rgba(0,0,0,.08)",padding:8,boxSizing:"border-box"}}>
+   <div style={{position:"absolute",left:8,top:8,width:82,height:82,borderRadius:"50%",background:"#fff",transform:"translateX("+(82*on)+"px)",boxShadow:"0 3px 9px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.8)"}}/>
+   <div style={{position:"absolute",right:31,top:42,width:7,height:7,borderRadius:"50%",background:"#969995",opacity:.45}}/>
   </div>
  </AbsoluteFill>;
 };
@@ -1006,8 +1021,8 @@ const PosterSequence = () => (
   <Sequence from={155} durationInFrames={5}><EasePoster /></Sequence>
   <Sequence from={160} durationInFrames={10}><OutPoster /></Sequence>
   <Sequence from={170} durationInFrames={10}><NeverPoster /></Sequence>
-  <Sequence from={180} durationInFrames={15}><LinearPoster /></Sequence>
-  <Sequence from={195} durationInFrames={5}><GreenCircleTransition /></Sequence>
+  <Sequence from={180} durationInFrames={14}><LinearPoster /></Sequence>
+  <Sequence from={194} durationInFrames={6}><GreenCircleTransition /></Sequence>
   <Sequence from={200} durationInFrames={7}><ClockPoster /></Sequence>
   <Sequence from={207} durationInFrames={8}><StatsPoster /></Sequence>
   <Sequence from={215} durationInFrames={8}><TogglePoster /></Sequence>
@@ -1253,13 +1268,20 @@ const CountdownSequence = () => (
 const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:number})=>{
  const style:React.CSSProperties={position:"absolute",inset:0,width:"100%",height:"100%",overflow:"hidden",borderRadius:44,border:"3px solid rgba(255,255,255,.78)",boxSizing:"border-box",backfaceVisibility:"hidden",transform,boxShadow:"inset 0 0 0 2px rgba(255,255,255,.18),inset 0 -24px 38px rgba(0,0,0,.17)"};
  return <div style={style}>
-  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f7d66a,#cf9c37 48%,#f4d16a)"}}>
-   <div style={{position:"absolute",inset:18,border:"8px solid #fff0bc",borderRadius:28,boxShadow:"inset 0 0 0 3px rgba(82,54,18,.3)"}}/>
-   <div style={{position:"absolute",left:65,top:54,width:230,height:230,borderRadius:"50%",background:"#10151c",border:"14px solid #fff1ba",boxShadow:"0 10px 0 #725127,inset 0 0 0 8px #354358",display:"grid",placeItems:"center"}}>
-    <div style={{width:142,height:142,borderRadius:"50%",background:"radial-gradient(circle at 32% 27%,#7ac5df,#1a3e61 46%,#050a11 72%)",border:"11px solid #d5bc71",boxShadow:"inset 0 0 0 6px #0b1118"}}><div style={{margin:30,width:25,height:25,borderRadius:"50%",background:"#fff",opacity:.78}}/></div>
+  {kind===0?<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#f4d9c7,#eabbaa 54%,#cf9886)"}}>
+   <div style={{position:"absolute",inset:18,border:"8px solid #fff0e1",borderRadius:28,boxShadow:"inset 0 0 0 3px rgba(82,54,42,.24)"}}/>
+   <div style={{position:"absolute",left:34,top:29,fontFamily:displayFont,fontSize:19,fontWeight:950,color:"#3a302c",letterSpacing:".1em"}}>MORRO / CAMERA</div>
+   <div style={{position:"absolute",left:56,right:56,top:88,bottom:74,borderRadius:24,background:"#f7eee4",border:"10px solid #66544b",boxShadow:"0 12px 0 rgba(91,53,39,.18),inset 0 0 0 4px #ddc4b5",display:"grid",placeItems:"center"}}>
+    <div style={{position:"relative",width:190,height:220,borderRadius:"48% 48% 38% 38%",background:"#27282b",border:"8px solid #e4c5ab",boxShadow:"0 8px 0 rgba(54,38,31,.25)"}}>
+     <div style={{position:"absolute",left:26,right:26,top:53,height:135,borderRadius:"48% 48% 42% 42%",background:"#dba17c",boxShadow:"inset 0 -9px 14px rgba(85,46,32,.17)"}}/>
+     <div style={{position:"absolute",left:29,right:29,top:34,height:58,borderRadius:"50% 50% 25% 25%",background:"#282321"}}/>
+     <div style={{position:"absolute",left:65,top:105,width:12,height:12,borderRadius:"50%",background:"#17191b",boxShadow:"48px 0 0 #17191b"}}/>
+     <div style={{position:"absolute",left:77,top:147,width:38,height:17,borderBottom:"5px solid #57372f",borderRadius:"50%"}}/>
+     <div style={{position:"absolute",left:42,right:42,bottom:0,height:42,background:"#397e78",borderRadius:"15px 15px 0 0"}}/>
+    </div>
    </div>
-   <div style={{position:"absolute",right:47,top:54,width:64,height:58,background:"#fff8e8",border:"7px solid #9c773f",borderRadius:12}}><div style={{width:28,height:28,margin:8,background:"#171d26",borderRadius:7}}/></div>
-   <div style={{position:"absolute",left:55,bottom:43,fontFamily:displayFont,fontSize:28,fontWeight:950,color:"#24252a",letterSpacing:".12em"}}>MORRO / 01</div>
+   <div style={{position:"absolute",right:38,top:33,width:43,height:43,borderRadius:12,background:"#fff5e8",border:"6px solid #94725c",boxShadow:"0 3px 0 rgba(65,45,35,.18)"}}/>
+   <div style={{position:"absolute",left:43,right:43,bottom:31,height:16,background:"rgba(48,40,38,.12)",borderRadius:5}}/>
   </div>:
   kind===1?<div style={{position:"absolute",inset:0,background:"#101317",display:"grid",placeItems:"center"}}>
    <div style={{position:"absolute",inset:30,border:"9px solid #e8eee9",borderRadius:44}}/>
@@ -1291,11 +1313,11 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 
 const ProjectCube=()=>{
  const f=useCurrentFrame();
- const rotateY=-28-300*e(f,0,126),rotateX=18+5*Math.sin(f/17),rotateZ=-3+Math.sin(f/18)*2;
- const scale=(.72+.28*e(f,0,18))*(1-.2*e(f,108,126)),size=470,z=size/2;
+ const rotateY=-32-120*e(f,0,126),rotateX=20+7*Math.sin(f/17),rotateZ=-3+Math.sin(f/18)*2;
+ const scale=(.78+.22*e(f,0,18))*(1-.18*e(f,108,126)),size=530,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f3f0e9"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 80%,rgba(25,27,31,.12),transparent 42%)"}}/>
-  <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1450,transform:"translate(-50%,-50%)"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 80%,rgba(25,27,31,.15),transparent 42%)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"47%",width:size,height:size,perspective:1650,transform:"translate(-50%,-50%)"}}>
    <div style={{position:"absolute",inset:0,transformStyle:"preserve-3d",transform:"rotateX("+rotateX+"deg) rotateY("+rotateY+"deg) rotateZ("+rotateZ+"deg) scale("+scale+")"}}>
     <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/>
     <CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/>
@@ -1305,7 +1327,7 @@ const ProjectCube=()=>{
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
    </div>
   </div>
-  <div style={{position:"absolute",left:"50%",top:"80%",width:600,height:95,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.13)",filter:"blur(36px)"}}/>
+  <div style={{position:"absolute",left:"50%",top:"80%",width:650,height:110,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.16)",filter:"blur(38px)"}}/>
  </AbsoluteFill>;
 };
 

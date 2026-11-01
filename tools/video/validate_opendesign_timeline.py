@@ -61,8 +61,8 @@ need(not missing, "components referenced by shot map / montage are missing: " + 
 required=[
     "Launch film", "Make a 10s launch film", "for our app.",
     "DeepSeek V4.1", "Claude Opus 5.5", "CountdownOne",
-    "GalleryPoster index={index%30}", "count=Math.round(80+16*progress)",
-    "day=Math.round(88+50*progress)", "3.7%", "open-design.ai",
+    "GalleryPoster index={index%30}", "const counts=[80,82,84,87,91,93,94,96]",
+    "days=[88,96,104,111,119,126,132,138]", "3.7%", "open-design.ai",
     "rotateY(180deg)", "squiggle-preview-v18", "BPM=114.84375"
 ]
 for token in required:
@@ -72,11 +72,15 @@ for token in required:
 # Lock source-observed values and preview art against silent regressions.
 audit = data.get("visualAudit", [])
 need(any(item.get("frame") == 523 and item.get("content") == "80K / Day 88" for item in audit), "frame 523 must record 80K / Day 88")
+need(any(item.get("frame") == 510 and "ring transition" in item.get("content", "") for item in audit), "frame 510 ring transition observation is missing")
 need(any(item.get("frame") == 547 and "3.7%" in item.get("content", "") for item in audit), "frame 547 must record 3.7%")
-need("count=Math.round(80+16*progress)" in source, "Star History must start at 80K")
-need("day=Math.round(88+50*progress)" in source, "Star History must start at Day 88")
+need("const counts=[80,82,84,87,91,93,94,96]" in source, "Star History source value sequence is missing")
+need("days=[88,96,104,111,119,126,132,138]" in source, "Star History day sequence is missing")
 need("3.7%" in source and "4.7%" not in source, "eye readout must match 3.7%")
 need("squiggle-preview-v18" in source, "black/white squiggle launch preview is missing")
-need("MORRO / 01" in source, "camera/lens cube face artwork is missing")
+need("resolve=e(f,0,2)" in source, "IN to LINEAR transition timing is missing")
+need("r=420-70*e(f,0,1)" in source, "green ring transition timing is missing")
+need("durationInFrames={14}><LinearPoster" in source and "from={194} durationInFrames={6}><GreenCircleTransition" in source, "source-frame 510 typography/ring boundary is incorrect")
+need("MORRO / CAMERA" in source, "camera-screen cube face artwork is missing")
 
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")

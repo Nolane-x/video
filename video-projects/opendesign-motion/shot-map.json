@@ -1,13 +1,13 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v18",
+  "id": "opendesign-motion-reference-rebuild-v19",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840.",
-    "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts."
+    "evidence": "preview.mp4 decoded at native 1920x1080, 30fps, frames 0-1118. Visual audit sampled exact native frames throughout the 28-cut montage and the Launch Film previews. In particular, StatsPoster was checked frame-by-frame at 523-530 (80K/Day88 through 96K/Day138), EyePoster at 547 (3.7%), and Launch Film preview states at 780/795/810/825/840. V19 additionally rechecked exact source frames 496-516 for the IN→LINEAR typography and green-ring transition, frames 523-530 for all eight Star History values, and frames 960-1020 for visible cube-face turns.",
+    "constraints": "Match native source cut frames, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition and camera-like app tile. Artwork is independently-authored SVG/CSS; no pixel-identity claim without original editable source layers/fonts. V19 specifically reproduces the source timing at frames 496-516 and the eight discrete Star History labels at 523-530; the cube uses a reduced turn angle to expose multiple faces."
   },
   "output": {
     "durationFrames": 1119,
@@ -149,11 +149,11 @@
         ],
         [
           "LinearPoster",
-          15
+          14
         ],
         [
           "GreenCircleTransition",
-          5
+          6
         ],
         [
           "ClockPoster",
@@ -246,13 +246,16 @@
     "12 contiguous root sections at 1920x1080, 30fps, 1119 frames.",
     "28 source-indexed montage beats across frames 316-585, 269 frames total; component order and exact nested boundaries are validated against this map.",
     "Native-frame visual observations: frame 353 optical logo and diagonal light beam over dark field with red halftone; frame 368 pixel-game landscape; frame 381 portfolio/project wall; frame 386 repeated MIND type; frame 400 concentric circular typography; frame 446 particle vortex inside a dark app viewport.",
-    "Kinetic typography source sequence: EASE 456-461; metallic IN 461-466; IN. 466-471; green EASE 471-476; OUT 476-486; NEVER 486-496; LINEAR 496-511; green circular mark 511-516.",
+    "Kinetic typography source sequence: EASE 456-461; metallic IN 461-466; IN. 466-471; green EASE 471-476; OUT 476-486; NEVER 486-496; LINEAR 496-510; green circular mark 510-516.",
     "Clock poster 516-523 is ornate gold clock over painted blue texture. StatsPoster is verified frame-by-frame: 523=80K/Day88, 524=82K/Day96, 525=84K/Day104, 526=87K/Day111, 527=91K/Day119, 528=93K/Day126, 529=94K/Day132, 530=96K/Day138.",
     "Toggle at 531-539 is a small isolated switch on a neutral background; eye at 547-555 is a blue iris on black with 3.7% readout.",
     "Gallery at 240-316 contains 30 distinct panels in 6x5 and fades the open-source claim card over the thumbnail wall.",
     "Launch Film preview states at 780/795/810/825/840 were individually sampled: ink-wash mountain/play emblem; printed 1962 compass/comic panel; bright green OPEN DESIGN typography; black/white squiggle pattern; bright green EASE typography. Countdown 3/2/full-screen 1 begins at 855/870/885.",
     "MORRO transition 897-933, rounded camera-like cube/app tile sequence 933-1050, end card 1050-1119.",
-    "Actions verifies source/map identity, typecheck, 1119 decoded frames, 1080p30 metadata, AAC stereo, loudness and checksum. These are technical gates; the rendered artifact still requires side-by-side visual and moving-sequence review."
+    "Actions verifies source/map identity, typecheck, 1119 decoded frames, 1080p30 metadata, AAC stereo, loudness and checksum. These are technical gates; the rendered artifact still requires side-by-side visual and moving-sequence review.",
+    "V19 typography timing: IN is visible at frame 496; LINEAR resolves by frame 500; green dot is present through frame 509; lime field and expanding ring begin at frame 510, with the inner ring/play mark clearly visible at frame 511; clock begins at frame 516.",
+    "Star History exact frame values: 523=80K/Day88, 524=82K/Day96, 525=84K/Day104, 526=87K/Day111, 527=91K/Day119, 528=93K/Day126, 529=94K/Day132, 530=96K/Day138. The displayed values are indexed, not linearly interpolated.",
+    "Cube turn is constrained so the camera-screen face, play icon, clock artwork, green graphic and typography faces remain visible across frames 960-1020 rather than turning nearly face-on."
   ],
   "visualAudit": [
     {
@@ -305,7 +308,27 @@
     },
     {
       "frame": 496,
-      "content": "LINEAR typographic transition"
+      "content": "IN type with motion trail; LINEAR reveal begins"
+    },
+    {
+      "frame": 498,
+      "content": "LINEAR type resolves"
+    },
+    {
+      "frame": 500,
+      "content": "LINEAR with green dot"
+    },
+    {
+      "frame": 509,
+      "content": "LINEAR holds with green dot"
+    },
+    {
+      "frame": 510,
+      "content": "lime-green ring transition starts"
+    },
+    {
+      "frame": 511,
+      "content": "white inner ring and centered play-mark"
     },
     {
       "frame": 516,
@@ -348,8 +371,16 @@
       "content": "green EASE launch preview"
     },
     {
+      "frame": 960,
+      "content": "rotating camera-screen face with illustrated portrait"
+    },
+    {
       "frame": 990,
-      "content": "rotating multi-face camera-like object"
+      "content": "multiple cube faces visible during rotation"
+    },
+    {
+      "frame": 1020,
+      "content": "cube turns to reveal alternate graphic faces"
     }
   ]
 }
