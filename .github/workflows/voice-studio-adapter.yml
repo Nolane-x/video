@@ -47,6 +47,7 @@ jobs:
           test -f integrations/voice-studio/actions_voice_lab.py
           test -f integrations/voice-studio/analyze_actions_voice_lab.py
           test -f integrations/voice-studio/tests/test_analyze_actions_voice_lab.py
+          test -f integrations/voice-studio/ratings/README.md
           test -f .github/workflows/voice-studio-actions-shortlist.yml
           test -f integrations/voice-studio/analyze_actions_voice_lab.py
           test -f integrations/voice-studio/tests/test_analyze_actions_voice_lab.py
