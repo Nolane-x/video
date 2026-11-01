@@ -1,20 +1,18 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V25)
+# OpenDesign Motion — frame-indexed reference reconstruction (V26)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
 This is an independently authored Remotion/SVG/CSS reconstruction, not the original editable project. Source-specific fonts and original layered artwork are unavailable; no pixel-identical claim is made.
 
-## V25 cube refinement
+## V26 cube correction after comparing V24 and V25
 
-V24 improved source-frame similarity across the cube sequence (SSIM gains against V23: +0.034 at frame960, +0.023 at frame990, +0.054 at frame1005, +0.019 at frame1020), but the full-size review showed an oversized EASE panel obscuring too much of the clock at frame990.
+V24 was stronger than V25 on the key cube frames (SSIM: 960 0.8604 vs 0.8415; 990 0.8187 vs 0.7984; 1005 0.8536 vs 0.8240). V25's more extreme negative camera pitch made the main clock face turn away from the viewer. V26 restores a shallow pitch while keeping the better frame-keyed front/side artwork:
+- frame960 / local f15: portrait front, black symbol adjacent;
+- frame990 / local f45: clock stays dominant on the front; blue side graphic remains adjacent; EASE becomes a narrow 10%-height lower fold;
+- frame1005 / local f60: yellow 100K face comes forward with the blue graphic side retained;
+- frame1020 / local f75: black glyph returns to the front.
 
-V25 keeps the source-indexed front artwork and changes the surface hierarchy:
-- frame960 / local f15: portrait front, black emblem on the left side;
-- frame990 / local f45: blue/gold 1889 clock remains the main front face; EASE becomes a narrow folded lower-edge strip rather than a large green panel;
-- frame1005 / local f60: yellow 100K artwork comes forward; adjacent side also switches to the yellow 100K visual;
-- frame1020 / local f75: black glyph face returns to the front.
-
-The camera pitch is now near level at frame960, rises through frame990, then reduces again through frame1020. The neighboring side artwork is frame-keyed to the reference's fast turn: black → blue clock motif → yellow 100K.
+Pitch is now approximately 4° at local f15, 10° at f45, 4° at f60 and 0° at f75. The EASE strip is at 84% vertical position and 10% height to prevent covering the clock.
 
 ## Verified content carried forward
 
@@ -44,4 +42,4 @@ The camera pitch is now near level at frame960, rises through frame990, then red
 
 Render only through `.github/workflows/render-opendesign-motion.yml`. Actions validates the timeline and source map, typechecks TypeScript, renders 1080p30, masters audio with FFmpeg, validates frame count/metadata/audio loudness, computes checksums and produces 1fps/2fps contact sheets.
 
-A successful workflow proves technical validity, not artistic similarity. Compare V25 with the supplied source at frames 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118 and watch the moving sequence.
+A successful workflow proves technical validity, not artistic similarity. Compare the V26 candidate at frames 933/945/960/975/990/1005/1020/1035/1049/1050/1080/1118 and watch the moving sequence.
