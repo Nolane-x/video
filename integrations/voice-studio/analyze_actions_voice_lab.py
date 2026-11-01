@@ -1,4 +1,4 @@
-"""Join the cross-scenario blind ratings to the private Actions voice map.
+"""Join the cross-scenario blind ratings to the separate Actions voice identity map.
 
 This creates a human-reviewed voice shortlist from a completed four-script
 Actions benchmark. It never turns engineering metrics or listener opinions
