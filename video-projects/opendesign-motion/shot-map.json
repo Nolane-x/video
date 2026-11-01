@@ -1,12 +1,12 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v11",
+  "id": "opendesign-motion-reference-rebuild-v13",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "evidence": "The supplied preview.mp4 was decoded at native frame indices 0-1118. Scene cuts and the Launch Film preview states were checked using native-size captures; the montage timings now follow the measured reference cut frames rather than rounded time samples.",
+    "evidence": "Source preview.mp4 decoded frame-by-frame at 30fps, 0-1118. V13 was compared to the source at exact native frame indices. Cut boundaries and montage/preview state changes are mapped to the source frames rather than rounded second samples.",
     "constraints": "Match the observed source timing, typography, poster composition, Launch Film pane geometry and preview order, provider medallions, MORRO transition, camera-like app tile and final lockup using independently authored graphics. Pixel identity is not claimed where source project layers/assets/fonts are unavailable."
   },
   "output": {
@@ -81,15 +81,15 @@
       "posterBeats": [
         [
           "Comic1952",
-          13
+          14
         ],
         [
           "Comic1962",
-          16
+          15
         ],
         [
           "DotPoster",
-          8
+          15
         ],
         [
           "LightSweep1973",
@@ -97,39 +97,39 @@
         ],
         [
           "PixelGamePoster",
-          13
-        ],
-        [
-          "PortfolioFlash",
-          9
+          15
         ],
         [
           "MindPoster",
-          10
+          15
         ],
         [
           "RingPoster",
-          30
+          25
         ],
         [
           "EditorialPosterGrid",
-          24
+          20
+        ],
+        [
+          "DepthField",
+          11
         ],
         [
           "EaseGreen",
-          22
+          7
         ],
         [
           "OutPoster",
-          7
+          8
         ],
         [
           "GreenGhostTransition",
           7
         ],
         [
-          "NeverPoster",
-          5
+          "InPoster",
+          12
         ],
         [
           "LinearPoster",
@@ -137,22 +137,22 @@
         ],
         [
           "GreenCircleTransition",
-          13
-        ],
-        [
-          "StatsPoster",
-          16
-        ],
-        [
-          "MotionFilmsPoster",
-          11
-        ],
-        [
-          "EyePoster",
           5
         ],
         [
-          "CoursesPoster",
+          "ClockPoster",
+          8
+        ],
+        [
+          "TogglePoster",
+          16
+        ],
+        [
+          "EyePoster",
+          16
+        ],
+        [
+          "Comic1952",
           15
         ],
         [
@@ -211,11 +211,12 @@
     }
   ],
   "qualityGates": [
-    "Root cut map: S01 0-83; S02 83-140; S03 140-170; S04 170-240; S05 240-316; S06 316-585; S07 585-641; S08 641-779; S09 779-897; S10 897-933; S11 933-1050; S12 1050-1119.",
-    "20 poster beats in measured order and duration across 269 frames; include 13-frame 1952 comic, 16-frame 1962 comic, 8-frame infinity dots, 15-frame prism, 22-frame EASE, 7-frame OUT, 5-frame NEVER, 16-frame growth card, 5-frame eye and 15-frame Courses/Future.",
-    "Growth card progresses from 80K / Day 88 to 96K / Day 138 while its Star History line advances.",
-    "Launch UI: five preview states at source frames 780, 795, 810, 825, and 840; countdown 3/2/GO starts at 855/870/885 inside preview.",
-    "MORRO typography + transparent prism transitions through the purple extruded mark into the camera-like rounded app tile.",
-    "Actions verifies exact root and nested frame maps, typecheck, 1119 decoded frames, H.264/AAC format, loudness and review contact sheets."
+    "12 contiguous root sections at 1920x1080, 30fps and 1119 decoded frames.",
+    "Montage: 20 exact frame ranges from 316 to 585; comic 1952/1962, dots, prism, pixel game, MIND, rings, poster grid, point cloud, EASE, OUT, IN, LINEAR, green transition, painterly clock, minimal toggle, iris, repeat comic and metallic FUTURE.",
+    "The poster edit matches the reference boundary samples: 330,345,360,375,390,405,430,450,461,468,476,483,495,510,515,523,539,555,570,585.",
+    "Opening composer is visible on frame 0 with the original prompt placeholder, then types Introducing OpenDesign Motion; title/claim typography matches the source scale and reveal timing.",
+    "Launch UI starts at frame 779; preview artwork states occur at 780,795,810,825,840; preview countdown 3 at 855, 2 at 870; full-screen 1 at 885-896.",
+    "MORRO typography-to-app-tile transition and 3D camera-like icon remain aligned to the source; the final lockup is held through frame 1118.",
+    "Run Actions timeline validator, TypeScript typecheck, Remotion render, ffprobe 1119-frame/AAC verification, EBU R128 and contact-sheet QA."
   ]
 }
