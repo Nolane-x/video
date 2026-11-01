@@ -73,7 +73,7 @@ need("fontSize:96,fontWeight:950" in source, "V30 end-card wordmark scale is mis
 need("zoom=1.0+.28*e(f,36,77)" in source, "V29 enlarged project-wall camera is missing")
 need("const dots=Array.from({length:19*31}" in source, "V29 irregular dense infinity-dot field is missing")
 need("ONE IDEA..." in source and "MEANWHILE, IN 1962..." in source and "POP ART" in source and "CLICK!" in source, "V29 source-matched 1962 comic panels are missing")
-need("1.88+0.035*Math.sin(f/7)" in source, "V29 oversized concentric typography crop is missing")
+need("1.92+0.04*Math.sin(f/7)" in source, "V30 oversized concentric typography crop is missing")
 need("shellLeft=118*(1-zoomExit)" in source and "sidebarWidth=frame<106?586-86*zoomExit" in source, "V29 Launch Film original-window-to-Preview morph is missing")
 need("paneRight=frame<106?285*(1-zoomExit):frame<110?109*e(frame,106,110):109+16*e(frame,110,111)" in source, "V29 Preview right-edge frame landmarks are missing")
 need("cardTop=frame<106?89+39*zoomExit:frame<110?128-116*e(frame,106,110):12-12*e(frame,110,111)" in source, "V29 Preview top-edge frame landmarks are missing")
