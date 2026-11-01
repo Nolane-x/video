@@ -659,6 +659,31 @@ const Comic1952 = () => {
  </AbsoluteFill>;
 };
 
+const Comic1962=()=>{
+ const f=useCurrentFrame(),scale=.985+.015*e(f,0,15);
+ return <AbsoluteFill style={{...full,background:"#f7efdb",overflow:"hidden",transform:"scale("+scale+")"}}>
+  <div style={{position:"absolute",inset:25,display:"grid",gridTemplateColumns:"18% 64% 18%",gridTemplateRows:"1fr 1fr",gap:10}}>
+   <div style={{background:"#f1cb42",border:"8px solid #17191b",display:"grid",placeItems:"center",fontFamily:displayFont,fontSize:30,fontWeight:1000,color:"#151719",writingMode:"vertical-rl",letterSpacing:".12em"}}>1962 · POP</div>
+   <div style={{gridColumn:"2",gridRow:"1 / span 2",position:"relative",background:"#77a8e7",border:"9px solid #17191b",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:-45,background:"repeating-conic-gradient(from -8deg at 50% 48%,#fff9e7 0deg 2.7deg,#73a5e4 2.7deg 9deg)"}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#2b66b6 0 4px,transparent 4.6px)",backgroundSize:"23px 23px",opacity:.55}}/>
+    <div style={{position:"absolute",left:"16%",top:"15%",width:"68%",height:"70%",borderRadius:"50%",background:"#f7d747",border:"10px solid #151719",boxShadow:"0 0 0 10px #fff7de"}}/>
+    <div style={{position:"absolute",left:"23%",top:"25%",width:"55%",height:"52%",borderRadius:"50%",background:"#e64335",border:"10px solid #151719",display:"grid",placeItems:"center",boxShadow:"inset 0 0 0 9px #f4d449"}}>
+     <div style={{width:"66%",height:"66%",borderRadius:"50%",background:"#fffdf0",border:"9px solid #151719",display:"grid",placeItems:"center"}}>
+      <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M8 4L94 62L49 67L37 116Z" fill="#101214"/></svg>
+     </div>
+    </div>
+    <div style={{position:"absolute",left:27,top:24,padding:"8px 18px",background:"#f7db47",border:"5px solid #151719",fontSize:23,fontWeight:1000,fontStyle:"italic",color:"#17191b",transform:"rotate(-2deg)"}}>MEANWHILE…</div>
+    <div style={{position:"absolute",right:25,top:22,textAlign:"right",fontFamily:displayFont,fontSize:54,fontWeight:1000,color:"#151719",lineHeight:.83}}>IN<br/>1962</div>
+    <div style={{position:"absolute",right:18,bottom:24,padding:"8px 26px",background:"#f7d747",border:"6px solid #151719",fontFamily:displayFont,fontSize:34,fontWeight:1000,color:"#e64335",clipPath:"polygon(50% 0,61% 18%,82% 4%,81% 29%,100% 39%,84% 56%,97% 78%,71% 74%,60% 100%,44% 82%,20% 98%,23% 70%,0 61%,18% 43%,7% 18%,37% 24%)"}}>CLICK!</div>
+    <div style={{position:"absolute",left:25,right:25,bottom:19,height:5,background:"#151719",opacity:.75}}/>
+   </div>
+   <div style={{background:"#f5d6df",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca4b6 2.3px,transparent 2.8px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:37,fontWeight:1000,color:"#17191b"}}>•••</div>
+   <div style={{background:"#f5d6df",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca4b6 2.3px,transparent 2.8px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:29,fontWeight:1000,color:"#17191b"}}>SFX!</div>
+  </div>
+ </AbsoluteFill>;
+};
+
 const Future3D = () => {
  const f=useCurrentFrame(),p=e(f,0,15);
  return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 48%,#314de8,#10249b 72%,#07176c)",color:"#fff",overflow:"hidden"}}>
