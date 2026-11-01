@@ -955,36 +955,33 @@ const CoursesPoster=()=>{
 };
 
 const PosterSequence = () => (
-  <AbsoluteFill style={full}>
-    <Sequence from={0} durationInFrames={9}><Comic1952 /></Sequence>
-    <Sequence from={9} durationInFrames={10}><Comic1962 /></Sequence>
-    <Sequence from={19} durationInFrames={20}><DotPoster /></Sequence>
-    <Sequence from={39} durationInFrames={10}><LightSweep1973 /></Sequence>
-    <Sequence from={49} durationInFrames={10}><PixelGamePoster /></Sequence>
-    <Sequence from={59} durationInFrames={10}><PortfolioFlash /></Sequence>
-    <Sequence from={69} durationInFrames={10}><MindPoster /></Sequence>
-    <Sequence from={79} durationInFrames={30}><RingPoster /></Sequence>
-    <Sequence from={109} durationInFrames={20}><EditorialPosterGrid /></Sequence>
-    <Sequence from={129} durationInFrames={10}><DepthField /></Sequence>
-    <Sequence from={139} durationInFrames={10}><EaseGreen /></Sequence>
-    <Sequence from={149} durationInFrames={10}><EasePoster /></Sequence>
-    <Sequence from={159} durationInFrames={10}><OutPoster /></Sequence>
-    <Sequence from={169} durationInFrames={10}><NeverPoster /></Sequence>
-    <Sequence from={179} durationInFrames={10}><LinearPoster /></Sequence>
-    <Sequence from={189} durationInFrames={10}><GreenCircleTransition /></Sequence>
-    <Sequence from={199} durationInFrames={10}><ClockPoster /></Sequence>
-    <Sequence from={209} durationInFrames={10}><StatsPoster /></Sequence>
-    <Sequence from={219} durationInFrames={10}><MotionFilmsPoster /></Sequence>
-    <Sequence from={229} durationInFrames={10}><EyePoster /></Sequence>
-    <Sequence from={239} durationInFrames={10}><CoursesPoster /></Sequence>
-    <Sequence from={249} durationInFrames={10}><Future3D /></Sequence>
-    <Sequence from={259} durationInFrames={10}><NotText fullText={false}/></Sequence>
-    <Sequence from={269} durationInFrames={10}><NotText fullText={true}/></Sequence>
-  </AbsoluteFill>
+ <AbsoluteFill style={full}>
+  <Sequence from={0} durationInFrames={2}><Comic1952 /></Sequence>
+  <Sequence from={2} durationInFrames={17}><Comic1962 /></Sequence>
+  <Sequence from={19} durationInFrames={20}><DotPoster /></Sequence>
+  <Sequence from={39} durationInFrames={10}><LightSweep1973 /></Sequence>
+  <Sequence from={49} durationInFrames={10}><PixelGamePoster /></Sequence>
+  <Sequence from={59} durationInFrames={10}><PortfolioFlash /></Sequence>
+  <Sequence from={69} durationInFrames={10}><MindPoster /></Sequence>
+  <Sequence from={79} durationInFrames={30}><RingPoster /></Sequence>
+  <Sequence from={109} durationInFrames={20}><EditorialPosterGrid /></Sequence>
+  <Sequence from={129} durationInFrames={10}><DepthField /></Sequence>
+  <Sequence from={139} durationInFrames={10}><EaseGreen /></Sequence>
+  <Sequence from={149} durationInFrames={10}><EasePoster /></Sequence>
+  <Sequence from={159} durationInFrames={10}><OutPoster /></Sequence>
+  <Sequence from={169} durationInFrames={10}><NeverPoster /></Sequence>
+  <Sequence from={179} durationInFrames={10}><LinearPoster /></Sequence>
+  <Sequence from={189} durationInFrames={10}><GreenCircleTransition /></Sequence>
+  <Sequence from={199} durationInFrames={5}><ClockPoster /></Sequence>
+  <Sequence from={204} durationInFrames={12}><StatsPoster /></Sequence>
+  <Sequence from={216} durationInFrames={10}><MotionFilmsPoster /></Sequence>
+  <Sequence from={226} durationInFrames={10}><EyePoster /></Sequence>
+  <Sequence from={236} durationInFrames={10}><CoursesPoster /></Sequence>
+  <Sequence from={246} durationInFrames={10}><Future3D /></Sequence>
+  <Sequence from={256} durationInFrames={10}><NotText fullText={false}/></Sequence>
+  <Sequence from={266} durationInFrames={13}><NotText fullText={true}/></Sequence>
+ </AbsoluteFill>
 );
-
-const NotJustOpus
-
 const NotJustOpus = () => {
  const f=useCurrentFrame(),p=pop(f,30,1,110,16),shift=e(f,0,24,70,0);
  return <AbsoluteFill style={{...full,background:"#08090b",color:"#fff"}}>
