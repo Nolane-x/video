@@ -1103,10 +1103,13 @@ const PosterSequence = () => (
   <Sequence from={167} durationInFrames={7}><GreenGhostTransition /></Sequence>
   <Sequence from={174} durationInFrames={5}><NeverPoster /></Sequence>
   <Sequence from={179} durationInFrames={15}><LinearPoster /></Sequence>
-  <Sequence from={194} durationInFrames={15}><ClockPoster /></Sequence>
-  <Sequence from={209} durationInFrames={15}><TogglePoster /></Sequence>
-  <Sequence from={224} durationInFrames={15}><EyePoster /></Sequence>
-  <Sequence from={239} durationInFrames={15}><Comic1952 /></Sequence>
+  <Sequence from={194} durationInFrames={5}><GreenCircleTransition /></Sequence>
+  <Sequence from={199} durationInFrames={8}><ClockPoster /></Sequence>
+  <Sequence from={207} durationInFrames={12}><StatsPoster /></Sequence>
+  <Sequence from={219} durationInFrames={5}><TogglePoster /></Sequence>
+  <Sequence from={224} durationInFrames={10}><MotionFilmsPoster /></Sequence>
+  <Sequence from={234} durationInFrames={5}><EyePoster /></Sequence>
+  <Sequence from={239} durationInFrames={15}><CoursesPoster /></Sequence>
   <Sequence from={254} durationInFrames={15}><Future3D /></Sequence>
  </AbsoluteFill>
 );
