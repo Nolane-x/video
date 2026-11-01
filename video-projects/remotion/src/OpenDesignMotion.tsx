@@ -1462,7 +1462,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   {kind===0?dynamicFront:
    kind===1?(frame>=55&&frame<72?yellow:blackSide):
    kind===2?dynamicSide:
-   kind===3?clock:
+   kind===3?(frame<55?clock:blackSide):
    kind===4?ease:
    (frame>=55&&frame<72?yellow:blackMark)}
   <div style={{position:"absolute",inset:0,borderRadius:44,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.28),transparent 28%,rgba(0,0,0,.18) 100%)"}}/>
@@ -1481,8 +1481,8 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
     <CubeFace kind={0} frame={f} transform={"translateZ("+z+"px)"}/>
     <CubeFace kind={1} frame={f} transform={"rotateY(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={2} frame={f} transform={"rotateY(-90deg) translateZ("+z+"px)"}/>
-    <CubeFace kind={3} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
-    <CubeFace kind={4} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={3} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
+    <CubeFace kind={4} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
    </div>
    <div style={{position:"absolute",left:"22%",right:"22%",top:"84%",height:"10%",transform:"translateZ("+(z+5)+"px) perspective(1200px) rotateX(24deg)",transformOrigin:"center top",opacity:e(f,38,42)*(1-e(f,54,58)),clipPath:"polygon(0 0,100% 0,92% 100%,8% 100%)",background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",border:"4px solid #eaffd7",boxShadow:"0 6px 0 rgba(25,85,20,.18)",display:"grid",placeItems:"center"}}>

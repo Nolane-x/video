@@ -27,7 +27,7 @@ V30 follows full-frame inspection of V29's render and exact source frame pairs. 
 ### Launch Film, cube and MORRO
 - Launch Film preview variant 0 now uses textured ink-wash mountains and an imperfect circular play mark.
 - The cube's blue/gold 1889 clock remains on the top plane at source frame990 while a black glyph side faces the camera and the EASE underside is exposed. The black face is kept camera-facing during the clock beat; the mint/yellow 100K GitHub-stars face rotates forward at 1005.
-- V31 tilts the cube toward the camera at frame990 so the blue/gold clock is visibly readable on the top plane while the black glyph faces the lens and the EASE fold stays below. At frame1005 the mint/yellow 100K face uses a dense halftone field and larger lettering; at frame1020 the black glyph face returns.
+- V32 fixes the cube's CSS plane mapping: the blue/gold 1889 clock is visibly on the top plane at frame990 while the black glyph faces the camera and the EASE fold sits below. At frame1005 the mint/yellow 100K halftone face becomes camera-facing and the clock moves to the adjacent side; at frame1020 the black glyph face returns.
 - MORRO V31 now reaches a fully opaque 1,120px cream collage tile at frame905, contracts to a 720px blue/cream letter tile by frame915, then holds the broader lavender folded ribbons at frame925 before the glossy app mark.
 - The end lockup is enlarged: a larger app tile, 96px class OpenDesign Motion wordmark, and prominent open-design.ai capsule.
 
