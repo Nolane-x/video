@@ -26,7 +26,7 @@ root=source.split("export const OpenDesignMotion",1)[1]
 actualRoot=[(int(a),int(b),c) for a,b,c in re.findall(r"<Sequence from=\{(\d+)\} durationInFrames=\{(\d+)\}><([A-Za-z0-9]+)",root)]
 expectedRoot=[(s["startFrame"],s["endFrame"]-s["startFrame"],s["component"]) for s in shots]
 need(actualRoot==expectedRoot,"root JSX differs from shot map")
-for x in ["Launch film","Make a 10s launch film","for our app.","GPT-6-Astra","Claude Opus 5.5","MorroCubeIntro","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962","const DotPoster","const GreenGhostTransition","count=Math.round(80+16*progress)","day=Math.round(88+50*progress)","const CoursesPoster"]:
+for x in ["Launch film","Make a 10s launch film","for our app.","DeepSeek V4.1","Claude Opus 5.5","MorroCubeIntro","const ProjectCube=","open-design.ai","rotateY(180deg)","const Comic1952","const Comic1962","const DotPoster","const GreenGhostTransition","count=Math.round(80+16*progress)","day=Math.round(88+50*progress)","const CoursesPoster"]:
  need(x in source,"missing required source token: "+x)
 need("BPM=114.84375" in score,"score BPM does not match source tempo")
 print("PASS: 12 source-indexed sections / 20 poster beats / 1119 frames / launch preview states / countdown / MORRO tile / end card")
