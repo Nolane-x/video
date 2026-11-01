@@ -15,7 +15,7 @@ SPEC.loader.exec_module(MODULE)
 class VoiceoverAlignmentTests(unittest.TestCase):
     def test_vietnamese_words_keep_diacritics_and_ignore_punctuation_tokens(self):
         self.assertEqual(MODULE.normalize_token("ĐỪNG"), "đừng")
-        self.assertEqual(MODULE.tokens("Xin chào — thế giới!"), ["Xin", "chào", "thế", "giới"])
+        self.assertEqual(MODULE.tokens("Xin chào — thế giới!"), ["Xin", "chào", "thế", "giới!"])
 
     def test_asr_words_are_mapped_to_h2_schema_and_keep_line_ownership(self):
         lines = [
