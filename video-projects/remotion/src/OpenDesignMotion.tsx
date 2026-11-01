@@ -821,6 +821,134 @@ const InPoster=()=>{
  </AbsoluteFill>;
 };
 
+const MindPoster = () => {
+ const f=useCurrentFrame(),rot=f*1.1;
+ return <AbsoluteFill style={{...full,background:"#1b2be4",color:"#fff",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 48%,#4057ff 0%,#1b2be4 56%,#101b9c 100%)"}}/>
+  <div style={{position:"absolute",left:-28,right:-20,top:85,display:"flex",flexDirection:"column",gap:6,transform:"translateX("+Math.sin(f/6)*12+"px)"}}>
+   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
+   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
+   <Word size={220} color="#060a18" tracking={-.1}>MIND</Word>
+  </div>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <defs><linearGradient id="mind-prism-ci" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#f7fbff" stopOpacity=".83"/><stop offset=".38" stopColor="#92caff" stopOpacity=".6"/><stop offset=".72" stopColor="#efb5ff" stopOpacity=".48"/><stop offset="1" stopColor="#fff" stopOpacity=".22"/></linearGradient></defs>
+   <g transform={"translate(960 550) rotate("+rot+")"}>
+    <path d="M0 -315L265 -110L190 240L-90 305L-275 52Z" fill="url(#mind-prism-ci)" stroke="#e4efff" strokeWidth="6"/>
+    <path d="M0 -315L-90 305L-275 52Z" fill="#c6e7ff" opacity=".38"/><path d="M0 -315L265 -110L190 240Z" fill="#fff" opacity=".2"/>
+    <path d="M-275 52L265 -110M-90 305L265 -110" stroke="#fff" strokeWidth="3" opacity=".48"/>
+   </g>
+   <rect x="76" y="74" width="1768" height="932" fill="none" stroke="#b9c9ff" strokeOpacity=".3" strokeWidth="2"/>
+  </svg>
+  <div style={{position:"absolute",left:95,bottom:64,fontSize:18,fontWeight:900,letterSpacing:".18em",color:"#e7edff"}}>MIND / MATERIAL STUDY</div>
+ </AbsoluteFill>;
+};
+
+const RingPoster = () => {
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{...full,background:"#030405",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+f*.12+"deg) scale(1.02)"}}>
+   <defs>
+    <path id="ring-a-ci" d="M960 540m-470 0a470 470 0 1 1 940 0a470 470 0 1 1 -940 0"/>
+    <path id="ring-b-ci" d="M960 540m-365 0a365 365 0 1 1 730 0a365 365 0 1 1 -730 0"/>
+    <path id="ring-c-ci" d="M960 540m-260 0a260 260 0 1 1 520 0a260 260 0 1 1 -520 0"/>
+   </defs>
+   <circle cx="960" cy="540" r="470" fill="none" stroke="#f7f7f2" strokeWidth="6"/>
+   <circle cx="960" cy="540" r="365" fill="none" stroke="#f7f7f2" strokeWidth="4"/>
+   <circle cx="960" cy="540" r="260" fill="none" stroke="#f7f7f2" strokeWidth="4"/>
+   <text fill="#fff" fontSize="64" fontWeight="950" letterSpacing="5"><textPath href="#ring-a-ci">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
+   <text fill="#fff" fontSize="48" fontWeight="950" letterSpacing="4"><textPath href="#ring-b-ci">MOTION DESIGN / OPEN DESIGN / FUTURE IS HERE ·</textPath></text>
+   <text fill="#fff" fontSize="34" fontWeight="950" letterSpacing="3"><textPath href="#ring-c-ci">THE FUTURE · THE FUTURE · THE FUTURE ·</textPath></text>
+   <circle cx="960" cy="540" r="134" fill="#fff"/><circle cx="960" cy="540" r="112" fill="#030405"/>
+  </svg>
+ </AbsoluteFill>;
+};
+
+const NeverPoster = () => (
+ <AbsoluteFill style={{...full,background:"#d8f6ad",color:"#101713",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(120deg,#e5f8c4,#c9ed91)"}}/>
+  <Word size={355} color="#111713" tracking={-.13} style={{position:"absolute",left:"-3%",right:"-3%",top:330,textAlign:"center"}}>NEVER</Word>
+  <div style={{position:"absolute",left:28,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>OPEN DESIGN / MOTION REEL</div>
+  <div style={{position:"absolute",right:28,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>06 — TYPE</div>
+  <div style={{position:"absolute",left:28,right:28,bottom:24,height:2,background:"#274b26",opacity:.45}}/>
+ </AbsoluteFill>
+);
+
+const LinearPoster = () => {
+ const f=useCurrentFrame(),pos=e(f,0,14);
+ return <AbsoluteFill style={{...full,background:"#111315",color:"#fff"}}>
+  <Word size={275} color="#f6f6f0" tracking={-.12} style={{position:"absolute",left:"-4%",right:"-4%",top:335,textAlign:"center"}}>LINEAR</Word>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <path d={"M160 850C"+(300+pos*30)+" 850 "+(410+pos*40)+" 205 1760 180"} stroke="#b9ed4a" strokeWidth="8" fill="none" strokeLinecap="round"/>
+   <path d="M160 870H1760" stroke="#fff" strokeWidth="2" opacity=".25"/>
+   {[0,1,2,3,4].map(i=><circle key={i} cx={160+i*400} cy={850-i*150} r="9" fill="#b9ed4a"/>)}
+  </svg>
+  <div style={{position:"absolute",left:80,bottom:65,fontSize:18,fontWeight:900,letterSpacing:".18em",color:"#b9ed4a"}}>LINEAR / NOT THE SAME AS NATURAL</div>
+ </AbsoluteFill>;
+};
+
+const ClockPoster = () => {
+ const f=useCurrentFrame(),angle=f*12;
+ return <AbsoluteFill style={{...full,background:"#162d82",overflow:"hidden",color:"#f3d47c"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 50%,#29479e,#101b59 72%)"}}/>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <circle cx="960" cy="535" r="350" fill="#dcb746" stroke="#f3d47c" strokeWidth="22"/>
+   <circle cx="960" cy="535" r="305" fill="#17317e" stroke="#b98636" strokeWidth="18"/>
+   <circle cx="960" cy="535" r="242" fill="none" stroke="#f5d77a" strokeWidth="6" strokeDasharray="5 18"/>
+   <circle cx="960" cy="535" r="178" fill="#18316f" stroke="#f1c55c" strokeWidth="8"/>
+   <g transform={"translate(960 535) rotate("+angle+")"}><path d="M-17 -145L20 -145L12 6L-11 6Z" fill="#f7d66a"/><path d="M0 2L130 72L14 22Z" fill="#f7d66a"/></g>
+   <circle cx="960" cy="535" r="25" fill="#e9c34c" stroke="#fff0a0" strokeWidth="7"/>
+   {Array.from({length:60},(_,i)=>{const a=i*Math.PI*2/60;return <line key={i} x1={960+Math.cos(a)*315} y1={535+Math.sin(a)*315} x2={960+Math.cos(a)*330} y2={535+Math.sin(a)*330} stroke="#f8dfa0" strokeWidth={i%5===0?8:3}/>;})}
+  </svg>
+  <div style={{position:"absolute",left:0,right:0,top:45,textAlign:"center",fontFamily:displayFont,fontSize:39,fontWeight:950,letterSpacing:".17em"}}>1889 / MOTION OF TIME</div>
+ </AbsoluteFill>;
+};
+
+const StatsPoster = () => {
+ const f=useCurrentFrame(),progress=e(f,0,7),count=Math.round(84+12*progress),day=Math.round(111+27*progress),y=485-340*progress;
+ return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c6e8e3,#c0e8d9 43%,#edcbb8 66%,#7bcac6)",overflow:"hidden"}}>
+  <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+   <path d="M0 690Q220 620 420 690T840 685T1250 700T1660 680T1920 690V1080H0Z" fill="#65c5bb" opacity=".72"/>
+   <path d="M0 850Q200 780 390 850T820 835T1260 865T1650 830T1920 855V1080H0Z" fill="#f0c6a9" opacity=".6"/>
+  </svg>
+  <div style={{position:"absolute",left:70,top:245,fontFamily:displayFont,fontSize:250,fontWeight:1000,color:"#111315",letterSpacing:"-.12em"}}>{count}K</div>
+  <div style={{position:"absolute",left:245,top:500,fontSize:52,fontWeight:850,color:"#343b38"}}>Day {day}</div>
+  <div style={{position:"absolute",left:665,top:80,width:1180,height:900,borderRadius:28,background:"#fff",padding:"62px 66px 48px",boxSizing:"border-box",boxShadow:"0 18px 55px rgba(37,85,92,.13)"}}>
+   <div style={{textAlign:"center",fontSize:36,fontWeight:900,color:"#202326",marginBottom:42}}>◉ Star History</div>
+   <div style={{position:"absolute",left:105,top:165,fontSize:20,fontWeight:800,color:"#45494b"}}>nexu-io/open-design</div>
+   <svg viewBox="0 0 1040 560" width="100%" height="560">
+    {[0,1,2,3,4].map(v=><g key={v}><line x1="82" x2="1010" y1={80+v*105} y2={80+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="12" y={87+v*105} fontSize="22" fill="#4a4e50">{100-v*20}K</text></g>)}
+    <path d={"M82 500C120 465 135 330 210 280S315 225 375 203S530 150 610 125S760 95 855 "+y+"L930 "+(y-25)} stroke="#c94d3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
+    <circle cx="930" cy={y-25} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
+    <text x="82" y="535" fontSize="20" fill="#303638">May</text><text x="270" y="535" fontSize="20" fill="#303638">June</text><text x="455" y="535" fontSize="20" fill="#303638">July</text><text x="645" y="535" fontSize="20" fill="#303638">August</text><text x="835" y="535" fontSize="20" fill="#303638">September</text><text x="960" y="535" fontSize="20" fill="#303638">October</text>
+   </svg>
+   <div style={{position:"absolute",left:75,bottom:23,fontSize:18,color:"#737a79"}}>GitHub stars</div>
+  </div>
+ </AbsoluteFill>;
+};
+
+const TogglePoster = () => {
+ const f=useCurrentFrame(),on=e(f,0,4);
+ return <AbsoluteFill style={{...full,background:"#f5f5f0",color:"#151719"}}>
+  <div style={{position:"absolute",left:360,top:220,width:1200,height:640,borderRadius:30,background:"#fff",boxShadow:"0 25px 75px rgba(0,0,0,.13)",padding:"70px 80px",boxSizing:"border-box"}}>
+   <div style={{fontSize:50,fontWeight:900}}>Motion preferences</div>
+   <div style={{marginTop:58,fontSize:29,color:"#737978"}}>Enable natural motion</div>
+   <div style={{position:"absolute",left:78,right:78,top:258,height:2,background:"#e7e9e7"}}/>
+   <div style={{position:"absolute",left:78,right:78,top:315,fontSize:27,color:"#343a3b"}}>Reduce unnecessary movement</div>
+   <div style={{position:"absolute",right:85,top:306,width:146,height:72,borderRadius:40,background:"#20252a",padding:7,boxSizing:"border-box"}}>
+    <div style={{width:58,height:58,borderRadius:"50%",background:"#fff",transform:"translateX("+(54*on)+"px)",boxShadow:"0 3px 8px rgba(0,0,0,.2)"}}/>
+   </div>
+   <div style={{position:"absolute",left:78,bottom:55,fontSize:19,color:"#8b9290",letterSpacing:".1em"}}>ACCESSIBILITY / SYSTEM</div>
+  </div>
+ </AbsoluteFill>;
+};
+
+const EyePoster = () => (
+ <AbsoluteFill style={full}>
+  <GlitchPoster/>
+  <div style={{position:"absolute",left:100,bottom:75,fontFamily:displayFont,fontSize:31,fontWeight:950,color:"#eaf3ff"}}>4.7%</div>
+ </AbsoluteFill>
+);
+
 const PosterSequence = () => (
  <AbsoluteFill style={full}>
   <Sequence from={0} durationInFrames={2}><GalleryWall showClaim={false}/></Sequence>
