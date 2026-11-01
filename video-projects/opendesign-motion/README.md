@@ -9,7 +9,7 @@ This is an independently authored Remotion/SVG/CSS reconstruction, not the origi
 V30 follows full-frame inspection of V29's render and exact source frame pairs. It is a broad visual-QA pass, not just another timing-only edit.
 
 ### Opening and gallery
-- The opening sky is now built from layered watercolor cloud washes, noisy/displaced brush edges and pastel warm/cool streaks. The horizon is lowered so the blue shoreline no longer occupies the bottom third.
+- The opening sky uses irregular layered watercolor cloud masses, displaced soft edges, scattered warm/cool brush washes and subtle paper grain; the blue shoreline remains low. V33 further removes the regular scalloped repetition and gives the clouds a more organic painterly silhouette. The MOTION title letters are slightly smaller/less tightly tracked to keep the staggered 3D reveal readable.
 - The project wall has a stronger camera angle and diagonal crop, instead of appearing nearly front-on.
 - The 1962 comic target is a circular red/cream pop-art mark with a yellow radial halo, replacing the rounded-square center.
 - The 1965 Infinity dots mark is circular with yellow/red rings and black speckling on the irregular cream-white dot field.

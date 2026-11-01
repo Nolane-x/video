@@ -90,39 +90,49 @@ const PlayGlyph = ({ size = 54, color = "#fff" }: { size?: number; color?: strin
 );
 
 const CloudSky = ({ frame }: { frame: number }) => {
- const drift=frame*.16;
+ const drift=frame*.11,breath=1+.006*Math.sin(frame/19);
+ const wash=Array.from({length:36},(_,i)=>{
+  const x=(i*257)%2060-70,y=70+(i*137)%560,w=110+(i*43)%260,h=24+(i*19)%74;
+  const tone=i%4===0?"#fff8ee":i%4===1?"#e2f0f2":i%4===2?"#c6dfe9":"#f5d2c4";
+  return {x,y,w,h,angle:((i%7)-3)*5,tone,opacity:.09+(i%5)*.025};
+ });
  return <AbsoluteFill style={{background:"#80bce3",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <linearGradient id="wc-sky-v30" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#69b4e5"/><stop offset=".48" stopColor="#b8d8e8"/><stop offset=".72" stopColor="#f1d9cd"/><stop offset="1" stopColor="#efbda7"/></linearGradient>
-    <linearGradient id="wc-white-v30" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff" stopOpacity=".86"/><stop offset=".55" stopColor="#fff8ef" stopOpacity=".45"/><stop offset="1" stopColor="#f7e8df" stopOpacity="0"/></linearGradient>
-    <linearGradient id="wc-warm-v30" x1="0" x2="1"><stop stopColor="#f4b9a4" stopOpacity="0"/><stop offset=".42" stopColor="#fff0d8" stopOpacity=".78"/><stop offset=".66" stopColor="#f4c5ab" stopOpacity=".7"/><stop offset="1" stopColor="#fff2e2" stopOpacity="0"/></linearGradient>
-    <filter id="wc-soft-v30"><feGaussianBlur stdDeviation="26"/></filter>
-    <filter id="wc-cloud-edge-v30"><feTurbulence type="fractalNoise" baseFrequency=".009 .025" numOctaves="2" seed="12" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="20" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="wc-grain-v30"><feTurbulence type="fractalNoise" baseFrequency=".74" numOctaves="2" seed="5"/><feColorMatrix type="saturate" values="0"/></filter>
+    <linearGradient id="wc-sky-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#70b8e5"/><stop offset=".36" stopColor="#a9d1e5"/><stop offset=".64" stopColor="#e6dcd2"/><stop offset=".83" stopColor="#f0c5b2"/><stop offset="1" stopColor="#d9ad9f"/></linearGradient>
+    <linearGradient id="wc-high-cloud-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fffdf4" stopOpacity=".82"/><stop offset=".46" stopColor="#fff8ef" stopOpacity=".52"/><stop offset="1" stopColor="#ecf2ed" stopOpacity=".12"/></linearGradient>
+    <linearGradient id="wc-cool-cloud-v33" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#e7f1f3" stopOpacity=".84"/><stop offset=".53" stopColor="#bedbe6" stopOpacity=".52"/><stop offset="1" stopColor="#9fc9da" stopOpacity=".08"/></linearGradient>
+    <linearGradient id="wc-warm-cloud-v33" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fff0df" stopOpacity=".12"/><stop offset=".45" stopColor="#f7d1bd" stopOpacity=".54"/><stop offset="1" stopColor="#f0b9a5" stopOpacity=".12"/></linearGradient>
+    <filter id="wc-edge-v33"><feTurbulence type="fractalNoise" baseFrequency=".012 .031" numOctaves="3" seed="22" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="21" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="wc-soft-v33"><feGaussianBlur stdDeviation="28"/></filter>
+    <filter id="wc-grain-v33"><feTurbulence type="fractalNoise" baseFrequency=".58" numOctaves="2" seed="7"/><feColorMatrix type="saturate" values="0"/></filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#wc-sky-v30)"/>
-   <g transform={"translate("+(-drift)+",0)"} filter="url(#wc-cloud-edge-v30)" opacity=".85">
-    <path d="M-120 198C25 80 186 64 328 139C433 44 606 54 704 165C835 72 990 84 1104 176C1225 69 1411 73 1534 181C1675 91 1820 111 2040 194L2040 350C1830 301 1700 314 1530 286C1394 331 1224 318 1086 280C932 353 775 337 660 280C505 352 344 338 227 282C105 323 -10 316 -120 286Z" fill="url(#wc-white-v30)"/>
-    <path d="M-90 382C65 281 207 298 324 370C454 277 597 287 737 384C856 293 1012 299 1137 383C1283 280 1430 289 1566 391C1702 311 1864 314 2010 404L2010 532C1810 482 1660 489 1525 466C1388 518 1253 502 1124 464C965 525 814 513 690 464C528 532 378 518 250 465C120 507 3 494 -90 462Z" fill="#e6f0ed" opacity=".42"/>
+   <rect width="1920" height="1080" fill="url(#wc-sky-v33)"/>
+   <g transform={"translate("+(-drift)+",0) scale("+breath+")"} filter="url(#wc-soft-v33)" opacity=".82">
+    <path d="M-180 236C-115 128 4 90 115 118C185 36 323 22 418 90C505 12 657 36 710 125C821 53 962 70 1035 164C1137 65 1282 44 1370 129C1482 33 1630 51 1715 143C1810 85 1955 113 2090 216L2090 388C1944 335 1812 358 1682 318C1562 389 1403 364 1306 317C1188 398 1034 378 938 317C812 400 664 377 563 312C431 382 278 376 188 314C68 366 -62 348 -180 326Z" fill="url(#wc-high-cloud-v33)"/>
+    <path d="M-120 427C-25 331 91 319 192 353C275 261 401 264 489 340C609 264 734 284 809 357C912 267 1044 274 1136 358C1242 267 1378 271 1470 365C1586 273 1720 282 1812 367C1924 324 2018 352 2100 422L2100 552C1962 512 1845 524 1725 490C1594 552 1462 539 1355 493C1231 560 1092 546 1000 493C877 561 737 540 644 493C512 562 374 542 278 492C153 536 22 518 -120 507Z" fill="url(#wc-cool-cloud-v33)"/>
    </g>
-   <g transform={"translate("+(drift*.45)+",0)"} filter="url(#wc-soft-v30)" opacity=".88">
-    <path d="M-80 620C55 522 190 560 307 628C431 533 586 552 704 651C837 545 983 562 1106 650C1240 548 1399 559 1515 658C1660 556 1816 568 2000 650L2000 850L-80 855Z" fill="#f5dfd3"/>
-    <path d="M-110 710C20 630 170 635 300 710C445 607 585 620 716 721C848 618 1010 628 1124 723C1252 620 1410 628 1545 730C1690 638 1850 650 2010 733L2010 875L-110 880Z" fill="url(#wc-warm-v30)"/>
-    <path d="M-80 790C40 720 178 725 302 790C433 717 565 720 700 799C829 721 974 730 1102 805C1238 728 1382 733 1510 807C1630 747 1810 750 2010 820L2010 918L-80 920Z" fill="#efb5a2" opacity=".36"/>
+   <g transform={"translate("+(drift*.36)+",0)"} filter="url(#wc-edge-v33)" opacity=".76">
+    <path d="M-110 275C-84 215 7 191 83 220C122 165 203 157 260 195C317 144 415 152 457 209C534 159 631 180 662 235C740 194 833 216 869 280C812 345 737 352 665 323C590 382 490 369 425 324C344 365 266 355 214 319C134 365 32 346 -110 333Z" fill="#f4f7f0" opacity=".65"/>
+    <path d="M720 230C767 165 858 156 922 198C978 126 1081 125 1140 183C1210 124 1305 147 1349 206C1439 156 1523 179 1569 235C1647 186 1752 209 1812 276C1755 349 1666 353 1594 315C1512 370 1419 356 1363 319C1279 371 1182 359 1124 318C1033 361 945 345 896 306C823 345 748 315 720 230Z" fill="#fff8eb" opacity=".53"/>
+    <path d="M-80 500C-22 442 59 437 118 468C184 414 269 416 330 464C398 415 497 420 540 475C616 445 705 462 752 515C681 570 602 583 535 550C461 596 380 585 326 548C241 596 152 578 101 540C23 574 -39 553 -80 500Z" fill="#e4eff1" opacity=".5"/>
+    <path d="M1120 490C1174 427 1256 427 1318 467C1377 414 1476 426 1526 481C1592 439 1682 446 1725 498C1794 455 1882 471 1960 538C1886 597 1805 599 1736 565C1657 611 1574 597 1519 561C1438 604 1353 585 1306 551C1230 587 1153 557 1120 490Z" fill="#fff3e4" opacity=".48"/>
    </g>
-   <g transform={"translate("+(drift*.45)+",0)"} fill="none" strokeLinecap="round" filter="url(#wc-soft-v30)">
-    <path d="M-80 115C190 38 360 82 540 142S850 193 1060 114S1460 76 1660 135S1900 138 2050 102" stroke="#fff" strokeWidth="20" opacity=".38"/>
-    <path d="M-80 470C170 393 338 410 516 475S835 522 1027 448S1430 398 1630 472S1900 478 2040 442" stroke="#fff8ec" strokeWidth="27" opacity=".48"/>
-    <path d="M-80 590C110 520 300 535 450 593S780 654 980 575S1350 532 1550 595S1870 602 2040 560" stroke="#f5c6ac" strokeWidth="31" opacity=".42"/>
+   <g filter="url(#wc-soft-v33)" opacity=".55">
+    {wash.map((p,i)=><ellipse key={i} cx={p.x} cy={p.y} rx={p.w/2} ry={p.h/2} fill={p.tone} opacity={p.opacity} transform={"rotate("+p.angle+" "+p.x+" "+p.y+")"}/>)}
    </g>
-   <path d="M0 952C180 930 325 946 470 932C620 918 780 954 940 932C1100 910 1260 947 1410 930C1590 910 1760 934 1920 915V1080H0Z" fill="#7db2c4" opacity=".22"/>
-   <path d="M0 1004C190 970 320 1004 480 984C645 965 790 1010 960 986C1120 965 1280 1002 1450 985C1625 967 1790 987 1920 970V1080H0Z" fill="#286f9b" opacity=".48"/>
-   <path d="M0 1044C190 1020 345 1043 520 1028C690 1013 830 1048 1000 1031C1175 1015 1338 1046 1510 1028C1680 1012 1810 1034 1920 1020V1080H0Z" fill="#1d5b86" opacity=".5"/>
-   <rect width="1920" height="1080" filter="url(#wc-grain-v30)" opacity=".085" style={{mixBlendMode:"soft-light"}}/>
+   <g transform={"translate("+(drift*.22)+",0)"} fill="none" strokeLinecap="round" filter="url(#wc-soft-v33)">
+    <path d="M-80 675C115 575 245 602 390 660S680 741 858 660S1192 590 1372 653S1730 720 2010 624" stroke="#fff0df" strokeWidth="49" opacity=".32"/>
+    <path d="M-90 755C120 681 260 696 390 742S690 818 882 747S1220 681 1390 743S1724 797 2010 711" stroke="#f3c7b1" strokeWidth="62" opacity=".35"/>
+    <path d="M-80 835C180 770 337 785 480 830S800 881 980 831S1322 778 1506 833S1790 865 2010 797" stroke="#f9e3d5" strokeWidth="43" opacity=".29"/>
+   </g>
+   <path d="M0 920C190 886 321 914 480 896C647 878 799 922 967 900C1125 879 1300 914 1466 895C1642 875 1790 902 1920 884V1080H0Z" fill="#9bbfca" opacity=".3"/>
+   <path d="M0 968C185 934 338 961 490 948C658 932 804 975 971 952C1128 934 1282 963 1450 944C1619 925 1786 954 1920 936V1080H0Z" fill="#6598b0" opacity=".44"/>
+   <path d="M0 1020C180 990 330 1016 488 1003C650 989 817 1022 980 1008C1150 991 1316 1018 1490 1001C1650 985 1800 1007 1920 993V1080H0Z" fill="#356f93" opacity=".55"/>
+   <rect width="1920" height="1080" filter="url(#wc-grain-v33)" opacity=".06" style={{mixBlendMode:"soft-light"}}/>
   </svg>
-  <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.04),transparent 55%,rgba(255,216,199,.13))"}}/>
-  <Noise opacity={.018}/>
+  <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 52%,rgba(255,214,195,.09))"}}/>
+  <Noise opacity={.012}/>
  </AbsoluteFill>;
 };
 
@@ -175,7 +185,7 @@ const HeroTitle = () => {
    {letters.map((ch,i)=>{
     const lag=i*2.1,enter=e(f,lag,lag+14),swing=Math.sin((f-lag)*.18)*5;
     const colors=["#fff","#fff","#fff","#f8f1e8","#fff","#fff"];
-    return <div key={i} style={{fontFamily:displayFont,fontSize:320,fontWeight:1000,letterSpacing:"-.11em",lineHeight:.85,color:colors[i],transform:"translateY("+(1-enter)*(-180+swing*7)+"px) translateX("+(i===3?0:0)+"px) rotateY("+(i===3?-18:0)+"deg) rotateX("+(i===3?8:0)+"deg)",textShadow:"1px 1px 0 #e0e7e8,3px 4px 0 #b6cbd2,6px 7px 0 #8eafbb,10px 12px 0 #5e8ba0,16px 20px 0 #345d75,24px 31px 33px rgba(25,62,83,.3)",marginLeft:i===0?0:-12}}>{ch}</div>;
+    return <div key={i} style={{fontFamily:displayFont,fontSize:294,fontWeight:1000,letterSpacing:"-.075em",lineHeight:.85,color:colors[i],transform:"translateY("+(1-enter)*(-180+swing*7)+"px) translateX("+(i===3?0:0)+"px) rotateY("+(i===3?-18:0)+"deg) rotateX("+(i===3?8:0)+"deg)",textShadow:"1px 1px 0 #e0e7e8,3px 4px 0 #b6cbd2,6px 7px 0 #8eafbb,10px 12px 0 #5e8ba0,16px 20px 0 #345d75,24px 31px 33px rgba(25,62,83,.3)",marginLeft:i===0?0:-6}}>{ch}</div>;
    })}
   </div>
   <div style={{position:"absolute",left:0,right:0,bottom:89,textAlign:"center",color:"#fff",fontSize:18,fontWeight:800,letterSpacing:".24em",opacity:fadeOut(f,47,7),textShadow:"0 2px 12px rgba(0,0,0,.16)"}}>A NEW CREATIVE WORKFLOW</div>
