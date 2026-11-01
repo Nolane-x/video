@@ -506,22 +506,23 @@ const InPoster = () => {
   );
 };
 
+const GreenGhostTransition=()=>{
+ const f=useCurrentFrame(),x=e(f,0,7,-180,80);
+ return <AbsoluteFill style={{...full,background:"#d8f6ad",overflow:"hidden"}}>
+  <div style={{position:"absolute",left:90,bottom:-90,fontFamily:displayFont,fontSize:680,fontWeight:950,lineHeight:.8,color:"#158324",transform:"translateX("+x+"px)",letterSpacing:"-.15em",textShadow:"12px 0 0 rgba(36,155,53,.35),24px 0 0 rgba(36,155,53,.25),36px 0 0 rgba(36,155,53,.15)"}}>N</div>
+  <div style={{position:"absolute",left:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>OPEN DESIGN / MOTION REEL — 2026</div>
+  <div style={{position:"absolute",right:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>06 — KINETIC TYPE</div>
+  <div style={{position:"absolute",left:26,right:26,bottom:24,height:2,background:"#274b26",opacity:.45}}/>
+ </AbsoluteFill>;
+};
+
 const NeverPoster = () => (
-  <AbsoluteFill style={{ ...full, background: "#b9f17a", color: "#101713" }}>
-    <div style={{ position: "absolute", inset: 0, opacity: .35, backgroundImage: "repeating-linear-gradient(0deg,transparent 0 48px,rgba(17,26,18,.13) 49px 51px)" }} />
-    <div style={{ position: "absolute", top: -20, left: -20, opacity: .13 }}>
-      <Word size={140} color="#16231b">NEVER NEVER</Word>
-      <Word size={140} color="#16231b">NEVER NEVER</Word>
-      <Word size={140} color="#16231b">NEVER NEVER</Word>
-      <Word size={140} color="#16231b">NEVER NEVER</Word>
-    </div>
-    <div style={{ position: "absolute", left: 85, right: 85, top: 360, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      <Word size={205} color="#121713">NEVER</Word>
-      <div style={{ width: 3, height: 210, background: "#121713", opacity: .35 }} />
-      <Word size={195} color="#121713">NEVER</Word>
-    </div>
-    <div style={{ position: "absolute", left: 92, bottom: 84, fontSize: 18, fontWeight: 900, letterSpacing: ".2em" }}>NOT LINEAR / NOT STATIC</div>
-  </AbsoluteFill>
+ <AbsoluteFill style={{...full,background:"#d7f7ae",color:"#101713",overflow:"hidden"}}>
+  <Word size={340} color="#111713" tracking={-.13} style={{position:"absolute",left:"-2%",right:"-2%",top:340,textAlign:"center"}}>NEVER</Word>
+  <div style={{position:"absolute",left:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>OPEN DESIGN / MOTION REEL — 2026</div>
+  <div style={{position:"absolute",right:25,top:28,fontSize:15,fontWeight:900,letterSpacing:".18em",color:"#304a24"}}>06 — KINETIC TYPE</div>
+  <div style={{position:"absolute",left:26,right:26,bottom:24,height:2,background:"#274b26",opacity:.45}}/>
+ </AbsoluteFill>
 );
 
 const LinearPoster = () => {
@@ -588,26 +589,32 @@ const EyePoster = () => {
 };
 
 const Comic1952 = () => {
- const f=useCurrentFrame(),n=e(f,0,2);
- return <AbsoluteFill style={{...full,background:"#f1e7d2",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,display:"grid",gridTemplateColumns:"1fr 1.12fr 1fr"}}>
-   <div style={{position:"relative",background:"#d64c8f",borderRight:"9px solid #17191b"}}>
-    <div style={{position:"absolute",left:46,top:65,fontFamily:"Georgia,serif",fontSize:35,fontWeight:900,color:"#ffe7d1"}}>1952</div>
-    <svg viewBox="0 0 570 1080" width="100%" height="100%"><path d="M50 760L400 215L530 315L180 865Z" fill="#f4d74a" stroke="#151719" strokeWidth="18"/><path d="M5 500L310 120L415 200L115 580Z" fill="#f8e7c9" stroke="#151719" strokeWidth="14"/><path d="M135 905L470 430" stroke="#17191b" strokeWidth="28"/><circle cx="170" cy="340" r="82" fill="#fff1dc" stroke="#141719" strokeWidth="13"/><path d="M160 262L245 365L150 415Z" fill="#283e97"/></svg>
-   </div>
-   <div style={{position:"relative",background:"#f8f1df",display:"grid",placeItems:"center",overflow:"hidden"}}>
-    <div style={{position:"absolute",inset:45,border:"8px solid #151719",background:"repeating-linear-gradient(135deg,#f5e7cf 0 22px,#9fb8e4 22px 25px)"}}/>
-    <div style={{position:"absolute",width:520,height:520,borderRadius:"50%",background:"#f5d447",border:"15px solid #161719",boxShadow:"inset 0 0 0 14px #fff5dc"}}/>
-    <div style={{position:"absolute",width:350,height:350,borderRadius:"50%",background:"#e44e39",border:"15px solid #161719",display:"grid",placeItems:"center"}}><div style={{width:200,height:200,borderRadius:"50%",background:"#fff",border:"12px solid #141719",display:"grid",placeItems:"center"}}><svg viewBox="0 0 100 120" width="180" height="210"><path d="M8 5L91 64L48 70L35 115Z" fill="#111315"/></svg></div></div>
-    <div style={{position:"absolute",top:25,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontSize:32,fontWeight:900,color:"#23346d"}}>Cut-outs / 1952</div>
-   </div>
-   <div style={{position:"relative",background:"#168c86",borderLeft:"9px solid #17191b"}}>
-    <div style={{position:"absolute",right:35,top:60,fontFamily:"Georgia,serif",fontSize:30,fontWeight:900,color:"#f7ecd6"}}>FORM</div>
-    <svg viewBox="0 0 570 1080" width="100%" height="100%"><path d="M-30 360L360 810L515 670L120 225Z" fill="#f2c83d" stroke="#141719" strokeWidth="18"/><path d="M40 800L430 270" stroke="#f4ecda" strokeWidth="31"/><path d="M150 875L530 350" stroke="#111315" strokeWidth="18"/><circle cx="380" cy="220" r="100" fill="#f2d84e" stroke="#17191b" strokeWidth="14"/><circle cx="380" cy="220" r="48" fill="#df4a89"/></svg>
+ const f=useCurrentFrame(),light=e(f,0,12);
+ return <AbsoluteFill style={{...full,background:"#fff9ef",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,display:"grid",gridTemplateColumns:"20% 60% 20%",gridTemplateRows:"1fr 1fr",padding:30,gap:12,boxSizing:"border-box"}}>
+   <div style={{gridColumn:"1",gridRow:"1",background:"#ffd839",border:"9px solid #151719",backgroundImage:"radial-gradient(#e6ad17 2px,transparent 2.5px)",backgroundSize:"17px 17px"}}/>
+   <div style={{gridColumn:"1",gridRow:"2",background:"#f5c9d8",border:"9px solid #151719",backgroundImage:"radial-gradient(#e8a6bd 2px,transparent 2.5px)",backgroundSize:"17px 17px"}}/>
+   <div style={{gridColumn:"3",gridRow:"1",background:"#f6cbd9",border:"9px solid #151719",backgroundImage:"radial-gradient(#e6a9c0 2px,transparent 2.5px)",backgroundSize:"16px 16px"}}/>
+   <div style={{gridColumn:"3",gridRow:"2",background:"#ffda39",border:"9px solid #151719",backgroundImage:"radial-gradient(#e8ad1b 2px,transparent 2.5px)",backgroundSize:"17px 17px"}}/>
+   <div style={{gridColumn:"2",gridRow:"1 / span 2",position:"relative",background:"#6f9ddb",border:"9px solid #151719",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:-30,background:"repeating-conic-gradient(from "+(f*1.2)+"deg at 50% 50%,rgba(255,255,255,.98) 0deg 3deg,rgba(64,111,187,.16) 3deg 8deg)"}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#4d85cc 0 4px,transparent 4.5px)",backgroundSize:"22px 22px",mixBlendMode:"multiply",opacity:.65}}/>
+    <div style={{position:"absolute",left:"17%",top:"13%",width:"66%",height:"74%",borderRadius:"50%",background:"#ffe55a",border:"7px solid #151719",boxShadow:"0 0 0 12px rgba(255,255,255,.58)"}}/>
+    <div style={{position:"absolute",left:"24%",top:"23%",width:"53%",height:"56%",borderRadius:"48% 48% 45% 45%",background:"#e93730",border:"9px solid #151719",boxShadow:"inset 0 0 0 7px rgba(255,255,255,.7)"}}/>
+    <div style={{position:"absolute",left:"37%",top:"35%",width:"29%",height:"31%",borderRadius:"50%",background:"#fff",border:"7px solid #151719",display:"grid",placeItems:"center"}}>
+     <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M8 4L94 61L52 68L38 116Z" fill="#101214"/></svg>
+    </div>
+    <svg viewBox="0 0 1200 1000" width="100%" height="100%" style={{position:"absolute",inset:0}}>
+     <path d="M-60 70L70 70L340 280L255 350L550 530L468 604L770 770L690 842L1040 1035L1125 1010" stroke="#151719" strokeWidth="34" fill="none" strokeLinejoin="miter"/>
+     <path d="M-60 70L70 70L340 280L255 350L550 530L468 604L770 770L690 842L1040 1035L1125 1010" stroke="#ffd739" strokeWidth="23" fill="none" strokeLinejoin="miter"/>
+    </svg>
+    <div style={{position:"absolute",top:18,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontStyle:"italic",fontSize:34,fontWeight:900,color:"#1a3872",textShadow:"0 1px #fff"}}>1952 · CUT-OUTS</div>
    </div>
   </div>
  </AbsoluteFill>;
 };
+
+const Future3D
 
 const Future3D = () => {
   const f = useCurrentFrame();
@@ -625,19 +632,21 @@ const Future3D = () => {
 
 
 const DotPoster = () => {
- const f=useCurrentFrame(),r=314+Math.sin(f/4)*2;
- return <AbsoluteFill style={{...full,background:"#e63d32",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#fff 0 7px,transparent 7px)",backgroundSize:"31px 31px"}}/>
-  <div style={{position:"absolute",left:"50%",top:"52%",width:r*2,height:r*2,marginLeft:-r,marginTop:-r,borderRadius:"50%",background:"#f7d343",border:"10px solid #17191a"}}>
-   <div style={{position:"absolute",inset:52,borderRadius:"50%",background:"#df4434",border:"17px solid #17191a",boxShadow:"inset 0 0 0 18px #f5d446"}}>
-    <div style={{position:"absolute",inset:43,borderRadius:"50%",background:"#fff",border:"8px solid #17191a",display:"grid",placeItems:"center"}}>
-     <svg viewBox="0 0 100 120" width="155" height="180"><path d="M12 7L91 63L50 68L37 115Z" fill="#111315"/></svg>
-    </div>
+ const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.012;
+ return <AbsoluteFill style={{...full,background:"#e83f31",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#fff8ec 0 10px,transparent 10.7px)",backgroundSize:"40px 40px",backgroundPosition:"0 0"}}/>
+  <div style={{position:"absolute",left:"50%",top:"55%",width:540,height:540,marginLeft:-270,marginTop:-270,transform:"scale("+pulse+")",borderRadius:45,background:"#f6cc35",boxShadow:"0 0 0 10px #e83f31,0 0 0 16px rgba(20,20,20,.95)"}}>
+   <div style={{position:"absolute",inset:24,borderRadius:35,border:"8px solid #18191a",background:"#e83f31",backgroundImage:"radial-gradient(#fff8ec 0 7px,transparent 7.5px)",backgroundSize:"28px 28px",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:36,borderRadius:"50%",border:"9px solid #17191b",background:"rgba(233,61,48,.28)"}}/>
+    {Array.from({length:30},(_,i)=>{const a=i*Math.PI*2/30;return <circle key={i} cx={270+Math.cos(a)*220} cy={220+Math.sin(a)*220} r={i%3===0?7:5} fill="#17191b" opacity=".9"/>;})}
+    <svg viewBox="0 0 100 120" width="170" height="205" style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)"}}><path d="M8 5L94 60L52 67L38 115Z" fill="#101214"/></svg>
    </div>
   </div>
-  <div style={{position:"absolute",top:25,left:0,right:0,textAlign:"center",fontFamily:"Georgia,serif",fontSize:35,fontWeight:900,color:"#111315"}}>1965 / INFINITY DOTS</div>
+  <div style={{position:"absolute",left:"50%",top:28,transform:"translateX(-50%)",padding:"12px 58px 16px",background:"#fff8ec",border:"6px solid #fff8ec",clipPath:"polygon(0 0,100% 0,96% 100%,4% 100%)",textAlign:"center",color:"#111315",fontFamily:displayFont,fontSize:29,fontWeight:950,whiteSpace:"nowrap",boxShadow:"0 8px 0 rgba(0,0,0,.1)"}}>1965 <span style={{fontSize:24}}>Infinity dots</span></div>
  </AbsoluteFill>;
 };
+
+const GlitchPoster
 
 const GlitchPoster = () => {
   const f = useCurrentFrame();
@@ -787,24 +796,24 @@ const PointCloudPoster=()=>{
  return <AbsoluteFill style={{...full,background:"radial-gradient(ellipse at 50% 50%,#252b32,#050608 66%)"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><ellipse cx="960" cy="520" rx="390" ry="272" fill="none" stroke="#a3b1b0" strokeOpacity=".22" strokeWidth="2"/>{points.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} fill={i%7===0?"#b9ed4a":"#e8efed"} opacity={p.a}/>)}</svg><div style={{position:"absolute",top:50,left:88,color:"#8d9998",fontSize:16,fontWeight:900,letterSpacing:".2em"}}>DEPTH / POINTS / MOTION</div></AbsoluteFill>;
 };
 const StatsPoster=()=>{
- const f=useCurrentFrame(),k=e(f,0,8);
- return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c6e7e5 0%,#b7e5d6 43%,#edcab9 64%,#7fc8c5 100%)",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse at 18% 78%,rgba(254,242,210,.65),transparent 34%),linear-gradient(160deg,transparent 42%,rgba(39,183,185,.35) 43%,transparent 56%)"}}/>
+ const f=useCurrentFrame(),progress=e(f,0,15),count=Math.round(80+16*progress),day=Math.round(88+50*progress);
+ const y=470-330*progress;
+ return <AbsoluteFill style={{...full,background:"linear-gradient(180deg,#c5e6e1 0%,#c9ebe0 42%,#f0cbb8 65%,#71c8c5 100%)",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-   <path d="M0 720Q180 660 330 720T650 715T980 740T1300 700T1620 730T1920 690V1080H0Z" fill="#65c5bb" opacity=".65"/>
-   <path d="M0 825Q190 780 390 835T800 820T1160 850T1570 815T1920 835V1080H0Z" fill="#f0c6a9" opacity=".54"/>
-   <path d="M0 920Q230 865 430 920T840 915T1280 940T1700 900T1920 920V1080H0Z" fill="#4db9bb" opacity=".55"/>
+   <path d="M0 650Q170 592 340 664T690 660T1050 676T1410 640T1740 674T1920 650V1080H0Z" fill="#6cc9bd" opacity=".76"/>
+   <path d="M0 820Q195 750 390 830T800 812T1220 845T1600 808T1920 842V1080H0Z" fill="#f2cdb2" opacity=".68"/>
+   <path d="M0 935Q230 875 430 934T840 923T1280 947T1700 914T1920 937V1080H0Z" fill="#4db9bb" opacity=".55"/>
+   {Array.from({length:26},(_,i)=><path key={i} d={"M"+(i*77)+" "+(704+(i%5)*22)+"q 55 -25 105 4"} stroke="#fff5e8" strokeWidth="7" fill="none" opacity=".44"/>)}
   </svg>
-  <div style={{position:"absolute",left:78,top:250,fontFamily:displayFont,fontSize:235,fontWeight:950,color:"#111315",letterSpacing:"-.11em",textShadow:"0 6px 10px rgba(0,0,0,.16)"}}>84K</div>
-  <div style={{position:"absolute",left:260,top:500,fontSize:50,fontWeight:800,color:"#343b38"}}>Day 104</div>
+  <div style={{position:"absolute",left:78,top:245,fontFamily:displayFont,fontSize:254,fontWeight:950,color:"#111315",letterSpacing:"-.12em",textShadow:"0 6px 10px rgba(0,0,0,.16)"}}>{count}K</div>
+  <div style={{position:"absolute",left:263,top:500,fontSize:54,fontWeight:850,color:"#343b38"}}>Day {day}</div>
   <div style={{position:"absolute",left:665,top:80,width:1180,height:900,borderRadius:28,background:"#fff",padding:"70px 70px 54px",boxSizing:"border-box",boxShadow:"0 18px 55px rgba(37,85,92,.13)"}}>
    <div style={{textAlign:"center",fontSize:36,fontWeight:900,color:"#202326",marginBottom:48}}>◉ Star History</div>
    <div style={{position:"absolute",left:110,top:175,fontSize:20,fontWeight:800,color:"#45494b"}}>nexu-io/open-design</div>
    <svg viewBox="0 0 1040 560" width="100%" height="560">
-    {[0,1,2,3,4].map((v)=><g key={v}><line x1="82" x2="1010" y1={80+v*105} y2={80+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="12" y={87+v*105} fontSize="22" fill="#4a4e50">{100-v*20}K</text></g>)}
-    <path d="M82 500C120 465 135 330 210 280S315 225 375 203S530 150 610 125S760 95 855 70" stroke="#c94d3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
-    <path d="M855 70L875 66" stroke="#c94d3e" strokeWidth="7" fill="none"/>
-    <circle cx="875" cy="66" r="11" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
+    {[0,1,2,3,4].map(v=><g key={v}><line x1="82" x2="1010" y1={80+v*105} y2={80+v*105} stroke="#e6e6e3" strokeWidth="2"/><text x="12" y={87+v*105} fontSize="22" fill="#4a4e50">{100-v*20}K</text></g>)}
+    <path d={"M82 500C120 465 135 330 210 280S315 225 375 203S530 150 610 125S760 95 855 "+y+"L930 "+(y-25)} stroke="#c94d3e" strokeWidth="7" fill="none" strokeLinecap="round"/>
+    <circle cx="930" cy={y-25} r="12" fill="#b9f05b" stroke="#141719" strokeWidth="4"/>
     <text x="82" y="535" fontSize="20" fill="#303638">May</text><text x="270" y="535" fontSize="20" fill="#303638">June</text><text x="455" y="535" fontSize="20" fill="#303638">July</text><text x="645" y="535" fontSize="20" fill="#303638">August</text><text x="835" y="535" fontSize="20" fill="#303638">September</text><text x="960" y="535" fontSize="20" fill="#303638">October</text>
    </svg>
    <div style={{position:"absolute",left:78,bottom:23,fontSize:18,color:"#737a79"}}>GitHub stars</div>
@@ -812,29 +821,39 @@ const StatsPoster=()=>{
  </AbsoluteFill>;
 };
 
+const KoalaPoster
+
 const KoalaPoster=()=><AbsoluteFill style={{...full,background:"linear-gradient(120deg,#2a8bd1,#144a9a)",color:"#fff"}}><div style={{position:"absolute",left:330,top:190,width:430,height:540,borderRadius:220,background:"#f5ead0",transform:"rotate(-5deg)"}}><svg viewBox="0 0 430 540" width="100%" height="100%"><ellipse cx="82" cy="165" rx="70" ry="90" fill="#818b94"/><ellipse cx="348" cy="165" rx="70" ry="90" fill="#818b94"/><ellipse cx="215" cy="255" rx="155" ry="170" fill="#9099a1"/><ellipse cx="215" cy="298" rx="120" ry="100" fill="#f2efe6"/><circle cx="160" cy="246" r="16" fill="#151a1d"/><circle cx="270" cy="246" r="16" fill="#151a1d"/><ellipse cx="215" cy="300" rx="42" ry="57" fill="#20262c"/><path d="M180 365Q215 392 250 365" stroke="#252a2c" strokeWidth="10" fill="none"/></svg></div><div style={{position:"absolute",right:270,top:195,width:450,height:650,background:"#fff",color:"#182431",borderRadius:20,padding:38,boxSizing:"border-box",boxShadow:"0 24px 55px rgba(0,0,0,.22)"}}><div style={{fontSize:21,fontWeight:950,letterSpacing:".1em"}}>COURSES / 2026</div><div style={{marginTop:34,height:250,borderRadius:14,background:"linear-gradient(135deg,#f2dfba,#e4a27b,#83b9cb)"}}/><div style={{marginTop:34,fontSize:48,fontWeight:950,lineHeight:.95}}>Learn to create.</div><div style={{marginTop:25,fontSize:18,color:"#7e8991"}}>A new way to make ideas move.</div></div></AbsoluteFill>;
 const GreenTransition=()=>{const f=useCurrentFrame(),r=e(f,0,7,90,650);return <AbsoluteFill style={{...full,background:"#b7ee5b"}}><svg viewBox="0 0 1920 1080" width="100%" height="100%"><circle cx="960" cy="540" r={r} fill="none" stroke="#efffd4" strokeWidth="3"/><circle cx="960" cy="540" r={r*.7} fill="none" stroke="#efffd4" strokeWidth="2"/></svg><Word size={420} color="#142016" style={{position:"absolute",left:0,right:0,top:300,textAlign:"center"}}>OUT.</Word></AbsoluteFill>;};
 
 
 
 const Comic1962=()=>{
- const f=useCurrentFrame(),z=e(f,0,10,.98,1.02);
- return <AbsoluteFill style={{...full,background:"#f7f0df",transform:"scale("+z+")"}}>
-  <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 45%,#fff8e9,#e9dfc8)"}}/>
-  <div style={{position:"absolute",left:0,top:0,width:360,bottom:0,background:"#f5ce3d",borderRight:"9px solid #151515"}}/>
-  <div style={{position:"absolute",right:0,top:0,width:280,bottom:0,background:"#fbf7eb",borderLeft:"9px solid #151515",backgroundImage:"radial-gradient(#151515 1.5px,transparent 1.5px)",backgroundSize:"14px 14px"}}/>
-  <div style={{position:"absolute",left:390,right:300,top:0,bottom:0,background:"repeating-conic-gradient(from 0deg at 50% 50%,#f9eac9 0deg 5deg,#8eb8ed 5deg 10deg)",borderLeft:"9px solid #151515",borderRight:"9px solid #151515"}}/>
-  <div style={{position:"absolute",left:455,right:365,top:175,bottom:155,background:"#fff4d6",border:"12px solid #171719",clipPath:"polygon(0 0,100% 0,100% 100%,0 100%)"}}/>
-  <div style={{position:"absolute",left:"50%",top:"51%",width:520,height:520,marginLeft:-260,marginTop:-260,borderRadius:"50%",background:"#efcf42",border:"16px solid #171719",boxShadow:"inset 0 0 0 15px #fbf6e8",display:"grid",placeItems:"center"}}>
-    <div style={{width:360,height:360,borderRadius:"50%",background:"#e64a37",border:"13px solid #171719",display:"grid",placeItems:"center",boxShadow:"inset 0 0 0 12px #f3d442"}}>
-      <PlayGlyph size={230} color="#111315"/>
+ const f=useCurrentFrame(),scale=1+e(f,0,16)*.012;
+ return <AbsoluteFill style={{...full,background:"#fbf5e9",transform:"scale("+scale+")",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:26,display:"grid",gridTemplateColumns:"20% 60% 20%",gridTemplateRows:"1fr 1fr",gap:10}}>
+   <div style={{background:"#ffdd3d",border:"8px solid #17191b",display:"grid",placeItems:"center",fontFamily:displayFont,fontSize:34,fontWeight:950,color:"#17191b",fontStyle:"italic"}}>ONE IDEA…</div>
+   <div style={{gridColumn:"2",gridRow:"1 / span 2",position:"relative",overflow:"hidden",border:"9px solid #17191b",background:"#76a5e4"}}>
+    <div style={{position:"absolute",inset:-40,background:"repeating-conic-gradient(from -6deg at 50% 48%,#fff 0deg 2.5deg,#6c9cdd 2.5deg 9deg)"}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(#3977c4 0 4px,transparent 4.4px)",backgroundSize:"24px 24px",opacity:.65}}/>
+    <div style={{position:"absolute",left:"14%",top:"13%",width:"72%",height:"74%",borderRadius:"50%",background:"#ffe25b",boxShadow:"0 0 0 8px rgba(255,255,255,.65)"}}/>
+    <div style={{position:"absolute",left:"23%",top:"25%",width:"55%",height:"55%",borderRadius:"34% 43% 36% 38%",background:"#ed3c2d",border:"9px solid #151719",boxShadow:"inset 0 0 0 8px rgba(20,20,20,.22)",display:"grid",placeItems:"center"}}>
+     <div style={{width:"72%",height:"72%",borderRadius:"50%",background:"#fff",border:"7px solid #151719",backgroundImage:"radial-gradient(#71a0dc 0 3px,transparent 3.5px)",backgroundSize:"20px 20px",display:"grid",placeItems:"center"}}>
+      <svg viewBox="0 0 100 120" width="100%" height="100%"><path d="M8 5L92 59L53 69L38 115Z" fill="#090b0d"/></svg>
+     </div>
     </div>
+    <div style={{position:"absolute",left:25,top:24,padding:"8px 18px",background:"#ffdf36",border:"5px solid #17191b",fontSize:25,fontWeight:950,fontStyle:"italic",color:"#17191b"}}>MEANWHILE, IN 1962…</div>
+    <div style={{position:"absolute",right:30,top:22,textAlign:"right",fontFamily:displayFont,fontSize:54,fontWeight:950,color:"#101214",lineHeight:.85}}>1962<div style={{fontSize:20,fontStyle:"italic"}}>POP ART</div></div>
+    <div style={{position:"absolute",right:16,bottom:28,padding:"10px 24px",background:"#ffdf37",border:"6px solid #17191b",clipPath:"polygon(50% 0,60% 18%,80% 5%,82% 30%,100% 36%,84% 54%,98% 75%,70% 73%,60% 100%,45% 81%,22% 96%,22% 70%,0 60%,19% 42%,8% 20%,36% 24%)",fontSize:37,fontWeight:950,fontStyle:"italic",color:"#ed392d",textShadow:"2px 2px #111"}}>CLICK!</div>
+   </div>
+   <div style={{background:"#fae7eb",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca9b6 2px,transparent 2.5px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:42,fontWeight:950}}>•••</div>
+   <div style={{background:"#fae7eb",border:"8px solid #17191b",backgroundImage:"radial-gradient(#dca9b6 2px,transparent 2.5px)",backgroundSize:"16px 16px",display:"grid",placeItems:"center",fontSize:26,fontWeight:950}}>SFX</div>
+   <div style={{background:"#ffdd3d",border:"8px solid #17191b",display:"grid",placeItems:"center",fontSize:26,fontWeight:950}}>CUT / OUT</div>
   </div>
-  <div style={{position:"absolute",left:0,right:0,top:54,textAlign:"center",fontSize:36,fontWeight:950,color:"#151515",letterSpacing:".05em"}}>MEANWHILE, IN 1962…</div>
-  <div style={{position:"absolute",right:310,bottom:104,padding:"10px 22px",background:"#f6d647",border:"7px solid #151515",fontSize:32,fontWeight:950,transform:"rotate(-8deg)"}}>CLICK!</div>
-  <div style={{position:"absolute",left:45,bottom:52,fontSize:23,fontWeight:950,letterSpacing:".13em"}}>ONE IDEA.</div>
  </AbsoluteFill>;
 };
+
+const PixelGamePoster
 
 const PixelGamePoster=()=>{
  const f=useCurrentFrame(),jump=Math.sin(f/2.8)*10;
@@ -959,32 +978,29 @@ const CoursesPoster=()=>{
 
 const PosterSequence = () => (
  <AbsoluteFill style={full}>
-  <Sequence from={0} durationInFrames={2}><Comic1952 /></Sequence>
-  <Sequence from={2} durationInFrames={17}><Comic1962 /></Sequence>
-  <Sequence from={19} durationInFrames={20}><DotPoster /></Sequence>
-  <Sequence from={39} durationInFrames={10}><LightSweep1973 /></Sequence>
-  <Sequence from={49} durationInFrames={10}><PixelGamePoster /></Sequence>
-  <Sequence from={59} durationInFrames={10}><PortfolioFlash /></Sequence>
-  <Sequence from={69} durationInFrames={10}><MindPoster /></Sequence>
-  <Sequence from={79} durationInFrames={30}><RingPoster /></Sequence>
-  <Sequence from={109} durationInFrames={20}><EditorialPosterGrid /></Sequence>
-  <Sequence from={129} durationInFrames={10}><DepthField /></Sequence>
-  <Sequence from={139} durationInFrames={10}><EaseGreen /></Sequence>
-  <Sequence from={149} durationInFrames={10}><EasePoster /></Sequence>
-  <Sequence from={159} durationInFrames={10}><OutPoster /></Sequence>
-  <Sequence from={169} durationInFrames={10}><NeverPoster /></Sequence>
-  <Sequence from={179} durationInFrames={10}><LinearPoster /></Sequence>
-  <Sequence from={189} durationInFrames={10}><GreenCircleTransition /></Sequence>
-  <Sequence from={199} durationInFrames={5}><ClockPoster /></Sequence>
-  <Sequence from={204} durationInFrames={12}><StatsPoster /></Sequence>
-  <Sequence from={216} durationInFrames={10}><MotionFilmsPoster /></Sequence>
-  <Sequence from={226} durationInFrames={10}><EyePoster /></Sequence>
-  <Sequence from={236} durationInFrames={10}><CoursesPoster /></Sequence>
-  <Sequence from={246} durationInFrames={10}><Future3D /></Sequence>
-  <Sequence from={256} durationInFrames={10}><NotText fullText={false}/></Sequence>
-  <Sequence from={266} durationInFrames={13}><NotText fullText={true}/></Sequence>
+  <Sequence from={0} durationInFrames={13}><Comic1952 /></Sequence>
+  <Sequence from={13} durationInFrames={16}><Comic1962 /></Sequence>
+  <Sequence from={29} durationInFrames={8}><DotPoster /></Sequence>
+  <Sequence from={37} durationInFrames={15}><LightSweep1973 /></Sequence>
+  <Sequence from={52} durationInFrames={13}><PixelGamePoster /></Sequence>
+  <Sequence from={65} durationInFrames={9}><PortfolioFlash /></Sequence>
+  <Sequence from={74} durationInFrames={10}><MindPoster /></Sequence>
+  <Sequence from={84} durationInFrames={30}><RingPoster /></Sequence>
+  <Sequence from={114} durationInFrames={24}><EditorialPosterGrid /></Sequence>
+  <Sequence from={138} durationInFrames={22}><EaseGreen /></Sequence>
+  <Sequence from={160} durationInFrames={7}><OutPoster /></Sequence>
+  <Sequence from={167} durationInFrames={7}><GreenGhostTransition /></Sequence>
+  <Sequence from={174} durationInFrames={5}><NeverPoster /></Sequence>
+  <Sequence from={179} durationInFrames={15}><LinearPoster /></Sequence>
+  <Sequence from={194} durationInFrames={13}><GreenCircleTransition /></Sequence>
+  <Sequence from={207} durationInFrames={16}><StatsPoster /></Sequence>
+  <Sequence from={223} durationInFrames={11}><MotionFilmsPoster /></Sequence>
+  <Sequence from={234} durationInFrames={5}><EyePoster /></Sequence>
+  <Sequence from={239} durationInFrames={15}><CoursesPoster /></Sequence>
+  <Sequence from={254} durationInFrames={15}><Future3D /></Sequence>
  </AbsoluteFill>
 );
+
 const NotJustOpus = () => {
  const f=useCurrentFrame(),p=pop(f,30,1,110,16),shift=e(f,0,24,70,0);
  return <AbsoluteFill style={{...full,background:"#08090b",color:"#fff"}}>
@@ -1079,7 +1095,7 @@ const PreviewArtwork=({variant,frame}:{variant:number;frame:number})=>{
   <div style={{position:"absolute",left:0,right:0,top:"10%",textAlign:"center",color:"#a64035",fontFamily:"Georgia,serif"}}><div style={{fontSize:40,fontWeight:900}}>1290</div><div style={{fontSize:24}}>Gothic illumination</div></div>
  </div>;
  if(variant===2)return <div style={{position:"absolute",inset:0,background:"#83ec45",overflow:"hidden"}}><div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(0,0,0,.08) 1px,transparent 1px)",backgroundSize:"100% 12px"}}/><div style={{position:"absolute",top:"27%",left:"-7%",width:"114%",textAlign:"center",fontFamily:displayFont,fontSize:118,fontWeight:950,letterSpacing:"-.09em",lineHeight:1.15,color:"#11160e",textShadow:"7px 7px 0 rgba(25,40,15,.28)"}}>OPEN<br/>DESIGN</div><div style={{position:"absolute",right:24,top:16,fontSize:12,color:"#284b20",fontWeight:900}}>SHOWREEL / OPEN</div><div style={{position:"absolute",left:0,right:0,top:"49%",height:2,background:"#11190d",opacity:.5}}/></div>;
- if(variant===3)return <div style={{position:"absolute",inset:0,background:"#f5f4ef",overflow:"hidden"}}><svg viewBox="0 0 1000 650" width="100%" height="100%">{Array.from({length:18},(_,i)=><path key={i} d={"M"+(-130+i*72)+" -30 C"+(90+i*30)+" 120 "+(-70+i*62)+" 390 "+(150+i*55)+" 700"} stroke="#111315" strokeWidth="34" fill="none" strokeLinecap="round"/>)}</svg></div>;
+ if(variant===3)return <div style={{position:"absolute",inset:0,background:"#090a0c",overflow:"hidden"}}><svg viewBox="0 0 1000 650" width="100%" height="100%">{Array.from({length:20},(_,i)=><path key={i} d={"M"+(-120+i*68)+" -20 C"+(60+i*34)+" 130 "+(-40+i*50)+" 370 "+(180+i*39)+" 670"} stroke="#fff" strokeWidth="31" fill="none" strokeLinecap="round"/>)}</svg></div>;
  if(variant===4)return <div style={{position:"absolute",inset:0,background:"#83ed43",overflow:"hidden"}}><div style={{position:"absolute",left:"-6%",right:"-8%",top:"31%",textAlign:"center",fontFamily:displayFont,fontWeight:950,fontSize:210,letterSpacing:"-.12em",color:"#12170e",textShadow:"10px 11px 0 rgba(36,58,18,.26)"}}>EASE</div><div style={{position:"absolute",left:22,right:22,bottom:28,height:2,background:"#1b3314",opacity:.55}}/><div style={{position:"absolute",left:22,bottom:37,fontSize:12,color:"#1b3314"}}>66 FPS</div><div style={{position:"absolute",right:22,bottom:37,fontSize:12,color:"#1b3314"}}>128 BPM</div></div>;
  if(variant===5)return <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,#f2f1ea 0 52%,#1746d6 52% 100%)",overflow:"hidden"}}><div style={{position:"absolute",left:38,top:50,fontSize:19,fontWeight:950,color:"#111315",letterSpacing:".16em"}}>CREATIVE / 03</div><div style={{position:"absolute",left:"12%",top:"22%",fontSize:390,fontWeight:950,fontFamily:displayFont,color:"#151719",letterSpacing:"-.12em",textShadow:"9px 11px 0 rgba(0,0,0,.16)"}}>3</div><div style={{position:"absolute",right:44,bottom:42,color:"#fff",fontSize:18,fontWeight:900,letterSpacing:".2em"}}>READY / MOTION</div></div>;
  return <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#f2f0e8,#fff)",overflow:"hidden"}}><div style={{position:"absolute",inset:0,display:"grid",placeItems:"center",fontSize:430,fontWeight:950,color:"#111315",fontFamily:displayFont,textShadow:"12px 14px 0 rgba(0,0,0,.15)"}}>3</div></div>;
@@ -1157,8 +1173,8 @@ const LaunchVariant = ({ variant, countdown = -1 }: { variant: number; countdown
 
 const LaunchKitSequence=()=>{
  const frame=useCurrentFrame();
- const variant=frame<23?0:frame<31?1:frame<39?2:frame<47?3:frame<55?4:frame<63?5:6;
- const countdown=frame<90?-1:frame<99?3:frame<108?2:1;
+ const variant=frame<15?0:frame<30?1:frame<45?2:frame<60?3:frame<75?4:frame<76?5:frame<91?5:frame<106?5:6;
+ const countdown=frame<76?-1:frame<91?3:frame<106?2:1;
  return <LaunchKitWindow frame={frame} variant={variant} countdown={countdown}/>;
 };
 
@@ -1219,17 +1235,23 @@ const ProjectCube=()=>{
 };
 
 const MorroCubeIntro=()=>{
- const f=useCurrentFrame(),p=e(f,0,35);
- return <AbsoluteFill style={{...full,background:"#f5f4ed",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"-90px 0",transform:"translateX("+(-30*p)+"px)"}}>
-   <Word size={290} color="#101113" tracking={-.12}>MORRO</Word>
-   <Word size={290} color="#f5f4ed" tracking={-.12} style={{WebkitTextStroke:"4px #101113"}}>MORRO</Word>
-   <Word size={290} color="#101113" tracking={-.12}>MORRO</Word>
+ const f=useCurrentFrame();
+ const typeOut=1-e(f,12,25),shape=e(f,14,34);
+ return <AbsoluteFill style={{...full,background:"#f2f1e9",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:0,opacity:typeOut,display:"flex",flexDirection:"column",justifyContent:"space-between",transform:"translateX("+(e(f,0,20,-18,8))+"px)"}}>
+   <Word size={330} color="#08090b" tracking={-.12}>MORRO</Word>
+   <Word size={330} color="#f2f1e9" tracking={-.12} style={{WebkitTextStroke:"3px #08090b"}}>MORRO</Word>
+   <Word size={330} color="#08090b" tracking={-.12}>MORRO</Word>
   </div>
-  <div style={{position:"absolute",left:690,top:110,width:620,height:790,transform:"translateY("+(-18*p)+"px) rotate(-2deg)",background:"rgba(255,255,255,.2)",clipPath:"polygon(48% 0,100% 19%,96% 73%,51% 100%,0 77%,5% 20%)",border:"1px solid rgba(0,0,0,.24)",boxShadow:"0 24px 35px rgba(0,0,0,.12)"}}>
-   <svg viewBox="0 0 620 790" width="100%" height="100%"><path d="M310 0L600 150L590 570L310 790L24 605L30 145Z" fill="rgba(255,255,255,.32)" stroke="#999" strokeWidth="4"/><path d="M310 0L310 790M30 145L590 570M600 150L24 605" stroke="#9c9c9c" strokeWidth="3" fill="none"/><path d="M180 430L300 340L435 445L310 535Z" fill="#79837f" opacity=".52"/></svg>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:640,height:640,transform:"translate(-50%,-50%) scale("+(0.68+.28*shape)+")",opacity:shape}}>
+   <div style={{position:"absolute",inset:70,borderRadius:100,background:"#2035ed",boxShadow:"0 20px 0 #7a54bc,0 32px 0 #b58ae1",transform:"rotate(0deg)"}}/>
+   <div style={{position:"absolute",left:"36%",top:-10,width:180,height:670,background:"linear-gradient(90deg,#b38ddf,#f0c9ff 45%,#8e6bc8)",transform:"rotate(13deg) skewY(-8deg)",boxShadow:"16px 0 0 rgba(98,58,161,.35),-12px 0 0 rgba(255,255,255,.6)"}}/>
+   <div style={{position:"absolute",left:"52%",top:"30%",width:190,height:410,background:"linear-gradient(90deg,#ac7bd5,#e7b8f4,#7d5bb8)",transform:"rotate(13deg) skewY(-8deg)",boxShadow:"12px 0 0 rgba(98,58,161,.4)"}}/>
   </div>
-  <div style={{position:"absolute",right:80,top:70,width:210,height:200,border:"2px solid #191a1b",background:"#f5f4ed",padding:16,boxSizing:"border-box",fontSize:16,fontWeight:900,letterSpacing:".12em",lineHeight:1.8}}>SPEC / PRISM<br/>MATERIAL<br/>IOR<br/>ROUGH<br/>ROT/S</div>
+  <div style={{position:"absolute",left:"50%",top:"50%",width:610,height:610,transform:"translate(-50%,-50%) scale("+(0.84+.16*e(f,25,36))+")",opacity:e(f,24,35),borderRadius:105,background:"linear-gradient(135deg,#1925ab,#070b2f 58%,#09114a)",boxShadow:"0 23px 50px rgba(0,0,0,.2)",overflow:"hidden"}}>
+   <div style={{position:"absolute",inset:0,background:"linear-gradient(125deg,rgba(255,255,255,.32),transparent 35%,rgba(0,0,0,.28))"}}/>
+   <svg viewBox="0 0 610 610" width="100%" height="100%"><path d="M140 70H458Q535 70 535 148V454Q535 535 455 535H160Q70 535 70 445V165Q70 70 140 70Z" fill="none" stroke="#fff" strokeWidth="12"/><circle cx="305" cy="303" r="151" fill="none" stroke="#fff" strokeWidth="14"/><circle cx="305" cy="303" r="119" fill="none" stroke="#a7c5ff" strokeWidth="7"/><path d="M251 180L400 290L322 301L287 416Z" fill="#fff"/></svg>
+  </div>
  </AbsoluteFill>;
 };
 
@@ -1251,17 +1273,17 @@ const FinalLockup=()=>{
 export const OpenDesignMotion: React.FC = () => (
   <AbsoluteFill style={{ ...full, background: "#101214" }}>
     <Sequence from={0} durationInFrames={83}><OpeningScene /></Sequence>
-    <Sequence from={83} durationInFrames={90}><HeroTitle /></Sequence>
-    <Sequence from={173} durationInFrames={36}><BrandReveal /></Sequence>
-    <Sequence from={209} durationInFrames={35}><ClaimScene /></Sequence>
-    <Sequence from={244} durationInFrames={77}><GalleryWall /></Sequence>
-    <Sequence from={321} durationInFrames={279}><PosterSequence /></Sequence>
-    <Sequence from={600} durationInFrames={41}><NotJustOpus /></Sequence>
+    <Sequence from={83} durationInFrames={57}><HeroTitle /></Sequence>
+    <Sequence from={140} durationInFrames={30}><BrandReveal /></Sequence>
+    <Sequence from={170} durationInFrames={70}><ClaimScene /></Sequence>
+    <Sequence from={240} durationInFrames={76}><GalleryWall /></Sequence>
+    <Sequence from={316} durationInFrames={269}><PosterSequence /></Sequence>
+    <Sequence from={585} durationInFrames={56}><NotJustOpus /></Sequence>
     <Sequence from={641} durationInFrames={138}><ModelAgentScene /></Sequence>
-    <Sequence from={779} durationInFrames={116}><LaunchKitSequence /></Sequence>
-    <Sequence from={895} durationInFrames={38}><MorroCubeIntro /></Sequence>
-    <Sequence from={933} durationInFrames={126}><TexturedCube /></Sequence>
-    <Sequence from={1059} durationInFrames={60}><FinalLockup /></Sequence>
+    <Sequence from={779} durationInFrames={118}><LaunchKitSequence /></Sequence>
+    <Sequence from={897} durationInFrames={36}><MorroCubeIntro /></Sequence>
+    <Sequence from={933} durationInFrames={117}><TexturedCube /></Sequence>
+    <Sequence from={1050} durationInFrames={69}><FinalLockup /></Sequence>
     <Audio src={staticFile("audio/opendesign-motion-score.wav")} volume={0.92} />
   </AbsoluteFill>
 );
