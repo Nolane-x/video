@@ -1758,10 +1758,10 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
  </div>;
   const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
  const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923;
- const topArtwork=frame<55?topCream:frame<72?blackSide:topBlue;
+ const topArtwork=frame<42?topCream:frame<55?clock:frame<72?blackSide:topBlue;
  return <div style={style}>
   {kind===0?dynamicFront:
-   kind===1?(frame<42?glossyLogo:frame<55?clock:frame<72?archiveFace:archive1923):
+   kind===1?(frame<55?glossyLogo:frame<72?archiveFace:archive1923):
    kind===2?dynamicSide:
    kind===3?topArtwork:
    kind===4?ease:
@@ -1772,7 +1772,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
- const rotateY=f<15?-90+128*e(f,0,15):f<30?38-108*e(f,15,30):f<45?-70-4*e(f,30,45):f<60?-74+209*e(f,45,60):135+25*e(f,60,75);
+ const rotateY=f<15?-90+128*e(f,0,15):f<30?38-83*e(f,15,30):f<45?-45-25*e(f,30,45):f<60?-70+205*e(f,45,60):135+25*e(f,60,75);
  const rotateX=f<15?18-14*e(f,0,15):f<30?4-26*e(f,15,30):f<45?-22+47*e(f,30,45):f<60?25-43*e(f,45,60):-18+10*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
