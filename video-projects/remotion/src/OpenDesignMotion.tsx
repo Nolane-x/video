@@ -1756,7 +1756,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <div style={{position:"absolute",left:"50%",top:"52%",width:225,height:225,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"radial-gradient(circle,#191817 0 42%,#d4493d 43% 57%,#f5ead6 58% 67%,#191817 68% 100%)",boxShadow:"0 5px 18px rgba(0,0,0,.28)"}}><div style={{position:"absolute",left:"50%",top:"50%",width:0,height:0,transform:"translate(-50%,-50%)",borderTop:"61px solid transparent",borderBottom:"61px solid transparent",borderLeft:"91px solid #f6ecdb"}}/></div>
   <div style={{position:"absolute",left:0,right:0,bottom:17,textAlign:"center",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".22em"}}>OPEN / DESIGN</div>
  </div>;
-  const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
+  const dynamicFront=frame<27?portrait:frame<42?glossyLogo:frame<55?clock:frame<72?archiveFace:archive1923;
  const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923;
  const topArtwork=frame<55?topCream:frame<72?blackSide:topBlue;
  return <div style={style}>
@@ -1772,8 +1772,8 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
 
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
- const rotateY=f<15?-90+128*e(f,0,15):f<45?38+31*e(f,15,45):f<60?69+66*e(f,45,60):135+25*e(f,60,75);
- const rotateX=f<15?18-14*e(f,0,15):f<45?4-26*e(f,15,45):f<60?-22+4*e(f,45,60):-18+10*e(f,60,75);
+ const rotateY=f<15?-90+128*e(f,0,15):f<30?38-108*e(f,15,30):f<45?-70-4*e(f,30,45):f<60?-74+209*e(f,45,60):135+25*e(f,60,75);
+ const rotateX=f<15?18-14*e(f,0,15):f<30?4-26*e(f,15,30):f<45?-22+47*e(f,30,45):f<60?25-43*e(f,45,60):-18+10*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 82%,rgba(25,27,31,.17),transparent 43%)"}}/>
@@ -1785,9 +1785,6 @@ const ProjectCube=({startAt=0}:{startAt?:number})=>{
     <CubeFace kind={3} frame={f} transform={"rotateX(90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={4} frame={f} transform={"rotateX(-90deg) translateZ("+z+"px)"}/>
     <CubeFace kind={5} frame={f} transform={"rotateY(180deg) translateZ("+z+"px)"}/>
-   </div>
-   <div style={{position:"absolute",left:"22%",right:"22%",top:"84%",height:"10%",transform:"translateZ("+(z+5)+"px) perspective(1200px) rotateX(24deg)",transformOrigin:"center top",opacity:e(f,38,42)*(1-e(f,54,58)),clipPath:"polygon(0 0,100% 0,92% 100%,8% 100%)",background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",border:"4px solid #eaffd7",boxShadow:"0 6px 0 rgba(25,85,20,.18)",display:"grid",placeItems:"center"}}>
-    <Word size={39} color="#101713" tracking={-.13}>EASE</Word>
    </div>
   </div>
   <div style={{position:"absolute",left:"50%",top:"81%",width:690,height:105,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"rgba(18,22,29,.17)",filter:"blur(42px)"}}/>
