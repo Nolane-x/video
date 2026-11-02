@@ -130,7 +130,7 @@ need("cubeClock-v24" in source, "blue/gold clock face must be on the top surface
 need("f<15?18-14*e(f,0,15):f<45?4-26*e(f,15,45):f<60?-22+4*e(f,45,60):-18+10*e(f,60,75)" in source, "V53 cube pitch landmarks are missing")
 need("const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923" in source, "V57 blue-night and archive side sequence is missing")
 need("const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923" in source, "V59 face order must progress from glossy D to clock to 100K to 1923")
-need("kind===3?(frame<55?clock:blackSide)" in source, "V32 clock must move from top to adjacent face after frame990")
+need("kind===3?topArtwork" in source and "frame<55?topCream:frame<72?blackSide:topBlue" in source, "V60 cube top surface must follow the cream/black/blue source sequence")
 need('top:"84%"' in source and 'height:"10%"' in source and "opacity:e(f,38,42)*(1-e(f,54,58))" in source, "V25 lower-edge EASE fold timing is missing")
 need('rotateX(90deg) translateZ("+z+"px)' in source, "blue clock must occupy the top face")
 need('rotateX(-90deg) translateZ("+z+"px)' in source, "lime EASE must occupy the underside")
