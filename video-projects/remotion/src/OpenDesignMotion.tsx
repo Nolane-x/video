@@ -1756,39 +1756,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <div style={{position:"absolute",left:"50%",top:"52%",width:225,height:225,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"radial-gradient(circle,#191817 0 42%,#d4493d 43% 57%,#f5ead6 58% 67%,#191817 68% 100%)",boxShadow:"0 5px 18px rgba(0,0,0,.28)"}}><div style={{position:"absolute",left:"50%",top:"50%",width:0,height:0,transform:"translate(-50%,-50%)",borderTop:"61px solid transparent",borderBottom:"61px solid transparent",borderLeft:"91px solid #f6ecdb"}}/></div>
   <div style={{position:"absolute",left:0,right:0,bottom:17,textAlign:"center",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".22em"}}>OPEN / DESIGN</div>
  </div>;
-  const archiveFace=<div style={{position:"absolute",inset:0,background:"#b68a38",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(90deg,rgba(35,22,13,.16) 0 2px,transparent 2px 13px),radial-gradient(ellipse at 50% 45%,#e5c77b,#9a6c31)"}}/>
-  <svg viewBox="0 0 360 360" width="100%" height="100%">
-   <defs><radialGradient id="archive-gold-v53"><stop stopColor="#f4df9b"/><stop offset=".7" stopColor="#b7873e"/><stop offset="1" stopColor="#5e401e"/></radialGradient></defs>
-   <circle cx="180" cy="168" r="125" fill="#1b1715" stroke="#e8ce8c" strokeWidth="9"/>
-   <circle cx="180" cy="168" r="101" fill="url(#archive-gold-v53)" stroke="#2c2116" strokeWidth="7"/>
-   <circle cx="180" cy="168" r="80" fill="#151515" stroke="#e4c477" strokeWidth="6"/>
-   {Array.from({length:24},(_,i)=><path key={i} d="M180 83v13" stroke="#e8c878" strokeWidth={i%3===0?6:3} transform={"rotate("+(i*15)+" 180 168)"}/>)}
-   {Array.from({length:16},(_,i)=><circle key={"bead-"+i} cx={180+Math.cos(i*Math.PI/8)*116} cy={168+Math.sin(i*Math.PI/8)*116} r="5" fill={["#e8c66a","#e96a4c","#4b88b0","#e9ddbd"][i%4]}/>)}
-   <path d="M174 168L126 104L162 190L203 226L187 177Z" fill="#e5d19c"/>
-   <path d="M0 284Q75 252 130 282T360 274V360H0Z" fill="#8d642c"/>
-   <text x="180" y="38" fontSize="17" fontWeight="900" textAnchor="middle" fill="#171414" letterSpacing="4">ARCHIVE / 1889</text>
-   <text x="180" y="328" fontSize="13" fontWeight="900" textAnchor="middle" fill="#f6e0a2" letterSpacing="3">TIME / CULTURE / MOTION</text>
-  </svg>
-  <div style={{position:"absolute",inset:18,border:"3px solid rgba(255,236,183,.66)",pointerEvents:"none"}}/>
- </div>;
- const archive1923=<div style={{position:"absolute",inset:0,background:"#eee5cb",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(0deg,rgba(43,35,26,.07) 0 1px,transparent 1px 8px),radial-gradient(ellipse at 45% 46%,#faf1d9,#d5c7a8)"}}/>
-  <svg viewBox="0 0 360 360" width="100%" height="100%">
-   <rect x="17" y="16" width="326" height="328" fill="none" stroke="#171717" strokeWidth="6"/>
-   <text x="180" y="42" fontSize="18" fontWeight="900" fill="#171717" textAnchor="middle" letterSpacing="4">1923 / THE FUTURE</text>
-   <circle cx="179" cy="175" r="110" fill="#151515"/>
-   <circle cx="179" cy="175" r="93" fill="#d34e43" stroke="#f2dfbf" strokeWidth="7"/>
-   <circle cx="179" cy="175" r="71" fill="#f6edda" stroke="#171717" strokeWidth="6"/>
-   <path d="M166 108L220 177L170 191L160 244Z" fill="#121212"/>
-   <path d="M166 108L198 167L170 191Z" fill="#d34e43"/>
-   <path d="M17 272L75 272L17 330Z" fill="#3153a0"/>
-   <path d="M343 272L286 272L343 330Z" fill="#d8a33d"/>
-   <g fill="#d34e43"><circle cx="50" cy="85" r="8"/><circle cx="310" cy="83" r="8"/></g>
-   <g fill="#366e9b"><circle cx="50" cy="110" r="6"/><circle cx="310" cy="110" r="6"/></g>
-   <text x="180" y="324" fontSize="19" fontWeight="900" fill="#171717" textAnchor="middle" letterSpacing="4">OPEN / DESIGN</text>
-  </svg>
- </div>; const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
+  const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
  const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923;
  const topArtwork=frame<55?topCream:frame<72?blackSide:topBlue;
  return <div style={style}>
