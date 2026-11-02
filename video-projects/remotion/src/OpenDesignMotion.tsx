@@ -1694,22 +1694,13 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <text x="180" y="332" textAnchor="middle" fill="#fff1b8" fontSize="22" fontWeight="900" letterSpacing="5">1889</text>
   </svg>
  </div>;
- const yellow=<div style={{position:"absolute",inset:0,background:"#dff3e7",color:"#17191c",overflow:"hidden"}}>
-  <div style={{position:"absolute",inset:16,border:"9px solid #e4bb54",boxShadow:"inset 0 0 0 3px #fff7d9"}}/>
-  <div style={{position:"absolute",left:25,right:25,top:22,height:35,background:"#ebcf75",border:"3px solid #26272a",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 12px",fontFamily:"monospace",fontSize:15,fontWeight:900}}><span>100K</span><span>✳ OPEN DESIGN</span></div>
-  <div style={{position:"absolute",left:18,right:18,top:72,bottom:55,display:"grid",placeItems:"center",background:"#eff8f0",border:"4px solid #202627",overflow:"hidden"}}>
-   <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,#3e9e69 2.1px,transparent 2.8px)",backgroundSize:"13px 13px",opacity:.3}}/>
-   <svg viewBox="0 0 360 260" width="100%" height="100%" style={{position:"absolute",inset:0}}>
-    <defs><pattern id="stars-grid-v31" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M14 0H0V14" stroke="#9bcdb5" strokeWidth="1" fill="none" opacity=".7"/><circle cx="7" cy="7" r="2.5" fill="#5ab67f" opacity=".55"/></pattern></defs>
-    <rect width="360" height="260" fill="url(#stars-grid-v31)"/>
-    <path d="M0 205L360 64" stroke="#b1dbc4" strokeWidth="3" opacity=".8"/>
-    <path d="M20 0V260M340 0V260" stroke="#d0e9da" strokeWidth="3"/>
-    <path d="M0 224L360 80" stroke="#56bd85" strokeWidth="12" opacity=".12"/>
-   </svg>
-   <div style={{position:"relative",fontFamily:displayFont,fontSize:140,fontWeight:1000,letterSpacing:"-.13em",color:"#111b15",textShadow:"4px 4px 0 #9dd4b5,8px 8px 0 rgba(66,145,99,.35)"}}>100K</div>
-   <div style={{position:"absolute",left:0,right:0,bottom:18,textAlign:"center",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".2em",color:"#245a42"}}>GITHUB STARS</div>
-  </div>
-  <div style={{position:"absolute",left:12,right:12,bottom:11,textAlign:"center",fontSize:15,fontWeight:900,letterSpacing:".15em",color:"#476c5c"}}>OPEN DESIGN / 100K</div>
+ const yellow=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#f9fcf2,#d9f2e7 70%,#b9e4d4)",color:"#121916",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:14,border:"7px solid #e4bb54",borderRadius:20}}/>
+  <div style={{position:"absolute",left:25,right:25,top:20,height:31,display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".12em",color:"#30291b"}}><span>100K</span><span>OPEN DESIGN</span></div>
+  <svg viewBox="0 0 360 360" width="100%" height="100%" style={{position:"absolute",inset:0}}><defs><pattern id="stars-grid-v57" width="13" height="13" patternUnits="userSpaceOnUse"><path d="M13 0H0V13" stroke="#74b78e" strokeWidth="1" opacity=".55"/><circle cx="6.5" cy="6.5" r="2.1" fill="#74b78e" opacity=".62"/></pattern></defs><rect x="22" y="64" width="316" height="250" fill="url(#stars-grid-v57)" opacity=".62"/><path d="M72 82H288V278H72Z" fill="none" stroke="#1c6648" strokeWidth="9" strokeDasharray="11 4"/></svg>
+  <div style={{position:"absolute",left:0,right:0,top:"33%",textAlign:"center",fontFamily:displayFont,fontSize:156,fontWeight:1000,letterSpacing:"-.12em",color:"#101713",textShadow:"3px 4px 0 #a7d6b9"}}>100K</div>
+  <div style={{position:"absolute",left:0,right:0,top:"69%",textAlign:"center",fontSize:17,fontWeight:950,letterSpacing:".18em",color:"#194c35"}}>GitHub stars</div>
+  <div style={{position:"absolute",left:0,right:0,bottom:18,textAlign:"center",fontFamily:"monospace",fontSize:12,fontWeight:950,letterSpacing:".2em",color:"#4b7963"}}>OPEN DESIGN / 100K</div>
  </div>;
  const ease=<div style={{position:"absolute",inset:0,background:"linear-gradient(140deg,#9ff05c,#63d932 55%,#44b52b)",display:"grid",placeItems:"center"}}>
   <div style={{position:"absolute",inset:23,border:"8px solid #101713",borderRadius:33,opacity:.86}}/>
@@ -1720,7 +1711,52 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
   <div style={{position:"absolute",inset:22,border:"3px solid rgba(255,255,255,.28)",borderRadius:36}}/>
   <svg viewBox="0 0 360 360" width="100%" height="100%"><path d="M180 48Q300 48 312 162Q322 274 208 308Q85 338 50 216Q16 93 131 54Z" fill="#fff"/><path d="M127 90L280 179L165 198L134 280Z" fill="#080a0d"/><path d="M127 90L180 164L165 198Z" fill="#d8dce0"/></svg>
  </div>;
- const archiveFace=<div style={{position:"absolute",inset:0,background:"#b68a38",overflow:"hidden"}}>
+ const nightCity=<div style={{position:"absolute",inset:0,overflow:"hidden",background:"linear-gradient(145deg,#173b91 0%,#244bb5 50%,#081d5b 100%)"}}>
+  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 42% 37%,rgba(111,158,235,.7),transparent 53%),repeating-linear-gradient(172deg,rgba(255,255,255,.13) 0 2px,transparent 2px 13px)"}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%">
+   <g opacity=".45" fill="none" stroke="#8db6ef" strokeWidth="3">{Array.from({length:25},(_,i)=><path key={i} d={"M"+(i*19-35)+" "+(20+i%5*17)+"l"+(15+i%4*9)+" "+(i%2?17:-13)}/>)}</g>
+   <circle cx="182" cy="154" r="108" fill="#102b75" stroke="#f4e8c9" strokeWidth="18"/>
+   <circle cx="182" cy="154" r="91" fill="none" stroke="#d6c7a0" strokeWidth="5"/>
+   <path d="M151 82L254 154L168 177L145 239Z" fill="#fff8e8"/><path d="M151 82L192 147L168 177Z" fill="#91b9ec"/>
+   <g fill="#0b1e52"><path d="M0 286L0 226L32 226L32 244L63 244L63 207L91 207L91 286Z"/><path d="M263 286L263 224L290 224L290 195L319 195L319 237L360 237L360 286Z"/></g>
+   <g fill="#ffdf77">{Array.from({length:25},(_,i)=><rect key={i} x={8+(i*29)%340} y={294+(i*17)%43} width="6" height="11" opacity={.65+(i%3)*.12}/>)}</g>
+   <path d="M0 333Q66 312 124 333T242 332T360 327V360H0Z" fill="#0a194b"/>
+  </svg>
+  <div style={{position:"absolute",left:15,right:15,top:14,display:"flex",justifyContent:"space-between",fontFamily:"monospace",fontSize:12,fontWeight:950,letterSpacing:".13em",color:"#fff1c8"}}><span>BLUE HOUR</span><span>OPEN / 01</span></div>
+ </div>;
+ const glossyLogo=<div style={{position:"absolute",inset:0,overflow:"hidden",background:"radial-gradient(ellipse at 28% 16%,#2d3945,#06090d 62%,#020305)"}}>
+  <div style={{position:"absolute",inset:20,border:"3px solid rgba(255,255,255,.18)",borderRadius:39}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%">
+   <defs><linearGradient id="glossy-d-v57" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#ffdf55"/><stop offset=".3" stopColor="#9cf05d"/><stop offset=".62" stopColor="#65e7d1"/><stop offset="1" stopColor="#6aa7ff"/></linearGradient><filter id="glossy-glow-v57"><feGaussianBlur stdDeviation="10"/></filter></defs>
+   <path d="M91 55Q55 55 55 97V266Q55 305 96 305H180Q307 305 307 180Q307 55 180 55Z" fill="none" stroke="#9cf05d" strokeWidth="30" opacity=".55" filter="url(#glossy-glow-v57)"/>
+   <path d="M91 55Q55 55 55 97V266Q55 305 96 305H180Q307 305 307 180Q307 55 180 55Z" fill="none" stroke="url(#glossy-d-v57)" strokeWidth="24" strokeLinejoin="round"/>
+   <path d="M124 101Q100 101 100 128V234Q100 256 128 256H178Q258 256 258 180Q258 101 178 101Z" fill="#070b11" stroke="rgba(255,255,255,.7)" strokeWidth="4"/>
+   <path d="M151 130L226 180L151 230Z" fill="#f6f7f4"/><path d="M151 130L182 177L151 230Z" fill="#a4ed76"/>
+  </svg>
+  <div style={{position:"absolute",left:0,right:0,bottom:17,textAlign:"center",fontFamily:"monospace",fontSize:12,fontWeight:950,letterSpacing:".2em",color:"#cbd9d6"}}>OPEN DESIGN / PLAY</div>
+ </div>;
+ const topCream=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#fffdf3,#d8e3ed 68%,#b9c7da)",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:18,border:"5px solid rgba(19,28,46,.7)",borderRadius:28}}/>
+  <svg viewBox="0 0 360 360" width="100%" height="100%"><ellipse cx="180" cy="174" rx="105" ry="76" fill="#101720"/><ellipse cx="180" cy="174" rx="83" ry="58" fill="#f8f6ea" stroke="#c5d2df" strokeWidth="8"/><path d="M153 126L225 174L153 222Z" fill="#111924"/><path d="M153 126L181 169L153 222Z" fill="#7da3df"/><text x="180" y="298" fontSize="15" textAnchor="middle" fontWeight="900" letterSpacing="5" fill="#263449">MORRO / FORM</text></svg>
+ </div>;
+ const topBlue=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#2c53ec,#132ba4 65%,#07153d)",overflow:"hidden"}}>
+  <div style={{position:"absolute",inset:15,border:"6px solid #f7f4e9",borderRadius:30}}/><svg viewBox="0 0 360 360" width="100%" height="100%"><circle cx="180" cy="173" r="105" fill="#f4f2e8" stroke="#9fb1f0" strokeWidth="8"/><circle cx="180" cy="173" r="80" fill="#101720"/><path d="M151 119L224 173L151 228Z" fill="#fff"/><path d="M151 119L181 166L151 228Z" fill="#7898eb"/></svg>
+ </div>;
+ const archiveFace=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#f1cd6c,#b57a2e 65%,#75491f)",overflow:"hidden",color:"#20160e"}}>
+  <div style={{position:"absolute",inset:13,border:"5px solid #f7e5a4",borderRadius:22}}/>
+  <div style={{position:"absolute",left:0,right:0,top:17,textAlign:"center",fontFamily:"Georgia,serif",fontSize:24,fontWeight:900,letterSpacing:".12em"}}>1889</div>
+  <div style={{position:"absolute",left:"50%",top:"49%",width:230,height:230,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"radial-gradient(circle,#17130f 0 36%,#dcb35d 37% 42%,#17130f 43% 54%,#f5da8c 55% 62%,#9a6829 63% 70%,#f1d27a 71% 100%)",boxShadow:"0 0 0 9px rgba(255,239,187,.48),0 14px 24px rgba(56,30,10,.35)"}}>
+   <div style={{position:"absolute",left:"50%",top:"50%",width:0,height:0,transform:"translate(-50%,-50%)",borderTop:"48px solid transparent",borderBottom:"48px solid transparent",borderLeft:"93px solid #f1d78c"}}/><div style={{position:"absolute",inset:23,border:"2px solid rgba(255,231,163,.8)",borderRadius:"50%"}}/>
+  </div>
+  <div style={{position:"absolute",left:0,right:0,bottom:19,textAlign:"center",fontFamily:"monospace",fontSize:13,fontWeight:950,letterSpacing:".2em"}}>TIME / CULTURE / MOTION</div>
+ </div>;
+ const archive1923=<div style={{position:"absolute",inset:0,background:"linear-gradient(145deg,#fff8e8,#e8ddc3)",overflow:"hidden",color:"#1b1715"}}>
+  <div style={{position:"absolute",inset:13,border:"5px solid #171717",borderRadius:20}}/>
+  <div style={{position:"absolute",left:0,right:0,top:13,textAlign:"center",fontFamily:"Georgia,serif",fontSize:26,fontWeight:900,letterSpacing:".08em"}}>1923</div>
+  <div style={{position:"absolute",left:"50%",top:"52%",width:225,height:225,transform:"translate(-50%,-50%)",borderRadius:"50%",background:"radial-gradient(circle,#191817 0 42%,#d4493d 43% 57%,#f5ead6 58% 67%,#191817 68% 100%)",boxShadow:"0 5px 18px rgba(0,0,0,.28)"}}><div style={{position:"absolute",left:"50%",top:"50%",width:0,height:0,transform:"translate(-50%,-50%)",borderTop:"61px solid transparent",borderBottom:"61px solid transparent",borderLeft:"91px solid #f6ecdb"}}/></div>
+  <div style={{position:"absolute",left:0,right:0,bottom:17,textAlign:"center",fontFamily:"monospace",fontSize:14,fontWeight:950,letterSpacing:".22em"}}>OPEN / DESIGN</div>
+ </div>;
+  const archiveFace=<div style={{position:"absolute",inset:0,background:"#b68a38",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(90deg,rgba(35,22,13,.16) 0 2px,transparent 2px 13px),radial-gradient(ellipse at 50% 45%,#e5c77b,#9a6c31)"}}/>
   <svg viewBox="0 0 360 360" width="100%" height="100%">
    <defs><radialGradient id="archive-gold-v53"><stop stopColor="#f4df9b"/><stop offset=".7" stopColor="#b7873e"/><stop offset="1" stopColor="#5e401e"/></radialGradient></defs>
@@ -1752,15 +1788,16 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <g fill="#366e9b"><circle cx="50" cy="110" r="6"/><circle cx="310" cy="110" r="6"/></g>
    <text x="180" y="324" fontSize="19" fontWeight="900" fill="#171717" textAnchor="middle" letterSpacing="4">OPEN / DESIGN</text>
   </svg>
- </div>; const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?archiveFace:blackMark;
- const dynamicSide=frame<27?blackSide:frame<55?blackSide:frame<72?yellow:blackMark;
+ </div>; const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
+ const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923;
+ const topArtwork=frame<55?topCream:frame<72?blackSide:topBlue;
  return <div style={style}>
   {kind===0?dynamicFront:
-   kind===1?(frame<55?clock:frame<72?archiveFace:archive1923):
+   kind===1?(frame<55?nightCity:frame<72?archiveFace:archive1923):
    kind===2?dynamicSide:
-   kind===3?(frame<55?clock:blackSide):
+   kind===3?topArtwork:
    kind===4?ease:
-   (frame>=55&&frame<72?archiveFace:archive1923)}
+   (frame<55?nightCity:frame<72?archiveFace:blackMark)}
   <div style={{position:"absolute",inset:0,borderRadius:44,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.28),transparent 28%,rgba(0,0,0,.18) 100%)"}}/>
  </div>;
 };

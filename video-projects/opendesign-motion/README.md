@@ -1,4 +1,4 @@
-# OpenDesign Motion — frame-indexed reference reconstruction (V56 candidate)
+# OpenDesign Motion — frame-indexed reference reconstruction (V57 candidate)
 
 Reference: `preview.mp4`, 1920×1080, 30fps, 1,119 decoded picture frames (0–1118), 37.312s source container. Output target: 37.300s picture, H.264, AAC stereo 48kHz.
 
