@@ -654,21 +654,20 @@ const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.008;
  const dots=Array.from({length:19*31},(_,i)=>{
   const row=Math.floor(i/31),col=i%31,seed=(i*37+13)%29;
-  return {x:col*62+((row%2)*18)+((seed%9)-4)*6,y:row*55+((seed%11)-5)*5,r:17+(seed%8)*1.9,op:.86+(seed%4)*.035};
+  return {x:col*62+((row%2)*18)+((seed%9)-4)*6,y:row*55+((seed%11)-5)*5,r:14+(seed%8)*1.5,op:.86+(seed%4)*.035};
  });
- const specks=Array.from({length:138},(_,i)=>{const a=i*2.399963,r=192+(i%11)*5;return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:2.5+(i%5)*1.4};});
+ const specks=Array.from({length:112},(_,i)=>{const a=i*2.399963+(i%7)*.11,r=185+((i*17)%67);return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:4+(i%7)*1.45};});
  return <AbsoluteFill style={{...full,background:"#e84434",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <rect width="1920" height="1080" fill="#e84434"/>
    <g fill="#fff8ed">{dots.map((d,i)=><circle key={i} cx={d.x} cy={d.y} r={d.r} opacity={d.op}/>)}</g>
-   <g transform={"translate(960 580) scale("+pulse+")"}>
+   <g transform={"translate(960 540) scale("+pulse+")"}>
     <path d="M-252 252V-22C-252 -165 -143 -270 0 -270C143 -270 252 -165 252 -22C252 123 145 238 0 252Z
              M-185 -22C-185 -124 -104 -194 0 -194C104 -194 185 -124 185 -22C185 79 107 163 0 163C-107 163 -185 79 -185 -22Z"
           fill="#f4ca31" fillRule="evenodd" stroke="#111315" strokeWidth="8" strokeLinejoin="round"/>
     <path d="M-248 190L-248 250L-10 250L-10 214" fill="none" stroke="#f4ca31" strokeWidth="15" strokeLinecap="square"/>
     <g fill="#111315">{specks.map((s,i)=><circle key={i} cx={s.x} cy={s.y} r={s.r}/>)}</g>
-    <path d="M-66 -112L145 -5L-29 30L-63 154Z" fill="#111315"/>
-    <path d="M-51 -94L119 -4L-27 16" fill="none" stroke="#fff1a3" strokeWidth="6" opacity=".52"/>
+    <path d="M-90 -104L118 -8L-31 29L-61 128Z" fill="#111315"/>
    </g>
    <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="#fff8ed"/>
    <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="none" stroke="#f9f3e4" strokeWidth="7"/>
@@ -742,8 +741,8 @@ const OutPoster = () => {
  const f=useCurrentFrame(),dx=e(f,0,9,28,0);
  return <AbsoluteFill style={{ ...full, background: "#08731f", color: "#f9fff4",overflow:"hidden" }}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 45%,#168d30,#006719 74%,#004b15)"}}/>
-  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+(dx-35)+"px)",opacity:.38,filter:"blur(10px)"}}><Word size={920} color="#fff" tracking={-.16}>OUT</Word></div>
-  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+dx+"px)"}}><Word size={790} color="#fff" tracking={-.16} style={{textShadow:"0 0 22px rgba(255,255,255,.15)"}}>OUT</Word></div>
+  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+(dx-35)+"px)",opacity:.38,filter:"blur(10px)"}}><Word size={820} color="#fff" tracking={-.16}>OUT</Word></div>
+  <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+dx+"px)"}}><Word size={620} color="#fff" tracking={-.16} style={{textShadow:"0 0 22px rgba(255,255,255,.15)"}}>OUT</Word></div>
   <div style={{position:"absolute",left:"-2%",right:"-2%",top:222,textAlign:"center",transform:"translateX("+(dx+24)+"px)",opacity:.18,filter:"blur(5px)"}}><Word size={820} color="#fff" tracking={-.16}>OUT</Word></div>
  </AbsoluteFill>;
 };
@@ -752,7 +751,7 @@ const EasePoster = () => {
  const f=useCurrentFrame(),shift=e(f,0,10,48,0);
  return <AbsoluteFill style={{...full,background:"#f5f5ef",color:"#111813",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#fff 0%,#f4f6ee 100%)"}}/>
-  <div style={{position:"absolute",left:"-6%",right:"-6%",top:238,transform:"translateX("+shift+"px)",textAlign:"center",fontFamily:displayFont,fontSize:900,fontWeight:1000,letterSpacing:"-.15em",color:"#07832b",textShadow:"3px 2px 0 #0b6f2a,7px 6px 0 #075c24,13px 13px 24px rgba(0,60,15,.22)"}}>EASE</div>
+  <div style={{position:"absolute",left:"-6%",right:"-6%",top:238,transform:"translateX("+shift+"px)",textAlign:"center",fontFamily:displayFont,fontSize:760,fontWeight:1000,letterSpacing:"-.15em",color:"#07832b",textShadow:"3px 2px 0 #0b6f2a,7px 6px 0 #075c24,13px 13px 24px rgba(0,60,15,.22)"}}>EASE</div>
   <div style={{position:"absolute",left:72,top:42,fontSize:14,fontWeight:900,letterSpacing:".2em",color:"#8c978d"}}>EASE / NATURAL MOTION</div>
  </AbsoluteFill>;
 };
@@ -954,7 +953,7 @@ const EaseGreen=()=>{
  return <AbsoluteFill style={{...full,background:"#8ff04e",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(115deg,#9af55f,#82e846 60%,#a7f77b)"}}/>
   <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+(shift-34)+"px)",opacity:.24*ghost,filter:"blur(8px)"}}><Word size={880} color="#101512" tracking={-.15}>EASE</Word></div>
-  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px)",filter:"blur(.25px)"}}><Word size={780} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
+  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px)",filter:"blur(.25px)"}}><Word size={600} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
   <div style={{position:"absolute",left:36,top:30,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#2e5427"}}>EASING / MOTION STUDY</div>
  </AbsoluteFill>;
 };
@@ -1010,7 +1009,7 @@ const CoursesPoster=()=>{
 
 const InMetallic=()=>{
  const f=useCurrentFrame(),rise=e(f,0,5,45,0),trail=1-e(f,0,8);
- const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:820,fontWeight:1000,letterSpacing:"-.045em",lineHeight:.8,whiteSpace:"nowrap" as const};
+ const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:690,fontWeight:1000,letterSpacing:"-.045em",lineHeight:.8,whiteSpace:"nowrap" as const};
  return <AbsoluteFill style={{...full,background:"#08090b",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 52%,#22282e,#08090b 70%)"}}/>
   <div style={{...type,color:"#8b939a",transform:"translate(-50%,-50%) translate(-95px,14px)",opacity:.3*trail,filter:"blur(13px)"}}>IN</div>
@@ -1023,7 +1022,7 @@ const InMetallic=()=>{
 const InPoster=()=>{
  const f=useCurrentFrame(),dot=.9+.1*Math.sin(f/2);
  return <AbsoluteFill style={{...full,background:"#07080b",overflow:"hidden"}}>
-  <div style={{position:"absolute",left:"-3%",right:"-3%",top:200,textAlign:"center",fontFamily:displayFont,fontSize:790,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.9,color:"#f6f6f1",textShadow:"0 4px 0 rgba(255,255,255,.12)"}}>IN.</div>
+  <div style={{position:"absolute",left:"-3%",right:"-3%",top:245,textAlign:"center",fontFamily:displayFont,fontSize:650,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.9,color:"#f6f6f1",textShadow:"0 4px 0 rgba(255,255,255,.12)"}}>IN.</div>
   <div style={{position:"absolute",left:"58.1%",top:535,width:47,height:47,borderRadius:"50%",background:"#9ceb51",boxShadow:"0 0 34px rgba(156,235,81,.5)",transform:"scale("+dot+")"}}/>
  </AbsoluteFill>;
 };
@@ -1059,35 +1058,48 @@ const RingPoster = () => {
  return <AbsoluteFill style={{...full,background:"#030405",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+f*.12+"deg) scale("+zoom+")"}}>
    <defs>
-    <path id="ring-v30-a" d="M960 540m-490 0a490 490 0 1 1 980 0a490 490 0 1 1 -980 0"/>
-    <path id="ring-v30-b" d="M960 540m-425 0a425 425 0 1 1 850 0a425 425 0 1 1 -850 0"/>
-    <path id="ring-v30-c" d="M960 540m-360 0a360 360 0 1 1 720 0a360 360 0 1 1 -720 0"/>
-    <path id="ring-v30-d" d="M960 540m-295 0a295 295 0 1 1 590 0a295 295 0 1 1 -590 0"/>
-    <path id="ring-v30-e" d="M960 540m-230 0a230 230 0 1 1 460 0a230 230 0 1 1 -460 0"/>
-    <path id="ring-v30-f" d="M960 540m-165 0a165 165 0 1 1 330 0a165 165 0 1 1 -330 0"/>
-    <path id="ring-v30-g" d="M960 540m-100 0a100 100 0 1 1 200 0a100 100 0 1 1 -200 0"/>
+    <path id="ring-v51-a" d="M960 540m-500 0a500 500 0 1 1 1000 0a500 500 0 1 1 -1000 0"/>
+    <path id="ring-v51-b" d="M960 540m-440 0a440 440 0 1 1 880 0a440 440 0 1 1 -880 0"/>
+    <path id="ring-v51-c" d="M960 540m-380 0a380 380 0 1 1 760 0a380 380 0 1 1 -760 0"/>
+    <path id="ring-v51-d" d="M960 540m-320 0a320 320 0 1 1 640 0a320 320 0 1 1 -640 0"/>
+    <path id="ring-v51-e" d="M960 540m-260 0a260 260 0 1 1 520 0a520 520 0 1 1 -520 0"/>
+    <path id="ring-v51-f" d="M960 540m-200 0a200 200 0 1 1 400 0a400 400 0 1 1 -400 0"/>
+    <path id="ring-v51-g" d="M960 540m-140 0a140 140 0 1 1 280 0a280 280 0 1 1 -280 0"/>
+    <path id="ring-v51-h" d="M960 540m-80 0a80 80 0 1 1 160 0a160 160 0 1 1 -160 0"/>
    </defs>
-   {[490,425,360,295,230,165,100].map((r,i)=><circle key={r} cx="960" cy="540" r={r} fill="none" stroke="#f7f7f2" strokeWidth={i<2?5:3} opacity={i===6?.65:1}/>)}
-   <g fill="#fff" fontFamily="Arial, sans-serif" fontWeight="1000">
-    <text fontSize="76" letterSpacing="5"><textPath href="#ring-v30-a">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-    <text fontSize="68" letterSpacing="4"><textPath href="#ring-v30-b">THE FUTURE · MOTION DESIGN · OPEN DESIGN · THE FUTURE ·</textPath></text>
-    <text fontSize="59" letterSpacing="3"><textPath href="#ring-v30-c">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-    <text fontSize="52" letterSpacing="3"><textPath href="#ring-v30-d">OPEN DESIGN / MOTION / THE FUTURE IS HERE /</textPath></text>
-    <text fontSize="45" letterSpacing="2"><textPath href="#ring-v30-e">THE FUTURE IS ALREADY HERE · OPEN DESIGN ·</textPath></text>
-    <text fontSize="37" letterSpacing="2"><textPath href="#ring-v30-f">MOTION / THE FUTURE / OPEN DESIGN /</textPath></text>
-    <text fontSize="30" letterSpacing="1"><textPath href="#ring-v30-g">THE FUTURE / MOTION /</textPath></text>
+   <circle cx="960" cy="540" r="520" fill="#f7f6f1"/>
+   <circle cx="960" cy="540" r="460" fill="#050609"/>
+   <circle cx="960" cy="540" r="400" fill="#f7f6f1"/>
+   <circle cx="960" cy="540" r="340" fill="#050609"/>
+   <circle cx="960" cy="540" r="280" fill="#f7f6f1"/>
+   <circle cx="960" cy="540" r="220" fill="#050609"/>
+   <circle cx="960" cy="540" r="160" fill="#f7f6f1"/>
+   <circle cx="960" cy="540" r="100" fill="#050609"/>
+   <circle cx="960" cy="540" r="43" fill="#f7f6f1"/>
+   <circle cx="960" cy="540" r="24" fill="#030405"/>
+   <g fontFamily="Arial Black,Arial,sans-serif" fontWeight="1000">
+    <g fill="#111315">
+     <text fontSize="73" letterSpacing="5"><textPath href="#ring-v51-a">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
+     <text fontSize="57" letterSpacing="3"><textPath href="#ring-v51-c">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
+     <text fontSize="43" letterSpacing="2"><textPath href="#ring-v51-e">THE FUTURE IS ALREADY HERE · OPEN DESIGN ·</textPath></text>
+     <text fontSize="30" letterSpacing="1"><textPath href="#ring-v51-g">THE FUTURE / MOTION /</textPath></text>
+    </g>
+    <g fill="#f7f6f1">
+     <text fontSize="66" letterSpacing="4"><textPath href="#ring-v51-b">THE FUTURE · MOTION DESIGN · OPEN DESIGN ·</textPath></text>
+     <text fontSize="51" letterSpacing="3"><textPath href="#ring-v51-d">OPEN DESIGN / MOTION / THE FUTURE IS HERE /</textPath></text>
+     <text fontSize="37" letterSpacing="2"><textPath href="#ring-v51-f">MOTION / THE FUTURE / OPEN DESIGN /</textPath></text>
+     <text fontSize="23" letterSpacing="1"><textPath href="#ring-v51-h">OPEN DESIGN / MOTION /</textPath></text>
+    </g>
    </g>
-   <circle cx="960" cy="540" r="68" fill="#fff"/><circle cx="960" cy="540" r="48" fill="#030405"/>
   </svg>
  </AbsoluteFill>;
 };
-
 const NeverPoster = () => {
  const f=useCurrentFrame(),shift=e(f,0,9,26,0);
  return <AbsoluteFill style={{...full,background:"#c8f7a6",color:"#101713",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(110deg,#d5f9b9,#c3f59b 62%,#ddfbc5)"}}/>
   <div style={{position:"absolute",left:"-2%",right:"-2%",top:305,textAlign:"center",display:"flex",justifyContent:"center",alignItems:"baseline",gap:2,transform:"translateX("+shift+"px)"}}>
-   {"NEVER".split("").map((ch,i)=><span key={i} style={{fontFamily:displayFont,fontSize:790-(i===2?45:0),fontWeight:1000,letterSpacing:"-.13em",color:"#111713",transform:"translateY("+(i===0?26:i===1?0:i===2?-80:i===3?-104:-20)+"px) skewX("+(i===2?-9:0)+"deg)",textShadow:"0 5px 0 rgba(15,35,16,.2)"}}>{ch}</span>)}
+   {"NEVER".split("").map((ch,i)=><span key={i} style={{fontFamily:displayFont,fontSize:640-(i===2?35:0),fontWeight:1000,letterSpacing:"-.13em",color:"#111713",transform:"translateY("+(i===0?26:i===1?0:i===2?-80:i===3?-104:-20)+"px) skewX("+(i===2?-9:0)+"deg)",textShadow:"0 5px 0 rgba(15,35,16,.2)"}}>{ch}</span>)}
   </div>
   <div style={{position:"absolute",left:28,top:27,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#446138"}}>NEVER / TYPE IN MOTION</div>
  </AbsoluteFill>;
@@ -1102,7 +1114,7 @@ const LinearPoster = () => {
   <div style={{position:"absolute",right:48,top:30,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#7e8589"}}>DIRECTION / LINEAR</div>
   <div style={{...common,fontSize:600,transform:"translateX(-65px)",opacity:(1-resolve)*.45*ghost,filter:"blur(10px)"}}><Word size={660} color="#fff" tracking={-.12}>IN</Word></div>
   <div style={{...common,fontSize:600,transform:"translateX(-28px)",opacity:1-resolve,filter:"blur(1.5px)"}}><Word size={600} color="#f4f5f4" tracking={-.12}>IN</Word></div>
-  <div style={{...common,fontSize:700,opacity:resolve,transform:"translateX("+(10*(1-resolve))+"px)"}}><Word size={780} color="#f4f5f2" tracking={-.12}>LINEAR.</Word></div>
+  <div style={{...common,fontSize:560,opacity:resolve,transform:"translateX("+(10*(1-resolve))+"px)"}}><Word size={660} color="#f4f5f2" tracking={-.12}>LINEAR.</Word></div>
   <div style={{position:"absolute",left:"72.3%",top:525,width:30,height:30,borderRadius:"50%",background:"#a3ef4d",opacity:dot,boxShadow:"0 0 20px rgba(163,239,77,.25)"}}/>
   <div style={{position:"absolute",left:48,right:48,bottom:31,height:2,background:"#5d6569",opacity:.28}}/>
  </AbsoluteFill>;
@@ -1110,28 +1122,59 @@ const LinearPoster = () => {
 
 const ClockPoster = () => {
  const f=useCurrentFrame(),angle=f*7;
- return <AbsoluteFill style={{...full,background:"#172c77",overflow:"hidden",color:"#f3d47c"}}>
+ const swirls=Array.from({length:225},(_,i)=>{
+  const a=i*2.399963,r=190+(i*53)%930,cx=960+Math.cos(a)*r,cy=455+Math.sin(a)*r*.68;
+  const len=28+(i*29)%148,dx=-Math.sin(a)*len,dy=Math.cos(a)*len*.68;
+  return {x1:cx-dx*.5,y1:cy-dy*.5,x2:cx+dx*.5,y2:cy+dy*.5,qx:cx+dy*.12,qy:cy-dx*.08,w:3+(i*7)%15,c:["#163a9d","#315cc8","#4773d4","#6c8fdd","#142f86","#8aa9e5","#b0c5ea"][i%7],o:.18+(i%6)*.06};
+ });
+ const lights=Array.from({length:68},(_,i)=>{
+  const a=i*2.399963,r=270+(i*41)%730,cx=960+Math.cos(a)*r,cy=452+Math.sin(a)*r*.7;
+  return {x:cx,y:cy,len:18+(i*11)%80,w:2+(i%4)*2,c:i%3===0?"#d6e1ee":"#95b4ed",o:.15+(i%5)*.045};
+ });
+ const water=Array.from({length:45},(_,i)=>({x:(i*119)%1960-20,y:790+(i*67)%270,w:35+(i*17)%115,op:.18+(i%4)*.08}));
+ return <AbsoluteFill style={{...full,background:"#193eaa",overflow:"hidden",color:"#f3d47c"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <defs>
-    <radialGradient id="clock-sea-v18"><stop stopColor="#25468a"/><stop offset=".65" stopColor="#123071"/><stop offset="1" stopColor="#061847"/></radialGradient>
+    <radialGradient id="clock-sea-v51" cx="51%" cy="40%" r="72%"><stop stopColor="#416cc8"/><stop offset=".45" stopColor="#2750b8"/><stop offset="1" stopColor="#09215f"/></radialGradient>
+    <radialGradient id="clock-aura-v51"><stop stopColor="#f5d36c" stopOpacity=".38"/><stop offset=".55" stopColor="#e4bc62" stopOpacity=".16"/><stop offset="1" stopColor="#e4bc62" stopOpacity="0"/></radialGradient>
     <linearGradient id="clock-gold-v18" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff1aa"/><stop offset=".24" stopColor="#d8a53b"/><stop offset=".5" stopColor="#f8d77a"/><stop offset=".78" stopColor="#9b6725"/><stop offset="1" stopColor="#f5d27b"/></linearGradient>
-    <filter id="clock-rough-v18"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="3" seed="9"/><feColorMatrix type="saturate" values="0"/><feBlend in="SourceGraphic" mode="multiply"/></filter>
+    <filter id="clock-brush-v51"><feTurbulence type="fractalNoise" baseFrequency=".012 .028" numOctaves="3" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="15" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation=".7"/></filter>
    </defs>
-   <rect width="1920" height="1080" fill="url(#clock-sea-v18)"/>
-   {Array.from({length:42},(_,i)=><path key={i} d={"M"+(-60+(i%7)*300)+" "+(i*29%1080)+"q 95 -85 180 8t 180 5"} fill="none" stroke={i%3===0?"#4b75a9":"#6c8fba"} strokeWidth={i%4===0?18:9} opacity=".24"/>)}
-   <g opacity=".78" filter="url(#clock-rough-v18)">
-    <path d="M0 692C180 592 308 620 456 687C575 740 698 720 816 670C962 610 1100 632 1255 691C1433 760 1603 726 1920 631V1080H0Z" fill="#101f4e" opacity=".72"/>
-    <path d="M0 842C180 760 336 771 494 837C654 904 822 886 978 826C1135 767 1308 800 1450 848C1624 906 1780 861 1920 817V1080H0Z" fill="#081a46" opacity=".84"/>
-    <path d="M120 735L195 634L240 715L294 585L347 727L412 645L474 751Z" fill="#0b1e49"/>
-    <path d="M1420 734L1487 626L1526 707L1601 552L1668 712L1720 648L1801 732Z" fill="#0b1c48"/>
-    <g fill="#07152f" stroke="#102b57" strokeWidth="7">
-     <path d="M240 715L250 520L260 715Z"/><path d="M250 565Q173 534 178 455Q258 482 250 565Z"/><path d="M252 602Q333 552 344 476Q264 489 252 602Z"/>
-     <path d="M1570 701L1578 508L1587 701Z"/><path d="M1578 558Q1504 529 1508 450Q1586 476 1578 558Z"/><path d="M1581 592Q1652 545 1668 470Q1591 482 1581 592Z"/>
-    </g>
-    <g fill="#14295a"><path d="M90 879L160 824L230 879Z"/><path d="M160 879V824H218V879Z"/><path d="M1680 893L1755 826L1834 893Z"/><path d="M1754 893V826H1817V893Z"/></g>
+   <rect width="1920" height="1080" fill="url(#clock-sea-v51)"/>
+   <rect width="1920" height="1080" fill="url(#clock-aura-v51)"/>
+   <g fill="none" strokeLinecap="round" filter="url(#clock-brush-v51)">
+    {swirls.map((p,i)=><path key={i} d={"M"+p.x1+" "+p.y1+"Q"+p.qx+" "+p.qy+" "+p.x2+" "+p.y2} stroke={p.c} strokeWidth={p.w} opacity={p.o}/>)}
+    {lights.map((p,i)=><path key={i} d={"M"+p.x+" "+p.y+"q "+(p.len*.42)+" -"+(p.len*.18)+" "+p.len+" "+(p.len*.09)} stroke={p.c} strokeWidth={p.w} opacity={p.o}/>)}
    </g>
-   <g opacity=".5" fill="none" strokeLinecap="round">
-    {Array.from({length:19},(_,i)=><path key={i} d={"M"+(-60+(i%5)*410)+" "+(762+(i*37)%270)+"q 120 -36 240 2t 210 -3"} stroke={i%3===0?"#91b6d5":"#446da7"} strokeWidth={5+(i%4)*4} opacity={.2+(i%5)*.08}/> )}
+   <g filter="url(#clock-brush-v51)">
+    <path d="M0 930C170 886 321 878 468 913C613 948 729 1010 864 1014C1027 1017 1156 958 1308 953C1519 946 1651 1022 1920 974V1080H0Z" fill="#112d79" opacity=".82"/>
+    <path d="M0 1008C215 955 352 966 505 1008C681 1054 819 1050 985 1018C1145 986 1272 974 1446 1004C1647 1039 1781 1035 1920 1017V1080H0Z" fill="#081d59" opacity=".9"/>
+   </g>
+   <g filter="url(#clock-brush-v51)" opacity=".98">
+    <path d="M82 1060C35 938 104 843 68 747C109 663 67 577 100 490C67 400 108 324 89 247C121 174 119 93 160 20C206 111 183 203 222 296C194 385 236 470 197 566C234 659 202 744 225 852C255 947 224 1020 248 1080Z" fill="#062f26" stroke="#0d4937" strokeWidth="11"/>
+    <path d="M81 876C37 792 59 707 105 638C144 710 145 808 180 927Z" fill="#0b583e"/>
+    <path d="M98 644C24 592 25 505 74 414C149 474 159 557 98 644Z" fill="#0a4b36"/>
+    <path d="M108 494C178 429 189 340 143 256C82 327 74 413 108 494Z" fill="#0c553b"/>
+    <path d="M119 319C56 264 61 189 130 110C174 190 173 258 119 319Z" fill="#0a4d36"/>
+    <path d="M140 912C104 843 115 765 162 711C203 786 200 856 204 963Z" fill="#0a4732" opacity=".82"/>
+   </g>
+   <g filter="url(#clock-brush-v51)">
+    <path d="M1250 1028L1250 906L1305 906L1305 834L1360 834L1360 886L1410 886L1410 936L1460 936L1460 1028Z" fill="#111b57"/>
+    <path d="M1410 1028L1410 853L1450 853L1450 792L1490 792L1490 853L1530 853L1530 1028Z" fill="#0b184e"/>
+    <path d="M1502 1028L1502 915L1552 915L1552 842L1603 842L1603 888L1655 888L1655 1028Z" fill="#172263"/>
+    <path d="M1640 1028L1640 918L1695 918L1695 862L1740 862L1740 918L1794 918L1794 1028Z" fill="#0c184b"/>
+    <path d="M1478 796L1487 572L1498 796Z" fill="#071340"/>
+    {Array.from({length:36},(_,i)=>{
+      const x=1268+(i*59)%575,y=884+(i*41)%111;
+      return <rect key={"village-window-"+i} x={x} y={y} width={6+(i%3)*3} height={10+(i%4)*2} fill="#ffd653" opacity={.48+(i%4)*.12}/>;
+    })}
+   </g>
+   <g fill="none" strokeLinecap="round" opacity=".72">
+    {water.map((p,i)=><path key={"water-"+i} d={"M"+p.x+" "+p.y+"q "+(p.w*.38)+" -10 "+p.w+" 1"} stroke={i%3===0?"#a2c1ec":"#567dce"} strokeWidth={3+(i%4)*3} opacity={p.op}/>)}
+   </g>
+   <g opacity=".58" filter="url(#clock-brush-v51)">
+    <circle cx="960" cy="538" r="374" fill="none" stroke="#e9c66b" strokeWidth="42"/>
+    <circle cx="960" cy="538" r="390" fill="none" stroke="#fff0a8" strokeWidth="10"/>
    </g>
    <g transform={"translate(960 538) rotate("+angle+")"}>
     {Array.from({length:24},(_,i)=><path key={i} d="M0 -355L-32 -294L0 -278L32 -294Z" fill="url(#clock-gold-v18)" stroke="#805b2b" strokeWidth="3" transform={"rotate("+(i*15)+")"}/>)}
@@ -1147,12 +1190,11 @@ const ClockPoster = () => {
     <circle r="28" fill="#e8bd5b" stroke="#fff1b6" strokeWidth="8"/>
    </g>
    <circle cx="960" cy="538" r="390" fill="none" stroke="#e8bd64" strokeWidth="3" opacity=".5"/>
-   <path d="M0 1005Q250 920 510 1005T1020 995T1540 1008T1920 990" stroke="#a7c3df" strokeWidth="5" fill="none" opacity=".24"/>
   </svg>
-  <div style={{position:"absolute",left:0,right:0,top:32,textAlign:"center",fontFamily:"Georgia,serif",fontSize:37,fontWeight:700,letterSpacing:".2em",color:"#f1d78d",textShadow:"0 3px 8px rgba(0,0,0,.5)"}}>1889</div>
+  <div style={{position:"absolute",left:0,right:0,top:29,textAlign:"center",fontFamily:"Georgia,serif",fontSize:48,fontWeight:800,letterSpacing:".12em",color:"#f4c847",textShadow:"0 3px 8px rgba(0,0,0,.55)"}}>1889</div>
+  <div style={{position:"absolute",left:0,right:0,top:83,textAlign:"center",fontFamily:"Georgia,serif",fontSize:24,fontWeight:750,letterSpacing:".025em",color:"#e9c96d",textShadow:"0 2px 7px rgba(0,0,0,.5)"}}>Post-Impressionism</div>
  </AbsoluteFill>;
 };
-
 const StatsPoster = () => {
  const f=useCurrentFrame();
  const counts=[80,82,84,87,91,93,94,96],days=[88,96,104,111,119,126,132,138];
@@ -1336,10 +1378,10 @@ const ModelAgentScene=()=>{
     <ellipse cx="1195" cy="585" rx="238" ry="158" fill="none" stroke="rgba(255,255,255,.66)" strokeWidth="6" strokeDasharray="24 18" transform={"rotate(-14 1195 585)"}/>
     <ellipse cx="1195" cy="585" rx="204" ry="132" fill="none" stroke="rgba(255,255,255,.30)" strokeWidth="3" transform={"rotate(18 1195 585)"}/>
    </svg>
-   {Array.from({length:13},(_,i)=>{
-    const angle=(i/13)*Math.PI*2+(f-109)*.075;
-    const x=1128+Math.cos(angle)*297;
-    const y=585+Math.sin(angle)*200;
+   {Array.from({length:11},(_,i)=>{
+    const angle=(i/11)*Math.PI*2+(f-109)*.075;
+    const x=1195+Math.cos(angle)*230;
+    const y=585+Math.sin(angle)*153;
     const depth=.72+.34*((Math.sin(angle)+1)/2);
     const rotation=Math.sin(angle)*11;
     return <div key={i} style={{position:"absolute",left:x,top:y,width:104,height:104,marginLeft:-52,marginTop:-52,transform:"scale("+depth+") rotate("+rotation+"deg)",zIndex:Math.round(depth*100),filter:"drop-shadow(0 18px 22px rgba(28,44,43,.16))"}}>

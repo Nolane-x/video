@@ -141,6 +141,10 @@ need("r=860-100*e(f,0,1)" in source and "r={bloom} fill=\"#f8faf5\"" in source, 
 need("durationInFrames={14}><LinearPoster" in source and "from={194} durationInFrames={6}><GreenCircleTransition" in source, "source-frame 510 typography/ring boundary is incorrect")
 need("MORRO / 01" in source, "illustrated camera cube face artwork is missing")
 
+need('translate(960 540)' in source and "r:14+(seed%8)*1.5" in source, "V51 D-badge centring and speckle scale are missing")
+need('id="ring-v51-a"' in source and 'r="520" fill="#f7f6f1"' in source and 'href="#ring-v51-b"' in source, "V51 alternating ring tunnel is missing")
+need("const swirls=Array.from({length:225}" in source and "Post-Impressionism" in source, "V51 painterly 1889 night scene is missing")
+need("const x=1195+Math.cos(angle)*230" in source and "Array.from({length:11},(_,i)" in source, "V51 provider orbit must retain the source-sized ellipse")
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")
 
 need('fontSize:100,fontWeight:700,letterSpacing:"-.055em"' in source, "V38 opening headline scale is missing")
