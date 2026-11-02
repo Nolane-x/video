@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v44",
+  "id": "opendesign-motion-reference-rebuild-v46",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -423,27 +423,27 @@
     },
     {
       "frame": 456,
-      "content": "oversized black EASE cropped through the frame edges"
+      "content": "Oversized cropped EASE word fills the black frame"
     },
     {
       "frame": 461,
-      "content": "very large metallic IN with vertical depth and motion trails"
+      "content": "Large metallic IN with thick vertical extrusion and motion trails"
     },
     {
       "frame": 466,
-      "content": "oversized white IN. with isolated lime dot"
+      "content": "Oversized white IN with lime terminal dot"
     },
     {
       "frame": 471,
-      "content": "giant dark-green EASE cropped at top and bottom"
+      "content": "Giant dark-green EASE cropped top and bottom"
     },
     {
       "frame": 476,
-      "content": "oversized white OUT with three horizontal motion echoes on green"
+      "content": "Oversized white OUT with broad motion echoes"
     },
     {
       "frame": 486,
-      "content": "oversized staggered NEVER letters with stepped vertical offsets"
+      "content": "Staggered oversized NEVER lettering"
     },
     {
       "frame": 496,
@@ -451,7 +451,7 @@
     },
     {
       "frame": 498,
-      "content": "large LINEAR. resolves on deep black"
+      "content": "Very large LINEAR word resolves on deep black"
     },
     {
       "frame": 500,
@@ -463,15 +463,15 @@
     },
     {
       "frame": 510,
-      "content": "ring transition: full-screen bright lime iris with near-frame-size white rings"
+      "content": "Bright green iris with large outer and middle white rings"
     },
     {
       "frame": 511,
-      "content": "white inner circle and tiny centered dark camera/play mark"
+      "content": "White circular iris blooms across the frame around a tiny dark mark"
     },
     {
       "frame": 516,
-      "content": "ornate gold clock in painterly swirling blue night scene with tree and village"
+      "content": "Ornate gold 1889 mechanism over painterly blue hills, trees, village edges and water strokes"
     },
     {
       "frame": 523,
@@ -611,27 +611,31 @@
     },
     {
       "frame": 975,
-      "content": "cube turns into three-quarter blue/black/lime view"
+      "content": "Three-quarter cube exposes blue and black faces while clock artwork remains on the top plane"
     },
     {
       "frame": 990,
-      "content": "blue/gold 1889 clock is on the top plane, black glyph faces the camera, green EASE fold is below the front face"
+      "content": "Gold 1889 clock on the top, black glyph camera-facing and EASE fold below"
     },
     {
       "frame": 1005,
-      "content": "mint/yellow 100K halftone face is camera-facing and the blue/gold 1889 clock has moved to the adjacent side"
+      "content": "Yellow/mint 100K editorial face turns toward camera with adjacent blue/gold plane visible"
     },
     {
       "frame": 1020,
-      "content": "black camera glyph face turns to front while a neighboring cube face remains visible"
+      "content": "Black play-mark camera face returns with a visible neighboring cube plane"
     },
     {
       "frame": 1050,
       "content": "isolated dark app mark for end-card transition"
     },
     {
+      "frame": 1080,
+      "content": "Larger OpenDesign Motion lockup with circular camera symbol; URL pill has not appeared yet"
+    },
+    {
       "frame": 1118,
-      "content": "large square mark, prominent OpenDesign Motion wordmark and legible open-design.ai domain capsule"
+      "content": "Large circular camera symbol, bold OpenDesign Motion wordmark and open-design.ai capsule"
     }
   ]
 }

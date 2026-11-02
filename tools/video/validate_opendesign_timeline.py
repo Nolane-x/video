@@ -123,7 +123,7 @@ need("const counts=[80,82,84,87,91,93,94,96]" in source, "Star History source va
 need("days=[88,96,104,111,119,126,132,138]" in source, "Star History day sequence is missing")
 need("3.7%" in source and "4.7%" not in source, "eye readout must match 3.7%")
 need("squiggle-preview-v18" in source, "black/white squiggle launch preview is missing")
-need("f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):87+93*e(f,45,75)" in source, "camera cube face order / rotation timing is missing")
+need("f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):f<60?87+48*e(f,45,60):135+25*e(f,60,75)" in source and "perspective:1250" in source, "V46 cube perspective and late side exposure are missing")
 need("if(f<12)return <AbsoluteFill" in source, "separate app-mark lead-in is missing")
 need("GITHUB STARS" in source and "stars-grid-v31" in source, "yellow/mint 100K GitHub-stars cube face is missing")
 need("cubeClock-v24" in source, "blue/gold clock face must be on the top surface")
@@ -137,7 +137,7 @@ need('rotateX(-90deg) translateZ("+z+"px)' in source, "lime EASE must occupy the
 need("MORRO / FORM STUDY" in source, "large purple MORRO transition is missing")
 need("OpenDesign Motion" in source and "open-design.ai" in source, "full branded end card is missing")
 need("resolve=e(f,0,2)" in source, "IN to LINEAR transition timing is missing")
-need("r=860-100*e(f,0,1)" in source, "green ring transition timing is missing")
+need("r=860-100*e(f,0,1)" in source and "r={bloom} fill=\"#f8faf5\"" in source, "green ring transition must bloom into the source white inner disc")
 need("durationInFrames={14}><LinearPoster" in source and "from={194} durationInFrames={6}><GreenCircleTransition" in source, "source-frame 510 typography/ring boundary is incorrect")
 need("MORRO / 01" in source, "illustrated camera cube face artwork is missing")
 
