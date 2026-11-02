@@ -654,20 +654,21 @@ const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.008;
  const dots=Array.from({length:19*31},(_,i)=>{
   const row=Math.floor(i/31),col=i%31,seed=(i*37+13)%29;
-  return {x:col*64+((row%2)*18)+((seed%7)-3)*3,y:row*59+((seed%9)-4)*3,r:13+(seed%6)*2.1,op:.86+(seed%4)*.035};
+  return {x:col*62+((row%2)*18)+((seed%9)-4)*6,y:row*55+((seed%11)-5)*5,r:17+(seed%8)*1.9,op:.86+(seed%4)*.035};
  });
- const specks=Array.from({length:90},(_,i)=>{const a=i*2.399963,r=142+(i%9)*5;return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:2+(i%4)*1.3};});
+ const specks=Array.from({length:138},(_,i)=>{const a=i*2.399963,r=192+(i%11)*5;return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:2.5+(i%5)*1.4};});
  return <AbsoluteFill style={{...full,background:"#e84434",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <rect width="1920" height="1080" fill="#e84434"/>
    <g fill="#fff8ed">{dots.map((d,i)=><circle key={i} cx={d.x} cy={d.y} r={d.r} opacity={d.op}/>)}</g>
    <g transform={"translate(960 580) scale("+pulse+")"}>
-    <circle r="203" fill="#111315" opacity=".97"/><circle r="188" fill="#f3c934"/>
-    <circle r="158" fill="#111315"/><circle r="145" fill="#e84434"/>
-    <circle r="122" fill="#e84434" stroke="#f8f2dd" strokeWidth="8"/>
+    <path d="M-252 252V-22C-252 -165 -143 -270 0 -270C143 -270 252 -165 252 -22C252 123 145 238 0 252Z
+             M-185 -22C-185 -124 -104 -194 0 -194C104 -194 185 -124 185 -22C185 79 107 163 0 163C-107 163 -185 79 -185 -22Z"
+          fill="#f4ca31" fillRule="evenodd" stroke="#111315" strokeWidth="8" strokeLinejoin="round"/>
+    <path d="M-248 190L-248 250L-10 250L-10 214" fill="none" stroke="#f4ca31" strokeWidth="15" strokeLinecap="square"/>
     <g fill="#111315">{specks.map((s,i)=><circle key={i} cx={s.x} cy={s.y} r={s.r}/>)}</g>
-    <path d="M-52 -102L118 -3L-27 31L-58 144Z" fill="#111315"/>
-    <path d="M-43 -88L97 -4L-28 17" fill="none" stroke="#f4d34d" strokeWidth="6" opacity=".45"/>
+    <path d="M-66 -112L145 -5L-29 30L-63 154Z" fill="#111315"/>
+    <path d="M-51 -94L119 -4L-27 16" fill="none" stroke="#fff1a3" strokeWidth="6" opacity=".52"/>
    </g>
    <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="#fff8ed"/>
    <path d="M650 23L1260 23L1267 53L1248 77L1265 110L1235 132L1250 170L1185 183L737 183L715 163L671 164L686 130L651 108L670 78L644 56Z" fill="none" stroke="#f9f3e4" strokeWidth="7"/>
