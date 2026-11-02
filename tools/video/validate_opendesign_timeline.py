@@ -142,7 +142,7 @@ need("durationInFrames={14}><LinearPoster" in source and "from={194} durationInF
 need("MORRO / 01" in source, "illustrated camera cube face artwork is missing")
 
 need('translate(960 540)' in source and "r:14+(seed%8)*1.5" in source, "V51 D-badge centring and speckle scale are missing")
-need('id="ring-v51-a"' in source and 'r="520" fill="#f7f6f1"' in source and 'href="#ring-v51-b"' in source, "V51 alternating ring tunnel is missing")
+need('const rings=[520,475,430,385,340,295,250,205,160,115,70,35]' in source and 'id={"ring-v52-"+i}' in source and 'fill={i%2===0?"#f7f6f1":"#050609"}' in source, "V52 alternating ring tunnel is missing")
 need("const swirls=Array.from({length:225}" in source and "Post-Impressionism" in source, "V51 painterly 1889 night scene is missing")
 need("const x=1195+Math.cos(angle)*230" in source and "Array.from({length:11},(_,i)" in source, "V51 provider orbit must retain the source-sized ellipse")
 need('scaleX(1.9) scaleY(.6)' in source, "V52 EASE poster must preserve the source's wide, shallow word geometry")
