@@ -81,7 +81,7 @@ need("wc-wash-white-v40" in source and "wc-wash-blue-v40" in source and "wc-wash
 need("source1973-spectrum-v30" in source, "V30 rainbow optical dispersion is missing")
 need("M-132 178V-72C-132 -205 132 -205 132 -72V178" in source, "V30 gold pixel-game portal is missing")
 need("mind-prism-v30" in source, "V30 translucent MIND polyhedron is missing")
-need("ring-v30-g" in source, "V30 concentric typography tunnel is incomplete")
+need('id="ring-v51-h"' in source and 'id="ring-v51-a"' in source and 'r="460" fill="#050609"' in source, "V51 alternating typographic tunnel is incomplete")
 need("eye-field-v30" in source and "3.7%" in source, "V30 angular blue-grid eye is missing")
 need("stars-grid-v31" in source, "V30 yellow/mint 100K stars face is missing")
 need("ink-mtn-texture-v30" in source, "V30 ink-wash Launch Film preview is missing")
