@@ -1752,7 +1752,7 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <g fill="#366e9b"><circle cx="50" cy="110" r="6"/><circle cx="310" cy="110" r="6"/></g>
    <text x="180" y="324" fontSize="19" fontWeight="900" fill="#171717" textAnchor="middle" letterSpacing="4">OPEN / DESIGN</text>
   </svg>
- </div>; const dynamicFront=frame<27?portrait:frame<55?blackSide:frame<72?archiveFace:blackMark;
+ </div>; const dynamicFront=frame<27?portrait:frame<55?clock:frame<72?archiveFace:blackMark;
  const dynamicSide=frame<27?blackSide:frame<55?blackSide:frame<72?yellow:blackMark;
  return <div style={style}>
   {kind===0?dynamicFront:
@@ -1760,14 +1760,14 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    kind===2?dynamicSide:
    kind===3?(frame<55?clock:blackSide):
    kind===4?ease:
-   (frame>=55&&frame<72?yellow:blackMark)}
+   (frame>=55&&frame<72?archiveFace:archive1923)}
   <div style={{position:"absolute",inset:0,borderRadius:44,pointerEvents:"none",background:"linear-gradient(135deg,rgba(255,255,255,.28),transparent 28%,rgba(0,0,0,.18) 100%)"}}/>
  </div>;
 };
 
 const ProjectCube=({startAt=0}:{startAt?:number})=>{
  const f=Math.max(0,useCurrentFrame()-startAt);
- const rotateY=f<15?-90+128*e(f,0,15):f<45?38+49*e(f,15,45):f<60?87+48*e(f,45,60):135+25*e(f,60,75);
+ const rotateY=f<15?-90+128*e(f,0,15):f<45?38+31*e(f,15,45):f<60?69+66*e(f,45,60):135+25*e(f,60,75);
  const rotateX=f<15?18-14*e(f,0,15):f<45?4-26*e(f,15,45):f<60?-22+4*e(f,45,60):-18+10*e(f,60,75);
  const rotateZ=-4+2*Math.sin(f/18),scale=(.78+.22*e(f,0,18))*(1-.16*e(f,108,126)),size=560,z=size/2;
  return <AbsoluteFill style={{...full,background:"#f2f0e9",overflow:"hidden"}}>
