@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v51",
+  "id": "opendesign-motion-reference-rebuild-v52",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -415,7 +415,7 @@
     },
     {
       "frame": 420,
-      "content": "Typographic tunnel with alternating black/cream concentric bands and text on each ring"
+      "content": "Dense multi-ring typographic tunnel with consistent concentric radii, alternating black/cream bands and progressively smaller type"
     },
     {
       "frame": 446,
@@ -423,11 +423,11 @@
     },
     {
       "frame": 456,
-      "content": "Wide cropped EASE typography at source-matched short-letter proportions"
+      "content": "Wide, shallow EASE lettering cropped near both horizontal frame edges with soft horizontal motion echo"
     },
     {
       "frame": 461,
-      "content": "Metallic IN with vertical extrusion and compact source-matched glyph width"
+      "content": "Tall metallic IN rises toward the upper half, with a bright face and layered dark extrusion"
     },
     {
       "frame": 466,
@@ -471,7 +471,7 @@
     },
     {
       "frame": 516,
-      "content": "1889 gold clock over a full-frame painterly swirling blue night, tall left cypress, illuminated village on right and loose water strokes"
+      "content": "Gold 1889 clock floats over a swirling painted blue night, left cypress, illuminated right village and expressive water strokes"
     },
     {
       "frame": 523,

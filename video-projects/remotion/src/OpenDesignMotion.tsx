@@ -952,8 +952,8 @@ const EaseGreen=()=>{
  const f=useCurrentFrame(),shift=e(f,0,7,95,0),ghost=1-e(f,1,8);
  return <AbsoluteFill style={{...full,background:"#8ff04e",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(115deg,#9af55f,#82e846 60%,#a7f77b)"}}/>
-  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+(shift-34)+"px)",opacity:.24*ghost,filter:"blur(8px)"}}><Word size={880} color="#101512" tracking={-.15}>EASE</Word></div>
-  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px)",filter:"blur(.25px)"}}><Word size={600} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
+  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+(shift-34)+"px) scaleX(1.9) scaleY(.6)",opacity:.24*ghost,filter:"blur(8px)"}}><Word size={880} color="#101512" tracking={-.15}>EASE</Word></div>
+  <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px) scaleX(1.9) scaleY(.6)",filter:"blur(.25px)"}}><Word size={600} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
   <div style={{position:"absolute",left:36,top:30,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#2e5427"}}>EASING / MOTION STUDY</div>
  </AbsoluteFill>;
 };
@@ -1009,11 +1009,11 @@ const CoursesPoster=()=>{
 
 const InMetallic=()=>{
  const f=useCurrentFrame(),rise=e(f,0,5,45,0),trail=1-e(f,0,8);
- const type={position:"absolute" as const,left:"50%",top:"50%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg)",fontFamily:displayFont,fontSize:690,fontWeight:1000,letterSpacing:"-.045em",lineHeight:.8,whiteSpace:"nowrap" as const};
+ const type={position:"absolute" as const,left:"50%",top:"31%",transform:"translate(-50%,-50%) translateY("+rise+"px) perspective(1100px) rotateX(5deg) scale(1.1,1.46)",fontFamily:displayFont,fontSize:690,fontWeight:1000,letterSpacing:"-.045em",lineHeight:.8,whiteSpace:"nowrap" as const};
  return <AbsoluteFill style={{...full,background:"#08090b",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 48% 52%,#22282e,#08090b 70%)"}}/>
-  <div style={{...type,color:"#8b939a",transform:"translate(-50%,-50%) translate(-95px,14px)",opacity:.3*trail,filter:"blur(13px)"}}>IN</div>
-  <div style={{...type,color:"#737b83",transform:"translate(-50%,-50%) translate(-43px,8px)",opacity:.4*trail,filter:"blur(5px)"}}>IN</div>
+  <div style={{...type,color:"#8b939a",transform:"translate(-50%,-50%) translate(-95px,14px) scale(1.1,1.46)",opacity:.3*trail,filter:"blur(13px)"}}>IN</div>
+  <div style={{...type,color:"#737b83",transform:"translate(-50%,-50%) translate(-43px,8px) scale(1.1,1.46)",opacity:.4*trail,filter:"blur(5px)"}}>IN</div>
   <div style={{...type,background:"linear-gradient(180deg,#fff 0%,#cfd5d9 18%,#5d666f 38%,#f5f7f8 49%,#8e979f 72%,#f8f8f6 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 3px 0 #abb3ba) drop-shadow(0 10px 0 #545c64) drop-shadow(0 22px 25px rgba(0,0,0,.82))"}}>IN</div>
   <div style={{position:"absolute",left:80,bottom:54,fontSize:14,color:"#747c84",letterSpacing:".2em",fontWeight:850}}>IN / METALLIC TYPE</div>
  </AbsoluteFill>;
@@ -1055,41 +1055,33 @@ const MindPoster = () => {
 
 const RingPoster = () => {
  const f=useCurrentFrame(),zoom=1.92+0.04*Math.sin(f/7);
+ const rings=[520,475,430,385,340,295,250,205,160,115,70,35];
+ const slogans=[
+  "THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·",
+  "THE FUTURE · MOTION DESIGN · OPEN DESIGN · THE FUTURE ·",
+  "THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·",
+  "OPEN DESIGN / MOTION / THE FUTURE IS HERE /",
+  "THE FUTURE IS ALREADY HERE · OPEN DESIGN ·",
+  "MOTION / THE FUTURE / OPEN DESIGN /",
+  "THE FUTURE · MOTION · THE FUTURE ·",
+  "OPEN DESIGN / MOTION / THE FUTURE /",
+  "THE FUTURE IS HERE · THE FUTURE IS HERE ·",
+  "MOTION / OPEN DESIGN / MOTION /",
+  "THE FUTURE / MOTION /",
+  "OPEN DESIGN / MOTION /"
+ ];
+ const sizes=[42,38,35,32,29,26,23,20,17,15,12,10];
  return <AbsoluteFill style={{...full,background:"#030405",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0,transform:"rotate("+f*.12+"deg) scale("+zoom+")"}}>
    <defs>
-    <path id="ring-v51-a" d="M960 540m-500 0a500 500 0 1 1 1000 0a500 500 0 1 1 -1000 0"/>
-    <path id="ring-v51-b" d="M960 540m-440 0a440 440 0 1 1 880 0a440 440 0 1 1 -880 0"/>
-    <path id="ring-v51-c" d="M960 540m-380 0a380 380 0 1 1 760 0a380 380 0 1 1 -760 0"/>
-    <path id="ring-v51-d" d="M960 540m-320 0a320 320 0 1 1 640 0a320 320 0 1 1 -640 0"/>
-    <path id="ring-v51-e" d="M960 540m-260 0a260 260 0 1 1 520 0a520 520 0 1 1 -520 0"/>
-    <path id="ring-v51-f" d="M960 540m-200 0a200 200 0 1 1 400 0a400 400 0 1 1 -400 0"/>
-    <path id="ring-v51-g" d="M960 540m-140 0a140 140 0 1 1 280 0a280 280 0 1 1 -280 0"/>
-    <path id="ring-v51-h" d="M960 540m-80 0a80 80 0 1 1 160 0a160 160 0 1 1 -160 0"/>
+    {rings.map((r,i)=>{const m=rings[i+1]??Math.max(12,r-25);const pathR=(r+m)/2;return <path key={r} id={"ring-v52-"+i} d={"M960 540m-"+pathR+" 0a"+pathR+" "+pathR+" 0 1 1 "+(pathR*2)+" 0a"+pathR+" "+pathR+" 0 1 1 -"+(pathR*2)+" 0"}/>;})}
    </defs>
-   <circle cx="960" cy="540" r="520" fill="#f7f6f1"/>
-   <circle cx="960" cy="540" r="460" fill="#050609"/>
-   <circle cx="960" cy="540" r="400" fill="#f7f6f1"/>
-   <circle cx="960" cy="540" r="340" fill="#050609"/>
-   <circle cx="960" cy="540" r="280" fill="#f7f6f1"/>
-   <circle cx="960" cy="540" r="220" fill="#050609"/>
-   <circle cx="960" cy="540" r="160" fill="#f7f6f1"/>
-   <circle cx="960" cy="540" r="100" fill="#050609"/>
-   <circle cx="960" cy="540" r="43" fill="#f7f6f1"/>
-   <circle cx="960" cy="540" r="24" fill="#030405"/>
+   {rings.map((r,i)=><circle key={r} cx="960" cy="540" r={r} fill={i%2===0?"#f7f6f1":"#050609"}/>)}
+   <circle cx="960" cy="540" r="17" fill="#f7f6f1"/>
    <g fontFamily="Arial Black,Arial,sans-serif" fontWeight="1000">
-    <g fill="#111315">
-     <text fontSize="73" letterSpacing="5"><textPath href="#ring-v51-a">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-     <text fontSize="57" letterSpacing="3"><textPath href="#ring-v51-c">THE FUTURE IS ALREADY HERE · THE FUTURE IS ALREADY HERE ·</textPath></text>
-     <text fontSize="43" letterSpacing="2"><textPath href="#ring-v51-e">THE FUTURE IS ALREADY HERE · OPEN DESIGN ·</textPath></text>
-     <text fontSize="30" letterSpacing="1"><textPath href="#ring-v51-g">THE FUTURE / MOTION /</textPath></text>
-    </g>
-    <g fill="#f7f6f1">
-     <text fontSize="66" letterSpacing="4"><textPath href="#ring-v51-b">THE FUTURE · MOTION DESIGN · OPEN DESIGN ·</textPath></text>
-     <text fontSize="51" letterSpacing="3"><textPath href="#ring-v51-d">OPEN DESIGN / MOTION / THE FUTURE IS HERE /</textPath></text>
-     <text fontSize="37" letterSpacing="2"><textPath href="#ring-v51-f">MOTION / THE FUTURE / OPEN DESIGN /</textPath></text>
-     <text fontSize="23" letterSpacing="1"><textPath href="#ring-v51-h">OPEN DESIGN / MOTION /</textPath></text>
-    </g>
+    {rings.map((r,i)=><text key={"text-"+i} fill={i%2===0?"#111315":"#f7f6f1"} fontSize={sizes[i]} letterSpacing={i<3?3:1.5}>
+      <textPath href={"#ring-v52-"+i}>{slogans[i]}</textPath>
+     </text>)}
    </g>
   </svg>
  </AbsoluteFill>;
@@ -1172,9 +1164,11 @@ const ClockPoster = () => {
    <g fill="none" strokeLinecap="round" opacity=".72">
     {water.map((p,i)=><path key={"water-"+i} d={"M"+p.x+" "+p.y+"q "+(p.w*.38)+" -10 "+p.w+" 1"} stroke={i%3===0?"#a2c1ec":"#567dce"} strokeWidth={3+(i%4)*3} opacity={p.op}/>)}
    </g>
-   <g opacity=".58" filter="url(#clock-brush-v51)">
-    <circle cx="960" cy="538" r="374" fill="none" stroke="#e9c66b" strokeWidth="42"/>
-    <circle cx="960" cy="538" r="390" fill="none" stroke="#fff0a8" strokeWidth="10"/>
+   <g opacity=".3" fill="none" strokeLinecap="round">
+    {Array.from({length:34},(_,i)=>{
+      const x=(i*137)%1920,y=120+(i*113)%860,w=28+(i*19)%96;
+      return <path key={"gold-glaze-"+i} d={"M"+x+" "+y+"q "+(w*.4)+" -16 "+w+" 0"} stroke={i%3===0?"#e9c66b":"#789bd9"} strokeWidth={2+(i%5)*2} opacity={.22+(i%4)*.07}/>;
+    })}
    </g>
    <g transform={"translate(960 538) rotate("+angle+")"}>
     {Array.from({length:24},(_,i)=><path key={i} d="M0 -355L-32 -294L0 -278L32 -294Z" fill="url(#clock-gold-v18)" stroke="#805b2b" strokeWidth="3" transform={"rotate("+(i*15)+")"}/>)}

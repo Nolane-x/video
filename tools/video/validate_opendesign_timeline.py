@@ -145,6 +145,9 @@ need('translate(960 540)' in source and "r:14+(seed%8)*1.5" in source, "V51 D-ba
 need('id="ring-v51-a"' in source and 'r="520" fill="#f7f6f1"' in source and 'href="#ring-v51-b"' in source, "V51 alternating ring tunnel is missing")
 need("const swirls=Array.from({length:225}" in source and "Post-Impressionism" in source, "V51 painterly 1889 night scene is missing")
 need("const x=1195+Math.cos(angle)*230" in source and "Array.from({length:11},(_,i)" in source, "V51 provider orbit must retain the source-sized ellipse")
+need('scaleX(1.9) scaleY(.6)' in source, "V52 EASE poster must preserve the source's wide, shallow word geometry")
+need('top:"31%"' in source and "scale(1.1,1.46)" in source, "V52 metallic IN must be tall and source-positioned")
+need('id={"ring-v52-"+i}' in source and "rings=[520,475,430,385,340,295,250,205,160,115,70,35]" in source, "V52 ring paths must keep concentric radii consistent")
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")
 
 need('fontSize:100,fontWeight:700,letterSpacing:"-.055em"' in source, "V38 opening headline scale is missing")
