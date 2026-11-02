@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v52",
+  "id": "opendesign-motion-reference-rebuild-v53",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -391,7 +391,7 @@
     },
     {
       "frame": 345,
-      "content": "1965 Infinity dots with irregular cream dots, yellow D-shaped badge, varied black speckles and centred play pointer"
+      "content": "1965 Infinity dots: dense irregular cream dot field, smaller variable dots, yellow D-shaped badge and centred black angular pointer"
     },
     {
       "frame": 353,
@@ -415,7 +415,7 @@
     },
     {
       "frame": 420,
-      "content": "Dense multi-ring typographic tunnel with consistent concentric radii, alternating black/cream bands and progressively smaller type"
+      "content": "Nine bold concentric typographic bands with larger text and contrasting cream/black fills, including readable inner rings"
     },
     {
       "frame": 446,
@@ -423,27 +423,27 @@
     },
     {
       "frame": 456,
-      "content": "Wide, shallow EASE lettering cropped near both horizontal frame edges with soft horizontal motion echo"
+      "content": "Wide shallow EASE crop with frame corners, metadata and lower timecode HUD"
     },
     {
       "frame": 461,
-      "content": "Tall metallic IN rises toward the upper half, with a bright face and layered dark extrusion"
+      "content": "Large white IN with ten discrete gray extrusion planes descending behind the letters and full kinetic HUD"
     },
     {
       "frame": 466,
-      "content": "Large white IN and terminal lime dot"
+      "content": "Large white IN and terminal lime dot with the source-style frame HUD"
     },
     {
       "frame": 471,
-      "content": "Large dark green EASE crop"
+      "content": "Wide green EASE typography with the source-style frame HUD"
     },
     {
       "frame": 476,
-      "content": "Wide white OUT with layered horizontal echoes"
+      "content": "White OUT with layered horizontal echoes and the source-style frame HUD"
     },
     {
       "frame": 486,
-      "content": "Staggered oversized NEVER type with source-relative letter height"
+      "content": "Staggered NEVER typography with source-size characters and the source-style frame HUD"
     },
     {
       "frame": 496,
@@ -451,7 +451,7 @@
     },
     {
       "frame": 498,
-      "content": "LINEAR. resolves at source-relative scale"
+      "content": "LINEAR. at source-relative scale and the source-style frame HUD"
     },
     {
       "frame": 500,
@@ -471,7 +471,7 @@
     },
     {
       "frame": 516,
-      "content": "Gold 1889 clock floats over a swirling painted blue night, left cypress, illuminated right village and expressive water strokes"
+      "content": "1889 golden arrow clock/halo over a Van-Gogh-like swirling blue night, cypress, stars and illuminated village"
     },
     {
       "frame": 523,
@@ -611,19 +611,19 @@
     },
     {
       "frame": 975,
-      "content": "Three-quarter cube exposes blue and black faces while clock artwork remains on the top plane"
+      "content": "Black camera/play face at front, painted blue clock-night artwork on the adjacent side and gold clock artwork on top"
     },
     {
       "frame": 990,
-      "content": "Gold 1889 clock on the top, black glyph camera-facing and EASE fold below"
+      "content": "Blue/gold 1889 clock top, blue night side and green EASE fold below"
     },
     {
       "frame": 1005,
-      "content": "Yellow/mint 100K editorial face turns toward camera with adjacent blue/gold plane visible"
+      "content": "Black camera top, yellow-gold archival side and 100K GitHub-stars panel on the front/right"
     },
     {
       "frame": 1020,
-      "content": "Black play-mark camera face returns with a visible neighboring cube plane"
+      "content": "Blue camera top, cream/red 1923 archival side and black play face on the front/right"
     },
     {
       "frame": 1050,

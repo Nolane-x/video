@@ -148,6 +148,11 @@ need("const x=1195+Math.cos(angle)*230" in source and "Array.from({length:11},(_
 need('scaleX(1.9) scaleY(.6)' in source, "V52 EASE poster must preserve the source's wide, shallow word geometry")
 need('top:"31%"' in source and "scale(1.1,1.46)" in source, "V52 metallic IN must be tall and source-positioned")
 need('id={"ring-v52-"+i}' in source and "rings=[520,475,430,385,340,295,250,205,160,115,70,35]" in source, "V52 ring paths must keep concentric radii consistent")
+need("length:26*44" in source and "r:9+(seed%6)*1.15" in source, "V53 1965 dot grid must match the source's density and dot scale")
+need('id={"ring-v53-"+i}' in source and "rings=[540,475,410,345,280,215,150,85,28]" in source and "sizes=[76,64,54,46,38,31,25,19,14]" in source, "V53 nine-band typographic tunnel must retain readable inner text")
+need("const sky=Array.from({length:1050}" in source and "const halo=Array.from({length:330}" in source and "clock-gold-v53" in source, "V53 painted night clock with dense sky/halo brushwork is missing")
+need("const archiveFace=" in source and "const archive1923=" in source and "frame<55?clock:frame<72?yellow:archive1923" in source, "V53 cube side faces must vary with the source-indexed frame sequence")
+need("const treeMarks=Array.from({length:250}" in source and "townStrokes=Array.from({length:160}" in source, "V53 clock painting tree/village brush textures are missing")
 print("PASS: 12 source-indexed sections / 28 montage cuts / 30 gallery panels / 1119 frames / launch preview / countdown / MORRO tile / end card")
 
 need('fontSize:100,fontWeight:700,letterSpacing:"-.055em"' in source, "V38 opening headline scale is missing")
