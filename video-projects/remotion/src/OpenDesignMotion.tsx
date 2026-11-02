@@ -652,15 +652,15 @@ const Future3D = () => {
 
 const DotPoster = () => {
  const f=useCurrentFrame(),pulse=1+Math.sin(f/3)*.008;
- const dots=Array.from({length:26*44},(_,i)=>{
-  const row=Math.floor(i/44),col=i%44,seed=(i*37+13)%41;
-  return {x:col*45+((row%2)*10)+((seed%9)-4)*2.4,y:row*43+((seed%11)-5)*2.2,r:9+(seed%6)*1.15,op:.86+(seed%4)*.035};
+ const dots=Array.from({length:18*36},(_,i)=>{
+  const row=Math.floor(i/36),col=i%36,seed=(i*37+13)%53;
+  return {x:col*54+((row%2)*17)+((seed%9)-4)*4.2,y:row*60+((seed%11)-5)*3.5,rx:16+(seed%6)*1.2,ry:14+((seed*3)%7)*1.15,angle:((seed%13)-6)*3,op:.9+(seed%4)*.025};
  });
- const specks=Array.from({length:126},(_,i)=>{const a=i*2.399963+(i%7)*.11,r=210+((i*17)%50);return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:3+(i%5)*.9};});
+ const specks=Array.from({length:126},(_,i)=>{const a=i*2.399963+(i%7)*.11,r=210+((i*17)%50);return {x:Math.cos(a)*r,y:Math.sin(a)*r,r:5+(i%6)*1.35};});
  return <AbsoluteFill style={{...full,background:"#e84434",overflow:"hidden"}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" style={{position:"absolute",inset:0}}>
    <rect width="1920" height="1080" fill="#e84434"/>
-   <g fill="#fff8ed">{dots.map((d,i)=><circle key={i} cx={d.x} cy={d.y} r={d.r} opacity={d.op}/>)}</g>
+   <g fill="#fff8ed">{dots.map((d,i)=><ellipse key={i} cx={d.x} cy={d.y} rx={d.rx} ry={d.ry} transform={"rotate("+d.angle+" "+d.x+" "+d.y+")"} opacity={d.op}/>)}</g>
    <g transform={"translate(960 540) scale("+pulse+")"}>
     <path d="M-252 252V-22C-252 -165 -143 -270 0 -270C143 -270 252 -165 252 -22C252 123 145 238 0 252Z
              M-185 -22C-185 -124 -104 -194 0 -194C104 -194 185 -124 185 -22C185 79 107 163 0 163C-107 163 -185 79 -185 -22Z"
@@ -1140,24 +1140,29 @@ const LinearPoster = () => {
 
 const ClockPoster = () => {
  const f=useCurrentFrame(),rot=f*1.1;
- const sky=Array.from({length:1050},(_,i)=>{
+ const sky=Array.from({length:1350},(_,i)=>{
   const x=(i*197)%1920,y=(i*113)%1080,cx=960+(i%5-2)*140,cy=440+(i%7-3)*80;
   const angle=Math.atan2(y-cy,x-cx)+Math.PI/2+Math.sin(i*1.73)*.35;
-  const len=18+(i*29)%76,dx=Math.cos(angle)*len,dy=Math.sin(angle)*len*.62;
-  return {x1:x-dx*.5,y1:y-dy*.5,x2:x+dx*.5,y2:y+dy*.5,qx:x+Math.sin(angle)*len*.24,qy:y-Math.cos(angle)*len*.18,w:3+(i*7)%11,c:["#102d82","#19409b","#2b56b5","#4773cc","#6f94db","#8ba9e7","#bfd1eb"][i%7],o:.24+(i%6)*.075};
+  const len=28+(i*29)%104,dx=Math.cos(angle)*len,dy=Math.sin(angle)*len*.62;
+  return {x1:x-dx*.5,y1:y-dy*.5,x2:x+dx*.5,y2:y+dy*.5,qx:x+Math.sin(angle)*len*.24,qy:y-Math.cos(angle)*len*.18,w:4+(i*7)%12,c:["#102d82","#19409b","#2b56b5","#4773cc","#6f94db","#8ba9e7","#bfd1eb"][i%7],o:.24+(i%6)*.075};
  });
- const halo=Array.from({length:330},(_,i)=>{
+ const halo=Array.from({length:410},(_,i)=>{
   const a=i*2.399963,r=320+(i%13)*9,x=960+Math.cos(a)*r,y=520+Math.sin(a)*r*.9;
   const len=22+(i*19)%70,dx=-Math.sin(a)*len,dy=Math.cos(a)*len*.9;
   return {x1:x-dx*.5,y1:y-dy*.5,x2:x+dx*.5,y2:y+dy*.5,qx:x+Math.cos(a)*12,qy:y+Math.sin(a)*10,w:5+(i%8)*3,c:["#b87524","#d79735","#f4c75a","#ffe18c","#eab64c"][i%5],o:.38+(i%5)*.09};
  });
- const treeMarks=Array.from({length:250},(_,i)=>{
-  const y=50+(i*31)%1010,half=23+Math.sin(y/90)*55+(i%7)*3,x=123+Math.sin(i*2.1)*half,side=i%2?1:-1;
-  return {x,y,w:5+(i%8)*3,dx:side*(14+(i%6)*8),c:["#052f27","#0a4334","#14543d","#1c6548"][i%4]};
+ const treeMarks=Array.from({length:390},(_,i)=>{
+  const y=35+(i*27)%1030,half=18+Math.sin(y/82)*63+(i%7)*4,x=135+Math.sin(i*2.1)*half,side=i%2?1:-1;
+  return {x,y,w:5+(i%8)*3,dx:side*(20+(i%6)*10),c:["#052f27","#0a4334","#14543d","#1c6548"][i%4]};
  });
- const townStrokes=Array.from({length:160},(_,i)=>{
+ const townStrokes=Array.from({length:220},(_,i)=>{
   const x=1260+(i*37)%610,y=730+(i*23)%260;
   return {x,y,w:10+(i%8)*5,dx:8+(i%5)*8,c:i%3===0?"#293b79":"#101c54"};
+ });
+ const faceMarks=Array.from({length:240},(_,i)=>{
+  const a=i*2.399963+(i%9)*.08,r=26+((i*31)%166),x=960+Math.cos(a)*r,y=520+Math.sin(a)*r*.92;
+  const len=9+(i*17)%32,dx=-Math.sin(a)*len,dy=Math.cos(a)*len*.7;
+  return {x1:x-dx*.5,y1:y-dy*.5,x2:x+dx*.5,y2:y+dy*.5,qx:x+Math.cos(a)*5,qy:y+Math.sin(a)*5,w:2+(i%5)*1.5,c:["#16377e","#2852a0","#4670bf","#7293d0","#d5b45f"][i%5],o:.16+(i%5)*.055};
  });
  const stars=[{x:485,y:150,r:15},{x:1310,y:72,r:18},{x:1568,y:585,r:12},{x:340,y:590,r:10},{x:1130,y:220,r:8}];
  return <AbsoluteFill style={{...full,background:"#163d9f",overflow:"hidden",color:"#f3d47c"}}>
@@ -1168,6 +1173,7 @@ const ClockPoster = () => {
     <linearGradient id="clock-gold-v53" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#fff1a2"/><stop offset=".26" stopColor="#f2c44e"/><stop offset=".62" stopColor="#c8862e"/><stop offset="1" stopColor="#fce18b"/></linearGradient>
     <filter id="clock-paint-v53"><feTurbulence type="fractalNoise" baseFrequency=".026 .034" numOctaves="3" seed="18" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation=".5"/></filter>
     <filter id="clock-glow-v53"><feGaussianBlur stdDeviation="26"/></filter>
+    <clipPath id="clock-face-clip-v67"><circle cx="960" cy="520" r="238"/></clipPath>
    </defs>
    <rect width="1920" height="1080" fill="url(#clock-sky-v53)"/>
    <g fill="none" strokeLinecap="round" filter="url(#clock-paint-v53)">
@@ -1200,7 +1206,7 @@ const ClockPoster = () => {
     <path d="M1548 1006L1548 910L1592 910L1592 851L1632 851L1632 910L1681 910L1681 1006Z" fill="#101a50"/>
     <path d="M1419 790L1432 565L1445 790Z" fill="#0b1747"/>
     {townStrokes.map((p,i)=><path key={"town-"+i} d={"M"+p.x+" "+p.y+"l"+p.dx+" -"+(p.w*.35)} stroke={p.c} strokeWidth={p.w} strokeLinecap="round" opacity=".35"/>)}
-    {Array.from({length:34},(_,i)=>{
+    {Array.from({length:46},(_,i)=>{
       const x=1260+(i*57)%450,y=884+(i*33)%100;
       return <rect key={"window-"+i} x={x} y={y} width={6+(i%3)*3} height={11+(i%4)*2} fill="#ffdb62" opacity={.55+(i%4)*.1}/>;
     })}
@@ -1211,6 +1217,7 @@ const ClockPoster = () => {
     <circle r="246" fill="url(#clock-face-v53)" stroke="#e3ac42" strokeWidth="14"/>
     <circle r="226" fill="none" stroke="#ffdc74" strokeWidth="5"/>
     <circle r="212" fill="none" stroke="#08245f" strokeWidth="5"/>
+    <g clipPath="url(#clock-face-clip-v67)" fill="none" strokeLinecap="round" opacity=".75">{faceMarks.map((m,i)=><path key={"face-brush-"+i} d={"M"+m.x1+" "+m.y1+"Q"+m.qx+" "+m.qy+" "+m.x2+" "+m.y2} stroke={m.c} strokeWidth={m.w} opacity={m.o}/>)}</g>
     <path d="M-12 -18L22 -11L147 60L80 69L-3 7Z" fill="#ffd64e" stroke="#d18b2b" strokeWidth="5"/>
     <path d="M-4 -6L125 59" stroke="#fff0a1" strokeWidth="4" opacity=".7"/>
     <circle r="17" fill="#ffe082" stroke="#c18429" strokeWidth="6"/>
@@ -1222,8 +1229,8 @@ const ClockPoster = () => {
     })}
    </g>
   </svg>
-  <div style={{position:"absolute",left:0,right:0,top:24,textAlign:"center",fontFamily:"Georgia,serif",fontSize:74,fontWeight:900,letterSpacing:".03em",color:"#ffca35",textShadow:"0 4px 0 #9a6023,0 7px 12px rgba(0,0,0,.28)"}}>1889</div>
-  <div style={{position:"absolute",left:0,right:0,top:104,textAlign:"center",fontFamily:"Georgia,serif",fontSize:34,fontWeight:850,letterSpacing:".025em",color:"#f4c348",textShadow:"0 3px 0 #935b29,0 5px 10px rgba(0,0,0,.25)"}}>Post-Impressionism</div>
+  <div style={{position:"absolute",left:0,right:0,top:24,textAlign:"center",fontFamily:"Georgia,serif",fontSize:84,fontWeight:900,letterSpacing:".03em",color:"#ffca35",textShadow:"0 4px 0 #9a6023,0 7px 12px rgba(0,0,0,.28)"}}>1889</div>
+  <div style={{position:"absolute",left:0,right:0,top:104,textAlign:"center",fontFamily:"Georgia,serif",fontSize:38,fontWeight:850,letterSpacing:".025em",color:"#f4c348",textShadow:"0 3px 0 #935b29,0 5px 10px rgba(0,0,0,.25)"}}>Post-Impressionism</div>
  </AbsoluteFill>;
 };
 const StatsPoster = () => {
