@@ -1758,10 +1758,10 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
  </div>;
   const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923;
  const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923;
- const topArtwork=frame<42?topCream:frame<55?clock:frame<72?blackSide:topBlue;
+ const topArtwork=frame<42?topCream:frame<55?blackSide:frame<72?blackSide:topBlue;
  return <div style={style}>
   {kind===0?dynamicFront:
-   kind===1?(frame<55?glossyLogo:frame<72?archiveFace:archive1923):
+   kind===1?(frame<42?glossyLogo:frame<55?clock:frame<72?archiveFace:archive1923):
    kind===2?dynamicSide:
    kind===3?topArtwork:
    kind===4?ease:
