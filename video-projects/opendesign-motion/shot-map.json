@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v53",
+  "id": "opendesign-motion-reference-rebuild-v55",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -423,11 +423,11 @@
     },
     {
       "frame": 456,
-      "content": "Wide shallow EASE crop with frame corners, metadata and lower timecode HUD"
+      "content": "Wide shallow EASE crop without duplicate local title, source-style metadata, corner marks and 60fps timecode"
     },
     {
       "frame": 461,
-      "content": "Large white IN with ten discrete gray extrusion planes descending behind the letters and full kinetic HUD"
+      "content": "White IN with ten discrete gray extrusion planes and light HUD ink on black"
     },
     {
       "frame": 466,
@@ -611,19 +611,19 @@
     },
     {
       "frame": 975,
-      "content": "Black camera/play face at front, painted blue clock-night artwork on the adjacent side and gold clock artwork on top"
+      "content": "Black camera face forward, painted blue night side adjacent and gold clock on top"
     },
     {
       "frame": 990,
-      "content": "Blue/gold 1889 clock top, blue night side and green EASE fold below"
+      "content": "Blue/gold 1889 clock top, black camera face forward and green EASE fold"
     },
     {
       "frame": 1005,
-      "content": "Black camera top, yellow-gold archival side and 100K GitHub-stars panel on the front/right"
+      "content": "100K GitHub-stars face forward, antique warm-gold archive side adjacent and black camera top"
     },
     {
       "frame": 1020,
-      "content": "Blue camera top, cream/red 1923 archival side and black play face on the front/right"
+      "content": "Black play/camera face forward, cream/red 1923 panel adjacent and black camera-mark top"
     },
     {
       "frame": 1050,

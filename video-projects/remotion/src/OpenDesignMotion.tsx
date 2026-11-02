@@ -744,7 +744,7 @@ const OutPoster = () => {
   <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+(dx-35)+"px)",opacity:.38,filter:"blur(10px)"}}><Word size={820} color="#fff" tracking={-.16}>OUT</Word></div>
   <div style={{position:"absolute",left:"-4%",right:"-4%",top:220,textAlign:"center",transform:"translateX("+dx+"px)"}}><Word size={620} color="#fff" tracking={-.16} style={{textShadow:"0 0 22px rgba(255,255,255,.15)"}}>OUT</Word></div>
   <div style={{position:"absolute",left:"-2%",right:"-2%",top:222,textAlign:"center",transform:"translateX("+(dx+24)+"px)",opacity:.18,filter:"blur(5px)"}}><Word size={820} color="#fff" tracking={-.16}>OUT</Word></div>
- <KineticHud/>
+ <KineticHud color="#f2f2ed"/>
  </AbsoluteFill>;
 };
 
@@ -753,7 +753,6 @@ const EasePoster = () => {
  return <AbsoluteFill style={{...full,background:"#f5f5ef",color:"#111813",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#fff 0%,#f4f6ee 100%)"}}/>
   <div style={{position:"absolute",left:"-6%",right:"-6%",top:238,transform:"translateX("+shift+"px)",textAlign:"center",fontFamily:displayFont,fontSize:760,fontWeight:1000,letterSpacing:"-.15em",color:"#07832b",textShadow:"3px 2px 0 #0b6f2a,7px 6px 0 #075c24,13px 13px 24px rgba(0,60,15,.22)"}}>EASE</div>
-  <div style={{position:"absolute",left:72,top:42,fontSize:14,fontWeight:900,letterSpacing:".2em",color:"#8c978d"}}>EASE / NATURAL MOTION</div>
  <KineticHud/>
  </AbsoluteFill>;
 };
@@ -950,10 +949,10 @@ const DepthField=()=>{
  </AbsoluteFill>;
 };
 
-const KineticHud=()=>{
- const f=useCurrentFrame(),seconds=Math.floor(f/30),frames=f%30;
+const KineticHud=({color="#131a14"}:{color?:string})=>{
+ const f=useCurrentFrame(),ticks=679+f*2,seconds=Math.floor(ticks/60),frames=ticks%60;
  const time="00:00:"+String(seconds).padStart(2,"0")+":"+String(frames).padStart(2,"0");
- return <AbsoluteFill style={{...full,pointerEvents:"none",color:"#131a14",fontFamily:"monospace",fontSize:15,fontWeight:850,letterSpacing:".14em"}}>
+ return <AbsoluteFill style={{...full,pointerEvents:"none",color,fontFamily:"monospace",fontSize:15,fontWeight:850,letterSpacing:".14em"}}>
   <div style={{position:"absolute",left:70,top:32}}>OPEN DESIGN <span style={{opacity:.55}}>MOTION REEL — 2026</span></div>
   <div style={{position:"absolute",right:70,top:32}}>06 — KINETIC TYPE</div>
   <div style={{position:"absolute",left:35,top:35,width:22,height:22,borderLeft:"2px solid currentColor",borderTop:"2px solid currentColor"}}/>
@@ -962,19 +961,17 @@ const KineticHud=()=>{
   <div style={{position:"absolute",right:35,bottom:36,width:22,height:22,borderRight:"2px solid currentColor",borderBottom:"2px solid currentColor"}}/>
   <div style={{position:"absolute",left:70,bottom:53}}>{time}　60 FPS</div>
   <div style={{position:"absolute",right:70,bottom:53}}>128 BPM　■ □ □ □　BAR 7/8</div>
-  <div style={{position:"absolute",left:40,right:40,bottom:25,height:2,background:"rgba(19,26,20,.46)"}}>
-   <div style={{width:(Math.min(1,f/72)*100)+"%",height:"100%",background:"#131a14"}}/>
+  <div style={{position:"absolute",left:40,right:40,bottom:25,height:2,background:"currentColor",opacity:.46}}>
+   <div style={{width:(Math.min(1,f/72)*100)+"%",height:"100%",background:"currentColor"}}/>
   </div>
  </AbsoluteFill>;
 };
-
 const EaseGreen=()=>{
  const f=useCurrentFrame(),shift=e(f,0,7,95,0),ghost=1-e(f,1,8);
  return <AbsoluteFill style={{...full,background:"#8ff04e",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"linear-gradient(115deg,#9af55f,#82e846 60%,#a7f77b)"}}/>
   <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+(shift-34)+"px) scaleX(1.9) scaleY(.6)",opacity:.24*ghost,filter:"blur(8px)"}}><Word size={880} color="#101512" tracking={-.15}>EASE</Word></div>
   <div style={{position:"absolute",left:"-8%",right:"-8%",top:282,textAlign:"center",transform:"translateX("+shift+"px) scaleX(1.9) scaleY(.6)",filter:"blur(.25px)"}}><Word size={600} color="#101512" tracking={-.15} style={{textShadow:"0 4px 0 rgba(20,52,21,.25)"}}>EASE</Word></div>
-  <div style={{position:"absolute",left:36,top:30,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#2e5427"}}>EASING / MOTION STUDY</div>
  <KineticHud/>
  </AbsoluteFill>;
 };
@@ -1046,8 +1043,7 @@ const InMetallic=()=>{
    <span style={{position:"absolute",left:20,top:155,fontSize:500,letterSpacing:"-.08em"}}>I</span>
    <span style={{position:"absolute",left:160,top:0,fontSize:650,letterSpacing:"-.1em"}}>N</span>
   </div>
-  <div style={{position:"absolute",left:80,bottom:54,fontSize:14,color:"#747c84",letterSpacing:".2em",fontWeight:850}}>IN / METALLIC TYPE</div>
-  <KineticHud/>
+  <KineticHud color="#f2f2ed"/>
  </AbsoluteFill>;
 };
 const InPoster=()=>{
@@ -1055,7 +1051,7 @@ const InPoster=()=>{
  return <AbsoluteFill style={{...full,background:"#07080b",overflow:"hidden"}}>
   <div style={{position:"absolute",left:"-3%",right:"-3%",top:245,textAlign:"center",fontFamily:displayFont,fontSize:650,fontWeight:1000,letterSpacing:"-.14em",lineHeight:.9,color:"#f6f6f1",textShadow:"0 4px 0 rgba(255,255,255,.12)"}}>IN.</div>
   <div style={{position:"absolute",left:"58.1%",top:535,width:47,height:47,borderRadius:"50%",background:"#9ceb51",boxShadow:"0 0 34px rgba(156,235,81,.5)",transform:"scale("+dot+")"}}/>
- <KineticHud/>
+ <KineticHud color="#f2f2ed"/>
  </AbsoluteFill>;
 };
 
@@ -1124,7 +1120,6 @@ const NeverPoster = () => {
   <div style={{position:"absolute",left:"-2%",right:"-2%",top:305,textAlign:"center",display:"flex",justifyContent:"center",alignItems:"baseline",gap:2,transform:"translateX("+shift+"px)"}}>
    {"NEVER".split("").map((ch,i)=><span key={i} style={{fontFamily:displayFont,fontSize:640-(i===2?35:0),fontWeight:1000,letterSpacing:"-.13em",color:"#111713",transform:"translateY("+(i===0?26:i===1?0:i===2?-80:i===3?-104:-20)+"px) skewX("+(i===2?-9:0)+"deg)",textShadow:"0 5px 0 rgba(15,35,16,.2)"}}>{ch}</span>)}
   </div>
-  <div style={{position:"absolute",left:28,top:27,fontSize:14,fontWeight:900,letterSpacing:".18em",color:"#446138"}}>NEVER / TYPE IN MOTION</div>
  <KineticHud/>
  </AbsoluteFill>;
 };
@@ -1134,14 +1129,12 @@ const LinearPoster = () => {
  const common={position:"absolute" as const,left:"-4%",right:"-4%",top:305,textAlign:"center" as const,fontFamily:displayFont,fontWeight:1000,letterSpacing:"-.12em",lineHeight:.9};
  return <AbsoluteFill style={{...full,background:"#0b0d10",color:"#f5f6f3",overflow:"hidden"}}>
   <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 48%,#171b20,#080a0c 70%)"}}/>
-  <div style={{position:"absolute",left:48,top:30,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#7e8589"}}>OPEN DESIGN / MOTION SYSTEM</div>
-  <div style={{position:"absolute",right:48,top:30,fontSize:14,fontWeight:850,letterSpacing:".18em",color:"#7e8589"}}>DIRECTION / LINEAR</div>
   <div style={{...common,fontSize:600,transform:"translateX(-65px)",opacity:(1-resolve)*.45*ghost,filter:"blur(10px)"}}><Word size={660} color="#fff" tracking={-.12}>IN</Word></div>
   <div style={{...common,fontSize:600,transform:"translateX(-28px)",opacity:1-resolve,filter:"blur(1.5px)"}}><Word size={600} color="#f4f5f4" tracking={-.12}>IN</Word></div>
   <div style={{...common,fontSize:560,opacity:resolve,transform:"translateX("+(10*(1-resolve))+"px)"}}><Word size={660} color="#f4f5f2" tracking={-.12}>LINEAR.</Word></div>
   <div style={{position:"absolute",left:"72.3%",top:525,width:30,height:30,borderRadius:"50%",background:"#a3ef4d",opacity:dot,boxShadow:"0 0 20px rgba(163,239,77,.25)"}}/>
   <div style={{position:"absolute",left:48,right:48,bottom:31,height:2,background:"#5d6569",opacity:.28}}/>
- <KineticHud/>
+ <KineticHud color="#f2f2ed"/>
  </AbsoluteFill>;
 };
 
@@ -1760,10 +1753,10 @@ const CubeFace=({kind,transform,frame}:{kind:number;transform:string;frame:numbe
    <text x="180" y="324" fontSize="19" fontWeight="900" fill="#171717" textAnchor="middle" letterSpacing="4">OPEN / DESIGN</text>
   </svg>
  </div>; const dynamicFront=frame<27?portrait:frame<55?blackSide:frame<72?archiveFace:blackMark;
- const dynamicSide=frame<27?blackSide:frame<55?clock:frame<72?yellow:archive1923;
+ const dynamicSide=frame<27?blackSide:frame<55?blackSide:frame<72?yellow:blackMark;
  return <div style={style}>
   {kind===0?dynamicFront:
-   kind===1?(frame>=55&&frame<72?yellow:blackSide):
+   kind===1?(frame<55?clock:frame<72?archiveFace:archive1923):
    kind===2?dynamicSide:
    kind===3?(frame<55?clock:blackSide):
    kind===4?ease:
