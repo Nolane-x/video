@@ -6,7 +6,12 @@ This is an independently authored Remotion/SVG/CSS reconstruction, not the origi
 
 ## Current focus: reference-led visual corrections across the whole film
 
-Latest authored revision: V47. Latest technically verified render is V45 / Actions #104; V46 art changes are retained, with V47 repairing a stale validator check before the render can run.
+### V68 candidate changes (render pending)
+- Re-key the cube yaw across source frames 990/1005/1020 so the 1889 clock remains dominant at 990, the 100K panel becomes the broad face at 1005, and the 1923 panel gains the intended left-side width at 1020.
+- Repaint the cube's blue/gold 1889 clock with deterministic brush marks and broken gold-ring strokes; rebuild the 100K face with larger type, a square green grid and a soft painted horizon; reshape the final camera/play glyph.
+- V68 remains a candidate until GitHub Actions renders it and the exact source frames are inspected against the supplied preview.
+
+Latest authored revision: V68 candidate. Latest completed technical render: V67 / Actions #130 (success). V68 has not yet been rendered or approved; its Actions run must pass before any new render is treated as verified.
 
 The source-indexed timeline remains fixed; each revision below is recorded against actual rendered frames and the supplied native preview.
 
@@ -35,6 +40,7 @@ The source-indexed timeline remains fixed; each revision below is recorded again
 - The 3.7% eye is an angular blue-grid optical field with radial iris detail, on black, with the number bottom-right. It no longer uses a large white sclera.
 
 ### Launch Film, cube and MORRO
+- V68 candidate: the cube's source-facing artworks and final yaw are being corrected at frames 990/1005/1020; the latest verified video remains V67 until the new render passes technical checks and visual review.
 - Launch Film preview variant 0 now uses textured ink-wash mountains and an imperfect circular play mark.
 - The cube's blue/gold 1889 clock remains on the top plane at source frame990 while a black glyph side faces the camera and the EASE underside is exposed. The black face is kept camera-facing during the clock beat; the mint/yellow 100K GitHub-stars face rotates forward at 1005.
 - V32 fixes the cube's CSS plane mapping: the blue/gold 1889 clock is visibly on the top plane at frame990 while the black glyph faces the camera and the EASE fold sits below. At frame1005 the mint/yellow 100K halftone face becomes camera-facing and the clock moves to the adjacent side; at frame1020 the black glyph face returns.

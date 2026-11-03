@@ -1,5 +1,5 @@
 {
-  "id": "opendesign-motion-reference-rebuild-v67",
+  "id": "opendesign-motion-reference-rebuild-v68",
   "reference": {
     "filename": "preview.mp4",
     "durationSeconds": 37.312,
@@ -636,6 +636,23 @@
     {
       "frame": 1118,
       "content": "Large circular camera symbol, bold OpenDesign Motion wordmark and legible open-design.ai domain capsule"
+    }
+  ],
+  "revisionNotes": [
+    {
+      "revision": "V68",
+      "frames": [
+        990,
+        1005,
+        1020
+      ],
+      "status": "authored candidate; awaiting Actions render and native-frame review",
+      "changes": [
+        "Repainted the cube's 1889 blue/gold clock face with deterministic impasto-like brush marks and broken gold ring strokes",
+        "Rebuilt the 100K face with larger source-scale typography, square green grid and a pale painted horizon",
+        "Reduced the 1005 yaw so 100K is the dominant front face and the antique clock is a narrower left side",
+        "Widened the 1923 left side at frame1020 and reshaped the front camera/play glyph"
+      ]
     }
   ]
 }
