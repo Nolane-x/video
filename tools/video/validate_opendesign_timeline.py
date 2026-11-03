@@ -131,7 +131,7 @@ need("f<15?18-14*e(f,0,15):f<30?4-26*e(f,15,30):f<45?-22+47*e(f,30,45):f<60?25-4
 need("const dynamicFront=frame<27?portrait:frame<55?nightCity:frame<72?archiveFace:archive1923" in source and "kind===1?(frame<42?glossyLogo:frame<55?clock:frame<72?archiveFace:archive1923)" in source, "V66 D-to-clock / city-left / archival cube face pairing is missing")
 need("const dynamicSide=frame<27?blackSide:frame<42?glossyLogo:frame<55?clock:frame<72?yellow:archive1923" in source, "V59 face order must progress from glossy D to clock to 100K to 1923")
 need("kind===3?topArtwork" in source and "frame<42?topCream:frame<55?blackSide:frame<72?blackSide:topBlue" in source, "V66 auxiliary face sequence is missing")
-need("kind===4?ease" in source and 'rotateX(-90deg) translateZ("+z+"px)' in source, "V62 full EASE underside panel is missing")
+need("const ease=<div" in source and "kind===4?ease" in source and 'rotateX(-90deg) translateZ("+z+"px)' in source, "V68 full EASE underside artwork must remain present")
 need('rotateX(90deg) translateZ("+z+"px)' in source, "blue clock must occupy the top face")
 need('rotateX(-90deg) translateZ("+z+"px)' in source, "lime EASE must occupy the underside")
 need("MORRO / FORM STUDY" in source, "large purple MORRO transition is missing")
