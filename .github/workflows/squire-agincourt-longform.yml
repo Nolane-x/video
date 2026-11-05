@@ -37,7 +37,7 @@ jobs:
           93918d4720b6aa52d61b1ca7a995dbe07949b0b2e579fab8eb19d01f22ebc414  video-projects/squire/agincourt-project.zip
           EOF
       - name: Unpack project for voice-job validation
-        run: unzip -q video-projects/squire/agincourt-project.zip -d video-projects/squire
+        run: unzip -q -o video-projects/squire/agincourt-project.zip -d video-projects/squire
       - name: Validate voice job and publish reusable-workflow input
         id: payload
         shell: bash
@@ -121,7 +121,7 @@ jobs:
         run: |
           mkdir -p integrations/h2-squire-studio video-projects/squire
           unzip -q integrations/h2-squire-studio/source.zip -d integrations/h2-squire-studio
-          unzip -q video-projects/squire/agincourt-project.zip -d video-projects/squire
+          unzip -q -o video-projects/squire/agincourt-project.zip -d video-projects/squire
           test -f integrations/h2-squire-studio/source/skills/lam-video-squire/kit/render.mjs
           test -f video-projects/squire/agincourt-project/voice-job.json
       - name: Install Squire Node renderer and Chromium
