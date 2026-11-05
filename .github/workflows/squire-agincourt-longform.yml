@@ -59,11 +59,12 @@ jobs:
               raise SystemExit('Narration exceeds VoiceStudio job character limit.')
           print(f"Validated {payload['job_id']}: {len(payload['segments'])} segments")
           PY
-          {
-            echo 'job_json<<SQUIRE_VOICE_JOB_EOF'
-            cat video-projects/squire/agincourt-project/voice-job.json
-            echo 'SQUIRE_VOICE_JOB_EOF'
-          } >> "$GITHUB_OUTPUT"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('video-projects/squire/agincourt-project/voice-job.json').read_text(encoding='utf-8'))
+          print('job_json=' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
+          PY
 
   voice:
     name: Generate and verify Adam narration
