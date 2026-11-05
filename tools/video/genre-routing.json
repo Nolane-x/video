@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "defaultProfile": "cinematic-stick-figure-narrative",
+  "profileSelection": "explicit-user-intent-first",
+  "profiles": [
+    {
+      "id": "cinematic-stick-figure-narrative",
+      "label": "Cinematic stick-figure narrative",
+      "triggers": [
+        "Ifverse-style narrative animation",
+        "Day One-style emotional short",
+        "existing cinematic stick-figure series"
+      ],
+      "primaryRenderer": [
+        "H2-dem",
+        "Remotion"
+      ],
+      "supportingTools": [
+        "Blender",
+        "Krita",
+        "FFmpeg"
+      ],
+      "creativeOwner": "video-cinematic-director",
+      "guardrails": [
+        "Preserve character and environment bible",
+        "Never use zoom-only motion as a substitute for acting",
+        "Keep existing masters immutable"
+      ],
+      "evidence": [
+        "storyboard",
+        "contact-sheets",
+        "moving-action-contact-proof",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "historical-military-animation-squire",
+      "label": "Historical military animation — Squire",
+      "triggers": [
+        "Squire animation",
+        "animated military history",
+        "knights battle animation",
+        "Roman army animation",
+        "samurai battle animation",
+        "Viking battle animation"
+      ],
+      "selection": "Use only when the user explicitly requests this genre/style or continues an established Squire project.",
+      "primaryRenderer": "H2 Squire Canvas/Chromium",
+      "specialistPlugin": {
+        "name": "h2-squire-studio",
+        "version": "1.2.2",
+        "pluginId": "plugins_6aec6edf62248191a93eba1668234012",
+        "activation": "explicit-host-activation",
+        "url": "https://chatgpt.com/plugins/plugins_6aec6edf62248191a93eba1668234012"
+      },
+      "creativeOwner": "historical-military-animation-director",
+      "supportingTools": [
+        "VoiceStudio reusable GitHub Actions narration workflow",
+        "Squire procedural music/SFX",
+        "FFmpeg and ffprobe",
+        "Blender only for shots with a material 3D requirement"
+      ],
+      "defaults": {
+        "aspectRatio": "16:9",
+        "resolution": "1920x1080",
+        "fps": 24,
+        "targetDurationMinutes": [
+          9,
+          11
+        ],
+        "language": "en"
+      },
+      "conditionalDependencies": [],
+      "guardrails": [
+        "Squire is not the Remotion renderer",
+        "Do not use Squire as a global house style",
+        "Preserve parallel asset-library ownership of video-library/**",
+        "Keep old master videos unchanged",
+        "Use canonical voice IDs with rights and attribution evidence",
+        "Distinguish historical fact from estimates and contested interpretations",
+        "No publication approval from technical checks alone"
+      ],
+      "qaChecks": [
+        "research-source-ledger",
+        "voice-job-schema-and-rights-check",
+        "voice-wav-format-and-watermark-verification",
+        "scene-template-coverage-and-timing",
+        "music-and-sfx-asset-presence",
+        "full-frame-render-check",
+        "contact-sheets",
+        "30-second-moving-preview",
+        "ffprobe-resolution-fps-duration-codecs",
+        "ebu-r128-loudness-and-true-peak",
+        "sha256-provenance",
+        "human-full-length-audiovisual-review"
+      ],
+      "requiredEvidence": [
+        "script",
+        "voice-manifest",
+        "art-bible",
+        "shot-plan",
+        "source-ledger",
+        "contact-sheets",
+        "preview",
+        "final-candidate-mp4",
+        "qa-report"
+      ]
+    },
+    {
+      "id": "data-science-explainer",
+      "label": "Data and science explainer",
+      "triggers": [
+        "charts",
+        "statistics",
+        "math",
+        "science explainer"
+      ],
+      "primaryRenderer": [
+        "Remotion",
+        "Manim"
+      ],
+      "supportingTools": [
+        "D3",
+        "SVG",
+        "FFmpeg"
+      ],
+      "guardrails": [
+        "Validate source data",
+        "Keep chart labels readable",
+        "No invented data"
+      ],
+      "evidence": [
+        "source-ledger",
+        "chart-contract",
+        "frame-timing",
+        "full-audiovisual-review"
+      ]
+    },
+    {
+      "id": "product-ui-walkthrough",
+      "label": "Product and UI walkthrough",
+      "triggers": [
+        "real website demo",
+        "product interface walkthrough",
+        "software tutorial"
+      ],
+      "primaryRenderer": [
+        "Playwright capture",
+        "Remotion composition"
+      ],
+      "supportingTools": [
+        "FFmpeg",
+        "caption/OCR QA"
+      ],
+      "guardrails": [
+        "Use authorized capture",
+        "Redact secrets and personal data",
+        "Do not synthesize fake product UI without disclosure"
+      ],
+      "evidence": [
+        "capture-provenance",
+        "redaction-review",
+        "text-readability",
+        "full-audiovisual-review"
+      ]
+    }
+  ],
+  "ownership": {
+    "assetLibraryPaths": [
+      "video-library/**",
+      ".github/workflows/build-video-asset-library.yml",
+      "tools/video/build_asset_library*.py"
+    ],
+    "doNotTouchUnlessExplicitlyReassigned": true,
+    "squirePaths": [
+      "integrations/h2-squire-studio/**",
+      "video-projects/squire/**",
+      ".github/workflows/squire-agincourt-longform.yml"
+    ]
+  }
+}
