@@ -44,8 +44,8 @@ jobs:
         id: collection
         shell: bash
         env:
-          INPUT_COLLECTION: \${{ inputs.collection }}
-          EVENT_NAME: \${{ github.event_name }}
+          INPUT_COLLECTION: ${{ inputs.collection }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "push" || -z "$INPUT_COLLECTION" ]]; then
@@ -59,12 +59,12 @@ jobs:
           set -euo pipefail
           python -m py_compile tools/audio/acquire_meta_open_sound_wav_master.py
           python tools/audio/acquire_meta_open_sound_wav_master.py \
-            --collection "\${{ steps.collection.outputs.value }}" \
+            --collection "${{ steps.collection.outputs.value }}" \
             --output-dir dist/wav-master
 
       - name: Publish WAV master to permanent Meta audio Release
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: nolane-historical-audio-library-v0.1.0
         run: |
           set -euo pipefail
@@ -77,7 +77,7 @@ jobs:
       - name: Upload production WAV master artifact
         uses: actions/upload-artifact@v7
         with:
-          name: meta-open-sound-wav-master-\${{ steps.collection.outputs.value }}
+          name: meta-open-sound-wav-master-${{ steps.collection.outputs.value }}
           path: dist/wav-master/*.zip
           if-no-files-found: error
           retention-days: 30
