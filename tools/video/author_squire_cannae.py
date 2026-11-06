@@ -113,6 +113,18 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
                 {"from": [0.49, 0.71], "to": [0.58, 0.6], "at": 1.4, "color": CARTHAGE},
             ],
         }
+        if any(k in low for k in ("both flanks", "encirclement", "surrounded", "enclosure", "rear")):
+            args["blocks"] = [
+                {"x": 0.5, "y": 0.5, "w": 0.26, "h": 0.48, "cols": 9, "rows": 16, "cell": 0.016, "side": "red", "face": -1},
+                {"x": 0.23, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.23, 0.5], [2.0, 0.39, 0.5]]},
+                {"x": 0.77, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.77, 0.5], [2.0, 0.61, 0.5]]},
+                {"x": 0.5, "y": 0.15, "w": 0.3, "h": 0.1, "cols": 10, "rows": 3, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.5, 0.15], [2.0, 0.5, 0.32]]},
+            ]
+            args["arrows"] = [
+                {"from": [0.23, 0.5], "to": [0.39, 0.5], "at": 0.5, "color": CARTHAGE},
+                {"from": [0.77, 0.5], "to": [0.61, 0.5], "at": 0.9, "color": CARTHAGE},
+                {"from": [0.5, 0.15], "to": [0.5, 0.32], "at": 1.3, "color": CARTHAGE},
+            ]
         cue("battle_roar", "battle_far", at=0.45)
     elif tpl == "plan":
         args = {

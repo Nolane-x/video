@@ -24,6 +24,7 @@ concurrency:
 
 jobs:
   prepare-voice:
+    if: ${{ !contains(github.event.head_commit.message || '', '[visual-recut]') }}
     name: Select the best eligible English narrator
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -64,6 +65,7 @@ jobs:
           retention-days: 30
 
   voiceover:
+    if: ${{ !contains(github.event.head_commit.message || '', '[visual-recut]') }}
     name: Synthesize and verify the narration
     needs: prepare-voice
     uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
@@ -75,6 +77,7 @@ jobs:
   render-squire:
     name: Align, animate, mix and QA the film
     needs: [prepare-voice, voiceover]
+    if: ${{ always() && (contains(github.event.head_commit.message || '', '[visual-recut]') || (needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
@@ -85,12 +88,32 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download VoiceStudio narration bundle
+      - name: Download the verified VoiceStudio narration bundle for a visual-only recut
+        if: ${{ contains(github.event.head_commit.message || '', '[visual-recut]') }}
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-42170629874
+          path: voice-assets
+          run-id: 42170629874
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+      - name: Download the matching narrator selection metadata for a visual-only recut
+        if: ${{ contains(github.event.head_commit.message || '', '[visual-recut]') }}
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-cannae-voice-selection-42170629874
+          path: voice-assets
+          run-id: 42170629874
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+      - name: Download VoiceStudio narration bundle for a fresh production
+        if: ${{ !contains(github.event.head_commit.message || '', '[visual-recut]') }}
         uses: actions/download-artifact@v4
         with:
           name: video-voice-assets-${{ github.run_id }}
           path: voice-assets
-      - name: Download narrator selection metadata
+      - name: Download narrator selection metadata for a fresh production
+        if: ${{ !contains(github.event.head_commit.message || '', '[visual-recut]') }}
         uses: actions/download-artifact@v4
         with:
           name: squire-cannae-voice-selection-${{ github.run_id }}
