@@ -27,6 +27,19 @@ User references:
 - Supplied examples: “The Words You Never Forgot” (https://www.youtube.com/watch?v=qyFUAlGMxSE) and “What If You Were a Mentalist?” (https://www.youtube.com/watch?v=XexSnQTMMhw). See `video-library/reference-clips.json` for source provenance and review checklist.
 Open the source and actually watch it before recording timestamped observations; the standalone reference MP4s were not found in the current workspace/Library snapshot. Study the high-level visual grammar. Do not copy frames, characters, dialogue, scripts or music.
 
+## Illustrated history and historical sound workflow
+
+Use the route that matches the brief; do not collapse different styles into one engine:
+- Illustrated/cartoon history: read .agents/skills/illustrated-history-animation-director/SKILL.md.
+- Footage-led cinematic history: read the Command Center's historical-cinematic-documentary-director skill.
+- H2 Squire military vector style: use only when explicitly requested or continuing that series; keep its separate renderer and specialist route.
+
+For user references, map the full runtime with systematic 1–2 second samples, then inspect dense 4–8 fps motion segments around key actions, cuts, reveals and camera moves. Record the sampling scope. Do not claim every frame or a full normal-speed watch-through unless performed. Study actor, prop, environment, camera and graphic motion separately. Every motion-led shot should have at least two meaningful independent channels. Build real variation in shot scale, angle, location, action and narrative information; prohibit repeated generic faces, weapon inserts, army rows and map filler.
+
+For historical audio, use audio-library/README.md and audio-library/SOURCES.json first, then docs/audio/HISTORICAL_SOUND_LIBRARY.md. Search existing Build 76 sound archives before acquisition. Prefer auditioned recordings, Foley, ambience and properly licensed scores; procedural WAVs are animatic placeholders or supplemental accents, not the default final soundscape. Keep public CC0/Public Domain, project-use-only and private production-only files separate. Never put private/raw licensed sources such as restricted sound libraries into public GitHub ZIPs. Each selected cue needs item-level source/license, SHA-256, human audition status and exact visual sync event. Deliver separate stems and a timecoded full-mix listening report.
+
+The Samurai reference study dated 2026-11-06 is stored at docs/reference-studies/samurai-history-animation-review-2026-11-06.md. It records the tested sample scope and observed motion grammar; it is a sampled analysis, not a claim that all source frames were inspected.
+ 
 ## Hard production gates
 1. **Repository truth:** inspect code, storyboard, assets, commits, CI and storage status.
 2. **Brief:** audience, platform, ratio, duration, language, voice-over policy, emotional outcome and constraints. Don't ask again for known details.
