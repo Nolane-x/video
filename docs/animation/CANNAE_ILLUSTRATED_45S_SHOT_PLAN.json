@@ -261,7 +261,7 @@
       "shot_id": "CAN-04-the-wings-turn",
       "start_frame": 648,
       "end_frame": 864,
-      "story_purpose": "Explain how the wings and cavalry movement threaten the exposed sides and rear as the Roman mass presses inward.",
+      "story_purpose": "Explain how the African infantry wings turn against the exposed Roman flanks while Carthaginian cavalry moves around toward the rear.",
       "location": "overhead battlefield diagram transitioning into a high oblique view",
       "time_of_day": "schematic tactical view",
       "scale": "overhead",
@@ -275,7 +275,7 @@
         "graphics",
         "environment"
       ],
-      "visual_state_change": "Two flank markers pivot inward; cavalry paths sweep around the outer edges; the Roman mass remains compressed in the middle.",
+      "visual_state_change": "The African infantry on both wings pivot inward against the exposed flanks; a distinct cavalry route curves around behind the Roman mass.",
       "camera": {
         "move": "reframe",
         "motivation": "Reframe from the bowed centre to both flanks so the audience understands the enclosing geometry.",
@@ -285,20 +285,28 @@
       },
       "characters": [
         {
-          "character_id": "cavalry-left-wing",
-          "role": "Carthaginian cavalry on one wing",
-          "blocking": "moves around the exposed side toward the rear",
-          "gaze": "toward the rear of the Roman formation",
-          "pose_cycle": "gallop-silhouette",
-          "acting_notes": "horse and rider remain mechanically linked; use staggered gait phases"
+          "character_id": "african-infantry-left-wing",
+          "role": "African infantry on the Carthaginian left wing",
+          "blocking": "turns inward toward the exposed Roman flank",
+          "gaze": "toward the Roman infantry side",
+          "pose_cycle": "pivot-and-advance",
+          "acting_notes": "the wing changes facing before advancing; shields and feet turn together"
         },
         {
-          "character_id": "cavalry-right-wing",
-          "role": "Carthaginian cavalry from the opposing wing",
-          "blocking": "joins the enclosing movement behind the infantry mass",
-          "gaze": "toward the Roman rear",
+          "character_id": "african-infantry-right-wing",
+          "role": "African infantry on the Carthaginian right wing",
+          "blocking": "turns inward toward the opposite exposed Roman flank",
+          "gaze": "toward the Roman infantry side",
+          "pose_cycle": "pivot-and-advance",
+          "acting_notes": "stagger the turn across ranks; do not synchronize the whole wing"
+        },
+        {
+          "character_id": "carthaginian-cavalry-rear",
+          "role": "Carthaginian cavalry moving toward the Roman rear after the cavalry engagement",
+          "blocking": "sweeps around the outside and appears behind the Roman formation",
+          "gaze": "toward the rear of the Roman mass",
           "pose_cycle": "gallop-silhouette",
-          "acting_notes": "use a distinct path and timing from the other cavalry group"
+          "acting_notes": "horse and rider remain mechanically linked; use a single motivated rearward route"
         }
       ],
       "action_type": "run",
@@ -309,41 +317,41 @@
       "props": [],
       "environment_layers": [
         {
-          "layer_id": "dust-trails-left",
+          "layer_id": "left-wing-dust",
           "depth": "midground",
-          "motion": "dust follows the left cavalry arc",
+          "motion": "dust follows the left African infantry pivot",
           "parallax_rate": 0.7
         },
         {
-          "layer_id": "dust-trails-right",
+          "layer_id": "right-wing-dust",
           "depth": "midground",
-          "motion": "dust follows the right cavalry arc",
+          "motion": "dust follows the right African infantry pivot",
           "parallax_rate": 0.7
         },
         {
-          "layer_id": "terrain-map",
+          "layer_id": "cavalry-rear-trail",
           "depth": "background",
-          "motion": "terrain remains stable during the tactical reveal",
-          "parallax_rate": 0.2
+          "motion": "a separate dust trail follows the cavalry route behind the Roman mass",
+          "parallax_rate": 0.45
         }
       ],
       "graphics": [
         {
-          "element": "left flank route",
+          "element": "left African infantry turn",
           "reveal_order": 0,
-          "text": "FLANK",
+          "text": "LEFT WING TURNS",
           "readable_seconds": 2
         },
         {
-          "element": "right cavalry arc",
+          "element": "right African infantry turn",
           "reveal_order": 1,
-          "text": "CAVALRY",
+          "text": "RIGHT WING TURNS",
           "readable_seconds": 2
         },
         {
-          "element": "rear closure path",
+          "element": "cavalry rear route",
           "reveal_order": 2,
-          "text": "THE REAR IS EXPOSED",
+          "text": "CAVALRY TO THE REAR",
           "readable_seconds": 2
         }
       ],
@@ -354,7 +362,7 @@
       "shot_id": "CAN-05-the-trap-closes",
       "start_frame": 864,
       "end_frame": 1080,
-      "story_purpose": "Resolve the tactical explanation: the Roman mass is increasingly surrounded as the flanks converge behind it.",
+      "story_purpose": "Resolve the tactical explanation: the Roman mass is attacked on both exposed flanks while cavalry movement threatens the rear.",
       "location": "the enclosed battlefield at Cannae",
       "time_of_day": "dust-filled late-afternoon light",
       "scale": "extreme_wide",
@@ -369,7 +377,7 @@
         "camera",
         "graphics"
       ],
-      "visual_state_change": "The two outer arcs meet behind the Roman mass; escape paths diminish; the frame settles on the enclosing shape and the place/date.",
+      "visual_state_change": "The African infantry flanks press inward as the cavalry reaches behind the Roman mass; the formation loses room to turn and escape.",
       "camera": {
         "move": "pull",
         "motivation": "Pull back to reveal the full enclosing geometry rather than treating the contact as an isolated duel.",
@@ -417,9 +425,9 @@
       ],
       "graphics": [
         {
-          "element": "closing perimeter",
+          "element": "flanks close",
           "reveal_order": 0,
-          "text": "THE WINGS CLOSE",
+          "text": "BOTH FLANKS EXPOSED",
           "readable_seconds": 3
         },
         {
@@ -431,7 +439,7 @@
         {
           "element": "tactical summary",
           "reveal_order": 2,
-          "text": "THE CENTRE BENDS. THE FLANKS CLOSE.",
+          "text": "THE CENTRE BENDS. THE REAR IS BLOCKED.",
           "readable_seconds": 3
         }
       ],
