@@ -1,8 +1,8 @@
-# Nolane Video Command Center v0.9.6
+# Nolane Video Command Center v0.9.7
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.9.6
+## What's new in v0.9.7
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
@@ -17,7 +17,7 @@ One private front door for Nolane video production. It includes **33 internal sk
 
 ## Unified audio search
 
-Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` to search Build 76 and Meta Open Sound together. Add `--kind foley` or `--kind instrument` to separate effects from note samples, and `--json` for structured results. Rights-review candidates are excluded by default; no search result bypasses human audition.
+Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` to search Build 76 and Meta Open Sound together. Add `--kind foley` or `--kind instrument` to separate effects from note samples, `--direct-only` to hide tag-only suggestions and `--json` for structured results. Rights-review candidates are excluded by default; no search result bypasses human audition.
 
 ## Lossless audio workflow
 
