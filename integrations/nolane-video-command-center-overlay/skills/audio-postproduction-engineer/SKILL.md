@@ -25,6 +25,10 @@ After the generated catalogs exist, search both with `python tools/audio/search_
 5. Record exact asset/source ID, file path/archive member, original source URL, license, attribution, SHA-256, duration, sample rate, bit depth, channels and human audition status.
 6. Fetch only genuinely missing material from an external source after a specific need is established. Keep source-only/private recordings outside public redistribution bundles.
 
+## Search confidence and historical fit
+
+Search with `python tools/audio/search_audio_resources.py --query "sword clash" --kind foley --direct-only` for strict title/category/file matches. Without `--direct-only`, tag-assisted suggestions are returned but must be treated as lower-confidence leads, not verified historical Foley. Consult `references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md` before claiming the bank contains horse-hoof, cavalry, bow/arrow, shield or battlefield crowd cues. Human audition remains mandatory.
+
 ## Lossless Meta source selection
 
 The Meta catalog carries an exact OGG-to-WAV map for each sample: `source_wav_file`, `wav_master_archive_name`, `wav_master_download_url`, `wav_master_size_bytes` and `wav_master_sha256`.
