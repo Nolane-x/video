@@ -3,7 +3,7 @@
 - Source release: video-asset-library-build-41184526545
 - Audio files indexed: 2446
 - Per-item index records: 2556
-- Rights status: {'redistributable_candidate': 2336, 'review_required': 110}
+- Rights status: {'redistributable_candidate': 2331, 'review_required': 110, 'source_specific_review_required': 5}
 - License values: {'CC0-1.0': 2331, 'UNKNOWN': 110, 'NASA Media Usage Guidelines — generally not copyrighted; not CC0': 5}
 - Archive counts: {'video-assets-kenney-audio-001.zip': 35, 'video-assets-opengameart-audio-001.zip': 2150, 'video-assets-originals-audio-001.zip': 196, 'video-assets-usgs-audio-001.zip': 60, 'video-assets-nasa-audio-001.zip': 5, 'video-assets-wikimedia-audio-001.zip': 0}
 

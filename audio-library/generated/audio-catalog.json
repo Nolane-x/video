@@ -1,13 +1,14 @@
 {
   "schema_version": "1.0.0",
   "generated_from_release": "video-asset-library-build-41184526545",
-  "generated_at_utc": "2026-11-06T13:27:43Z",
+  "generated_at_utc": "2026-11-06T13:41:24Z",
   "source_index_records": 2556,
   "archive_count": 6,
   "audio_asset_count": 2446,
   "rights_status_counts": {
-    "redistributable_candidate": 2336,
-    "review_required": 110
+    "redistributable_candidate": 2331,
+    "review_required": 110,
+    "source_specific_review_required": 5
   },
   "license_counts": {
     "CC0-1.0": 2331,
@@ -67,7 +68,7 @@
       "audio_member_count": 5,
       "audio_uncompressed_bytes": 170279056,
       "rights_status_counts": {
-        "redistributable_candidate": 5
+        "source_specific_review_required": 5
       },
       "source_family": "NASA"
     },
@@ -46482,7 +46483,7 @@
       "source_url": "https://images.nasa.gov/details/Ep392_Ask_An_Astronaut_On_Our_Anniversary",
       "license": "NASA Media Usage Guidelines — generally not copyrighted; not CC0",
       "attribution_text": null,
-      "rights_status": "redistributable_candidate",
+      "rights_status": "source_specific_review_required",
       "rights_match_method": "unique_suffix",
       "auditioned_by_human": false,
       "approved_for_final_mix": false,
@@ -46501,7 +46502,7 @@
       "source_url": "https://images.nasa.gov/details/Ep373_Intuitive%20Machines%20Returns%20To%20The%20Moon",
       "license": "NASA Media Usage Guidelines — generally not copyrighted; not CC0",
       "attribution_text": null,
-      "rights_status": "redistributable_candidate",
+      "rights_status": "source_specific_review_required",
       "rights_match_method": "unique_suffix",
       "auditioned_by_human": false,
       "approved_for_final_mix": false,
@@ -46520,7 +46521,7 @@
       "source_url": "https://images.nasa.gov/details/Ep395_Constructing_NASA_Infrastructure",
       "license": "NASA Media Usage Guidelines — generally not copyrighted; not CC0",
       "attribution_text": null,
-      "rights_status": "redistributable_candidate",
+      "rights_status": "source_specific_review_required",
       "rights_match_method": "unique_suffix",
       "auditioned_by_human": false,
       "approved_for_final_mix": false,
@@ -46539,7 +46540,7 @@
       "source_url": "https://images.nasa.gov/details/Ep401_Artemis_II_Launch",
       "license": "NASA Media Usage Guidelines — generally not copyrighted; not CC0",
       "attribution_text": null,
-      "rights_status": "redistributable_candidate",
+      "rights_status": "source_specific_review_required",
       "rights_match_method": "unique_suffix",
       "auditioned_by_human": false,
       "approved_for_final_mix": false,
@@ -46558,7 +46559,7 @@
       "source_url": "https://images.nasa.gov/details/Ep431_CHAPEA_2_Audio_Log_3",
       "license": "NASA Media Usage Guidelines — generally not copyrighted; not CC0",
       "attribution_text": null,
-      "rights_status": "redistributable_candidate",
+      "rights_status": "source_specific_review_required",
       "rights_match_method": "unique_suffix",
       "auditioned_by_human": false,
       "approved_for_final_mix": false,
