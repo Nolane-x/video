@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate plugin manifest and overlay structure
         run: |
@@ -31,7 +31,7 @@ jobs:
           root = Path("integrations/nolane-video-command-center-overlay")
           manifest = json.loads((root / "plugin.json").read_text())
           assert manifest["name"] == "nolane-video-command-center"
-          assert manifest["version"] == "0.8.3"
+          assert manifest["version"] == "0.9.1"
           required = [
               "README.md",
               "SKILL-CATALOG.md",
@@ -41,16 +41,31 @@ jobs:
               "skills/audio-postproduction-engineer/SKILL.md",
               "skills/scene-detection-researcher/SKILL.md",
               "skills/video-cinematic-director/SKILL.md",
+              "skills/illustrated-history-animation-director/SKILL.md",
+              "skills/historical-audio-library-curator/SKILL.md",
           ]
           missing = [p for p in required if not (root / p).is_file()]
           assert not missing, missing
+          catalog = (root / "SKILL-CATALOG.md").read_text()
+          assert "33 internal skills" in catalog
+          assert "illustrated-history-animation-director" in catalog
+          assert "historical-audio-library-curator" in catalog
           print("Plugin overlay validated:", manifest["version"])
+          
           PY
 
-      - name: Upload overlay as a plugin-root archive
-        uses: actions/upload-artifact@v4
+      - name: Create plugin-root ZIP archive
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          (cd integrations/nolane-video-command-center-overlay && zip -qr ../../dist/nolane-video-command-center-0.9.1.zip .)
+          unzip -l dist/nolane-video-command-center-0.9.1.zip | head -60
+          test -s dist/nolane-video-command-center-0.9.1.zip
+
+      - name: Upload overlay plugin archive
+        uses: actions/upload-artifact@v7
         with:
-          name: nolane-video-command-center-plugin-0.8.3
-          path: integrations/nolane-video-command-center-overlay/
+          name: nolane-video-command-center-plugin-0.9.1
+          path: dist/nolane-video-command-center-0.9.1.zip
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
