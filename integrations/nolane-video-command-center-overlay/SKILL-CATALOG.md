@@ -1,4 +1,4 @@
-# Nolane Video Command Center — internal skill catalog v0.9.2
+# Nolane Video Command Center — internal skill catalog v0.9.3
 
 The Command Center contains **33 internal skills**, a directory of **37 core specialist plugins**, and **1 genre-specific Squire specialist (38 separately activated specialists total)**. Internal skills are the normal entry path. Specialist plugins require explicit host activation; they are not silently invoked. Rendering and release remain evidence-gated.
 
