@@ -1,0 +1,56 @@
+name: Package Nolane Video Command Center plugin overlay
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - "integrations/nolane-video-command-center-overlay/**"
+      - ".github/workflows/package-nolane-video-plugin-overlay.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nolane-video-plugin-overlay-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate plugin manifest and overlay structure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("integrations/nolane-video-command-center-overlay")
+          manifest = json.loads((root / "plugin.json").read_text())
+          assert manifest["name"] == "nolane-video-command-center"
+          assert manifest["version"] == "0.8.3"
+          required = [
+              "README.md",
+              "SKILL-CATALOG.md",
+              "skills/video-command-center/SKILL.md",
+              "skills/historical-cinematic-documentary-director/SKILL.md",
+              "skills/historical-military-animation-director/SKILL.md",
+              "skills/audio-postproduction-engineer/SKILL.md",
+              "skills/scene-detection-researcher/SKILL.md",
+              "skills/video-cinematic-director/SKILL.md",
+          ]
+          missing = [p for p in required if not (root / p).is_file()]
+          assert not missing, missing
+          print("Plugin overlay validated:", manifest["version"])
+          PY
+
+      - name: Upload overlay as a plugin-root archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: nolane-video-command-center-plugin-0.8.3
+          path: integrations/nolane-video-command-center-overlay/
+          if-no-files-found: error
+          retention-days: 7
