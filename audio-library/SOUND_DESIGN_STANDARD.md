@@ -37,6 +37,13 @@ For each prominent cue record:
 - Measure integrated loudness, loudness range, true peak and clipping. Preserve headroom and avoid limiter pumping.
 - Listen to the full mix from beginning to end at normal speed and log issues with exact timecodes.
 
+## Curated recorded-source priority
+
+- Check Build 76 archives and the pinned Meta Open Sound preview bank before inventing or synthesizing replacement Foley.
+- Meta Oculus Audio Pack 1 includes searchable 48 kHz recordings for sword contact/scrape, footsteps, cloth/gear, horse vocalizations, boats/oars, wind, water and ambience. The Oculus collection is CC BY 4.0 and requires its exact attribution line; its 3 instrument sample collections are CC0 1.0. Never merge those rights classes.
+- Use OGG previews for selection; use the linked 48 kHz WAV masters for production where the cue is selected and legal terms are satisfied.
+- A UCS category or file name is only a search hint. Its metadata may be machine-classified and every selected sound must still be heard for historical fit, quality, loop points, noise and perspective.
+
 ## Placeholder policy
 
 Procedural sounds may fill a temporary gap in an animatic or test. The final candidate must replace them with an auditioned recording or document why no suitable legal recording exists. Never call an oscillator "realistic Foley".
