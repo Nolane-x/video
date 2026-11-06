@@ -5,6 +5,19 @@ description: End-to-end workflow for cinematic code-driven YouTube animation: st
 
 # Video Production Master
 
+## Separate route: cinematic historical documentaries
+
+The cinematic stick-figure/Remotion/H2 workflow remains available for the established house style, but do not impose it on every historical film. For footage-led, high-motion historical documentaries, user-supplied cinematic references, archival evidence, 2.5D/3D reconstructions and deliberate camera choreography, load the internal skill historical-cinematic-documentary-director and read docs/HISTORICAL_CINEMATIC_DOCUMENTARY_PLAYBOOK.md. H2 Squire is only selected when the user explicitly requests Squire/vector style or an existing Squire series.
+
+This route uses a three-pass edit: paper edit (research/story), radio edit (narration/real sound/score), picture edit (shot planning and assembly). Every key shot needs camera path, lens/angle/scale, actor/prop choreography, anticipation/contact/reaction/follow-through, depth layers, transition motivation and sound cues. Prototype difficult shots and a 30–60 second representative picture/sound sample before long renders.
+
+## Recorded sound is the default
+
+Read audio-library/README.md and audio-library/SOURCES.json before audio sourcing. Build 76 already published approximately 1.14 GB of distinct audio archives across Kenney, OpenGameArt, original, USGS, NASA and Wikimedia. Search and audition them before external sourcing. Resolve exact per-item rights and attribution; never assume a bundle has one blanket license. Use real Foley, ambience, environmental recordings and licensed music/sample performances. Procedural sound and oscillator music are temporary placeholders or documented exceptions. Code is responsible for selection, synchronization, layering, spatialization, processing and mastering, not for replacing the complete soundscape.
+
+For supplied references, full normal-speed playback with sound and timestamped logs is mandatory before claiming visual analysis. If the current runtime cannot inspect it, record BLOCKED_NOT_WATCHED and keep the reference study open. Contact sheets are supporting evidence only.
+
+
 Persistent production memory for AI sessions in `Nolane-x/video`. This is a gated workflow, not a promise of automatic quality.
 
 ## ChatGPT Plugin Creator integration
