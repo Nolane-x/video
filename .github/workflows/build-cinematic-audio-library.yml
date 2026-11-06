@@ -1,0 +1,65 @@
+name: Build cinematic audio library index
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - "audio-library/**"
+      - "tools/audio/**"
+      - ".github/workflows/build-cinematic-audio-library.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cinematic-audio-library-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test fail-closed rights and matching rules
+        run: python -m unittest discover -s tools/audio -p "test_*.py" -v
+
+      - name: Download and inventory existing Build 76 audio archives
+        run: |
+          python tools/audio/build_audio_library_index.py \
+            --download-dir "$RUNNER_TEMP/nolane-audio-library" \
+            --output build/audio-catalog.json \
+            --report build/AUDIO-LIBRARY-REPORT.md
+
+      - name: Validate generated catalog
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          catalog = json.loads(Path("build/audio-catalog.json").read_text())
+          assert catalog["archive_count"] == 6, catalog["archive_count"]
+          assert catalog["audio_asset_count"] > 0, "No audio files discovered"
+          assert catalog["policy"]["human_audition_required"] is True
+          assert all(not x["approved_for_final_mix"] for x in catalog["assets"])
+          print("Validated", catalog["audio_asset_count"], "audio entries")
+          print("Rights", catalog["rights_status_counts"])
+          PY
+
+      - name: Upload searchable catalog and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: nolane-cinematic-audio-catalog-${{ github.run_number }}
+          path: |
+            build/audio-catalog.json
+            build/AUDIO-LIBRARY-REPORT.md
+          if-no-files-found: error
+          retention-days: 30
