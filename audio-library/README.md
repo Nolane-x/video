@@ -42,7 +42,7 @@ The command searches both generated catalogs, excludes review-required records b
 
 ## Permanent Meta Open Sound mirror
 
-The four Meta Open Sound OGG packs are mirrored in the permanent [Nolane Historical Audio Library v0.1.0 Release](https://github.com/Nolane-x/video/releases/tag/nolane-historical-audio-library-v0.1.0). It contains all 1,583 previews, the searchable source catalog, collection license texts and required Oculus attribution. This Release is not subject to the 90-day GitHub Actions artifact retention window. Use the mirror URLs in `SOURCES.json`; the four production WAV master URLs remain in the same source map and can be fetched selectively when a cue is chosen.
+The four Meta Open Sound OGG packs are mirrored in the permanent [Nolane Historical Audio Library v0.1.0 Release](https://github.com/Nolane-x/video/releases/tag/nolane-historical-audio-library-v0.1.0). It contains all 1,583 previews, the searchable source catalog, collection license texts and required Oculus attribution. The Oculus lossless WAV master (360,146,596 bytes, 48 kHz/16-bit) is now mirrored in the same Release and SHA-256 verified. This Release is not subject to the 90-day GitHub Actions artifact retention window. The piano/guitar WAV masters remain available at their pinned upstream URLs; use the manual `Acquire Meta Open Sound WAV master` workflow to mirror a selected collection without downloading all of them.
 
 ## Production-first policy
 
