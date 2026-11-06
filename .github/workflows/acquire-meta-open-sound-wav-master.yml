@@ -1,0 +1,84 @@
+name: Acquire Meta Open Sound WAV master
+
+on:
+  workflow_dispatch:
+    inputs:
+      collection:
+        description: "Select the lossless WAV master collection"
+        type: choice
+        required: true
+        default: oculus-audio-pack
+        options:
+          - oculus-audio-pack
+          - meta-piano
+          - meta-nylon-guitar
+          - meta-steel-guitar
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - ".github/workflows/acquire-meta-open-sound-wav-master.yml"
+      - "tools/audio/acquire_meta_open_sound_wav_master.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meta-open-sound-wav-master
+  cancel-in-progress: false
+
+jobs:
+  acquire-and-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Select WAV collection
+        id: collection
+        shell: bash
+        env:
+          INPUT_COLLECTION: \${{ inputs.collection }}
+          EVENT_NAME: \${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "push" || -z "$INPUT_COLLECTION" ]]; then
+            echo "value=oculus-audio-pack" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$INPUT_COLLECTION" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download and verify pinned lossless WAV master
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/audio/acquire_meta_open_sound_wav_master.py
+          python tools/audio/acquire_meta_open_sound_wav_master.py \
+            --collection "\${{ steps.collection.outputs.value }}" \
+            --output-dir dist/wav-master
+
+      - name: Publish WAV master to permanent Meta audio Release
+        env:
+          GH_TOKEN: \${{ github.token }}
+          RELEASE_TAG: nolane-historical-audio-library-v0.1.0
+        run: |
+          set -euo pipefail
+          FILE="$(find dist/wav-master -maxdepth 1 -name '*.zip' -print -quit)"
+          test -n "$FILE"
+          gh release upload "$RELEASE_TAG" "$FILE" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets
+
+      - name: Upload production WAV master artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: meta-open-sound-wav-master-\${{ steps.collection.outputs.value }}
+          path: dist/wav-master/*.zip
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
