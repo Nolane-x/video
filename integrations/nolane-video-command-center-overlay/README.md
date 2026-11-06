@@ -1,11 +1,12 @@
-# Nolane Video Command Center v0.9.1
+# Nolane Video Command Center v0.9.2
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.9.1
+## What's new in v0.9.2
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
+- Adds a detailed illustrated-history motion reference covering character/prop/environment/camera/graphic channels, camera grammar, action cycles, uniqueness checks and full-motion QA.
 - Adds a searchable offline audio preview bank built from the existing Build 76 pool and the pinned Meta Open Sound collections. Oculus Audio Pack remains CC BY 4.0; the three instrument collections are CC0.
 - Routes illustrated/cartoon history, footage-led cinematic documentaries and H2 Squire vector history as three separate visual languages.
 - Keeps H2 Squire as a separate route only when the user explicitly asks for its symbolic/vector military-history style or an established Squire series.
@@ -34,4 +35,4 @@ The Command Center does not invisibly activate other private plugins. Host-contr
 - A plugin's existence or source-backed skill does not prove its CLI, weights or runtime are installed. Check pinned versions and actual evidence.
 - License boundaries remain per component and per media record. Preserve third-party notices and verify fonts, assets, runtimes, music and sound files separately.
 
-See SKILL-CATALOG.md and the plugin registries for internal skills and explicit specialist handoffs.
+See `references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md` for the complete shot/motion standard. See SKILL-CATALOG.md and the plugin registries for internal skills and explicit specialist handoffs.
