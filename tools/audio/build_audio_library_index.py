@@ -109,6 +109,8 @@ def rights_status(license_value: str | None, explicit_redistributable: Any) -> s
         return "not_approved_for_default_commercial_use"
     if any(term in text for term in ("cc0", "cc-zero", "public domain", "public-domain")):
         return "redistributable_candidate"
+    if "cc-by-sa" in text or "cc by-sa" in text or "cc-by-sa" in text or "cc by sa" in text:
+        return "share_alike_required"
     if any(term in text for term in ("cc-by", "cc by", "attribution")):
         return "attribution_required"
     if explicit_redistributable is True:
@@ -237,6 +239,8 @@ def main() -> int:
         all_entries.extend(entries)
 
     counts = Counter(entry["rights_status"] for entry in all_entries)
+    license_counts = Counter(entry.get("license") or "UNKNOWN" for entry in all_entries)
+    archive_counts = {item["archive_name"]: item["audio_member_count"] for item in archive_summaries}
     catalog = {
         "schema_version": "1.0.0",
         "generated_from_release": RELEASE_TAG,
@@ -245,7 +249,9 @@ def main() -> int:
         "archive_count": len(archive_summaries),
         "audio_asset_count": len(all_entries),
         "rights_status_counts": dict(counts),
+        "license_counts": dict(license_counts),
         "archives": archive_summaries,
+        "archive_audio_member_counts": archive_counts,
         "assets": all_entries,
         "policy": {
             "human_audition_required": True,
@@ -253,7 +259,7 @@ def main() -> int:
             "source_only_files_must_not_be_redistributed": True,
             "asset_binaries_are_not_embedded_in_this_catalog": True
         },
-        "download_checksums": downloads
+        "download_checksums": [{"file": Path(x["path"]).name, "bytes": x["bytes"], "sha256": x["sha256"]} for x in downloads]
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -263,7 +269,9 @@ def main() -> int:
         f"- Source release: {RELEASE_TAG}",
         f"- Audio files indexed: {len(all_entries)}",
         f"- Per-item index records: {len(by_path)}",
-        f"- Rights status: {dict(counts)}", "",
+        f"- Rights status: {dict(counts)}",
+        f"- License values: {dict(license_counts)}",
+        f"- Archive counts: {archive_counts}", "",
         "## Archive audit", "",
         "| Archive | Audio files | Audio bytes | SHA-256 |",
         "|---|---:|---:|---|"
@@ -276,7 +284,7 @@ def main() -> int:
     ])
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(json.dumps({"audio_asset_count": len(all_entries), "rights_status_counts": dict(counts), "catalog": str(args.output), "report": str(args.report)}, indent=2))
+    print(json.dumps({"audio_asset_count": len(all_entries), "rights_status_counts": dict(counts), "license_counts": dict(license_counts), "archive_audio_member_counts": archive_counts, "catalog": str(args.output), "report": str(args.report)}, indent=2))
     return 0
 
 
