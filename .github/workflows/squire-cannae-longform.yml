@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: squire-cannae-216bc-${{ github.ref }}
+  group: ${{ contains(github.event.head_commit.message || '', '[visual-recut]') && 'squire-cannae-visual-recut' || 'squire-cannae-longform' }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
