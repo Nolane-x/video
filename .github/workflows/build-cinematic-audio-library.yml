@@ -41,6 +41,7 @@ jobs:
       - name: Test fail-closed rights, source matching and Meta attribution
         run: |
           python -m unittest discover -s tools/audio -p "test_*.py" -v
+          python tests/audio/test_audio_preview_bundle.py
           python tests/audio/test_meta_open_sound_preview.py
 
       - name: Download and inventory existing Build 76 audio archives
