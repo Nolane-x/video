@@ -1,0 +1,120 @@
+name: Render Cannae illustrated-history 45s proof
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - "docs/animation/CANNAE_ILLUSTRATED_45S_SHOT_PLAN.json"
+      - "docs/animation/ILLUSTRATED_HISTORY_SHOT_PLAN.schema.json"
+      - "tools/video/validate_illustrated_history_shot_plan.py"
+      - "tests/video/test_illustrated_history_shot_plan.py"
+      - "video-projects/remotion/src/Root.tsx"
+      - "video-projects/remotion/src/IllustratedHistoryCannae45s.tsx"
+      - "video-projects/remotion/package.json"
+      - "video-projects/remotion/package-lock.json"
+      - ".github/workflows/render-cannae-illustrated-45s.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cannae-illustrated-history-45s-proof
+  cancel-in-progress: false
+
+jobs:
+  validate-and-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Validate shot-plan gates and regression tests
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/validate_illustrated_history_shot_plan.py
+          python -m unittest tests/video/test_illustrated_history_shot_plan.py -v
+          python tools/video/validate_illustrated_history_shot_plan.py \
+            docs/animation/CANNAE_ILLUSTRATED_45S_SHOT_PLAN.json \
+            --report video-projects/remotion/out/cannae-shot-plan-validation.json
+          mkdir -p video-projects/remotion/out
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Remotion dependencies
+        working-directory: video-projects/remotion
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck all Remotion compositions
+        working-directory: video-projects/remotion
+        run: npm run typecheck
+
+      - name: Render the 45-second Cannae motion proof
+        working-directory: video-projects/remotion
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          npx remotion render src/index.ts CannaeIllustrated45s out/cannae-illustrated-45s.mp4 \
+            --codec=h264 --concurrency=2
+
+      - name: Install FFmpeg and ffprobe
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+          ffprobe -version
+
+      - name: Validate MP4 and generate visual contact sheet
+        run: |
+          set -euo pipefail
+          cd video-projects/remotion
+          ffprobe -v error -show_entries format=duration:stream=codec_name,codec_type,width,height,r_frame_rate,nb_frames \
+            -of json out/cannae-illustrated-45s.mp4 > out/cannae-metadata.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          meta = json.loads(Path("out/cannae-metadata.json").read_text())
+          video = next((s for s in meta["streams"] if s.get("codec_type") == "video"), None)
+          audio = [s for s in meta["streams"] if s.get("codec_type") == "audio"]
+          duration = float(meta["format"]["duration"])
+          assert video is not None, "missing video stream"
+          assert abs(duration - 45.0) <= 0.2, f"unexpected duration: {duration}"
+          assert video.get("width") == 1920 and video.get("height") == 1080, "expected 1920x1080"
+          assert video.get("r_frame_rate") == "24/1", "expected 24fps"
+          assert video.get("codec_name") == "h264", "expected H.264"
+          assert not audio, "this proof is intentionally picture-only; remove unexpected audio"
+          print(f"Validated picture-only proof: {duration:.3f}s, 1920x1080, 24fps H.264")
+          PY
+          ffmpeg -hide_banner -loglevel error -y -i out/cannae-illustrated-45s.mp4 \
+            -vf "fps=1/3,scale=480:-1,tile=4x4" -frames:v 1 out/cannae-contact-sheet.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0 -i out/cannae-illustrated-45s.mp4 -frames:v 1 out/cannae-frame-000.png
+          ffmpeg -hide_banner -loglevel error -y -ss 9 -i out/cannae-illustrated-45s.mp4 -frames:v 1 out/cannae-frame-009.png
+          ffmpeg -hide_banner -loglevel error -y -ss 18 -i out/cannae-illustrated-45s.mp4 -frames:v 1 out/cannae-frame-018.png
+          ffmpeg -hide_banner -loglevel error -y -ss 27 -i out/cannae-illustrated-45s.mp4 -frames:v 1 out/cannae-frame-027.png
+          ffmpeg -hide_banner -loglevel error -y -ss 36 -i out/cannae-illustrated-45s.mp4 -frames:v 1 out/cannae-frame-036.png
+          sha256sum out/cannae-illustrated-45s.mp4 > out/SHA256SUMS.txt
+
+      - name: Upload Cannae picture-only proof and QA evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: cannae-illustrated-history-45s-proof
+          path: |
+            video-projects/remotion/out/cannae-illustrated-45s.mp4
+            video-projects/remotion/out/cannae-contact-sheet.jpg
+            video-projects/remotion/out/cannae-frame-*.png
+            video-projects/remotion/out/cannae-metadata.json
+            video-projects/remotion/out/cannae-shot-plan-validation.json
+            video-projects/remotion/out/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
