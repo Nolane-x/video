@@ -4,6 +4,16 @@
 Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
 
 ## Non-negotiable requirements
+
+## Genre routing and recorded-sound policy
+- The preferred stick-figure house style remains the default only when the brief or existing series calls for it. A user-provided reference or request for a cinematic, footage-led historical film routes to the dedicated historical-cinematic-documentary-director skill; do not force that work into H2 Squire or repeated vector boards.
+- H2 Squire is an opt-in route for the explicitly requested Squire/vector language or an established Squire series. Historical subject matter alone does not select Squire.
+- For cinematic documentary production, complete a full-length reference watch with sound and a timestamped camera/action/audio study. If decoding or playback is blocked, state BLOCKED_NOT_WATCHED rather than inventing an analysis.
+- Search and audition the existing Build 76 media pool before generating or downloading new material. The Build 76 release already includes about 1.14 GB of separate audio archives; use the source map in audio-library/SOURCES.json, then verify each item's license and attribution.
+- Prefer real recorded sound and licensed music. Procedural audio is a temporary placeholder or documented exception; code should arrange, synchronize, process and master genuine recordings.
+- Do not mutate video-library/**, global asset source manifests, downloaders, packagers or the parallel asset-library workflow from a production route. Read and consume its Releases with per-item rights.
+- See docs/HISTORICAL_CINEMATIC_DOCUMENTARY_PLAYBOOK.md and docs/SAMURAI_REFERENCE_STUDY.md for the cinematic-documentary route and reference-review status.
+
 - Preferred look: cinematic, story-led stick-figure animation. Character simple and reusable; environments, light, camera, props and action carry richness.
 - Do not regress to flat slides, generic gradients, repeated sets, excessive HUDs, pseudo-real AI humans, or zoom-only “motion.”
 - Do not replace H2 Studio with a homemade SVG renderer without explicit approval. Remotion is a separate timeline/compositing pipeline; never call it the H2 renderer.
