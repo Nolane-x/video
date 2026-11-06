@@ -5,6 +5,16 @@ description: Use when editing narration, selecting or recording real music and s
 # Audio Postproduction Engineer
 
 ## Library-first source selection
+1. Read `audio-library/README.md`, `audio-library/SOURCES.json`, `audio-library/generated/preview-catalog.json` and `audio-library/generated/meta-preview-catalog.json` before downloading or unpacking media.
+2. Search the generated indexes for Build 76 and Meta Open Sound candidates; inspect rights class, source, hash, tags and technical metadata, then audition suitable previews.
+3. For Build 76, use the 2,331 playable redistribution candidates first; do not default to 110 rights-review entries or 5 source-specific items.
+4. Meta Open Sound has 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. The latter require the exact Oculus Audio Pack attribution in publication credits. The instruments are individual note samples, not finished music tracks.
+5. Use OGG samples for discovery/listening and the linked WAV masters for high-quality production when selected and legally eligible.
+6. Search the existing Build 76 Kenney, OpenGameArt, USGS, NASA, Wikimedia and original-audio archives before downloading new sounds.
+7. Search by physical material, action, environment, perspective and emotion. Use aliases and synonyms; don't rely on one exact keyword.
+8. Compare several candidates and **audition** them. Tags and filenames are search hints, not proof of what the sound contains.
+9. Record exact asset/source ID, file path/archive member, original source URL, license, attribution, SHA-256, duration, sample rate, bit depth, channels and human audition status.
+10. Fetch only genuinely missing material from an external source after a specific need is established. Keep source-only/private recordings outside public redistribution bundles.
 1. Read the repository audio-library README, source catalogue, asset index and the focused historical audio map when available.
 2. Search the existing Build 76 Kenney, OpenGameArt, USGS, NASA, Wikimedia and original-audio archives before downloading new sounds.
 3. Search by physical material, action, environment, perspective and emotion. Use aliases and synonyms; don't rely on one exact keyword.
