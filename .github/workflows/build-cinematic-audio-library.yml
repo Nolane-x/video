@@ -195,19 +195,7 @@ jobs:
             python -m json.tool audio-library/generated/audio-catalog.json > /dev/null
             python -m json.tool audio-library/generated/preview-catalog.json > /dev/null
             python -m json.tool audio-library/generated/meta-preview-catalog.json > /dev/null
-            python - <<'PY'
-            import json
-            from pathlib import Path
-            base = json.loads(Path("audio-library/generated/preview-catalog.json").read_text())
-            meta = json.loads(Path("audio-library/generated/meta-preview-catalog.json").read_text())
-            assert base["summary"]["playable_audio_files"] == 2331
-            assert meta["summary"]["files"] == 1583
-            assert meta["summary"]["cc0_files"] == 1075
-            assert meta["summary"]["cc_by_files"] == 508
-            assert meta["summary"]["human_auditioned"] == 0
-            assert meta["summary"]["approved_for_final_mix"] == 0
-            print("Published indexes:", base["summary"], meta["summary"])
-            PY
+            python -c 'import json; from pathlib import Path; base=json.loads(Path("audio-library/generated/preview-catalog.json").read_text()); meta=json.loads(Path("audio-library/generated/meta-preview-catalog.json").read_text()); assert base["summary"]["playable_audio_files"] == 2331; assert meta["summary"]["files"] == 1583; assert meta["summary"]["cc0_files"] == 1075; assert meta["summary"]["cc_by_files"] == 508; assert meta["summary"]["human_auditioned"] == 0; assert meta["summary"]["approved_for_final_mix"] == 0; print("Published indexes:", base["summary"], meta["summary"])'
             git add audio-library/generated/audio-catalog.json audio-library/generated/AUDIO-LIBRARY-REPORT.md audio-library/generated/preview-catalog.json audio-library/generated/meta-preview-catalog.json
             if git diff --cached --quiet; then
               echo "Audio catalog is already up to date."
