@@ -13,7 +13,14 @@
         "size_bytes": 1724247,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-kenney-audio-001.zip",
         "source_family": "Kenney",
-        "typical_contents": ["impact", "interface", "digital", "RPG", "UI", "music-jingles"],
+        "typical_contents": [
+          "impact",
+          "interface",
+          "digital",
+          "RPG",
+          "UI",
+          "music-jingles"
+        ],
         "rights_rule": "Use exact manifest record. Kenney audio pack assets are generally CC0, but preserve provenance and check the pack record."
       },
       {
@@ -22,7 +29,14 @@
         "size_bytes": 462854835,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-opengameart-audio-001.zip",
         "source_family": "OpenGameArt",
-        "typical_contents": ["foley", "battle", "ambience", "music", "impact", "footsteps"],
+        "typical_contents": [
+          "foley",
+          "battle",
+          "ambience",
+          "music",
+          "impact",
+          "footsteps"
+        ],
         "rights_rule": "Strict per-item license and attribution. Do not mark the entire bundle CC0."
       },
       {
@@ -31,7 +45,11 @@
         "size_bytes": 33910385,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-originals-audio-001.zip",
         "source_family": "Nolane originals",
-        "typical_contents": ["original Foley", "original effects", "original ambience"],
+        "typical_contents": [
+          "original Foley",
+          "original effects",
+          "original ambience"
+        ],
         "rights_rule": "Check the repository's original asset record and source hash."
       },
       {
@@ -40,7 +58,11 @@
         "size_bytes": 456076826,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-usgs-audio-001.zip",
         "source_family": "USGS",
-        "typical_contents": ["environmental recordings", "geological sounds", "field recordings"],
+        "typical_contents": [
+          "environmental recordings",
+          "geological sounds",
+          "field recordings"
+        ],
         "rights_rule": "Use only with item-level Sources/Usage or public-domain evidence; do not infer rights from agency name."
       },
       {
@@ -49,7 +71,10 @@
         "size_bytes": 165256750,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-nasa-audio-001.zip",
         "source_family": "NASA",
-        "typical_contents": ["space mission audio", "environment and spacecraft recordings"],
+        "typical_contents": [
+          "space mission audio",
+          "environment and spacecraft recordings"
+        ],
         "rights_rule": "Apply NASA's media-use guidance and verify any third-party, endorsement, logo and personality restrictions. Not blanket CC0."
       },
       {
@@ -58,7 +83,11 @@
         "size_bytes": 17840331,
         "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-wikimedia-audio-001.zip",
         "source_family": "Wikimedia Commons",
-        "typical_contents": ["field recordings", "historical audio", "environmental recordings"],
+        "typical_contents": [
+          "field recordings",
+          "historical audio",
+          "environmental recordings"
+        ],
         "rights_rule": "Exact file page license, creator, attribution and share-alike requirements apply."
       }
     ]
@@ -70,12 +99,88 @@
       "catalog_url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/main/catalog.json",
       "license": "per_collection",
       "collections": [
-        {"id": "meta-piano", "license": "CC0-1.0", "role": "real multisampled piano, full WAV/OGG releases"},
-        {"id": "meta-nylon-guitar", "license": "CC0-1.0", "role": "real multisampled nylon guitar, full WAV/OGG releases"},
-        {"id": "meta-steel-guitar", "license": "CC0-1.0", "role": "real multisampled steel-string guitar, full WAV/OGG releases"},
-        {"id": "oculus-audio-pack", "license": "CC-BY-4.0", "role": "289 recorded Foley/ambience/game sound effects; attribution required"}
+        {
+          "id": "meta-piano",
+          "license": "CC0-1.0",
+          "role": "real multisampled piano, full WAV/OGG releases"
+        },
+        {
+          "id": "meta-nylon-guitar",
+          "license": "CC0-1.0",
+          "role": "real multisampled nylon guitar, full WAV/OGG releases"
+        },
+        {
+          "id": "meta-steel-guitar",
+          "license": "CC0-1.0",
+          "role": "real multisampled steel-string guitar, full WAV/OGG releases"
+        },
+        {
+          "id": "oculus-audio-pack",
+          "license": "CC-BY-4.0",
+          "role": "289 recorded Foley/ambience/game sound effects; attribution required"
+        }
       ],
-      "policy": "Download only selected collections/samples after inspecting the collection manifest and per-file SHA256SUMS. Preserve LICENSE and ATTRIBUTION.md."
+      "policy": "Download only selected collections/samples after inspecting the collection manifest and per-file SHA256SUMS. Preserve LICENSE and ATTRIBUTION.md.",
+      "revision": "251c0be57d5d1b3242b91f53e0cde62ab1cb42d9",
+      "inventory_verified": {
+        "audio_files_in_source_tree": 1583,
+        "oculus_files": 508,
+        "instrument_samples": 1075,
+        "ogg_release_archives_total_bytes": 134732887,
+        "rights_split": "Oculus Audio Pack is CC-BY-4.0; three instrument collections are CC0-1.0."
+      },
+      "release_assets": [
+        {
+          "collection": "oculus-audio-pack",
+          "license": "CC-BY-4.0",
+          "samples": 508,
+          "distinct_sounds": 289,
+          "archive": "meta-open-sound-oculus-audio-pack-ogg.zip",
+          "size_bytes": 44626986,
+          "sha256": "d807c8f4a09512f506f5a6170ef291b2ff4a9783b87dcddf2f458538d25afcb4",
+          "download_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-ogg.zip",
+          "wav_master_size_bytes": 360146596,
+          "wav_master_sha256": "cc9dcf42d20c339e82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c",
+          "wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip"
+        },
+        {
+          "collection": "meta-piano",
+          "license": "CC0-1.0",
+          "samples": 352,
+          "archive": "meta-open-sound-meta-piano-ogg.zip",
+          "size_bytes": 48182243,
+          "sha256": "4ba8095f5c2a70396d14f3b9c563f6c9010a093893159bad50e83145e1c35d40",
+          "download_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-piano-v1.0.0/meta-open-sound-meta-piano-ogg.zip",
+          "wav_master_size_bytes": 752311261,
+          "wav_master_sha256": "ee9023dbde849ecab393a098aa0cfbd6f2ef48d4a096b9c08808b72fc913f70e",
+          "wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-piano-v1.0.0/meta-open-sound-meta-piano-wav.zip"
+        },
+        {
+          "collection": "meta-nylon-guitar",
+          "license": "CC0-1.0",
+          "samples": 348,
+          "archive": "meta-open-sound-meta-nylon-guitar-ogg.zip",
+          "size_bytes": 16483193,
+          "sha256": "2ff8f6296cfdb1a98f67116c5091a4f9f01c0c46ac538dd1c5756acc8b76889b",
+          "download_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-nylon-guitar-v1.0.0/meta-open-sound-meta-nylon-guitar-ogg.zip",
+          "wav_master_size_bytes": 423479840,
+          "wav_master_sha256": "d76a23d438c7e6002aad61c564173141daac3a89f7bae5400f996d1a59b4eb76",
+          "wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-nylon-guitar-v1.0.0/meta-nylon-guitar-wav.zip"
+        },
+        {
+          "collection": "meta-steel-guitar",
+          "license": "CC0-1.0",
+          "samples": 375,
+          "archive": "meta-open-sound-meta-steel-guitar-ogg.zip",
+          "size_bytes": 25440465,
+          "sha256": "a06baf193497ba36f20ccb67018e9f106155ad5e4f81d8a672530498038f68ed",
+          "download_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-steel-guitar-v1.0.0/meta-open-sound-meta-steel-guitar-ogg.zip",
+          "wav_master_size_bytes": 663385210,
+          "wav_master_sha256": "caaa8a9c07217f4a82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c",
+          "wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-steel-guitar-v1.0.0/meta-open-sound-meta-steel-guitar-wav.zip"
+        }
+      ],
+      "acquisition_policy": "Download pinned OGG ZIPs for previews. The matching WAV Release ZIPs are higher-quality production masters. Keep per-collection licenses separate. Oculus CC-BY-4.0 requires the exact ATTRIBUTION.md line; instrument collections CC0-1.0. The catalog parses per-sound index summaries and tags. No asset is audition-approved by automation."
     },
     {
       "id": "open-game-sfx-index",
@@ -111,7 +216,12 @@
     }
   ],
   "production_policy": {
-    "priority": ["existing_build76_audio", "approved_external_recordings", "originally_recorded_or_commissioned_sound", "procedural_placeholders_only_when_unavoidable"],
+    "priority": [
+      "existing_build76_audio",
+      "approved_external_recordings",
+      "originally_recorded_or_commissioned_sound",
+      "procedural_placeholders_only_when_unavoidable"
+    ],
     "never_assume_bundle_license": true,
     "never_republish_source_only_audio": true,
     "require_human_audition_before_final_mix": true,
