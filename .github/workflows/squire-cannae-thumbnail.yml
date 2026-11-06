@@ -38,6 +38,11 @@ jobs:
         working-directory: integrations/h2-squire-studio/kit
         run: npx playwright install --with-deps chromium
 
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Prepare a minimal Squire thumbnail project
         shell: bash
         run: |
