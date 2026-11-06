@@ -67,6 +67,18 @@ class IllustratedHistoryShotPlanTests(unittest.TestCase):
         result = validate_plan(plan)
         self.assertTrue(any("missing phases" in error for error in result["errors"]))
 
+    def test_sample_45s_plan_passes_motion_and_diversity_gates(self):
+        import json
+        root = Path(__file__).resolve().parents[2]
+        template = json.loads((root / "docs/animation/ILLUSTRATED_HISTORY_45S_SAMPLE.template.json").read_text(encoding="utf-8"))
+        result = validate_plan(template)
+        self.assertEqual(result["status"], "pass", result["errors"])
+        self.assertEqual(result["summary"]["shot_count"], 5)
+        self.assertEqual(result["summary"]["distinct_scales"], 5)
+        self.assertEqual(result["summary"]["distinct_angles"], 5)
+        self.assertGreaterEqual(result["summary"]["distinct_locations"], 3)
+        self.assertGreaterEqual(len(result["summary"]["action_types"]), 3)
+
     def test_three_consecutive_same_compositions_fail(self):
         shots = []
         for i in range(3):
