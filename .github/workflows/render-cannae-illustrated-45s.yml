@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/video/validate_illustrated_history_shot_plan.py
-          python -m unittest tests/video/test_illustrated_history_shot_plan.py -v
+          python tests/video/test_illustrated_history_shot_plan.py -v
           python tools/video/validate_illustrated_history_shot_plan.py \
             docs/animation/CANNAE_ILLUSTRATED_45S_SHOT_PLAN.json \
             --report video-projects/remotion/out/cannae-shot-plan-validation.json
