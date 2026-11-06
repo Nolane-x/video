@@ -41,6 +41,18 @@ Meta Piano, Meta Nylon Guitar and Meta Steel Guitar are separate CC0 collections
 
 For high-quality production, use the matching WAV masters linked above. OGGs are for compact preview and selection. The instrument master collections are 24-bit/48 kHz; Oculus master is 16-bit/48 kHz, according to the pinned repository's collection documentation.
 
+## Search both generated indexes with one command
+
+Run from the repository root:
+
+```bash
+python tools/audio/search_audio_resources.py --query "katana sword clash"
+python tools/audio/search_audio_resources.py --query "horse hooves dirt" --kind foley
+python tools/audio/search_audio_resources.py --query "piano note" --kind instrument --json
+```
+
+This searches Build 76 and Meta Open Sound in one pass. By default it excludes records in rights-review/source-only categories, carries required CC-BY attribution, and keeps the human audition/final-use gate. Search is discovery only; it does not approve a sample.
+
 ## Historical sound taxonomy
 
 Build tags/search collections for:
