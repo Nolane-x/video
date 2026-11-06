@@ -131,6 +131,9 @@ def extract_preview_bank(catalog: dict[str, Any], download_dir: Path, output_dir
                     destination.unlink(missing_ok=True)
                     raise ValueError("per-file SHA-256 does not match source manifest")
                 probe = probe_audio(destination)
+                if probe.get("probe_status") != "ok":
+                    destination.unlink(missing_ok=True)
+                    raise ValueError("ffprobe rejected source audio: " + str(probe.get("probe_error") or probe.get("probe_status")))
                 output_item = dict(item)
                 output_item.update({
                     "preview_path": f"media/{destination.name}",
