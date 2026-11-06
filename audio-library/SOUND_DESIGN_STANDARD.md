@@ -44,6 +44,10 @@ For each prominent cue record:
 - Use OGG previews for selection; use the linked 48 kHz WAV masters for production where the cue is selected and legal terms are satisfied.
 - A UCS category or file name is only a search hint. Its metadata may be machine-classified and every selected sound must still be heard for historical fit, quality, loop points, noise and perspective.
 
+## Preview versus production source
+
+Meta Open Sound OGG files are compact audition copies. After selecting a cue, use the catalog's exact `source_wav_file` mapping to retrieve the lossless WAV master, verify its archive SHA-256 and extract only the relevant member. Oculus WAV is permanently mirrored in the Nolane Release; instrument masters may be added collection by collection via the WAV acquisition workflow. The Foley collection is CC BY 4.0; the three instrument sample collections are CC0.
+
 ## Placeholder policy
 
 Procedural sounds may fill a temporary gap in an animatic or test. The final candidate must replace them with an auditioned recording or document why no suitable legal recording exists. Never call an oscillator "realistic Foley".
