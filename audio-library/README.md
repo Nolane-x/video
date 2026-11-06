@@ -28,6 +28,10 @@ The GitHub Actions audio-library workflow publishes lightweight metadata indexes
 
 The catalogs are metadata, not the audio binaries. Search them first, choose by tags/source/license and only fetch the exact source archive/member needed. Every sample remains `not auditioned` until a person listens to it. The Meta Oculus group must retain the required attribution; the CC0 instrument sets stay a separate rights class. Download the complete browser preview bank from the latest [audio-library GitHub Actions run](https://github.com/Nolane-x/video/actions/workflows/build-cinematic-audio-library.yml).
 
+## Historical sound coverage
+
+See `docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md` for the current evidence-based breakdown of available sword, footsteps, horse, cavalry, shield, spear, bow/arrow, crowd and ship cues, including known gaps and false-positive risks.
+
 ## Unified search command
 
 From the repository root run:
