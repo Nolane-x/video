@@ -66,6 +66,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/audio/build_historical_audio_catalog.py
+          python tests/audio/test_historical_audio_catalog.py
           python tools/audio/build_historical_audio_catalog.py \
             --archive-dir dist/downloads \
             --manifest-dir dist/manifests \
