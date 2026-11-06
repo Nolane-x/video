@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {"name": "Nolane Studio"},
+  "description": "AI-first video production front door with 31 internal skills, 37 core specialist plugins, a cinematic historical documentary route and an opt-in H2 Squire route.",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "capabilities": [],
+        "category": "Productivity",
+        "defaultPrompt": "Use Nolane Video Command Center as the front door. Restore repo/project state, route by genre, search the existing resource pool before generating media, prefer auditioned recordings over synthesized sound, and require full independent audiovisual review. For cinematic history documentaries, use the cinematic documentary director and choose footage, 2.5D, Blender, Remotion, maps and motion per shot. Use H2 Squire only when the user explicitly wants its vector style. Preserve the parallel asset-library boundary.",
+        "developerName": "Nolane Studio",
+        "displayName": "Nolane Video Command Center",
+        "longDescription": "Private video-production orchestrator with 31 internal skills, 37 core specialist plugins and two separate historical routes: a footage-led cinematic documentary route and an opt-in H2 Squire vector military-history route. Includes recorded-sound-first direction, resource-library search, camera/motion planning, rights-aware audio use and evidence-gated full audiovisual QA. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the parallel asset-library workstream.",
+        "shortDescription": "31 skills, 38 specialists"
+      }
+    }
+  },
+  "keywords": [
+    "video", "orchestration", "ai-agent", "github", "remotion", "hyperframes", "manim", "blender", "audio", "captions", "toolchain", "production", "licensing", "comfyui", "playwright", "shotcraft", "ai-media", "specialist-plugins", "source-backed-skills", "historical-military-animation", "cinematic-documentary", "camera-motion", "sound-library", "foley", "squire"
+  ],
+  "name": "nolane-video-command-center",
+  "repository": "https://github.com/Nolane-x/video",
+  "version": "0.8.3"
+}
