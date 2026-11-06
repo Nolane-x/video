@@ -29,10 +29,15 @@ def test_cc0_candidate_is_extracted_and_playable() -> None:
             wav.writeframes(b"\x00\x00" * 4800)
         media_bytes = wav_bytes_path.read_bytes()
         digest = hashlib.sha256(media_bytes).hexdigest()
+        invalid_path = root / "invalid.wav"
+        invalid_bytes = b"not an audio stream"
+        invalid_path.write_bytes(invalid_bytes)
+        invalid_digest = hashlib.sha256(invalid_bytes).hexdigest()
 
         archive_name = "video-assets-test-audio-001.zip"
         with zipfile.ZipFile(download_dir / archive_name, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.write(wav_bytes_path, "fixture/soft-step.wav")
+            archive.write(invalid_path, "fixture/._bad-metadata.wav")
 
         catalog = {
             "assets": [
@@ -50,6 +55,18 @@ def test_cc0_candidate_is_extracted_and_playable() -> None:
                     "source_url": "https://example.invalid/fixture",
                 },
                 {
+                    "asset_id": "bad-audio-fixture",
+                    "archive_name": archive_name,
+                    "archive_member": "fixture/._bad-metadata.wav",
+                    "license": "CC0-1.0",
+                    "rights_status": "redistributable_candidate",
+                    "rights_match_method": "exact_path",
+                    "sha256": invalid_digest,
+                    "size_bytes": len(invalid_bytes),
+                    "title": "Invalid metadata WAV",
+                    "source_url": "https://example.invalid/bad",
+                },
+                {
                     "asset_id": "nasa-fixture",
                     "archive_name": archive_name,
                     "archive_member": "fixture/soft-step.wav",
@@ -65,6 +82,9 @@ def test_cc0_candidate_is_extracted_and_playable() -> None:
         preview.write_catalog(output_dir, assets, rejected)
         assert len(assets) == 1
         assert assets[0]["asset_id"] == "cc0-fixture"
+        assert len(rejected) == 1
+        assert rejected[0]["asset_id"] == "bad-audio-fixture"
+        assert "ffprobe rejected source audio" in rejected[0]["reason"]
         assert assets[0]["computed_sha256"] == digest
         assert assets[0]["source_sha256_verified"] is True
         assert assets[0]["auditioned_by_human"] is False
