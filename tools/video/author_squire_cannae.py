@@ -148,6 +148,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
             "flags": [{"col": 0.5, "row": 0.8, "kind": "eagle", "color": ROMAN if index % 2 else CARTHAGE}],
             "enemy": "latin" if index % 2 else "hastatus",
             "bg": "plain",
+            "bgOpts": {"volcano": False},
             "time": time_of_day,
             "move": "right",
         }
@@ -160,6 +161,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
             "face": face,
             "pose": "guard",
             "bg": "plain",
+            "bgOpts": {"volcano": False},
             "time": time_of_day,
             "R": 0.25,
             "x": 0.53,
@@ -177,6 +179,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
             "thing": {"kind": thing, "type": "scutum" if thing == "shield" else None, "s": 0.58, "anim": "grow" if index % 2 else "pop"},
             "props": [{"kind": "spear", "x": 0.22, "y": 0.76, "s": 0.22, "rot": -0.25}],
             "bg": "plain",
+            "bgOpts": {"volcano": False},
             "time": time_of_day,
             "sway": True,
         }
@@ -198,7 +201,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         }
         cue("sting_low", "war_horn", at=0.3)
     elif tpl == "title":
-        args = {"text": "CANNAE\n216 BC", "sub": "THE TRAP THAT BEAT ROME", "bg": "plain", "time": "sunset", "dim": 0.15}
+        args = {"text": "CANNAE\n216 BC", "sub": "THE TRAP THAT BEAT ROME", "bg": "plain", "bgOpts": {"volcano": False}, "time": "sunset", "dim": 0.15}
         cue("war_horn", "drum_hit", at=0.15)
     elif tpl == "black":
         args = {}
@@ -210,7 +213,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         args = {
             "bg": "plain",
             "time": time_of_day,
-            "bgOpts": {"trees": 3, "bushes": 5, "tents": 2, "flags": [{"x": 0.18, "color": ROMAN}, {"x": 0.82, "color": CARTHAGE}]},
+            "bgOpts": {"volcano": False, "trees": 3, "bushes": 5, "tents": 2, "flags": [{"x": 0.18, "color": ROMAN}, {"x": 0.82, "color": CARTHAGE}]},
             "back": [
                 {"preset": "hastatus", "rows": 3, "cols": 12, "x0": 0.05, "x1": 0.92, "yFront": 0.84, "yBack": 0.68, "hFront": 0.14, "hBack": 0.08, "advance": 0.004, "face": "determined", "weapon": "pilum"},
             ],
