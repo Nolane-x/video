@@ -22,12 +22,12 @@ def load(path: Path, default):
 
 
 def choose_template(text: str, index: int, progress: float, usage=None, last_at=None, last_template=None) -> str:
-    """Choose a varied template with deliberate caps for repeated visual devices."""
+    """Choose a varied template while protecting story beats from repetitive visual devices."""
     t = text.casefold()
     usage = usage or {}
     last_at = last_at or {}
 
-    def available(name: str, cap: int, gap: int = 3) -> bool:
+    def available(name: str, cap: int, gap: int = 4) -> bool:
         return usage.get(name, 0) < cap and index - last_at.get(name, -999) >= gap and last_template != name
 
     if index == 0:
@@ -42,7 +42,7 @@ def choose_template(text: str, index: int, progress: float, usage=None, last_at=
         "eighty thousand", "forty thousand", "six thousand", "ten thousand",
         "far more infantry", "more cavalry", "more infantry"
     ))
-    if number_or_force and available("board", 2, 5):
+    if number_or_force and available("board", 2, 7):
         return "board"
 
     tactical = any(k in t for k in (
@@ -51,36 +51,50 @@ def choose_template(text: str, index: int, progress: float, usage=None, last_at=
         "give ground", "giving ground", "the centre", "the center",
         "the wings", "the rear"
     ))
-    if tactical and available("top", 7, 4):
+    if tactical and available("top", 5, 7):
         return "top"
 
-    if any(k in t for k in ("tactical victory", "strategic outcome", "the lesson", "remember one rule", "remember the rule")) and available("plan", 4, 5):
+    if any(k in t for k in ("tactical victory", "strategic outcome", "the lesson", "remember one rule", "remember the rule")) and available("plan", 3, 8):
         return "plan"
 
     comparison = any(k in t for k in ("not one uniform block", "mixed force", "bigger hammer", "shape that can turn", "two different"))
-    if comparison and available("split", 6, 4):
+    if comparison and available("split", 3, 10):
         return "split"
+
+    if any(k in t for k in ("shield", "spear", "weapon", "sword", "standard", "standards")) and available("item", 7, 5):
+        return "item"
+
+    if any(k in t for k in ("hannibal", "varro", "paullus", "consul", "polybius")) and available("close", 12, 5):
+        return "close"
 
     if any(k in t for k in ("horsemen", "numidian", "hooves", "horse", "gallop", "riders")):
         return "scene"
-    if "cavalry" in t and available("army", 26, 2):
+    if "cavalry" in t and available("army", 16, 4):
         return "army"
-
-    if any(k in t for k in ("hannibal", "varro", "paullus", "consul", "polybius")) and available("close", 16, 4):
-        return "close"
-
-    if any(k in t for k in ("shield", "spear", "weapon", "sword", "standard", "standards")) and available("item", 4, 6):
-        return "item"
 
     if any(k in t for k in ("dead", "died", "wounded", "killed", "catastrophic", "disaster")):
         return "scene"
 
-    sequence = ("scene", "army", "close", "scene", "split", "army", "plan", "scene", "top", "scene")
+    sequence = ("scene", "army", "item", "scene", "close", "plan", "army", "scene", "top", "item", "scene", "split")
     choice = sequence[index % len(sequence)]
     if choice == last_template:
         choice = "scene" if last_template != "scene" else "army"
+    if choice == "top" and not available("top", 5, 7):
+        choice = "scene"
+    if choice == "split" and not available("split", 3, 10):
+        choice = "scene"
+    if choice == "plan" and not available("plan", 3, 8):
+        choice = "scene"
+    if choice == "item" and not available("item", 7, 5):
+        choice = "scene"
+    if choice == "army" and not available("army", 16, 4):
+        choice = "scene"
+    if choice == "close" and not available("close", 12, 5):
+        choice = "scene"
     return choice
-def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) -> tuple[dict, list[dict]]:
+
+
+def base_args(def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) -> tuple[dict, list[dict]]:
     low = text.casefold()
     seed = index * 7919 + 216
     rng = random.Random(seed)
@@ -186,25 +200,40 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         }
         cue("page_turn", "drum_hit", at=0.1)
     elif tpl == "army":
-        args = {
-            "preset": "hastatus" if index % 2 else "latin",
-            "presets": ["hastatus", "princeps", "triarius"],
-            "rows": 4 if index % 2 else 3,
-            "cols": 10 if index % 2 else 8,
-            "march": 0.55,
-            "flip": bool(index % 2),
-            "face": "determined",
-            "flags": [{"col": 0.5, "row": 0.8, "kind": "eagle", "color": ROMAN if index % 2 else CARTHAGE}],
-            "enemy": "latin" if index % 2 else "hastatus",
-            "bg": "plain",
-            "bgOpts": {"volcano": False},
-            "time": time_of_day,
-            "move": "right",
-        }
-        cue("drum_march", "battle_far", at=0.35)
+        carthage_focus = any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian"))
+        if "cavalry" in low or any(k in low for k in ("horse", "riders", "numidian")):
+            args = {
+                "bg": "hills" if index % 2 else "field",
+                "bgOpts": {"volcano": False, "trees": 2, "flags": [{"x": 0.16, "color": ROMAN}, {"x": 0.84, "color": CARTHAGE}]},
+                "time": time_of_day,
+                "mid": [
+                    {"preset": "latinOld" if carthage_focus else "hastatus", "rows": 2, "cols": 8, "x0": 0.03, "x1": 0.46, "yFront": 0.95, "yBack": 0.78, "hFront": 0.25, "hBack": 0.12, "march": 0.4, "flip": False, "face": "determined"},
+                    {"preset": "latin" if carthage_focus else "princeps", "rows": 2, "cols": 7, "x0": 0.54, "x1": 0.97, "yFront": 0.9, "yBack": 0.75, "hFront": 0.23, "hBack": 0.12, "march": 0.35, "flip": True, "face": "determined"},
+                ],
+                "people": [
+                    {"preset": "latinOld" if carthage_focus else "hastatus", "x": 0.30, "y": 0.67, "h": 0.39, "pose": "guard", "horse": {"color": "bay" if carthage_focus else "chestnut", "gait": "gallop", "travel": False}, "flip": False},
+                    {"preset": "latin" if carthage_focus else "princeps", "x": 0.72, "y": 0.7, "h": 0.34, "pose": "guard", "horse": {"color": "dark" if carthage_focus else "bay", "gait": "gallop", "travel": False}, "flip": True},
+                ],
+                "fx": [{"kind": "dust", "at": 0.2, "x": 0.5, "y": 0.82, "s": 0.18}],
+            }
+            cue("hooves_gallop", "horse_neigh", "battle_far", at=0.25)
+        else:
+            args = {
+                "bg": "plain" if index % 3 == 0 else ("hills" if index % 3 == 1 else "field"),
+                "bgOpts": {"volcano": False, "trees": 3 + index % 3, "bushes": 4, "tents": 2, "flags": [{"x": 0.12, "color": ROMAN}, {"x": 0.86, "color": CARTHAGE}]},
+                "time": time_of_day,
+                "mid": [
+                    {"preset": "hastatus" if not carthage_focus else "latinOld", "presets": ["hastatus", "princeps", "triarius"] if not carthage_focus else ["latin", "latinOld"], "rows": 3 + index % 2, "cols": 10 + index % 4, "x0": 0.03, "x1": 0.49, "yFront": 0.98, "yBack": 0.7, "hFront": 0.31, "hBack": 0.1, "march": 0.35, "flip": False},
+                    {"preset": "latinOld" if not carthage_focus else "hastatus", "presets": ["latin", "latinOld"] if not carthage_focus else ["hastatus", "princeps"], "rows": 2 + index % 2, "cols": 9 + index % 3, "x0": 0.53, "x1": 0.97, "yFront": 0.94, "yBack": 0.72, "hFront": 0.27, "hBack": 0.1, "march": 0.25, "flip": True},
+                ],
+                "move": ("left", "right", "in", "out")[index % 4],
+                "face": "determined",
+            }
+            cue("drum_march", "battle_far", at=0.35)
     elif tpl == "close":
-        if any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian")):
-            preset = "latinOld"  # blue-side generic commander, not authenticated Punic costume
+        carthage_focus = any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian"))
+        if carthage_focus:
+            preset = "latinOld"  # blue-side generic commander; illustrative rather than authenticated Punic dress
         elif any(k in low for k in ("consul", "paullus", "varro")):
             preset = "consul"
         elif "polybius" in low:
@@ -213,27 +242,28 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
             preset = "hastatus"
         face = "worried" if any(k in low for k in ("trapped", "fear", "wounded", "crush", "confusing", "surrounded", "no clear front")) else "determined"
         pose = "point" if any(k in low for k in ("places", "shows", "orders", "points")) else ("push" if any(k in low for k in ("push", "advance", "press")) else "guard")
-        others = [
-            {"preset": "princeps", "x": 0.15, "y": 0.67, "R": 0.13, "face": "worried"},
-            {"preset": "triarius", "x": 0.85, "y": 0.67, "R": 0.13, "face": "determined"},
-        ]
-        if "hannibal" in low:
-            others = [{"preset": "latin", "x": 0.18, "y": 0.67, "R": 0.14, "face": "calm"}]
+        bg_kind = ("tent" if "camp" in low or "command" in low else ("hills" if index % 3 == 0 else "field"))
+        opponent = "hastatus" if carthage_focus else "latinOld"
         args = {
             "preset": preset,
             "face": face,
             "pose": pose,
-            "bg": "plain",
-            "bgOpts": {"volcano": False},
+            "bg": bg_kind,
+            "bgOpts": {"volcano": False, "trees": 2 + index % 3, "flags": [{"x": 0.14, "color": ROMAN}, {"x": 0.86, "color": CARTHAGE}], "tents": 2 if bg_kind == "tent" else 0},
             "time": time_of_day,
-            "R": 0.23 + (0.01 if index % 2 else 0),
-            "x": 0.46 if index % 3 else 0.55,
-            "y": 0.52,
-            "others": others,
-            "fx": [{"kind": "dust", "at": 0.5}] if progress > 0.35 else [],
+            "R": 0.24 + (0.015 if index % 2 else 0),
+            "x": 0.43 if index % 3 else 0.55,
+            "y": 0.51,
+            "others": [
+                {"preset": opponent, "x": 0.82 if index % 2 else 0.16, "y": 0.69, "R": 0.15, "face": "worried" if face == "determined" else "determined", "pose": "guard", "flip": bool(index % 2)},
+            ],
+            "fx": [{"kind": "dust", "at": 0.35, "x": 0.78, "y": 0.78, "s": 0.1}] if progress > 0.35 else [],
+            "move": ("in", "left", "out", "right")[index % 4],
         }
+        if "hannibal" in low:
+            args["props"] = [{"kind": "scroll", "x": 0.75, "y": 0.82, "s": 0.14, "anim": "float"}]
         cue("armor_clank", "chainmail", at=0.3)
-    elif tpl == "item":
+    elif tpl == "item":    elif tpl == "item":
         thing = "shield" if "shield" in low else ("spear" if "spear" in low else ("standard" if "standard" in low else "sword"))
         args = {
             "thing": {"kind": thing, "type": "scutum" if thing == "shield" else None, "s": 0.58, "anim": "grow" if index % 2 else "pop"},
@@ -267,31 +297,150 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         args = {}
     else:
         carthage_focus = any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian"))
-        roman_lead = {"preset": "hastatus", "x": 0.30 + (0.04 if index % 2 else 0), "h": 0.61, "face": "worried" if progress > 0.62 else "determined", "pose": "guard" if index % 3 else "push", "weapon": "pilum"}
-        blue_lead = {"preset": "latinOld" if carthage_focus else "latin", "x": 0.70 - (0.04 if index % 2 else 0), "h": 0.58, "face": "determined" if progress < 0.7 else "worried", "pose": "stand" if index % 3 else "guard", "weapon": "spear", "flip": True}
-        people = [blue_lead, roman_lead] if carthage_focus else [roman_lead, blue_lead]
-        back_preset = "latin" if carthage_focus else "hastatus"
-        args = {
-            "bg": "plain",
-            "time": time_of_day,
-            "bgOpts": {"volcano": False, "trees": 3, "bushes": 5, "tents": 2, "flags": [{"x": 0.18, "color": ROMAN}, {"x": 0.82, "color": CARTHAGE}]},
-            "back": [
-                {"preset": back_preset, "rows": 2 + (index % 2), "cols": 9 + (index % 4), "x0": 0.04, "x1": 0.94, "yFront": 0.84, "yBack": 0.68, "hFront": 0.14, "hBack": 0.08, "advance": 0.003 + (0.001 if index % 2 else 0), "face": "determined", "weapon": "pilum" if not carthage_focus else "spear"},
-            ],
-            "people": people,
-            "move": ("in" if index % 3 else "left") if progress < 0.72 else ("left" if index % 2 else "in"),
-            "fx": [{"kind": "dust", "at": 0.5}] if progress > 0.25 else [],
-        }
-        if any(k in low for k in ("horse", "cavalry", "gallop", "horsemen", "numidian")):
-            people[0 if carthage_focus else 1]["horse"] = {"color": "bay" if carthage_focus else "chestnut", "gait": "gallop"}
-            cue("hooves_gallop", "horse_neigh", at=0.3)
-        elif any(k in low for k in ("sword", "clash", "fight", "battle")):
-            cue("sword_clash", "battle_far", at=0.4)
-        elif any(k in low for k in ("drum", "march", "advance")):
-            cue("drum_march", "war_horn", at=0.2)
-        else:
-            cue("battle_far", "wind_loop", at=0.2)
+        roman_focus = any(k in low for k in ("roman", "rome", "varro", "paullus", "legion", "consul"))
+        horse_focus = any(k in low for k in ("horse", "cavalry", "gallop", "horsemen", "numidian", "riders", "hooves"))
+        camp_focus = any(k in low for k in ("camp", "supply", "stores", "river", "tent", "marching", "supplies"))
+        ruins_focus = any(k in low for k in ("citadel", "ruins", "ruined", "town", "stores", "cannae"))
+        aftermath = any(k in low for k in ("dead", "died", "wounded", "killed", "catastrophic", "disaster", "aftermath", "losses", "blood"))
+        crush = any(k in low for k in ("crush", "pressed", "pressing", "shield", "no clear front", "cannot turn", "crowded", "corridor", "packed"))
+        red = "hastatus"
+        blue = "latinOld"
+        move = ("in", "left", "out", "right", "up", "still")[index % 6]
 
+        if horse_focus:
+            hero = blue if carthage_focus or "numidian" in low else red
+            rival = red if hero == blue else blue
+            args = {
+                "bg": "hills" if index % 2 else "field",
+                "time": time_of_day,
+                "bgOpts": {"volcano": False, "trees": 4, "bushes": 3, "flags": [{"x": 0.12, "color": ROMAN}, {"x": 0.86, "color": CARTHAGE}]},
+                "back": [{"preset": rival, "rows": 2, "cols": 12, "x0": 0.08, "x1": 0.92, "yFront": 0.78, "yBack": 0.68, "hFront": 0.12, "hBack": 0.07, "flip": True}],
+                "mid": [{"preset": hero, "rows": 2, "cols": 7, "x0": 0.08, "x1": 0.92, "yFront": 0.95, "yBack": 0.81, "hFront": 0.19, "hBack": 0.11, "march": 0.25}],
+                "people": [
+                    {"preset": hero, "x": 0.28, "y": 0.68, "h": 0.39, "pose": "guard", "horse": {"color": "bay" if hero == blue else "chestnut", "gait": "gallop", "travel": False}},
+                    {"preset": hero, "x": 0.69, "y": 0.73, "h": 0.33, "pose": "push", "horse": {"color": "dark" if hero == blue else "bay", "gait": "gallop", "travel": False}, "flip": True},
+                ],
+                "fx": [{"kind": "dust", "at": 0.15, "x": 0.5, "y": 0.83, "s": 0.2}],
+                "move": move,
+                "moveAmt": 0.025,
+            }
+            cue("hooves_gallop", "horse_neigh", "battle_far", at=0.25)
+        elif aftermath:
+            args = {
+                "bg": "mud" if index % 2 else "field",
+                "time": "dusk",
+                "bgOpts": {"volcano": False, "trees": 2, "clouds": 2, "mud": True, "wet": True, "flags": [{"x": 0.12, "color": ROMAN}]},
+                "back": [{"preset": red, "rows": 2, "cols": 11, "x0": 0.08, "x1": 0.92, "yFront": 0.73, "yBack": 0.64, "hFront": 0.1, "hBack": 0.06, "face": "worried"}],
+                "people": [
+                    {"preset": red, "x": 0.45, "y": 0.81, "h": 0.53, "pose": "guard", "face": "worried", "fall": 0.7},
+                    {"preset": red, "x": 0.78, "y": 0.85, "h": 0.34, "pose": "guard", "face": "worried"},
+                ],
+                "props": [{"kind": "shield", "type": "scutum", "x": 0.22, "y": 0.82, "s": 0.22, "rot": -0.4}, {"kind": "spear", "x": 0.9, "y": 0.83, "s": 0.27, "rot": 0.9}],
+                "fx": [{"kind": "smoke", "at": 0.2, "x": 0.7, "y": 0.45, "s": 0.2}, {"kind": "dust", "at": 0.35, "x": 0.5, "y": 0.85, "s": 0.16}],
+                "move": ("out", "left", "in")[index % 3],
+                "dark": 0.08,
+            }
+            cue("wind_loop", "sting_low", "battle_far", at=0.25)
+        elif camp_focus:
+            bg_kind = "tent" if "camp" in low or "tent" in low else ("hills" if index % 2 else "field")
+            args = {
+                "bg": bg_kind,
+                "time": "golden" if progress < 0.5 else "day",
+                "bgOpts": {"volcano": False, "tents": 4 if bg_kind != "tent" else 0, "trees": 3, "flags": [{"x": 0.18, "color": ROMAN}, {"x": 0.82, "color": CARTHAGE}]},
+                "back": [{"preset": blue if carthage_focus else red, "rows": 2, "cols": 9, "x0": 0.08, "x1": 0.92, "yFront": 0.82, "yBack": 0.71, "hFront": 0.13, "hBack": 0.07}],
+                "people": [
+                    {"preset": blue if carthage_focus else red, "x": 0.34, "y": 0.72, "h": 0.43, "pose": "point", "face": "determined"},
+                    {"preset": red if carthage_focus else blue, "x": 0.72, "y": 0.75, "h": 0.35, "pose": "guard", "face": "neutral", "flip": True},
+                ],
+                "props": [{"kind": "scroll", "x": 0.82, "y": 0.85, "s": 0.14, "anim": "float"}, {"kind": "barrel", "x": 0.16, "y": 0.86, "s": 0.13}],
+                "move": move,
+            }
+            cue("page_turn", "drum_march", "wind_loop", at=0.2)
+        elif ruins_focus:
+            args = {
+                "bg": "stone" if index % 2 else "castle",
+                "time": "day" if index % 3 else "dawn",
+                "bgOpts": {"volcano": False, "banner": {"color": ROMAN}, "window": False, "trees": 0},
+                "back": [{"preset": red, "rows": 2, "cols": 10, "x0": 0.06, "x1": 0.94, "yFront": 0.8, "yBack": 0.72, "hFront": 0.12, "hBack": 0.07}],
+                "people": [{"preset": red, "x": 0.28, "y": 0.76, "h": 0.42, "pose": "guard"}, {"preset": blue, "x": 0.72, "y": 0.74, "h": 0.38, "pose": "push", "flip": True}],
+                "props": [{"kind": "rock", "x": 0.13, "y": 0.89, "s": 0.16}, {"kind": "standard", "x": 0.88, "y": 0.82, "s": 0.22, "color": CARTHAGE}],
+                "move": move,
+            }
+            cue("wind_loop", "battle_far", at=0.2)
+        elif crush and roman_focus:
+            args = {
+                "bg": "mud" if index % 2 else "field",
+                "time": time_of_day,
+                "bgOpts": {"volcano": False, "trees": 1, "bushes": 2, "mud": index % 2 == 0, "flags": [{"x": 0.12, "color": ROMAN}]},
+                "back": [{"preset": red, "presets": ["hastatus", "princeps", "triarius"], "rows": 4, "cols": 18, "x0": 0.0, "x1": 1.0, "yFront": 0.83, "yBack": 0.58, "hFront": 0.23, "hBack": 0.1, "face": "worried"}],
+                "mid": [{"preset": red, "presets": ["hastatus", "princeps"], "rows": 3, "cols": 12, "x0": 0.02, "x1": 0.98, "yFront": 0.98, "yBack": 0.8, "hFront": 0.28, "hBack": 0.14, "face": "worried", "march": 0.15}],
+                "people": [{"preset": red, "x": 0.22 + (index % 3) * 0.08, "y": 0.68, "h": 0.48, "pose": "push", "face": "worried"}, {"preset": red, "x": 0.78, "y": 0.7, "h": 0.4, "pose": "guard", "face": "worried", "flip": True}],
+                "props": [{"kind": "shield", "type": "scutum", "x": 0.87, "y": 0.86, "s": 0.18, "rot": 0.18}],
+                "fx": [{"kind": "dust", "at": 0.2, "x": 0.54, "y": 0.81, "s": 0.18}],
+                "move": move,
+                "shake": 0.08,
+            }
+            cue("battle_roar", "shield_bash", "battle_far", at=0.25)
+        elif carthage_focus:
+            args = {
+                "bg": "hills" if index % 2 else "field",
+                "time": time_of_day,
+                "bgOpts": {"volcano": False, "trees": 3, "flags": [{"x": 0.17, "color": CARTHAGE}, {"x": 0.83, "color": ROMAN}]},
+                "back": [{"preset": blue, "presets": ["latin", "latinOld"], "rows": 2 + index % 2, "cols": 14, "x0": 0.04, "x1": 0.96, "yFront": 0.83, "yBack": 0.66, "hFront": 0.16, "hBack": 0.08, "flip": False}],
+                "people": [{"preset": blue, "x": 0.63, "y": 0.66, "h": 0.51, "pose": "point", "face": "determined"}, {"preset": red, "x": 0.25, "y": 0.76, "h": 0.35, "pose": "guard", "face": "worried", "flip": True}],
+                "props": [{"kind": "standard", "x": 0.9, "y": 0.79, "s": 0.23, "color": CARTHAGE}],
+                "move": move,
+            }
+            cue("war_horn", "battle_far", at=0.2)
+        else:
+            # Rotate through deliberately different compositions instead of reusing the same face-off.
+            mode = index % 4
+            if mode == 0:
+                args = {
+                    "bg": "hills", "time": time_of_day,
+                    "bgOpts": {"volcano": False, "trees": 5, "bushes": 4, "flags": [{"x": 0.1, "color": ROMAN}, {"x": 0.9, "color": CARTHAGE}]},
+                    "back": [{"preset": red, "rows": 3, "cols": 16, "x0": 0.02, "x1": 0.48, "yFront": 0.84, "yBack": 0.66, "hFront": 0.17, "hBack": 0.08}, {"preset": blue, "rows": 3, "cols": 16, "x0": 0.52, "x1": 0.98, "yFront": 0.83, "yBack": 0.65, "hFront": 0.16, "hBack": 0.08, "flip": True}],
+                    "people": [{"preset": red, "x": 0.22, "y": 0.72, "h": 0.41, "pose": "guard"}, {"preset": blue, "x": 0.78, "y": 0.72, "h": 0.42, "pose": "push", "flip": True}],
+                    "move": "in",
+                }
+            elif mode == 1:
+                args = {
+                    "bg": "field", "time": "day",
+                    "bgOpts": {"volcano": False, "trees": 2, "bushes": 6, "tents": 2, "flags": [{"x": 0.8, "color": ROMAN}]},
+                    "back": [{"preset": red, "rows": 2, "cols": 20, "x0": 0.02, "x1": 0.98, "yFront": 0.83, "yBack": 0.68, "hFront": 0.15, "hBack": 0.08}],
+                    "people": [{"preset": red, "x": 0.48, "y": 0.67, "h": 0.55, "pose": "point", "face": "determined"}, {"preset": red, "x": 0.78, "y": 0.78, "h": 0.31, "pose": "guard", "flip": True}],
+                    "props": [{"kind": "eagle", "x": 0.16, "y": 0.82, "s": 0.25, "color": ROMAN}],
+                    "move": "left",
+                }
+            elif mode == 2:
+                args = {
+                    "bg": "tent", "time": "golden",
+                    "bgOpts": {"volcano": False, "lantern": True},
+                    "people": [{"preset": blue, "x": 0.45, "y": 0.71, "h": 0.5, "pose": "guard", "face": "determined"}, {"preset": red, "x": 0.78, "y": 0.76, "h": 0.32, "pose": "guard", "flip": True}],
+                    "props": [{"kind": "scroll", "x": 0.18, "y": 0.82, "s": 0.18, "anim": "float"}, {"kind": "campfire", "x": 0.86, "y": 0.91, "s": 0.16}],
+                    "move": "out",
+                }
+            else:
+                args = {
+                    "bg": "mud", "time": "storm",
+                    "bgOpts": {"volcano": False, "mud": True, "wet": True, "clouds": 1, "trees": 1},
+                    "back": [{"preset": red, "rows": 4, "cols": 17, "x0": 0.0, "x1": 1.0, "yFront": 0.82, "yBack": 0.6, "hFront": 0.18, "hBack": 0.07, "face": "worried"}],
+                    "people": [{"preset": red, "x": 0.33, "y": 0.73, "h": 0.48, "pose": "push", "face": "worried"}],
+                    "props": [{"kind": "shield", "type": "scutum", "x": 0.78, "y": 0.85, "s": 0.2}],
+                    "fx": [{"kind": "dust", "at": 0.25, "x": 0.5, "y": 0.85, "s": 0.16}],
+                    "move": "right",
+                }
+            if any(k in low for k in ("sword", "clash", "fight", "battle")):
+                cue("sword_clash", "battle_far", at=0.4)
+            else:
+                cue("battle_far", "wind_loop", at=0.2)
+
+    if tpl not in VALID_TEMPLATES:
+    args.setdefault("seed", seed)
+    args.setdefault("move", ("in", "left", "out", "right", "up", "still")[index % 6])
+    args.setdefault("moveAmt", 0.018 + (index % 4) * 0.006)
+    if any(k in low for k in ("charge", "attack", "clash", "surrounded")):
+        args.setdefault("shake", 0.035)
     if tpl not in VALID_TEMPLATES:
         raise ValueError(f"Unsupported Squire template: {tpl}")
     return args, cues[:1]
@@ -352,7 +501,7 @@ def main() -> int:
         "resolution": "1080p",
         "fps": 24,
         "style": "flat",
-        "captions": False,
+        "captions": True,
         "bars": "none",
         "pack": "squire",
         "lang": "en",
