@@ -31,7 +31,7 @@ jobs:
           root = Path("integrations/nolane-video-command-center-overlay")
           manifest = json.loads((root / "plugin.json").read_text())
           assert manifest["name"] == "nolane-video-command-center"
-          assert manifest["version"] == "0.9.2"
+          assert manifest["version"] == "0.9.3"
           required = [
               "README.md",
               "SKILL-CATALOG.md",
@@ -43,6 +43,7 @@ jobs:
               "skills/video-cinematic-director/SKILL.md",
               "skills/illustrated-history-animation-director/SKILL.md",
               "skills/historical-audio-library-curator/SKILL.md",
+              "skills/audio-postproduction-engineer/SKILL.md",
               "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md",
           ]
           missing = [p for p in required if not (root / p).is_file()]
@@ -51,6 +52,8 @@ jobs:
           assert "33 internal skills" in catalog
           assert "illustrated-history-animation-director" in catalog
           assert "historical-audio-library-curator" in catalog
+          audio = (root / "skills/audio-postproduction-engineer/SKILL.md").read_text()
+          assert "meta-preview-catalog.json" in audio
           motion = (root / "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md").read_text()
           assert "Five independent motion channels" in motion
           print("Plugin overlay validated:", manifest["version"])
@@ -70,7 +73,7 @@ jobs:
       - name: Upload plugin-root directory as a direct artifact
         uses: actions/upload-artifact@v7
         with:
-          name: nolane-video-command-center-plugin-0.9.2
+          name: nolane-video-command-center-plugin-0.9.3
           path: dist/plugin-root/
           if-no-files-found: error
           retention-days: 14
