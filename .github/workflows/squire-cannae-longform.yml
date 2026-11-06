@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: squire-cannae-216bc-${ github.ref }}
+  group: squire-cannae-216bc-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     outputs:
-      job_json: ${ steps.prepare.outputs.job_json }}
-      voice_id: ${ steps.prepare.outputs.voice_id }}
+      job_json: ${{ steps.prepare.outputs.job_json }}
+      voice_id: ${{ steps.prepare.outputs.voice_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -58,8 +58,8 @@ jobs:
       - name: Preserve exact voice selection and source metadata
         uses: actions/upload-artifact@v4
         with:
-          name: squire-cannae-voice-selection-${ github.run_id }}
-          path: ${ runner.temp }}/voice-selection.json
+          name: squire-cannae-voice-selection-${{ github.run_id }}
+          path: ${{ runner.temp }}/voice-selection.json
           if-no-files-found: error
           retention-days: 30
 
@@ -68,7 +68,7 @@ jobs:
     needs: prepare-voice
     uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
     with:
-      job_json: ${ needs.prepare-voice.outputs.job_json }}
+      job_json: ${{ needs.prepare-voice.outputs.job_json }}
     permissions:
       contents: read
 
@@ -88,12 +88,12 @@ jobs:
       - name: Download VoiceStudio narration bundle
         uses: actions/download-artifact@v4
         with:
-          name: video-voice-assets-${ github.run_id }}
+          name: video-voice-assets-${{ github.run_id }}
           path: voice-assets
       - name: Download narrator selection metadata
         uses: actions/download-artifact@v4
         with:
-          name: squire-cannae-voice-selection-${ github.run_id }}
+          name: squire-cannae-voice-selection-${{ github.run_id }}
           path: voice-assets
       - name: Install FFmpeg and pinned alignment dependencies
         shell: bash
@@ -251,7 +251,7 @@ jobs:
       - name: Upload Cannae master candidate and production evidence
         uses: actions/upload-artifact@v4
         with:
-          name: squire-cannae-216bc-master-${ github.run_id }}
-          path: ${ runner.temp }}/squire-delivery/
+          name: squire-cannae-216bc-master-${{ github.run_id }}
+          path: ${{ runner.temp }}/squire-delivery/
           if-no-files-found: error
           retention-days: 30
