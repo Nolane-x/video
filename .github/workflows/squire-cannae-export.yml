@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: squire-cannae-export
+  group: squire-cannae-export-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 120
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '42171136161' }}
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '42170629874' }}
     steps:
       - name: Wait for the source render and verify it succeeded
         shell: bash
