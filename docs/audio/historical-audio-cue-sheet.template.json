@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "project_id": "replace-with-project-slug",
+  "fps": 24,
+  "mix_sample_rate_hz": 48000,
+  "tracks": [
+    "narration",
+    "music",
+    "ambience",
+    "character_foley",
+    "prop_foley",
+    "spot_sfx",
+    "transitions",
+    "intentional_silence"
+  ],
+  "cues": [
+    {
+      "cue_id": "horse-hooves-001",
+      "shot_id": "shot-001",
+      "track": "character_foley",
+      "asset_id": "selected-library-item-id",
+      "source_sha256": "",
+      "rights_class": "public_cc0_pd",
+      "sync_event": "hoof_contact",
+      "start_frame": 24,
+      "source_in_ms": 0,
+      "duration_ms": 1800,
+      "gain_db": -5,
+      "pan": 0,
+      "fade_in_ms": 15,
+      "fade_out_ms": 160,
+      "perspective": "foreground-close",
+      "auditioned": false,
+      "notes": "Replace with a rights-cleared, preview-listened source item."
+    }
+  ]
+}
