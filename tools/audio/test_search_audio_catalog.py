@@ -17,7 +17,7 @@ class AudioSearchTests(unittest.TestCase):
 
     def test_review_required_is_hidden_by_default(self):
         catalog = {"assets": [
-            {"title": "approved candidate", "rights_status": "redistributable_candidate"},
+            {"title": "approved recording candidate", "rights_status": "redistributable_candidate"},
             {"title": "unknown recording", "rights_status": "review_required"}
         ]}
         found = search_assets(catalog, "recording", limit=5)
