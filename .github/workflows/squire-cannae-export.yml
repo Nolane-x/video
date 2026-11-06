@@ -79,6 +79,34 @@ jobs:
           )
           echo "Source run: $SOURCE_RUN_ID" > export/SOURCE-RUN.txt
           echo "Selected master: $(basename "$mp4")" >> export/SOURCE-RUN.txt
+          python - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          with zipfile.ZipFile("source-bundle/h2-timeline.zip") as archive:
+              lines = json.loads(archive.read("timeline/lines.json"))
+          markers = [
+              ("The army that cannot turn", "The first thing you notice"),
+              ("Why the Romans came to Cannae", "But to understand why you are trapped"),
+              ("The numbers and cavalry advantage", "The Roman army is enormous by the standards of the war"),
+              ("Hannibal reads the Roman formation", "Hannibal sees that"),
+              ("The Roman infantry advances", "Now you are standing in the Roman front rank"),
+              ("The cavalry battle opens", "The battle begins with the light troops"),
+              ("The centre gives ground", "Now return to the centre"),
+              ("Both wings close the trap", "The African infantry on the Carthaginian wings has been waiting"),
+              ("The losses at Cannae", "The battle becomes a long killing ground"),
+              ("Why Cannae did not end the war", "Now the strange part"),
+              ("Rome adapts", "Rome eventually adapted"),
+          ]
+          output = ["# YouTube chapters", ""]
+          for title, phrase in markers:
+              row = next((line for line in lines if phrase.casefold() in line["text"].casefold()), None)
+              if row is None:
+                  raise SystemExit(f"Missing chapter anchor: {phrase}")
+              seconds = int(round(float(row["start"])))
+              stamp = f"{seconds // 60}:{seconds % 60:02d}"
+              output.append(f"{stamp} {title}")
+          Path("export/review/CHAPTERS.txt").write_text("\n".join(output) + "\n", encoding="utf-8")
+          PY
           cat export/FILE-INVENTORY.txt
       - name: Upload the standalone final MP4 and thumbnail
         uses: actions/upload-artifact@v4
