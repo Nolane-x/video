@@ -38,6 +38,7 @@ def main():
         assert records[0]["auditioned_by_human"] is False
         assert records[0]["source_wav_file"] == "SwordClash.wav"
         assert records[0]["wav_master_archive_name"] == "master.zip"
+        assert records[0]["wav_master_download_url"].endswith("/meta-open-sound-oculus-audio-pack-wav.zip")
         summary=preview.write_bank(output,records,licenses)
         assert summary["cc_by_files"]==1
         assert (output/"media"/(records[0]["asset_id"]+".ogg")).is_file()
