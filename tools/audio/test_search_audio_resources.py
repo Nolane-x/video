@@ -113,6 +113,12 @@ class UnifiedAudioSearchTests(unittest.TestCase):
         self.assertIn("real-bow", ids)
         self.assertNotIn("false-bow-hit", ids)
 
+    def test_generic_foley_synonyms_are_tag_assisted_not_direct(self):
+        matches = search_catalogs([self.build76, self.meta], "march")
+        self.assertTrue(matches)
+        self.assertTrue(all(item["match_quality"] == "tag_assisted" for item in matches))
+        self.assertEqual(search_catalogs([self.build76, self.meta], "march", direct_only=True), [])
+
     def test_search_never_promotes_unauditioned_assets(self):
         items = search_catalogs([self.build76, self.meta], "sword clash")
         self.assertTrue(all(item["final_use_gate"].startswith("human_audition") for item in items))
