@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Production source map for existing and candidate audio. The exact file license remains per asset record; this file never grants a blanket license.",
+  "existing_build": {
+    "release_tag": "video-asset-library-build-41184526545",
+    "release_url": "https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41184526545",
+    "inventory_status": "release_asset_names_and_sizes_verified",
+    "total_audio_archive_bytes": 1137763074,
+    "archives": [
+      {
+        "id": "build76-kenney-audio",
+        "name": "video-assets-kenney-audio-001.zip",
+        "size_bytes": 1724247,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-kenney-audio-001.zip",
+        "source_family": "Kenney",
+        "typical_contents": ["impact", "interface", "digital", "RPG", "UI", "music-jingles"],
+        "rights_rule": "Use exact manifest record. Kenney audio pack assets are generally CC0, but preserve provenance and check the pack record."
+      },
+      {
+        "id": "build76-opengameart-audio",
+        "name": "video-assets-opengameart-audio-001.zip",
+        "size_bytes": 462854835,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-opengameart-audio-001.zip",
+        "source_family": "OpenGameArt",
+        "typical_contents": ["foley", "battle", "ambience", "music", "impact", "footsteps"],
+        "rights_rule": "Strict per-item license and attribution. Do not mark the entire bundle CC0."
+      },
+      {
+        "id": "build76-originals-audio",
+        "name": "video-assets-originals-audio-001.zip",
+        "size_bytes": 33910385,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-originals-audio-001.zip",
+        "source_family": "Nolane originals",
+        "typical_contents": ["original Foley", "original effects", "original ambience"],
+        "rights_rule": "Check the repository's original asset record and source hash."
+      },
+      {
+        "id": "build76-usgs-audio",
+        "name": "video-assets-usgs-audio-001.zip",
+        "size_bytes": 456076826,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-usgs-audio-001.zip",
+        "source_family": "USGS",
+        "typical_contents": ["environmental recordings", "geological sounds", "field recordings"],
+        "rights_rule": "Use only with item-level Sources/Usage or public-domain evidence; do not infer rights from agency name."
+      },
+      {
+        "id": "build76-nasa-audio",
+        "name": "video-assets-nasa-audio-001.zip",
+        "size_bytes": 165256750,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-nasa-audio-001.zip",
+        "source_family": "NASA",
+        "typical_contents": ["space mission audio", "environment and spacecraft recordings"],
+        "rights_rule": "Apply NASA's media-use guidance and verify any third-party, endorsement, logo and personality restrictions. Not blanket CC0."
+      },
+      {
+        "id": "build76-wikimedia-audio",
+        "name": "video-assets-wikimedia-audio-001.zip",
+        "size_bytes": 17840331,
+        "download_url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-wikimedia-audio-001.zip",
+        "source_family": "Wikimedia Commons",
+        "typical_contents": ["field recordings", "historical audio", "environmental recordings"],
+        "rights_rule": "Exact file page license, creator, attribution and share-alike requirements apply."
+      }
+    ]
+  },
+  "external_sources": [
+    {
+      "id": "meta-open-sound",
+      "url": "https://github.com/facebookincubator/Meta-open-sound",
+      "catalog_url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/main/catalog.json",
+      "license": "per_collection",
+      "collections": [
+        {"id": "meta-piano", "license": "CC0-1.0", "role": "real multisampled piano, full WAV/OGG releases"},
+        {"id": "meta-nylon-guitar", "license": "CC0-1.0", "role": "real multisampled nylon guitar, full WAV/OGG releases"},
+        {"id": "meta-steel-guitar", "license": "CC0-1.0", "role": "real multisampled steel-string guitar, full WAV/OGG releases"},
+        {"id": "oculus-audio-pack", "license": "CC-BY-4.0", "role": "289 recorded Foley/ambience/game sound effects; attribution required"}
+      ],
+      "policy": "Download only selected collections/samples after inspecting the collection manifest and per-file SHA256SUMS. Preserve LICENSE and ATTRIBUTION.md."
+    },
+    {
+      "id": "open-game-sfx-index",
+      "url": "https://github.com/Mcamento8/open-game-sfx-index",
+      "index_url": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/main/index.json",
+      "sound_count_claimed_by_upstream": 1451,
+      "license": "CC0-1.0",
+      "policy": "Use as a searchable reference and deduplicate against existing Kenney/OpenGameArt audio before fetching. Its game/UI SFX are utility layers, not a replacement for cinematic Foley or score."
+    },
+    {
+      "id": "sonniss-gdc",
+      "url": "https://sonniss.com/gameaudiogdc/",
+      "license": "source-only-under-current-GDC-license",
+      "policy": "Private use synced into a finished film may be permitted by the current license; raw sound-library redistribution and AI-training use are prohibited. Do not mirror in a public release; check the current license before each use."
+    },
+    {
+      "id": "mixkit",
+      "url": "https://mixkit.co/free-sound-effects/",
+      "license": "source-only-under-applicable-item/license",
+      "policy": "May be usable in finished creative projects subject to Mixkit's asset-specific license. Do not republish the raw file as a library."
+    },
+    {
+      "id": "pixabay",
+      "url": "https://pixabay.com/service/license-summary/",
+      "license": "source-only-under-content-license",
+      "policy": "Use in a finished creative work under the current Content License; no standalone redistribution as a sound library."
+    },
+    {
+      "id": "freesound",
+      "url": "https://freesound.org/",
+      "license": "per-item",
+      "policy": "Check CC0/CC-BY/NC/ND terms per recording and preserve attribution. No bulk mirror without permissions and compliant API use."
+    }
+  ],
+  "production_policy": {
+    "priority": ["existing_build76_audio", "approved_external_recordings", "originally_recorded_or_commissioned_sound", "procedural_placeholders_only_when_unavoidable"],
+    "never_assume_bundle_license": true,
+    "never_republish_source_only_audio": true,
+    "require_human_audition_before_final_mix": true,
+    "code_role": "synchronization, selection, layering, automation, panning, EQ, dynamics, reverb and mastering—not default synthesis of all sound."
+  }
+}
