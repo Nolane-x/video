@@ -12,7 +12,7 @@
         "defaultPrompt": "Use Nolane Video Command Center as the front door. Restore repo/project state, route by visual genre, search the existing resource pool before generating media, prefer rights-cleared recorded Foley/ambience/music over synthesized sound, and require full moving-picture and soundtrack review. For illustrated/cartoon history, use the illustrated-history animation director with expressive rigs, varied settings, pose/action/prop choreography, multi-plane motion, animated maps and infographics. For footage-led historical documentaries, choose footage, 2.5D, Blender, Remotion, maps and motion per shot. Use H2 Squire only when the user explicitly wants its separate vector style. Preserve the parallel asset-library boundary.",
         "developerName": "Nolane Studio",
         "displayName": "Nolane Video Command Center",
-        "longDescription": "Private video-production orchestrator with 33 internal skills, 37 core specialist plugins and three distinct historical routes: illustrated/cartoon history, footage-led cinematic documentary and opt-in H2 Squire vector military history. Includes recorded-sound-first direction, a searchable rights-aware audio preview bank, camera/motion planning, source-backed reference studies, stem-based sound design and evidence-gated full audiovisual QA. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the parallel asset-library workstream.",
+        "longDescription": "Private video-production orchestrator with 33 internal skills, 37 core specialist plugins and three distinct historical routes: illustrated/cartoon history, footage-led cinematic documentary and opt-in H2 Squire vector military history. Includes recorded-sound-first direction, a searchable rights-aware audio preview bank, camera/motion planning, source-backed reference studies, stem-based sound design and evidence-gated full audiovisual QA and a reusable illustrated-history motion system. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the parallel asset-library workstream.",
         "shortDescription": "33 skills, 38 specialists"
       }
     }
@@ -46,5 +46,5 @@
   ],
   "name": "nolane-video-command-center",
   "repository": "https://github.com/Nolane-x/video",
-  "version": "0.9.1"
+  "version": "0.9.2"
 }
