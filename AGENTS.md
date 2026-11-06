@@ -29,3 +29,5 @@ See `docs/STATE.md` and `video-library/one-more-scroll/manifest.json` for curren
 
 ## Audio discovery
 Search `audio-library/generated/preview-catalog.json` and `audio-library/generated/meta-preview-catalog.json` before unpacking archives. Check source and rights metadata, audition the selected preview, and fetch only the required source/member.
+
+Sonniss GDC 2026 is tracked as `private_production_only`: the licensee must accept current EULA v2.0, raw archives/WAVs must never be pushed into this public repo, its public Releases or its public Actions artifacts, and the sound files must never be used for AI/ML training. Keep only sanitized metadata and production cue decisions here.
