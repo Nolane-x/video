@@ -28,6 +28,18 @@ The GitHub Actions audio-library workflow publishes lightweight metadata indexes
 
 The catalogs are metadata, not the audio binaries. Search them first, choose by tags/source/license and only fetch the exact source archive/member needed. Every sample remains `not auditioned` until a person listens to it. The Meta Oculus group must retain the required attribution; the CC0 instrument sets stay a separate rights class. Download the complete browser preview bank from the latest [audio-library GitHub Actions run](https://github.com/Nolane-x/video/actions/workflows/build-cinematic-audio-library.yml).
 
+## Unified search command
+
+From the repository root run:
+
+```bash
+python tools/audio/search_audio_resources.py --query "katana sword clash"
+python tools/audio/search_audio_resources.py --query "horse hooves" --kind foley
+python tools/audio/search_audio_resources.py --query "piano note" --kind instrument --json
+```
+
+The command searches both generated catalogs, excludes review-required records by default, carries attribution and never promotes an unauditioned sample. Use `--include-review-required` only for rights investigation, not normal production selection.
+
 ## Production-first policy
 
 **Audition the recordings before synthesizing.** The library is searched first for every shot. A new web download is justified only when the library lacks a suitable recording or the match is materially poor.
