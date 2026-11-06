@@ -1,6 +1,13 @@
 name: Build historical audio library
 
 on:
+  push:
+    branches:
+      - feat/samurai-history-motion-audio
+    paths:
+      - '.github/workflows/build-historical-audio-library.yml'
+      - 'tools/audio/build_historical_audio_catalog.py'
+      - 'tests/audio/test_historical_audio_catalog.py'
   workflow_dispatch:
 
 permissions:
@@ -20,7 +27,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
