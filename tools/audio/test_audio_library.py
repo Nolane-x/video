@@ -20,6 +20,12 @@ class AudioRightsTests(unittest.TestCase):
         self.assertEqual(audio.rights_status("Creative Commons Attribution-ShareAlike 4.0", None), "share_alike_required")
 
     def test_unknown_license_fails_closed(self):
+    def test_nasa_guidance_is_not_treated_as_cc0(self):
+        self.assertEqual(
+            audio.rights_status("NASA Media Usage Guidelines — generally not copyrighted; not CC0", True),
+            "source_specific_review_required"
+        )
+
         self.assertEqual(audio.rights_status(None, None), "review_required")
         self.assertEqual(audio.rights_status("royalty free", None), "review_required")
     def test_explicit_non_redistributable_overrides_cc0_label(self):
