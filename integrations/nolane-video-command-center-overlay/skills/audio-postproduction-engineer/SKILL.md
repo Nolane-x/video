@@ -25,6 +25,15 @@ After the generated catalogs exist, search both with `python tools/audio/search_
 5. Record exact asset/source ID, file path/archive member, original source URL, license, attribution, SHA-256, duration, sample rate, bit depth, channels and human audition status.
 6. Fetch only genuinely missing material from an external source after a specific need is established. Keep source-only/private recordings outside public redistribution bundles.
 
+## Lossless Meta source selection
+
+The Meta catalog carries an exact OGG-to-WAV map for each sample: `source_wav_file`, `wav_master_archive_name`, `wav_master_download_url`, `wav_master_size_bytes` and `wav_master_sha256`.
+- Use OGG for search and audition only.
+- Once a candidate is heard and selected, fetch only its matching WAV collection/master; then extract the exact `source_wav_file` member.
+- Oculus WAV is already mirrored in the permanent Nolane audio Release. Piano/Guitar WAV masters can be acquired one collection at a time through `.github/workflows/acquire-meta-open-sound-wav-master.yml`.
+- Verify archive size and SHA-256 before extraction. Retain the original WAV, source hash and exact collection rights.
+- Oculus samples need CC BY 4.0 attribution; Piano, Nylon Guitar and Steel Guitar samples are CC0 note samples, not complete music tracks.
+
 ## Soundscape and stems
 Treat sound as intentional separate layers: narration/dialogue, score, location ambience, environmental detail, footsteps/cloth/armor Foley, weapons/impacts, crowds/animals, transitions and special accents. Keep stems separate until mastering. Use multiple takes/layers for repeated prominent actions where available.
 
