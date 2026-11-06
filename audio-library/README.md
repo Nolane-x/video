@@ -38,7 +38,7 @@ python tools/audio/search_audio_resources.py --query "horse hooves" --kind foley
 python tools/audio/search_audio_resources.py --query "piano note" --kind instrument --json
 ```
 
-The command searches both generated catalogs, excludes review-required records by default, carries attribution and never promotes an unauditioned sample. Use `--include-review-required` only for rights investigation, not normal production selection.
+The command searches both generated catalogs, excludes review-required records by default, carries attribution and never promotes an unauditioned sample. Direct matches in title/category/file rank before broad tag-assisted suggestions; add `--direct-only` when you need strict text evidence. Use `--include-review-required` only for rights investigation, not normal production selection.
 
 ## Permanent Meta Open Sound mirror
 
