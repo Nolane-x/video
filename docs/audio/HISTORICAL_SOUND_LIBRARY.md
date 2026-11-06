@@ -17,6 +17,30 @@ Release: https://github.com/Nolane-x/video/releases/tag/video-asset-library-buil
 
 These are actual Release asset byte sizes, not counts of valid historical cues. The archive filenames are category containers. Inspect each file's item metadata and embedded source/license record, then audition it; an “audio” archive is not automatically a curated Foley pack. OpenGameArt may contain mixed SFX/music packages.
 
+## Additional curated source: Meta Open Sound
+
+Pinned source revision: `251c0be57d5d1b3242b91f53e0cde62ab1cb42d9`  
+Repository: https://github.com/facebookincubator/Meta-open-sound
+
+This repository contributes **1,583 audio files**: 508 OGG files in the Oculus Audio Pack (289 distinct sounds) and 1,075 multisampled instrument OGGs. The 4 OGG release archives total 134,732,887 bytes. This is a curated supplement to Build 76, not a replacement for its field recordings and OpenGameArt assets.
+
+| Collection | Preview archive | License | Production master |
+|---|---:|---|---|
+| Oculus Audio Pack 1 | 44,626,986 bytes | CC BY 4.0; exact attribution required | [WAV 360,146,596 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip) |
+| Meta Piano | 48,182,243 bytes | CC0 1.0 | [WAV 752,311,261 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-piano-v1.0.0/meta-open-sound-meta-piano-wav.zip) |
+| Meta Nylon Guitar | 16,483,193 bytes | CC0 1.0 | [WAV 423,479,840 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-nylon-guitar-v1.0.0/meta-open-sound-meta-nylon-guitar-wav.zip) |
+| Meta Steel Guitar | 25,440,465 bytes | CC0 1.0 | [WAV 663,385,210 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-steel-guitar-v1.0.0/meta-open-sound-meta-steel-guitar-wav.zip) |
+
+The Oculus pack is recorded Foley/ambience (46.8 minutes; 48 kHz, 16-bit; 456 mono and 52 stereo files). Its UCS index provides descriptions and keywords across footsteps, weapons, cloth, metal, wind, water, ambience, boats, voices and other categories. Particularly relevant search terms include sword clash, sword scrape, katana, horse neigh, rowing and footsteps. The actual candidate still must be auditioned; the set also includes game/VR/fantasy recordings that may not fit a grounded historical film.
+
+**Required CC BY 4.0 attribution for Oculus Audio Pack 1:**
+
+> "Oculus Audio Pack 01" by Oculus VR, LLC (https://developers.meta.com/vr/downloads/package/oculus-audio-pack-1/), licensed under CC BY 4.0. Files renamed to the UCS naming convention; OGG previews transcoded from the original WAVs.
+
+Meta Piano, Meta Nylon Guitar and Meta Steel Guitar are separate CC0 collections. Do not apply CC0 to the Oculus pack or infer one collection's license from the repository-level license. The build script pins the source commit and SHA-256 of each OGG Release archive, extracts an offline search/player catalog, stores collection licenses and attribution in the output, and marks all cues NOT AUDITIONED until a person reviews them.
+
+For high-quality production, use the matching WAV masters linked above. OGGs are for compact preview and selection. The instrument master collections are 24-bit/48 kHz; Oculus master is 16-bit/48 kHz, according to the pinned repository's collection documentation.
+
 ## Historical sound taxonomy
 
 Build tags/search collections for:
