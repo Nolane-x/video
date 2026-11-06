@@ -15,7 +15,7 @@ The Build 76 asset-library Release already contains these audio archives:
 | video-assets-nasa-audio-001.zip | 165,256,750 | NASA-origin space/mission/environmental audio | NASA media guidance applies; not labelled CC0 automatically |
 | video-assets-wikimedia-audio-001.zip | 17,840,331 | Wikimedia audio | Exact file license and attribution per record |
 
-Total published audio archive size: **1,137,? bytes (about 1.14 GB)**. These files are already in the public [Build 76 Release](https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41184526545). The asset library's cumulative deduplicated index is much larger; do not download or repackage it wholesale for every film.
+Total published audio archive size: **1,137,663,374 bytes (about 1.14 GB)**. These files are already in the public [Build 76 Release](https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41184526545). The asset library's cumulative deduplicated index is much larger; do not download or repackage it wholesale for every film.
 
 The URLs and exact byte counts are machine-readable in [SOURCES.json](SOURCES.json). This source map is a starting point, not proof that every sound is appropriate for a specific film. Before a sound enters a final mix, resolve its exact source record, rights, attribution, identity, technical properties and audition status.
 
