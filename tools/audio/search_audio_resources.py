@@ -29,15 +29,38 @@ def fields(item: dict[str, Any]) -> dict[str, str]:
         "credit": str(item.get("attribution_text") or "").casefold(),
     }
 
+def token_variants(term: str) -> set[str]:
+    aliases = {
+        "hoof": {"hoof", "hooves"}, "hooves": {"hoof", "hooves"},
+        "footstep": {"footstep", "footsteps"}, "footsteps": {"footstep", "footsteps"},
+        "sword": {"sword", "swords"}, "swords": {"sword", "swords"},
+        "arrow": {"arrow", "arrows"}, "arrows": {"arrow", "arrows"},
+        "horse": {"horse", "horses"}, "horses": {"horse", "horses"},
+    }
+    if term in aliases:
+        return aliases[term]
+    if len(term) > 4 and term.endswith("s"):
+        return {term, term[:-1]}
+    return {term}
+
 def score_item(item: dict[str, Any], query: str) -> tuple[int, list[str]]:
     terms=tokens(query)
     if not terms: return 1,[]
-    f=fields(item); alltext=" ".join(f.values())
-    if not all(t in alltext for t in terms): return 0,[]
-    score=0
+    f=fields(item)
+    field_tokens={key:set(tokens(value)) for key,value in f.items()}
+    all_tokens=set().union(*field_tokens.values())
+    matched=[]
     for term in terms:
-        score += (6 if term in f["title"] else 0)+(4 if term in f["category"] else 0)+(4 if term in f["tags"] else 0)+(2 if term in f["file"] else 0)+(1 if term in f["source"] else 0)+(1 if term in f["credit"] else 0)
-    return score,terms
+        variants=token_variants(term)
+        if not (variants & all_tokens):
+            return 0,[]
+        matched.append(term)
+    score=0
+    weights={"title":6,"category":4,"tags":4,"file":2,"source":1,"credit":1}
+    for term in terms:
+        variants=token_variants(term)
+        score += sum(weights[key] for key,values in field_tokens.items() if variants & values)
+    return score,matched
 
 def search_catalogs(catalog_paths: Iterable[Path], query: str, *, limit:int=30,
                     include_review_required:bool=False, only_auditioned:bool=False,
