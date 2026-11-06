@@ -116,6 +116,10 @@ def main()->int:
             print(f"  audition={x['audition_status']} | {x['recommended_use']} | score={x['search_score']}")
             if x.get("attribution_text"): print("  attribution="+x["attribution_text"])
             if x.get("source_url"): print("  source="+x["source_url"])
+            if x.get("wav_master_download_url"):
+                print("  WAV master="+x["wav_master_download_url"])
+                print("  WAV member="+str(x.get("source_wav_file") or ""))
+                print("  WAV SHA-256="+str(x.get("wav_master_sha256") or ""))
             print()
     print(f"Matches: {len(results)} (search never approves an unauditioned sample)",file=sys.stderr)
     return 0
