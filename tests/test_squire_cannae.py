@@ -120,7 +120,7 @@ class SquireCannaeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             args, _ = AUTHOR.base_args("close", "Hannibal studies the Carthaginian line.", 75, 0.4, Path(tmp))
         self.assertEqual(args["preset"], "latinOld")
-        self.assertEqual(args["others"][0]["preset"], "latin")
+        self.assertEqual(args["others"][0]["preset"], "hastatus")
 
     def test_title_card_is_only_used_for_the_first_shot_and_maps_are_capped(self):
         usage = {}
@@ -147,7 +147,7 @@ class SquireCannaeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             args, _ = AUTHOR.base_args("close", "Hannibal studies the Carthaginian line.", 75, 0.4, Path(tmp))
         self.assertEqual(args["preset"], "latinOld")
-        self.assertEqual(args["others"][0]["preset"], "latin")
+        self.assertEqual(args["others"][0]["preset"], "hastatus")
 
     def test_squire_top_down_geometry_is_normalized(self):
         with tempfile.TemporaryDirectory() as tmp:
