@@ -11,11 +11,11 @@ The proof is intentionally **picture-only**. No music, ambience or battle Foley 
 The narrative is limited to the central tactical explanation:
 - Cannae was fought in 216 BCE beside the River Aufidus in Apulia.
 - Polybius describes the initial cavalry engagement and the infantry battle; the commonly explained manoeuvre has Hannibal's centre yield under Roman pressure while the wings and cavalry create an enveloping movement.
-- The five scenes here are an original teaching schematic. They are not a surveyed map, a minute-by-minute reconstruction, or a claim that exact unit positions and strengths are known.
+- The five scenes here are an original teaching schematic. They are not a surveyed map, a minute-by-minute reconstruction, or a claim that exact unit positions and strengths are known. In particular, the African infantry wings turn against the exposed Roman flanks while the Carthaginian cavalry movement reaches the rear; the artwork does not depict two symmetrical cavalry wings closing a literal circle.
 
 Sources:
 - Polybius, *Histories*, Book III, battle of Cannae: https://www.fordham.edu/halsall/ancient/polybius-cannae.asp
-- Oxford Classical Dictionary, “Cannae”: https://doi.org/10.1093/acrefore/9780199381135.013.1315
+- Oxford Classical Dictionary, “Cannae”: https://doi.org/10.1093/acrefore/9780199381135.013.1340
 
 Ancient casualty and force-strength figures are omitted. Ancient accounts and modern scholarship differ; this short visual proof does not need a numerical claim.
 
