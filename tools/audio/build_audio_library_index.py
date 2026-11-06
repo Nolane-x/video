@@ -109,7 +109,7 @@ def rights_status(license_value: str | None, explicit_redistributable: Any) -> s
         return "not_approved_for_default_commercial_use"
     if any(term in text for term in ("cc0", "cc-zero", "public domain", "public-domain")):
         return "redistributable_candidate"
-    if "cc-by-sa" in text or "cc by-sa" in text or "cc-by-sa" in text or "cc by sa" in text:
+    if any(term in text for term in ("cc-by-sa", "cc by-sa", "cc by sa", "sharealike", "share-alike", "share alike")):
         return "share_alike_required"
     if any(term in text for term in ("cc-by", "cc by", "attribution")):
         return "attribution_required"
