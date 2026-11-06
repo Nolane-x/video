@@ -148,36 +148,77 @@ def base_args(def base_args(tpl: str, text: str, index: int, progress: float, sf
             }
         cue("drum_hit", "sting_low", at=0.15)
     elif tpl == "top":
-        args = {
-            "ground": {"color": "#c9ad7a", "grass": True, "rocks": True},
-            "blocks": [
-                {"x": 0.64, "y": 0.5, "w": 0.22, "h": 0.34, "cols": 10, "rows": 16, "cell": 0.016, "side": "red", "face": -1},
-                {"x": 0.4, "y": 0.5, "w": 0.2, "h": 0.12, "cols": 9, "rows": 5, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.4, 0.5], [1.6, 0.49, 0.5]]},
-                {"x": 0.34, "y": 0.27, "w": 0.17, "h": 0.1, "cols": 7, "rows": 4, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.34, 0.27], [2, 0.54, 0.32]]},
-                {"x": 0.34, "y": 0.73, "w": 0.17, "h": 0.1, "cols": 7, "rows": 4, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.34, 0.73], [2, 0.54, 0.68]]},
-            ],
-            "zones": [
-                {"x": 0.59, "y": 0.5, "w": 0.26, "h": 0.47, "color": "#8d382f", "at": 0.2, "dur": 0.5, "dashed": True},
-            ],
-            "arrows": [
-                {"from": [0.49, 0.29], "to": [0.58, 0.4], "at": 0.9, "color": CARTHAGE},
-                {"from": [0.49, 0.71], "to": [0.58, 0.6], "at": 1.4, "color": CARTHAGE},
-            ],
+        base = {
+            "ground": {"color": "#c9ad7a" if index % 2 else "#b99c70", "grass": True, "rocks": True},
+            "blocks": [],
+            "zones": [],
+            "arrows": [],
         }
-        if any(k in low for k in ("both flanks", "encirclement", "surrounded", "enclosure", "rear")):
-            args["blocks"] = [
-                {"x": 0.5, "y": 0.5, "w": 0.26, "h": 0.48, "cols": 9, "rows": 16, "cell": 0.016, "side": "red", "face": -1},
-                {"x": 0.23, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.23, 0.5], [2.0, 0.39, 0.5]]},
-                {"x": 0.77, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.77, 0.5], [2.0, 0.61, 0.5]]},
-                {"x": 0.5, "y": 0.15, "w": 0.3, "h": 0.1, "cols": 10, "rows": 3, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.5, 0.15], [2.0, 0.5, 0.32]]},
+        envelopment = any(k in low for k in ("both flanks", "encirclement", "surrounded", "enclosure", "rear", "double envelopment"))
+        yielding = any(k in low for k in ("crescent", "give ground", "giving ground", "folding inward", "folds inward", "centre", "center"))
+        if envelopment:
+            variant = index % 3
+            if variant == 0:
+                base["blocks"] = [
+                    {"x": 0.5, "y": 0.5, "w": 0.26, "h": 0.48, "cols": 9, "rows": 16, "cell": 0.016, "side": "red", "face": -1},
+                    {"x": 0.23, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": 1, "path": [[0, 0.23, 0.5], [2.0, 0.39, 0.5]]},
+                    {"x": 0.77, "y": 0.5, "w": 0.17, "h": 0.42, "cols": 6, "rows": 14, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.77, 0.5], [2.0, 0.61, 0.5]]},
+                    {"x": 0.5, "y": 0.15, "w": 0.3, "h": 0.1, "cols": 10, "rows": 3, "cell": 0.018, "side": "blue", "face": -1, "path": [[0, 0.5, 0.15], [2.0, 0.5, 0.32]]},
+                ]
+                base["arrows"] = [
+                    {"from": [0.23, 0.5], "to": [0.39, 0.5], "at": 0.5, "color": CARTHAGE},
+                    {"from": [0.77, 0.5], "to": [0.61, 0.5], "at": 0.9, "color": CARTHAGE},
+                    {"from": [0.5, 0.15], "to": [0.5, 0.32], "at": 1.3, "color": CARTHAGE},
+                ]
+            elif variant == 1:
+                base["blocks"] = [
+                    {"x": 0.5, "y": 0.52, "w": 0.32, "h": 0.48, "cols": 12, "rows": 18, "cell": 0.015, "side": "red", "face": -1},
+                    {"x": 0.19, "y": 0.5, "w": 0.13, "h": 0.38, "cols": 6, "rows": 13, "cell": 0.018, "side": "blue", "path": [[0, 0.19, 0.5], [1.7, 0.37, 0.5]]},
+                    {"x": 0.81, "y": 0.5, "w": 0.13, "h": 0.38, "cols": 6, "rows": 13, "cell": 0.018, "side": "blue", "path": [[0, 0.81, 0.5], [1.7, 0.63, 0.5]]},
+                    {"x": 0.5, "y": 0.13, "w": 0.36, "h": 0.09, "cols": 12, "rows": 3, "cell": 0.018, "side": "blue"},
+                ]
+                base["arrows"] = [
+                    {"from": [0.16, 0.5], "to": [0.37, 0.5], "at": 0.4, "color": CARTHAGE},
+                    {"from": [0.84, 0.5], "to": [0.63, 0.5], "at": 0.8, "color": CARTHAGE},
+                    {"from": [0.5, 0.12], "to": [0.5, 0.34], "at": 1.2, "color": CARTHAGE},
+                ]
+            else:
+                base["blocks"] = [
+                    {"x": 0.5, "y": 0.55, "w": 0.2, "h": 0.5, "cols": 8, "rows": 19, "cell": 0.016, "side": "red"},
+                    {"x": 0.28, "y": 0.4, "w": 0.16, "h": 0.34, "cols": 7, "rows": 12, "cell": 0.018, "side": "blue", "path": [[0, 0.28, 0.4], [1.8, 0.43, 0.5]]},
+                    {"x": 0.72, "y": 0.4, "w": 0.16, "h": 0.34, "cols": 7, "rows": 12, "cell": 0.018, "side": "blue", "path": [[0, 0.72, 0.4], [1.8, 0.57, 0.5]]},
+                    {"x": 0.5, "y": 0.17, "w": 0.28, "h": 0.08, "cols": 10, "rows": 3, "cell": 0.018, "side": "blue"},
+                ]
+                base["arrows"] = [
+                    {"from": [0.28, 0.35], "to": [0.42, 0.5], "at": 0.45, "color": CARTHAGE},
+                    {"from": [0.72, 0.35], "to": [0.58, 0.5], "at": 0.85, "color": CARTHAGE},
+                ]
+            base["zones"] = [{"x": 0.5, "y": 0.5, "w": 0.58, "h": 0.62, "color": "#8d382f", "at": 0.2, "dur": 0.55, "dashed": True}]
+        elif yielding:
+            base["blocks"] = [
+                {"x": 0.5, "y": 0.43, "w": 0.34, "h": 0.18, "cols": 15, "rows": 6, "cell": 0.017, "side": "blue", "path": [[0, 0.5, 0.43], [1.6, 0.5, 0.55]]},
+                {"x": 0.5, "y": 0.75, "w": 0.2, "h": 0.28, "cols": 10, "rows": 9, "cell": 0.018, "side": "red", "path": [[0, 0.5, 0.75], [1.6, 0.5, 0.57]]},
+                {"x": 0.21, "y": 0.54, "w": 0.15, "h": 0.24, "cols": 6, "rows": 8, "cell": 0.018, "side": "blue"},
+                {"x": 0.79, "y": 0.54, "w": 0.15, "h": 0.24, "cols": 6, "rows": 8, "cell": 0.018, "side": "blue"},
             ]
-            args["arrows"] = [
-                {"from": [0.23, 0.5], "to": [0.39, 0.5], "at": 0.5, "color": CARTHAGE},
-                {"from": [0.77, 0.5], "to": [0.61, 0.5], "at": 0.9, "color": CARTHAGE},
-                {"from": [0.5, 0.15], "to": [0.5, 0.32], "at": 1.3, "color": CARTHAGE},
+            base["arrows"] = [
+                {"from": [0.5, 0.78], "to": [0.5, 0.59], "at": 0.45, "color": ROMAN},
+                {"from": [0.23, 0.52], "to": [0.38, 0.57], "at": 1.0, "color": CARTHAGE},
+                {"from": [0.77, 0.52], "to": [0.62, 0.57], "at": 1.35, "color": CARTHAGE},
             ]
+            base["zones"] = [{"x": 0.5, "y": 0.5, "w": 0.7, "h": 0.48, "color": "#456789", "at": 0.2, "dur": 0.7, "dashed": True}]
+        else:
+            base["blocks"] = [
+                {"x": 0.68, "y": 0.5, "w": 0.17, "h": 0.44, "cols": 8, "rows": 16, "cell": 0.017, "side": "red"},
+                {"x": 0.33, "y": 0.5, "w": 0.23, "h": 0.18, "cols": 11, "rows": 6, "cell": 0.018, "side": "blue"},
+                {"x": 0.27, "y": 0.28, "w": 0.15, "h": 0.1, "cols": 7, "rows": 4, "cell": 0.018, "side": "blue"},
+                {"x": 0.27, "y": 0.72, "w": 0.15, "h": 0.1, "cols": 7, "rows": 4, "cell": 0.018, "side": "blue"},
+            ]
+            base["arrows"] = [{"from": [0.44, 0.5], "to": [0.56, 0.5], "at": 0.8, "color": ROMAN}]
+        base["labels"] = [{"text": "CARTHAGE", "x": 0.24, "y": 0.1, "size": 34, "at": 0.35, "color": CARTHAGE}, {"text": "ROME", "x": 0.76, "y": 0.1, "size": 34, "at": 0.65, "color": ROMAN}]
+        args = base
         cue("battle_roar", "battle_far", at=0.45)
-    elif tpl == "plan":
+    elif tpl == "plan":    elif tpl == "plan":
         args = {
             "paper": "parchment",
             "zones": [
@@ -300,7 +341,7 @@ def base_args(def base_args(tpl: str, text: str, index: int, progress: float, sf
         roman_focus = any(k in low for k in ("roman", "rome", "varro", "paullus", "legion", "consul"))
         horse_focus = any(k in low for k in ("horse", "cavalry", "gallop", "horsemen", "numidian", "riders", "hooves"))
         camp_focus = any(k in low for k in ("camp", "supply", "stores", "river", "tent", "marching", "supplies"))
-        ruins_focus = any(k in low for k in ("citadel", "ruins", "ruined", "town", "stores", "cannae"))
+        ruins_focus = any(k in low for k in ("citadel", "ruins", "ruined", "town"))
         aftermath = any(k in low for k in ("dead", "died", "wounded", "killed", "catastrophic", "disaster", "aftermath", "losses", "blood"))
         crush = any(k in low for k in ("crush", "pressed", "pressing", "shield", "no clear front", "cannot turn", "crowded", "corridor", "packed"))
         red = "hastatus"
