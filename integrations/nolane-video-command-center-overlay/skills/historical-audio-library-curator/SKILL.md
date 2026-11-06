@@ -7,6 +7,14 @@ description: Use when finding, downloading, curating, indexing, licensing or sel
 ## Principle
 Use real recorded/licensed audio as the default foundation. Code-generated tones/noise are a last-mile supplement for designed UI ticks, stylized transitions or genuinely unavailable sounds—not a replacement for horses, footsteps, weapons, crowds, weather, water, room tone, instruments or cinematic music.
 
+## Fast local search before downloads
+
+- Search `audio-library/generated/preview-catalog.json` for Build 76 playable candidates and `audio-library/generated/meta-preview-catalog.json` for Meta Open Sound samples before unpacking archives.
+- Use category/tags, title, creator, source and `rights_class` to shortlist. These records do not prove a sound fits the film; audition candidates before selection.
+- Build 76 currently has 2,446 inventoried items; 2,331 are redistributable candidates with playable previews, 110 require rights review and 5 require source-specific review. Do not use the 115 review entries by default.
+- Meta Open Sound currently has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Preserve the exact Oculus attribution. A sample bank is not 1,583 complete music tracks.
+- Download the entire audio preview artifact only when broad listening is necessary; otherwise fetch the relevant source pack/member to save bandwidth.
+
 ## Existing library first
 The verified Build 76 GitHub Release contains separate audio-category volumes. Read the item-level source manifests and the `docs/audio/HISTORICAL_SOUND_LIBRARY.md` map before building anything new. The current archive families include OpenGameArt, USGS, NASA, Wikimedia Commons, Kenney and a distinct procedural-originals pack. Treat filename/category and rights class as separate facts; an audio ZIP is not proof every item inside is a historical Foley recording.
 
