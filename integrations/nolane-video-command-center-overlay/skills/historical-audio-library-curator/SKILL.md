@@ -15,6 +15,9 @@ Use real recorded/licensed audio as the default foundation. Code-generated tones
 - Meta Open Sound currently has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Preserve the exact Oculus attribution. A sample bank is not 1,583 complete music tracks.
 - Download the entire audio preview artifact only when broad listening is necessary; otherwise fetch the relevant source pack/member to save bandwidth.
 
+## Unified search CLI
+
+Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` to search Build 76 and Meta Open Sound together before downloading. Filter with `--kind foley` or `--kind instrument`; use `--json` for an agent-readable result. Do not include review-required items in normal production queries. Every result keeps its human audition/final-use gate and per-item attribution.
 ## Existing library first
 The verified Build 76 GitHub Release contains separate audio-category volumes. Read the item-level source manifests and the `docs/audio/HISTORICAL_SOUND_LIBRARY.md` map before building anything new. The current archive families include OpenGameArt, USGS, NASA, Wikimedia Commons, Kenney and a distinct procedural-originals pack. Treat filename/category and rights class as separate facts; an audio ZIP is not proof every item inside is a historical Foley recording.
 
