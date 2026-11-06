@@ -1,8 +1,8 @@
-# Nolane Video Command Center v0.9.7
+# Nolane Video Command Center v0.9.8
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.9.7
+## What's new in v0.9.8
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
@@ -26,6 +26,10 @@ The Meta catalog maps each OGG preview to `source_wav_file`, WAV archive, downlo
 ## Private production sound sources
 
 The source map also tracks the Sonniss GDC 2026 bundle as `private_production_only`. Its current EULA allows film/video synchronization but prohibits raw-file sale and AI/ML training. Because the main repository is public, never upload Sonniss source archives or loose recordings to public branches, Releases or preview artifacts; only retain sanitized cue metadata. The licensee must accept the EULA before downloading.
+
+## Historical Foley coverage
+
+The plugin bundles `references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md`: current direct matches, broad tag-only suggestions and gaps such as hoofbeats/cavalry, bow/arrow, shield/spear and battlefield crowd cues. For historical Foley searches prefer `--direct-only` and inspect the candidate audio yourself.
 
 ## How to use
 
