@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build-index:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -31,6 +31,12 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+
+      - name: Install FFmpeg for audio probing
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffprobe -version
 
       - name: Test fail-closed rights and matching rules
         run: python -m unittest discover -s tools/audio -p "test_*.py" -v
@@ -56,6 +62,33 @@ jobs:
           print("Rights", catalog["rights_status_counts"])
           PY
 
+      - name: Extract and validate CC0/Public Domain listening bank
+        run: |
+          set -euo pipefail
+          python tools/audio/build_audio_preview_bundle.py \
+            --catalog build/audio-catalog.json \
+            --download-dir "$RUNNER_TEMP/nolane-audio-library" \
+            --output-dir build/audio-preview-bank
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          catalog = json.loads(Path("build/audio-preview-bank/preview-catalog.json").read_text())
+          assert catalog["summary"]["playable_audio_files"] > 0
+          assert catalog["summary"]["human_auditioned"] == 0
+          assert catalog["summary"]["approved_for_final_mix"] == 0
+          assert (Path("build/audio-preview-bank") / "AUDIO_PREVIEW_BANK.html").is_file()
+          print(json.dumps(catalog["summary"], indent=2))
+          PY
+
+      - name: Upload offline playable audio bank
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-audio-preview-bank-${{ github.run_number }}
+          path: build/audio-preview-bank/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+
       - name: Upload searchable catalog and report
         uses: actions/upload-artifact@v7
         with:
@@ -70,16 +103,25 @@ jobs:
         if: github.ref == 'refs/heads/codex/samurai-cinematic-audio-v1'
         run: |
           set -euo pipefail
-          mkdir -p audio-library/generated
-          cp build/audio-catalog.json audio-library/generated/audio-catalog.json
-          cp build/AUDIO-LIBRARY-REPORT.md audio-library/generated/AUDIO-LIBRARY-REPORT.md
-          python -m json.tool audio-library/generated/audio-catalog.json > /dev/null
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audio-library/generated/audio-catalog.json audio-library/generated/AUDIO-LIBRARY-REPORT.md
-          if git diff --cached --quiet; then
-            echo "Audio catalog is already up to date."
-            exit 0
-          fi
-          git commit -m "Publish generated cinematic audio catalog"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin "${GITHUB_REF_NAME}"
+            git reset --hard FETCH_HEAD
+            mkdir -p audio-library/generated
+            cp build/audio-catalog.json audio-library/generated/audio-catalog.json
+            cp build/AUDIO-LIBRARY-REPORT.md audio-library/generated/AUDIO-LIBRARY-REPORT.md
+            python -m json.tool audio-library/generated/audio-catalog.json > /dev/null
+            git add audio-library/generated/audio-catalog.json audio-library/generated/AUDIO-LIBRARY-REPORT.md
+            if git diff --cached --quiet; then
+              echo "Audio catalog is already up to date."
+              exit 0
+            fi
+            git commit -m "Publish generated cinematic audio catalog"
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "Remote branch moved during publication; rebasing the report onto the latest branch (attempt ${attempt})."
+          done
+          echo "Could not publish metadata after three attempts; downloadable artifacts remain available."
+          exit 1
