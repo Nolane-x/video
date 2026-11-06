@@ -240,13 +240,13 @@ const ShotFour: React.FC<{f:number}> = ({f}) => {
       <path d={`M1700 280 Q1450 70 ${1290-180*p} 370`} fill="none" stroke={CARTHAGE} strokeWidth="22" strokeLinecap="round" strokeDasharray="940" strokeDashoffset={940*(1-arc)}/>
       <path d={`M250 300 Q490 165 ${690+150*p} 425`} fill="none" stroke="#6e513b" strokeWidth="7" strokeDasharray="19 16" opacity=".9"/>
       <path d={`M1670 300 Q1440 160 ${1230-150*p} 425`} fill="none" stroke="#6e513b" strokeWidth="7" strokeDasharray="19 16" opacity=".9"/>
-      <g transform={`translate(${300+620*arc} ${330+200*arc})`}>
-        <Cavalry x={0} y={0} s={.9} phase={f/60} direction={1}/>
+      <path d={`M540 220 Q960 ${40+80*(1-arc)} 1380 220 Q1480 270 1410 365`} fill="none" stroke="#a35b3e" strokeWidth="15" strokeDasharray="28 18" strokeDashoffset={-arc*520} opacity=".85"/>
+      <g transform={`translate(${720+450*arc} ${155+90*arc})`}>
+        <Cavalry x={0} y={0} s={1.0} phase={f/60} direction={1}/>
       </g>
-      <g transform={`translate(${1600-620*arc} ${330+200*arc})`}>
-        <Cavalry x={0} y={0} s={.9} phase={f/53} direction={-1}/>
-      </g>
-      <Label x={960} y={245} size={32} anchor="middle" color="#4c514f" opacity={fade(f,25,65)}>THE TWO WINGS TURN INWARD</Label>
+      <Label x={300} y={510} size={25} anchor="middle" color="#4c514f" opacity={fade(f,25,65)}>AFRICAN INFANTRY</Label>
+      <Label x={1620} y={510} size={25} anchor="middle" color="#4c514f" opacity={fade(f,25,65)}>AFRICAN INFANTRY</Label>
+      <Label x={960} y={245} size={32} anchor="middle" color="#4c514f" opacity={fade(f,25,65)}>THE WINGS TURN — CAVALRY REACHES THE REAR</Label>
       <Label x={960} y={890} size={26} anchor="middle" color="#7d4938">SCHEMATIC TACTICAL VIEW</Label>
       <PaperFrame title="THE WINGS TURN" subtitle="Cavalry movement threatens the exposed rear"/>
     </g>
