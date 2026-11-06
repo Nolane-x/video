@@ -148,8 +148,8 @@ def extract_bank(download_dir: Path, output_dir: Path):
 def write_bank(output_dir: Path,records,licenses):
     summary={"files":len(records),"total_bytes":sum(x["size_bytes"] for x in records),"cc0_files":sum(x["rights_class"]=="cc0_public_domain" for x in records),"cc_by_files":sum(x["rights_class"]=="cc_by_4_attribution_required" for x in records),"human_auditioned":0,"approved_for_final_mix":0}
     payload={"schema_version":"1.0.0","source_repository":REPOSITORY,"source_revision":REVISION,"summary":summary,"assets":records,"policy":"Each collection keeps its own license; all samples still require human audition before final mix."}
-    (output_dir/"meta-preview-catalog.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
-    (output_dir/"ATTRIBUTION.md").write_text("# Attribution\\n\\n"+ATTRIBUTION+"\\n\\nOculus Audio Pack 1 is CC BY 4.0. Meta Piano, Meta Nylon Guitar and Meta Steel Guitar are CC0 1.0. Retain this attribution when using or redistributing the Oculus collection.\\n",encoding="utf-8")
+    (output_dir/"meta-preview-catalog.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    (output_dir/"ATTRIBUTION.md").write_text("# Attribution\n\n"+ATTRIBUTION+"\n\nOculus Audio Pack 1 is CC BY 4.0. Meta Piano, Meta Nylon Guitar and Meta Steel Guitar are CC0 1.0. Retain this attribution when using or redistributing the Oculus collection.\n",encoding="utf-8")
     for name,text in licenses.items(): (output_dir/f"{name}.txt").write_text(text,encoding="utf-8")
     cards=[]
     for item in records:
@@ -167,7 +167,7 @@ def write_bank(output_dir: Path,records,licenses):
 const q=document.getElementById('q'),cards=[...document.querySelectorAll('.card')];function update(){let n=0;const t=q.value.toLowerCase();for(const c of cards){const ok=c.dataset.search.includes(t);c.classList.toggle('hidden',!ok);if(ok)n++}document.getElementById('count').textContent=n+' / '+cards.length+' playable samples'}q.addEventListener('input',update);update();
 </script></html>"""
     (output_dir/"META_AUDIO_PREVIEW_BANK.html").write_text(page,encoding="utf-8")
-    (output_dir/"README.md").write_text("# Meta Open Sound preview bank\\n\\nOpen META_AUDIO_PREVIEW_BANK.html in a browser and search/play the local OGG files. meta-preview-catalog.json records tags, sources, hashes and technical metadata. Oculus requires CC BY 4.0 attribution; the three instrument collections are CC0. All files require human audition before final use.\\n",encoding="utf-8")
+    (output_dir/"README.md").write_text("# Meta Open Sound preview bank\n\nOpen META_AUDIO_PREVIEW_BANK.html in a browser and search/play the local OGG files. meta-preview-catalog.json records tags, sources, hashes and technical metadata. Oculus requires CC BY 4.0 attribution; the three instrument collections are CC0. All files require human audition before final use.\n",encoding="utf-8")
     return summary
 
 def main():
