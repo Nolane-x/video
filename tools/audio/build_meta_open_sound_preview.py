@@ -15,10 +15,10 @@ ATTRIBUTION = (
     "OGG previews transcoded from the original WAVs."
 )
 COLLECTIONS = [
-    {"id":"oculus-audio-pack","archive":"meta-open-sound-oculus-audio-pack-ogg.zip","tag":"oculus-audio-pack-v1.0.0","sha256":"d807c8f4a09512f506f5a6170ef291b2ff4a9783b87dcddf2f458538d25afcb4","size":44626986,"license":"CC-BY-4.0","license_url":"https://creativecommons.org/licenses/by/4.0/","kind":"foley"},
-    {"id":"meta-piano","archive":"meta-open-sound-meta-piano-ogg.zip","tag":"meta-piano-v1.0.0","sha256":"4ba8095f5c2a70396d14f3b9c563f6c9010a093893159bad50e83145e1c35d40","size":48182243,"license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
-    {"id":"meta-nylon-guitar","archive":"meta-open-sound-meta-nylon-guitar-ogg.zip","tag":"meta-nylon-guitar-v1.0.0","sha256":"2ff8f6296cfdb1a98f67116c5091a4f9f01c0c46ac538dd1c5756acc8b76889b","size":16483193,"license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
-    {"id":"meta-steel-guitar","archive":"meta-open-sound-meta-steel-guitar-ogg.zip","tag":"meta-steel-guitar-v1.0.0","sha256":"a06baf193497ba36f20ccb67018e9f106155ad5e4f81d8a672530498038f68ed","size":25440465,"license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
+    {"id":"oculus-audio-pack","archive":"meta-open-sound-oculus-audio-pack-ogg.zip","tag":"oculus-audio-pack-v1.0.0","sha256":"d807c8f4a09512f506f5a6170ef291b2ff4a9783b87dcddf2f458538d25afcb4","size":44626986,"wav_master_url":"https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip","wav_master_size":360146596,"wav_master_sha256":"cc9dcf42d20c339e82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c","license":"CC-BY-4.0","license_url":"https://creativecommons.org/licenses/by/4.0/","kind":"foley"},
+    {"id":"meta-piano","archive":"meta-open-sound-meta-piano-ogg.zip","tag":"meta-piano-v1.0.0","sha256":"4ba8095f5c2a70396d14f3b9c563f6c9010a093893159bad50e83145e1c35d40","size":48182243,"wav_master_url":"https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-piano-v1.0.0/meta-open-sound-meta-piano-wav.zip","wav_master_size":752311261,"wav_master_sha256":"ee9023dbde849ecab393a098aa0cfbd6f2ef48d4a096b9c08808b72fc913f70e","license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
+    {"id":"meta-nylon-guitar","archive":"meta-open-sound-meta-nylon-guitar-ogg.zip","tag":"meta-nylon-guitar-v1.0.0","sha256":"2ff8f6296cfdb1a98f67116c5091a4f9f01c0c46ac538dd1c5756acc8b76889b","size":16483193,"wav_master_url":"https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-nylon-guitar-v1.0.0/meta-open-sound-meta-nylon-guitar-wav.zip","wav_master_size":423479840,"wav_master_sha256":"d76a23d438c7e6002aad61c564173141daac3a89f7bae5400f996d1a59b4eb76","license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
+    {"id":"meta-steel-guitar","archive":"meta-open-sound-meta-steel-guitar-ogg.zip","tag":"meta-steel-guitar-v1.0.0","sha256":"a06baf193497ba36f20ccb67018e9f106155ad5e4f81d8a672530498038f68ed","size":25440465,"wav_master_url":"https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-steel-guitar-v1.0.0/meta-open-sound-meta-steel-guitar-wav.zip","wav_master_size":663385210,"wav_master_sha256":"caaa8a9c07217f4a82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c","license":"CC0-1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/","kind":"instrument"},
 ]
 
 def sha256_file(path: Path) -> str:
@@ -134,7 +134,10 @@ def extract_bank(download_dir: Path, output_dir: Path):
                 records.append({
                   "asset_id":asset_id,"title":summary or Path(info.filename).stem,
                   "file_name":Path(info.filename).name,"archive_name":c["archive"],
-                  "archive_member":info.filename,"collection":c["id"],"collection_kind":c["kind"],
+                  "archive_member":info.filename,"source_wav_file":str(sample.get("file") or ""),
+                  "wav_master_source_url":c["wav_master_url"],"wav_master_archive_name":Path(c["wav_master_url"].split("?")[0]).name,
+                  "wav_master_size_bytes":c["wav_master_size"],"wav_master_sha256":c["wav_master_sha256"],
+                  "collection":c["id"],"collection_kind":c["kind"],
                   "tags":tags,"license":c["license"],"license_url":c["license_url"],
                   "rights_class":"cc_by_4_attribution_required" if c["license"]=="CC-BY-4.0" else "cc0_public_domain",
                   "source_url":f"https://github.com/{REPOSITORY}/tree/{REVISION}/"+("corpora/oculus-audio-pack" if c["id"]=="oculus-audio-pack" else f"systems/instruments/{c['id']}"),
