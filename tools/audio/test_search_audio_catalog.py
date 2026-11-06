@@ -21,7 +21,7 @@ class AudioSearchTests(unittest.TestCase):
             {"title": "unknown recording", "rights_status": "review_required"}
         ]}
         found = search_assets(catalog, "recording", limit=5)
-        self.assertEqual([x["title"] for x in found], ["approved candidate"])
+        self.assertEqual([x["title"] for x in found], ["approved recording candidate"])
 
     def test_search_never_promotes_unheard_audio_to_final(self):
         catalog = {"assets": [
