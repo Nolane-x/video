@@ -40,6 +40,10 @@ Tag each file with controlled terms:
 - **Music:** period-relevant instruments/textures, ceremonial, tense drone, pulse, action ostinato, grief, reflection, resolve, stingers and transitions. Avoid claiming a track is historically authentic without evidence.
 - **Editorial:** whooshes, impacts, risers, reverse swells, transition tails, UI accents and logo cues.
 
+## Sonniss GDC source-only policy
+
+The 2026 Sonniss bundle is a promising private-only SFX source (Historical Weapons Vol. 2 includes shield/spear/sword cues), but it is not a redistributable CC0 library. Check the live EULA before use; current version 2.0 permits synchronization into film/video and commercial projects, forbids raw-file sale and AI/ML training, and requires the licensee to accept the terms at download. The user’s main repo is public: never upload Sonniss raw archives or extracted files to it, its public Releases or its public audio preview artifact. Only maintain a sanitized metadata/cue index. The current agent has not downloaded or accepted this EULA.
+
 ## Source tiers and legal separation
 1. **Redistributable library:** accept only verified CC0 or Public Domain items whose exact item record proves that status. Preserve creator, source landing page, exact file URL, license URL/version, date, hash, size, duration, sample rate, channel count, format and notice. Validate file signature and safe archive paths.
 2. **Project-use tier:** licensed stock can be synchronized into a finished video when item-specific terms allow it, but the raw file stays out of a public asset pack/repository release if redistribution is prohibited.
