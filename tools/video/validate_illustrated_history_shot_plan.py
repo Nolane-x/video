@@ -14,6 +14,9 @@ PHYSICAL_ACTIONS = {"draw", "aim", "release", "impact", "block", "parry", "fall"
 CONTACT_ACTIONS = {"walk", "march", "run"}
 FULL_ACTION_PHASES = {"anticipation", "action", "contact", "reaction", "follow_through", "recovery"}
 REDISTRIBUTABLE = {"public_cc0_pd", "cc_by_4_attribution_required"}
+ACTION_PHASE_ORDER = ["anticipation", "action", "contact", "reaction", "follow_through", "recovery", "settle"]
+VALID_AUDIO_TRACKS = {"narration", "music", "ambience", "character_foley", "prop_foley", "spot_sfx", "transition", "intentional_silence"}
+VALID_ACTIONS = {"none", "walk", "march", "run", "draw", "aim", "release", "impact", "block", "parry", "fall", "board", "row", "gesture", "other_physical"}
 
 
 def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
@@ -46,6 +49,7 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
     consecutive_keys: Counter[str] = Counter()
     previous_key: str | None = None
     seconds_total = 0.0
+    previous_end_frame: int | None = None
     cue_count = 0
     unauditioned_count = 0
 
@@ -65,6 +69,17 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
                 errors.append(f"{prefix}: end_frame must be greater than start_frame and start_frame must be non-negative")
             duration = max(0, end - start) / fps if fps > 0 else 0
             seconds_total += duration
+            if index == 0 and start != 0:
+                errors.append(f"{prefix}: first shot must start at frame 0")
+            if previous_end_frame is not None:
+                if start < previous_end_frame:
+                    errors.append(f"{prefix}: shot overlaps the previous shot by {previous_end_frame - start} frames")
+                elif start > previous_end_frame:
+                    errors.append(f"{prefix}: timeline has a gap of {start - previous_end_frame} frames")
+            previous_end_frame = end
+            target_seconds = project.get("sample_duration_seconds")
+            if isinstance(target_seconds, (int, float)) and fps > 0 and end > round(target_seconds * fps):
+                errors.append(f"{prefix}: end_frame exceeds the declared sample duration")
         except (TypeError, ValueError):
             errors.append(f"{prefix}: start_frame and end_frame must be integers")
             duration = 0
@@ -96,9 +111,19 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"{prefix}: intentional holds must state their visual purpose")
 
         action = str(shot.get("action_type") or "none")
+        if action not in VALID_ACTIONS:
+            errors.append(f"{prefix}.action_type {action!r} is not recognized")
         if action != "none":
             action_types.add(action)
-        phases = set(shot.get("action_phases") or [])
+        phase_list = list(shot.get("action_phases") or [])
+        phases = set(phase_list)
+        if len(phase_list) != len(phases):
+            errors.append(f"{prefix}.action_phases contains duplicates")
+        phase_positions = [ACTION_PHASE_ORDER.index(p) for p in phase_list if p in ACTION_PHASE_ORDER]
+        if phase_positions != sorted(phase_positions):
+            errors.append(f"{prefix}.action_phases are not in causal order")
+        if any(p not in ACTION_PHASE_ORDER for p in phase_list):
+            errors.append(f"{prefix}.action_phases contains an unknown phase")
         required_phases: set[str] = set()
         if action in PHYSICAL_ACTIONS:
             required_phases = FULL_ACTION_PHASES
@@ -120,6 +145,15 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
         else:
             previous_key = None
 
+        for prop_index, prop in enumerate(shot.get("props") or []):
+            if not str(prop.get("prop_id") or "").strip():
+                errors.append(f"{prefix}.props[{prop_index}].prop_id is required")
+            if not str(prop.get("state") or "").strip():
+                errors.append(f"{prefix}.props[{prop_index}].state is required")
+            contact_frame = prop.get("contact_frame")
+            if contact_frame is not None and not (start <= int(contact_frame) < end):
+                errors.append(f"{prefix}.props[{prop_index}].contact_frame must fall inside its shot")
+
         for asset_index, asset in enumerate(shot.get("asset_sources") or []):
             asset_prefix = f"{prefix}.asset_sources[{asset_index}]"
             for field in ("asset_id", "source_url", "license", "rights_class"):
@@ -136,10 +170,18 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             for field in ("cue_id", "track", "sync_event", "rights_class", "audition_status"):
                 if not str(cue.get(field) or "").strip():
                     errors.append(f"{cue_prefix}.{field} is required")
+            if cue.get("track") not in VALID_AUDIO_TRACKS:
+                errors.append(f"{cue_prefix}.track is not recognized")
+            if cue.get("audition_status") not in {"not_auditioned", "auditioned"}:
+                errors.append(f"{cue_prefix}.audition_status must be not_auditioned or auditioned")
             if cue.get("audition_status") == "not_auditioned":
                 unauditioned_count += 1
                 if cue.get("approved_for_final_mix") is True:
                     errors.append(f"{cue_prefix}: an unauditioned cue cannot be approved for final mix")
+            if cue.get("approved_for_final_mix") is True and cue.get("audition_status") != "auditioned":
+                errors.append(f"{cue_prefix}: final approval requires an auditioned cue")
+            if cue.get("approved_for_final_mix") is True and cue.get("rights_class") == "cc_by_4_attribution_required" and not str(cue.get("attribution_text") or "").strip():
+                errors.append(f"{cue_prefix}: approved CC BY cue needs exact attribution_text")
             if cue.get("rights_class") not in {
                 "public_cc0_pd", "cc_by_4_attribution_required", "project_use_only", "private_production_only"
             }:
@@ -160,6 +202,13 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             warnings.append(f"sample target 30-60s: only {len(action_types)} action types; aim for at least 3")
         if len(channels_seen) < 3:
             warnings.append("sample target 30-60s: demonstrate at least 3 independent motion channels across the edit")
+
+    sample_target = project.get("sample_duration_seconds")
+    if isinstance(sample_target, (int, float)) and fps > 0:
+        expected_frames = round(sample_target * fps)
+        actual_end = int(shots[-1].get("end_frame", 0)) if shots else 0
+        if abs(actual_end - expected_frames) > 1:
+            errors.append(f"timeline ends at frame {actual_end}; declared duration requires {expected_frames} frames")
 
     if seconds_total > 0:
         for index, shot in enumerate(shots):
