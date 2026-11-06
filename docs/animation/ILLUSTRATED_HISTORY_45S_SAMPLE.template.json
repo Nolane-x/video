@@ -1,0 +1,285 @@
+{
+  "schema_version": "1.0.0",
+  "project": {
+    "project_id": "illustrated-history-45s-sample",
+    "fps": 24,
+    "style": "illustrated_history",
+    "sample_duration_seconds": 45
+  },
+  "shots": [
+    {
+      "shot_id": "S01-establish-geography",
+      "start_frame": 0,
+      "end_frame": 216,
+      "story_purpose": "Establish the battlefield geography before introducing the opposing forces.",
+      "location": "river plain and distant ridge",
+      "time_of_day": "overcast dawn",
+      "scale": "wide",
+      "angle": "aerial",
+      "composition_key": "river-map-aerial",
+      "template_id": "map-geography-a",
+      "motion_led": true,
+      "motion_channels": [
+        "camera",
+        "environment",
+        "graphics"
+      ],
+      "visual_state_change": "The river contour appears, the plain is highlighted, then two army markers enter the map.",
+      "camera": {
+        "move": "push",
+        "motivation": "Push toward the river bend to direct the viewer to the decisive terrain.",
+        "start": "high wide",
+        "end": "oblique map close",
+        "easing": "ease-in-out"
+      },
+      "action_type": "none",
+      "environment_layers": [
+        {
+          "layer_id": "clouds",
+          "depth": "background",
+          "motion": "cloud layer drifts slowly east"
+        },
+        {
+          "layer_id": "map-grain",
+          "depth": "foreground",
+          "motion": "paper texture remains locked"
+        }
+      ],
+      "graphics": [
+        {
+          "element": "river contour",
+          "reveal_order": 0,
+          "readable_seconds": 2
+        },
+        {
+          "element": "Roman marker",
+          "reveal_order": 1,
+          "readable_seconds": 2
+        },
+        {
+          "element": "opposing marker",
+          "reveal_order": 2,
+          "readable_seconds": 2
+        }
+      ],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "S02-approach",
+      "start_frame": 216,
+      "end_frame": 432,
+      "story_purpose": "Show the infantry column entering the exposed plain and establish direction of travel.",
+      "location": "dusty approach road",
+      "time_of_day": "dawn",
+      "scale": "medium_wide",
+      "angle": "eye_level",
+      "composition_key": "column-approach-side",
+      "template_id": "marching-rig-a",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "environment",
+        "camera"
+      ],
+      "visual_state_change": "The front soldier crosses the frame while the rear ranks and dust reveal the column's depth.",
+      "camera": {
+        "move": "track",
+        "motivation": "Track beside the front rank to establish screen direction and scale.",
+        "start": "left flank",
+        "end": "front third",
+        "easing": "linear"
+      },
+      "characters": [
+        {
+          "character_id": "infantry-front-01",
+          "role": "front-rank soldier",
+          "blocking": "marches left to right",
+          "gaze": "toward the plain",
+          "pose_cycle": "march",
+          "acting_notes": "weight settles on each foot contact"
+        }
+      ],
+      "action_type": "march",
+      "action_phases": [
+        "action",
+        "contact"
+      ],
+      "environment_layers": [
+        {
+          "layer_id": "dust",
+          "depth": "midground",
+          "motion": "dust trails behind boots",
+          "parallax_rate": 0.6
+        }
+      ],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "S03-weapon-contact",
+      "start_frame": 432,
+      "end_frame": 648,
+      "story_purpose": "Make the first weapon contact physically readable and show the reaction of both fighters.",
+      "location": "frontline on the open plain",
+      "time_of_day": "morning",
+      "scale": "close",
+      "angle": "low",
+      "composition_key": "shield-sword-contact-close",
+      "template_id": "weapon-contact-rig-a",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "prop",
+        "camera"
+      ],
+      "visual_state_change": "The defender braces, the blade strikes the shield rim, and the arm recoils under the force.",
+      "camera": {
+        "move": "push",
+        "motivation": "Push into the contact point so the audience reads the material collision.",
+        "start": "medium close",
+        "end": "tight contact insert",
+        "easing": "ease-out"
+      },
+      "characters": [
+        {
+          "character_id": "fighter-a",
+          "role": "attacker",
+          "blocking": "steps into range and swings",
+          "gaze": "on the shield edge"
+        },
+        {
+          "character_id": "fighter-b",
+          "role": "defender",
+          "blocking": "raises shield and absorbs impact",
+          "gaze": "tracks the blade"
+        }
+      ],
+      "action_type": "impact",
+      "action_phases": [
+        "anticipation",
+        "action",
+        "contact",
+        "reaction",
+        "follow_through",
+        "recovery"
+      ],
+      "props": [
+        {
+          "prop_id": "blade-01",
+          "state": "moving into shield rim",
+          "attachment": "attacker right hand",
+          "contact_frame": 552,
+          "reaction": "blade deflects and hand recoils"
+        }
+      ],
+      "audio_cues": [
+        {
+          "cue_id": "blade-contact-preview",
+          "track": "prop_foley",
+          "sync_event": "frame 552 shield-rim contact",
+          "asset_id": "selected-after-audition",
+          "license": "CC-BY-4.0 or another exact item license",
+          "rights_class": "cc_by_4_attribution_required",
+          "audition_status": "not_auditioned",
+          "approved_for_final_mix": false
+        }
+      ]
+    },
+    {
+      "shot_id": "S04-command-map",
+      "start_frame": 648,
+      "end_frame": 864,
+      "story_purpose": "Explain the commander's route choice without interrupting the physical action with another generic battlefield shot.",
+      "location": "field command table",
+      "time_of_day": "morning",
+      "scale": "overhead",
+      "angle": "overhead",
+      "composition_key": "table-map-route-reveal",
+      "template_id": "route-graphic-a",
+      "motion_led": true,
+      "motion_channels": [
+        "graphics",
+        "camera",
+        "environment"
+      ],
+      "visual_state_change": "The route draws from the river crossing to the flank; two markers move into their new positions.",
+      "camera": {
+        "move": "reframe",
+        "motivation": "Reframe from the river to the flank to reveal the tactical consequence.",
+        "start": "whole map",
+        "end": "flank detail",
+        "easing": "ease-in-out"
+      },
+      "action_type": "none",
+      "graphics": [
+        {
+          "element": "route line",
+          "reveal_order": 0,
+          "text": "",
+          "readable_seconds": 3
+        },
+        {
+          "element": "flank marker",
+          "reveal_order": 1,
+          "readable_seconds": 3
+        },
+        {
+          "element": "date label",
+          "reveal_order": 2,
+          "text": "",
+          "readable_seconds": 2
+        }
+      ],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "S05-human-reaction",
+      "start_frame": 864,
+      "end_frame": 1080,
+      "story_purpose": "Return to the human cost with a close reaction after the tactical explanation.",
+      "location": "village edge beyond the field",
+      "time_of_day": "late morning",
+      "scale": "medium_close",
+      "angle": "profile",
+      "composition_key": "civilian-reaction-profile",
+      "template_id": "reaction-rig-a",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "environment",
+        "camera"
+      ],
+      "visual_state_change": "The character looks toward the distant battle, lowers their gaze, and turns away as smoke moves behind the rooftops.",
+      "camera": {
+        "move": "locked",
+        "motivation": "Hold still to let the character's facial change carry the emotional beat.",
+        "start": "profile medium close",
+        "end": "same",
+        "easing": "hold"
+      },
+      "characters": [
+        {
+          "character_id": "civilian-01",
+          "role": "civilian witness",
+          "blocking": "stands at the doorway and slowly turns away",
+          "gaze": "toward distant smoke then down",
+          "acting_notes": "small eye and shoulder movement; no melodramatic gesture"
+        }
+      ],
+      "action_type": "gesture",
+      "action_phases": [
+        "anticipation",
+        "action",
+        "reaction",
+        "settle"
+      ],
+      "environment_layers": [
+        {
+          "layer_id": "smoke",
+          "depth": "background",
+          "motion": "thin smoke column drifts with the wind"
+        }
+      ],
+      "audio_cues": []
+    }
+  ]
+}
