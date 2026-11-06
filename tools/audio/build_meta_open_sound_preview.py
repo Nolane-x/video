@@ -132,11 +132,17 @@ def extract_bank(download_dir: Path, output_dir: Path):
                 else:
                     tags=["instrument",c["id"],Path(info.filename).stem]
                     summary=f"Multisampled {c['id']} instrument sample."
+                wav_master_name=Path(c["wav_master_url"].split("?")[0]).name
+                wav_master_mirror_url=(
+                    f"https://github.com/Nolane-x/video/releases/download/nolane-historical-audio-library-v0.1.0/{wav_master_name}"
+                    if c["id"]=="oculus-audio-pack" else c["wav_master_url"]
+                )
                 records.append({
                   "asset_id":asset_id,"title":summary or Path(info.filename).stem,
                   "file_name":Path(info.filename).name,"archive_name":c["archive"],
                   "archive_member":info.filename,"source_wav_file":str(sample.get("file") or ""),
-                  "wav_master_source_url":c["wav_master_url"],"wav_master_archive_name":Path(c["wav_master_url"].split("?")[0]).name,
+                  "wav_master_source_url":c["wav_master_url"],"wav_master_download_url":wav_master_mirror_url,
+                  "wav_master_archive_name":wav_master_name,
                   "wav_master_size_bytes":c["wav_master_size"],"wav_master_sha256":c["wav_master_sha256"],
                   "collection":c["id"],"collection_kind":c["kind"],
                   "tags":tags,"license":c["license"],"license_url":c["license_url"],
