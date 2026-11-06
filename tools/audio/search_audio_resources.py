@@ -43,28 +43,32 @@ def token_variants(term: str) -> set[str]:
         return {term, term[:-1]}
     return {term}
 
-def score_item(item: dict[str, Any], query: str) -> tuple[int, list[str]]:
+def score_item(item: dict[str, Any], query: str) -> tuple[int, list[str], str]:
     terms=tokens(query)
-    if not terms: return 1,[]
+    if not terms: return 1,[], "direct"
     f=fields(item)
     field_tokens={key:set(tokens(value)) for key,value in f.items()}
     all_tokens=set().union(*field_tokens.values())
+    direct_tokens=field_tokens["title"] | field_tokens["category"] | field_tokens["file"]
     matched=[]
+    all_direct=True
     for term in terms:
         variants=token_variants(term)
         if not (variants & all_tokens):
-            return 0,[]
+            return 0,[], "none"
+        if not (variants & direct_tokens):
+            all_direct=False
         matched.append(term)
     score=0
     weights={"title":6,"category":4,"tags":4,"file":2,"source":1,"credit":1}
     for term in terms:
         variants=token_variants(term)
         score += sum(weights[key] for key,values in field_tokens.items() if variants & values)
-    return score,matched
+    return score,matched,("direct" if all_direct else "tag_assisted")
 
 def search_catalogs(catalog_paths: Iterable[Path], query: str, *, limit:int=30,
                     include_review_required:bool=False, only_auditioned:bool=False,
-                    kind:str|None=None) -> list[dict[str,Any]]:
+                    kind:str|None=None, direct_only:bool=False) -> list[dict[str,Any]]:
     if limit<1: raise ValueError("limit must be at least 1")
     results=[]; seen=set()
     for cp in catalog_paths:
@@ -77,18 +81,19 @@ def search_catalogs(catalog_paths: Iterable[Path], query: str, *, limit:int=30,
             if only_auditioned and not heard: continue
             item_kind=str(raw.get("collection_kind") or raw.get("kind") or "").casefold()
             if kind and item_kind!=kind.casefold(): continue
-            score,matched=score_item(raw,query)
-            if score<=0: continue
+            score,matched,quality=score_item(raw,query)
+            if score<=0 or (direct_only and quality!="direct"): continue
             unique=(str(raw.get("asset_id") or raw.get("id") or ""),str(raw.get("source_url") or raw.get("source_page") or ""),str(raw.get("archive_member") or raw.get("path") or ""))
             if unique in seen: continue
             seen.add(unique)
             out=dict(raw); out["catalog"]=cp.stem; out["rights_status_normalized"]=status
             out["search_score"]=score; out["matched_terms"]=matched
+            out["match_quality"]=quality
             out["audition_status"]="HUMAN_AUDITIONED" if heard else "NOT_AUDITIONED"
             out["final_use_gate"]="human_audition_and_item_level_rights_check_required" if not heard else "project_context_and_mix_check"
             out["recommended_use"]=("instrument_sample_not_finished_music" if item_kind=="instrument" else "foley_or_ambience_candidate" if item_kind=="foley" else "recorded_audio_candidate")
             results.append(out)
-    results.sort(key=lambda x:(-x["search_score"],str(x.get("title") or "").casefold(),str(x.get("archive_member") or x.get("path") or "").casefold()))
+    results.sort(key=lambda x:(0 if x["match_quality"]=="direct" else 1,-x["search_score"],str(x.get("title") or "").casefold(),str(x.get("archive_member") or x.get("path") or "").casefold()))
     return results[:limit]
 
 def main()->int:
@@ -98,6 +103,7 @@ def main()->int:
     p.add_argument("--limit",type=int,default=30)
     p.add_argument("--include-review-required",action="store_true")
     p.add_argument("--only-auditioned",action="store_true")
+    p.add_argument("--direct-only",action="store_true",help="Only return matches in title, category or filename; ignore broad tags-only suggestions.")
     p.add_argument("--kind",choices=("foley","instrument"))
     p.add_argument("--json",action="store_true")
     a=p.parse_args(); paths=a.catalog or DEFAULT_CATALOGS
@@ -106,14 +112,14 @@ def main()->int:
         print("Missing catalog(s): "+", ".join(missing),file=sys.stderr)
         print("Run the build-cinematic-audio-library GitHub Actions workflow first.",file=sys.stderr)
         return 2
-    results=search_catalogs(paths,a.query,limit=a.limit,include_review_required=a.include_review_required,only_auditioned=a.only_auditioned,kind=a.kind)
+    results=search_catalogs(paths,a.query,limit=a.limit,include_review_required=a.include_review_required,only_auditioned=a.only_auditioned,kind=a.kind,direct_only=a.direct_only)
     if a.json: print(json.dumps(results,ensure_ascii=False,indent=2))
     else:
         for x in results:
             title=x.get("title") or x.get("file_name") or x.get("archive_member") or "Untitled"
             print(f"{title} | {x.get('collection_kind') or x.get('category') or ''} | {x['rights_status_normalized']}")
             print(f"  {x.get('archive_name') or x.get('collection','unknown')} :: {x.get('archive_member') or x.get('path') or x.get('file_name','')}")
-            print(f"  audition={x['audition_status']} | {x['recommended_use']} | score={x['search_score']}")
+            print(f"  match={x['match_quality']} | audition={x['audition_status']} | {x['recommended_use']} | score={x['search_score']}")
             if x.get("attribution_text"): print("  attribution="+x["attribution_text"])
             if x.get("source_url"): print("  source="+x["source_url"])
             if x.get("wav_master_download_url"):
