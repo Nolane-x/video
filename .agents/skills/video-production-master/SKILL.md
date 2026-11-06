@@ -5,6 +5,12 @@ description: End-to-end workflow for cinematic code-driven YouTube animation: st
 
 # Video Production Master
 
+## Separate route: illustrated/cartoon history
+
+When a supplied reference uses drawn/illustrated characters, pose-based animation, animated maps, visual explainers and designed historical environments (as in the Samurai reference study dated 2026-11-06), load `.agents/skills/illustrated-history-animation-director/SKILL.md`. This is distinct from footage-led historical documentary and the H2 Squire military-vector series. Use expressive rigs, varied sets, prop acting, environment motion, progressive map/graphic reveals, camera choreography and recurring visual motifs. Do not convert every paragraph into the same map, face close-up or army-row template.
+
+For reference analysis, use `docs/reference-studies/samurai-history-animation-review-2026-11-06.md` as a sampled whole-runtime study with explicitly stated scope; its timestamps and observations are evidence, not a claim of a normal-speed full watch or full subjective audio audition.
+
 ## Separate route: cinematic historical documentaries
 
 The cinematic stick-figure/Remotion/H2 workflow remains available for the established house style, but do not impose it on every historical film. For footage-led, high-motion historical documentaries, user-supplied cinematic references, archival evidence, 2.5D/3D reconstructions and deliberate camera choreography, load the internal skill historical-cinematic-documentary-director and read docs/HISTORICAL_CINEMATIC_DOCUMENTARY_PLAYBOOK.md. H2 Squire is only selected when the user explicitly requests Squire/vector style or an existing Squire series.
