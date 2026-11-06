@@ -3,6 +3,19 @@
 ## Mandatory start sequence
 Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
 
+## Historical military animation — Squire route
+
+When a task explicitly asks for animated historical military history in the Squire look, read `docs/GENRE_ROUTING_MATRIX.md` and `tools/video/genre-routing.json`, then use the dedicated route under `integrations/h2-squire-studio/`. The current mirrored source is the private `h2-squire-studio` v1.2.2 plugin. This is a separate code-drawn vector/canvas engine; do not call it Remotion or H2 Canvas/Chromium.
+
+- Squire projects live in `video-projects/squire/<slug>/`.
+- The first reference production is `video-projects/squire/cannae-216bc/`.
+- Use VoiceStudio's pinned reusable Actions workflow for requested synthetic narration. Select exact voice IDs from the live manifest and retain the complete voice metadata, generated WAV, captions and provenance.
+- Use the Squire engine's real registered templates and presets. Never invent unsupported names.
+- Attribute historical claims, label ancient force/casualty counts as estimates, and label tactical diagrams as reconstructions.
+- Render to a separate Actions candidate and keep its artifact, preview, contact sheets, QA, checksum and review log. Never overwrite the existing H2/Remotion masters.
+- A green Actions run is only a technical gate. Human full-motion/audio review is still required before publication.
+- Keep this work separate from the parallel asset-library ownership boundary below.
+
 ## Non-negotiable requirements
 - Preferred look: cinematic, story-led stick-figure animation. Character simple and reusable; environments, light, camera, props and action carry richness.
 - Do not regress to flat slides, generic gradients, repeated sets, excessive HUDs, pseudo-real AI humans, or zoom-only “motion.”

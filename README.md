@@ -20,6 +20,10 @@ Simple reusable stick-figure characters staged in rich, cinematic environments. 
 
 [Open/activate the private H2 SelfImprove Studio plugin](https://chatgpt.com/plugins/plugins_6ade1c3ca8d0819188070ae20f2792d0). The active Plugin Creator release is **v1.1.0** (`pluginrel_6ade248942988191a57ff1059c818720`), updated and confirmed on 2026-10-25. The 51-file source mirror under [integrations/h2-selfimprove-studio/](integrations/h2-selfimprove-studio/) intentionally preserves the v1.0.2 base source; the production overlay is versioned separately under [integrations/h2-selfimprove-studio-production-overlay/](integrations/h2-selfimprove-studio-production-overlay/). See the [source manifest](integrations/h2-selfimprove-studio/SOURCE-MANIFEST.json), [release result](integrations/h2-selfimprove-studio-production-overlay/RELEASE-RESULT-v1.1.0.md) and [activation notes](docs/CHATGPT_PLUGIN.md).
 
+## Historical military animation — Squire
+
+A dedicated historical-military animation genre uses the native Squire vector/canvas engine and its army, character, horse, map, sound and shot-authoring packs. The current h2-squire-studio v1.2.2 source and both skills are mirrored under [integrations/h2-squire-studio/](integrations/h2-squire-studio/); routing rules live in [the genre matrix](docs/GENRE_ROUTING_MATRIX.md). The first reproducible production is [Cannae — How Hannibal Turned Rome's Army Into a Trap](video-projects/squire/cannae-216bc/README.md), built by [its dedicated GitHub Actions workflow](.github/workflows/squire-cannae-longform.yml). This is a distinct Squire renderer, not Remotion or the existing H2 Canvas/Chromium pipeline.
+
 ## Production architecture
 - **H2 Studio:** primary for the established H2 rig/renderer when its full source and bundled skill are available.
 - **Remotion:** timeline, text, frame-driven composition, compositing and CI. Project: [video-projects/remotion](video-projects/remotion).

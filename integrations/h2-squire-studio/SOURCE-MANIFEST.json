@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "integration": "h2-squire-studio",
+  "plugin": {
+    "name": "h2-squire-studio",
+    "plugin_id": "plugins_6aec6edf62248191b2eb6333f7620cbc",
+    "release_id": "pluginrel_6aed0f69052c8191b54a5e97c5422f75",
+    "version": "1.2.2",
+    "scope": "USER",
+    "discoverability": "PRIVATE",
+    "current": true
+  },
+  "engine": {
+    "package_name": "h2-2d-studio-kit",
+    "package_version": "0.5.1",
+    "repository_path": "integrations/h2-squire-studio/kit",
+    "kind": "code-drawn 2D/vector canvas renderer",
+    "not_equivalent_to": ["Remotion", "H2 Canvas/Chromium"]
+  },
+  "skills": [
+    "integrations/h2-squire-studio/skills/lam-video-squire/SKILL.md",
+    "integrations/h2-squire-studio/skills/kich-ban-squire/SKILL.md"
+  ],
+  "older_upload": {
+    "version": "1.2.1",
+    "sha256": "668b98bff0187748513a15bc7025ff76ac8aea401b49523224e68ba61c2900f7",
+    "used_as_source": false,
+    "reason": "A newer private plugin release v1.2.2 was already present and was mirrored instead."
+  },
+  "voice_service": {
+    "repository": "Nolane-x/VoiceStudio",
+    "workflow": ".github/workflows/render-video-narration.yml",
+    "pinned_commit": "cc5633f5e7840bfb18f759226c1e76d7b6f0b645",
+    "voice_selection": "Dynamic exact-ID selection from the current voice-library-latest manifest; prefers the documented VieNeu Adam English preset, then the highest eligible curated Kokoro grade."
+  },
+  "project_convention": "video-projects/squire/<slug>/",
+  "reference_project": "video-projects/squire/cannae-216bc/",
+  "reference_workflow": ".github/workflows/squire-cannae-longform.yml",
+  "output_policy": "Actions artifacts or explicit GitHub Releases; do not commit generated MP4/WAV masters to ordinary Git history by default."
+}

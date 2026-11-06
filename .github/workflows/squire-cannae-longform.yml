@@ -1,0 +1,257 @@
+name: Squire · Cannae Long-form Film
+
+on:
+  push:
+    branches:
+      - 'squire/cannae-216bc'
+    paths:
+      - '.github/workflows/squire-cannae-longform.yml'
+      - 'integrations/h2-squire-studio/**'
+      - 'video-projects/squire/cannae-216bc/**'
+      - 'tools/video/author_squire_cannae.py'
+      - 'tools/video/prepare_squire_voice_job.py'
+      - 'tools/video/qa_squire_output.py'
+      - 'tests/test_squire_cannae.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-cannae-216bc-${ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-voice:
+    name: Select the best eligible English narrator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      job_json: ${ steps.prepare.outputs.job_json }}
+      voice_id: ${ steps.prepare.outputs.voice_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Select from the current VoiceStudio manifest
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/video/prepare_squire_voice_job.py \
+            --script video-projects/squire/cannae-216bc/01-SCRIPT.md \
+            --output "$RUNNER_TEMP/voice-job.json" \
+            --metadata "$RUNNER_TEMP/voice-selection.json"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])
+          job=json.loads((root/"voice-job.json").read_text(encoding="utf-8"))
+          meta=json.loads((root/"voice-selection.json").read_text(encoding="utf-8"))
+          print("voice_id="+meta["voice_id"])
+          print("job_json<<VOICE_JOB_EOF")
+          print(json.dumps(job,ensure_ascii=False,separators=(",",":")))
+          print("VOICE_JOB_EOF")
+          PY
+      - name: Preserve exact voice selection and source metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-voice-selection-${ github.run_id }}
+          path: ${ runner.temp }}/voice-selection.json
+          if-no-files-found: error
+          retention-days: 30
+
+  voiceover:
+    name: Synthesize and verify the narration
+    needs: prepare-voice
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
+    with:
+      job_json: ${ needs.prepare-voice.outputs.job_json }}
+    permissions:
+      contents: read
+
+  render-squire:
+    name: Align, animate, mix and QA the film
+    needs: [prepare-voice, voiceover]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download VoiceStudio narration bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${ github.run_id }}
+          path: voice-assets
+      - name: Download narrator selection metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-cannae-voice-selection-${ github.run_id }}
+          path: voice-assets
+      - name: Install FFmpeg and pinned alignment dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check \
+            'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' \
+            'pyloudnorm>=0.1.1' 'faster-whisper==1.2.1'
+      - name: Verify VoiceStudio source master and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s voice-assets/narration.wav
+          test -s voice-assets/manifest.json
+          test -s voice-assets/captions.srt
+          test -s voice-assets/captions.vtt
+          test -s voice-assets/voice-selection.json
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("voice-assets")
+          m=json.loads((p/"manifest.json").read_text(encoding="utf-8"))
+          selected=json.loads((p/"voice-selection.json").read_text(encoding="utf-8"))
+          a=m["audio"]
+          digest=hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()
+          assert digest==a["sha256"], "VoiceStudio WAV SHA-256 mismatch"
+          assert m["voice_id"]==selected["voice_id"], "Selected and rendered voice IDs differ"
+          assert a["sample_rate"]==48000 and a["channels"]==1 and a["subtype"]=="PCM_24", a
+          assert a["watermark"]["status"]=="verified", a["watermark"]
+          assert a["checks"]=="passed", a["checks"]
+          print("Verified VoiceStudio master, exact voice ID, PCM-24, SHA-256 and AudioSeal")
+          print("Voice:",m["voice_id"],"| duration:",a["duration_seconds"])
+          PY
+      - name: Build ASR-assisted line and word timing
+        run: python tools/video/align_voicestudio_voiceover.py --artifact-dir voice-assets --model small
+      - name: Compile project scripts and run focused Squire tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/prepare_squire_voice_job.py tools/video/author_squire_cannae.py tools/video/qa_squire_output.py tests/test_squire_cannae.py
+          python tests/test_squire_cannae.py
+      - name: Install and verify the vendored Squire 1.2.2 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          test -s "$KIT/render.mjs"
+          test -s "$KIT/packs/squire/pack.js"
+          test -s "$KIT/packs/squire/army.js"
+          test -s "$KIT/engine/core.js"
+          test -s "$KIT/tools/mix.py"
+          echo "SQUIRE_KIT=$KIT" >> "$GITHUB_ENV"
+      - name: Create Squire project and bind the measured narration timeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$SQUIRE_KIT"
+          PROJ="$KIT/projects/cannae-216bc"
+          python "$KIT/tools/new_project.py" \
+            --name cannae-216bc \
+            --title "How Hannibal Turned Rome's Army Into a Trap" \
+            --aspect 16:9 --resolution 1080p --style flat --pack squire --lang en
+          cp video-projects/squire/cannae-216bc/config.json "$PROJ/config.json"
+          cp video-projects/squire/cannae-216bc/01-SCRIPT.md "$PROJ/story/narration.txt"
+          cp video-projects/squire/cannae-216bc/story/bible.md "$PROJ/story/bible.md"
+          cp video-projects/squire/cannae-216bc/story/03-VISUAL-DIRECTION.md "$PROJ/story/03-VISUAL-DIRECTION.md"
+          cp video-projects/squire/cannae-216bc/story/05-PACKAGING.md "$PROJ/story/05-PACKAGING.md"
+          cp video-projects/squire/cannae-216bc/scenes/shots/thumb.js "$PROJ/scenes/shots/thumb.js"
+          cp voice-assets/h2-timeline/timeline/voice.wav "$PROJ/timeline/voice.wav"
+          cp voice-assets/h2-timeline/timeline/blocks.json voice-assets/h2-timeline/timeline/lines.json \
+             voice-assets/h2-timeline/timeline/words.json voice-assets/h2-timeline/timeline/transcript.txt \
+             "$PROJ/timeline/"
+          cp voice-assets/h2-timeline/alignment-report.json "$PROJ/story/alignment-report.json"
+          cp voice-assets/manifest.json "$PROJ/story/voice-manifest.json"
+          cp voice-assets/voice-selection.json "$PROJ/story/voice-selection.json"
+          cp voice-assets/captions.srt "$PROJ/story/captions.srt"
+          cp voice-assets/captions.vtt "$PROJ/story/captions.vtt"
+          echo "SQUIRE_PROJECT=$PROJ" >> "$GITHUB_ENV"
+      - name: Install Squire Node runtime and Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Generate Squire procedural music and battle SFX
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python audio/build_audio.py
+          python tools/doctor.py
+      - name: Draft voice-timed shots and author Cannae tactics
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/draft_shots.py --project projects/cannae-216bc --min 1.6 --max 4.5 --force
+          cd "$GITHUB_WORKSPACE"
+          python tools/video/author_squire_cannae.py --project "$SQUIRE_PROJECT"
+      - name: Run Squire scene scan and render contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/cannae-216bc --check --scale 0.25 2>&1 | tee projects/cannae-216bc/build/check.log
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' projects/cannae-216bc/build/check.log; then
+            echo "Squire scene scan found missing or broken shots."
+            exit 1
+          fi
+          node render.mjs --project projects/cannae-216bc --sheet --scale 0.4 --at 0.7 2>&1 | tee projects/cannae-216bc/build/contact-sheet.log
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' projects/cannae-216bc/build/contact-sheet.log; then
+            echo "Squire contact sheet found missing or broken shots."
+            exit 1
+          fi
+      - name: Render a moving 45-second preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/cannae-216bc --from 0 --to 45 --workers 2 --crf 21 2>&1 | tee projects/cannae-216bc/build/preview.log
+      - name: Render the complete 1080p Squire candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/cannae-216bc --workers 4 --crf 19 2>&1 | tee projects/cannae-216bc/build/full-render.log
+      - name: Mix verified narration, procedural score and SFX; build thumbnail
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/mix.py --project projects/cannae-216bc
+          node render.mjs --project projects/cannae-216bc --thumb
+      - name: Run technical QA and create evidence bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/video/qa_squire_output.py --project "$SQUIRE_PROJECT" --voice-assets "$GITHUB_WORKSPACE/voice-assets"
+          mkdir -p "$RUNNER_TEMP/squire-delivery"
+          cp -a "$SQUIRE_PROJECT/out/." "$RUNNER_TEMP/squire-delivery/"
+          cp -a "$SQUIRE_PROJECT/build/sheets" "$RUNNER_TEMP/squire-delivery/contact-sheets"
+          cp "$SQUIRE_PROJECT/build/preview.mp4" "$RUNNER_TEMP/squire-delivery/preview-45s.mp4"
+          cp "$SQUIRE_PROJECT/build/mix.wav" "$RUNNER_TEMP/squire-delivery/final-mix.wav"
+          cp "$SQUIRE_PROJECT/timeline/voice.wav" "$RUNNER_TEMP/squire-delivery/narration-timeline.wav"
+          cp "$SQUIRE_PROJECT/story/QA-REPORT.md" "$SQUIRE_PROJECT/story/QA-REPORT.json" "$RUNNER_TEMP/squire-delivery/"
+          cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-manifest.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$RUNNER_TEMP/squire-delivery/"
+          cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$RUNNER_TEMP/squire-delivery/"
+          cp voice-assets/h2-timeline.zip "$RUNNER_TEMP/squire-delivery/"
+          cp video-projects/squire/cannae-216bc/01-SCRIPT.md video-projects/squire/cannae-216bc/story/research.md "$RUNNER_TEMP/squire-delivery/"
+          (cd "$RUNNER_TEMP/squire-delivery" && sha256sum *.mp4 *.wav *.srt *.vtt *.json *.zip > SHA256SUMS.txt)
+      - name: Upload Cannae master candidate and production evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-216bc-master-${ github.run_id }}
+          path: ${ runner.temp }}/squire-delivery/
+          if-no-files-found: error
+          retention-days: 30

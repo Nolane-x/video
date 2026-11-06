@@ -1,0 +1,30 @@
+{
+  "author": {
+    "email": "casioreview20@gmail.com",
+    "name": "Sio Ca"
+  },
+  "description": "Animated English military-history video production with Squire's code-drawn 2D vector engine, historically grounded characters, horses, armies, parchment maps, tactical diagrams, procedural music/SFX, thumbnails, and a GitHub Actions production lane for Nolane-x/video using VoiceStudio narration.",
+  "interface": {
+    "capabilities": [],
+    "category": "Other",
+    "defaultPrompt": null,
+    "developerName": "Sio Ca",
+    "displayName": "h2-squire-studio",
+    "longDescription": "H2 Squire Studio creates long-form and short animated military-history videos using code-drawn 2D vector animation. It includes historical storytelling, the Squire engine, period character/horse/army packs, parchment maps, tactical diagrams, procedural music and sound effects, voice preparation, thumbnails and production QA. In Nolane-x/video, use the public source integration and GitHub Actions workflow for automated VoiceStudio narration and cloud rendering.",
+    "screenshots": [],
+    "shortDescription": "Animated military-history video production with Squire vector animation, procedural audio and GitHub Actions rendering."
+  },
+  "keywords": [
+    "video",
+    "animated history",
+    "military history",
+    "knights",
+    "longform video",
+    "shorts",
+    "GitHub Actions",
+    "VoiceStudio",
+    "Squire"
+  ],
+  "name": "h2-squire-studio",
+  "version": "1.2.2"
+}

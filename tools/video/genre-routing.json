@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Genre-to-engine routing contract. Genres choose a primary production recipe; conditional tools never silently replace the primary renderer.",
+  "profiles": {
+    "historical-military-animation": {
+      "when": "User explicitly requests animated ancient, medieval, samurai, Viking or other military history in the Squire vector-animation look.",
+      "primaryEngine": "H2 Squire 2D/vector",
+      "creativeOwners": [
+        "historical-military-animation-director",
+        "cinematic-storytelling",
+        "editorial-timeline-architect"
+      ],
+      "specialistPlugin": {
+        "name": "h2-squire-studio",
+        "version": "1.2.2",
+        "pluginId": "plugins_6aec6edf62248191b2eb6333f7620cbc",
+        "activation": "explicit-host-activation"
+      },
+      "primaryTools": [
+        "integrations/h2-squire-studio/kit",
+        "VoiceStudio reusable GitHub Actions narration workflow",
+        "FFmpeg",
+        "ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender for selected shots that materially benefit from real 3D depth or simulation",
+        "Krita for painted map or texture inserts",
+        "Playwright for browser-rendered scene QA"
+      ],
+      "requiredEvidence": [
+        "Historical claim/source ledger",
+        "Script and voice-selection metadata",
+        "VoiceStudio PCM-24 WAV, captions and verified watermark manifest",
+        "ASR-assisted line/word timing report with interpolation clearly labelled",
+        "Squire storyboard and contact sheets",
+        "45-second preview and full MP4 candidate",
+        "Audio loudness/true-peak and ffprobe measurements",
+        "SHA-256 checksums and full-motion/audio human-review log"
+      ],
+      "guardrails": [
+        "Do not substitute Remotion and call it Squire.",
+        "Treat ancient troop counts and casualty counts as estimates and attribute them.",
+        "Label visual formations as explanatory reconstructions.",
+        "Use historically appropriate but source-backed presets; identify generic character presets as visual shorthand.",
+        "Do not overwrite archived masters or alter the parallel asset-library workstream.",
+        "A technical pass is not human artistic approval."
+      ],
+      "qaChecks": [
+        "Voice ID resolves against the live manifest and published eligibility metadata.",
+        "Voice WAV checksum, PCM format and VoiceStudio watermark all pass.",
+        "Narration timeline preserves source WAV bytes and identifies ASR/interpolated words.",
+        "All Squire templates exist and no shot is longer than eight seconds without an editorial reason.",
+        "Contact sheets contain no missing shot/template/import errors.",
+        "Final output is 1920x1080, 24 fps, H.264 with AAC stereo 48 kHz.",
+        "Integrated loudness is approximately -14 LUFS and true peak remains below -1 dBTP.",
+        "Preview and complete moving-picture/audio review are retained separately."
+      ],
+      "referenceProject": "video-projects/squire/cannae-216bc",
+      "referenceWorkflow": ".github/workflows/squire-cannae-longform.yml"
+    },
+    "cinematic-stick-figure-narrative": {
+      "when": "User requests the established emotional, story-led stick-figure cinematic look.",
+      "primaryEngine": "Existing H2 Canvas/Chromium or Remotion, selected per existing project",
+      "creativeOwners": [
+        "video-cinematic-director",
+        "cinematic-storytelling",
+        "video-production-director"
+      ],
+      "primaryTools": [
+        "Existing H2/Remotion project",
+        "FFmpeg",
+        "ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender",
+        "Krita",
+        "Playwright"
+      ],
+      "requiredEvidence": [
+        "Story bible and storyboard",
+        "Contact sheets and motion frame samples",
+        "Narration/music/SFX mix measurements",
+        "Final candidate checksum and full-motion/audio review"
+      ],
+      "guardrails": [
+        "Preserve existing H2/Remotion engine distinction.",
+        "Do not switch to Squire unless the user requests Squire military history."
+      ],
+      "qaChecks": [
+        "Character continuity and contact physics are inspected.",
+        "Shot variety and motivated camera movement are verified.",
+        "Captions are readable and synchronized.",
+        "Audio and full-film review are complete."
+      ]
+    },
+    "mathematical-scientific-explainer": {
+      "when": "User requests mathematics, science or technical concepts that benefit from geometric or data-driven explanation.",
+      "primaryEngine": "Manim or Remotion according to mathematical complexity and editorial needs",
+      "creativeOwners": [
+        "manim-explainer-director",
+        "video-cinematic-director",
+        "editorial-timeline-architect"
+      ],
+      "primaryTools": [
+        "Manim",
+        "Remotion",
+        "FFmpeg",
+        "ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender for physical 3D concepts",
+        "Krita for authored illustrations"
+      ],
+      "requiredEvidence": [
+        "Equation/fact validation",
+        "Storyboard and narration timing",
+        "Render preview and full technical QA"
+      ],
+      "guardrails": [
+        "Mathematical correctness takes priority over decorative motion.",
+        "Do not animate a false derivation or misleading graph."
+      ],
+      "qaChecks": [
+        "Equations and labels are readable.",
+        "Graph scales and units are correct.",
+        "No key transformation is skipped in the explanation."
+      ]
+    },
+    "product-ui-walkthrough": {
+      "when": "User requests a product or UI walkthrough that must reflect real application state.",
+      "primaryEngine": "Authorized Playwright browser capture plus Remotion editorial timeline",
+      "creativeOwners": [
+        "browser-capture-director",
+        "video-production-director",
+        "video-caption-qa-engineer"
+      ],
+      "primaryTools": [
+        "Playwright",
+        "Remotion",
+        "FFmpeg",
+        "ffprobe"
+      ],
+      "conditionalTools": [
+        "Blender for illustrative inserts",
+        "Krita for custom diagrams"
+      ],
+      "requiredEvidence": [
+        "Capture source URL and authorization",
+        "Actual browser screenshots or recordings",
+        "Timeline, captions and final output checksums"
+      ],
+      "guardrails": [
+        "Do not fabricate product states or claim an interaction occurred if it was not observed.",
+        "Redact private data and credentials.",
+        "Do not bypass access controls."
+      ],
+      "qaChecks": [
+        "Every shown interaction corresponds to captured evidence.",
+        "UI text is legible at delivery resolution.",
+        "No credentials, private user data or unintended tabs are shown."
+      ]
+    },
+    "cinematic-3d-sequence": {
+      "when": "A sequence materially benefits from spatial geometry, lighting, camera or physical simulation.",
+      "primaryEngine": "Blender",
+      "creativeOwners": [
+        "3d-vfx-engineering",
+        "video-3d-vfx-engineer",
+        "video-cinematic-director"
+      ],
+      "primaryTools": [
+        "Blender",
+        "FFmpeg",
+        "ffprobe"
+      ],
+      "conditionalTools": [
+        "Remotion for compositing and title integration",
+        "Krita for paint-over and texture"
+      ],
+      "requiredEvidence": [
+        "Scene file and render settings",
+        "Preview/contact sheet",
+        "Final shot metadata and checksum"
+      ],
+      "guardrails": [
+        "Use 3D only when it materially improves the shot.",
+        "Keep render settings and assets reproducible."
+      ],
+      "qaChecks": [
+        "Camera, geometry, lighting and frame sequence are validated.",
+        "No missing frames or unresolved render errors."
+      ]
+    }
+  }
+}
