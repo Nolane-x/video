@@ -3,6 +3,12 @@
 ## Mandatory start sequence
 Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/STATE.md`, (3) `docs/AI_HANDOFF.md`, (4) `docs/ART_DIRECTION_IFVERSE_DAYONE.md`, (5) `video-library/README.md`, (6) `video-library/reference-clips.json`, (7) `video-library/one-more-scroll/manifest.json` and `QA.md`, (8) `video-projects/remotion/README.md`, (9) `video-projects/remotion/public/story/bible.md`, (10) `video-projects/remotion/public/story/shots.json`. Then inspect current HEAD, relevant Actions/logs/artifacts, and the actual files.
 
+## Genre routing and audio-library precedence
+
+The default cinematic stick-figure preference applies to that established series only; it is not a universal visual style. When a supplied reference or brief calls for illustrated/cartoon history, use .agents/skills/illustrated-history-animation-director/SKILL.md and record the reference-study scope. For footage-led cinematic history, use the Command Center historical-cinematic-documentary route. Use H2 Squire only when the user explicitly selects that vector style or continues an existing Squire film.
+
+For historical/illustrated productions, search audio-library/README.md and audio-library/SOURCES.json plus docs/audio/HISTORICAL_SOUND_LIBRARY.md before creating or acquiring sound. Recorded/licensed Foley, ambience and music are the default; procedural sound is a placeholder or supplement. Maintain exact per-item rights/provenance and human audition status. Do not move private or project-use-only raw sound into public GitHub archives.
+ 
 ## Non-negotiable requirements
 - Preferred look: cinematic, story-led stick-figure animation. Character simple and reusable; environments, light, camera, props and action carry richness.
 - Do not regress to flat slides, generic gradients, repeated sets, excessive HUDs, pseudo-real AI humans, or zoom-only “motion.”
