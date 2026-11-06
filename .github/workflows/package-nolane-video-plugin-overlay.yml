@@ -57,18 +57,20 @@ jobs:
           
           PY
 
-      - name: Create plugin-root ZIP archive
+      - name: Prepare plugin-root directory
         run: |
           set -euo pipefail
-          mkdir -p dist
-          (cd integrations/nolane-video-command-center-overlay && zip -qr ../../dist/nolane-video-command-center-0.9.2.zip .)
-          unzip -l dist/nolane-video-command-center-0.9.2.zip | head -60
-          test -s dist/nolane-video-command-center-0.9.2.zip
+          mkdir -p dist/plugin-root
+          cp -a integrations/nolane-video-command-center-overlay/. dist/plugin-root/
+          test -s dist/plugin-root/plugin.json
+          test -s dist/plugin-root/skills/illustrated-history-animation-director/SKILL.md
+          test -s dist/plugin-root/references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md
+          find dist/plugin-root -type f | sort | head -80
 
-      - name: Upload overlay plugin archive
+      - name: Upload plugin-root directory as a direct artifact
         uses: actions/upload-artifact@v7
         with:
           name: nolane-video-command-center-plugin-0.9.2
-          path: dist/nolane-video-command-center-0.9.2.zip
+          path: dist/plugin-root/
           if-no-files-found: error
           retention-days: 14
