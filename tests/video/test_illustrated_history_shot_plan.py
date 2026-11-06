@@ -111,6 +111,19 @@ class IllustratedHistoryShotPlanTests(unittest.TestCase):
         result = validate_plan(plan)
         self.assertTrue(any("exact attribution_text" in error for error in result["errors"]))
 
+    def test_cannae_45s_plan_passes_complete_motion_gates(self):
+        import json
+        root = Path(__file__).resolve().parents[2]
+        plan = json.loads((root / "docs/animation/CANNAE_ILLUSTRATED_45S_SHOT_PLAN.json").read_text(encoding="utf-8"))
+        result = validate_plan(plan)
+        self.assertEqual(result["status"], "pass", result["errors"])
+        self.assertEqual(result["summary"]["shot_count"], 5)
+        self.assertEqual(result["summary"]["duration_seconds"], 45.0)
+        self.assertEqual(result["summary"]["distinct_scales"], 5)
+        self.assertGreaterEqual(result["summary"]["distinct_angles"], 5)
+        self.assertEqual(result["summary"]["unauditioned_audio_cues"], 0)
+        self.assertEqual(result["summary"]["audio_cues"], 0)
+
     def test_three_consecutive_same_compositions_fail(self):
         shots = []
         for i in range(3):
