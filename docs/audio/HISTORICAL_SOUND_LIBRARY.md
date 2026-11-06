@@ -28,7 +28,7 @@ This repository contributes **1,583 audio files**: 508 OGG files in the Oculus A
 
 | Collection | Preview archive | License | Production master |
 |---|---:|---|---|
-| Oculus Audio Pack 1 | 44,626,986 bytes | CC BY 4.0; exact attribution required | [WAV 360,146,596 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip) |
+| Oculus Audio Pack 1 | 44,626,986 bytes | CC BY 4.0; exact attribution required | [WAV master mirror 360,146,596 bytes](https://github.com/Nolane-x/video/releases/download/nolane-historical-audio-library-v0.1.0/meta-open-sound-oculus-audio-pack-wav.zip) |
 | Meta Piano | 48,182,243 bytes | CC0 1.0 | [WAV 752,311,261 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-piano-v1.0.0/meta-open-sound-meta-piano-wav.zip) |
 | Meta Nylon Guitar | 16,483,193 bytes | CC0 1.0 | [WAV 423,479,840 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-nylon-guitar-v1.0.0/meta-open-sound-meta-nylon-guitar-wav.zip) |
 | Meta Steel Guitar | 25,440,465 bytes | CC0 1.0 | [WAV 663,385,210 bytes](https://github.com/facebookincubator/Meta-open-sound/releases/download/meta-steel-guitar-v1.0.0/meta-open-sound-meta-steel-guitar-wav.zip) |
@@ -41,7 +41,7 @@ The Oculus pack is recorded Foley/ambience (46.8 minutes; 48 kHz, 16-bit; 456 mo
 
 Meta Piano, Meta Nylon Guitar and Meta Steel Guitar are separate CC0 collections. Do not apply CC0 to the Oculus pack or infer one collection's license from the repository-level license. The build script pins the source commit and SHA-256 of each OGG Release archive, extracts an offline search/player catalog, stores collection licenses and attribution in the output, and marks all cues NOT AUDITIONED until a person reviews them.
 
-For high-quality production, use the matching WAV masters linked above. OGGs are for compact preview and selection. The instrument master collections are 24-bit/48 kHz; Oculus master is 16-bit/48 kHz, according to the pinned repository's collection documentation.
+For high-quality production, use the matching WAV masters linked above. OGGs are for compact preview and selection. The instrument master collections are 24-bit/48 kHz; Oculus master is 16-bit/48 kHz, according to the pinned repository's collection documentation. The first WAV master (Oculus) has been hash-verified and mirrored permanently. To add one of the piano/guitar masters, run `.github/workflows/acquire-meta-open-sound-wav-master.yml` and select only that collection; it verifies its pinned SHA-256 before publishing to the same Release.
 
 ## Search both generated indexes with one command
 
