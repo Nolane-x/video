@@ -18,7 +18,7 @@ Recorded/licensed sound is the default. Procedural WAV presets are placeholders 
 - private_production_only: private licensed cache; never add raw media to public GitHub packs.
 - blocked: unclear, conflicting or unsuitable rights; do not use.
 
-Sonniss GDC 2026 must be kept private: current EULA permits film synchronization but prohibits raw sound resupply and AI/ML training. Mixkit is item/license-specific and source-only by default. Do not confuse software or collection licenses with an individual media file's license.
+NASA media belongs in government_media_conditions: apply item-level NASA Media Usage Guidelines, retain credit and do not imply endorsement; it is not labelled CC0. Sonniss GDC 2026 must be kept private: current EULA permits film synchronization but prohibits raw sound resupply and AI/ML training. Mixkit is item/license-specific and source-only by default. Do not confuse software or collection licenses with an individual media file's license.
 
 ## Editorial use
 Create separate narration, score, ambience, character Foley, prop Foley, spot SFX, transition and intentional-silence tracks. Sync transients to visible contact; layer near/far perspective; do not reuse one generic clang for every hit. Listen to the complete final film at normal speed. Loudness/metadata checks do not replace human audition.
