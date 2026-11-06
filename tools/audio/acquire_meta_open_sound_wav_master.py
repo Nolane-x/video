@@ -20,7 +20,10 @@ def main()->int:
     data=json.loads(a.sources.read_text(encoding="utf-8"))
     meta=next(x for x in data["external_sources"] if x["id"]=="meta-open-sound")
     item=next(x for x in meta["release_assets"] if x["collection"]==a.collection)
+    collection=next(x for x in meta.get("collections",[]) if x["id"]==a.collection)
     url=item["wav_master_url"]; expected_size=int(item["wav_master_size_bytes"]); expected_sha=item["wav_master_sha256"].lower()
+    license_url=item.get("license_url") or collection.get("license_url")
+    license_name=item.get("license") or collection.get("license")
     filename=Path(urlparse(url).path).name
     a.output_dir.mkdir(parents=True,exist_ok=True)
     dest=a.output_dir/filename
@@ -41,7 +44,7 @@ def main()->int:
     print(json.dumps({
         "collection":a.collection,"archive":dest.name,"path":str(dest),
         "size_bytes":dest.stat().st_size,"sha256":digest,
-        "license":item["license"],"license_url":item["license_url"],
+        "license":license_name,"license_url":license_url,
         "source_url":url,"release_tag":meta["permanent_mirror_release"]["tag"]
     },indent=2))
     return 0
