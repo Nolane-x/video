@@ -141,10 +141,14 @@
           "download_url": "https://github.com/Nolane-x/video/releases/download/nolane-historical-audio-library-v0.1.0/meta-open-sound-oculus-audio-pack-ogg.zip",
           "wav_master_size_bytes": 360146596,
           "wav_master_sha256": "cc9dcf42d20c339e82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c",
-          "wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip",
+          "wav_master_url": "https://github.com/Nolane-x/video/releases/download/nolane-historical-audio-library-v0.1.0/meta-open-sound-oculus-audio-pack-wav.zip",
           "source_download_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-ogg.zip",
           "mirror_release_tag": "nolane-historical-audio-library-v0.1.0",
-          "archive_sha256": "d807c8f4a09512f506f5a6170ef291b2ff4a9783b87dcddf2f458538d25afcb4"
+          "archive_sha256": "d807c8f4a09512f506f5a6170ef291b2ff4a9783b87dcddf2f458538d25afcb4",
+          "source_wav_master_url": "https://github.com/facebookincubator/Meta-open-sound/releases/download/oculus-audio-pack-v1.0.0/meta-open-sound-oculus-audio-pack-wav.zip",
+          "wav_master_mirror_release_tag": "nolane-historical-audio-library-v0.1.0",
+          "wav_master_mirror_sha256": "cc9dcf42d20c339e82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c",
+          "wav_master_mirror_size_bytes": 360146596
         },
         {
           "collection": "meta-piano",
