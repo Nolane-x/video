@@ -476,7 +476,6 @@ def base_args(def base_args(tpl: str, text: str, index: int, progress: float, sf
             else:
                 cue("battle_far", "wind_loop", at=0.2)
 
-    if tpl not in VALID_TEMPLATES:
     args.setdefault("seed", seed)
     args.setdefault("move", ("in", "left", "out", "right", "up", "still")[index % 6])
     args.setdefault("moveAmt", 0.018 + (index % 4) * 0.006)
