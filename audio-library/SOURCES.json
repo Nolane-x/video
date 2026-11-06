@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "release": "video-asset-library-build-41184526545",
   "release_url": "https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41184526545",
-  "note": "Archive-level index only. Each contained media item retains its own source and license; verify and audition before use.",
+  "note": "Archive-level index only. SHA-256 values are pinned to the Build 76 GitHub Release. Each contained media item retains its own source and license; verify and audition before use.",
   "sources": [
     {
       "id": "opengameart-audio",
@@ -19,7 +19,9 @@
         "music",
         "ui"
       ],
-      "priority": "high"
+      "priority": "high",
+      "sha256": "b43bbac5ae7dc505dfd512ea714505c3ac5f210ec83a6f6aa09a94595fc031db",
+      "manifest_sha256": "2e963c60914519db098d907de01617105b8e093681e5c914cf53044c4de0d441"
     },
     {
       "id": "usgs-audio",
@@ -35,13 +37,15 @@
         "animals",
         "field-recordings"
       ],
-      "priority": "high"
+      "priority": "high",
+      "sha256": "1f70a2ac8fcb6af2f242cb46db29829a8d70756bd1f0cb016da8332e3403ce87",
+      "manifest_sha256": "ed52f4a7ee13cdecd374771ff93c862306dcda902d2b2c9b09b4730aa9f5a4f4"
     },
     {
       "id": "nasa-audio",
       "archive": "video-assets-nasa-audio-001.zip",
       "size_bytes": 165256750,
-      "rights_class": "project_use_only",
+      "rights_class": "government_media_conditions",
       "license_gate": "NASA media usage guidelines and item-level copyright/context review; not CC0",
       "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-nasa-audio-001.zip",
       "tags": [
@@ -50,7 +54,9 @@
         "mechanical",
         "communications"
       ],
-      "priority": "medium"
+      "priority": "medium",
+      "sha256": "0a44be52ef4728c8b22f3516c6e616f276e263f9caa713e5f9ef618340d791a6",
+      "manifest_sha256": "4ebfc929f5e0ff00d2b59f9f57ed0788b05e028f2116b69a6b9f1c24eb12cfc8"
     },
     {
       "id": "wikimedia-audio",
@@ -66,7 +72,9 @@
         "historic-broadcast",
         "field-recording"
       ],
-      "priority": "high"
+      "priority": "high",
+      "sha256": "49e66b9855cd5184b902164d93180a32af52d01349dcd09dd57b0b8312a7fe00",
+      "manifest_sha256": "920c407297af3ac99c015c5dc036cac4b905a0e352267056cdd56a209b36f9ce"
     },
     {
       "id": "kenney-audio",
@@ -80,7 +88,9 @@
         "game-sfx",
         "impacts"
       ],
-      "priority": "low"
+      "priority": "low",
+      "sha256": "c83444e0628af5af4452045f5346785275330196bf415cd37e9d4ed05edd23e2",
+      "manifest_sha256": "6facad4131e09feaa63b0f299fd042218b0985da34666b7c87d0cafad88dcb09"
     },
     {
       "id": "originals-audio",
