@@ -1,0 +1,76 @@
+name: Squire · Cannae Thumbnail
+
+on:
+  push:
+    branches:
+      - 'squire/cannae-216bc'
+    paths:
+      - '.github/workflows/squire-cannae-thumbnail.yml'
+      - 'video-projects/squire/cannae-216bc/scenes/shots/thumb.js'
+      - 'video-projects/squire/cannae-216bc/config.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: squire-cannae-thumbnail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render-thumbnail:
+    name: Render and validate the standalone thumbnail
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: integrations/h2-squire-studio/kit/package-lock.json
+
+      - name: Install Squire runtime dependencies
+        working-directory: integrations/h2-squire-studio/kit
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: integrations/h2-squire-studio/kit
+        run: npx playwright install --with-deps chromium
+
+      - name: Prepare a minimal Squire thumbnail project
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd integrations/h2-squire-studio/kit
+          mkdir -p projects/cannae-thumbnail/scenes/shots projects/cannae-thumbnail/story projects/cannae-thumbnail/timeline
+          cp ../../../../video-projects/squire/cannae-216bc/config.json projects/cannae-thumbnail/config.json
+          cp ../../../../video-projects/squire/cannae-216bc/scenes/shots/thumb.js projects/cannae-thumbnail/scenes/shots/thumb.js
+          printf '{"shots":[]}\n' > projects/cannae-thumbnail/story/shots.json
+          printf '[]\n' > projects/cannae-thumbnail/timeline/words.json
+          printf '[]\n' > projects/cannae-thumbnail/timeline/lines.json
+
+      - name: Render the standalone Squire thumbnail
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/cannae-thumbnail --thumb
+
+      - name: Validate and upload the 1280-pixel thumbnail
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail.png
+          test -s integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail_1280.jpg
+          mkdir -p "${RUNNER_TEMP}/cannae-thumbnail"
+          cp integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail.png "${RUNNER_TEMP}/cannae-thumbnail/"
+          cp integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail_1280.jpg "${RUNNER_TEMP}/cannae-thumbnail/"
+          file "${RUNNER_TEMP}/cannae-thumbnail/"*
+          identify "${RUNNER_TEMP}/cannae-thumbnail/thumbnail_1280.jpg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-thumbnail-${{ github.run_id }}
+          path: ${{ runner.temp }}/cannae-thumbnail/
+          if-no-files-found: error
+          retention-days: 30
