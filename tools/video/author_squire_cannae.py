@@ -218,7 +218,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         base["labels"] = [{"text": "CARTHAGE", "x": 0.24, "y": 0.1, "size": 34, "at": 0.35, "color": CARTHAGE}, {"text": "ROME", "x": 0.76, "y": 0.1, "size": 34, "at": 0.65, "color": ROMAN}]
         args = base
         cue("battle_roar", "battle_far", at=0.45)
-    elif tpl == "plan":    elif tpl == "plan":
+    elif tpl == "plan":
         args = {
             "paper": "parchment",
             "zones": [
@@ -304,7 +304,7 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         if "hannibal" in low:
             args["props"] = [{"kind": "scroll", "x": 0.75, "y": 0.82, "s": 0.14, "anim": "float"}]
         cue("armor_clank", "chainmail", at=0.3)
-    elif tpl == "item":    elif tpl == "item":
+    elif tpl == "item":
         thing = "shield" if "shield" in low else ("spear" if "spear" in low else ("standard" if "standard" in low else "sword"))
         args = {
             "thing": {"kind": thing, "type": "scutum" if thing == "shield" else None, "s": 0.58, "anim": "grow" if index % 2 else "pop"},
