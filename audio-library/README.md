@@ -19,6 +19,15 @@ Total published audio archive size: **1,137,663,374 bytes (about 1.14 GB)**. The
 
 The URLs and exact byte counts are machine-readable in [SOURCES.json](SOURCES.json). This source map is a starting point, not proof that every sound is appropriate for a specific film. Before a sound enters a final mix, resolve its exact source record, rights, attribution, identity, technical properties and audition status.
 
+## Generated searchable catalog indexes
+
+The GitHub Actions audio-library workflow publishes lightweight metadata indexes under `audio-library/generated/`:
+- `audio-catalog.json`: source inventory and per-item rights status across the six Build 76 audio archives (2,446 metadata entries at the latest successful build).
+- `preview-catalog.json`: the 2,331 Build 76 audio files that passed redistribution-candidate, source-manifest and media validation and have a playable offline preview.
+- `meta-preview-catalog.json`: 1,583 Meta Open Sound preview samples: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples.
+
+The catalogs are metadata, not the audio binaries. Search them first, choose by tags/source/license and only fetch the exact source archive/member needed. Every sample remains `not auditioned` until a person listens to it. The Meta Oculus group must retain the required attribution; the CC0 instrument sets stay a separate rights class. Download the complete browser preview bank from the latest [audio-library GitHub Actions run](https://github.com/Nolane-x/video/actions/workflows/build-cinematic-audio-library.yml).
+
 ## Production-first policy
 
 **Audition the recordings before synthesizing.** The library is searched first for every shot. A new web download is justified only when the library lacks a suitable recording or the match is materially poor.
