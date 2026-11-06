@@ -1,0 +1,442 @@
+{
+  "schema_version": "1.0.0",
+  "project": {
+    "project_id": "cannae-illustrated-history-45s",
+    "fps": 24,
+    "style": "illustrated_history",
+    "sample_duration_seconds": 45,
+    "title": "Cannae: The Centre Bends",
+    "date": "216 BCE — 2 August",
+    "location": "Cannae, Apulia, beside the River Aufidus",
+    "production_mode": "original illustrated 2D proof of motion; picture-only; no audio cue is approved",
+    "historical_basis": [
+      "Polybius, Histories Book III, account of the battle of Cannae",
+      "Oxford Classical Dictionary, Cannae battle summary"
+    ],
+    "interpretive_caveat": "The five shots are a schematic explanation of the enveloping manoeuvre, not a surveyed reconstruction of exact unit positions, head counts or minute-by-minute movement. Ancient casualty figures and force strengths are deliberately omitted.",
+    "sound_status": "silent_picture_proof; all music and Foley deferred until exact samples are human-auditioned"
+  },
+  "shots": [
+    {
+      "shot_id": "CAN-01-map-and-river",
+      "start_frame": 0,
+      "end_frame": 216,
+      "story_purpose": "Locate Cannae beside the Aufidus and make the river plain legible before showing the armies.",
+      "location": "Apulia map and the river Aufidus",
+      "time_of_day": "historical map graphic; no literal time of day",
+      "scale": "wide",
+      "angle": "aerial",
+      "composition_key": "apulia-parchment-map",
+      "template_id": "river-geography-reveal",
+      "motion_led": true,
+      "motion_channels": [
+        "camera",
+        "environment",
+        "graphics"
+      ],
+      "visual_state_change": "Parchment contours emerge; the river draws across the plain; Cannae is marked; two army tokens enter the field.",
+      "camera": {
+        "move": "push",
+        "motivation": "Push toward the river bend to move from regional context to the battlefield location.",
+        "start": "regional Apulia view",
+        "end": "close view of the Aufidus bend",
+        "easing": "ease-in-out"
+      },
+      "characters": [],
+      "action_type": "none",
+      "action_phases": [],
+      "props": [],
+      "environment_layers": [
+        {
+          "layer_id": "parchment-grain",
+          "depth": "foreground",
+          "motion": "subtle paper texture drift"
+        },
+        {
+          "layer_id": "hill-contours",
+          "depth": "background",
+          "motion": "contour lines reveal in staggered bands"
+        }
+      ],
+      "graphics": [
+        {
+          "element": "APULIA",
+          "reveal_order": 0,
+          "text": "APULIA",
+          "readable_seconds": 3
+        },
+        {
+          "element": "river Aufidus",
+          "reveal_order": 1,
+          "text": "AUFIDUS",
+          "readable_seconds": 3
+        },
+        {
+          "element": "Cannae location marker",
+          "reveal_order": 2,
+          "text": "CANNAE",
+          "readable_seconds": 3
+        },
+        {
+          "element": "date",
+          "reveal_order": 3,
+          "text": "2 AUGUST · 216 BCE",
+          "readable_seconds": 3
+        }
+      ],
+      "asset_sources": [],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "CAN-02-the-roman-mass",
+      "start_frame": 216,
+      "end_frame": 432,
+      "story_purpose": "Show the Roman infantry mass advancing and establish why the centre becomes the point of pressure.",
+      "location": "open plain outside Cannae",
+      "time_of_day": "bright late-summer daylight",
+      "scale": "medium_wide",
+      "angle": "eye_level",
+      "composition_key": "roman-column-diagonal-advance",
+      "template_id": "infantry-march-layered",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "environment",
+        "camera"
+      ],
+      "visual_state_change": "Front-rank soldiers step forward in staggered rhythm; rear ranks emerge through dust; standards and cloak hems move in the crosswind.",
+      "camera": {
+        "move": "track",
+        "motivation": "Track beside the front rank to reveal the depth and forward momentum of the Roman formation.",
+        "start": "front-left flank",
+        "end": "three-quarter view into the column",
+        "easing": "linear"
+      },
+      "characters": [
+        {
+          "character_id": "roman-front-rank-a",
+          "role": "Roman infantry front rank",
+          "blocking": "marches toward the opposing line with shield close to the body",
+          "gaze": "toward the centre ahead",
+          "pose_cycle": "march",
+          "acting_notes": "feet alternate with visible ground contact; shield stays attached to the forearm"
+        },
+        {
+          "character_id": "roman-rear-ranks",
+          "role": "Roman infantry mass",
+          "blocking": "moves in offset rows behind the front rank",
+          "gaze": "forward",
+          "pose_cycle": "staggered-march",
+          "acting_notes": "cycle phase offsets prevent synchronized repetition"
+        }
+      ],
+      "action_type": "march",
+      "action_phases": [
+        "action",
+        "contact"
+      ],
+      "props": [
+        {
+          "prop_id": "roman-shields",
+          "state": "carried forward at chest height",
+          "attachment": "left forearm",
+          "reaction": "small weight response with each step"
+        }
+      ],
+      "environment_layers": [
+        {
+          "layer_id": "foreground-dust",
+          "depth": "foreground",
+          "motion": "occasional dust sweeps across the lower frame",
+          "parallax_rate": 1.2
+        },
+        {
+          "layer_id": "olive-grove",
+          "depth": "midground",
+          "motion": "branches and leaves move in wind",
+          "parallax_rate": 0.7
+        },
+        {
+          "layer_id": "distant-ridge",
+          "depth": "background",
+          "motion": "held as a stable horizon",
+          "parallax_rate": 0.25
+        }
+      ],
+      "graphics": [
+        {
+          "element": "Roman infantry label",
+          "reveal_order": 0,
+          "text": "ROMAN INFANTRY",
+          "readable_seconds": 2
+        }
+      ],
+      "asset_sources": [],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "CAN-03-the-centre-gives-ground",
+      "start_frame": 432,
+      "end_frame": 648,
+      "story_purpose": "Make the crucial centre movement readable: Hannibal's forward-curving centre yields under pressure instead of holding a rigid line.",
+      "location": "the central infantry engagement",
+      "time_of_day": "hard daylight through battlefield dust",
+      "scale": "close",
+      "angle": "low",
+      "composition_key": "curved-centre-pressure-close",
+      "template_id": "shield-line-contact-and-recoil",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "prop",
+        "camera",
+        "environment"
+      ],
+      "visual_state_change": "The central line begins convex; Roman pressure advances; the centre bends backward; shields and bodies react while dust rolls through the contact zone.",
+      "camera": {
+        "move": "push",
+        "motivation": "Push toward the bending line so the audience reads the centre giving ground, not a generic weapon montage.",
+        "start": "two front-rank figures in medium close",
+        "end": "tight view of the bowing central line",
+        "easing": "ease-out"
+      },
+      "characters": [
+        {
+          "character_id": "carthaginian-centre-a",
+          "role": "Carthaginian centre infantry",
+          "blocking": "steps back in a controlled arc while maintaining facing",
+          "gaze": "toward the pressing Roman line",
+          "acting_notes": "weight shifts backward; avoid depicting a chaotic rout"
+        },
+        {
+          "character_id": "roman-pressure-a",
+          "role": "Roman infantry at the point of pressure",
+          "blocking": "leans and steps forward into the narrowing centre",
+          "gaze": "fixed on the opposing line",
+          "acting_notes": "shield and torso move as one; shoulders compress on contact"
+        }
+      ],
+      "action_type": "impact",
+      "action_phases": [
+        "anticipation",
+        "action",
+        "contact",
+        "reaction",
+        "follow_through",
+        "recovery"
+      ],
+      "props": [
+        {
+          "prop_id": "shield-edge-contact",
+          "state": "shield rim meets opposing shield",
+          "attachment": "forearm grip",
+          "contact_frame": 552,
+          "reaction": "the defender's shield and shoulder recoil, then settle"
+        }
+      ],
+      "environment_layers": [
+        {
+          "layer_id": "impact-dust",
+          "depth": "foreground",
+          "motion": "dust blooms outward at contact then falls"
+        },
+        {
+          "layer_id": "central-ranks",
+          "depth": "background",
+          "motion": "successive rank silhouettes follow the centre's backward curve"
+        }
+      ],
+      "graphics": [
+        {
+          "element": "central line curve",
+          "reveal_order": 0,
+          "text": "THE CENTRE BENDS",
+          "readable_seconds": 3
+        }
+      ],
+      "asset_sources": [],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "CAN-04-the-wings-turn",
+      "start_frame": 648,
+      "end_frame": 864,
+      "story_purpose": "Explain how the wings and cavalry movement threaten the exposed sides and rear as the Roman mass presses inward.",
+      "location": "overhead battlefield diagram transitioning into a high oblique view",
+      "time_of_day": "schematic tactical view",
+      "scale": "overhead",
+      "angle": "overhead",
+      "composition_key": "cannae-envelopment-overhead",
+      "template_id": "flank-and-cavalry-route-reveal",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "camera",
+        "graphics",
+        "environment"
+      ],
+      "visual_state_change": "Two flank markers pivot inward; cavalry paths sweep around the outer edges; the Roman mass remains compressed in the middle.",
+      "camera": {
+        "move": "reframe",
+        "motivation": "Reframe from the bowed centre to both flanks so the audience understands the enclosing geometry.",
+        "start": "central line overhead",
+        "end": "full battlefield overhead",
+        "easing": "ease-in-out"
+      },
+      "characters": [
+        {
+          "character_id": "cavalry-left-wing",
+          "role": "Carthaginian cavalry on one wing",
+          "blocking": "moves around the exposed side toward the rear",
+          "gaze": "toward the rear of the Roman formation",
+          "pose_cycle": "gallop-silhouette",
+          "acting_notes": "horse and rider remain mechanically linked; use staggered gait phases"
+        },
+        {
+          "character_id": "cavalry-right-wing",
+          "role": "Carthaginian cavalry from the opposing wing",
+          "blocking": "joins the enclosing movement behind the infantry mass",
+          "gaze": "toward the Roman rear",
+          "pose_cycle": "gallop-silhouette",
+          "acting_notes": "use a distinct path and timing from the other cavalry group"
+        }
+      ],
+      "action_type": "run",
+      "action_phases": [
+        "action",
+        "contact"
+      ],
+      "props": [],
+      "environment_layers": [
+        {
+          "layer_id": "dust-trails-left",
+          "depth": "midground",
+          "motion": "dust follows the left cavalry arc",
+          "parallax_rate": 0.7
+        },
+        {
+          "layer_id": "dust-trails-right",
+          "depth": "midground",
+          "motion": "dust follows the right cavalry arc",
+          "parallax_rate": 0.7
+        },
+        {
+          "layer_id": "terrain-map",
+          "depth": "background",
+          "motion": "terrain remains stable during the tactical reveal",
+          "parallax_rate": 0.2
+        }
+      ],
+      "graphics": [
+        {
+          "element": "left flank route",
+          "reveal_order": 0,
+          "text": "FLANK",
+          "readable_seconds": 2
+        },
+        {
+          "element": "right cavalry arc",
+          "reveal_order": 1,
+          "text": "CAVALRY",
+          "readable_seconds": 2
+        },
+        {
+          "element": "rear closure path",
+          "reveal_order": 2,
+          "text": "THE REAR IS EXPOSED",
+          "readable_seconds": 2
+        }
+      ],
+      "asset_sources": [],
+      "audio_cues": []
+    },
+    {
+      "shot_id": "CAN-05-the-trap-closes",
+      "start_frame": 864,
+      "end_frame": 1080,
+      "story_purpose": "Resolve the tactical explanation: the Roman mass is increasingly surrounded as the flanks converge behind it.",
+      "location": "the enclosed battlefield at Cannae",
+      "time_of_day": "dust-filled late-afternoon light",
+      "scale": "extreme_wide",
+      "angle": "high",
+      "composition_key": "cannae-encirclement-wide",
+      "template_id": "closing-arc-and-map-caption",
+      "motion_led": true,
+      "motion_channels": [
+        "actor",
+        "prop",
+        "environment",
+        "camera",
+        "graphics"
+      ],
+      "visual_state_change": "The two outer arcs meet behind the Roman mass; escape paths diminish; the frame settles on the enclosing shape and the place/date.",
+      "camera": {
+        "move": "pull",
+        "motivation": "Pull back to reveal the full enclosing geometry rather than treating the contact as an isolated duel.",
+        "start": "high oblique on the rear of the Roman line",
+        "end": "full battlefield tableau",
+        "easing": "ease-in-out"
+      },
+      "characters": [
+        {
+          "character_id": "roman-formation",
+          "role": "Roman infantry formation",
+          "blocking": "holds compressed in the centre with limited room to turn",
+          "gaze": "toward the converging perimeter",
+          "acting_notes": "movement becomes constrained, not a synchronized collapse"
+        },
+        {
+          "character_id": "cannae-flank-formation",
+          "role": "Carthaginian infantry wings",
+          "blocking": "turn inward to narrow the surrounding arc",
+          "gaze": "toward the interior of the encirclement",
+          "acting_notes": "staggered rows and distinct spacing"
+        }
+      ],
+      "action_type": "other_physical",
+      "action_phases": [
+        "anticipation",
+        "action",
+        "contact",
+        "reaction",
+        "follow_through",
+        "recovery"
+      ],
+      "props": [],
+      "environment_layers": [
+        {
+          "layer_id": "battlefield-haze",
+          "depth": "foreground",
+          "motion": "fine dust drifts across the lower edge"
+        },
+        {
+          "layer_id": "distant-field",
+          "depth": "background",
+          "motion": "haze softens the far ridge while keeping silhouettes readable"
+        }
+      ],
+      "graphics": [
+        {
+          "element": "closing perimeter",
+          "reveal_order": 0,
+          "text": "THE WINGS CLOSE",
+          "readable_seconds": 3
+        },
+        {
+          "element": "historical caption",
+          "reveal_order": 1,
+          "text": "CANNAE · 2 AUGUST 216 BCE",
+          "readable_seconds": 3
+        },
+        {
+          "element": "tactical summary",
+          "reveal_order": 2,
+          "text": "THE CENTRE BENDS. THE FLANKS CLOSE.",
+          "readable_seconds": 3
+        }
+      ],
+      "asset_sources": [],
+      "audio_cues": []
+    }
+  ]
+}
