@@ -1,34 +1,36 @@
-# Nolane Video Command Center v0.8.3
+# Nolane Video Command Center v0.9.1
 
-One private front door for Nolane video production. It includes **31 internal skills**, **37 core specialist plugins**, and **1 genre-specific Squire specialist** (38 separately activated specialist plugins total).
+One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.8.3
+## What's new in v0.9.1
 
-- Adds a dedicated **historical-cinematic-documentary-director** skill for footage-led, 2.5D/3D, archival and high-motion historical films.
+- Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
+- Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
+- Adds a searchable offline audio preview bank built from the existing Build 76 pool and the pinned Meta Open Sound collections. Oculus Audio Pack remains CC BY 4.0; the three instrument collections are CC0.
+- Routes illustrated/cartoon history, footage-led cinematic documentaries and H2 Squire vector history as three separate visual languages.
 - Keeps H2 Squire as a separate route only when the user explicitly asks for its symbolic/vector military-history style or an established Squire series.
-- Makes complete reference playback, timecoded motion/camera analysis, full sound listening and an honest blocked state mandatory.
-- Makes the existing resource pool and its source/rights metadata the first search stop before external downloads or generated media.
+- Makes full-motion sampling, explicit inspection-scope reporting, source provenance and timecoded audiovisual review mandatory. No workflow success or contact sheet is treated as artistic approval.
 - Makes recorded SFX, Foley, ambience and licensed music the default; code synchronizes, layers and masters recordings rather than replacing the soundscape with oscillators.
-- Adds camera-path, actor/prop action, depth, edit-grammar and motion-seek safety requirements.
 
 ## How to use
 
 1. Start with the Command Center and describe the story, audience, platform, language, duration and reference.
-2. It restores current repository/project state and routes internally to the minimum useful skills.
-3. For cinematic historical documentaries, it selects the cinematic-history director, then assigns media, camera, acting, sound and edit responsibilities shot by shot.
-4. For explicitly requested H2 Squire/vector historical animation, it selects the separate Squire director and calls out the host-controlled handoff to the private H2 Squire specialist.
-5. It searches the current resource library before generating or externally sourcing footage, imagery, 3D assets and sound.
-6. It prototypes the hardest motion, reviews the moving preview with sound, then scales only after quality gates pass.
-7. Full-length viewing/listening and a timecoded defect log remain required before approval.
+2. It restores repository/project state and selects the visual route before choosing an engine.
+3. For illustrated/cartoon history, use expressive rigs, varied environments, action/prop blocking, parallax and progressive map/graphic reveals. Read the timecoded Samurai reference study.
+4. For footage-led cinematic documentaries, it selects real/archive footage, 2.5D/3D reconstruction, camera paths and motion typography per shot.
+5. For explicitly requested H2 Squire/vector historical animation, it selects the separate Squire director and host-controlled H2 Squire specialist.
+6. Search the local resource pool and audio preview bank before creating synthetic sound or fetching more media.
+7. Prototype the hardest moving shot and a 30–60 second picture/sound sample, then scale after human review.
+8. Full-length viewing/listening and a timecoded defect log remain required before approval.
 
-The Command Center does not invisibly activate other private plugins. The host-controlled activation boundary is explicit in the router and registries.
+The Command Center does not invisibly activate other private plugins. Host-controlled activation is explicit in the router and registries.
 
 ## Safety and reproducibility
 
-- The parallel asset AI owns video-library/**, catalogues, downloaders, asset packaging/importers and the Build 76 resource release. The cinematic production route may read the resource manifests and Releases but must not mutate or trigger that workstream.
+- The parallel asset-library agent exclusively owns video-library/**, global resource catalogs, downloaders, asset packaging/importers and the Build 76 resource release. Production may read/pull published resources but must not mutate that workstream.
 - Inspect the complete changed-file list before PR creation; keep mixed asset/toolchain work separate.
 - Do not overwrite master videos; deliver a separately rendered candidate with checksums and visual/audio review.
-- Keep costs, model downloads, voice likeness, rights, production writes and PR merges behind explicit approval.
+- Keep production writes, raw licensed audio, voice likeness, model downloads, costs and PR merges behind explicit approval.
 - A plugin's existence or source-backed skill does not prove its CLI, weights or runtime are installed. Check pinned versions and actual evidence.
 - License boundaries remain per component and per media record. Preserve third-party notices and verify fonts, assets, runtimes, music and sound files separately.
 
