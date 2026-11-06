@@ -44,6 +44,12 @@ The command searches both generated catalogs, excludes review-required records b
 
 The four Meta Open Sound OGG packs are mirrored in the permanent [Nolane Historical Audio Library v0.1.0 Release](https://github.com/Nolane-x/video/releases/tag/nolane-historical-audio-library-v0.1.0). It contains all 1,583 previews, the searchable source catalog, collection license texts and required Oculus attribution. The Oculus lossless WAV master (360,146,596 bytes, 48 kHz/16-bit) is now mirrored in the same Release and SHA-256 verified. This Release is not subject to the 90-day GitHub Actions artifact retention window. The piano/guitar WAV masters remain available at their pinned upstream URLs; use the manual `Acquire Meta Open Sound WAV master` workflow to mirror a selected collection without downloading all of them.
 
+## Private-only professional source: Sonniss GDC 2026
+
+The [official GDC 2026 bundle](https://gdc.sonniss.com/) advertises 7.47 GB+ / 347+ files in five ZIP parts. The current [EULA v2.0](https://sonniss.com/gdc-bundle-license/) (effective 27 August 2026) permits synchronizing the sounds into personal/commercial films and projects, but prohibits selling the raw recordings as supplied and AI/ML training. The official [track list](https://docs.google.com/spreadsheets/d/1MkoGwA6FfgNXhye9wLnY0gNLvjEp4H2iYXM1YxMI6Qs/edit?usp=sharing) identifies shield, spear and sword cues in Historical Weapons Vol. 2.
+
+This source is marked private_production_only in SOURCES.json. It has **not been downloaded**: the licensee must review and accept the EULA. Because this repository is public, never upload the source ZIPs/WAVs here or include them in public Releases/artifacts. After the licensee obtains the pack privately, index only metadata and audition decisions; keep the media in private production storage.
+
 ## Production-first policy
 
 **Audition the recordings before synthesizing.** The library is searched first for every shot. A new web download is justified only when the library lacks a suitable recording or the match is materially poor.
