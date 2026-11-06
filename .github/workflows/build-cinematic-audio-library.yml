@@ -106,6 +106,46 @@ jobs:
           print(json.dumps(summary, indent=2))
           PY
 
+      - name: Publish pinned Meta Open Sound source packs as a permanent GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          META_AUDIO_RELEASE_TAG: nolane-historical-audio-library-v0.1.0
+        run: |
+          set -euo pipefail
+          mkdir -p dist/meta-open-sound-release
+          cp "$RUNNER_TEMP/meta-open-sound/"*.zip dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/ATTRIBUTION.md dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/meta-preview-catalog.json dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/README.md dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/"oculus-attribution.txt" dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/"oculus-license.txt" dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/"meta-piano-license.txt" dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/"meta-nylon-guitar-license.txt" dist/meta-open-sound-release/
+          cp build/audio-preview-bank/meta-open-sound/"meta-steel-guitar-license.txt" dist/meta-open-sound-release/
+          cat > dist/meta-open-sound-release/RELEASE-NOTES.md <<'EOF'
+          # Nolane historical audio library — Meta Open Sound add-on
+
+          Pinned source revision: facebookincubator/Meta-open-sound@251c0be57d5d1b3242b91f53e0cde62ab1cb42d9.
+
+          - Oculus Audio Pack 1: 508 OGG previews / 289 distinct sounds / CC BY 4.0. Retain the exact attribution in ATTRIBUTION.md.
+          - Meta Piano: 352 OGG multisamples / CC0 1.0.
+          - Meta Nylon Guitar: 348 OGG multisamples / CC0 1.0.
+          - Meta Steel Guitar: 375 OGG multisamples / CC0 1.0.
+
+          The 1,583 OGG files are preview/selection media, not a set of mastered tracks. Matching high-quality WAV masters and exact source terms are listed in audio-library/SOURCES.json. No sample is marked human-auditioned or approved for a final mix by automation.
+          EOF
+          test "$(find dist/meta-open-sound-release -maxdepth 1 -name '*.zip' | wc -l)" -eq 4
+          if ! gh release view "${META_AUDIO_RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release create "${META_AUDIO_RELEASE_TAG}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --target "${GITHUB_SHA}" \
+              --title "Nolane Historical Audio Library v0.1.0 — Meta Open Sound" \
+              --notes-file dist/meta-open-sound-release/RELEASE-NOTES.md
+          fi
+          gh release upload "${META_AUDIO_RELEASE_TAG}" dist/meta-open-sound-release/* \
+            --repo "${GITHUB_REPOSITORY}" --clobber
+          gh release view "${META_AUDIO_RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json url,assets
+
       - name: Upload offline playable audio bank
         uses: actions/upload-artifact@v7
         with:
