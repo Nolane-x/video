@@ -1,0 +1,124 @@
+name: Squire · Cannae Artifact Export
+
+on:
+  push:
+    branches:
+      - 'squire/cannae-216bc'
+    paths:
+      - '.github/workflows/squire-cannae-export.yml'
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful Squire render workflow run ID"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-cannae-export
+  cancel-in-progress: false
+
+jobs:
+  split-delivery:
+    name: Split the master bundle into downloadable review artifacts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '42171136161' }}
+    steps:
+      - name: Wait for the source render and verify it succeeded
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 120); do
+            payload="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}")"
+            status="$(jq -r '.status' <<< "$payload")"
+            conclusion="$(jq -r '.conclusion // ""' <<< "$payload")"
+            echo "Source run ${SOURCE_RUN_ID}: ${status} / ${conclusion:-pending}"
+            if [[ "$status" == "completed" ]]; then
+              [[ "$conclusion" == "success" ]] || { echo "Source render did not succeed"; exit 1; }
+              break
+            fi
+            sleep 60
+          done
+          [[ "${status:-}" == "completed" && "${conclusion:-}" == "success" ]] || { echo "Timed out waiting for source render"; exit 1; }
+          echo "SOURCE_RUN_ID=$SOURCE_RUN_ID" >> "$GITHUB_ENV"
+      - name: Download the source master bundle from the completed Actions run
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-cannae-216bc-master-${{ env.SOURCE_RUN_ID }}
+          path: source-bundle
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+      - name: Split video, review evidence and audio masters
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export/video export/review export/audio-mix export/audio-narration
+          mp4="$(find source-bundle -maxdepth 1 -type f -name '*.mp4' ! -name 'preview-45s.mp4' -print -quit)"
+          test -n "$mp4" && test -s "$mp4"
+          cp "$mp4" export/video/
+          cp source-bundle/thumbnail.png source-bundle/thumbnail_1280.jpg export/video/
+          cp source-bundle/preview-45s.mp4 export/review/
+          cp -a source-bundle/contact-sheets export/review/
+          cp source-bundle/QA-REPORT.md source-bundle/QA-REPORT.json \
+             source-bundle/alignment-report.json source-bundle/voice-manifest.json \
+             source-bundle/voice-selection.json source-bundle/captions.srt \
+             source-bundle/captions.vtt source-bundle/01-SCRIPT.md \
+             source-bundle/research.md source-bundle/SHA256SUMS.txt export/review/
+          cp source-bundle/final-mix.wav export/audio-mix/
+          cp source-bundle/narration-timeline.wav source-bundle/h2-timeline.zip export/audio-narration/
+          (
+            cd export
+            find . -type f -printf '%p\t%s bytes\n' | sort > FILE-INVENTORY.txt
+          )
+          echo "Source run: $SOURCE_RUN_ID" > export/SOURCE-RUN.txt
+          echo "Selected master: $(basename "$mp4")" >> export/SOURCE-RUN.txt
+          cat export/FILE-INVENTORY.txt
+      - name: Upload the standalone final MP4 and thumbnail
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-video-${{ env.SOURCE_RUN_ID }}
+          path: export/video/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Upload preview, contact sheets, captions and QA evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-review-${{ env.SOURCE_RUN_ID }}
+          path: export/review/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+      - name: Upload final music and effects mix
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-audio-mix-${{ env.SOURCE_RUN_ID }}
+          path: export/audio-mix/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Upload voice master and aligned Squire narration timeline
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-audio-narration-${{ env.SOURCE_RUN_ID }}
+          path: export/audio-narration/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Upload export inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-cannae-export-inventory-${{ env.SOURCE_RUN_ID }}
+          path: |
+            export/FILE-INVENTORY.txt
+            export/SOURCE-RUN.txt
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
