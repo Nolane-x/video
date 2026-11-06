@@ -21,6 +21,16 @@ Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` 
 ## Existing library first
 The verified Build 76 GitHub Release contains separate audio-category volumes. Read the item-level source manifests and the `docs/audio/HISTORICAL_SOUND_LIBRARY.md` map before building anything new. The current archive families include OpenGameArt, USGS, NASA, Wikimedia Commons, Kenney and a distinct procedural-originals pack. Treat filename/category and rights class as separate facts; an audio ZIP is not proof every item inside is a historical Foley recording.
 
+## OGG preview to verified WAV master
+
+The Meta Open Sound catalog links every preview sample to its original WAV member through `source_wav_file`, `wav_master_archive_name`, `wav_master_size_bytes` and `wav_master_sha256`.
+1. Search and audition the OGG preview first; do not download a master merely because it exists.
+2. For a selected item, look up its exact WAV member in `meta-preview-catalog.json` and use the collection's WAV master archive.
+3. Oculus Audio Pack WAV is mirrored in the permanent Nolane release. Prefer the `wav_master_download_url` recorded in the generated catalog.
+4. Piano, Nylon Guitar and Steel Guitar WAV masters are multi-hundred-megabyte archives. Acquire only the collection needed with the GitHub Actions workflow `.github/workflows/acquire-meta-open-sound-wav-master.yml`; it verifies exact archive size and SHA-256 before publishing.
+5. Extract only the selected source WAV member, retain its original file name, hash and collection license, and use that WAV in the final mix. Keep preview OGG and production WAV distinct in the cue sheet.
+6. Oculus Foley remains CC BY 4.0 and requires its exact attribution. The three instrument sample collections are CC0; the samples are not finished compositions.
+
 ## Asset taxonomy
 Tag each file with controlled terms:
 - **People:** crowd walla, cheers, chants, panic, command, distant voices, footsteps, clothing/armor movement, breathing.
