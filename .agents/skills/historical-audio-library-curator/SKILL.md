@@ -14,6 +14,9 @@ Recorded/licensed sound is the default. Procedural WAV presets are placeholders 
 - Meta Open Sound currently has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Preserve the exact Oculus attribution. A sample bank is not 1,583 complete music tracks.
 - Download the entire audio preview artifact only when broad listening is necessary; otherwise fetch the relevant source pack/member to save bandwidth.
 
+## Unified search CLI
+
+Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` for both generated catalogs. Use `--kind foley` or `--kind instrument` to separate recorded effects from multisampled notes, `--json` for structured results, and `--include-review-required` only for investigating quarantined candidates. Search never grants approval: every returned item still has an audition and rights gate.
 ## Search and audition
 - Read audio-library/README.md, audio-library/SOURCES.json and docs/audio/HISTORICAL_SOUND_LIBRARY.md.
 - Search by material, action, environment, distance and emotion. Prioritise horses/hooves/tack, blades/armor/shields/bows/arrows, crowds/commands, rain/wind/fire/water, ships/rigging/oars, steps, markets/workshops, paper/wood/metal and historically appropriate music textures.
