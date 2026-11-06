@@ -436,6 +436,10 @@
                 },
                 "approved_for_final_mix": {
                   "type": "boolean"
+                },
+                "attribution_text": {
+                  "type": "string",
+                  "description": "Exact license-required attribution for CC BY audio assets."
                 }
               }
             }
