@@ -62,6 +62,8 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"{prefix}.shot_id duplicates {shot_id}")
         seen_ids.add(shot_id)
 
+        start = 0
+        end = 0
         try:
             start = int(shot.get("start_frame"))
             end = int(shot.get("end_frame"))
@@ -151,8 +153,13 @@ def validate_plan(plan: dict[str, Any]) -> dict[str, Any]:
             if not str(prop.get("state") or "").strip():
                 errors.append(f"{prefix}.props[{prop_index}].state is required")
             contact_frame = prop.get("contact_frame")
-            if contact_frame is not None and not (start <= int(contact_frame) < end):
-                errors.append(f"{prefix}.props[{prop_index}].contact_frame must fall inside its shot")
+            if contact_frame is not None:
+                try:
+                    contact_frame_value = int(contact_frame)
+                    if not (start <= contact_frame_value < end):
+                        errors.append(f"{prefix}.props[{prop_index}].contact_frame must fall inside its shot")
+                except (TypeError, ValueError):
+                    errors.append(f"{prefix}.props[{prop_index}].contact_frame must be an integer")
 
         for asset_index, asset in enumerate(shot.get("asset_sources") or []):
             asset_prefix = f"{prefix}.asset_sources[{asset_index}]"
