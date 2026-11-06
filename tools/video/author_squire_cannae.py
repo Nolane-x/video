@@ -21,30 +21,65 @@ def load(path: Path, default):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def choose_template(text: str, index: int, progress: float) -> str:
+def choose_template(text: str, index: int, progress: float, usage=None, last_at=None, last_template=None) -> str:
+    """Choose a varied template with deliberate caps for repeated visual devices."""
     t = text.casefold()
-    if any(k in t for k in ("cannae", "apulia", "aufidus", "canusium", "southern italy", "river")):
-        return "map"
-    if any(k in t for k in ("eighty thousand", "forty thousand", "six thousand", "ten thousand", "far more infantry", "more cavalry")):
+    usage = usage or {}
+    last_at = last_at or {}
+
+    def available(name: str, cap: int, gap: int = 3) -> bool:
+        return usage.get(name, 0) < cap and index - last_at.get(name, -999) >= gap and last_template != name
+
+    if index == 0:
+        return "title"
+
+    geo = any(k in t for k in ("cannae", "apulia", "aufidus", "canusium", "southern italy", "river"))
+    if geo and available("map", 2, 12):
+        if (usage.get("map", 0) == 0 and progress < 0.30) or (usage.get("map", 0) == 1 and progress > 0.88):
+            return "map"
+
+    number_or_force = any(k in t for k in (
+        "eighty thousand", "forty thousand", "six thousand", "ten thousand",
+        "far more infantry", "more cavalry", "more infantry"
+    ))
+    if number_or_force and available("board", 2, 5):
         return "board"
-    if any(k in t for k in ("crescent", "double envelopment", "encirclement", "surrounded", "both flanks", "flanks", "folding inward", "give ground", "giving ground")):
+
+    tactical = any(k in t for k in (
+        "crescent", "double envelopment", "encirclement", "surrounded",
+        "both flanks", "flanks", "folding inward", "folds inward",
+        "give ground", "giving ground", "the centre", "the center",
+        "the wings", "the rear"
+    ))
+    if tactical and available("top", 7, 4):
         return "top"
-    if any(k in t for k in ("cavalry", "horsemen", "numidian", "hooves", "horse")):
-        return "army" if index % 2 else "scene"
-    if any(k in t for k in ("hannibal", "varro", "paullus", "consul", "polybius")):
-        return "close"
-    if any(k in t for k in ("shield", "spear", "weapon", "sword", "standard", "standards")):
-        return "item"
-    if any(k in t for k in ("tactical victory", "strategic outcome", "the lesson", "remember one rule", "remember the rule")):
+
+    if any(k in t for k in ("tactical victory", "strategic outcome", "the lesson", "remember one rule", "remember the rule")) and available("plan", 4, 5):
         return "plan"
+
+    comparison = any(k in t for k in ("not one uniform block", "mixed force", "bigger hammer", "shape that can turn", "two different"))
+    if comparison and available("split", 6, 4):
+        return "split"
+
+    if any(k in t for k in ("horsemen", "numidian", "hooves", "horse", "gallop", "riders")):
+        return "scene"
+    if "cavalry" in t and available("army", 26, 2):
+        return "army"
+
+    if any(k in t for k in ("hannibal", "varro", "paullus", "consul", "polybius")) and available("close", 16, 4):
+        return "close"
+
+    if any(k in t for k in ("shield", "spear", "weapon", "sword", "standard", "standards")) and available("item", 4, 6):
+        return "item"
+
     if any(k in t for k in ("dead", "died", "wounded", "killed", "catastrophic", "disaster")):
         return "scene"
-    if progress < 0.045:
-        return "title"
-    sequence = ("scene", "close", "army", "plan", "scene", "split", "item", "map", "army", "top")
-    return sequence[index % len(sequence)]
 
-
+    sequence = ("scene", "army", "close", "scene", "split", "army", "plan", "scene", "top", "scene")
+    choice = sequence[index % len(sequence)]
+    if choice == last_template:
+        choice = "scene" if last_template != "scene" else "army"
+    return choice
 def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) -> tuple[dict, list[dict]]:
     low = text.casefold()
     seed = index * 7919 + 216
@@ -81,19 +116,21 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
             args = {
                 "title": "CAVALRY",
                 "bars": [
-                    {"label": "ROME", "v": 0.62, "at": 0.2},
-                    {"label": "CARTHAGE", "v": 1.0, "at": 0.7},
+                    {"label": "ROME", "v": 0.62, "top": "≈6,000", "at": 0.2},
+                    {"label": "CARTHAGE", "v": 1.0, "top": "≈10,000", "at": 0.7},
                 ],
                 "mult": {"text": "THE EDGE", "x": 0.5, "y": 0.34, "at": 0.9},
+                "labels": [{"text": "POLYBIUS' ESTIMATE", "x": 0.5, "y": 0.2, "size": 30, "at": 0.2, "color": "#f0d9c8"}],
             }
         else:
             args = {
                 "title": "INFANTRY",
                 "bars": [
-                    {"label": "ROME", "v": 1.0, "at": 0.2},
-                    {"label": "CARTHAGE", "v": 0.5, "at": 0.7},
+                    {"label": "ROME", "v": 1.0, "top": "≈80,000", "at": 0.2},
+                    {"label": "CARTHAGE", "v": 0.5, "top": "≈40,000", "at": 0.7},
                 ],
                 "mult": {"text": "MORE MEN", "x": 0.5, "y": 0.34, "at": 0.9},
+                "labels": [{"text": "POLYBIUS' ESTIMATE", "x": 0.5, "y": 0.2, "size": 30, "at": 0.2, "color": "#f0d9c8"}],
             }
         cue("drum_hit", "sting_low", at=0.15)
     elif tpl == "top":
@@ -166,23 +203,34 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
         }
         cue("drum_march", "battle_far", at=0.35)
     elif tpl == "close":
-        preset = "consul" if any(k in low for k in ("consul", "paullus", "varro")) else ("senator" if "polybius" in low else "hastatus")
-        face = "worried" if any(k in low for k in ("trapped", "fear", "wounded", "crush", "confusing")) else "determined"
+        if any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian")):
+            preset = "latinOld"  # blue-side generic commander, not authenticated Punic costume
+        elif any(k in low for k in ("consul", "paullus", "varro")):
+            preset = "consul"
+        elif "polybius" in low:
+            preset = "senator"
+        else:
+            preset = "hastatus"
+        face = "worried" if any(k in low for k in ("trapped", "fear", "wounded", "crush", "confusing", "surrounded", "no clear front")) else "determined"
+        pose = "point" if any(k in low for k in ("places", "shows", "orders", "points")) else ("push" if any(k in low for k in ("push", "advance", "press")) else "guard")
+        others = [
+            {"preset": "princeps", "x": 0.15, "y": 0.67, "R": 0.13, "face": "worried"},
+            {"preset": "triarius", "x": 0.85, "y": 0.67, "R": 0.13, "face": "determined"},
+        ]
+        if "hannibal" in low:
+            others = [{"preset": "latin", "x": 0.18, "y": 0.67, "R": 0.14, "face": "calm"}]
         args = {
             "preset": preset,
             "face": face,
-            "pose": "guard",
+            "pose": pose,
             "bg": "plain",
             "bgOpts": {"volcano": False},
             "time": time_of_day,
-            "R": 0.25,
-            "x": 0.53,
+            "R": 0.23 + (0.01 if index % 2 else 0),
+            "x": 0.46 if index % 3 else 0.55,
             "y": 0.52,
-            "others": [
-                {"preset": "princeps", "x": 0.16, "y": 0.66, "R": 0.14, "face": "worried"},
-                {"preset": "triarius", "x": 0.84, "y": 0.66, "R": 0.14, "face": "determined"},
-            ],
-            "fx": [{"kind": "dust", "at": 0.5}],
+            "others": others,
+            "fx": [{"kind": "dust", "at": 0.5}] if progress > 0.35 else [],
         }
         cue("armor_clank", "chainmail", at=0.3)
     elif tpl == "item":
@@ -218,23 +266,24 @@ def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) 
     elif tpl == "black":
         args = {}
     else:
-        people = [
-            {"preset": "hastatus", "x": 0.34, "h": 0.61, "face": "worried" if progress > 0.6 else "determined", "pose": "guard", "weapon": "pilum"},
-            {"preset": "latin", "x": 0.68, "h": 0.58, "face": "determined", "pose": "stand", "weapon": "spear", "flip": True},
-        ]
+        carthage_focus = any(k in low for k in ("hannibal", "carthaginian", "african", "iberian", "gallic", "numidian"))
+        roman_lead = {"preset": "hastatus", "x": 0.30 + (0.04 if index % 2 else 0), "h": 0.61, "face": "worried" if progress > 0.62 else "determined", "pose": "guard" if index % 3 else "push", "weapon": "pilum"}
+        blue_lead = {"preset": "latinOld" if carthage_focus else "latin", "x": 0.70 - (0.04 if index % 2 else 0), "h": 0.58, "face": "determined" if progress < 0.7 else "worried", "pose": "stand" if index % 3 else "guard", "weapon": "spear", "flip": True}
+        people = [blue_lead, roman_lead] if carthage_focus else [roman_lead, blue_lead]
+        back_preset = "latin" if carthage_focus else "hastatus"
         args = {
             "bg": "plain",
             "time": time_of_day,
             "bgOpts": {"volcano": False, "trees": 3, "bushes": 5, "tents": 2, "flags": [{"x": 0.18, "color": ROMAN}, {"x": 0.82, "color": CARTHAGE}]},
             "back": [
-                {"preset": "hastatus", "rows": 3, "cols": 12, "x0": 0.05, "x1": 0.92, "yFront": 0.84, "yBack": 0.68, "hFront": 0.14, "hBack": 0.08, "advance": 0.004, "face": "determined", "weapon": "pilum"},
+                {"preset": back_preset, "rows": 2 + (index % 2), "cols": 9 + (index % 4), "x0": 0.04, "x1": 0.94, "yFront": 0.84, "yBack": 0.68, "hFront": 0.14, "hBack": 0.08, "advance": 0.003 + (0.001 if index % 2 else 0), "face": "determined", "weapon": "pilum" if not carthage_focus else "spear"},
             ],
             "people": people,
-            "move": "in" if index % 3 else "left",
-            "fx": [{"kind": "dust", "at": 0.5}],
+            "move": ("in" if index % 3 else "left") if progress < 0.72 else ("left" if index % 2 else "in"),
+            "fx": [{"kind": "dust", "at": 0.5}] if progress > 0.25 else [],
         }
-        if any(k in low for k in ("horse", "cavalry", "gallop")):
-            args["people"][1]["horse"] = {"color": "bay", "gait": "gallop"}
+        if any(k in low for k in ("horse", "cavalry", "gallop", "horsemen", "numidian")):
+            people[0 if carthage_focus else 1]["horse"] = {"color": "bay" if carthage_focus else "chestnut", "gait": "gallop"}
             cue("hooves_gallop", "horse_neigh", at=0.3)
         elif any(k in low for k in ("sword", "clash", "fight", "battle")):
             cue("sword_clash", "battle_far", at=0.4)
@@ -260,14 +309,20 @@ def main() -> int:
         raise ValueError(f"Voice-timed draft produced only {len(shots)} shots; expected a long-form sequence")
     duration = float(story.get("duration") or shots[-1]["end"])
     sfx_root = project.parents[1] / "audio" / "sfx"
+    usage: dict[str, int] = {}
+    last_at: dict[str, int] = {}
+    last_template = None
     for index, shot in enumerate(shots):
         text = str(shot.get("line") or "")
         start, end = float(shot["start"]), float(shot["end"])
         if end <= start:
             raise ValueError(f"Non-positive shot duration in {shot.get('id')}")
         progress = ((start + end) / 2) / max(duration, 0.001)
-        tpl = choose_template(text, index, progress)
+        tpl = choose_template(text, index, progress, usage, last_at, last_template)
         visual, cues = base_args(tpl, text, index, progress, sfx_root)
+        usage[tpl] = usage.get(tpl, 0) + 1
+        last_at[tpl] = index
+        last_template = tpl
         shot["tpl"] = tpl
         shot["args"] = visual
         shot["sfx"] = cues

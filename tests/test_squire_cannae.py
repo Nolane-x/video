@@ -122,6 +122,33 @@ class SquireCannaeTests(unittest.TestCase):
         self.assertEqual(args["preset"], "latinOld")
         self.assertEqual(args["others"][0]["preset"], "latin")
 
+    def test_title_card_is_only_used_for_the_first_shot_and_maps_are_capped(self):
+        usage = {}
+        last_at = {}
+        last = None
+        first = AUTHOR.choose_template("The first thing you notice is the enemy.", 0, 0.001, usage, last_at, last)
+        self.assertEqual(first, "title")
+        usage[first] = usage.get(first, 0) + 1
+        last_at[first] = 0
+        last = first
+        second = AUTHOR.choose_template("It is the noise.", 1, 0.004, usage, last_at, last)
+        self.assertNotEqual(second, "title")
+        map1 = AUTHOR.choose_template("Your camp stands near the Aufidus River.", 12, 0.12, usage, last_at, last)
+        self.assertEqual(map1, "map")
+        usage["map"] = 1
+        last_at["map"] = 12
+        last = map1
+        repeated = AUTHOR.choose_template("The river lies beside Cannae.", 16, 0.14, usage, last_at, last)
+        self.assertNotEqual(repeated, "map")
+        late_map = AUTHOR.choose_template("The name Cannae survives.", 220, 0.94, usage, last_at, "scene")
+        self.assertEqual(late_map, "map")
+
+    def test_hannibal_closeup_uses_carthaginian_side_palette(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            args, _ = AUTHOR.base_args("close", "Hannibal studies the Carthaginian line.", 75, 0.4, Path(tmp))
+        self.assertEqual(args["preset"], "latinOld")
+        self.assertEqual(args["others"][0]["preset"], "latin")
+
     def test_squire_top_down_geometry_is_normalized(self):
         with tempfile.TemporaryDirectory() as tmp:
             args, cues = AUTHOR.base_args("top", "The centre is surrounded on both flanks.", 12, 0.7, Path(tmp))
