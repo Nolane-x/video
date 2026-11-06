@@ -113,6 +113,7 @@ def extract_bank(download_dir: Path, output_dir: Path):
                 if info.file_size<1 or info.file_size>128*1024*1024: raise ValueError("OGG size out of range")
                 stem=Path(info.filename).stem.casefold()
                 if stem not in sample_map: raise ValueError("OGG sample absent from pinned manifest: "+info.filename)
+                sample=sample_map[stem]
                 sound=sound_map.get(stem) if c["id"]=="oculus-audio-pack" else None
                 asset_id=f"meta-{c['id']}-{stem}"
                 destination=media_dir/(asset_id+".ogg")
