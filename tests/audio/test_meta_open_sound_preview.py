@@ -12,7 +12,7 @@ def main():
       "id":"oculus-audio-pack","archive":"meta-open-sound-oculus-audio-pack-ogg.zip",
       "tag":"fixture","sha256":"0"*64,"size":1,"license":"CC-BY-4.0",
       "license_url":"https://creativecommons.org/licenses/by/4.0/","kind":"foley",
-      "wav_master_url":"https://example.invalid/master.zip","wav_master_size":1234,"wav_master_sha256":"abc123"
+      "wav_master_url":"https://example.invalid/meta-open-sound-oculus-audio-pack-wav.zip","wav_master_size":1234,"wav_master_sha256":"abc123"
     }]
     try:
       with tempfile.TemporaryDirectory(prefix="meta-open-sound-test-") as temp:
@@ -37,7 +37,7 @@ def main():
         assert "katana" in records[0]["tags"]
         assert records[0]["auditioned_by_human"] is False
         assert records[0]["source_wav_file"] == "SwordClash.wav"
-        assert records[0]["wav_master_archive_name"] == "master.zip"
+        assert records[0]["wav_master_archive_name"] == "meta-open-sound-oculus-audio-pack-wav.zip"
         assert records[0]["wav_master_download_url"].endswith("/meta-open-sound-oculus-audio-pack-wav.zip")
         summary=preview.write_bank(output,records,licenses)
         assert summary["cc_by_files"]==1
