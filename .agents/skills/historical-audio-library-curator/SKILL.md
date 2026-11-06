@@ -16,7 +16,7 @@ Recorded/licensed sound is the default. Procedural WAV presets are placeholders 
 
 ## Unified search CLI
 
-Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` for both generated catalogs. Use `--kind foley` or `--kind instrument` to separate recorded effects from multisampled notes, `--json` for structured results, and `--include-review-required` only for investigating quarantined candidates. Search never grants approval: every returned item still has an audition and rights gate.
+Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` for both generated catalogs. Use `--kind foley` or `--kind instrument` to separate recorded effects from multisampled notes, `--json` for structured results, and `--include-review-required` only for investigating quarantined candidates. Results with `match_quality=direct` match the title/category/file; `tag_assisted` are broader keyword suggestions. Add `--direct-only` when the context must match exactly. Search never grants approval: every returned item still has an audition and rights gate.
 ## Search and audition
 - Read audio-library/README.md, audio-library/SOURCES.json and docs/audio/HISTORICAL_SOUND_LIBRARY.md.
 - Search by material, action, environment, distance and emotion. Prioritise horses/hooves/tack, blades/armor/shields/bows/arrows, crowds/commands, rain/wind/fire/water, ships/rigging/oars, steps, markets/workshops, paper/wood/metal and historically appropriate music textures.
