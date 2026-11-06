@@ -1,6 +1,6 @@
 import { thumb } from '/packs/squire/pack.js';
 
-// Cannae long-form thumbnail: one trapped Roman hero, distant Carthaginian wings, one clear phrase.
+// Cannae long-form thumbnail v2: the Roman soldier remains fully inside the frame.
 thumb({
   bg: 'hills',
   time: 'sunset',
@@ -13,14 +13,13 @@ thumb({
   ],
   hero: {
     preset: 'hastatus',
-    x: 0.76, y: 0.61, R: 0.255,
+    x: 0.74, y: 0.64, R: 0.18,
     face: 'shock', pose: 'guard', weapon: 'pilum',
     shield: { type: 'scutum', color: '#9f4037', charge: 'eagle', chargeColor: '#d7c39b' }
   },
   symbols: [
-    { kind: 'arrow', x: 0.22, y: 0.52, to: [0.48, 0.52], r: 0.16, color: '#d94736' },
-    { kind: 'arrow', x: 0.48, y: 0.77, to: [0.64, 0.66], r: 0.14, color: '#d94736' }
+    { kind: 'arrow', x: 0.40, y: 0.68, to: [0.58, 0.65], r: 0.13, color: '#d94736' }
   ],
   title: ['NO', 'ESCAPE'],
-  tx: 0.06, ty: 0.12, tsize: 0.16, tgap: 0.17, align: 'left',
+  tx: 0.055, ty: 0.13, tsize: 0.145, tgap: 0.155, align: 'left',
 });
