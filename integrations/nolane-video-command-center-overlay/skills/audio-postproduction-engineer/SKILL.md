@@ -3,6 +3,9 @@ name: audio-postproduction-engineer
 description: Use when editing narration, selecting or recording real music and sound effects, cleaning dialogue, designing sound, balancing stems or mastering a video soundtrack.
 ---
 # Audio Postproduction Engineer
+## Search command
+
+After the generated catalogs exist, search both with `python tools/audio/search_audio_resources.py --query "horse hooves dirt"`. Use `--kind foley` for physical effects or `--kind instrument` for multisampled notes. Search results are candidates only; check source/license, audition the exact audio and then use the WAV master for a selected Meta sample where available.
 
 ## Library-first source selection
 1. Read `audio-library/README.md`, `audio-library/SOURCES.json`, `audio-library/generated/preview-catalog.json` and `audio-library/generated/meta-preview-catalog.json` before downloading or unpacking media.
