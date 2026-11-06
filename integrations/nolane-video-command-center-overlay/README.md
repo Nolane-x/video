@@ -1,13 +1,14 @@
-# Nolane Video Command Center v0.9.2
+# Nolane Video Command Center v0.9.3
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.9.2
+## What's new in v0.9.3
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
 - Adds a detailed illustrated-history motion reference covering character/prop/environment/camera/graphic channels, camera grammar, action cycles, uniqueness checks and full-motion QA.
-- Adds a searchable offline audio preview bank built from the existing Build 76 pool and the pinned Meta Open Sound collections. Oculus Audio Pack remains CC BY 4.0; the three instrument collections are CC0.
+- Adds searchable metadata indexes for the 2,331 Build 76 redistribution candidates and 1,583 pinned Meta Open Sound samples, then an offline playable audio preview bank.
+- Routes sound selection through those lightweight catalogs before unpacking source archives, preserving the Oculus CC BY 4.0 attribution and CC0 instrument rights. Oculus Audio Pack remains CC BY 4.0; the three instrument collections are CC0.
 - Routes illustrated/cartoon history, footage-led cinematic documentaries and H2 Squire vector history as three separate visual languages.
 - Keeps H2 Squire as a separate route only when the user explicitly asks for its symbolic/vector military-history style or an established Squire series.
 - Makes full-motion sampling, explicit inspection-scope reporting, source provenance and timecoded audiovisual review mandatory. No workflow success or contact sheet is treated as artistic approval.
@@ -20,7 +21,7 @@ One private front door for Nolane video production. It includes **33 internal sk
 3. For illustrated/cartoon history, use expressive rigs, varied environments, action/prop blocking, parallax and progressive map/graphic reveals. Read the timecoded Samurai reference study.
 4. For footage-led cinematic documentaries, it selects real/archive footage, 2.5D/3D reconstruction, camera paths and motion typography per shot.
 5. For explicitly requested H2 Squire/vector historical animation, it selects the separate Squire director and host-controlled H2 Squire specialist.
-6. Search the local resource pool and audio preview bank before creating synthetic sound or fetching more media.
+6. Search `audio-library/generated/preview-catalog.json` and `meta-preview-catalog.json` first; audition preview candidates before fetching source files or creating synthetic sound.
 7. Prototype the hardest moving shot and a 30–60 second picture/sound sample, then scale after human review.
 8. Full-length viewing/listening and a timecoded defect log remain required before approval.
 
