@@ -17,6 +17,8 @@ def search_assets(catalog: dict[str, Any], query: str, limit: int = 30,
         if not include_review_required and status in {
             "review_required", "source_only_or_not_redistributable",
             "not_approved_for_default_commercial_use"
+            "not_approved_for_default_commercial_use", "source_specific_review_required",
+            "share_alike_required"
         }:
             continue
         haystack = " ".join(str(asset.get(key) or "") for key in (
