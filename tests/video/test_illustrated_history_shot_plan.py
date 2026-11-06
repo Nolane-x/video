@@ -79,6 +79,38 @@ class IllustratedHistoryShotPlanTests(unittest.TestCase):
         self.assertGreaterEqual(result["summary"]["distinct_locations"], 3)
         self.assertGreaterEqual(len(result["summary"]["action_types"]), 3)
 
+    def test_timeline_gap_fails(self):
+        first = good_shot("shot-01")
+        second = good_shot("shot-02")
+        first["start_frame"], first["end_frame"] = 0, 72
+        second["start_frame"], second["end_frame"] = 80, 152
+        plan = {"schema_version": "1.0.0", "project": {"project_id": "x", "fps": 24, "style": "illustrated_history"}, "shots": [first, second]}
+        result = validate_plan(plan)
+        self.assertTrue(any("timeline has a gap" in error for error in result["errors"]))
+
+    def test_contact_frame_must_be_inside_shot(self):
+        shot = good_shot()
+        shot["props"][0]["contact_frame"] = 90
+        plan = {"schema_version": "1.0.0", "project": {"project_id": "x", "fps": 24, "style": "illustrated_history"}, "shots": [shot]}
+        result = validate_plan(plan)
+        self.assertTrue(any("contact_frame must fall inside its shot" in error for error in result["errors"]))
+
+    def test_physical_action_phases_must_be_causally_ordered(self):
+        shot = good_shot()
+        shot["action_phases"] = ["anticipation", "contact", "action", "reaction", "follow_through", "recovery"]
+        plan = {"schema_version": "1.0.0", "project": {"project_id": "x", "fps": 24, "style": "illustrated_history"}, "shots": [shot]}
+        result = validate_plan(plan)
+        self.assertTrue(any("not in causal order" in error for error in result["errors"]))
+
+    def test_cc_by_final_approval_requires_exact_attribution(self):
+        shot = good_shot()
+        shot["audio_cues"][0]["audition_status"] = "auditioned"
+        shot["audio_cues"][0]["approved_for_final_mix"] = True
+        shot["audio_cues"][0]["attribution_text"] = ""
+        plan = {"schema_version": "1.0.0", "project": {"project_id": "x", "fps": 24, "style": "illustrated_history"}, "shots": [shot]}
+        result = validate_plan(plan)
+        self.assertTrue(any("exact attribution_text" in error for error in result["errors"]))
+
     def test_three_consecutive_same_compositions_fail(self):
         shots = []
         for i in range(3):
