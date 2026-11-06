@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Author a historically cautious, visually varied Squire storyboard from real voice timings."""
+"""Author context-specific, visually varied Cannae scenes from the measured voice timeline."""
 from __future__ import annotations
 
 import argparse
