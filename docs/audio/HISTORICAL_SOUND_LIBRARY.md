@@ -19,6 +19,8 @@ These are actual Release asset byte sizes, not counts of valid historical cues. 
 
 ## Additional curated source: Meta Open Sound
 
+Permanent OGG preview mirror: [Nolane Historical Audio Library v0.1.0](https://github.com/Nolane-x/video/releases/tag/nolane-historical-audio-library-v0.1.0). Its assets include the four collection ZIPs, source catalog, licenses and Oculus attribution.
+
 Pinned source revision: `251c0be57d5d1b3242b91f53e0cde62ab1cb42d9`  
 Repository: https://github.com/facebookincubator/Meta-open-sound
 
