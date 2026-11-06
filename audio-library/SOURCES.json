@@ -237,6 +237,49 @@
       "url": "https://freesound.org/",
       "license": "per-item",
       "policy": "Check CC0/CC-BY/NC/ND terms per recording and preserve attribution. No bulk mirror without permissions and compliant API use."
+    },
+    {
+      "id": "sonniss-gdc-2026",
+      "name": "Sonniss GDC 2026 Game Audio Bundle",
+      "url": "https://gdc.sonniss.com/",
+      "track_list_url": "https://docs.google.com/spreadsheets/d/1MkoGwA6FfgNXhye9wLnY0gNLvjEp4H2iYXM1YxMI6Qs/edit?usp=sharing",
+      "license_url": "https://sonniss.com/gdc-bundle-license/",
+      "license_version": "2.0",
+      "license_effective_date": "2026-08-27",
+      "advertised_size_bytes": 7470000000,
+      "advertised_files": 347,
+      "distribution_parts": 5,
+      "rights_class": "private_production_only",
+      "permitted_uses": [
+        "personal and commercial film/video/TV/interactive synchronization",
+        "modification and processing inside a production",
+        "unlimited projects"
+      ],
+      "restrictions": [
+        "no sale of raw sound effects as supplied",
+        "no AI/ML training or enhancement",
+        "do not claim authorship of the original recording"
+      ],
+      "no_attribution_required": true,
+      "historical_relevance": {
+        "examples_from_official_track_list": [
+          "WEAPArmr_Metal Shield Spin On Floor, Buckler MKH — Historical Weapons Vol. 2",
+          "WEAPBlnt_Spear And Stick Impact, Wooden MKH 2 — Historical Weapons Vol. 2",
+          "WEAPSwrd_Sword Slide Cuts, Metallic, Impact CM4 2 — Historical Weapons Vol. 2",
+          "Cinematic Fight Vol. 1 — choking/tension and body impact cues"
+        ],
+        "note": "These are promising specific cues from the public track-list excerpt. The complete bundle must still be searched and auditioned. This bundle is not a comprehensive cavalry/hoofbeat solution."
+      },
+      "acquisition_status": "not_downloaded_no_eula_acceptance",
+      "storage_policy": "Never upload raw Sonniss ZIPs or loose source WAVs to the public Nolane-x/video repository, public GitHub Releases, public Actions artifacts, or redistributable sound banks. Keep in a private production store controlled by the licensee.",
+      "download_page_parts": [
+        "Sonniss.com-GDC2026-GameAudioBundle1of5.zip",
+        "Sonniss.com-GDC2026-GameAudioBundle2of5.zip",
+        "Sonniss.com-GDC2026-GameAudioBundle3of5.zip",
+        "Sonniss.com-GDC2026-GameAudioBundle4of5.zip",
+        "Sonniss.com-GDC2026-GameAudioBundle5of5.zip"
+      ],
+      "notes": "Downloading/using requires the licensee to accept the current EULA. Agent has not accepted it or downloaded these files. Once the licensee obtains the private pack, create a private index and audition log; do not expose raw media or use it for AI training."
     }
   ],
   "production_policy": {
