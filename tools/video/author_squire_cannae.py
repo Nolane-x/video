@@ -94,7 +94,7 @@ def choose_template(text: str, index: int, progress: float, usage=None, last_at=
     return choice
 
 
-def base_args(def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) -> tuple[dict, list[dict]]:
+def base_args(tpl: str, text: str, index: int, progress: float, sfx_root: Path) -> tuple[dict, list[dict]]:
     low = text.casefold()
     seed = index * 7919 + 216
     rng = random.Random(seed)
