@@ -23,6 +23,7 @@ Only when the user explicitly asks for H2 Squire/vector style or an existing Squ
 Use the established cinematic stick-figure narrative style only when that style is selected by the user or belongs to the existing series. Match documentary, product, explainer, social and motion-graphic formats to their actual purpose; do not impose one universal look.
 
 ## Audio policy
+Before unpacking audio archives, search `audio-library/generated/preview-catalog.json` and `audio-library/generated/meta-preview-catalog.json` for candidates by tag/category, title, material, action, perspective and rights class. Prefer exact catalog hits and audition them in the offline preview bank; then fetch only the relevant source pack/member. Use recorded and licensed sound first.
 Use recorded and licensed sound first. Search the existing audio index/bundles, inspect rights and technical metadata, compare and audition several candidates, then layer and synchronize. Procedural synthesis is a temporary placeholder or a documented exception—not the default soundtrack. Keep score, ambience, Foley, impacts, narration, transitions and stems distinct until mix. Route acquisition and rights separation through `historical-audio-library-curator`; use `audio-postproduction-engineer` for per-shot cue design, stem mix and mastering.
 
 ## Motion and QA
