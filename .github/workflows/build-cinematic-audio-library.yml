@@ -122,9 +122,16 @@ jobs:
           catalog_path = Path("dist/meta-open-sound-release/meta-source-catalog.json")
           catalog = json.loads(catalog_path.read_text())
           base = "https://github.com/" + __import__("os").environ["GITHUB_REPOSITORY"] + "/releases/download/nolane-historical-audio-library-v0.1.0/"
+          mirrored_wav_masters = {"meta-open-sound-oculus-audio-pack-wav.zip"}
           for item in catalog["assets"]:
               item.pop("preview_path", None)
               item["archive_download_url"] = base + item["archive_name"]
+              master_name = item.get("wav_master_archive_name")
+              if master_name:
+                  item["wav_master_download_url"] = (
+                      base + master_name if master_name in mirrored_wav_masters
+                      else item.get("wav_master_source_url")
+                  )
               item["preview_bank"] = "Download the separate GitHub Actions preview-bank artifact for local playable previews."
           catalog["purpose"] = "Source index for the four OGG ZIPs in this release; not itself a playable-media folder."
           catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
