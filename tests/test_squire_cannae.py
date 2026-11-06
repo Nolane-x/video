@@ -161,6 +161,37 @@ class SquireCannaeTests(unittest.TestCase):
     def test_safe_output_name(self):
         self.assertEqual(QA.safe_title('How Hannibal Turned Rome: "Trap"'), "How Hannibal Turned Rome Trap")
 
+    def test_cavalry_scene_uses_distinct_mounted_units_and_carthage_palette(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            args, _ = AUTHOR.base_args(
+                "scene",
+                "Numidian horsemen gallop around the Roman cavalry.",
+                71,
+                0.58,
+                Path(tmp),
+            )
+        mounted = [person for person in args.get("people", []) if person.get("horse")]
+        self.assertGreaterEqual(len(mounted), 2)
+        self.assertTrue(all(person["horse"]["gait"] == "gallop" for person in mounted))
+        self.assertTrue(all(person["preset"] == "latinOld" for person in mounted))
+
+    def test_aftermath_scene_is_not_a_reused_battle_faceoff(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            args, _ = AUTHOR.base_args(
+                "scene",
+                "After the disaster, thousands are dead and wounded on the field.",
+                88,
+                0.86,
+                Path(tmp),
+            )
+        self.assertEqual(args["time"], "dusk")
+        self.assertTrue(any(person.get("fall") is not None for person in args.get("people", [])))
+        self.assertTrue(any(prop.get("kind") == "shield" for prop in args.get("props", [])))
+
+    def test_landscape_captions_are_enabled(self):
+        config = json.loads((ROOT / "video-projects/squire/cannae-216bc/config.json").read_text(encoding="utf-8"))
+        self.assertTrue(config["captions"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
