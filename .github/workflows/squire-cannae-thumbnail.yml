@@ -46,8 +46,8 @@ jobs:
           set -euo pipefail
           cd integrations/h2-squire-studio/kit
           mkdir -p projects/cannae-thumbnail/scenes/shots projects/cannae-thumbnail/story projects/cannae-thumbnail/timeline
-          cp ../../../../video-projects/squire/cannae-216bc/config.json projects/cannae-thumbnail/config.json
-          cp ../../../../video-projects/squire/cannae-216bc/scenes/shots/thumb.js projects/cannae-thumbnail/scenes/shots/thumb.js
+          cp ../../../video-projects/squire/cannae-216bc/config.json projects/cannae-thumbnail/config.json
+          cp ../../../video-projects/squire/cannae-216bc/scenes/shots/thumb.js projects/cannae-thumbnail/scenes/shots/thumb.js
           printf '{"shots":[]}\n' > projects/cannae-thumbnail/story/shots.json
           printf '[]\n' > projects/cannae-thumbnail/timeline/words.json
           printf '[]\n' > projects/cannae-thumbnail/timeline/lines.json
@@ -66,7 +66,7 @@ jobs:
           cp integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail.png "${RUNNER_TEMP}/cannae-thumbnail/"
           cp integrations/h2-squire-studio/kit/projects/cannae-thumbnail/out/thumbnail_1280.jpg "${RUNNER_TEMP}/cannae-thumbnail/"
           file "${RUNNER_TEMP}/cannae-thumbnail/"*
-          identify "${RUNNER_TEMP}/cannae-thumbnail/thumbnail_1280.jpg"
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "${RUNNER_TEMP}/cannae-thumbnail/thumbnail_1280.jpg"
 
       - uses: actions/upload-artifact@v4
         with:
