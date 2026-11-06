@@ -38,8 +38,10 @@ jobs:
           sudo apt-get install -y ffmpeg
           ffprobe -version
 
-      - name: Test fail-closed rights and matching rules
-        run: python -m unittest discover -s tools/audio -p "test_*.py" -v
+      - name: Test fail-closed rights, source matching and Meta attribution
+        run: |
+          python -m unittest discover -s tools/audio -p "test_*.py" -v
+          python tests/audio/test_meta_open_sound_preview.py
 
       - name: Download and inventory existing Build 76 audio archives
         run: |
@@ -78,6 +80,28 @@ jobs:
           assert catalog["summary"]["approved_for_final_mix"] == 0
           assert (Path("build/audio-preview-bank") / "AUDIO_PREVIEW_BANK.html").is_file()
           print(json.dumps(catalog["summary"], indent=2))
+          PY
+
+      - name: Build verified Meta Open Sound preview bank
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/audio/build_meta_open_sound_preview.py
+          python tools/audio/build_meta_open_sound_preview.py \
+            --download-dir "$RUNNER_TEMP/meta-open-sound" \
+            --output-dir build/audio-preview-bank/meta-open-sound
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("build/audio-preview-bank/meta-open-sound")
+          catalog = json.loads((root / "meta-preview-catalog.json").read_text())
+          summary = catalog["summary"]
+          assert summary["files"] == 1583, summary
+          assert summary["cc0_files"] == 1075, summary
+          assert summary["cc_by_files"] == 508, summary
+          assert summary["human_auditioned"] == 0
+          assert (root / "META_AUDIO_PREVIEW_BANK.html").is_file()
+          assert (root / "ATTRIBUTION.md").is_file()
+          print(json.dumps(summary, indent=2))
           PY
 
       - name: Upload offline playable audio bank
