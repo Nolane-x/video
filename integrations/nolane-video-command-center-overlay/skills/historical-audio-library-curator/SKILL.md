@@ -21,6 +21,10 @@ Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` 
 ## Existing library first
 The verified Build 76 GitHub Release contains separate audio-category volumes. Read the item-level source manifests and the `docs/audio/HISTORICAL_SOUND_LIBRARY.md` map before building anything new. The current archive families include OpenGameArt, USGS, NASA, Wikimedia Commons, Kenney and a distinct procedural-originals pack. Treat filename/category and rights class as separate facts; an audio ZIP is not proof every item inside is a historical Foley recording.
 
+## Historical coverage audit
+
+Read `docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md` before assigning a historical battle soundscape. Do not infer horse hoofbeats, cavalry, arrow or shield impacts from broad tags; use the direct-vs-tag-assisted match confidence and audition the chosen recording.
+
 ## OGG preview to verified WAV master
 
 The Meta Open Sound catalog links every preview sample to its original WAV member through `source_wav_file`, `wav_master_archive_name`, `wav_master_size_bytes` and `wav_master_sha256`.
