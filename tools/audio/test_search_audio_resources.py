@@ -21,7 +21,7 @@ class UnifiedAudioSearchTests(unittest.TestCase):
                     "archive_member": "weapons/blade_clash.wav",
                     "rights_status": "redistributable_candidate",
                     "auditioned_by_human": False,
-                    "tags": ["sword", "impact", "metal"],
+                    "tags": ["sword", "impact", "metal", "march"],
                     "category": "weapon foley",
                 },
                 {
