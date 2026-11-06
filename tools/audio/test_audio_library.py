@@ -15,6 +15,10 @@ class AudioRightsTests(unittest.TestCase):
     def test_nc_and_nd_are_not_default_commercial_assets(self):
         self.assertEqual(audio.rights_status("CC-BY-NC-4.0", None), "not_approved_for_default_commercial_use")
         self.assertEqual(audio.rights_status("CC-BY-ND-4.0", None), "not_approved_for_default_commercial_use")
+    def test_share_alike_is_not_mislabeled_as_plain_attribution(self):
+        self.assertEqual(audio.rights_status("CC-BY-SA-4.0", None), "share_alike_required")
+        self.assertEqual(audio.rights_status("Creative Commons Attribution-ShareAlike 4.0", None), "share_alike_required")
+
     def test_unknown_license_fails_closed(self):
         self.assertEqual(audio.rights_status(None, None), "review_required")
         self.assertEqual(audio.rights_status("royalty free", None), "review_required")
