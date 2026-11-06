@@ -23,6 +23,10 @@ Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` 
 - Inspect exact per-item source and license metadata. Audition several candidates; filenames and tags are not evidence of sound quality.
 - Record asset ID, title, creator, semantic tags, archive/member path, source page, exact file URL, SHA-256, duration, channel/sample-rate/bit-depth data, loudness/peak, rights class and human audition status.
 
+## OGG preview to verified WAV master
+
+The Meta Open Sound catalog links each OGG preview to its exact WAV member through `source_wav_file`, master archive name, size and SHA-256. Search and audition OGG first; fetch a master only after choosing a cue. Oculus WAV is mirrored in the permanent Nolane release. Fetch Piano/Nylon/Steel masters only as needed using `.github/workflows/acquire-meta-open-sound-wav-master.yml`; the workflow verifies archive bytes and SHA-256. Extract the exact original WAV member, retain its metadata and apply the collection-level rights correctly (Oculus CC BY 4.0; instrument collections CC0).
+
 ## Rights classes
 - public_cc0_pd: redistributable only after exact item-level CC0/Public Domain proof and required attribution is retained.
 - project_use_only: may be synchronized into a finished film under exact item terms; raw source cannot be redistributed.
