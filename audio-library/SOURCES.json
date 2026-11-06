@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "release": "video-asset-library-build-41184526545",
+  "release_url": "https://github.com/Nolane-x/video/releases/tag/video-asset-library-build-41184526545",
+  "note": "Archive-level index only. Each contained media item retains its own source and license; verify and audition before use.",
+  "sources": [
+    {
+      "id": "opengameart-audio",
+      "archive": "video-assets-opengameart-audio-001.zip",
+      "size_bytes": 462854835,
+      "rights_class": "public_cc0_pd",
+      "license_gate": "exactly one CC0 1.0 link on the item's own License(s) field",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-opengameart-audio-001.zip",
+      "tags": [
+        "foley",
+        "weapons",
+        "impacts",
+        "ambience",
+        "music",
+        "ui"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "usgs-audio",
+      "archive": "video-assets-usgs-audio-001.zip",
+      "size_bytes": 456076826,
+      "rights_class": "public_cc0_pd",
+      "license_gate": "exact item Sources/Usage text must be exactly Public Domain; preserve USGS credit",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-usgs-audio-001.zip",
+      "tags": [
+        "nature",
+        "water",
+        "weather",
+        "animals",
+        "field-recordings"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "nasa-audio",
+      "archive": "video-assets-nasa-audio-001.zip",
+      "size_bytes": 165256750,
+      "rights_class": "project_use_only",
+      "license_gate": "NASA media usage guidelines and item-level copyright/context review; not CC0",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-nasa-audio-001.zip",
+      "tags": [
+        "space",
+        "science",
+        "mechanical",
+        "communications"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "wikimedia-audio",
+      "archive": "video-assets-wikimedia-audio-001.zip",
+      "size_bytes": 17840331,
+      "rights_class": "public_cc0_pd",
+      "license_gate": "exact file-level CC0 or Public Domain metadata; preserve creator and file page",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-wikimedia-audio-001.zip",
+      "tags": [
+        "birds",
+        "ocean",
+        "machinery",
+        "historic-broadcast",
+        "field-recording"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "kenney-audio",
+      "archive": "video-assets-kenney-audio-001.zip",
+      "size_bytes": 1724247,
+      "rights_class": "public_cc0_pd",
+      "license_gate": "only media files from the verified CC0 subset; software license is separate",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-kenney-audio-001.zip",
+      "tags": [
+        "ui",
+        "game-sfx",
+        "impacts"
+      ],
+      "priority": "low"
+    },
+    {
+      "id": "originals-audio",
+      "archive": "video-assets-originals-audio-001.zip",
+      "size_bytes": 33910385,
+      "rights_class": "internal_original_supplement",
+      "license_gate": "repository-generated presets; synthetic/fallback, not authentic recordings",
+      "url": "https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-originals-audio-001.zip",
+      "tags": [
+        "placeholder",
+        "transition",
+        "procedural"
+      ],
+      "priority": "supplemental"
+    }
+  ]
+}
