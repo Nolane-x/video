@@ -7,6 +7,10 @@ description: Use when the user requests polished illustrated/cartoon history fil
 ## Purpose and route
 This is a distinct route for animated historical explainers (samurai, Japan, empires, military history, biographies, inventions and social history). It is **not automatically the H2 Squire style** and is not the footage-led cinematic documentary route. Analyse the reference and select an engine and asset strategy per shot. Never assume that the source video's exact software, budget or production method is known.
 
+## Production reference
+
+For shot schemas, the five independent motion channels, camera grammar, repeatability gates and full moving QA, follow `references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md`. The exact Samurai sample map and honest evidence scope live in `docs/reference-studies/samurai-history-animation-review-2026-11-06.md` in the repository.
+
 ## Reference study: required evidence
 1. Probe the source file: duration, resolution, frame rate, codecs, audio layout and variable-frame-rate status.
 2. Sample the full runtime at a repeatable interval (normally every 1–2 seconds) to map the complete visual arc. Create contact sheets with timecodes.
