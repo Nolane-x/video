@@ -6,7 +6,7 @@ Read in order: (1) `.agents/skills/video-production-master/SKILL.md`, (2) `docs/
 ## Non-negotiable requirements
 
 ## Genre routing and recorded-sound policy
-- The preferred stick-figure house style remains the default only when the brief or existing series calls for it. A user-provided reference or request for a cinematic, footage-led historical film routes to the dedicated historical-cinematic-documentary-director skill; do not force that work into H2 Squire or repeated vector boards.
+- The preferred stick-figure house style remains the default only when the brief or existing series calls for it. A supplied illustrated/cartoon history reference routes to `.agents/skills/illustrated-history-animation-director/SKILL.md`; use expressive acting, varied environments, prop choreography, animated maps/graphics and multi-plane motion rather than repeating the same vector board. A footage-led cinematic historical brief routes to `historical-cinematic-documentary-director`. Do not force either route into H2 Squire.
 - H2 Squire is an opt-in route for the explicitly requested Squire/vector language or an established Squire series. Historical subject matter alone does not select Squire.
 - For cinematic documentary production, complete a full-length reference watch with sound and a timestamped camera/action/audio study. If decoding or playback is blocked, state BLOCKED_NOT_WATCHED rather than inventing an analysis.
 - Search and audition the existing Build 76 media pool before generating or downloading new material. The Build 76 release already includes about 1.14 GB of separate audio archives; use the source map in audio-library/SOURCES.json, then verify each item's license and attribution.
