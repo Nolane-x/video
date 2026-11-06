@@ -40,6 +40,10 @@ python tools/audio/search_audio_resources.py --query "piano note" --kind instrum
 
 The command searches both generated catalogs, excludes review-required records by default, carries attribution and never promotes an unauditioned sample. Use `--include-review-required` only for rights investigation, not normal production selection.
 
+## Permanent Meta Open Sound mirror
+
+The four Meta Open Sound OGG packs are mirrored in the permanent [Nolane Historical Audio Library v0.1.0 Release](https://github.com/Nolane-x/video/releases/tag/nolane-historical-audio-library-v0.1.0). It contains all 1,583 previews, the searchable source catalog, collection license texts and required Oculus attribution. This Release is not subject to the 90-day GitHub Actions artifact retention window. Use the mirror URLs in `SOURCES.json`; the four production WAV master URLs remain in the same source map and can be fetched selectively when a cue is chosen.
+
 ## Production-first policy
 
 **Audition the recordings before synthesizing.** The library is searched first for every shot. A new web download is justified only when the library lacks a suitable recording or the match is materially poor.
