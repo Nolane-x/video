@@ -55,6 +55,24 @@ class UnifiedAudioSearchTests(unittest.TestCase):
                     "tags": ["piano", "instrument", "note"],
                     "auditioned_by_human": False,
                 },
+                {
+                    "asset_id": "false-bow-hit",
+                    "title": "Elbow body collision",
+                    "collection_kind": "foley",
+                    "license": "CC-BY-4.0",
+                    "rights_class": "cc_by_4_attribution_required",
+                    "tags": ["body", "elbow", "impact"],
+                    "auditioned_by_human": False,
+                },
+                {
+                    "asset_id": "real-bow",
+                    "title": "Bowstring release",
+                    "collection_kind": "foley",
+                    "license": "CC-BY-4.0",
+                    "rights_class": "cc_by_4_attribution_required",
+                    "tags": ["bow", "string", "release"],
+                    "auditioned_by_human": False,
+                },
             ]
         }), encoding="utf-8")
 
@@ -78,6 +96,12 @@ class UnifiedAudioSearchTests(unittest.TestCase):
         instruments = search_catalogs([self.build76, self.meta], "piano note", kind="instrument")
         self.assertEqual([item["asset_id"] for item in foley], ["meta-1"])
         self.assertEqual([item["asset_id"] for item in instruments], ["meta-piano-1"])
+
+    def test_whole_token_search_avoids_false_positive_substrings(self):
+        items = search_catalogs([self.build76, self.meta], "bow")
+        ids = {item["asset_id"] for item in items}
+        self.assertIn("real-bow", ids)
+        self.assertNotIn("false-bow-hit", ids)
 
     def test_search_never_promotes_unauditioned_assets(self):
         items = search_catalogs([self.build76, self.meta], "sword clash")
