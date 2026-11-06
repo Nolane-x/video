@@ -105,8 +105,6 @@ def rights_status(license_value: str | None, explicit_redistributable: Any) -> s
     text = (license_value or "").strip().casefold()
     if explicit_redistributable is False:
         return "source_only_or_not_redistributable"
-    if explicit_redistributable is False:
-        return "source_only_or_not_redistributable"
     if any(term in text for term in ("nasa media usage guidelines", "nasa media usage", "agency media usage guidelines")):
         return "source_specific_review_required"
     if any(term in text for term in ("noncommercial", "non-commercial", "cc-by-nc", "cc by-nc", "no derivatives", "no-derivatives", "cc-by-nd", "cc by-nd")):
