@@ -45,6 +45,9 @@ class UnifiedAudioSearchTests(unittest.TestCase):
                     "auditioned_by_human": False,
                     "attribution_text": "Oculus Audio Pack 01 by Oculus VR, LLC",
                     "archive_member": "WEAP/sword-clash.ogg",
+                    "source_wav_file": "WEAPSwrd_SwordClash_OS_01.wav",
+                    "wav_master_download_url": "https://github.com/Nolane-x/video/releases/download/nolane-historical-audio-library-v0.1.0/meta-open-sound-oculus-audio-pack-wav.zip",
+                    "wav_master_sha256": "cc9dcf42d20c339e82ca9dcaa976553179ee4d1951f011ea31eeed93ac43e93c",
                 },
                 {
                     "asset_id": "meta-piano-1",
@@ -90,6 +93,13 @@ class UnifiedAudioSearchTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertIn("Oculus Audio Pack 01", items[0]["attribution_text"])
         self.assertEqual(items[0]["rights_status_normalized"], "cc_by_4_attribution_required")
+
+    def test_search_result_exposes_exact_wav_master(self):
+        items = search_catalogs([self.build76, self.meta], "katana sword")
+        self.assertEqual(len(items), 1)
+        self.assertTrue(items[0]["wav_master_download_url"].endswith("-wav.zip"))
+        self.assertEqual(items[0]["source_wav_file"], "WEAPSwrd_SwordClash_OS_01.wav")
+        self.assertEqual(len(items[0]["wav_master_sha256"]), 64)
 
     def test_kind_filter_separates_instrument_samples_from_foley(self):
         foley = search_catalogs([self.build76, self.meta], "sword clash", kind="foley")
