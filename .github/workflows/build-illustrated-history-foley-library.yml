@@ -9,6 +9,9 @@ on:
       - "tools/audio/illustrated_history_foley_sources.json"
       - "tools/audio/build_illustrated_history_foley_bundle.py"
       - "tools/audio/test_illustrated_history_foley_bundle.py"
+      - "tools/audio/validate_foley_review_decisions.py"
+      - "tools/audio/test_validate_foley_review_decisions.py"
+      - "docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json"
       - "docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md"
       - ".github/workflows/build-illustrated-history-foley-library.yml"
 
@@ -38,7 +41,7 @@ jobs:
       - name: Test safe extraction, provenance and approval gates
         run: |
           set -euo pipefail
-          python -m py_compile tools/audio/build_illustrated_history_foley_bundle.py
+          python -m py_compile tools/audio/build_illustrated_history_foley_bundle.py tools/audio/validate_foley_review_decisions.py
           python -m unittest discover -s tools/audio -p "test_illustrated_history_foley_bundle.py" -v
 
       - name: Acquire the exact item-level CC0 source packs
@@ -85,6 +88,8 @@ jobs:
             build/illustrated-history-foley/build-report.json
             build/illustrated-history-foley/download-manifest.json
             build/illustrated-history-foley/SHA256SUMS.txt
+            docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json
+            tools/audio/validate_foley_review_decisions.py
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
