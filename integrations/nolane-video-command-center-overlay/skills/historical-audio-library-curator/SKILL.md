@@ -79,6 +79,11 @@ The v0.3.0 Foley + score pack is published at https://github.com/Nolane-x/video/
 The next source pack adds five CC0 field recordings: Adelaide park birds before rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. Treat them according to their real recording context. They are not period-authentic and are not battlefield/harbour recordings. Check v0.4.0 Actions build and Release status before using the package; keep all new assets un-auditioned until the exact files have been heard and exported through the review console.
 
 
-## v0.4.0 environment ambience expansion
+## v0.4.0 environment ambience — published
 
-The source manifest adds five item-level CC0 field recordings: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. Treat their real recording context accurately: modern Adelaide public park, Vistula river, or indoor building. They are not period-authentic reconstructions. Do not use birds in battle by default, Vistula waves as ocean surf, or indoor wind as exterior ambience. Check the v0.4.0 build and permanent Release before use, listen to the exact candidate, then export and validate review JSON.
+The [v0.4.0 CC0 Release](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0) adds five item-level CC0 field recordings: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. The package contains 123 files from 16 sources. Treat their real recording context accurately: modern Adelaide public park, Vistula river, or indoor building. They are not period-authentic reconstructions. Do not use birds in battle by default, Vistula waves as ocean surf, or indoor wind as exterior ambience. Listen to exact candidates and validate exported review JSON before cue use.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
