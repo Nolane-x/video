@@ -62,7 +62,7 @@ jobs:
           root = Path("build/illustrated-history-foley")
           report = json.loads((root / "build-report.json").read_text(encoding="utf-8"))
           catalog = json.loads((root / "package" / "catalog.json").read_text(encoding="utf-8"))
-          assert report["source_count"] == 8, report
+          assert report["source_count"] == 11, report
           assert "Audition Edition" in report["collection"]
           assert report["audio_asset_count"] >= 20, report
           assert report["human_auditioned"] == 0
@@ -81,7 +81,7 @@ jobs:
         with:
           name: illustrated-history-foley-cc0-${{ github.run_number }}
           path: |
-            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.2.0.zip
+            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.3.0.zip
             build/illustrated-history-foley/package/catalog.json
             build/illustrated-history-foley/package/AUDIO_PREVIEW.html
             build/illustrated-history-foley/package/source-register.json
@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.NOLANE_RELEASE_TOKEN || github.token }}
-          RELEASE_TAG: nolane-illustrated-history-foley-v0.2.0
+          RELEASE_TAG: nolane-illustrated-history-foley-v0.3.0
         run: |
           set -euo pipefail
           NOTES="$RUNNER_TEMP/foley-release-notes.md"
@@ -116,11 +116,11 @@ jobs:
             gh release create "$RELEASE_TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
-              --title "Nolane Illustrated History Foley CC0 v0.2.0" \
+              --title "Nolane Illustrated History Foley + Score CC0 v0.3.0" \
               --notes-file "$NOTES"
           fi
           gh release upload "$RELEASE_TAG" \
-            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.2.0.zip \
+            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.3.0.zip \
             build/illustrated-history-foley/build-report.json \
             build/illustrated-history-foley/download-manifest.json \
             build/illustrated-history-foley/SHA256SUMS.txt \
@@ -136,7 +136,7 @@ jobs:
           if [ "$RELEASE_OUTCOME" = "success" ]; then
             {
               echo "## Foley Release"
-              echo "Published \`nolane-illustrated-history-foley-v0.2.0\` successfully."
+              echo "Published \`nolane-illustrated-history-foley-v0.3.0\` successfully."
             } >> "$GITHUB_STEP_SUMMARY"
           else
             {
