@@ -3,7 +3,7 @@
   "author": {
     "name": "Nolane Studio"
   },
-  "description": "AI-first video production front door with 33 internal skills, 37 core specialist plugins, illustrated-history and cinematic-documentary routes, a curated CC0 Foley audition console, and opt-in H2 Squire.",
+  "description": "AI-first video production front door with 33 internal skills, 37 core specialist plugins, illustrated-history and cinematic-documentary routes, a curated CC0 Foley and orchestral-score audition console, and opt-in H2 Squire.",
   "extensions": {
     "com.openai": {
       "interface": {
@@ -12,7 +12,7 @@
         "defaultPrompt": "Use Nolane Video Command Center as the front door. Restore repo/project state, route by visual genre, search existing media and generated audio metadata catalogs before fetching or generating media, search and audition OGG previews first, then retrieve the exact hash-verified WAV master for selected recordings; prefer direct metadata matches for historical Foley, consult the bundled historical coverage audit and use rights-cleared recorded Foley/ambience/music before synthesis; isolate private source-only libraries such as Sonniss from the public asset bank and never use them for AI training, and require full moving-picture and soundtrack review. For illustrated/cartoon history, use the illustrated-history animation director with expressive rigs, varied settings, pose/action/prop choreography, multi-plane motion, animated maps and infographics. For footage-led historical documentaries, choose footage, 2.5D, Blender, Remotion, maps and motion per shot. Use H2 Squire only when the user explicitly wants its separate vector style. Preserve the parallel asset-library boundary.",
         "developerName": "Nolane Studio",
         "displayName": "Nolane Video Command Center",
-        "longDescription": "Private video-production orchestrator with 33 internal skills, 37 core specialist plugins and three distinct historical routes: illustrated/cartoon history, footage-led cinematic documentary and opt-in H2 Squire vector military history. Includes recorded-sound-first direction, searchable Build 76 and Meta Open Sound audio catalogs plus an offline playable preview bank with exact per-sample WAV-master mapping and verified lossless acquisition, camera/motion planning, source-backed reference studies, stem-based sound design and evidence-gated full audiovisual QA, a reusable illustrated-history motion system and strict separation of private licensed audio from public redistribution, plus an evidence-based historical Foley coverage audit. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the parallel asset-library workstream. Adds a curated CC0 illustrated-history Foley acquisition lane with 115 indexed files from eight source entries, human-audition gates and a searchable offline audition pack. v1.0 adds an offline Foley audition console, SHA-256-bound review export, human-audition/final-mix approval validator and shot-level Cannae cue map.",
+        "longDescription": "Private video-production orchestrator with 33 internal skills, 37 core specialist plugins and three distinct historical routes: illustrated/cartoon history, footage-led cinematic documentary and opt-in H2 Squire vector military history. Includes recorded-sound-first direction, searchable Build 76 and Meta Open Sound audio catalogs plus an offline playable preview bank with exact per-sample WAV-master mapping and verified lossless acquisition, camera/motion planning, source-backed reference studies, stem-based sound design and evidence-gated full audiovisual QA, a reusable illustrated-history motion system and strict separation of private licensed audio from public redistribution, plus an evidence-based historical Foley coverage audit. Specialist plugins require explicit host activation; no hidden plugin-to-plugin invocation is claimed. Protects the parallel asset-library workstream. Adds a curated CC0 illustrated-history Foley acquisition lane with 115 indexed files from eight source entries, human-audition gates and a searchable offline audition pack. v1.0 adds an offline Foley audition console, SHA-256-bound review export, human-audition/final-mix approval validator and shot-level Cannae cue map. v1.0.1 extends the CC0 review pack with three orchestral score candidates while retaining human-audition and approval gates.",
         "shortDescription": "33 skills, 38 specialists"
       }
     }
@@ -46,5 +46,5 @@
   ],
   "name": "nolane-video-command-center",
   "repository": "https://github.com/Nolane-x/video",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
