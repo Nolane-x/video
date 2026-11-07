@@ -1,8 +1,8 @@
-# Nolane Video Command Center v1.0.1
+# Nolane Video Command Center v1.0.2
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v1.0.1
+## What's new in v1.0.2
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
@@ -76,3 +76,10 @@ The v0.3.0 source pack includes three item-level CC0 music candidates: Eye of th
 The v0.3.0 pack contains 118 audio files from 11 item-level CC0 sources, including three orchestral candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). These are modern cinematic/game-style recordings, not period-authentic music. They remain un-auditioned.
 
 The v0.3.0 acquisition, decode and catalog checks passed. Its 432 MB Actions artifact (ID 13563793933) expires 2027-02-05; persistent Release publication was denied by GitHub with HTTP 403. Use the [successful Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721) to download it. Inner package SHA-256: `c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40`.
+
+
+## Verified Foley + score v0.3.0 delivery
+
+The v0.3.0 acquisition and decode/catalog checks passed: **118 audio files from 11 item-level CC0 sources**. The ZIP is delivered as Actions artifact `illustrated-history-foley-cc0-18` (ID `13563793933`) in [run 42347935721](https://github.com/Nolane-x/video/actions/runs/42347935721), available until **2027-02-05 06:38:50 UTC**. Inner package SHA-256: `c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40`. Outer artifact SHA-256: `37dade9eddadb006c03779de5a98edacc8f824d396c8ceafdb1a0c9acec5d3a5`.
+
+The persistent GitHub Release upload was denied with HTTP 403 from the Actions integration token. Do not treat `/releases/tag/nolane-illustrated-history-foley-v0.3.0` as published; use the Actions run/artifact while it remains available. A repository maintainer must add `NOLANE_RELEASE_TOKEN` with Contents: write and rerun to create a permanent Release.
