@@ -90,6 +90,11 @@ The v0.3.0 audition pack adds three real CC0 orchestral score candidates. Use th
 The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as optional music beds that still require human audition and historical/style review; do not imply they are period-authentic. The Cannae cue map lists candidates but leaves asset approvals empty.
 
 
-## Environmental sound and period-fit
+## Environmental sound and period-fit — v0.4.0 published
 
-The next CC0 ambience pack (v0.4.0) adds park birds-before-rain, a small river, open-field wind, Vistula River waves and interior howling wind. These are modern field recordings with specific source contexts, not period-authentic assets. Use them as neutral environmental layers only when the scene calls for them, and never claim they reconstruct a specific ancient location. They must be human-auditioned before cue assignment.
+The published [v0.4.0 CC0 pack](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0) includes park birds-before-rain, a small river, open-field wind, Vistula River waves and interior howling wind. These are modern field recordings with specific source contexts, not period-authentic assets. Use them only as neutral environmental layers when the scene calls for them, and never claim they reconstruct a specific ancient location. Human audition and the review validator remain required before cue approval.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
