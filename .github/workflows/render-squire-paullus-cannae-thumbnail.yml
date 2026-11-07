@@ -1,0 +1,76 @@
+name: Render Squire Paullus Cannae thumbnail
+
+on:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - ".github/workflows/render-squire-paullus-cannae-thumbnail.yml"
+      - "integrations/h2-squire-studio/thumbnail-refinements/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: squire-paullus-thumbnail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  thumbnail:
+    name: Render and validate final thumbnail
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the video repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg and system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+
+      - name: Install H2 Squire runtime and Chromium
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Create the independent vertical thumbnail project
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          python tools/new_project.py --name paullus-cannae-short --title "The Roman Consul Who Rode Into Hannibal's Trap" --pack squire --lang en --style flat --aspect 9:16 --captions
+          cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/config.json" projects/paullus-cannae-short/config.json
+          mkdir -p projects/paullus-cannae-short/story projects/paullus-cannae-short/scenes/shots
+          cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/story/bible.md" projects/paullus-cannae-short/story/bible.md
+          cp "$GITHUB_WORKSPACE/integrations/h2-squire-studio/thumbnail-refinements/paullus-cannae-thumb.js" projects/paullus-cannae-short/scenes/shots/thumb.js
+
+      - name: Render the final thumbnail
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          node render.mjs --project projects/paullus-cannae-short --thumb
+          test -s projects/paullus-cannae-short/out/thumbnail.png
+          test -s projects/paullus-cannae-short/out/thumbnail_1280.jpg
+          file projects/paullus-cannae-short/out/thumbnail.png
+          file projects/paullus-cannae-short/out/thumbnail_1280.jpg
+
+      - name: Upload final thumbnail assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: paullus-cannae-final-thumbnail-${{ github.run_id }}
+          path: |
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/out/thumbnail.png
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/out/thumbnail_1280.jpg
+          if-no-files-found: error
+          retention-days: 30
