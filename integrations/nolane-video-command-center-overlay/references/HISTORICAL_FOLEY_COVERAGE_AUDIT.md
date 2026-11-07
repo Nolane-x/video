@@ -87,7 +87,7 @@ No item in either generated catalog is human-auditioned merely because it appear
 The final artifact-first workflow completed successfully in run [42341596143](https://github.com/Nolane-x/video/actions/runs/42341596143). All test, acquisition, FFprobe/catalog validation, Actions artifact upload and GitHub Release steps passed.
 
 - GitHub Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.1.0
-- Actions artifact: `illustrated-history-foley-foley-cc0-3` (90-day retention; artifact ID `13562295186`)
+- Actions artifact: `illustrated-history-foley-cc0-3` (90-day retention; artifact ID `13562295186`)
 - ZIP size: 397,657,285 bytes
 - ZIP SHA-256: `78e7136449d773456117f26a21e73d7e2cc00bb4709ea11d2c6ecc9f422a956e`
 - Catalog: 115 distinct audio files from 8 source entries
