@@ -77,3 +77,8 @@ The v0.3.0 Foley + score pack is published at https://github.com/Nolane-x/video/
 ## v0.4.0 environment ambience candidates
 
 The next source pack adds five CC0 field recordings: Adelaide park birds before rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. Treat them according to their real recording context. They are not period-authentic and are not battlefield/harbour recordings. Check v0.4.0 Actions build and Release status before using the package; keep all new assets un-auditioned until the exact files have been heard and exported through the review console.
+
+
+## v0.4.0 environment ambience expansion
+
+The source manifest adds five item-level CC0 field recordings: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. Treat their real recording context accurately: modern Adelaide public park, Vistula river, or indoor building. They are not period-authentic reconstructions. Do not use birds in battle by default, Vistula waves as ocean surf, or indoor wind as exterior ambience. Check the v0.4.0 build and permanent Release before use, listen to the exact candidate, then export and validate review JSON.
