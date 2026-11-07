@@ -72,3 +72,8 @@ The current audition edition includes three real orchestral score sources: Eye o
 ## v0.3.0 release status — verified
 
 The v0.3.0 Foley + score pack is published at https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0. It contains 118 files from 11 CC0 source entries. Download the ZIP from https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.3.0/nolane-illustrated-history-foley-v0.3.0.zip. SHA-256: `d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd`. The Actions fallback artifact ID 13563804097 expires 2027-02-05. All entries remain un-auditioned and not approved for final mix.
+
+
+## v0.4.0 environment ambience candidates
+
+The next source pack adds five CC0 field recordings: Adelaide park birds before rain, a small park river with wildlife, open-field wind, five-minute Vistula River waves and interior howling wind. Treat them according to their real recording context. They are not period-authentic and are not battlefield/harbour recordings. Check v0.4.0 Actions build and Release status before using the package; keep all new assets un-auditioned until the exact files have been heard and exported through the review console.
