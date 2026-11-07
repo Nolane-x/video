@@ -1,80 +1,35 @@
 ---
 name: historical-audio-library-curator
-description: Use when finding, downloading, curating, indexing, licensing or selecting real music, ambience, Foley and sound effects for historical, military, documentary, illustrated-history or cinematic video; especially when a reusable sound bank is needed instead of mostly synthetic SFX.
+description: Curate, acquire and select real/licensed music, ambience, Foley and effects for history films with per-item rights, source hashes and human-audition records.
 ---
 # Historical Audio Library Curator
 
 ## Principle
-Use real recorded/licensed audio as the default foundation. Code-generated tones/noise are a last-mile supplement for designed UI ticks, stylized transitions or genuinely unavailable sounds—not a replacement for horses, footsteps, weapons, crowds, weather, water, room tone, instruments or cinematic music.
+Recorded/licensed audio is the default foundation. Procedural tones/noise are last-mile supplements for stylized ticks or temporary animatics, not replacements for horses, weapons, footsteps, crowds, weather, water, workshop ambience, instruments or score.
 
-## Fast local search before downloads
+## Search existing catalogues first
+- Search Build 76 preview-catalog.json and Meta Open Sound meta-preview-catalog.json before unpacking large archives.
+- Use python tools/audio/search_audio_resources.py --query "horse hooves dirt" --kind foley --direct-only for strict matches; use tag-assisted results only as leads.
+- Inspect item-level rights, file hash, duration, channels/sample rate and creator. Listen to the exact preview before choosing a cue.
+- Build 76 currently indexes 2,446 items (2,331 redistribution candidates, 110 rights-review and 5 source-specific-review). Meta has 1,583 OGG previews: 1,075 CC0 instrument notes and 508 CC BY 4.0 Oculus Foley/ambience samples; preserve Oculus attribution and do not mistake note samples for finished music.
 
-- Search `audio-library/generated/preview-catalog.json` for Build 76 playable candidates and `audio-library/generated/meta-preview-catalog.json` for Meta Open Sound samples before unpacking archives.
-- Use category/tags, title, creator, source and `rights_class` to shortlist. These records do not prove a sound fits the film; audition candidates before selection.
-- Build 76 currently has 2,446 inventoried items; 2,331 are redistributable candidates with playable previews, 110 require rights review and 5 require source-specific review. Do not use the 115 review entries by default.
-- Meta Open Sound currently has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Preserve the exact Oculus attribution. A sample bank is not 1,583 complete music tracks.
-- Download the entire audio preview artifact only when broad listening is necessary; otherwise fetch the relevant source pack/member to save bandwidth.
+## Targeted illustrated-history CC0 pack
+The source map and acquisition status are in docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md and tools/audio/illustrated_history_foley_sources.json.
+The workflow .github/workflows/build-illustrated-history-foley-library.yml downloads and indexes the listed CC0 sources: Medieval Weapon Textures (katana/bow/arrow handling), Weapon Impacts, Six Horses Galloping By, Crowd Shouting/Speaking Ambience, Blacksmith's Hammer and Thwack Sounds. Confirm the Actions result and the release tag nolane-illustrated-history-foley-v0.1.0 before claiming it has been published.
+The crowd cue is edited group voice material, not a field recording of a historical army. The six-horse recording is the direct gallop candidate. The weapon pack provides weapon handling and weapon-to-weapon contacts, not a complete shield/armour/cavalry Foley library. Every new item is initially un-auditioned.
 
-## Unified search CLI
+## Coverage gaps and next sourcing
+The metadata audit still calls for hoofbeat surface round-robins, tack/reins, shield impacts, chainmail/armour handling, distant command/crowd beds, Japanese rain/temple/port/workshop ambience and period-appropriate recorded music. Search exact sources and licenses; don't infer these from broad tags.
 
-Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` to search Build 76 and Meta Open Sound together before downloading. Filter with `--kind foley` or `--kind instrument`; use `--json` for an agent-readable result. Prefer `match_quality=direct`; tag-assisted matches are lower-confidence suggestions. Add `--direct-only` to exclude broad tag-only matches. Do not include review-required items in normal production queries. Every result keeps its human audition/final-use gate and per-item attribution.
-## Existing library first
-The verified Build 76 GitHub Release contains separate audio-category volumes. Read the item-level source manifests and the `docs/audio/HISTORICAL_SOUND_LIBRARY.md` map before building anything new. The current archive families include OpenGameArt, USGS, NASA, Wikimedia Commons, Kenney and a distinct procedural-originals pack. Treat filename/category and rights class as separate facts; an audio ZIP is not proof every item inside is a historical Foley recording.
+## OGG preview to WAV master
+The Meta catalog links each OGG preview to a WAV member and collection archive with size/SHA-256. Search/listen to OGG first; only then fetch the exact matching WAV master. Oculus Audio Pack WAV requires CC BY 4.0 attribution. Piano/Nylon/Steel Guitar masters contain CC0 instrument note samples, not complete scores.
 
-## Historical coverage audit
+## Source rights tiers
+1. public_cc0_pd: exact item-level CC0/Public Domain proof, source page, creator, license URL and hash retained.
+2. project_use_only: use in the finished video only when exact terms permit; do not redistribute raw files.
+3. private_production_only: private licensed store only. Sonniss GDC 2026 is private-only; check current EULA, never public-mirror raw assets and obey the AI/ML-training prohibition.
+4. government_media_conditions: apply NASA item-level rules, retain credit and do not imply endorsement.
+5. blocked: unclear or conflicting rights; do not download/use.
 
-Read `docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md` before assigning a historical battle soundscape. Do not infer horse hoofbeats, cavalry, arrow or shield impacts from broad tags; use the direct-vs-tag-assisted match confidence and audition the chosen recording.
-
-## OGG preview to verified WAV master
-
-The Meta Open Sound catalog links every preview sample to its original WAV member through `source_wav_file`, `wav_master_archive_name`, `wav_master_size_bytes` and `wav_master_sha256`.
-1. Search and audition the OGG preview first; do not download a master merely because it exists.
-2. For a selected item, look up its exact WAV member in `meta-preview-catalog.json` and use the collection's WAV master archive.
-3. Oculus Audio Pack WAV is mirrored in the permanent Nolane release. Prefer the `wav_master_download_url` recorded in the generated catalog.
-4. Piano, Nylon Guitar and Steel Guitar WAV masters are multi-hundred-megabyte archives. Acquire only the collection needed with the GitHub Actions workflow `.github/workflows/acquire-meta-open-sound-wav-master.yml`; it verifies exact archive size and SHA-256 before publishing.
-5. Extract only the selected source WAV member, retain its original file name, hash and collection license, and use that WAV in the final mix. Keep preview OGG and production WAV distinct in the cue sheet.
-6. Oculus Foley remains CC BY 4.0 and requires its exact attribution. The three instrument sample collections are CC0; the samples are not finished compositions.
-
-## Asset taxonomy
-Tag each file with controlled terms:
-- **People:** crowd walla, cheers, chants, panic, command, distant voices, footsteps, clothing/armor movement, breathing.
-- **Historical combat:** sword draw, blade clash, metal armour, shield impact, spear/shaft, arrow release, arrow flight/impact, bowstring, reload, distant melee, cavalry charge, horse gallop/trot/walk/whinny/snort, cannon/gunfire where historically appropriate.
-- **World/transport:** wind, rain, thunder, fire, forest, birds/insects, river, surf, harbor, wood creak, ship hull/rigging/sails, oars, wheels, carts, doors, interior room tone.
-- **Materials/objects:** leather, cloth, wood, stone, metal, paper, scroll, ceramics, glass, tools, food preparation and market stalls.
-- **Music:** period-relevant instruments/textures, ceremonial, tense drone, pulse, action ostinato, grief, reflection, resolve, stingers and transitions. Avoid claiming a track is historically authentic without evidence.
-- **Editorial:** whooshes, impacts, risers, reverse swells, transition tails, UI accents and logo cues.
-
-## Sonniss GDC source-only policy
-
-The 2026 Sonniss bundle is a promising private-only SFX source (Historical Weapons Vol. 2 includes shield/spear/sword cues), but it is not a redistributable CC0 library. Check the live EULA before use; current version 2.0 permits synchronization into film/video and commercial projects, forbids raw-file sale and AI/ML training, and requires the licensee to accept the terms at download. The user’s main repo is public: never upload Sonniss raw archives or extracted files to it, its public Releases or its public audio preview artifact. Only maintain a sanitized metadata/cue index. The current agent has not downloaded or accepted this EULA.
-
-## Source tiers and legal separation
-1. **Redistributable library:** accept only verified CC0 or Public Domain items whose exact item record proves that status. Preserve creator, source landing page, exact file URL, license URL/version, date, hash, size, duration, sample rate, channel count, format and notice. Validate file signature and safe archive paths.
-2. **Project-use tier:** licensed stock can be synchronized into a finished video when item-specific terms allow it, but the raw file stays out of a public asset pack/repository release if redistribution is prohibited.
-3. **Private production tier:** Sonniss #GameAudioGDC can be used under its current EULA for synchronized personal/commercial film projects, but raw sounds may not be resupplied/sold and may not be used for AI/ML training. Store the exact EULA version and download date. Do not upload the pack to a public GitHub release or shared redistributable collection.
-4. **Blocked/unverified:** mixed, missing, conflicting or unclear rights are not downloaded into the redistributable pool. Never infer a license from a provider, collection or repository-wide default.
-
-Source routes (re-verify current item terms at acquisition): OpenGameArt CC0 item-page results; Openverse audio API with exact `license=cc0`; Wikimedia Commons file-level CC0/Public Domain metadata; USGS items whose own Sources/Usage block explicitly says Public Domain; Kenney packs whose individual page identifies CC0. Mixkit and Sonniss are project-use/private-source routes, not raw-library redistribution routes under their standard terms.
-
-## Acquisition and catalogue
-1. Search specific scene/action/material and synonyms: `horse hoofbeats cobblestone`, `chainmail movement`, `katana sheath draw`, `sword blade ring`, `wooden ship rigging creak`, `rain bamboo roof`, `taiko ensemble`, `crowd battle distant`.
-2. Query multiple trusted sources; respect API quotas, rate limits and download controls.
-3. Check item page rights and actual file. Keep evidence and original filename; deduplicate by SHA-256 without discarding distinct provenance records.
-4. Store source files losslessly; create processed working copies, not destructive edits to archival masters.
-5. Index duration, peak, LUFS, true peak, sample rate, channels, bit depth, clipping, silence and a waveform/spectral preview.
-6. Automated tags are search hints only. Preview-listen to every selected file before marking it production-ready; record human audition status.
-7. Maintain an offline playable catalogue; keep public CC0/PD assets physically and logically separate from project-use/private assets.
-
-## Historical sound editing
-- Build a per-shot cue map: ambience bed, specific Foley/action, distant world, transitions and music, each with an exact cue ID and timing.
-- Synchronize attacks/transients with visible contact; add body and tail only when distance/material supports it; vary near/far perspective.
-- Use perspective layers: close detail dry/intimate; distant combat filtered/reverberant; interiors with short room response; outdoors with spatial width and restrained tails.
-- Avoid one generic sword clang repeated for every action. Draw, swing, contact, armor scrape, shield hit and recovery are distinct.
-- Make music evolve across narrative acts; create tension/release and deliberate silence. Duck under narration with smooth automation; do not push SFX/music above dialogue.
-- Keep music, ambience, spot Foley, designed transitions and narration as separate stems.
-
-## Quality and rights gates
-- No public release until every raw file is cleared for that exact use and attribution is preserved.
-- Do not use licensed SFX for AI training where the license forbids it; never clone an identifiable voice without authorization.
-- Do not claim full listening from metadata or automated classification. A human must listen to the full mix and spot-check critical cues.
-- Deliver source register, asset IDs/hashes, category index, rights separation report, cue sheet, stem map, loudness/true-peak measure and listening QA log.
+## Cue design and post
+Build shot-level ambience, near/mid/far world, character/prop Foley, impacts, transitions and music separately. Sync transients to visible contact and vary takes/perspective. Keep stems separated until mix. Preserve silence and narration headroom. Every new entry has human_auditioned=false and approved_for_final_mix=false until a person listens and records the decision.
