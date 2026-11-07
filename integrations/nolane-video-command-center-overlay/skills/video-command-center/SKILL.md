@@ -40,11 +40,11 @@ Every key shot names camera path, subject/prop action, depth layers and edit mot
 
 
 
-## Foley + score pack delivery status — verified
+## Foley + score + ambience pack — verified v0.4.0
 
-The v0.3.0 pack is published as a permanent GitHub Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0. It contains 118 audio files from 11 CC0 source entries. Its ZIP SHA-256 is `d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd`. All cues remain un-auditioned/unapproved until reviewed with the offline console and validator.
+The [v0.4.0 pack](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0) is published and contains 123 audio files from 16 CC0 source entries. ZIP SHA-256: `aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74`. All cues remain un-auditioned/unapproved until reviewed with the offline console and validator. The five ambience additions retain their modern recording contexts.
 
 
-## v0.4.0 ambience route
+## Cannae 45-second narration
 
-The illustrated-history CC0 pack is expanding beyond Foley and score to include five modern field-recorded environment candidates: birds before rain, river/wildlife, open-field wind, Vistula River waves and interior howling wind. Use only after the v0.4.0 release succeeds and a human auditions the exact file. Preserve recording context; never label these as period-specific historical or battlefield recordings.
+The generated English narration is documented at `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md` and linked in the Cannae cue plan. It is split across five shots. The generated voiceover is pending human review; verify pronunciation, 45-second timing and style before a final render. Keep it on its own stem.
