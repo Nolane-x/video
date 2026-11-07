@@ -67,7 +67,7 @@ jobs:
           assert "oga_eye_of_the_storm" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "v0.3.0" in curator
           assert "13563804097" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
-          assert "persistent_release_published" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
+          assert "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "build-illustrated-history-foley-library.yml" in audio
           motion = (root / "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md").read_text()
           assert "Five independent motion channels" in motion
