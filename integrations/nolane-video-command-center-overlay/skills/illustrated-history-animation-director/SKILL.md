@@ -77,3 +77,8 @@ Record: shot ID; story beat; duration/frame range; location/time; shot size; vie
 - Verify silhouette, hand/foot contact, prop attachment, depth layers, crop, text legibility, cut continuity and visual repetition.
 - Review complete picture and soundtrack before release; log defects and cues with timecodes.
 - Report technical pass, sampled review, full picture review and full audio audition as separate states.
+
+
+## Shot-level sound approval
+
+For every hero action, author a shot cue map that separates narration, score, ambience, character Foley, prop Foley, spot impact, transitions and intentional silence. Keep cue IDs empty until exact files are found and listened to. The v0.2.0 Foley pack includes an offline audition console; export the human review JSON and validate with \`tools/audio/validate_foley_review_decisions.py\` before adding approved IDs. Use \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as a concrete five-shot example, not as a ready-made score or approved sound mix.
