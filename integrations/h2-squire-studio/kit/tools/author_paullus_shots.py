@@ -54,62 +54,62 @@ def close(face="determined", *, preset="consul", move="in", R=0.135, y=0.445, **
 def top_centre(mode="push"):
     # Schematic Cannae plan: Roman mass in red, Carthaginian centre and wings in blue.
     roman = {
-        "x": 0.50, "y": 0.66, "w": 0.34, "h": 0.22,
+        "x": 0.50, "y": 0.50, "w": 0.34, "h": 0.22,
         "cell": 0.018, "rows": 11, "cols": 16, "side": "red",
         "face": -1, "spears": True, "tired": True
     }
     carth_center = {
-        "x": 0.50, "y": 0.39, "w": 0.28, "h": 0.105,
+        "x": 0.50, "y": 0.27, "w": 0.28, "h": 0.105,
         "cell": 0.018, "rows": 5, "cols": 13, "side": "blue",
         "face": 1, "spears": True
     }
     left_wing = {
-        "x": 0.18, "y": 0.56, "w": 0.105, "h": 0.28,
+        "x": 0.18, "y": 0.43, "w": 0.105, "h": 0.28,
         "cell": 0.018, "rows": 13, "cols": 5, "side": "blue",
         "face": 1, "spears": True
     }
     right_wing = {
-        "x": 0.82, "y": 0.56, "w": 0.105, "h": 0.28,
+        "x": 0.82, "y": 0.43, "w": 0.105, "h": 0.28,
         "cell": 0.018, "rows": 13, "cols": 5, "side": "blue",
         "face": -1, "spears": True
     }
     blocks = [roman, carth_center, left_wing, right_wing]
     arrows = []
     if mode == "push":
-        roman["path"] = [[1.65, 0.50, 0.54]]
-        arrows = [{"from": [0.50, 0.82], "to": [0.50, 0.53], "at": 0.2, "w": 10, "color": ROMAN}]
+        roman["path"] = [[1.65, 0.50, 0.40]]
+        arrows = [{"from": [0.50, 0.68], "to": [0.50, 0.42], "at": 0.2, "w": 10, "color": ROMAN}]
     elif mode == "bend":
-        roman["path"] = [[1.1, 0.50, 0.58]]
-        carth_center["path"] = [[0.9, 0.50, 0.33]]
+        roman["path"] = [[1.1, 0.50, 0.46]]
+        carth_center["path"] = [[0.9, 0.50, 0.22]]
         arrows = [
-            {"from": [0.50, 0.40], "to": [0.50, 0.26], "at": 0.25, "w": 8, "color": CARTHAGE},
-            {"from": [0.50, 0.78], "to": [0.50, 0.59], "at": 0.25, "w": 8, "color": ROMAN},
+            {"from": [0.50, 0.31], "to": [0.50, 0.18], "at": 0.25, "w": 8, "color": CARTHAGE},
+            {"from": [0.50, 0.69], "to": [0.50, 0.48], "at": 0.25, "w": 8, "color": ROMAN},
         ]
     elif mode in ("inward", "trap"):
-        left_wing["path"] = [[1.6, 0.36, 0.59]]
-        right_wing["path"] = [[1.6, 0.64, 0.59]]
+        left_wing["path"] = [[1.6, 0.36, 0.46]]
+        right_wing["path"] = [[1.6, 0.64, 0.46]]
         arrows = [
-            {"from": [0.22, 0.54], "to": [0.39, 0.59], "at": 0.2, "w": 9, "color": CARTHAGE},
-            {"from": [0.78, 0.54], "to": [0.61, 0.59], "at": 0.45, "w": 9, "color": CARTHAGE},
+            {"from": [0.22, 0.42], "to": [0.39, 0.47], "at": 0.2, "w": 9, "color": CARTHAGE},
+            {"from": [0.78, 0.42], "to": [0.61, 0.47], "at": 0.45, "w": 9, "color": CARTHAGE},
         ]
     if mode == "trap":
-        roman["path"] = [[1.3, 0.50, 0.61]]
+        roman["path"] = [[1.3, 0.50, 0.49]]
         blocks.append({
-            "x": 0.50, "y": 0.91, "w": 0.25, "h": 0.08,
+            "x": 0.50, "y": 0.82, "w": 0.25, "h": 0.075,
             "cell": 0.018, "rows": 4, "cols": 12, "side": "blue",
-            "face": -1, "path": [[1.7, 0.50, 0.76]], "spears": True
+            "face": -1, "path": [[1.7, 0.50, 0.70]], "spears": True
         })
-        arrows.append({"from": [0.50, 0.89], "to": [0.50, 0.72], "at": 0.55, "w": 10, "color": CARTHAGE})
+        arrows.append({"from": [0.50, 0.79], "to": [0.50, 0.68], "at": 0.55, "w": 10, "color": CARTHAGE})
     return {"tpl": "top", "args": {
         "ground": GROUND, "blocks": blocks, "arrows": arrows,
         "dust": [
-            {"x": 0.50, "y": 0.59, "s": 0.12, "at": 0.25, "a": 0.42},
-            {"x": 0.38, "y": 0.58, "s": 0.08, "at": 0.8, "a": 0.25}
+            {"x": 0.50, "y": 0.46, "s": 0.12, "at": 0.25, "a": 0.42},
+            {"x": 0.38, "y": 0.43, "s": 0.08, "at": 0.8, "a": 0.25}
         ],
         "move": "in", "moveAmt": 0.025,
         "signs": [
-            {"text": "ROME", "x": 0.50, "y": 0.14, "at": 0.2, "size": 39},
-            {"text": "CARTHAGE", "x": 0.50, "y": 0.94, "at": 0.5, "size": 34}
+            {"text": "ROME", "x": 0.50, "y": 0.11, "at": 0.2, "size": 45},
+            {"text": "CARTHAGE", "x": 0.50, "y": 0.91, "at": 0.5, "size": 38}
         ]
     }}
 
@@ -156,11 +156,9 @@ def battle_scene(*, action="push", horse=False, face="determined",
              "face": "determined", "march": 0.4}
         ],
         "people": people,
-        "front": [
-            {"preset": "legionary", "x": 0.94, "y": 1.05, "h": 0.68, "flip": True}
-        ],
+        "front": [],
         "fx": [
-            {"kind": "dust", "x": 0.52, "y": 0.66, "n": 14, "a": 0.65},
+            {"kind": "dust", "x": 0.52, "y": 0.70, "n": 7, "a": 0.28},
             {"kind": "rays", "x": 0.25, "n": 3, "a": 0.07}
         ],
         "move": "right" if action in ("right", "retreat") else "in",
@@ -180,13 +178,13 @@ def paullus_fall_scene():
              "flip": True, "march": 0.55}
         ],
         "people": [
-            {"preset": "consul", "x": 0.48, "y": 0.79, "h": 0.43,
+            {"preset": "consul", "x": 0.46, "y": 0.74, "h": 0.38,
              "face": "pain", "pose": "kneel", "fall": 1.05, "tremble": True}
         ],
         "props": [
             {"kind": "shield", "type": "scutum", "color": ROMAN,
-             "charge": "eagle", "chargeColor": GOLD, "x": 0.76, "y": 0.87,
-             "s": 0.24, "rot": 0.45, "at": 0.4, "anim": "drop"}
+             "charge": "eagle", "chargeColor": GOLD, "x": 0.84, "y": 0.83,
+             "s": 0.17, "rot": 0.45, "at": 0.4, "anim": "drop"}
         ],
         "fx": [{"kind": "dust", "x": 0.51, "y": 0.79, "n": 9, "a": 0.4}],
         "move": "in", "moveAmt": 0.04, "vignette": 0.28
@@ -224,19 +222,23 @@ for index, shot in enumerate(shots):
                 {"name": "war_horn", "at": 0.45, "gain": -9}
             ]
     elif "august second" in line or "two hundred and sixteen" in line:
-        shot.update({"tpl": "title", "args": {
-            "text": "CANNAE\n216 BCE", "sub": "2 AUGUST 216 BCE",
-            "bg": "plain", "time": "golden", "dim": 0.12, "y": 0.40,
-            "size": 118
-        }})
-        shot["sfx"] = [{"name": "drum_hit", "at": 0.15, "gain": -7}]
+        if sub_index == 0:
+            shot.update({"tpl": "title", "args": {
+                "text": "CANNAE\n216 BCE", "sub": "2 AUGUST 216 BCE",
+                "bg": "plain", "time": "golden", "dim": 0.12, "y": 0.40,
+                "size": 118
+            }})
+            shot["sfx"] = [{"name": "drum_hit", "at": 0.15, "gain": -7}]
+        else:
+            shot.update(battle_scene(action="push", horse=False))
+            shot["args"]["signs"] = [{"text": "216 BCE", "x": 0.50, "y": 0.13, "at": 0.2, "size": 44}]
     elif "near cannae" in line or "southern italy" in line or "faces hannibal" in line:
         shot.update({"tpl": "map", "args": {
             "view": [10.8, 39.5, 17.1, 43.2],
             "places": [
-                {"text": "ROME", "lon": 12.496, "lat": 41.903, "at": 0.1, "dx": 0.025, "size": 42},
-                {"text": "CANNAE", "lon": 15.59, "lat": 41.31, "at": 0.55, "dx": -0.015, "dy": 0.01, "size": 42},
-                {"text": "AUFIDUS", "lon": 15.63, "lat": 41.35, "at": 1.0, "dx": 0.06, "dy": 0.045, "size": 34}
+                {"text": "ROME", "lon": 12.496, "lat": 41.903, "at": 0.1, "dx": 0.025, "size": 52},
+                {"text": "CANNAE", "lon": 15.59, "lat": 41.31, "at": 0.55, "dx": -0.045, "dy": 0.01, "size": 52},
+                {"text": "AUFIDUS", "lon": 15.63, "lat": 41.35, "at": 1.0, "dx": 0.07, "dy": 0.05, "size": 42}
             ],
             "routes": [
                 {"pts": [[12.496, 41.903], [13.9, 41.7], [15.59, 41.31]], "at": 0.8, "dur": 1.1, "color": ROMAN}
@@ -296,8 +298,8 @@ for index, shot in enumerate(shots):
     elif "flanks are exposed" in line or "flanks exposed" in line:
         shot.update(top_centre("inward"))
         shot["args"]["marks"] = [
-            {"kind": "circle", "x": 0.31, "y": 0.59, "r": 0.09, "at": 0.2},
-            {"kind": "circle", "x": 0.69, "y": 0.59, "r": 0.09, "at": 0.45}
+            {"kind": "circle", "x": 0.31, "y": 0.47, "r": 0.09, "at": 0.2},
+            {"kind": "circle", "x": 0.69, "y": 0.47, "r": 0.09, "at": 0.45}
         ]
     elif "could remain on the right" in line:
         shot.update(close("worried", move="still", R=0.145, y=0.445,
@@ -318,10 +320,10 @@ for index, shot in enumerate(shots):
         ]
     elif "legions are trapped" in line or "packed ranks" in line:
         shot.update(top_centre("trap"))
-        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.61, "r": 0.23, "at": 0.3}]
+        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.49, "r": 0.23, "at": 0.3}]
     elif "ranks fall" in line or "circle contracts" in line:
         shot.update(top_centre("trap"))
-        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.61, "r": 0.23, "at": 0.2}]
+        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.49, "r": 0.23, "at": 0.2}]
     elif "falls in the thick" in line or "covered with wounds" in line or "severe wounds" in line:
         shot.update(paullus_fall_scene())
         shot["notes"] = "DROP"
@@ -331,7 +333,7 @@ for index, shot in enumerate(shots):
         shot["notes"] = "DROP"
     elif "trap was closing around him" in line or "hannibal's trap" in line:
         shot.update(top_centre("trap"))
-        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.61, "r": 0.24, "at": 0.25}]
+        shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.49, "r": 0.24, "at": 0.25}]
     elif "point where rome needed him most" in line or "rome needed him most" in line:
         shot.update(battle_scene(action="right", horse=True, face="determined"))
         shot["sfx"] = [{"name": "hooves_walk", "at": 0.0, "gain": -7}]

@@ -13,17 +13,17 @@ thumb({
     { preset: 'hastatus', rows: 2, cols: 8, x0: 0.02, x1: 0.36, yFront: 0.79, yBack: 0.69, hFront: 0.14, hBack: 0.08, flip: true },
     { preset: 'latin', rows: 2, cols: 8, x0: 0.63, x1: 0.98, yFront: 0.79, yBack: 0.69, hFront: 0.14, hBack: 0.08 }
   ],
-  hero: { preset: 'consul', x: 0.70, y: 0.57, R: 0.235, face: 'scared', pose: 'guard', shield: null },
+  hero: { preset: 'consul', x: 0.73, y: 0.70, R: 0.185, face: 'scared', pose: 'guard', shield: null },
   symbols: [
-    { kind: 'arrow', x: 0.26, y: 0.58, to: [0.56, 0.58], color: '#3e64a3', r: 0.16 },
-    { kind: 'q', x: 0.28, y: 0.32, r: 0.12, glow: true }
+    { kind: 'arrow', x: 0.22, y: 0.58, to: [0.54, 0.58], color: '#3e64a3', r: 0.13 },
+    { kind: 'q', x: 0.12, y: 0.42, r: 0.09, glow: true }
   ],
   title: [
-    { text: "HANNIBAL'S", x: 0.32, y: 0.13, size: 0.145, color: '#fff4df' },
-    { text: 'TRAP', x: 0.32, y: 0.27, size: 0.20, color: '#fff4df' }
+    { text: "HANNIBAL'S", x: 0.30, y: 0.12, size: 0.071, color: '#fff4df' },
+    { text: 'TRAP', x: 0.30, y: 0.25, size: 0.155, color: '#fff4df' }
   ],
-  tx: 0.32,
+  tx: 0.30,
   ty: 0.16,
-  tsize: 0.18,
+  tsize: 0.10,
   align: 'center'
 });
