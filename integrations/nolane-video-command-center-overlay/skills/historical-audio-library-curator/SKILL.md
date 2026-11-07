@@ -65,3 +65,8 @@ The audition pack also includes three real CC0 orchestral score candidates: Eye 
 ## CC0 score-candidate coverage — v0.3.0
 
 The current audition edition includes three real orchestral score sources: Eye of the Storm (Indieteur, WAV), The Final Battle (skrjablin, OGG) and Prepare to fight (Basil, MP3). They have CC0 item-level source pages but are modern cinematic/game-style recordings, not historical-period performances. Listen in context; do not auto-select by title or genre tag. Keep them separate from Foley and record review decisions against the source SHA-256.
+
+
+## v0.3.0 package delivery status
+
+The v0.3.0 acquisition run validated 118 assets from 11 item-level CC0 sources. Its Actions artifact is `illustrated-history-foley-cc0-18` (ID `13563793933`) and expires 2027-02-05. It is a time-limited Actions artifact, not a permanent Release: the Release API returned HTTP 403 for the default Actions token. Use the [successful Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721) to download it. Do not cite a release URL until a maintainer reruns with a repository `NOLANE_RELEASE_TOKEN` having Contents: write.
