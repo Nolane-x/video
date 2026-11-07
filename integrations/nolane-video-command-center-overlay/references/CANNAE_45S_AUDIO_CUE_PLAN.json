@@ -3,8 +3,8 @@
   "project_id": "cannae-illustrated-history-45s",
   "fps": 24,
   "status": "CANDIDATE_CUE_PLAN_NOT_APPROVED_FOR_RENDER",
-  "source_pack": "nolane-illustrated-history-foley-v0.3.0",
-  "source_pack_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0",
+  "source_pack": "nolane-illustrated-history-foley-v0.4.0",
+  "source_pack_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0",
   "mix_sample_rate_hz": 48000,
   "principle": "Every cue is a candidate until its exact source file has been heard and approved. No generic synthetic placeholder should silently replace a missing recording.",
   "tracks": [
@@ -31,7 +31,10 @@
         {
           "track": "ambience",
           "need": "Very restrained open-air wind/river bed",
-          "source_status": "not_in_the_118_file_pack; search Build 76 and Meta direct matches"
+          "source_status": "new candidate: modern small-river/wildlife field recording from an Adelaide public park; audition for a neutral water bed, but do not imply it is an Aufidus reconstruction",
+          "candidate_source_ids": [
+            "oga_park_ambience_river"
+          ]
         },
         {
           "track": "music",
@@ -54,7 +57,10 @@
         {
           "track": "ambience",
           "need": "Distant army bed and restrained wind",
-          "source_status": "search Build 76; crowd file is designed shouting, not a long-distance field recording"
+          "source_status": "new candidate: open-field wind field recording from an Adelaide public park; modern neutral ambience only, no historical provenance",
+          "candidate_source_ids": [
+            "oga_park_ambience_wind"
+          ]
         },
         {
           "track": "character_foley",
@@ -100,7 +106,10 @@
         {
           "track": "ambience",
           "need": "Distant group movement",
-          "source_status": "search separate battle/field ambience; current crowd cue is a designed shout bed"
+          "source_status": "optional outdoor wind bed from the park field recording; avoid adding birds to the battle by default",
+          "candidate_source_ids": [
+            "oga_park_ambience_wind"
+          ]
         }
       ],
       "approved_asset_ids": []
@@ -168,22 +177,67 @@
       "intended_use": "battle-intro cue; test pacing and tonal fit"
     }
   ],
-  "source_pack_status": "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED",
+  "source_pack_status": "BUILD_PENDING_NOT_YET_RELEASED",
   "source_pack_delivery": {
-    "type": "github_release",
-    "run_id": 42348053901,
-    "release_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0",
-    "zip_url": "https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.3.0/nolane-illustrated-history-foley-v0.3.0.zip",
-    "zip_name": "nolane-illustrated-history-foley-v0.3.0.zip",
-    "source_count": 11,
-    "asset_count": 118,
-    "inner_zip_size_bytes": 431804481,
-    "inner_zip_sha256": "d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd",
-    "actions_fallback_artifact_id": 13563804097,
-    "actions_fallback_artifact_name": "illustrated-history-foley-cc0-19",
-    "actions_fallback_expires_at": "2027-02-05T06:40:33Z",
-    "actions_fallback_outer_sha256": "015768fdbda68af42dbec23ddedfb60b2e0f3e6ae32d9d42a0e873e3ab9cf15e",
+    "type": "github_release_pending",
+    "expected_source_count": 16,
+    "expected_previous_asset_count": 118,
+    "new_ambience_candidates": [
+      "oga_park_ambience_birds",
+      "oga_park_ambience_river",
+      "oga_park_ambience_wind",
+      "oga_vistula_river_waves",
+      "commons_howling_wind_building"
+    ],
+    "release_published": false,
     "human_auditioned": 0,
     "approved_for_final_mix": 0
-  }
+  },
+  "environment_candidates": [
+    {
+      "source_id": "oga_park_ambience_birds",
+      "title": "Park Ambience — Birds Before Rain",
+      "creator": "Thimras",
+      "status": "unauditioned_candidate",
+      "recording_context": "48 kHz field recording in a public park in Adelaide, South Australia, winter; trees and birds before rain",
+      "good_for": "peaceful outdoor transitions, settlement establishing shots, nature cutaways",
+      "caution": "not a period-specific or battlefield recording; bird presence may be distracting during combat"
+    },
+    {
+      "source_id": "oga_park_ambience_river",
+      "title": "Park Ambience — Small River and Wildlife",
+      "creator": "Thimras",
+      "status": "unauditioned_candidate",
+      "recording_context": "48 kHz field recording of a small park river with birds/frogs in Adelaide, South Australia",
+      "good_for": "quiet riverside or waterside scenes",
+      "caution": "not the Aufidus or a historical riverbank recording"
+    },
+    {
+      "source_id": "oga_park_ambience_wind",
+      "title": "Park Ambience — Open Field Wind",
+      "creator": "Thimras",
+      "status": "unauditioned_candidate",
+      "recording_context": "48 kHz, 24-bit field recording in an open public park field in Adelaide in winter",
+      "good_for": "neutral outdoor wind bed",
+      "caution": "modern recording; not historically specific storm or battle wind"
+    },
+    {
+      "source_id": "oga_vistula_river_waves",
+      "title": "Vistula River Waves — Five-Minute Recording",
+      "creator": "RandomMind",
+      "status": "unauditioned_candidate",
+      "recording_context": "five-minute recording of waves on Poland's Vistula River",
+      "good_for": "riverbank/shore/water movement when the scene needs moving water",
+      "caution": "river waves, not open-ocean surf; not a Cannae/Aufidus-specific recording"
+    },
+    {
+      "source_id": "commons_howling_wind_building",
+      "title": "Howling Wind Inside a Building",
+      "creator": "Tvabutzku1234",
+      "status": "unauditioned_candidate",
+      "recording_context": "2:08 recording of wind howling inside a building",
+      "good_for": "interior/castle/sheltered storm scenes",
+      "caution": "interior wind, not exterior field ambience"
+    }
+  ]
 }
