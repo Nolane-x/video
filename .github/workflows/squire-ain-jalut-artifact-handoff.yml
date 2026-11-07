@@ -114,6 +114,15 @@ jobs:
           compression-level: 0
           retention-days: 30
 
+      - name: Upload the master MP4 as a standalone artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-jalut-master-video
+          path: ${{ runner.temp }}/verified-master/The Day the Mongols Were Stopped at Ain Jalut.mp4
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
       - name: Upload preview, audio, thumbnail and QA review bundle
         uses: actions/upload-artifact@v4
         with:
