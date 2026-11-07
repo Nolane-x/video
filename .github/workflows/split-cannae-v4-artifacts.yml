@@ -41,10 +41,33 @@ jobs:
             TARGET="${DELIVERY}/review/${REL}"
             mkdir -p "$(dirname "${TARGET}")"
             cp "${FILE}" "${TARGET}"
-          done < <(find "${ROOT}" -type f \(
-            -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o
-            -iname '*.json' -o -iname '*.srt' -o -iname '*.vtt' -o -iname '*.txt' -o -iname '*.md'
-          \) -print0)
+          done < <(find "${ROOT}" -type f -regextype posix-extended -iregex '.*\\.(png|jpg|jpeg|webp|json|srt|vtt|txt|md)
+
+          echo "Final video:"
+          ls -lh "${DELIVERY}"/*.mp4
+          echo "Review files:"
+          find "${DELIVERY}/review" -type f | sort
+          du -sh "${DELIVERY}/review"
+
+      - name: Upload the MP4 as a standalone download
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-paullus-cannae-short-v4-mp4
+          path: ${{ runner.temp }}/cannae-v4-delivery/*.mp4
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Upload thumbnail, contact sheets, captions and QA report
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-paullus-cannae-short-v4-review
+          path: ${{ runner.temp }}/cannae-v4-delivery/review/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+ -print0)
+          test -n "$(find "${DELIVERY}/review" -type f -print -quit)"
 
           echo "Final video:"
           ls -lh "${DELIVERY}"/*.mp4
