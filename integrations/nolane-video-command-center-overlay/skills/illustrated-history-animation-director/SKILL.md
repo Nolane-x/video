@@ -88,3 +88,8 @@ The v0.3.0 audition pack adds three real CC0 orchestral score candidates. Use th
 
 
 The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as optional music beds that still require human audition and historical/style review; do not imply they are period-authentic. The Cannae cue map lists candidates but leaves asset approvals empty.
+
+
+## Environmental sound and period-fit
+
+The next CC0 ambience pack (v0.4.0) adds park birds-before-rain, a small river, open-field wind, Vistula River waves and interior howling wind. These are modern field recordings with specific source contexts, not period-authentic assets. Use them as neutral environmental layers only when the scene calls for them, and never claim they reconstruct a specific ancient location. They must be human-auditioned before cue assignment.
