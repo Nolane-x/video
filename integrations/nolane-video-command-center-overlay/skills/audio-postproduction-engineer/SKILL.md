@@ -57,3 +57,8 @@ The v0.3.0 source manifest adds three CC0 orchestral score candidates (Eye of th
 
 
 The v0.3.0 pack includes three CC0 orchestral score candidates in addition to Foley. They remain un-auditioned; review and choose them as music, not as generic Foley. Match the score's phrasing and dynamic contour to the edit; don't loop a score across every scene by default.
+
+
+## v0.4.0 ambience candidates
+
+Five CC0 modern field recordings are being added for ambience coverage: park birds before rain, small river with wildlife, open-field wind, Vistula River waves and indoor howling wind. Match each to its recording context; do not use birds during battle automatically, do not present Vistula river waves as open-ocean surf, and do not use the indoor wind recording as exterior ambience. Listen and rate the exact source before use.
