@@ -1,7 +1,7 @@
 # Illustrated-history Foley acquisition pack
 
-Status: v0.3.0 is built, validated and published as a permanent GitHub Release.  
-Current release: [nolane-illustrated-history-foley-v0.3.0](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0)
+Status: v0.4.0 is built, validated and published as a permanent GitHub Release.  
+Current release: [nolane-illustrated-history-foley-v0.4.0](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0)
 
 This is a targeted gap-filling pack for the illustrated/cartoon history route. It supplements, rather than duplicates, the broad Build 76 and Meta Open Sound catalogues. The sources are selected for concrete needs found in the Samurai reference study and historical Foley coverage audit.
 
@@ -150,6 +150,30 @@ The source manifest now adds five item-level CC0 environment recordings to the v
 | Vistula River Waves | RandomMind | Five-minute recording of waves on Poland's Vistula River | Riverbank/shore movement; not open-ocean surf or a Cannae field recording |
 | Howling Wind Inside a Building | Tvabutzku1234 | 2:08 wind recorded inside a building | Interior/castle/sheltered storm scenes; not exterior wind |
 
-Each entry retains its exact item-level CC0 page, creator, source, download URL, hash and technical metadata in the built catalog. All five begin un-auditioned and unapproved. The v0.4.0 GitHub Actions build has not yet been validated/published at the time this source register was edited; do not present the v0.4.0 Release URL as available until the workflow succeeds.
+Each entry retains its exact item-level CC0 page, creator, source, download URL, hash and technical metadata in the built catalog. All five begin un-auditioned and unapproved. The v0.4.0 pack is now built and published; exact package size, checksums and artifact retention are recorded below.
 
 The Cannae cue plan only lists the river and open-field wind as optional candidates, with explicit warnings that they are modern Adelaide field recordings. Birds, Vistula water and indoor howling wind are kept as reusable environment assets for suitable non-battle shots rather than forced into Cannae.
+
+
+## Verified v0.4.0 release — 2026-11-07
+
+The complete acquisition, extraction, FFprobe/catalog validation, offline review bundle upload and permanent GitHub Release publication succeeded in [Actions run 42349383012](https://github.com/Nolane-x/video/actions/runs/42349383012).
+
+- GitHub Release: [nolane-illustrated-history-foley-v0.4.0](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0)
+- ZIP: [nolane-illustrated-history-foley-v0.4.0.zip](https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.4.0/nolane-illustrated-history-foley-v0.4.0.zip)
+- Sources: **16** item-level CC0 entries
+- Catalogued audio assets: **123** (118 from v0.3.0 + 5 environment recordings)
+- ZIP size: **642,950,284 bytes**
+- ZIP SHA-256: `aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74`
+- Actions fallback artifact: ID `13565181166`, name `illustrated-history-foley-cc0-34`
+- Artifact size: 643,407,737 bytes; expires 2027-02-05 07:00:05 UTC
+- Artifact SHA-256: `d3987a0a23d9980b8ef68ebb223bf1629bc4a179c4c6b28d23b6b2bff364e389`
+- Human-auditioned: **0/123**
+- Approved for final mix: **0/123**
+
+The ZIP contains the source register, exact per-file catalog, original audio, offline audition/review console, build report, download manifest and SHA256SUMS. All recordings remain un-auditioned until a person listens to the exact file and exports a review decision.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
