@@ -1,73 +1,79 @@
 ---
 name: illustrated-history-animation-director
-description: Use when the user requests polished illustrated/cartoon history films with lively 2D character acting, animated maps and infographics, historical set changes, layered camera motion and varied editorial grammar; especially when a supplied reference is the target for study.
+description: Direct polished illustrated/cartoon history films with character acting, world-building, multi-form motion graphics, camera choreography, licensed asset use and motion/audio QA; study supplied references without copying them.
 ---
 # Illustrated History Animation Director
 
 ## Purpose and route
-This is a distinct route for animated historical explainers (samurai, Japan, empires, military history, biographies, inventions and social history). It is **not automatically the H2 Squire style** and is not the footage-led cinematic documentary route. Analyse the reference and select an engine and asset strategy per shot. Never assume that the source video's exact software, budget or production method is known.
+Use this route for original illustrated/cartoon history films. It is distinct from H2 Squire/vector military animation and footage-led historical documentary. The supplied Samurai example demonstrates an illustrated-history visual vocabulary, not a design to copy.
 
-## Production reference
+## Required reference study
+1. Probe/hash the exact source and record video/audio stream metadata.
+2. Map the whole runtime with repeatable samples; create timecoded contact sheets.
+3. Inspect action-heavy intervals densely. Record anticipation, motion path, contact, follow-through, recovery, camera movement, transition and secondary motion.
+4. Record shot scale/angle, character action, prop interaction, environment, camera, graphics, palette/light and timecode.
+5. Separate direct observation from interpretation. Still frames do not prove motion or subjective sound; never claim a full normal-speed watch/listen unless performed.
+6. Do not copy protected characters, frames, exact compositions, scripts, narration, music or SFX.
+The Samurai source record is docs/SAMURAI_REFERENCE_STUDY.md; the detailed sample map is docs/reference-studies/samurai-history-animation-review-2026-11-06.md.
 
-For shot schemas, the five independent motion channels, camera grammar, repeatability gates and full moving QA, follow `references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md`. The exact Samurai sample map and honest evidence scope live in `docs/reference-studies/samurai-history-animation-review-2026-11-06.md` in the repository.
+## Visual storytelling modes
+Rotate these modes according to the story:
+- character-led acting and physical action;
+- geography, routes, coastline, fleet and formation explanation;
+- relationships, politics, family, civilian stakes and aftermath;
+- world-building through markets, workshops, smithies, ships, roads, castles and landscapes;
+- evidence/explanation through scrolls, calligraphy, portraits, timelines, rank cards, diagrams, myth/fact comparisons and historical artwork;
+- time changes and legacy through costumes, institutions, museum frames and recurring motifs.
 
-## Reference study: required evidence
-1. Probe the source file: duration, resolution, frame rate, codecs, audio layout and variable-frame-rate status.
-2. Sample the full runtime at a repeatable interval (normally every 1–2 seconds) to map the complete visual arc. Create contact sheets with timecodes.
-3. Select representative action-heavy intervals and sample them densely (normally 4–8 fps; 10–15 fps for especially fast motion). Inspect start, anticipation, midpoint, contact, follow-through, recovery and transition.
-4. Record shot size, angle, camera path, subject action, prop interaction, environment movement, graphic overlays, transition, colour/light, sound cue and confidence for each observation.
-5. Separate direct observation from inference. A still/contact sheet cannot prove a moving action, camera path or soundtrack detail. Never claim every source frame was inspected unless that was actually done.
-6. Do not copy the reference's characters, exact compositions, scripts, narration, music, SFX or copyrighted frames. Extract visual grammar and produce original designs.
+The Samurai sample changes visual mode: mounted action and group scale; invasion/fleet geography; brush/calligraphy and map transitions; social/workshop life; institutional change; museum/legacy imagery. Transfer the variety principle, not the exact scene compositions or character designs.
 
-## Visual grammar to adapt, not imitate
-Mix these forms with narrative intent:
-- Character-led scenes: distinct poses, gaze, facial acting, walk/run cycles, riding, bow/weapon handling, recoil, group reactions and prop interaction.
-- Environment-led scenes: castle interiors, roads, villages, ports, ships, markets, training grounds, temples, battlefields and weathered terrain, staged with foreground/midground/background depth.
-- Story graphics: animated maps, routes that draw progressively, moving troop/ship markers, timeline reveals, stat/portrait cards, hierarchy diagrams, split comparisons, myth/fact cards and annotated historical art.
-- Editorial variety: establishing wides, medium group action, close reaction, object inserts, over-shoulder, profile/tracking, overhead/map, tableaux and brief graphic transitions.
-- Motif callbacks: bring back a character, object, map symbol, camera composition or visual metaphor when it creates a meaningful narrative echo.
-
-Do not turn this into a mandatory checklist for every shot. Each shot needs one dominant story purpose and a clear visual hierarchy. Variety means meaningful changes in visual information, not random scene changes.
-
-## Motion design and character performance
+## Five motion channels
 For each important shot define separate channels:
-1. Actor/body performance (pose, limbs, face, gaze, weight and timing).
-2. Props and physical response (weapon path, bowstring/arrow, shield recoil, cloth, horse tack, boat/vehicle response, debris and contact).
-3. Environment (rain, wind, smoke, waves, banners, fire, crowds and parallax layers).
-4. Camera (locked, pan, track, push, pull, tilt, orbit, crane or motivated reframing).
-5. Information graphics (route drawing, labels, markers, chart fills, card entrances and wipes).
+1. Actor/body performance: pose, limbs, face, gaze, weight shift and timing.
+2. Prop/physical response: weapon path, bowstring/arrow, shield, cloth, horse tack, boat, debris and contact.
+3. Environment: rain, wind, smoke, waves, banners, fire, crowds, water and parallax layers.
+4. Camera: locked, pan, track, push, pull, tilt, orbit, crane or motivated reframing.
+5. Information graphics: route drawing, labels, markers, chart fills, card entrances, timelines and wipes.
 
-At least two channels should create independent, story-motivated motion in a motion-led shot; three or more may be used for a hero shot. Camera movement alone does not count as character action. Avoid motion clutter: keep a primary focal action, secondary motion and a readable settle.
+At least two channels should create independent, story-motivated motion in a motion-led shot; three or more may be used for hero beats. Keep one primary focal action, secondary movement and a readable settle. Camera movement alone is not character action.
 
-For physical action, plan anticipation → action → contact/impact → follow-through → recovery. Make the prop respond at contact, keep hands/feet connected to objects and ground, and keep gaze aligned. For cycles, design reusable walk/march/run, horse gait, rowing, sailing, idle and crowd loops with phase variation so copied cycles do not look synchronized. Use held poses and limited animation where they help readability; do not make every part move continuously.
+For physical action, plan anticipation → action → contact/impact → follow-through → recovery. The prop must respond at the same contact frame. Check hand/foot grounding, balance, rider/horse coupling, gaze and screen direction.
 
-## Camera and editing rules
-- Build a shot-scale ladder: establishing wide → medium action → close reaction/insert → geography or return to the environment as appropriate.
-- State why the camera moves and what information it reveals.
-- Use lateral tracking for travel/progression, push-ins for recognition/threat, pull-backs for scale/context, top-down for geography and inserts for important evidence/objects.
-- Use match cuts, direction continuity, graphic matches and motivated wipes. Keep screen direction coherent across action cuts.
-- Vary shot length to narration and action beats. Do not force a fixed shot duration or cut rate.
-- Reuse a visual motif only when it pays off story meaning.
+## Reusable animation and scene systems
+Build deterministic, frame-seek-safe cycles for:
+- idle, look, speak, point, turn, walk, march, run, kneel, fall, stand, group cheer/panic;
+- horse walk/trot/canter/gallop/rear with rider bounce, rein/tack response and hoof contacts;
+- weapon draw/sheath, bow nock/draw/release, arrow travel/pass/impact, sword/spear/shield contact, recoil and recovery;
+- rowing, ship bob, boarding, ladder climb, rope/rigging and sail motion;
+- banners, cloth, rain, smoke, fire, water, clouds, dust, foliage and asynchronous crowd loops;
+- map route drawing, marker travel, location highlight, portrait/rank cards, timelines and myth/fact reveals.
 
-## Engine and asset routing
-- **H2 Squire/H2 Canvas**: only when its established symbolic vector/rig grammar is intended and the current rig can execute the shot.
-- **Remotion**: frame-accurate timeline, multi-layer 2D compositions, animated titles/maps/charts and editorial transitions; separate from H2 renderer.
-- **Blender**: conditional for camera depth, ship/horse/weapon mechanics, layered 2.5D, real lighting or physics that materially improve a shot.
-- **Krita**: authored character sheets, hand-painted environments, historic-art paintovers and frame-by-frame animation.
-- **Motion Canvas**: evaluate for voice-synchronized vector graphics, diagrams, map paths and infographic sequences; verify current license/runtime and benchmark before adoption.
-- **FFmpeg/ffprobe**: source inspection, audio finishing, frame extraction and technical QC.
+Use stable rig pivots and named attachment points. Stagger repeated cycles so crowds and cavalry do not move in synchrony. Use holds when they support emotion or reading.
 
-Prefer real, licensed source assets and authored artwork for environments, objects, music and sound. Use procedural graphics for story information, not to replace every visual and audio asset with code-generated approximations. Prototype the hardest action/transition as a 3–8 second moving proof before scaling.
+## Camera and edit grammar
+Use establishing wides, medium group/action, close reactions, object inserts, profile/over-shoulder, tracking/travel, overhead geography and graphic tableaux. Specify camera start/end, angle/height, duration, easing and narrative motivation. Pull back to reveal scale, track to expose movement, push in for a decision, and use top-down views to clarify spatial relations when useful.
+Keep screen direction coherent. Use match cuts, map-to-location transitions, graphic matches, wipes and sound J/L cuts for a reason. Avoid repeating the same slow zoom or map/face/army template. Combat should be balanced by people, places, craft, trade, politics, training and aftermath.
 
-## Per-shot manifest contract
-Record: id; story beat; duration/frame range; location; shot size; viewpoint; camera path/easing; screen direction; character IDs/key poses; action phases; props/contact; environment layers/motion; lighting/palette; graphics; transition; asset IDs/rights; narration segment; music/SFX/ambience cue IDs; text/subtitles; risk; motion-proof status.
+## Art, engines and asset strategy
+- Search the existing 50 GB+ asset pool before new acquisition or AI generation.
+- Invest in original character/expression sheets, costume and prop variants, distinct environment plates, historical document/art cards, map/infographic components, camera recipes and real sound.
+- Use Remotion for editorial timing, maps, text and layered compositions; Krita for authored/painted assets; Blender for shots where depth, mechanics or lighting add real value; evaluate Motion Canvas only after dependency/license and sample-shot tests; use H2 rigs only when the Squire visual language is explicitly desired.
+- Prototype the hardest motion or transition as a 3–8 second moving proof before scaling.
+
+## Audio: recordings first
+- Search Build 76 and Meta Open Sound with tools/audio/search_audio_resources.py; direct matches outrank broad tag-assisted candidates.
+- Consult docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md and docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md.
+- The targeted public CC0 acquisition workflow is .github/workflows/build-illustrated-history-foley-library.yml. It acquires bow/katana handling, weapon impacts, six-horse gallop, crowd shout, forge hammer and generic impacts. Use the versioned release only after its GitHub Actions run actually publishes it.
+- Retain creator, exact source page, license, source hash, duration, sample rate and channels. Never place private/project-use raw sources in a public release.
+- All new items start human_auditioned=false and approved_for_final_mix=false. FFprobe success does not approve the sound.
+- Code should select, synchronize, layer, loop, pan, EQ, compress, duck, reverberate and master recordings. Synthesized audio is a temporary placeholder or a documented exception, not the main soundscape.
+
+## Per-shot manifest
+Record: shot ID; story beat; duration/frame range; location/time; shot size; viewpoint; camera path/easing; screen direction; character IDs/key poses; action phases; prop/contact; environment layers/motion; palette/light; graphics; transition; asset IDs/rights; narration segment; music/SFX/ambience cue IDs; on-screen text/subtitles; risks; motion-proof status.
 
 ## Quality gates
-- Contact sheet covers every shot; overview alone is insufficient for detailed action review.
-- For hero actions, inspect actual motion at start/contact/follow-through/recovery at normal speed and selected frame-by-frame points.
-- Verify silhouette, prop/hand/foot contact, layer depth, safe crop, text legibility and transition continuity.
-- Flag repeated camera/scene/pose/template reuse. If many shots share composition, explain why and show intentional counter-variation.
-- Review the complete render with sound before release. A technical render and a still contact sheet never equal artistic approval.
-
-## Deliverables
-Reference breakdown with exact evidence scope/timecodes; original style bible; story beat/shot manifest; character/environment rig plan; selected reusable motion recipes with exact sources; sound cue sheet and rights ledger; blocking/motion proofs; final QA and unresolved gates.
+- Contact sheet covers every shot; detailed action needs moving proof.
+- Inspect hero action at normal speed and selected frames around contact/follow-through/recovery.
+- Verify silhouette, hand/foot contact, prop attachment, depth layers, crop, text legibility, cut continuity and visual repetition.
+- Review complete picture and soundtrack before release; log defects and cues with timecodes.
+- Report technical pass, sampled review, full picture review and full audio audition as separate states.
