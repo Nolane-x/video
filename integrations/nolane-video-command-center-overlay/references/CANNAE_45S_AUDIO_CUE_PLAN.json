@@ -47,7 +47,9 @@
           ]
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "216 BCE. Near Cannae, beside the River Aufidus in southern Italy, two armies met.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-02-roman-mass",
@@ -73,7 +75,9 @@
           "source_status": "candidate gap; weapon impact packs are not armour/chainmail round-robins"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "Rome's infantry pressed into the Carthaginian centre. Hannibal's centre gave ground,",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-03-centre-gives-ground",
@@ -91,7 +95,9 @@
           "source_status": "candidate only; do not use one generic thwack as the entire battle"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "drawing the Roman line deeper and compressing its formation.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-04-the-wings-turn",
@@ -112,7 +118,9 @@
           ]
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "On the flanks, Carthaginian infantry turned inward. Their cavalry, having driven away Rome's mounted troops, swept around to the rear.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-05-the-wings-close",
@@ -140,7 +148,9 @@
           "source_status": "editorial decision"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "The Roman force was surrounded. Cannae became one of history's most studied examples of battlefield envelopment: an advance transformed by coordinated movement into a trap.",
+      "narration_status": "generated_pending_human_review"
     }
   ],
   "render_gate": {
@@ -177,19 +187,23 @@
       "intended_use": "battle-intro cue; test pacing and tonal fit"
     }
   ],
-  "source_pack_status": "BUILD_PENDING_NOT_YET_RELEASED",
+  "source_pack_status": "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED",
   "source_pack_delivery": {
-    "type": "github_release_pending",
-    "expected_source_count": 16,
-    "expected_previous_asset_count": 118,
-    "new_ambience_candidates": [
-      "oga_park_ambience_birds",
-      "oga_park_ambience_river",
-      "oga_park_ambience_wind",
-      "oga_vistula_river_waves",
-      "commons_howling_wind_building"
-    ],
-    "release_published": false,
+    "type": "github_release",
+    "run_id": 42349383012,
+    "run_url": "https://github.com/Nolane-x/video/actions/runs/42349383012",
+    "release_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0",
+    "zip_url": "https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.4.0/nolane-illustrated-history-foley-v0.4.0.zip",
+    "zip_name": "nolane-illustrated-history-foley-v0.4.0.zip",
+    "source_count": 16,
+    "asset_count": 123,
+    "inner_zip_size_bytes": 642950284,
+    "inner_zip_sha256": "aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74",
+    "actions_fallback_artifact_id": 13565181166,
+    "actions_fallback_artifact_name": "illustrated-history-foley-cc0-34",
+    "actions_fallback_size_bytes": 643407737,
+    "actions_fallback_expires_at": "2027-02-05T07:00:05Z",
+    "actions_fallback_outer_sha256": "d3987a0a23d9980b8ef68ebb223bf1629bc4a179c4c6b28d23b6b2bff364e389",
     "human_auditioned": 0,
     "approved_for_final_mix": 0
   },
@@ -239,5 +253,24 @@
       "good_for": "interior/castle/sheltered storm scenes",
       "caution": "interior wind, not exterior field ambience"
     }
-  ]
+  ],
+  "narration": {
+    "status": "AI_VOICEOVER_GENERATED_PENDING_HUMAN_REVIEW",
+    "language": "en",
+    "voice_direction": "deep, measured, articulate historical-documentary narration",
+    "voice_preset": "deep",
+    "generated_in": "AI Voice Generator / AI Doc Maker",
+    "generation_context_id": "45ad22e901854f05b5b25b60aea6b6e6",
+    "full_audio_url": "https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6",
+    "full_transcript": "216 BCE. Near Cannae, beside the River Aufidus in southern Italy, two armies met. Rome's infantry pressed into the Carthaginian centre. Hannibal's centre gave ground, drawing the Roman line deeper and compressing its formation. On the flanks, Carthaginian infantry turned inward. Their cavalry, having driven away Rome's mounted troops, swept around to the rear. The Roman force was surrounded. Cannae became one of history's most studied examples of battlefield envelopment: an advance transformed by coordinated movement into a trap.",
+    "review_gates": [
+      "listen_to_full_voiceover",
+      "verify_Cannae_and_Aufidus_pronunciation",
+      "check_timing_against_45s_edit",
+      "human_approval_before_final_render"
+    ],
+    "script_path": "docs/audio/CANNAE_45S_NARRATION_SCRIPT.md",
+    "duration_target_seconds": 45,
+    "shot_count": 5
+  }
 }
