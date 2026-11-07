@@ -41,7 +41,7 @@ jobs:
             TARGET="${DELIVERY}/review/${REL}"
             mkdir -p "$(dirname "${TARGET}")"
             cp "${FILE}" "${TARGET}"
-          done < <(find "${ROOT}" -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.json' -o -iname '*.srt' -o -iname '*.vtt' -o -iname '*.txt' -o -iname '*.md' \\) -print0)
+          done < <(find "${ROOT}" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.json' -o -iname '*.srt' -o -iname '*.vtt' -o -iname '*.txt' -o -iname '*.md' \) -print0)
 
           test -n "$(find "${DELIVERY}/review" -type f -print -quit)"
           echo "Final video:"
