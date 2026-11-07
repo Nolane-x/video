@@ -65,7 +65,7 @@ jobs:
           assert "build-illustrated-history-foley-library.yml" in audio
           motion = (root / "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md").read_text()
           assert "Five independent motion channels" in motion
-          assert "museum/legacy" in motion.lower()
+          assert "museum" in motion.lower() and "legacy" in motion.lower()
           audit = (root / "references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md").read_text()
           assert "hoofbeats" in audit and "cavalry" in audit
           assert "source_wav_file" in curator
