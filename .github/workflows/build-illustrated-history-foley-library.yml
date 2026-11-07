@@ -108,7 +108,7 @@ jobs:
 
           Targeted, source-backed Foley acquisition for historical/cartoon video production.
 
-          Includes CC0 weapon handling and weapon-impact collections, six-horse gallop, crowd-shout layer, blacksmith hammer and generic impacts. The ZIP carries a per-file provenance catalog and offline audition page.
+          Includes CC0 weapon handling and weapon-impact collections, six-horse gallop, crowd-shout layer, blacksmith hammer, generic impacts, plus three CC0 orchestral score candidates. The ZIP carries a per-file provenance catalog and offline audition/review console.
 
           Every sound is initially marked NOT HUMAN-AUDITIONED and NOT APPROVED FOR FINAL MIX. A successful CI build only proves download, extraction and media decoding.
           EOF
