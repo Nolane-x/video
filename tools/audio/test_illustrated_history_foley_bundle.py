@@ -68,7 +68,7 @@ class IllustratedHistoryFoleyBundleTests(unittest.TestCase):
                 self.assertIn("AUDIO_PREVIEW.html", archive.namelist())
                 self.assertIn(asset["path"], archive.namelist())
                 preview = archive.read("AUDIO_PREVIEW.html").decode("utf-8")
-                self.assertIn("Foley audition & review console", preview)
+                self.assertIn("Foley + score audition & review console", preview)
                 self.assertIn("Export decisions JSON", preview)
                 self.assertIn("human_auditioned", preview)
                 self.assertIn("approved_for_final_mix", preview)
