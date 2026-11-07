@@ -7,7 +7,7 @@ One private front door for Nolane video production. It includes **33 internal sk
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
 - Adds a detailed illustrated-history motion reference covering character/prop/environment/camera/graphic channels, camera grammar, action cycles, uniqueness checks and full-motion QA.
-- Adds the CC0 illustrated-history Foley Audition Edition v0.2.0 with an offline console for listening to individual recordings, filtering, fit ratings, keep/reject notes, browser-local review persistence and JSON export/import.
+- Adds the CC0 illustrated-history Foley + Score Audition Edition v0.3.0 with an offline console for listening to individual recordings, filtering, fit ratings, keep/reject notes, browser-local review persistence and JSON export/import.
 - Adds a SHA-256-bound review validator that rejects un-auditioned approvals, rejected cues, unknown IDs, duplicate rows and rights-class mismatches before cue-sheet inclusion.
 - Adds a five-shot Cannae audio cue map that separates narration, score, ambience, Foley, impacts, transitions and intentional silence without pre-approving any asset.
 - Adds searchable metadata indexes for the 2,331 Build 76 redistribution candidates and 1,583 pinned Meta Open Sound samples, then an offline playable audio preview bank.
@@ -71,3 +71,8 @@ See `references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md` for the complete shot/moti
 
 
 The v0.3.0 source pack includes three item-level CC0 music candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). They are modern orchestral/game-style recordings, not period-authentic music; audition them in edit context and keep them unapproved until a person chooses them.
+
+
+The v0.3.0 pack contains 118 audio files from 11 item-level CC0 sources, including three orchestral candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). These are modern cinematic/game-style recordings, not period-authentic music. They remain un-auditioned.
+
+The v0.3.0 acquisition, decode and catalog checks passed. Its 432 MB Actions artifact (ID 13563793933) expires 2027-02-05; persistent Release publication was denied by GitHub with HTTP 403. Use the [successful Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721) to download it. Inner package SHA-256: `c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40`.
