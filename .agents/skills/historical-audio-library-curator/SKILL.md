@@ -35,3 +35,10 @@ NASA media uses government-specific media conditions and is not labelled CC0. So
 
 ## Editorial use
 Separate narration, score, ambience, character Foley, prop Foley, spot SFX, transition and intentional-silence tracks. Sync transients to visible contact; layer near/far perspective; do not reuse one generic clang for every hit. Listen to the complete final mix at normal speed. Metadata and loudness checks do not replace audition.
+
+
+## Human audition workflow — Foley pack v0.2.0
+
+The targeted CC0 pack v0.2.0 adds an offline audition console. Open \`AUDIO_PREVIEW.html\` after extracting the release. Listen to the exact original audio; record keep/reject, a 1–5 fit score and notes; then tick the exact-file audition checkbox. The final-mix approval control is gated by audition + keep + public CC0/PD rights.
+
+Export the browser review JSON. It is local to that browser until exported; no review decision is automatically synced to GitHub. Validate the exported record against the same package catalog with \`tools/audio/validate_foley_review_decisions.py\`. Never create an approved cue-sheet row from a filename match, FFprobe result, metadata tag or unverified review export. Every approved cue must retain its asset ID, source SHA-256, creator, source page and item license.
