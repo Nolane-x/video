@@ -21,6 +21,12 @@ The crowd cue is edited group voice material, not a field recording of a histori
 ## Coverage gaps and next sourcing
 The metadata audit still calls for hoofbeat surface round-robins, tack/reins, shield impacts, chainmail/armour handling, distant command/crowd beds, Japanese rain/temple/port/workshop ambience and period-appropriate recorded music. Search exact sources and licenses; don't infer these from broad tags.
 
+## Lossless Meta preview-to-master mapping
+
+The Meta Open Sound catalog carries each OGG preview's exact original WAV path as `source_wav_file`, together with `wav_master_archive_name`, `wav_master_download_url`, `wav_master_size_bytes` and `wav_master_sha256`. Use OGG for discovery/audition, then retrieve only the selected source WAV member through `.github/workflows/acquire-meta-open-sound-wav-master.yml`. Verify the collection archive size and SHA-256 before extraction. Oculus samples are CC BY 4.0 and require attribution; Piano/Nylon/Steel Guitar entries are CC0 note samples, not finished scores.
+
+Sonniss GDC 2026 is a private production source. Never upload Sonniss raw archives or extracted files into this public repository, public Releases or shared preview packs. Follow the live EULA and its AI/ML-training prohibition.
+
 ## OGG preview to WAV master
 The Meta catalog links each OGG preview to a WAV member and collection archive with size/SHA-256. Search/listen to OGG first; only then fetch the exact matching WAV master. Oculus Audio Pack WAV requires CC BY 4.0 attribution. Piano/Nylon/Steel Guitar masters contain CC0 instrument note samples, not complete scores.
 
