@@ -335,7 +335,7 @@ a{color:var(--accent)}code{font-size:11px;overflow-wrap:anywhere}audio{width:100
 </head>
 <body>
 <p class="eyebrow">NOLANE · HISTORICAL AUDIO LIBRARY</p>
-<h1>Foley + score audition & review console</h1>
+<h1>Foley + ambience + score audition & review console</h1>
 <p class="sub">Listen to the exact source file, assess whether it fits the visible action, then record a decision. This page works offline after you extract the ZIP. Review decisions are saved in this browser and can be exported/imported as JSON.</p>
 <div class="warning"><strong>Important approval gate.</strong> Every recording starts unreviewed. FFprobe confirms that a file decodes; it does not confirm sound quality, historical suitability or final-mix approval. A cue cannot be approved for a final mix until you have listened to that exact file and marked it as a candidate.</div>
 <div class="stats">
@@ -361,7 +361,7 @@ a{color:var(--accent)}code{font-size:11px;overflow-wrap:anywhere}audio{width:100
 <div id="cues">{{ASSET_ROWS}}</div>
 <p class="footer">Rights class for this pack: CC0 1.0 as recorded in the per-item source manifest. Keep the source register and license links with the files. Approval means your human audition found this particular take suitable for this project; it does not create rights beyond the stated license.</p>
 <script>
-const PACK_ID="nolane-illustrated-history-foley-review-v0.3.0";
+const PACK_ID="nolane-illustrated-history-foley-review-v0.4.0";
 const STORAGE_KEY=PACK_ID+":decisions";
 const cards=[...document.querySelectorAll(".cue")];
 const byId=new Map(cards.map(card=>[card.dataset.id,card]));
