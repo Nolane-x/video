@@ -1,0 +1,71 @@
+import { thumb } from '/packs/squire/pack.js';
+
+// Ain Jalut: a Mamluk defender against the incoming Mongol mounted line.
+thumb({
+  bg: 'hills',
+  time: 'dawn',
+  blur: 9,
+  bgOpts: {
+    volcano: false,
+    trees: 3,
+    bushes: 3,
+    flags: [
+      { x: 0.14, color: '#41677f' },
+      { x: 0.86, color: '#a6533b' },
+    ],
+  },
+  back: [
+    {
+      preset: 'englishArcher',
+      rows: 3,
+      cols: 14,
+      x0: 0.02,
+      x1: 0.55,
+      yFront: 0.9,
+      yBack: 0.68,
+      hFront: 0.18,
+      hBack: 0.09,
+      flip: true,
+      face: 'determined',
+    },
+    {
+      preset: 'greek',
+      rows: 2,
+      cols: 10,
+      x0: 0.5,
+      x1: 0.98,
+      yFront: 0.94,
+      yBack: 0.76,
+      hFront: 0.16,
+      hBack: 0.08,
+      face: 'determined',
+    },
+  ],
+  hero: {
+    preset: 'knight12',
+    helmet: 'turban',
+    body: 'mail',
+    tunicColor: '#41677f',
+    cape: '#34566b',
+    x: 0.75,
+    y: 0.64,
+    R: 0.22,
+    face: 'determined',
+    pose: 'guard',
+    weapon: 'spear',
+    shield: {
+      type: 'round',
+      color: '#41677f',
+      charge: 'star',
+      chargeColor: '#e1d2ae',
+    },
+  },
+  symbols: [
+    { kind: 'arrow', x: 0.39, y: 0.62, to: [0.57, 0.62], r: 0.16, color: '#d94736' },
+  ],
+  title: ['STOPPED'],
+  tx: 0.08,
+  ty: 0.14,
+  tsize: 0.19,
+  align: 'left',
+});
