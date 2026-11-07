@@ -76,7 +76,7 @@ jobs:
           assert "acquire-meta-open-sound-wav-master.yml" in curator
           assert "never upload Sonniss raw archives" in curator
           assert "build-illustrated-history-foley-library.yml" in curator
-          assert "foley-v0.2.0" in curator
+          assert "foley-v0.3.0" in curator
           assert "validate_foley_review_decisions.py" in curator
           print("Plugin overlay validated:", manifest["version"])
           
