@@ -1,8 +1,8 @@
-# Nolane Video Command Center v1.0.2
+# Nolane Video Command Center v1.0.3
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v1.0.2
+## What's new in v1.0.3
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
@@ -86,3 +86,6 @@ The persistent GitHub Release upload was denied with HTTP 403 from the Actions i
 
 
 The v0.3.0 build, catalog checks and permanent GitHub Release succeeded in [Actions run 42348053901](https://github.com/Nolane-x/video/actions/runs/42348053901). [Download the 431.8 MB ZIP](https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.3.0/nolane-illustrated-history-foley-v0.3.0.zip) or [open the Release](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0). It contains 118 files from 11 CC0 source entries. ZIP SHA-256: `d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd`. An Actions fallback artifact (ID 13563804097) expires 2027-02-05. All 118 entries are still un-auditioned and unapproved for final mix.
+
+
+The next CC0 pack v0.4.0 expands the source pool with five modern environment recordings: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, Vistula River waves and indoor howling wind. Their original context is retained; they are not period-authentic sound reconstructions. Birds are not a default battle bed, Vistula waves are river rather than ocean, and indoor wind is for interiors. The v0.4.0 GitHub Actions acquisition/build is being validated before a permanent Release is available.
