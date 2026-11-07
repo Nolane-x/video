@@ -4,7 +4,7 @@
   "fps": 24,
   "status": "CANDIDATE_CUE_PLAN_NOT_APPROVED_FOR_RENDER",
   "source_pack": "nolane-illustrated-history-foley-v0.3.0",
-  "source_pack_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0",
+  "source_pack_url": "https://github.com/Nolane-x/video/actions/runs/42347935721",
   "mix_sample_rate_hz": 48000,
   "principle": "Every cue is a candidate until its exact source file has been heard and approved. No generic synthetic placeholder should silently replace a missing recording.",
   "tracks": [
@@ -31,7 +31,7 @@
         {
           "track": "ambience",
           "need": "Very restrained open-air wind/river bed",
-          "source_status": "not_in_the_115_file_pack; search Build 76 and Meta direct matches"
+          "source_status": "not_in_the_118_file_pack; search Build 76 and Meta direct matches"
         },
         {
           "track": "music",
@@ -77,7 +77,7 @@
         {
           "track": "prop_foley",
           "need": "Weapon-on-weapon or blade/haft contact",
-          "source_status": "115-file CC0 pack includes weapon impact variants; exact file must be auditioned"
+          "source_status": "118-file CC0 pack includes weapon impact variants; exact file must be auditioned"
         },
         {
           "track": "spot_sfx",
@@ -167,5 +167,21 @@
       "status": "unauditioned_candidate",
       "intended_use": "battle-intro cue; test pacing and tonal fit"
     }
-  ]
+  ],
+  "source_pack_status": "BUILT_VALIDATED_ARTIFACT_UPLOADED_RELEASE_BLOCKED_BY_GITHUB_TOKEN_403",
+  "source_pack_delivery": {
+    "type": "github_actions_artifact",
+    "run_id": 42347935721,
+    "artifact_id": 13563793933,
+    "artifact_name": "illustrated-history-foley-cc0-18",
+    "artifact_expires_at": "2027-02-05T06:38:50Z",
+    "source_count": 11,
+    "asset_count": 118,
+    "inner_zip_size_bytes": 431804481,
+    "inner_zip_sha256": "c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40",
+    "outer_artifact_size_bytes": 432234327,
+    "outer_artifact_sha256": "37dade9eddadb006c03779de5a98edacc8f824d396c8ceafdb1a0c9acec5d3a5",
+    "persistent_release_published": false,
+    "release_error": "HTTP 403 Resource not accessible by integration"
+  }
 }
