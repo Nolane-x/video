@@ -54,3 +54,6 @@ Use the v0.3.0 offline audition console to listen to exact files and export the 
 
 
 The v0.3.0 source manifest adds three CC0 orchestral score candidates (Eye of the Storm/WAV, The Final Battle/OGG, Prepare to fight/MP3). They are modern cinematic tracks rather than verified period music. Audition them in context; do not treat a battle tag as a scoring decision. Keep score stem, ambience, narration and impact/Foley stems distinct.
+
+
+The v0.3.0 pack includes three CC0 orchestral score candidates in addition to Foley. They remain un-auditioned; review and choose them as music, not as generic Foley. Match the score's phrasing and dynamic contour to the edit; don't loop a score across every scene by default.
