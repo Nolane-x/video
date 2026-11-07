@@ -3,8 +3,8 @@
   "project_id": "cannae-illustrated-history-45s",
   "fps": 24,
   "status": "CANDIDATE_CUE_PLAN_NOT_APPROVED_FOR_RENDER",
-  "source_pack": "nolane-illustrated-history-foley-v0.2.0",
-  "source_pack_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.2.0",
+  "source_pack": "nolane-illustrated-history-foley-v0.3.0",
+  "source_pack_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0",
   "mix_sample_rate_hz": 48000,
   "principle": "Every cue is a candidate until its exact source file has been heard and approved. No generic synthetic placeholder should silently replace a missing recording.",
   "tracks": [
@@ -23,9 +23,26 @@
       "time": "00:00-00:09",
       "purpose": "Establish Apulia, the Aufidus and the Cannae location.",
       "candidate_layers": [
-        {"track": "narration", "need": "Calm, authoritative location and date narration", "source_status": "voiceover_not_yet_recorded"},
-        {"track": "ambience", "need": "Very restrained open-air wind/river bed", "source_status": "not_in_the_115_file_pack; search Build 76 and Meta direct matches"},
-        {"track": "music", "need": "Low, sparse tonal bed that leaves room for the map reveal", "source_status": "no_score_in_foley_pack; source a separate licensed recorded composition"}
+        {
+          "track": "narration",
+          "need": "Calm, authoritative location and date narration",
+          "source_status": "voiceover_not_yet_recorded"
+        },
+        {
+          "track": "ambience",
+          "need": "Very restrained open-air wind/river bed",
+          "source_status": "not_in_the_115_file_pack; search Build 76 and Meta direct matches"
+        },
+        {
+          "track": "music",
+          "need": "Low, sparse tonal bed that leaves room for the map reveal",
+          "source_status": "three item-level CC0 score candidates now exist (Eye of the Storm, The Final Battle, Prepare to fight); audition each exact source before assigning any score cue",
+          "candidate_source_ids": [
+            "oga_eye_of_the_storm",
+            "oga_the_final_battle",
+            "oga_prepare_to_fight"
+          ]
+        }
       ],
       "approved_asset_ids": []
     },
@@ -34,9 +51,21 @@
       "time": "00:09-00:18",
       "purpose": "Establish marching pressure and formation scale.",
       "candidate_layers": [
-        {"track": "ambience", "need": "Distant army bed and restrained wind", "source_status": "search Build 76; crowd file is designed shouting, not a long-distance field recording"},
-        {"track": "character_foley", "need": "Heavy footfalls with dirt/earth texture", "source_status": "search Build 76; current CC0 pack has no dedicated boot-march set"},
-        {"track": "prop_foley", "need": "Leather, shield and metal handling", "source_status": "candidate gap; weapon impact packs are not armour/chainmail round-robins"}
+        {
+          "track": "ambience",
+          "need": "Distant army bed and restrained wind",
+          "source_status": "search Build 76; crowd file is designed shouting, not a long-distance field recording"
+        },
+        {
+          "track": "character_foley",
+          "need": "Heavy footfalls with dirt/earth texture",
+          "source_status": "search Build 76; current CC0 pack has no dedicated boot-march set"
+        },
+        {
+          "track": "prop_foley",
+          "need": "Leather, shield and metal handling",
+          "source_status": "candidate gap; weapon impact packs are not armour/chainmail round-robins"
+        }
       ],
       "approved_asset_ids": []
     },
@@ -45,8 +74,16 @@
       "time": "00:18-00:27",
       "purpose": "Synchronize visible blade/shield contact, recoil and dust with one clear physical beat.",
       "candidate_layers": [
-        {"track": "prop_foley", "need": "Weapon-on-weapon or blade/haft contact", "source_status": "115-file CC0 pack includes weapon impact variants; exact file must be auditioned"},
-        {"track": "spot_sfx", "need": "One close transient at the visible contact frame and a softer body/gear response", "source_status": "candidate only; do not use one generic thwack as the entire battle"}
+        {
+          "track": "prop_foley",
+          "need": "Weapon-on-weapon or blade/haft contact",
+          "source_status": "115-file CC0 pack includes weapon impact variants; exact file must be auditioned"
+        },
+        {
+          "track": "spot_sfx",
+          "need": "One close transient at the visible contact frame and a softer body/gear response",
+          "source_status": "candidate only; do not use one generic thwack as the entire battle"
+        }
       ],
       "approved_asset_ids": []
     },
@@ -55,8 +92,16 @@
       "time": "00:27-00:36",
       "purpose": "Make the cavalry movement approach, pass and reach the rear without masking the tactical explanation.",
       "candidate_layers": [
-        {"track": "character_foley", "need": "Horse gallop approach and pass", "source_status": "one six-horse 25-second gallop recording exists; it is not a full gait/surface library"},
-        {"track": "ambience", "need": "Distant group movement", "source_status": "search separate battle/field ambience; current crowd cue is a designed shout bed"}
+        {
+          "track": "character_foley",
+          "need": "Horse gallop approach and pass",
+          "source_status": "one six-horse 25-second gallop recording exists; it is not a full gait/surface library"
+        },
+        {
+          "track": "ambience",
+          "need": "Distant group movement",
+          "source_status": "search separate battle/field ambience; current crowd cue is a designed shout bed"
+        }
       ],
       "approved_asset_ids": []
     },
@@ -65,9 +110,26 @@
       "time": "00:36-00:45",
       "purpose": "Resolve the manoeuvre, leave space for the final historical statement.",
       "candidate_layers": [
-        {"track": "ambience", "need": "Crowd/army swell with a near-far perspective", "source_status": "CC0 crowd candidate exists; it is a designed group-voice effect and needs audition"},
-        {"track": "music", "need": "Controlled low-frequency rise and clear resolve, never a generic loop", "source_status": "source separate licensed recorded music; not included in Foley pack"},
-        {"track": "intentional_silence", "need": "Brief clear pocket around the final statement", "source_status": "editorial decision"}
+        {
+          "track": "ambience",
+          "need": "Crowd/army swell with a near-far perspective",
+          "source_status": "CC0 crowd candidate exists; it is a designed group-voice effect and needs audition"
+        },
+        {
+          "track": "music",
+          "need": "Controlled low-frequency rise and clear resolve, never a generic loop",
+          "source_status": "three item-level CC0 score candidates now exist (Eye of the Storm, The Final Battle, Prepare to fight); audition each exact source before assigning any score cue",
+          "candidate_source_ids": [
+            "oga_eye_of_the_storm",
+            "oga_the_final_battle",
+            "oga_prepare_to_fight"
+          ]
+        },
+        {
+          "track": "intentional_silence",
+          "need": "Brief clear pocket around the final statement",
+          "source_status": "editorial decision"
+        }
       ],
       "approved_asset_ids": []
     }
@@ -79,5 +141,31 @@
     "require_sync_event_frame": true,
     "require_separate_stems": true,
     "allow_placeholder_synthesis_in_final": false
-  }
+  },
+  "music_candidates": [
+    {
+      "source_id": "oga_eye_of_the_storm",
+      "title": "Eye of the Storm",
+      "creator": "Indieteur",
+      "license": "CC0-1.0",
+      "status": "unauditioned_candidate",
+      "intended_use": "warfare/orchestral bed; creator describes use for warfare scenes; check whether it fits this historical documentary"
+    },
+    {
+      "source_id": "oga_the_final_battle",
+      "title": "The Final Battle",
+      "creator": "skrjablin",
+      "license": "CC0-1.0",
+      "status": "unauditioned_candidate",
+      "intended_use": "generic dramatic orchestral loop; avoid using it as a default full-scene bed without audition"
+    },
+    {
+      "source_id": "oga_prepare_to_fight",
+      "title": "Prepare to fight",
+      "creator": "Basil",
+      "license": "CC0-1.0",
+      "status": "unauditioned_candidate",
+      "intended_use": "battle-intro cue; test pacing and tonal fit"
+    }
+  ]
 }
