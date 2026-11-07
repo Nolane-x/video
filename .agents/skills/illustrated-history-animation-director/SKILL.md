@@ -65,3 +65,8 @@ The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as o
 ## Environmental sound coverage — v0.4.0
 
 The v0.4.0 CC0 pack adds five modern field-recorded environment beds: birds-before-rain in an Adelaide park, a small park river with wildlife, open-field wind, Vistula River waves and indoor howling wind. The recording context is part of the asset metadata and must guide use. These are not historical reconstructions; choose them only as neutral ambience when the scene matches. Do not imply they were recorded at the historical location. Human audition and the review validator remain required before cue approval.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
