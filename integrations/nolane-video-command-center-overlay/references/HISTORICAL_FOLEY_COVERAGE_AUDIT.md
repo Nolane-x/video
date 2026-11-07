@@ -80,3 +80,18 @@ Acquisition status: **not downloaded**. Do not claim the repository currently co
 ## Approval rule
 
 No item in either generated catalog is human-auditioned merely because it appears in a preview bank. For final production, keep the preview OGG separate from the selected WAV/master, verify exact item rights, listen to the selected file, record a cue-sheet entry, and only then mark it approved for a final mix.
+
+
+## Verified release publication — 2026-11-07
+
+The final artifact-first workflow completed successfully in run [42341596143](https://github.com/Nolane-x/video/actions/runs/42341596143). All test, acquisition, FFprobe/catalog validation, Actions artifact upload and GitHub Release steps passed.
+
+- GitHub Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.1.0
+- Actions artifact: `illustrated-history-foley-foley-cc0-3` (90-day retention; artifact ID `13562295186`)
+- ZIP size: 397,657,285 bytes
+- ZIP SHA-256: `78e7136449d773456117f26a21e73d7e2cc00bb4709ea11d2c6ecc9f422a956e`
+- Catalog: 115 distinct audio files from 8 source entries
+- Human auditioned: 0/115
+- Approved for final mix: 0/115
+
+The release is now published. The previous two failed attempts are superseded by this final successful run. The pack is acquired, decoded and indexed, but remains **not human-auditioned**; do not treat it as a production-approved sound library until cues are listened to and selected.
