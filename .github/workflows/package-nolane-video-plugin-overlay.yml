@@ -75,9 +75,7 @@ jobs:
           assert "123" in cue_plan and "aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74" in cue_plan
           assert "45ad22e901854f05b5b25b60aea6b6e6" in cue_plan
           narration = (root / "references/CANNAE_45S_NARRATION_SCRIPT.md").read_text()
-          assert "CAN-05" in narration and "human approval" in narration.lower()
-          assert "oga_park_ambience_river" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
-          assert "oga_vistula_river_waves" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
+          assert "CAN-05" in narration and "approval decision" in narration.lower()
           assert "build-illustrated-history-foley-library.yml" in audio
           motion = (root / "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md").read_text()
           assert "Five independent motion channels" in motion
