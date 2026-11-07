@@ -144,8 +144,30 @@ The final build and permanent GitHub Release succeeded in [Actions run 423480539
 The Release contains the ZIP, build report, download manifest and SHA256SUMS. The package includes the per-file catalog, source register, original audio and offline audition/review console. All recordings remain un-auditioned until a human listens and records a decision.
 
 
-## v0.4.0 environment/ambience additions — build pending
+## v0.4.0 environment/ambience additions — verified
 
-Five additional item-level CC0 candidate recordings have been added to the source manifest: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, Vistula River waves and interior howling wind. They broaden the library's real outdoor/water/interior ambience options, but they are modern field recordings, not period-authentic historical sounds. The Vistula track is river waves rather than ocean surf; the howling wind was recorded inside a building. Do not label these as ancient battlefield or harbour recordings.
+The five environment additions are now part of the published pack: Adelaide park birds-before-rain, small river/wildlife, open-field wind, Vistula River waves and interior howling wind. Their real recording contexts remain attached. They are modern field recordings, not period-specific reconstructions.
 
-The new items start un-auditioned and are not approved for final mix. The v0.4.0 Actions build and Release are pending; use v0.3.0 until the v0.4.0 workflow completes and publishes its release.
+
+## Verified v0.4.0 release — 2026-11-07
+
+The complete acquisition, extraction, FFprobe/catalog validation, offline review bundle upload and permanent GitHub Release publication succeeded in [Actions run 42349383012](https://github.com/Nolane-x/video/actions/runs/42349383012).
+
+- GitHub Release: [nolane-illustrated-history-foley-v0.4.0](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0)
+- ZIP: [nolane-illustrated-history-foley-v0.4.0.zip](https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.4.0/nolane-illustrated-history-foley-v0.4.0.zip)
+- Sources: **16** item-level CC0 entries
+- Catalogued audio assets: **123** (118 from v0.3.0 + 5 environment recordings)
+- ZIP size: **642,950,284 bytes**
+- ZIP SHA-256: `aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74`
+- Actions fallback artifact: ID `13565181166`, name `illustrated-history-foley-cc0-34`
+- Artifact size: 643,407,737 bytes; expires 2027-02-05 07:00:05 UTC
+- Artifact SHA-256: `d3987a0a23d9980b8ef68ebb223bf1629bc4a179c4c6b28d23b6b2bff364e389`
+- Human-auditioned: **0/123**
+- Approved for final mix: **0/123**
+
+The ZIP contains the source register, exact per-file catalog, original audio, offline audition/review console, build report, download manifest and SHA256SUMS. All recordings remain un-auditioned until a person listens to the exact file and exports a review decision.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
