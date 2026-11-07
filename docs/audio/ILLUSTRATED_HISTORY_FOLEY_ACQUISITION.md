@@ -1,7 +1,7 @@
 # Illustrated-history Foley acquisition pack
 
-Status: v0.3.0 acquisition/build and Actions artifact upload passed; persistent Release publication was blocked by GitHub token permissions.  
-Version identifier: nolane-illustrated-history-foley-v0.3.0
+Status: v0.3.0 is built, validated and published as a permanent GitHub Release.  
+Current release: [nolane-illustrated-history-foley-v0.3.0](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0)
 
 This is a targeted gap-filling pack for the illustrated/cartoon history route. It supplements, rather than duplicates, the broad Build 76 and Meta Open Sound catalogues. The sources are selected for concrete needs found in the Samurai reference study and historical Foley coverage audit.
 
@@ -117,18 +117,22 @@ These are real audio recordings, not code-generated music. They are CC0 per thei
 The exact source IDs are mapped in docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json. The five-shot map contains no approved music asset IDs until the exact recordings are auditioned.
 
 
-## Verified v0.3.0 build and artifact — 2026-11-07
 
-The source acquisition, FFprobe/catalog validation, regression tests and Actions artifact upload passed in [run 42347935721](https://github.com/Nolane-x/video/actions/runs/42347935721). The workflow's persistent Release upload was denied with HTTP 403, so this is a time-limited Actions artifact, not a permanent GitHub Release.
 
+## Verified v0.3.0 release — 2026-11-07
+
+The final build and permanent GitHub Release succeeded in [Actions run 42348053901](https://github.com/Nolane-x/video/actions/runs/42348053901). This supersedes the earlier run whose Release upload was denied with HTTP 403.
+
+- GitHub Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0
+- ZIP: [nolane-illustrated-history-foley-v0.3.0.zip](https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.3.0/nolane-illustrated-history-foley-v0.3.0.zip)
 - Source entries: 11
 - Catalogued audio files: 118 (115 Foley/weapon/environment cues + 3 orchestral score candidates)
-- Inner package ZIP size: 431,804,481 bytes
-- Inner package SHA-256: `c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40`
-- Actions artifact ID: `13563793933` (`illustrated-history-foley-cc0-18`)
-- Outer artifact size: 432,234,327 bytes
-- Outer artifact SHA-256: `37dade9eddadb006c03779de5a98edacc8f824d396c8ceafdb1a0c9acec5d3a5`
-- Artifact expires: 2027-02-05 06:38:50 UTC
-- Human-auditioned: 0/118; approved for final mix: 0/118
+- ZIP size: 431,804,481 bytes
+- ZIP SHA-256: `d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd`
+- Actions fallback artifact: ID `13563804097`, `illustrated-history-foley-cc0-19`
+- Artifact size: 432,234,335 bytes; expires 2027-02-05 06:40:33 UTC
+- Artifact SHA-256: `015768fdbda68af42dbec23ddedfb60b2e0f3e6ae32d9d42a0e873e3ab9cf15e`
+- Human-auditioned: **0/118**
+- Approved for final mix: **0/118**
 
-[Download from the successful Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721). A permanent Release needs a repository `NOLANE_RELEASE_TOKEN` Actions secret with Contents: write, followed by a rerun.
+The Release contains the ZIP, build report, download manifest and SHA256SUMS. The package includes the per-file catalog, source register, original audio and offline audition/review console. All recordings remain un-auditioned until a human listens and records a decision.
