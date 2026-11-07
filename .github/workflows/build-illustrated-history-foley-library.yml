@@ -74,7 +74,7 @@ jobs:
 
       - name: Publish the curated source pack as a versioned GitHub Release
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: nolane-illustrated-history-foley-v0.1.0
         run: |
           set -euo pipefail
