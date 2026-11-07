@@ -37,16 +37,16 @@ NASA media uses government-specific media conditions and is not labelled CC0. So
 Separate narration, score, ambience, character Foley, prop Foley, spot SFX, transition and intentional-silence tracks. Sync transients to visible contact; layer near/far perspective; do not reuse one generic clang for every hit. Listen to the complete final mix at normal speed. Metadata and loudness checks do not replace audition.
 
 
-## Human audition workflow — Foley pack v0.2.0
+## Human audition workflow — Foley pack v0.3.0
 
-The targeted CC0 pack v0.2.0 adds an offline audition console. Open \`AUDIO_PREVIEW.html\` after extracting the release. Listen to the exact original audio; record keep/reject, a 1–5 fit score and notes; then tick the exact-file audition checkbox. The final-mix approval control is gated by audition + keep + public CC0/PD rights.
+The targeted CC0 pack v0.3.0 adds an offline audition console. Open \`AUDIO_PREVIEW.html\` after extracting the release. Listen to the exact original audio; record keep/reject, a 1–5 fit score and notes; then tick the exact-file audition checkbox. The final-mix approval control is gated by audition + keep + public CC0/PD rights.
 
 Export the browser review JSON. It is local to that browser until exported; no review decision is automatically synced to GitHub. Validate the exported record against the same package catalog with \`tools/audio/validate_foley_review_decisions.py\`. Never create an approved cue-sheet row from a filename match, FFprobe result, metadata tag or unverified review export. Every approved cue must retain its asset ID, source SHA-256, creator, source page and item license.
 
 
-## Offline human audition and approval — Foley v0.2.0
+## Offline human audition and approval — Foley v0.3.0
 
-The CC0 Audition Edition v0.2.0 includes an offline \`AUDIO_PREVIEW.html\` console. Listen to the exact file, record keep/reject, 1–5 fit rating and notes, then explicitly mark it auditioned. Final-mix approval is enabled only for an auditioned keep-candidate under the public CC0/PD rights class.
+The CC0 Audition Edition v0.3.0 includes an offline \`AUDIO_PREVIEW.html\` console. Listen to the exact file, record keep/reject, 1–5 fit rating and notes, then explicitly mark it auditioned. Final-mix approval is enabled only for an auditioned keep-candidate under the public CC0/PD rights class.
 
 Export the review JSON from the browser (local state is not synced to GitHub) and validate it against the same package catalog:
 
@@ -58,3 +58,8 @@ python tools/audio/validate_foley_review_decisions.py \\
 \`\`\`
 
 Never infer audition from metadata or decoder success. The validator checks asset ID, SHA-256, rights class, human audition state and decision consistency; it does not listen to audio.
+
+
+## CC0 score-candidate coverage — v0.3.0
+
+The current audition edition includes three real orchestral score sources: Eye of the Storm (Indieteur, WAV), The Final Battle (skrjablin, OGG) and Prepare to fight (Basil, MP3). They have CC0 item-level source pages but are modern cinematic/game-style recordings, not historical-period performances. Listen in context; do not auto-select by title or genre tag. Keep them separate from Foley and record review decisions against the source SHA-256.
