@@ -47,7 +47,9 @@
           ]
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "216 BCE. Near Cannae, beside the River Aufidus in southern Italy, two armies met.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-02-roman-mass",
@@ -73,7 +75,9 @@
           "source_status": "candidate gap; weapon impact packs are not armour/chainmail round-robins"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "Rome's infantry pressed into the Carthaginian centre. Hannibal's centre gave ground,",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-03-centre-gives-ground",
@@ -91,7 +95,9 @@
           "source_status": "candidate only; do not use one generic thwack as the entire battle"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "drawing the Roman line deeper and compressing its formation.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-04-the-wings-turn",
@@ -112,7 +118,9 @@
           ]
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "On the flanks, Carthaginian infantry turned inward. Their cavalry, having driven away Rome's mounted troops, swept around to the rear.",
+      "narration_status": "generated_pending_human_review"
     },
     {
       "shot_id": "CAN-05-the-wings-close",
@@ -140,7 +148,9 @@
           "source_status": "editorial decision"
         }
       ],
-      "approved_asset_ids": []
+      "approved_asset_ids": [],
+      "narration_line": "The Roman force was surrounded. Cannae became one of history's most studied examples of battlefield envelopment: an advance transformed by coordinated movement into a trap.",
+      "narration_status": "generated_pending_human_review"
     }
   ],
   "render_gate": {
@@ -239,5 +249,21 @@
       "good_for": "interior/castle/sheltered storm scenes",
       "caution": "interior wind, not exterior field ambience"
     }
-  ]
+  ],
+  "narration": {
+    "status": "AI_VOICEOVER_GENERATED_PENDING_HUMAN_REVIEW",
+    "language": "en",
+    "voice_direction": "deep, measured, articulate historical-documentary narration",
+    "voice_preset": "deep",
+    "generated_in": "AI Voice Generator / AI Doc Maker",
+    "generation_context_id": "45ad22e901854f05b5b25b60aea6b6e6",
+    "full_audio_url": "https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6",
+    "full_transcript": "216 BCE. Near Cannae, beside the River Aufidus in southern Italy, two armies met. Rome's infantry pressed into the Carthaginian centre. Hannibal's centre gave ground, drawing the Roman line deeper and compressing its formation. On the flanks, Carthaginian infantry turned inward. Their cavalry, having driven away Rome's mounted troops, swept around to the rear. The Roman force was surrounded. Cannae became one of history's most studied examples of battlefield envelopment: an advance transformed by coordinated movement into a trap.",
+    "review_gates": [
+      "listen_to_full_voiceover",
+      "verify_Cannae_and_Aufidus_pronunciation",
+      "check_timing_against_45s_edit",
+      "human_approval_before_final_render"
+    ]
+  }
 }
