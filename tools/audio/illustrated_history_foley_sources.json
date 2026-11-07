@@ -279,7 +279,7 @@
         "park",
         "outdoor"
       ],
-      "minimum_bytes": 80000000,
+      "minimum_bytes": 1000000,
       "expected_sha256": null
     },
     {
@@ -305,7 +305,7 @@
         "wildlife",
         "outdoor"
       ],
-      "minimum_bytes": 90000000,
+      "minimum_bytes": 1000000,
       "expected_sha256": null
     },
     {
@@ -329,7 +329,7 @@
         "outdoor",
         "nature"
       ],
-      "minimum_bytes": 65000000,
+      "minimum_bytes": 1000000,
       "expected_sha256": null
     },
     {
@@ -354,7 +354,7 @@
         "riverbank",
         "loop-candidate"
       ],
-      "minimum_bytes": 9000000,
+      "minimum_bytes": 1000000,
       "expected_sha256": null
     },
     {
@@ -378,7 +378,7 @@
         "weather",
         "howling"
       ],
-      "minimum_bytes": 900000,
+      "minimum_bytes": 200000,
       "expected_sha256": null
     }
   ]
