@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 VALID_DECISIONS = {"unreviewed", "keep_candidate", "reject"}
-PACK_ID = "nolane-illustrated-history-foley-review-v0.3.0"
+PACK_ID = "nolane-illustrated-history-foley-review-v0.4.0"
 
 
 def validate_review(catalog: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
