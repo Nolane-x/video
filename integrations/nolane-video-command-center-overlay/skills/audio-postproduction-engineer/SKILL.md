@@ -46,3 +46,8 @@ Prefer field/foley recordings, licensed stems and properly licensed sample perfo
 - Project-use/private stock: follow exact terms and do not redistribute raw assets.
 - Sonniss GDC: private cache only under the current EULA; never place raw files in public GitHub releases or shared asset packs.
 - NASA: follow item-specific NASA Media Usage Guidelines and credit; not CC0.
+
+
+## Human review evidence before the cue sheet
+
+Use the v0.2.0 offline audition console to listen to exact files and export the review JSON. Run \`tools/audio/validate_foley_review_decisions.py\` against the matching \`catalog.json\` before creating any final-mix cue rows. Preserve the exact source SHA-256. Only include cues whose record is human-auditioned, marked keep, explicitly approved for final mix and permitted by item-level rights. A filename, tag, decoder pass or automatic audio classifier never counts as audition. The Cannae sample's shot requirements are documented in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\`; it deliberately contains no pre-approved asset IDs.
