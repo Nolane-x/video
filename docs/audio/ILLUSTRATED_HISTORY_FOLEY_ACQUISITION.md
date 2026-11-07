@@ -55,3 +55,18 @@ The workflow proves download integrity and decodability, not sound quality. List
 4. Marching boots, group commands, distant battle ambience and panic/cheer layers.
 5. Japanese environment beds: rain on tile/bamboo, temple/market/workshop, port, timber boats, oars, rigging and surf.
 6. Music made from properly licensed performances/stems or recorded/sample-based instrument performances; multisampled piano/guitar notes are not complete scores.
+
+
+## Verified build and published release — 2026-11-07
+
+The final Actions build [42341596143](https://github.com/Nolane-x/video/actions/runs/42341596143) completed successfully, including tests, all eight source downloads, archive extraction, FFprobe/catalog validation, artifact upload and GitHub Release publication.
+
+Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.1.0
+
+- ZIP: `nolane-illustrated-history-foley-v0.1.0.zip`
+- Size: 397,657,285 bytes
+- SHA-256: `78e7136449d773456117f26a21e73d7e2cc00bb4709ea11d2c6ecc9f422a956e`
+- Audio count: 115 files / 8 source entries
+- Actions artifact: `illustrated-history-foley-cc0-3`, ID `13562295186`, 90-day retention.
+
+The catalog intentionally remains at 0 human-auditioned and 0 approved-for-final-mix. Download/decode is not sonic QA; listen to each cue before use.
