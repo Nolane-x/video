@@ -136,3 +136,20 @@ The final build and permanent GitHub Release succeeded in [Actions run 423480539
 - Approved for final mix: **0/118**
 
 The Release contains the ZIP, build report, download manifest and SHA256SUMS. The package includes the per-file catalog, source register, original audio and offline audition/review console. All recordings remain un-auditioned until a human listens and records a decision.
+
+
+## v0.4.0 ambience expansion — build pending
+
+The source manifest now adds five item-level CC0 environment recordings to the v0.3.0 Foley + score collection. They are real modern field recordings, not period-authentic historical ambience:
+
+| Source | Creator | Recorded context | Use cautiously |
+|---|---|---|---|
+| Park Ambience — Birds Before Rain | Thimras | 48 kHz public-park field recording, Adelaide, winter; trees and birds before rain | Peaceful outdoor establishing shots; birds may be wrong for combat |
+| Park Ambience — Small River and Wildlife | Thimras | Small park river with birds/frogs, Adelaide | Neutral river/waterside bed; not the Aufidus |
+| Park Ambience — Open Field Wind | Thimras | 48 kHz/24-bit open park field in Adelaide, winter | Neutral outdoor wind; not a historically documented battle recording |
+| Vistula River Waves | RandomMind | Five-minute recording of waves on Poland's Vistula River | Riverbank/shore movement; not open-ocean surf or a Cannae field recording |
+| Howling Wind Inside a Building | Tvabutzku1234 | 2:08 wind recorded inside a building | Interior/castle/sheltered storm scenes; not exterior wind |
+
+Each entry retains its exact item-level CC0 page, creator, source, download URL, hash and technical metadata in the built catalog. All five begin un-auditioned and unapproved. The v0.4.0 GitHub Actions build has not yet been validated/published at the time this source register was edited; do not present the v0.4.0 Release URL as available until the workflow succeeds.
+
+The Cannae cue plan only lists the river and open-field wind as optional candidates, with explicit warnings that they are modern Adelaide field recordings. Birds, Vistula water and indoor howling wind are kept as reusable environment assets for suitable non-battle shots rather than forced into Cannae.
