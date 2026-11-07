@@ -81,4 +81,7 @@ Record: shot ID; story beat; duration/frame range; location/time; shot size; vie
 
 ## Shot-level sound approval
 
-For every hero action, author a shot cue map that separates narration, score, ambience, character Foley, prop Foley, spot impact, transitions and intentional silence. Keep cue IDs empty until exact files are found and listened to. The v0.2.0 Foley pack includes an offline audition console; export the human review JSON and validate with \`tools/audio/validate_foley_review_decisions.py\` before adding approved IDs. Use \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as a concrete five-shot example, not as a ready-made score or approved sound mix.
+For every hero action, author a shot cue map that separates narration, score, ambience, character Foley, prop Foley, spot impact, transitions and intentional silence. Keep cue IDs empty until exact files are found and listened to. The v0.3.0 Foley pack includes an offline audition console; export the human review JSON and validate with \`tools/audio/validate_foley_review_decisions.py\` before adding approved IDs. Use \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as a concrete five-shot example, not as a ready-made score or approved sound mix.
+
+
+The v0.3.0 audition pack adds three real CC0 orchestral score candidates. Use the Cannae cue plan to select a score direction by scene function, but do not assign an asset ID until a human has listened to the exact track and validated the review export. Modern orchestral score is not historically authentic by default.
