@@ -46,11 +46,11 @@ def top_centre(mode="push"):
     if mode == "trap":
         blocks += [
             {"x": 0.28, "y": 0.32, "w": 0.18, "h": 0.08, "cell": 0.018, "side": "blue", "face": 1},
-            {"x": 0.28, "y": 0.67, "w": 0.18, "h": 0.08, "cell": 0.018, "side": "blue", "face": 1},
+            {"x": 0.28, "y": 0.59, "w": 0.18, "h": 0.08, "cell": 0.018, "side": "blue", "face": 1},
         ]
         arrows += [
             {"from": [0.35, 0.30], "to": [0.48, 0.43], "at": 0.45, "w": 8, "color": BLUE},
-            {"from": [0.35, 0.70], "to": [0.48, 0.58], "at": 0.65, "w": 8, "color": BLUE},
+            {"from": [0.35, 0.62], "to": [0.48, 0.58], "at": 0.65, "w": 8, "color": BLUE},
         ]
     return {"tpl": "top", "args": {
         "ground": GROUND, "blocks": blocks, "arrows": arrows,
@@ -136,7 +136,7 @@ for index, shot in enumerate(shots):
         shot.update(top_centre("inward"))
         shot["args"]["marks"] = [{"kind": "circle", "x": 0.19, "y": 0.49, "r": 0.09, "at": 0.2},
                                  {"kind": "circle", "x": 0.81, "y": 0.49, "r": 0.09, "at": 0.4}]
-    elif ("legions are trapped" in line or "formation" in line and "crowded" in line or "trap was closing" in line):
+    elif ("legions are trapped" in line or "formation" in line and "crowded" in line or "trap was closing" in line or "formation contracts" in line or "circle contracts" in line):
         shot.update(top_centre("trap"))
         shot["args"]["marks"] = [{"kind": "circle", "x": 0.50, "y": 0.50, "r": 0.22, "at": 0.3}]
     elif ("roman infantry pushes" in line or "pushes forward" in line or "surge deeper" in line):
@@ -145,7 +145,12 @@ for index, shot in enumerate(shots):
             "march": 0.8, "flip": False, "face": "determined",
             "bg": "plain", "time": "day",
             "move": "in", "moveAmt": 0.025,
-            "flags": [{"col": 0.30, "row": 0.75, "kind": "eagle", "color": GOLD}]
+            "mid": [{"preset": "hastatus", "rows": 5, "cols": 10, "x0": 0.05, "x1": 0.95,
+                      "yFront": 0.61, "yBack": 0.45, "hFront": 0.15, "hBack": 0.08,
+                      "march": 0.8, "face": "determined",
+                      "flags": [{"col": 0.30, "row": 0.75, "kind": "eagle", "color": GOLD}]}],
+            "back": [{"preset": "latin", "rows": 4, "cols": 15, "x0": 0.0, "x1": 1.0,
+                      "yFront": 0.45, "yBack": 0.34, "hFront": 0.08, "hBack": 0.05, "flip": True}]
         }})
         shot["sfx"] = [{"name": "drum_march", "at": 0.0, "gain": -7},
                        {"name": "battle_far", "at": 0.2, "gain": -12}]
@@ -186,7 +191,11 @@ for index, shot in enumerate(shots):
         else:
             shot.update({"tpl": "army", "args": {
                 "preset": "hastatus", "enemy": "latin", "rows": 4, "cols": 8,
-                "march": 0.7, "bg": "plain", "time": "day", "move": "in"
+                "march": 0.7, "bg": "plain", "time": "day", "move": "in",
+                "mid": [{"preset": "hastatus", "rows": 4, "cols": 8, "x0": 0.08, "x1": 0.92,
+                         "yFront": 0.60, "yBack": 0.45, "hFront": 0.14, "hBack": 0.08, "march": 0.7}],
+                "back": [{"preset": "latin", "rows": 3, "cols": 14, "x0": 0.0, "x1": 1.0,
+                          "yFront": 0.45, "yBack": 0.34, "hFront": 0.08, "hBack": 0.05, "flip": True}]
             }})
 
     shot["args"] = shot.get("args") or {}
@@ -224,6 +233,10 @@ for i in range(2, len(shots)):
         elif shots[i]["tpl"] == "top":
             shots[i]["tpl"] = "army"
             shots[i]["args"] = {"preset": "hastatus", "enemy": "latin", "rows": 4, "cols": 8,
-                                "march": 0.7, "bg": "plain", "time": "day", "move": "in"}
+                                "march": 0.7, "bg": "plain", "time": "day", "move": "in",
+                                "mid": [{"preset": "hastatus", "rows": 4, "cols": 8, "x0": 0.08, "x1": 0.92,
+                                         "yFront": 0.60, "yBack": 0.45, "hFront": 0.14, "hBack": 0.08}],
+                                "back": [{"preset": "latin", "rows": 3, "cols": 14, "x0": 0.0, "x1": 1.0,
+                                          "yFront": 0.45, "yBack": 0.34, "hFront": 0.08, "hBack": 0.05, "flip": True}]}
 story_path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Authored {len(shots)} Squire shots, {duration:.2f}s, 9:16 @24fps; one war bed and action-led SFX.")

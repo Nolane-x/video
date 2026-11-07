@@ -28,7 +28,7 @@ jobs:
       job_json: |
         {
           "schema_version": 1,
-          "job_id": "paullus-cannae-short-en-v1",
+          "job_id": "paullus-cannae-short-en-v2",
           "title": "The Roman Consul Who Rode Into Hannibal's Trap",
           "language": "en",
           "engine": "vieneu",
@@ -37,131 +37,121 @@ jobs:
             {
               "id": "paullus-01",
               "text": "A brutal cavalry fight is raging.",
-              "pause_ms_after": 120
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-02",
-              "text": "One Roman consul survives it.",
-              "pause_ms_after": 120
+              "text": "A Roman consul survives it.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-03",
-              "text": "Then he rides toward the centre as Hannibal's trap closes.",
-              "pause_ms_after": 120
+              "text": "Then he rides into the centre as Hannibal's trap closes.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-04",
               "text": "August second, two hundred and sixteen BCE.",
-              "pause_ms_after": 120
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-05",
-              "text": "Near Cannae in southern Italy, Rome faces Hannibal's army.",
-              "pause_ms_after": 120
+              "text": "Near Cannae, Rome faces Hannibal's army.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-06",
               "text": "Lucius Aemilius Paullus is one of Rome's two consuls.",
-              "pause_ms_after": 120
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-07",
-              "text": "Polybius places him on the Roman right.",
-              "pause_ms_after": 120
+              "text": "Polybius places him on Rome's right.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-08",
-              "text": "He survives the cavalry clash.",
-              "pause_ms_after": 120
+              "text": "But the decisive struggle is forming in the centre.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-09",
-              "text": "But the decision is forming in the centre.",
-              "pause_ms_after": 120
+              "text": "Roman infantry pushes forward.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-10",
-              "text": "Roman infantry pushes forward.",
-              "pause_ms_after": 120
+              "text": "Hannibal's centre gives ground.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-11",
-              "text": "Hannibal's centre gives ground.",
-              "pause_ms_after": 120
+              "text": "The Romans surge deeper.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-12",
-              "text": "The Romans surge deeper into a narrowing space.",
-              "pause_ms_after": 120
+              "text": "Carthaginian infantry turns inward from both wings.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-13",
-              "text": "Then Carthaginian infantry on both wings turns inward.",
-              "pause_ms_after": 120
+              "text": "Rome's flanks are exposed.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-14",
-              "text": "The Roman flanks are exposed.",
-              "pause_ms_after": 120
+              "text": "Paullus could remain on the right.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-15",
-              "text": "Paullus could remain on the right.",
-              "pause_ms_after": 120
+              "text": "Instead, he rides toward the infantry.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-16",
-              "text": "Instead, he rides toward the infantry.",
-              "pause_ms_after": 120
+              "text": "The battle will be decided there.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-17",
-              "text": "The battle will be decided there.",
-              "pause_ms_after": 120
+              "text": "Hannibal is fighting in the centre too.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-18",
-              "text": "Polybius says Hannibal is fighting in the centre too.",
-              "pause_ms_after": 120
+              "text": "Then Carthaginian cavalry strikes the Roman rear.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-19",
-              "text": "Both commanders are inside the same tightening battle.",
-              "pause_ms_after": 120
+              "text": "The legions are trapped in their own packed ranks.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-20",
-              "text": "Then Carthaginian cavalry reaches the Roman rear.",
-              "pause_ms_after": 120
+              "text": "As the ranks fall, the Roman circle contracts.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-21",
-              "text": "Around them, the Roman formation keeps shrinking.",
-              "pause_ms_after": 120
+              "text": "Paullus falls in the thick of the fighting, covered with wounds.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-22",
-              "text": "The legions are trapped in their own crowded formation.",
-              "pause_ms_after": 120
+              "text": "He did not ride toward safety.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-23",
-              "text": "Paullus falls in the thick of the fighting, covered with wounds.",
-              "pause_ms_after": 120
+              "text": "He rode toward the point where Rome needed him most.",
+              "pause_ms_after": 80
             },
             {
               "id": "paullus-24",
-              "text": "He did not ride toward safety.",
-              "pause_ms_after": 120
-            },
-            {
-              "id": "paullus-25",
-              "text": "He rode toward the point where Rome needed him most.",
-              "pause_ms_after": 120
-            },
-            {
-              "id": "paullus-26",
-              "text": "That was exactly where Hannibal's trap was closing.",
+              "text": "Hannibal's trap was closing around him.",
               "pause_ms_after": 0
             }
           ]
@@ -292,7 +282,7 @@ jobs:
           assert (v.get("width"), v.get("height")) == (1080, 1920), v
           assert v.get("r_frame_rate") == "24/1", v
           assert a.get("codec_type") == "audio", a
-          assert 55 <= d <= 85, f"Unexpected Short duration: {d:.2f}s"
+          assert 58 <= d <= 78, f"Short duration is outside the target window: {d:.2f}s"
           report = {
               "status": "TECHNICAL_RENDER_AND_STREAM_CHECKS_PASSED",
               "duration_seconds": round(d, 3),
