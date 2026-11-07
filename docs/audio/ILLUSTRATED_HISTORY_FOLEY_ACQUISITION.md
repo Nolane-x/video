@@ -1,7 +1,7 @@
 # Illustrated-history Foley acquisition pack
 
-Status: v0.1.0 source pack is published; v0.2.0 adds the offline audition/review console and a SHA-256-bound human-approval validator.  
-Current target release: nolane-illustrated-history-foley-v0.2.0
+Status: v0.1.0 is published; v0.2.0 added the offline audition console; v0.3.0 adds three CC0 orchestral score candidates.  
+Current target release: nolane-illustrated-history-foley-v0.3.0
 
 This is a targeted gap-filling pack for the illustrated/cartoon history route. It supplements, rather than duplicates, the broad Build 76 and Meta Open Sound catalogues. The sources are selected for concrete needs found in the Samurai reference study and historical Foley coverage audit.
 
@@ -17,6 +17,9 @@ The canonical machine-readable register is tools/audio/illustrated_history_foley
 | OpenGameArt — Crowd Shouting/Speaking Ambience | Human voice group/army-shout layer | CC0 1.0 |
 | OpenGameArt — Blacksmith's Hammer | Hammer-to-anvil impact for forge/repair scenes | CC0 1.0 |
 | OpenGameArt — Thwack Sounds | Generic impacts for layered action design | CC0 1.0 |
+| OpenGameArt — Eye of the Storm | Orchestral warfare score candidate (WAV master) | CC0 1.0 |
+| OpenGameArt — The Final Battle | Dramatic orchestral battle loop candidate | CC0 1.0 |
+| OpenGameArt — Prepare to fight | Epic battle-intro score candidate | CC0 1.0 |
 
 The weapon packs were created/recorded by Ben Jaszczak and Brian Nelson. The crowd cue is voice material recorded by its creator and siblings then edited into a crowd-like texture; it is not an authentic historical battle recording. The horse file is described by Wikimedia Commons as six horses galloping toward the listener and past. The hammer file is described as a hammer hitting an anvil. The thwack pack is a generic impact collection. Do not overstate their historical authenticity.
 
@@ -28,7 +31,8 @@ The existing Build 76 + Meta Open Sound metadata audit found no credible direct 
 - multiple weapon-on-weapon contact variations;
 - a designed human crowd-shout layer;
 - a forge-specific hammer/anvil hit;
-- general impact variation.
+- general impact variation;
+- three CC0 orchestral score candidates, kept separate from Foley and still awaiting human audition.
 
 It does not fully solve cavalry walk/trot/canter round-robins, horse tack/reins, shield-on-shield impact, armour/chainmail movement, distant battle-command layers or historically appropriate full music. Those remain acquisition/recording priorities.
 
@@ -97,3 +101,17 @@ To block a final-mix shortlist unless at least one cue was genuinely approved, a
 ## Cannae 45-second audio cue map
 
 \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` maps the existing five shots to required narration, ambience, Foley, impact and music layers. It intentionally contains no approved asset IDs. The 115-file Foley pack does not include a finished score, dedicated marching-foot bank, shield-on-shield bank or full ambience library. Search Build 76 and Meta Open Sound for direct matches, source any missing music/ambience under suitable item terms, and audition each exact file before adding an asset ID to a cue.
+
+## Score candidates added in v0.3.0
+
+Three item-level CC0 music recordings have been added to the audition pack:
+
+| Track | Creator | Source | Editorial caution |
+|---|---|---|---|
+| Eye of the Storm | Indieteur | https://opengameart.org/content/eye-of-the-storm-0 | The creator describes an orchestral warfare cue; listen for modern game/fantasy coloration before using it in a documentary |
+| The Final Battle | skrjablin | https://opengameart.org/content/the-final-battle | Generic dramatic orchestral loop; contains an audible restart/pause according to the source description |
+| Prepare to fight | Basil | https://opengameart.org/content/prepare-to-fight | Epic battle-intro cue; test pacing and emotional fit |
+
+These are real audio recordings, not code-generated music. They are CC0 per their item-level source pages, but are not automatically appropriate or approved. All three enter the console as un-auditioned candidates. Treat them as modern cinematic score options, not historically authentic ancient Roman music.
+
+The exact source IDs are mapped in docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json. The five-shot map contains no approved music asset IDs until the exact recordings are auditioned.
