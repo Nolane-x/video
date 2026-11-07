@@ -64,6 +64,11 @@ The v0.3.0 pack includes three CC0 orchestral score candidates in addition to Fo
 Five CC0 modern field recordings are being added for ambience coverage: park birds before rain, small river with wildlife, open-field wind, Vistula River waves and indoor howling wind. Match each to its recording context; do not use birds during battle automatically, do not present Vistula river waves as open-ocean surf, and do not use the indoor wind recording as exterior ambience. Listen and rate the exact source before use.
 
 
-## v0.4.0 ambience coverage
+## v0.4.0 ambience coverage — published
 
-Five CC0 field recordings are being added: birds-before-rain in a public park, small river/wildlife, open-field wind, Vistula River waves and indoor howling wind. The modern recording context is not interchangeable. Use only after hearing the exact source; choose layers by distance, scene geography and emotional intent. The indoor wind belongs to sheltered interiors, while the Vistula recording is river rather than sea. These recordings do not establish period authenticity.
+The published [v0.4.0 pack](https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0) contains five CC0 field recordings: birds-before-rain in a public park, small river/wildlife, open-field wind, Vistula River waves and indoor howling wind. The modern recording context is not interchangeable. Use only after hearing the exact source; choose layers by distance, scene geography and emotional intent. The indoor wind belongs to sheltered interiors, while the Vistula recording is river rather than sea. These recordings do not establish period authenticity.
+
+
+## Cannae 45-second narration — generated, pending approval
+
+The shot-aligned English narration is documented in `docs/audio/CANNAE_45S_NARRATION_SCRIPT.md`. An AI voiceover was generated in a deep, measured documentary style. [Open the generated full voiceover](https://www.aidocmaker.com/g0/audio?name=45ad22e901854f05b5b25b60aea6b6e6). It is split across the five CAN-01…CAN-05 shots in the cue map. Before final render, listen to the complete audio, check the pronunciations of “Cannae” and “Aufidus”, verify timing against the 45-second edit, and record human approval. The generated voice is a separate narration stem; it does not approve or replace the Foley/score review gates.
