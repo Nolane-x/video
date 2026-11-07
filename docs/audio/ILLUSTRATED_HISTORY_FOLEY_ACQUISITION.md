@@ -1,7 +1,7 @@
 # Illustrated-history Foley acquisition pack
 
-Status: source manifest committed; GitHub Actions acquisition/build required before the release is available.  
-Target release: nolane-illustrated-history-foley-v0.1.0
+Status: v0.1.0 source pack is published; v0.2.0 adds the offline audition/review console and a SHA-256-bound human-approval validator.  
+Current target release: nolane-illustrated-history-foley-v0.2.0
 
 This is a targeted gap-filling pack for the illustrated/cartoon history route. It supplements, rather than duplicates, the broad Build 76 and Meta Open Sound catalogues. The sources are selected for concrete needs found in the Samurai reference study and historical Foley coverage audit.
 
@@ -70,3 +70,30 @@ Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-histo
 - Actions artifact: `illustrated-history-foley-cc0-3`, ID `13562295186`, 90-day retention.
 
 The catalog intentionally remains at 0 human-auditioned and 0 approved-for-final-mix. Download/decode is not sonic QA; listen to each cue before use.
+
+
+## Audition Edition v0.2.0 — human review console
+
+The v0.2.0 pack upgrades AUDIO_PREVIEW.html from a simple search/list page into an offline review console:
+
+- Search by cue title, filename or tags; filter by source pack and review state.
+- Play each original file in-browser without converting or rewriting the source audio.
+- Record a decision (keep candidate / reject), a 1–5 production-fit rating and notes.
+- Explicitly mark that the exact file was listened to.
+- Approve a cue for a final-mix shortlist only after the exact file is marked auditioned, is kept as a candidate and its item rights class is CC0/Public Domain.
+- Persist decisions in that browser's local storage, export JSON, and import a prior review using asset ID plus SHA-256 matching.
+
+The browser state is not sent automatically to GitHub. Export \`nolane-foley-review-decisions.json\` and keep that file with the project. Validate it against the exact pack catalog:
+
+\`\`\`bash
+python tools/audio/validate_foley_review_decisions.py \\
+  --catalog package/catalog.json \\
+  --review nolane-foley-review-decisions.json \\
+  --output build/foley-review-report.json
+\`\`\`
+
+To block a final-mix shortlist unless at least one cue was genuinely approved, add \`--require-approved\`. The validator rejects unknown IDs, duplicate rows, SHA-256 mismatches, un-auditioned decisions, rejected cues marked approved, and assets outside the CC0 Public Domain rights class. It does not listen to audio or create a human decision; it validates the human-exported review record.
+
+## Cannae 45-second audio cue map
+
+\`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` maps the existing five shots to required narration, ambience, Foley, impact and music layers. It intentionally contains no approved asset IDs. The 115-file Foley pack does not include a finished score, dedicated marching-foot bank, shield-on-shield bank or full ambience library. Search Build 76 and Meta Open Sound for direct matches, source any missing music/ambience under suitable item terms, and audition each exact file before adding an asset ID to a cue.
