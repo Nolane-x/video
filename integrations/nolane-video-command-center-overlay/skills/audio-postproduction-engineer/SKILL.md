@@ -50,4 +50,7 @@ Prefer field/foley recordings, licensed stems and properly licensed sample perfo
 
 ## Human review evidence before the cue sheet
 
-Use the v0.2.0 offline audition console to listen to exact files and export the review JSON. Run \`tools/audio/validate_foley_review_decisions.py\` against the matching \`catalog.json\` before creating any final-mix cue rows. Preserve the exact source SHA-256. Only include cues whose record is human-auditioned, marked keep, explicitly approved for final mix and permitted by item-level rights. A filename, tag, decoder pass or automatic audio classifier never counts as audition. The Cannae sample's shot requirements are documented in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\`; it deliberately contains no pre-approved asset IDs.
+Use the v0.3.0 offline audition console to listen to exact files and export the review JSON. Run \`tools/audio/validate_foley_review_decisions.py\` against the matching \`catalog.json\` before creating any final-mix cue rows. Preserve the exact source SHA-256. Only include cues whose record is human-auditioned, marked keep, explicitly approved for final mix and permitted by item-level rights. A filename, tag, decoder pass or automatic audio classifier never counts as audition. The Cannae sample's shot requirements are documented in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\`; it deliberately contains no pre-approved asset IDs.
+
+
+The v0.3.0 source manifest adds three CC0 orchestral score candidates (Eye of the Storm/WAV, The Final Battle/OGG, Prepare to fight/MP3). They are modern cinematic tracks rather than verified period music. Audition them in context; do not treat a battle tag as a scoring decision. Keep score stem, ambience, narration and impact/Foley stems distinct.
