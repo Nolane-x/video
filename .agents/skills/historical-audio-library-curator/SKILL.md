@@ -7,37 +7,31 @@ description: Curate and select recorded Foley, ambience, music and SFX for histo
 Recorded/licensed sound is the default. Procedural WAV presets are placeholders or supplemental accents, not the main soundscape.
 
 ## Fast local search before downloads
-
-- Search `audio-library/generated/preview-catalog.json` for Build 76 playable candidates and `audio-library/generated/meta-preview-catalog.json` for Meta Open Sound samples before unpacking archives.
-- Use category/tags, title, creator, source and `rights_class` to shortlist. These records do not prove a sound fits the film; audition candidates before selection.
-- Build 76 currently has 2,446 inventoried items; 2,331 are redistributable candidates with playable previews, 110 require rights review and 5 require source-specific review. Do not use the 115 review entries by default.
-- Meta Open Sound currently has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Preserve the exact Oculus attribution. A sample bank is not 1,583 complete music tracks.
-- Download the entire audio preview artifact only when broad listening is necessary; otherwise fetch the relevant source pack/member to save bandwidth.
+- Search audio-library/generated/preview-catalog.json and audio-library/generated/meta-preview-catalog.json before unpacking archives.
+- Use category/tags, title, creator, source and rights_class to shortlist. Metadata does not prove audible content; audition candidates before selection.
+- Build 76 currently has 2,446 inventoried items: 2,331 redistribution candidates, 110 rights-review items and 5 source-specific-review items. Do not use the 115 review entries by default.
+- Meta Open Sound has 1,583 OGG previews: 1,075 CC0 instrument samples and 508 CC BY 4.0 Oculus Foley/ambience samples. Keep the exact Oculus attribution. Instrument note samples are not finished music tracks.
 
 ## Unified search CLI
+Use python tools/audio/search_audio_resources.py --query "katana sword clash". Filter with --kind foley or --kind instrument, --json for structured results, --direct-only for strict title/category/file matches and --include-review-required only to investigate quarantined candidates. Tag-assisted results are leads, not proof of historical fit.
 
-Use `python tools/audio/search_audio_resources.py --query "katana sword clash"` for both generated catalogs. Use `--kind foley` or `--kind instrument` to separate recorded effects from multisampled notes, `--json` for structured results, and `--include-review-required` only for investigating quarantined candidates. Results with `match_quality=direct` match the title/category/file; `tag_assisted` are broader keyword suggestions. Add `--direct-only` when the context must match exactly. Search never grants approval: every returned item still has an audition and rights gate.
-## Historical coverage audit
+## Historical coverage and targeted Foley acquisition
+Read docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md and docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md before designing battle sound.
+The targeted acquisition workflow is .github/workflows/build-illustrated-history-foley-library.yml; its source manifest is tools/audio/illustrated_history_foley_sources.json. It is designed to package CC0 weapon handling/katana/bow/arrow sounds, weapon-on-weapon impacts, a six-horse gallop recording, a designed crowd-shout layer, a blacksmith hammer/anvil hit and generic impacts. Confirm that the Actions build succeeded and the release exists before relying on the pack.
+This pack does not solve cavalry gait round-robins by surface, horse tack/reins, dedicated shield-on-shield Foley, chainmail movement, historical command layers or Japanese environmental beds.
 
-Before designing a historical battle soundscape, read `docs/audio/HISTORICAL_FOLEY_COVERAGE_AUDIT.md`. It separates direct catalogue matches from generic tag suggestions and lists the missing hoofbeat, cavalry, bow/arrow, armor and battlefield-crowd families.
-
-## Search and audition
-- Read audio-library/README.md, audio-library/SOURCES.json and docs/audio/HISTORICAL_SOUND_LIBRARY.md.
-- Search by material, action, environment, distance and emotion. Prioritise horses/hooves/tack, blades/armor/shields/bows/arrows, crowds/commands, rain/wind/fire/water, ships/rigging/oars, steps, markets/workshops, paper/wood/metal and historically appropriate music textures.
-- Inspect exact per-item source and license metadata. Audition several candidates; filenames and tags are not evidence of sound quality.
-- Record asset ID, title, creator, semantic tags, archive/member path, source page, exact file URL, SHA-256, duration, channel/sample-rate/bit-depth data, loudness/peak, rights class and human audition status.
-
-## OGG preview to verified WAV master
-
-The Meta Open Sound catalog links each OGG preview to its exact WAV member through `source_wav_file`, master archive name, size and SHA-256. Search and audition OGG first; fetch a master only after choosing a cue. Oculus WAV is mirrored in the permanent Nolane release. Fetch Piano/Nylon/Steel masters only as needed using `.github/workflows/acquire-meta-open-sound-wav-master.yml`; the workflow verifies archive bytes and SHA-256. Extract the exact original WAV member, retain its metadata and apply the collection-level rights correctly (Oculus CC BY 4.0; instrument collections CC0).
+## Search, audition and master selection
+- Search by material, action, environment, distance and emotion: hooves on dirt/stone/timber, blade draw/clash, shield/spear, armour, bows/arrows, crowd/commands, rain/wind/fire/water, ships/rigging/oars, markets/workshops, scroll/paper and period-relevant music.
+- Prefer direct item matches. Audition multiple candidates; filenames/tags do not prove what the sound contains.
+- Record asset ID, title, creator, archive/member path, exact source page/file URL, license, attribution, SHA-256, duration, channel/sample-rate/bit-depth data, loudness/peak and human-audition state.
+- Meta Open Sound previews map to original WAV members by source_wav_file, master archive, size and SHA-256. Audition OGG first; fetch only the chosen matching WAV master. Oculus is CC BY 4.0 and needs exact attribution; the piano/guitar note-sample collections are CC0, not complete compositions.
 
 ## Rights classes
-- public_cc0_pd: redistributable only after exact item-level CC0/Public Domain proof and required attribution is retained.
-- project_use_only: may be synchronized into a finished film under exact item terms; raw source cannot be redistributed.
-- private_production_only: private licensed cache; never add raw media to public GitHub packs.
+- public_cc0_pd: redistributable only with exact item-level CC0/Public Domain proof and preserved provenance.
+- project_use_only: synchronize into a finished video only where exact item terms permit; raw files cannot be redistributed.
+- private_production_only: private licensed cache; never add raw files to public packs.
 - blocked: unclear, conflicting or unsuitable rights; do not use.
-
-NASA media belongs in government_media_conditions: apply item-level NASA Media Usage Guidelines, retain credit and do not imply endorsement; it is not labelled CC0. Sonniss GDC 2026 is private_production_only. Its current EULA v2.0 permits film/TV synchronization, commercial projects and modifications in the production, but prohibits selling raw files as supplied and all AI/ML training. The licensee must review and accept the EULA before downloading. Never upload Sonniss ZIPs or extracted WAVs to this public repo, public Releases, public Actions artifacts or redistributable preview packs; keep the raw source in private production storage and retain only sanitized metadata/cue decisions here. Mixkit is item/license-specific and source-only by default. Do not confuse software or collection licenses with an individual media file's license.
+NASA media uses government-specific media conditions and is not labelled CC0. Sonniss GDC 2026 is private_production_only; follow the live EULA, keep raw sources private and obey its AI/ML-training prohibition. Do not confuse a pack/repository license with an individual file's license.
 
 ## Editorial use
-Create separate narration, score, ambience, character Foley, prop Foley, spot SFX, transition and intentional-silence tracks. Sync transients to visible contact; layer near/far perspective; do not reuse one generic clang for every hit. Listen to the complete final film at normal speed. Loudness/metadata checks do not replace human audition.
+Separate narration, score, ambience, character Foley, prop Foley, spot SFX, transition and intentional-silence tracks. Sync transients to visible contact; layer near/far perspective; do not reuse one generic clang for every hit. Listen to the complete final mix at normal speed. Metadata and loudness checks do not replace audition.
