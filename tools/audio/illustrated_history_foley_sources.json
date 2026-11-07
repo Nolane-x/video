@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "collection": "Nolane Illustrated History Foley — CC0 Audition Edition",
-  "release_tag": "nolane-illustrated-history-foley-v0.2.0",
+  "collection": "Nolane Illustrated History Foley and Score — CC0 Audition Edition",
+  "release_tag": "nolane-illustrated-history-foley-v0.3.0",
   "retrieved_on": "2026-11-07",
   "sources": [
     {
@@ -186,6 +186,75 @@
         "attack"
       ],
       "minimum_bytes": 10000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_the_final_battle",
+      "title": "The Final Battle",
+      "creator": "skrjablin",
+      "source_page": "https://opengameart.org/content/the-final-battle",
+      "download_url": "https://opengameart.org/sites/default/files/the_final_battle.ogg",
+      "download_filename": "the_final_battle.ogg",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "Generic orchestral, dramatic battle loop. Source page describes it as public domain/CC0; audition for fit before scoring historical footage.",
+      "tags": [
+        "music",
+        "score",
+        "battle",
+        "orchestral",
+        "loop",
+        "dramatic"
+      ],
+      "minimum_bytes": 1000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_eye_of_the_storm",
+      "title": "Eye of the Storm",
+      "creator": "Indieteur",
+      "source_page": "https://opengameart.org/content/eye-of-the-storm-0",
+      "download_url": "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav",
+      "download_filename": "Eye_of_the_Storm.wav",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "Original orchestral music described by its creator as suitable for warfare scenes. Attribution is appreciated but not required; retain creator/source metadata.",
+      "tags": [
+        "music",
+        "score",
+        "battle",
+        "warfare",
+        "orchestral",
+        "medieval"
+      ],
+      "minimum_bytes": 20000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_prepare_to_fight",
+      "title": "Prepare to fight",
+      "creator": "Basil",
+      "source_page": "https://opengameart.org/content/prepare-to-fight",
+      "download_url": "https://opengameart.org/sites/default/files/prepare_to_fight.mp3",
+      "download_filename": "prepare_to_fight.mp3",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "Epic instrumental battle-introduction cue; audition before use, especially for historical rather than game/fantasy scoring.",
+      "tags": [
+        "music",
+        "score",
+        "battle",
+        "intro",
+        "epic",
+        "instrumental"
+      ],
+      "minimum_bytes": 1500000,
       "expected_sha256": null
     }
   ]
