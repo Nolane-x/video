@@ -31,7 +31,7 @@ jobs:
           root = Path("integrations/nolane-video-command-center-overlay")
           manifest = json.loads((root / "plugin.json").read_text())
           assert manifest["name"] == "nolane-video-command-center"
-          assert manifest["version"] == "1.0.2"
+          assert manifest["version"] == "1.0.3"
           required = [
               "README.md",
               "SKILL-CATALOG.md",
@@ -54,7 +54,7 @@ jobs:
           assert "33 internal skills" in catalog
           assert "illustrated-history-animation-director" in catalog
           assert "historical-audio-library-curator" in catalog
-          assert "1.0.2" in catalog
+          assert "1.0.3" in catalog
           assert "search_audio_resources.py" in (root / "skills/historical-audio-library-curator/SKILL.md").read_text()
           curator = (root / "skills/historical-audio-library-curator/SKILL.md").read_text()
           assert "source_wav_file" in curator
@@ -65,8 +65,11 @@ jobs:
           assert "meta-preview-catalog.json" in audio
           assert "validate_foley_review_decisions.py" in audio
           assert "oga_eye_of_the_storm" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
-          assert "v0.3.0" in curator
+          assert "v0.4.0" in curator
           assert "13563804097" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
+          cue_plan = (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
+          assert "oga_park_ambience_river" in cue_plan and "oga_park_ambience_wind" in cue_plan
+          assert "oga_vistula_river_waves" in cue_plan and "commons_howling_wind_building" in cue_plan
           assert "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "build-illustrated-history-foley-library.yml" in audio
           motion = (root / "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md").read_text()
@@ -97,7 +100,7 @@ jobs:
       - name: Upload plugin-root directory as a direct artifact
         uses: actions/upload-artifact@v7
         with:
-          name: nolane-video-command-center-plugin-1.0.2
+          name: nolane-video-command-center-plugin-1.0.3
           path: dist/plugin-root/
           if-no-files-found: error
           retention-days: 14
