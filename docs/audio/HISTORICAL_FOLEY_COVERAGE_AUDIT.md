@@ -142,3 +142,10 @@ The final build and permanent GitHub Release succeeded in [Actions run 423480539
 - Approved for final mix: **0/118**
 
 The Release contains the ZIP, build report, download manifest and SHA256SUMS. The package includes the per-file catalog, source register, original audio and offline audition/review console. All recordings remain un-auditioned until a human listens and records a decision.
+
+
+## v0.4.0 environment/ambience additions — build pending
+
+Five additional item-level CC0 candidate recordings have been added to the source manifest: Adelaide park birds-before-rain, a small park river with wildlife, open-field wind, Vistula River waves and interior howling wind. They broaden the library's real outdoor/water/interior ambience options, but they are modern field recordings, not period-authentic historical sounds. The Vistula track is river waves rather than ocean surf; the howling wind was recorded inside a building. Do not label these as ancient battlefield or harbour recordings.
+
+The new items start un-auditioned and are not approved for final mix. The v0.4.0 Actions build and Release are pending; use v0.3.0 until the v0.4.0 workflow completes and publishes its release.
