@@ -5,7 +5,7 @@ from validate_foley_review_decisions import PACK_ID, validate_review
 
 def fixture_catalog():
     return {
-        "release_tag": "nolane-illustrated-history-foley-v0.2.0",
+        "release_tag": "nolane-illustrated-history-foley-v0.4.0",
         "assets": [{
             "asset_id": "ihf-abc123",
             "title": "Sword impact",
