@@ -62,3 +62,8 @@ The v0.3.0 pack includes three CC0 orchestral score candidates in addition to Fo
 ## v0.4.0 ambience candidates
 
 Five CC0 modern field recordings are being added for ambience coverage: park birds before rain, small river with wildlife, open-field wind, Vistula River waves and indoor howling wind. Match each to its recording context; do not use birds during battle automatically, do not present Vistula river waves as open-ocean surf, and do not use the indoor wind recording as exterior ambience. Listen and rate the exact source before use.
+
+
+## v0.4.0 ambience coverage
+
+Five CC0 field recordings are being added: birds-before-rain in a public park, small river/wildlife, open-field wind, Vistula River waves and indoor howling wind. The modern recording context is not interchangeable. Use only after hearing the exact source; choose layers by distance, scene geography and emotional intent. The indoor wind belongs to sheltered interiors, while the Vistula recording is river rather than sea. These recordings do not establish period authenticity.
