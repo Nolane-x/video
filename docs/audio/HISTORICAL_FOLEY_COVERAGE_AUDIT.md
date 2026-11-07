@@ -95,3 +95,19 @@ The final artifact-first workflow completed successfully in run [42341596143](ht
 - Approved for final mix: 0/115
 
 The release is now published. The previous two failed attempts are superseded by this final successful run. The pack is acquired, decoded and indexed, but remains **not human-auditioned**; do not treat it as a production-approved sound library until cues are listened to and selected.
+
+
+## Audition console and approval validation — v0.2.0
+
+The Foley pack now has an offline human-review console in \`AUDIO_PREVIEW.html\`. It supports per-file listening, decision, fit rating, notes, audition state, and a final-mix approval checkbox. The browser stores reviews locally; export the JSON and validate it against the exact matching \`catalog.json\` using:
+
+\`\`\`bash
+python tools/audio/validate_foley_review_decisions.py \\
+  --catalog package/catalog.json \\
+  --review nolane-foley-review-decisions.json \\
+  --output foley-review-report.json
+\`\`\`
+
+The validator checks the asset ID and SHA-256 pair, license/right class, listened state and keep/reject decision. A final-mix shortlist is emitted only from human-approved CC0 cues. This is an approval-record validator, not an automated audio quality classifier.
+
+The Cannae shot-by-shot requirements are mapped in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\`. Its asset IDs are intentionally empty until the exact sounds have been auditioned.
