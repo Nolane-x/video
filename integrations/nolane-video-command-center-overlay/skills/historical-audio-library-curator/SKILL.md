@@ -15,7 +15,7 @@ Recorded/licensed audio is the default foundation. Procedural tones/noise are la
 
 ## Targeted illustrated-history CC0 pack
 The source map and acquisition status are in docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md and tools/audio/illustrated_history_foley_sources.json.
-The workflow .github/workflows/build-illustrated-history-foley-library.yml downloads and indexes the listed CC0 sources: Medieval Weapon Textures (katana/bow/arrow handling), Weapon Impacts, Six Horses Galloping By, Crowd Shouting/Speaking Ambience, Blacksmith's Hammer and Thwack Sounds. Confirm the Actions result and the release tag nolane-illustrated-history-foley-v0.2.0 before claiming it has been published.
+The workflow .github/workflows/build-illustrated-history-foley-library.yml downloads and indexes the listed CC0 sources: Medieval Weapon Textures (katana/bow/arrow handling), Weapon Impacts, Six Horses Galloping By, Crowd Shouting/Speaking Ambience, Blacksmith's Hammer and Thwack Sounds. Confirm the Actions result and the release tag nolane-illustrated-history-foley-v0.3.0 before claiming it has been published.
 The crowd cue is edited group voice material, not a field recording of a historical army. The six-horse recording is the direct gallop candidate. The weapon pack provides weapon handling and weapon-to-weapon contacts, not a complete shield/armour/cavalry Foley library. Every new item is initially un-auditioned.
 
 ## Coverage gaps and next sourcing
@@ -41,7 +41,7 @@ The Meta catalog links each OGG preview to a WAV member and collection archive w
 Build shot-level ambience, near/mid/far world, character/prop Foley, impacts, transitions and music separately. Sync transients to visible contact and vary takes/perspective. Keep stems separated until mix. Preserve silence and narration headroom. Every new entry has human_auditioned=false and approved_for_final_mix=false until a person listens and records the decision.
 
 
-## Human audition workflow — v0.2.0
+## Human audition workflow — v0.3.0
 
 Open the pack's offline \`AUDIO_PREVIEW.html\` after extracting the release. It is a review console, not just a player: search and filter all cues, listen to the exact original file, record keep/reject, score 1–5, write notes and explicitly mark the audition checkbox. Final-mix approval is disabled until the cue has been heard, kept as a candidate and has CC0/Public Domain item-level rights.
 
@@ -55,3 +55,8 @@ python tools/audio/validate_foley_review_decisions.py \\
 \`\`\`
 
 The validator rejects duplicate/unknown IDs, changed file hashes, un-auditioned keep/reject decisions and final-mix approval that bypasses the human/rights gate. A valid report is an auditable shortlist, not an automatic mix decision.
+
+
+## Score candidate coverage — v0.3.0
+
+The audition pack also includes three real CC0 orchestral score candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). These are modern cinematic/game-style recordings, not historically authentic ancient Roman music. Listen to each exact source, compare its emotional arc and loop behavior with the edit, and keep the music track separate from Foley. A CC0 license permits use under its terms; it does not make the track artistically appropriate. No score candidate is pre-approved.
