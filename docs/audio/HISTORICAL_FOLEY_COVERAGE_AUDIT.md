@@ -121,3 +121,20 @@ The audio source manifest now includes three item-level CC0 orchestral score can
 - Prepare to fight — Basil, MP3 source, epic battle-intro cue.
 
 All three are modern cinematic/game-style recordings, not period-authentic music. Their availability in the pack does not imply they fit Cannae or any historical scene. They start un-auditioned and not approved for final mix; use the review console and SHA-256 validator.
+
+
+## Verified v0.3.0 build and artifact — 2026-11-07
+
+The source acquisition, FFprobe/catalog validation, regression tests and Actions artifact upload passed in [run 42347935721](https://github.com/Nolane-x/video/actions/runs/42347935721). The workflow's persistent Release upload was denied with HTTP 403, so this is a time-limited Actions artifact, not a permanent GitHub Release.
+
+- Source entries: 11
+- Catalogued audio files: 118 (115 Foley/weapon/environment cues + 3 orchestral score candidates)
+- Inner package ZIP size: 431,804,481 bytes
+- Inner package SHA-256: `c5dbb1f639b6a96c0533657e983994ba99eb67ce9b86c2605f2f9de11eeced40`
+- Actions artifact ID: `13563793933` (`illustrated-history-foley-cc0-18`)
+- Outer artifact size: 432,234,327 bytes
+- Outer artifact SHA-256: `37dade9eddadb006c03779de5a98edacc8f824d396c8ceafdb1a0c9acec5d3a5`
+- Artifact expires: 2027-02-05 06:38:50 UTC
+- Human-auditioned: 0/118; approved for final mix: 0/118
+
+[Download from the successful Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721). A permanent Release needs a repository `NOLANE_RELEASE_TOKEN` Actions secret with Contents: write, followed by a rerun.
