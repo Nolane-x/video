@@ -19,42 +19,42 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: squire-paullus-cannae-short-42362419616
-          path: \${{ runner.temp }}/cannae-v4
-          github-token: \${{ github.token }}
-          repository: \${{ github.repository }}
+          path: ${{ runner.temp }}/cannae-v4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
           run-id: 42362419616
 
       - name: Separate the MP4 and visual review materials
         shell: bash
         run: |
           set -euo pipefail
-          ROOT="\${RUNNER_TEMP}/cannae-v4"
-          DELIVERY="\${RUNNER_TEMP}/cannae-v4-delivery"
-          mkdir -p "\${DELIVERY}/review"
+          ROOT="${RUNNER_TEMP}/cannae-v4"
+          DELIVERY="${RUNNER_TEMP}/cannae-v4-delivery"
+          mkdir -p "${DELIVERY}/review"
 
-          VIDEO="$(find "\${ROOT}/integrations/h2-squire-studio/kit/projects/paullus-cannae-short/out" -maxdepth 1 -type f -name '*.mp4' | head -n 1)"
-          test -n "\${VIDEO}"
-          cp "\${VIDEO}" "\${DELIVERY}/The-Roman-Consul-Who-Rode-Into-Hannibals-Trap.mp4"
+          VIDEO="$(find "${ROOT}/integrations/h2-squire-studio/kit/projects/paullus-cannae-short/out" -maxdepth 1 -type f -name '*.mp4' | head -n 1)"
+          test -n "${VIDEO}"
+          cp "${VIDEO}" "${DELIVERY}/The-Roman-Consul-Who-Rode-Into-Hannibals-Trap.mp4"
 
           while IFS= read -r -d '' FILE; do
-            REL="\${FILE#\${ROOT}/}"
-            TARGET="\${DELIVERY}/review/\${REL}"
-            mkdir -p "$(dirname "\${TARGET}")"
-            cp "\${FILE}" "\${TARGET}"
-          done < <(find "\${ROOT}" -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.json' -o -iname '*.srt' -o -iname '*.vtt' -o -iname '*.txt' -o -iname '*.md' \\) -print0)
+            REL="${FILE#${ROOT}/}"
+            TARGET="${DELIVERY}/review/${REL}"
+            mkdir -p "$(dirname "${TARGET}")"
+            cp "${FILE}" "${TARGET}"
+          done < <(find "${ROOT}" -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.json' -o -iname '*.srt' -o -iname '*.vtt' -o -iname '*.txt' -o -iname '*.md' \\) -print0)
 
-          test -n "$(find "\${DELIVERY}/review" -type f -print -quit)"
+          test -n "$(find "${DELIVERY}/review" -type f -print -quit)"
           echo "Final video:"
-          ls -lh "\${DELIVERY}"/*.mp4
+          ls -lh "${DELIVERY}"/*.mp4
           echo "Review files:"
-          find "\${DELIVERY}/review" -type f | sort
-          du -sh "\${DELIVERY}/review"
+          find "${DELIVERY}/review" -type f | sort
+          du -sh "${DELIVERY}/review"
 
       - name: Upload the MP4 as a standalone download
         uses: actions/upload-artifact@v4
         with:
           name: squire-paullus-cannae-short-v4-mp4
-          path: \${{ runner.temp }}/cannae-v4-delivery/*.mp4
+          path: ${{ runner.temp }}/cannae-v4-delivery/*.mp4
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: squire-paullus-cannae-short-v4-review
-          path: \${{ runner.temp }}/cannae-v4-delivery/review/
+          path: ${{ runner.temp }}/cannae-v4-delivery/review/
           if-no-files-found: error
           retention-days: 30
           compression-level: 6
