@@ -31,7 +31,7 @@ jobs:
           root = Path("integrations/nolane-video-command-center-overlay")
           manifest = json.loads((root / "plugin.json").read_text())
           assert manifest["name"] == "nolane-video-command-center"
-          assert manifest["version"] == "1.0.3"
+          assert manifest["version"] == "1.0.4"
           required = [
               "README.md",
               "SKILL-CATALOG.md",
@@ -47,6 +47,7 @@ jobs:
               "references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md",
               "references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md",
               "references/CANNAE_45S_AUDIO_CUE_PLAN.json",
+              "references/CANNAE_45S_NARRATION_SCRIPT.md",
           ]
           missing = [p for p in required if not (root / p).is_file()]
           assert not missing, missing
@@ -54,7 +55,7 @@ jobs:
           assert "33 internal skills" in catalog
           assert "illustrated-history-animation-director" in catalog
           assert "historical-audio-library-curator" in catalog
-          assert "1.0.3" in catalog
+          assert "1.0.4" in catalog
           assert "search_audio_resources.py" in (root / "skills/historical-audio-library-curator/SKILL.md").read_text()
           curator = (root / "skills/historical-audio-library-curator/SKILL.md").read_text()
           assert "source_wav_file" in curator
@@ -69,7 +70,12 @@ jobs:
           cue_plan = (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "oga_park_ambience_river" in cue_plan and "oga_park_ambience_wind" in cue_plan
           assert "oga_vistula_river_waves" in cue_plan and "commons_howling_wind_building" in cue_plan
-          assert "BUILD_PENDING_NOT_YET_RELEASED" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
+          assert "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED" in cue_plan
+          assert "nolane-illustrated-history-foley-v0.4.0" in cue_plan
+          assert "123" in cue_plan and "aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74" in cue_plan
+          assert "45ad22e901854f05b5b25b60aea6b6e6" in cue_plan
+          narration = (root / "references/CANNAE_45S_NARRATION_SCRIPT.md").read_text()
+          assert "CAN-05" in narration and "human approval" in narration.lower()
           assert "oga_park_ambience_river" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "oga_vistula_river_waves" in (root / "references/CANNAE_45S_AUDIO_CUE_PLAN.json").read_text()
           assert "build-illustrated-history-foley-library.yml" in audio
@@ -82,7 +88,7 @@ jobs:
           assert "acquire-meta-open-sound-wav-master.yml" in curator
           assert "never upload Sonniss raw archives" in curator
           assert "build-illustrated-history-foley-library.yml" in curator
-          assert "foley-v0.3.0" in curator
+          assert "foley-v0.4.0" in curator
           assert "validate_foley_review_decisions.py" in curator
           print("Plugin overlay validated:", manifest["version"])
           
@@ -101,7 +107,7 @@ jobs:
       - name: Upload plugin-root directory as a direct artifact
         uses: actions/upload-artifact@v7
         with:
-          name: nolane-video-command-center-plugin-1.0.3
+          name: nolane-video-command-center-plugin-1.0.4
           path: dist/plugin-root/
           if-no-files-found: error
           retention-days: 14
