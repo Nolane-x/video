@@ -1,0 +1,325 @@
+name: Render Squire — The Roman Consul at Cannae
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - ".github/workflows/render-squire-paullus-cannae-short.yml"
+      - "integrations/h2-squire-studio/kit/**"
+      - "video-projects/squire/paullus-cannae-short/**"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-paullus-cannae-short-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  voiceover:
+    name: Generate and verify English narration
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
+    permissions:
+      contents: read
+    with:
+      job_json: |
+        {
+          "schema_version": 1,
+          "job_id": "paullus-cannae-short-en-v1",
+          "title": "The Roman Consul Who Rode Into Hannibal's Trap",
+          "language": "en",
+          "engine": "vieneu",
+          "voice_id": "en-vieneu-v3turbo-adam-bua-87e364",
+          "segments": [
+            {
+              "id": "paullus-01",
+              "text": "A brutal cavalry fight is raging.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-02",
+              "text": "One Roman consul survives it.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-03",
+              "text": "Then he rides toward the centre as Hannibal's trap closes.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-04",
+              "text": "August second, two hundred and sixteen BCE.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-05",
+              "text": "Near Cannae in southern Italy, Rome faces Hannibal's army.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-06",
+              "text": "Lucius Aemilius Paullus is one of Rome's two consuls.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-07",
+              "text": "Polybius places him on the Roman right.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-08",
+              "text": "He survives the cavalry clash.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-09",
+              "text": "But the decision is forming in the centre.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-10",
+              "text": "Roman infantry pushes forward.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-11",
+              "text": "Hannibal's centre gives ground.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-12",
+              "text": "The Romans surge deeper into a narrowing space.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-13",
+              "text": "Then Carthaginian infantry on both wings turns inward.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-14",
+              "text": "The Roman flanks are exposed.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-15",
+              "text": "Paullus could remain on the right.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-16",
+              "text": "Instead, he rides toward the infantry.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-17",
+              "text": "The battle will be decided there.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-18",
+              "text": "Polybius says Hannibal is fighting in the centre too.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-19",
+              "text": "Both commanders are inside the same tightening battle.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-20",
+              "text": "Then Carthaginian cavalry reaches the Roman rear.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-21",
+              "text": "Around them, the Roman formation keeps shrinking.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-22",
+              "text": "The legions are trapped in their own crowded formation.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-23",
+              "text": "Paullus falls in the thick of the fighting, covered with wounds.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-24",
+              "text": "He did not ride toward safety.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-25",
+              "text": "He rode toward the point where Rome needed him most.",
+              "pause_ms_after": 120
+            },
+            {
+              "id": "paullus-26",
+              "text": "That was exactly where Hannibal's trap was closing.",
+              "pause_ms_after": 0
+            }
+          ]
+        }
+
+  render:
+    name: Build Squire animation, sound and final MP4
+    needs: voiceover
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      PROJECT: integrations/h2-squire-studio/kit/projects/paullus-cannae-short
+      KIT: integrations/h2-squire-studio/kit
+    steps:
+      - name: Check out the video repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg and system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+
+      - name: Install H2 Squire runtime and Chromium
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check "numpy>=1.26,<3" "scipy>=1.12,<2" "soundfile>=0.12,<1" "pyloudnorm>=0.1,<1" "faster-whisper==1.2.1"
+
+      - name: Generate Squire music and sound effects
+        working-directory: integrations/h2-squire-studio/kit
+        run: python audio/build_audio.py
+
+      - name: Check the complete H2 Squire environment
+        working-directory: integrations/h2-squire-studio/kit
+        run: python tools/doctor.py
+
+      - name: Create the independent vertical short project
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          python tools/new_project.py --name paullus-cannae-short --title "The Roman Consul Who Rode Into Hannibal's Trap" --pack squire --lang en --style flat --aspect 9:16 --captions
+          cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/config.json" projects/paullus-cannae-short/config.json
+          mkdir -p projects/paullus-cannae-short/story
+          cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/story/bible.md" projects/paullus-cannae-short/story/bible.md
+
+      - name: Download the verified VoiceStudio narration artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voiceover-assets
+
+      - name: Verify narration and align words to the generated audio
+        run: |
+          python -m py_compile tools/video/align_voicestudio_voiceover.py
+          python tools/video/align_voicestudio_voiceover.py --artifact-dir voiceover-assets --model small
+          unzip -o voiceover-assets/h2-timeline.zip -d "$GITHUB_WORKSPACE/$PROJECT"
+
+      - name: Draft and author each animated shot
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          python tools/draft_shots.py --project projects/paullus-cannae-short --min 0.8 --max 2.6
+          python tools/author_paullus_shots.py --project projects/paullus-cannae-short
+          python -m py_compile tools/author_paullus_shots.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("projects/paullus-cannae-short/story/shots.json")
+          c = json.loads(Path("projects/paullus-cannae-short/config.json").read_text())
+          s = json.loads(p.read_text())
+          assert len(s["shots"]) >= 22, len(s["shots"])
+          assert all(x.get("tpl") and x.get("args") is not None for x in s["shots"])
+          assert abs(float(s["duration"]) - float(c["duration"])) < 0.01
+          assert s["music"] and s["music"][0]["bed"] == "war"
+          assert any("DROP" in x.get("notes", "") for x in s["shots"])
+          print(f"Storyboard: {len(s['shots'])} shots, {s['duration']:.2f}s, {c['aspect']} @ {c['fps']} fps")
+          PY
+
+      - name: Validate all Squire frames and templates
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/paullus-cannae-short --check --scale 0.25
+
+      - name: Render visual contact sheets
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/paullus-cannae-short --sheet --scale 0.4 --at 0.8
+
+      - name: Render the first thirty seconds for review
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/paullus-cannae-short --from 0 --to 30 --scale 0.5
+
+      - name: Render the complete Squire animation
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/paullus-cannae-short --workers 4
+
+      - name: Mix narration, war bed and shot-synchronous SFX
+        working-directory: integrations/h2-squire-studio/kit
+        run: python tools/mix.py --project projects/paullus-cannae-short
+
+      - name: Probe final MP4 and measure audio
+        working-directory: integrations/h2-squire-studio/kit
+        run: |
+          set -euo pipefail
+          mkdir -p projects/paullus-cannae-short/build/reports
+          VIDEO=$(find projects/paullus-cannae-short/out -maxdepth 1 -type f -name '*.mp4' | head -n 1)
+          test -n "$VIDEO"
+          ffprobe -v error -show_entries format=duration,size:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json "$VIDEO" > projects/paullus-cannae-short/build/reports/final-ffprobe.json
+          ffmpeg -hide_banner -i "$VIDEO" -vn -af ebur128=peak=true -f null - 2> projects/paullus-cannae-short/build/reports/audio-ebu-r128.txt || true
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("projects/paullus-cannae-short/build/reports/final-ffprobe.json")
+          data = json.loads(p.read_text())
+          v = next(x for x in data["streams"] if x["codec_type"] == "video")
+          a = next(x for x in data["streams"] if x["codec_type"] == "audio")
+          d = float(data["format"]["duration"])
+          assert (v.get("width"), v.get("height")) == (1080, 1920), v
+          assert v.get("r_frame_rate") == "24/1", v
+          assert a.get("codec_type") == "audio", a
+          assert 55 <= d <= 85, f"Unexpected Short duration: {d:.2f}s"
+          report = {
+              "status": "TECHNICAL_RENDER_AND_STREAM_CHECKS_PASSED",
+              "duration_seconds": round(d, 3),
+              "resolution": f"{v['width']}x{v['height']}",
+              "fps": v["r_frame_rate"],
+              "video_codec": v["codec_name"],
+              "audio_codec": a["codec_name"],
+              "audio_sample_rate": a.get("sample_rate"),
+              "audio_channels": a.get("channels"),
+              "artistic_signoff": "PENDING_FULL_MOVING_PICTURE_AND_AUDIO_REVIEW"
+          }
+          Path("projects/paullus-cannae-short/build/reports/final-qa.json").write_text(json.dumps(report, indent=2)+"\n")
+          print(json.dumps(report, indent=2))
+          PY
+
+      - name: Bundle the final MP4 and review materials
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-paullus-cannae-short-${{ github.run_id }}
+          path: |
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/out/
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/build/
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/story/
+            integrations/h2-squire-studio/kit/projects/paullus-cannae-short/timeline/
+            voiceover-assets/manifest.json
+            voiceover-assets/captions.srt
+            voiceover-assets/captions.vtt
+            voiceover-assets/transcript.txt
+          if-no-files-found: error
+          retention-days: 30
