@@ -56,4 +56,7 @@ Search the existing 50 GB+ pool before external acquisition or AI generation. In
 
 ## Audio direction and audition gate
 
-Use the Cannae five-shot cue plan in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as the reference for keeping narration, score, ambience, character Foley, prop Foley, impacts and intentional silence separate. The CC0 Foley v0.2.0 pack has an offline audition console; export and validate human decisions with \`tools/audio/validate_foley_review_decisions.py\` before adding asset IDs to a shot cue. Keep approved asset IDs empty while audition is outstanding. This pack does not contain a finished score or a complete battle ambience library.
+Use the Cannae five-shot cue plan in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as the reference for keeping narration, score, ambience, character Foley, prop Foley, impacts and intentional silence separate. The CC0 Foley v0.3.0 pack has an offline audition console; export and validate human decisions with \`tools/audio/validate_foley_review_decisions.py\` before adding asset IDs to a shot cue. Keep approved asset IDs empty while audition is outstanding. This pack does not contain a finished score or a complete battle ambience library.
+
+
+The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as optional music beds that still require human audition and historical/style review; do not imply they are period-authentic. The Cannae cue map lists candidates but leaves asset approvals empty.
