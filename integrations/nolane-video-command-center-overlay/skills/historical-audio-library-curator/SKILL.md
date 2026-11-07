@@ -60,3 +60,8 @@ The validator rejects duplicate/unknown IDs, changed file hashes, un-auditioned 
 ## Score candidate coverage — v0.3.0
 
 The audition pack also includes three real CC0 orchestral score candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). These are modern cinematic/game-style recordings, not historically authentic ancient Roman music. Listen to each exact source, compare its emotional arc and loop behavior with the edit, and keep the music track separate from Foley. A CC0 license permits use under its terms; it does not make the track artistically appropriate. No score candidate is pre-approved.
+
+
+## CC0 score-candidate coverage — v0.3.0
+
+The current audition edition includes three real orchestral score sources: Eye of the Storm (Indieteur, WAV), The Final Battle (skrjablin, OGG) and Prepare to fight (Basil, MP3). They have CC0 item-level source pages but are modern cinematic/game-style recordings, not historical-period performances. Listen in context; do not auto-select by title or genre tag. Keep them separate from Foley and record review decisions against the source SHA-256.
