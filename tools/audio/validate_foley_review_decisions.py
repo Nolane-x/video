@@ -58,11 +58,11 @@ def validate_review(catalog: dict[str, Any], review: dict[str, Any]) -> dict[str
                 raise ValueError(f"Rating for {asset_id} must be 1-5") from exc
             if numeric_rating not in range(1, 6):
                 raise ValueError(f"Rating for {asset_id} must be 1-5")
+        if is_approved and not heard:
+            raise ValueError(f"{asset_id} cannot be approved before human audition")
         if decision != "unreviewed" and not heard:
             raise ValueError(f"{asset_id} has a listening decision but is not marked human_auditioned")
         if is_approved:
-            if not heard:
-                raise ValueError(f"{asset_id} cannot be approved before human audition")
             if decision != "keep_candidate":
                 raise ValueError(f"{asset_id} can only be approved when decision=keep_candidate")
             if asset.get("rights_class") != "public_cc0_pd" or asset.get("license") != "CC0-1.0":
