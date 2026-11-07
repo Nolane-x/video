@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "collection": "Nolane Illustrated History Foley — CC0",
-  "release_tag": "nolane-illustrated-history-foley-v0.1.0",
+  "collection": "Nolane Illustrated History Foley — CC0 Audition Edition",
+  "release_tag": "nolane-illustrated-history-foley-v0.2.0",
   "retrieved_on": "2026-11-07",
   "sources": [
     {
@@ -16,7 +16,15 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Weapon handling, draw/sheath, bow preparation and release, projectile pass/approach, katana and other blade actions.",
-      "tags": ["weapon-handling", "katana", "bow", "arrow", "draw", "sheath", "swing"],
+      "tags": [
+        "weapon-handling",
+        "katana",
+        "bow",
+        "arrow",
+        "draw",
+        "sheath",
+        "swing"
+      ],
       "minimum_bytes": 10000000,
       "expected_sha256": null
     },
@@ -32,7 +40,15 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Second archive part of the CC0 recorded medieval weapon-texture collection.",
-      "tags": ["weapon-handling", "katana", "bow", "arrow", "draw", "sheath", "swing"],
+      "tags": [
+        "weapon-handling",
+        "katana",
+        "bow",
+        "arrow",
+        "draw",
+        "sheath",
+        "swing"
+      ],
       "minimum_bytes": 10000000,
       "expected_sha256": null
     },
@@ -48,7 +64,13 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Weapon-on-weapon contacts including blade, haft and spear interactions. Not a dedicated shield-impact pack.",
-      "tags": ["weapon-impact", "blade-clash", "spear", "metal", "contact"],
+      "tags": [
+        "weapon-impact",
+        "blade-clash",
+        "spear",
+        "metal",
+        "contact"
+      ],
       "minimum_bytes": 10000000,
       "expected_sha256": null
     },
@@ -64,7 +86,13 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Second archive part of the CC0 weapon-impact collection.",
-      "tags": ["weapon-impact", "blade-clash", "spear", "metal", "contact"],
+      "tags": [
+        "weapon-impact",
+        "blade-clash",
+        "spear",
+        "metal",
+        "contact"
+      ],
       "minimum_bytes": 10000000,
       "expected_sha256": null
     },
@@ -80,7 +108,14 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "25-second recording described as six horses galloping toward the listener and then past. Direct horse-gallop gap-filler.",
-      "tags": ["horse", "six-horses", "gallop", "hoofbeats", "approach", "pass-by"],
+      "tags": [
+        "horse",
+        "six-horses",
+        "gallop",
+        "hoofbeats",
+        "approach",
+        "pass-by"
+      ],
       "minimum_bytes": 50000,
       "expected_sha256": null
     },
@@ -96,7 +131,15 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Creator-recorded voices edited into a crowd/army-style shout bed; designed crowd layer, not a historical battlefield field recording.",
-      "tags": ["crowd", "voices", "shouting", "army", "battle-cry", "charge", "ambience"],
+      "tags": [
+        "crowd",
+        "voices",
+        "shouting",
+        "army",
+        "battle-cry",
+        "charge",
+        "ambience"
+      ],
       "minimum_bytes": 10000,
       "expected_sha256": null
     },
@@ -112,7 +155,13 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Hammer striking an anvil; intended for smithy and armour-repair scenes.",
-      "tags": ["blacksmith", "hammer", "anvil", "metalworking", "forge"],
+      "tags": [
+        "blacksmith",
+        "hammer",
+        "anvil",
+        "metalworking",
+        "forge"
+      ],
       "minimum_bytes": 10000,
       "expected_sha256": null
     },
@@ -128,7 +177,14 @@
       "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "rights_class": "public_cc0_pd",
       "description": "Simple impacts made by hitting objects; useful as a generic impact layer, not a substitute for specific armour or shield Foley.",
-      "tags": ["impact", "thwack", "melee", "thud", "hit", "attack"],
+      "tags": [
+        "impact",
+        "thwack",
+        "melee",
+        "thud",
+        "hit",
+        "attack"
+      ],
       "minimum_bytes": 10000,
       "expected_sha256": null
     }
