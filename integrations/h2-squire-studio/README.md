@@ -1,13 +1,13 @@
 # H2 Squire — Paullus at Cannae
 
-Independent Squire Studio integration and production project for a vertical English history short.
+An independent H2 Squire Studio production project for a vertical English history short.
 
-- Project: `video-projects/squire/paullus-cannae-short/`
-- Output: `1080 × 1920`, 24 fps, English narration, 9:16.
-- Production: GitHub Actions only. The reusable VoiceStudio workflow generates a verified narration artifact; the H2 Squire kit renders the animation with Chromium and FFmpeg on the runner.
-- Final MP4 and review bundle are delivered as the GitHub Actions artifact `squire-paullus-cannae-short-<run_id>`.
-- The workflow keeps this separate from the existing Remotion Cannae 45-second picture-only proof.
+- Story: **The Roman Consul Who Rode Into Hannibal's Trap**
+- Output: 1080 × 1920, 24 fps, English narration, 9:16.
+- Production: GitHub Actions. VoiceStudio generates a watermarked 48 kHz PCM-24 narration artifact; Squire renders the animation through Chromium and FFmpeg on the runner.
+- Output artifact: `squire-paullus-cannae-short-<run_id>` containing the MP4, preview, visual contact sheets, thumbnail, storyboard, aligned narration, captions and QA reports.
+- Source project: `video-projects/squire/paullus-cannae-short/`.
 
-The integrated kit is copied from the installed H2 Squire Studio 0.5.1 bundle. The vertical parchment-map layout is adjusted to reserve the lower caption band. This is an original Squire-style rendering, not an attempt to reproduce another creator's exact film.
+The visuals follow H2 Squire's vector-history language: a recurring Paullus character, mounted cavalry movement, deep battlefield staging, parchment geography and animated overhead tactics. Roman units are red and Carthaginian units blue as a viewer-facing diagram convention, not a claim of uniform historical livery. The encirclement graphics are schematic, not a surveyed reconstruction.
 
-Technical CI checks do not equal artistic approval. Watch the complete MP4 with sound and review pronunciation, pacing, captions and motion before public release.
+The historical account is grounded in Polybius, *Histories* Book III, sections 113–116. The video omits disputed army and casualty totals. The final MP4 must still receive a full moving-picture and audio review before public release; passing technical CI is not artistic approval.

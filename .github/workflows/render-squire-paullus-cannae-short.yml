@@ -207,8 +207,9 @@ jobs:
         run: |
           python tools/new_project.py --name paullus-cannae-short --title "The Roman Consul Who Rode Into Hannibal's Trap" --pack squire --lang en --style flat --aspect 9:16 --captions
           cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/config.json" projects/paullus-cannae-short/config.json
-          mkdir -p projects/paullus-cannae-short/story
+          mkdir -p projects/paullus-cannae-short/story projects/paullus-cannae-short/scenes/shots
           cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/story/bible.md" projects/paullus-cannae-short/story/bible.md
+          cp "$GITHUB_WORKSPACE/video-projects/squire/paullus-cannae-short/scenes/shots/thumb.js" projects/paullus-cannae-short/scenes/shots/thumb.js
 
       - name: Download the verified VoiceStudio narration artifact
         uses: actions/download-artifact@v4
@@ -239,6 +240,8 @@ jobs:
           assert abs(float(s["duration"]) - float(c["duration"])) < 0.01
           assert s["music"] and s["music"][0]["bed"] == "war"
           assert any("DROP" in x.get("notes", "") for x in s["shots"])
+          assert all(x.get("source_line_id") for x in s["shots"])
+          assert sum(1 for x in s["shots"] if x["tpl"] == "top") >= 5
           print(f"Storyboard: {len(s['shots'])} shots, {s['duration']:.2f}s, {c['aspect']} @ {c['fps']} fps")
           PY
 
@@ -249,6 +252,10 @@ jobs:
       - name: Render visual contact sheets
         working-directory: integrations/h2-squire-studio/kit
         run: node render.mjs --project projects/paullus-cannae-short --sheet --scale 0.4 --at 0.8
+
+      - name: Render the custom Squire thumbnail
+        working-directory: integrations/h2-squire-studio/kit
+        run: node render.mjs --project projects/paullus-cannae-short --thumb
 
       - name: Render the first thirty seconds for review
         working-directory: integrations/h2-squire-studio/kit
