@@ -85,3 +85,6 @@ For every hero action, author a shot cue map that separates narration, score, am
 
 
 The v0.3.0 audition pack adds three real CC0 orchestral score candidates. Use the Cannae cue plan to select a score direction by scene function, but do not assign an asset ID until a human has listened to the exact track and validated the review export. Modern orchestral score is not historically authentic by default.
+
+
+The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as optional music beds that still require human audition and historical/style review; do not imply they are period-authentic. The Cannae cue map lists candidates but leaves asset approvals empty.
