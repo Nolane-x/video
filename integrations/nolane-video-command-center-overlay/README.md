@@ -1,12 +1,15 @@
-# Nolane Video Command Center v0.9.8
+# Nolane Video Command Center v1.0.0
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v0.9.8
+## What's new in v1.0.0
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
 - Adds a detailed illustrated-history motion reference covering character/prop/environment/camera/graphic channels, camera grammar, action cycles, uniqueness checks and full-motion QA.
+- Adds the CC0 illustrated-history Foley Audition Edition v0.2.0 with an offline console for listening to individual recordings, filtering, fit ratings, keep/reject notes, browser-local review persistence and JSON export/import.
+- Adds a SHA-256-bound review validator that rejects un-auditioned approvals, rejected cues, unknown IDs, duplicate rows and rights-class mismatches before cue-sheet inclusion.
+- Adds a five-shot Cannae audio cue map that separates narration, score, ambience, Foley, impacts, transitions and intentional silence without pre-approving any asset.
 - Adds searchable metadata indexes for the 2,331 Build 76 redistribution candidates and 1,583 pinned Meta Open Sound samples, then an offline playable audio preview bank.
 - Routes sound selection through lightweight catalogs before unpacking source archives, preserving Oculus CC BY 4.0 attribution and CC0 instrument rights.
 - Links each Meta OGG preview to its exact WAV master source member, size and SHA-256. The Oculus WAV master is mirrored in the permanent Release; instrument masters can be acquired one collection at a time through GitHub Actions.
@@ -30,6 +33,17 @@ The source map also tracks the Sonniss GDC 2026 bundle as `private_production_on
 ## Historical Foley coverage
 
 The plugin bundles `references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md`: current direct matches, broad tag-only suggestions and gaps such as hoofbeats/cavalry, bow/arrow, shield/spear and battlefield crowd cues. For historical Foley searches prefer `--direct-only` and inspect the candidate audio yourself.
+
+The CC0 Audition Edition v0.2.0 adds `AUDIO_PREVIEW.html`. Listen to each exact file, mark it heard and choose keep/reject, fit rating and notes. Export `nolane-foley-review-decisions.json`; browser decisions are local until exported. Validate against the exact package catalog before making a final-mix shortlist:
+
+```bash
+python tools/audio/validate_foley_review_decisions.py \
+  --catalog package/catalog.json \
+  --review nolane-foley-review-decisions.json \
+  --output build/foley-review-report.json
+```
+
+The Cannae shot-by-shot cue map is `references/CANNAE_45S_AUDIO_CUE_PLAN.json`. It deliberately leaves approved asset IDs empty until human audition.
 
 ## How to use
 
