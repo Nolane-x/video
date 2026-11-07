@@ -36,3 +36,8 @@ Every key shot names camera path, subject/prop action, depth layers and edit mot
 - Separate public CC0/Public Domain redistribution from item-specific project-use and private production-only sources. Never put unredistributable raw media in public GitHub Releases.
 - Never overwrite an existing master. Render a distinct candidate, preserve source/checksum and require explicit approval before merge or promotion.
 - Plugin activation is host-controlled. Do not claim hidden plugin-to-plugin calls.
+
+
+## Foley + score pack delivery status
+
+The v0.3.0 pack contains 118 CC0 audio entries from 11 sources. It passed acquisition, FFprobe and catalog validation and is available through Actions artifact `13563793933` until 2027-02-05. Persistent Release publication is not complete because GitHub denied the release token with HTTP 403. Use the [Actions run](https://github.com/Nolane-x/video/actions/runs/42347935721) as the download entry point; do not assume a permanent Release exists.
