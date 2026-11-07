@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "collection": "Nolane Illustrated History Foley and Score — CC0 Audition Edition",
-  "release_tag": "nolane-illustrated-history-foley-v0.3.0",
+  "collection": "Nolane Illustrated History Foley, Ambience and Score — CC0 Audition Edition",
+  "release_tag": "nolane-illustrated-history-foley-v0.4.0",
   "retrieved_on": "2026-11-07",
   "sources": [
     {
@@ -255,6 +255,130 @@
         "instrumental"
       ],
       "minimum_bytes": 1500000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_park_ambience_birds",
+      "title": "Park Ambience — Birds Before Rain",
+      "creator": "Thimras",
+      "source_page": "https://opengameart.org/content/park-ambiences",
+      "download_url": "https://opengameart.org/sites/default/files/park_ambience_birds.wav",
+      "download_filename": "park_ambience_birds.wav",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "48 kHz field recording from a public park in Adelaide, South Australia, in winter. Close to trees, with birds chattering before rain; a real nature ambience, not a period-specific historical recording.",
+      "tags": [
+        "ambience",
+        "field-recording",
+        "birds",
+        "trees",
+        "nature",
+        "rain-approach",
+        "park",
+        "outdoor"
+      ],
+      "minimum_bytes": 80000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_park_ambience_river",
+      "title": "Park Ambience — Small River and Wildlife",
+      "creator": "Thimras",
+      "source_page": "https://opengameart.org/content/park-ambiences",
+      "download_url": "https://opengameart.org/sites/default/files/park_ambience_river.wav",
+      "download_filename": "park_ambience_river.wav",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "48 kHz field recording from a public park in Adelaide, South Australia, in winter. A small river flowing over a low step, with birds, frogs and other wildlife; not a surveyed or ancient river recording.",
+      "tags": [
+        "ambience",
+        "field-recording",
+        "river",
+        "water",
+        "stream",
+        "birds",
+        "frogs",
+        "wildlife",
+        "outdoor"
+      ],
+      "minimum_bytes": 90000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_park_ambience_wind",
+      "title": "Park Ambience — Open Field Wind",
+      "creator": "Thimras",
+      "source_page": "https://opengameart.org/content/park-ambiences",
+      "download_url": "https://opengameart.org/sites/default/files/park_ambience_wind.wav",
+      "download_filename": "park_ambience_wind.wav",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "48 kHz, 24-bit field recording from an open field in a public park in Adelaide, South Australia, in winter; stronger wind than the other two park recordings. Natural exterior bed, not battle wind or historical Foley.",
+      "tags": [
+        "ambience",
+        "field-recording",
+        "wind",
+        "open-field",
+        "weather",
+        "outdoor",
+        "nature"
+      ],
+      "minimum_bytes": 65000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "oga_vistula_river_waves",
+      "title": "Vistula River Waves — Five-Minute Recording",
+      "creator": "RandomMind",
+      "source_page": "https://opengameart.org/content/sea-and-river-wave-sounds",
+      "download_url": "https://opengameart.org/sites/default/files/VistulaShort_0.mp3",
+      "download_filename": "VistulaShort.mp3",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "Approximately five minutes of real water/wave sound recorded on the Vistula River. Use as river, bank or water-side ambience; do not relabel it as open-ocean surf or a medieval harbor field recording.",
+      "tags": [
+        "ambience",
+        "field-recording",
+        "river",
+        "water",
+        "waves",
+        "shore",
+        "riverbank",
+        "loop-candidate"
+      ],
+      "minimum_bytes": 9000000,
+      "expected_sha256": null
+    },
+    {
+      "source_id": "commons_howling_wind_building",
+      "title": "Howling Wind Inside a Building",
+      "creator": "Tvabutzku1234",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Howling_wind.ogg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Howling_wind.ogg",
+      "download_filename": "Howling_wind.ogg",
+      "archive_type": "file",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights_class": "public_cc0_pd",
+      "description": "A 2 minute 8 second recording described by its creator as wind howling inside a building. Good for sheltered interior/castle storm mood; not an outdoor field wind recording.",
+      "tags": [
+        "ambience",
+        "wind",
+        "interior",
+        "building",
+        "storm",
+        "weather",
+        "howling"
+      ],
+      "minimum_bytes": 900000,
       "expected_sha256": null
     }
   ]
