@@ -248,13 +248,219 @@ Open AUDIO_PREVIEW.html in a browser to audition the extracted files offline. Re
 
     rows = []
     for item in assets:
+        asset_id = html.escape(item["asset_id"], quote=True)
         title = html.escape(item["title"])
-        path = html.escape(item["path"], quote=True)
-        meta = html.escape(f"{item['duration_seconds']:.2f}s · {item.get('codec') or 'audio'} · {item.get('sample_rate_hz') or '?'} Hz · {item.get('channels') or '?'} ch")
+        rel_path = html.escape(item["path"], quote=True)
+        meta = html.escape(
+            f"{item['duration_seconds']:.2f}s · {item.get('codec') or 'audio'} · "
+            f"{item.get('sample_rate_hz') or '?'} Hz · {item.get('channels') or '?'} ch"
+        )
         creator = html.escape(item["creator"])
-        search_value = html.escape((title + " " + " ".join(item["tags"])).lower(), quote=True)
-        rows.append(f'<article data-search="{search_value}"><h3>{title}</h3><p>{meta}</p><p>Creator: {creator}</p><audio controls preload="none" src="{path}"></audio><p><small>CC0 · Not yet human-auditioned · {html.escape(item["source_ids"][0])}</small></p></article>')
-    preview = """<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Illustrated History Foley Preview</title><style>body{font:16px system-ui;max-width:1100px;margin:2rem auto;padding:0 1rem;background:#111;color:#eee}input{width:100%;padding:.8rem;font:inherit}article{padding:1rem;margin:1rem 0;border:1px solid #444;border-radius:12px}audio{width:100%}small{color:#bbb}</style><h1>Illustrated History Foley — Offline audition</h1><p>Search by cue, then listen to the exact file. None of these entries is pre-approved for a final mix.</p><input id="search" placeholder="Search horse, katana, arrow, crowd, forge…">""" + "".join(rows) + """<script>const q=document.querySelector('#search');q.addEventListener('input',()=>{const v=q.value.toLowerCase();document.querySelectorAll('article').forEach(x=>x.hidden=!x.dataset.search.includes(v))})</script></html>"""
+        source_id = html.escape(item["source_ids"][0])
+        source_page = html.escape(item["source_page"], quote=True)
+        license_name = html.escape(item["license"])
+        license_url = html.escape(item["license_url"], quote=True)
+        digest = html.escape(item["sha256"])
+        tags = html.escape(", ".join(item["tags"]))
+        search_value = html.escape(
+            (item["title"] + " " + " ".join(item["tags"]) + " " + item["original_filename"]).lower(),
+            quote=True,
+        )
+        rows.append(
+            f'<article class="cue" data-id="{asset_id}" data-search="{search_value}" '
+            f'data-source="{source_id}" data-rights="{html.escape(item["rights_class"], quote=True)}" '
+            f'data-sha="{digest}">'
+            f'<header><div><span class="eyebrow">{source_id}</span><h2>{title}</h2></div>'
+            f'<span class="status">NOT HEARD</span></header>'
+            f'<p class="meta">{meta} · {item["size_bytes"]:,} bytes</p>'
+            f'<div class="provenance"><span>Creator: {creator}</span>'
+            f'<span>License: <a href="{license_url}" target="_blank" rel="noreferrer">{license_name}</a></span>'
+            f'<span>SHA-256: <code>{digest}</code></span>'
+            f'<span>Tags: {tags}</span>'
+            f'<a href="{source_page}" target="_blank" rel="noreferrer">Open original source page ↗</a></div>'
+            f'<audio controls preload="none" src="{rel_path}"></audio>'
+            f'<div class="review-grid">'
+            f'<label>Listening decision<select class="decision">'
+            f'<option value="unreviewed">Not reviewed</option>'
+            f'<option value="keep_candidate">Keep as candidate</option>'
+            f'<option value="reject">Reject</option>'
+            f'</select></label>'
+            f'<label>Production fit<select class="rating">'
+            f'<option value="">Not rated</option><option value="1">1 — Poor</option>'
+            f'<option value="2">2 — Weak</option><option value="3">3 — Usable</option>'
+            f'<option value="4">4 — Good</option><option value="5">5 — Excellent</option>'
+            f'</select></label>'
+            f'<label class="note">Reviewer notes<textarea class="notes" rows="2" '
+            f'placeholder="Material, distance, quality, loop/clicks, period fit, best shot…"></textarea></label>'
+            f'<label class="check"><input class="heard" type="checkbox"> I listened to this exact file</label>'
+            f'<label class="check"><input class="approved" type="checkbox" disabled> Approved for final mix</label>'
+            f'</div><p class="gate">Downloaded and decoded; not yet human-auditioned.</p></article>'
+        )
+    source_options = "".join(
+        f'<option value="{html.escape(source["source_id"], quote=True)}">'
+        f'{html.escape(source["title"])}'
+        f'</option>'
+        for source in manifest["sources"]
+    )
+    preview_template = r"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Illustrated History Foley — Audition & Review Console</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#1a1d22;--line:#343943;--muted:#a7afba;--ink:#f1eee6;--accent:#d8b77c;--green:#87b99b;--red:#d88e87}
+*{box-sizing:border-box}body{font:15px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;max-width:1180px;margin:0 auto;padding:28px 18px 80px;background:var(--bg);color:var(--ink)}
+h1{font-size:clamp(27px,4vw,42px);line-height:1.08;margin:4px 0 12px;letter-spacing:-.04em}
+h2{font-size:19px;line-height:1.2;margin:4px 0 0}.sub{color:var(--muted);max-width:850px}
+.warning{border:1px solid #755d38;background:#2b2418;padding:14px 16px;border-radius:12px;margin:20px 0}
+.toolbar,.stats,.review-grid{display:grid;gap:10px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:18px 0}
+.stat,.panel,.cue{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat{padding:12px 14px}.stat strong{display:block;font-size:25px}.stat span,.meta,.eyebrow,.gate,small{color:var(--muted)}
+.toolbar{grid-template-columns:2fr 1.3fr 1.3fr auto auto;align-items:end;margin:20px 0}
+label{display:block;font-size:12px;color:var(--muted)}input[type=search],select,textarea,button{font:inherit}
+input[type=search],select,textarea{width:100%;background:#111317;color:var(--ink);border:1px solid #444a55;border-radius:8px;padding:9px 10px;margin-top:5px}
+button{padding:10px 13px;border:1px solid #5a606a;border-radius:9px;background:#252a31;color:var(--ink);cursor:pointer}
+button.primary{background:#d8b77c;color:#211c15;border-color:#d8b77c;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}
+.cue{padding:16px;margin:13px 0}.cue header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+.eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:.14em}.status{font-size:10px;letter-spacing:.1em;padding:4px 8px;border:1px solid var(--line);border-radius:99px;white-space:nowrap}
+.meta{font-size:12px;margin:7px 0 12px}.provenance{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;color:var(--muted);font-size:12px;margin-bottom:12px;overflow-wrap:anywhere}
+a{color:var(--accent)}code{font-size:11px;overflow-wrap:anywhere}audio{width:100%;height:42px;margin:3px 0 10px}
+.review-grid{grid-template-columns:1fr 1fr 1.5fr 1fr 1.2fr;align-items:start}.review-grid .note{grid-column:span 1}.check{display:flex;gap:8px;align-items:center;padding-top:27px}.check input{width:17px;height:17px;accent-color:var(--green)}
+.gate{font-size:12px;margin:8px 0 0}.cue.reviewed .status{border-color:var(--green);color:var(--green)}.cue.approved-card .gate{color:var(--green)}.cue.rejected .status{border-color:var(--red);color:var(--red)}
+.empty{padding:24px;text-align:center;color:var(--muted)}.footer{margin-top:28px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.toolbar{grid-template-columns:1fr 1fr}.review-grid{grid-template-columns:1fr 1fr}.review-grid .note{grid-column:span 2}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.review-grid,.provenance{grid-template-columns:1fr}.review-grid .note{grid-column:span 1}.toolbar{grid-template-columns:1fr}.check{padding-top:5px}}
+</style>
+</head>
+<body>
+<p class="eyebrow">NOLANE · HISTORICAL AUDIO LIBRARY</p>
+<h1>Foley audition & review console</h1>
+<p class="sub">Listen to the exact source file, assess whether it fits the visible action, then record a decision. This page works offline after you extract the ZIP. Review decisions are saved in this browser and can be exported/imported as JSON.</p>
+<div class="warning"><strong>Important approval gate.</strong> Every recording starts unreviewed. FFprobe confirms that a file decodes; it does not confirm sound quality, historical suitability or final-mix approval. A cue cannot be approved for a final mix until you have listened to that exact file and marked it as a candidate.</div>
+<div class="stats">
+ <div class="stat"><strong id="total">0</strong><span>Total cue files</span></div>
+ <div class="stat"><strong id="heard">0</strong><span>Human-auditioned</span></div>
+ <div class="stat"><strong id="approved">0</strong><span>Approved for final mix</span></div>
+ <div class="stat"><strong id="rejected">0</strong><span>Rejected after listening</span></div>
+</div>
+<div class="panel" style="padding:15px">
+ <div class="toolbar">
+  <label>Search<input id="search" type="search" placeholder="horse, katana, arrow, impact, metal…"></label>
+  <label>Source<select id="source"><option value="">All source packs</option>{{SOURCE_OPTIONS}}</select></label>
+  <label>Review status<select id="status"><option value="">All statuses</option><option value="unreviewed">Not reviewed</option><option value="heard">Listened</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></label>
+  <button id="next">Next unreviewed</button>
+  <button id="export" class="primary">Export decisions JSON</button>
+ </div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+  <label style="display:flex;gap:8px;align-items:center"><input id="import" type="file" accept="application/json" style="max-width:250px"> Import previous review</label>
+  <button id="clear">Clear this browser's review</button>
+  <span id="visible" class="meta"></span>
+ </div>
+</div>
+<div id="cues">{{ASSET_ROWS}}</div>
+<p class="footer">Rights class for this pack: CC0 1.0 as recorded in the per-item source manifest. Keep the source register and license links with the files. Approval means your human audition found this particular take suitable for this project; it does not create rights beyond the stated license.</p>
+<script>
+const PACK_ID="nolane-illustrated-history-foley-review-v0.2.0";
+const STORAGE_KEY=PACK_ID+":decisions";
+const cards=[...document.querySelectorAll(".cue")];
+const byId=new Map(cards.map(card=>[card.dataset.id,card]));
+const el=id=>document.getElementById(id);
+let decisions=load();
+function blank(){return {human_auditioned:false,approved_for_final_mix:false,decision:"unreviewed",rating:"",notes:""}}
+function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch{return {}}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(decisions));render()}
+function state(card){return decisions[card.dataset.id]||blank()}
+function apply(card){
+ const s=state(card);
+ card.querySelector(".decision").value=s.decision||"unreviewed";
+ card.querySelector(".rating").value=s.rating||"";
+ card.querySelector(".notes").value=s.notes||"";
+ card.querySelector(".heard").checked=!!s.human_auditioned;
+ const approve=card.querySelector(".approved");
+ approve.checked=!!s.approved_for_final_mix;
+ approve.disabled=!(s.human_auditioned&&s.decision==="keep_candidate"&&card.dataset.rights==="public_cc0_pd");
+ card.classList.toggle("reviewed",!!s.human_auditioned);
+ card.classList.toggle("approved-card",!!s.approved_for_final_mix);
+ card.classList.toggle("rejected",s.decision==="reject");
+ card.querySelector(".status").textContent=s.approved_for_final_mix?"APPROVED":s.decision==="reject"?"REJECTED":s.human_auditioned?"LISTENED":"NOT HEARD";
+ card.querySelector(".gate").textContent=s.approved_for_final_mix?"Human audition recorded; approved for this project's final-mix shortlist.":s.human_auditioned?"Listened. Check candidate decision and notes; not approved for final mix.":"Downloaded and decoded; not yet human-auditioned.";
+}
+function render(){
+ cards.forEach(card=>{
+  const s=state(card);apply(card);
+  const q=el("search").value.trim().toLowerCase();
+  const source=el("source").value,status=el("status").value;
+  const searchMatch=!q||card.dataset.search.includes(q)||card.dataset.id.includes(q);
+  const sourceMatch=!source||card.dataset.source===source;
+  const statusMatch=!status||(status==="unreviewed"?!s.human_auditioned:status==="heard"?s.human_auditioned:status==="approved"?s.approved_for_final_mix:status==="rejected"?s.decision==="reject":true);
+  card.hidden=!(searchMatch&&sourceMatch&&statusMatch);
+ });
+ const heard=cards.filter(c=>state(c).human_auditioned).length;
+ const approved=cards.filter(c=>state(c).approved_for_final_mix).length;
+ const rejected=cards.filter(c=>state(c).decision==="reject"&&state(c).human_auditioned).length;
+ el("total").textContent=cards.length;el("heard").textContent=heard;el("approved").textContent=approved;el("rejected").textContent=rejected;
+ el("visible").textContent=cards.filter(c=>!c.hidden).length+" of "+cards.length+" shown";
+}
+function update(card,patch){decisions[card.dataset.id]={...blank(),...state(card),...patch};save()}
+cards.forEach(card=>{
+ card.querySelector(".decision").addEventListener("change",e=>{
+  const s=state(card);let decision=e.target.value;
+  if(decision!=="unreviewed"&&!s.human_auditioned){alert("Listen to this exact file and tick the audition checkbox first.");e.target.value="unreviewed";return}
+  if(decision==="reject")update(card,{decision,approved_for_final_mix:false});
+  else update(card,{decision});
+ });
+ card.querySelector(".rating").addEventListener("change",e=>update(card,{rating:e.target.value}));
+ card.querySelector(".notes").addEventListener("change",e=>update(card,{notes:e.target.value}));
+ card.querySelector(".heard").addEventListener("change",e=>{
+  if(!e.target.checked){update(card,{human_auditioned:false,approved_for_final_mix:false,decision:"unreviewed"});return}
+  update(card,{human_auditioned:true});
+ });
+ card.querySelector(".approved").addEventListener("change",e=>{
+  const s=state(card);
+  if(e.target.checked&&!(s.human_auditioned&&s.decision==="keep_candidate"&&card.dataset.rights==="public_cc0_pd")){
+   alert("Approval requires an auditioned CC0/PD cue marked Keep as candidate.");e.target.checked=false;return
+  }
+  update(card,{approved_for_final_mix:e.target.checked});
+ });
+});
+["search","source","status"].forEach(id=>el(id).addEventListener("input",render));
+el("next").addEventListener("click",()=>{
+ const card=cards.find(c=>!c.hidden&&!state(c).human_auditioned);
+ if(!card){alert("No unreviewed cue in the current filter.");return}
+ card.scrollIntoView({behavior:"smooth",block:"center"});card.querySelector("audio").focus();
+});
+el("export").addEventListener("click",()=>{
+ const rows=cards.map(c=>({asset_id:c.dataset.id,sha256:c.dataset.sha,...state(c)}));
+ const payload={schema_version:"1.0.0",pack:PACK_ID,exported_at:new Date().toISOString(),summary:{total:rows.length,human_auditioned:rows.filter(x=>x.human_auditioned).length,approved_for_final_mix:rows.filter(x=>x.approved_for_final_mix).length},decisions:rows};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nolane-foley-review-decisions.json";a.click();URL.revokeObjectURL(url);
+});
+el("import").addEventListener("change",async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const incoming=JSON.parse(await file.text());
+  if(!Array.isArray(incoming.decisions))throw new Error("Missing decisions array");
+  const next={...decisions};
+  for(const row of incoming.decisions){
+   const card=byId.get(row.asset_id);if(!card||row.sha256!==card.dataset.sha)continue;
+   const heard=!!row.human_auditioned;
+   const keep=heard&&row.decision==="keep_candidate"&&card.dataset.rights==="public_cc0_pd";
+   next[row.asset_id]={human_auditioned:heard,decision:heard?row.decision:"unreviewed",rating:row.rating||"",notes:String(row.notes||""),approved_for_final_mix:keep&&!!row.approved_for_final_mix};
+  }
+  decisions=next;save();alert("Review imported. Only matching asset IDs and SHA-256 hashes were applied.");
+ }catch(err){alert("Could not import review JSON: "+err.message)}
+ e.target.value="";
+});
+el("clear").addEventListener("click",()=>{
+ if(!confirm("Clear all review decisions saved in this browser for this pack? Export first if you need a backup."))return;
+ decisions={};localStorage.removeItem(STORAGE_KEY);render();
+});
+render();
+</script>
+</body>
+</html>"""
+    preview = preview_template.replace("{{SOURCE_OPTIONS}}", source_options).replace("{{ASSET_ROWS}}", "".join(rows))
     (package_root / "AUDIO_PREVIEW.html").write_text(preview, encoding="utf-8")
 
     package_name = f"{manifest['release_tag']}.zip"
