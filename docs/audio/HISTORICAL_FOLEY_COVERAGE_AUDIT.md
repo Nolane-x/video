@@ -111,3 +111,13 @@ python tools/audio/validate_foley_review_decisions.py \\
 The validator checks the asset ID and SHA-256 pair, license/right class, listened state and keep/reject decision. A final-mix shortlist is emitted only from human-approved CC0 cues. This is an approval-record validator, not an automated audio quality classifier.
 
 The Cannae shot-by-shot requirements are mapped in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\`. Its asset IDs are intentionally empty until the exact sounds have been auditioned.
+
+
+## v0.3.0 score additions
+
+The audio source manifest now includes three item-level CC0 orchestral score candidates:
+- Eye of the Storm — Indieteur, WAV source, creator describes it as orchestral music for warfare scenes.
+- The Final Battle — skrjablin, OGG source, generic dramatic orchestral loop with a restart pause noted on the source page.
+- Prepare to fight — Basil, MP3 source, epic battle-intro cue.
+
+All three are modern cinematic/game-style recordings, not period-authentic music. Their availability in the pack does not imply they fit Cannae or any historical scene. They start un-auditioned and not approved for final mix; use the review console and SHA-256 validator.
