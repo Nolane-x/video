@@ -95,3 +95,13 @@ The final artifact-first workflow completed successfully in run [42341596143](ht
 - Approved for final mix: 0/115
 
 The release is now published. The previous two failed attempts are superseded by this final successful run. The pack is acquired, decoded and indexed, but remains **not human-auditioned**; do not treat it as a production-approved sound library until cues are listened to and selected.
+
+
+## v0.3.0 score additions
+
+The audio source manifest now includes three item-level CC0 orchestral score candidates:
+- Eye of the Storm — Indieteur, WAV source, creator describes it as orchestral music for warfare scenes.
+- The Final Battle — skrjablin, OGG source, generic dramatic orchestral loop with a restart pause noted on the source page.
+- Prepare to fight — Basil, MP3 source, epic battle-intro cue.
+
+All three are modern cinematic/game-style recordings, not period-authentic music. Their availability in the pack does not imply they fit Cannae or any historical scene. They start un-auditioned and not approved for final mix; use the review console and SHA-256 validator.
