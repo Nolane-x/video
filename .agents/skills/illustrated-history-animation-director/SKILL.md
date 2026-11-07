@@ -52,3 +52,8 @@ Search the existing 50 GB+ pool before external acquisition or AI generation. In
 - Review actual moving footage at normal speed, including contact/follow-through and camera changes.
 - Review the full soundtrack at normal speed; keep separate stems and a timecoded defect/cue log.
 - Render success is not artistic approval. Report technical pass, sampled review, complete human picture review and complete human audio review separately.
+
+
+## Audio direction and audition gate
+
+Use the Cannae five-shot cue plan in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json\` as the reference for keeping narration, score, ambience, character Foley, prop Foley, impacts and intentional silence separate. The CC0 Foley v0.2.0 pack has an offline audition console; export and validate human decisions with \`tools/audio/validate_foley_review_decisions.py\` before adding asset IDs to a shot cue. Keep approved asset IDs empty while audition is outstanding. This pack does not contain a finished score or a complete battle ambience library.
