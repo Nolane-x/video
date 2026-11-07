@@ -13,15 +13,40 @@ Method: whole-token searches over title, description, file name, archive member,
 | Sword handling / swing | Generic sound/swing candidates | 2 handling/swing candidates | Candidate only; some are game/VR oriented |
 | Human footsteps | 26 records; mixed game footsteps | 72 records, mostly shoes on concrete/metal | Plenty of generic steps, but material is often modern |
 | Horse vocalization | No clear horse record | 2 horse-neigh takes | Useful animal vocalization; not a hoofbeat |
-| Hoofbeats / trot / gallop | No credible direct match found | No credible direct match found | **Critical gap** for cavalry/history scenes |
-| Cavalry movement | No credible direct match found | No credible direct match found | **Critical gap** |
+| Hoofbeats / trot / gallop | No credible direct match found | No credible direct match found | Targeted CC0 pack now adds one six-horse gallop approach/pass recording; surface-specific hoofbeat layers and gait round-robins remain missing |
+| Cavalry movement | No credible direct match found | No credible direct match found | One gallop pass is now available; walk/trot/canter cycles, tack, rider coupling and varied surfaces remain a gap |
 | Armor / chain | 2 generic armor-light records; 4 chainmail records in prior Build76 text search included duplicate AppleDouble metadata | Some chains/metal; no clear historical armor set | Needs audition and source hygiene |
-| Shield impact / spear impact | No clearly suitable direct match | No clearly suitable shield/spear direct match | **Gap**; Sonniss track list is a promising private-only source |
-| Bowstring / arrow release / flight / impact | No credible direct match | No credible direct match | **Critical gap** |
-| Battlefield crowd / commands | 4 crowd records, e.g. station / cheer / stylized murmur | No direct battle-crowd bed surfaced | Needs dedicated crowd / command recordings |
+| Shield impact / spear impact | No clearly suitable direct match | No clearly suitable shield/spear direct match | The new OGA packs add several weapon-on-weapon/spear contacts, but no dedicated shield-on-shield or shield-block Foley; Sonniss remains private-only |
+| Bowstring / arrow release / flight / impact | No credible direct match | No credible direct match | New OGA Weapon Textures provides bow handling/release and arrow travel/pass cues; target-impact variants still require targeted review/acquisition |
+| Battlefield crowd / commands | 4 crowd records, e.g. station / cheer / stylized murmur | No direct battle-crowd bed surfaced | New CC0 crowd-shouting cue is a designed group-voice layer, not a historical field recording; commands and near/mid/far layers remain missing |
 | Boats / oars / water | No strong rowing direct match | 5 distinct rowing takes | Useful for historical ship scenes after audition |
 | Wind / rain / forest beds | Several generic ambience records | Small set of wind/rain/forest ambiences | Useful bed candidates; check setting and recording quality |
 | Fire / destruction | Mixed fire/game effects | Some door/hatch and non-period machine cues | Weak historical fit unless manually auditioned |
+
+
+## Targeted CC0 illustrated-history acquisition — 2026-11-07
+
+The first GitHub Actions build verified a new targeted source pack from eight item-level CC0 source entries. Download, extraction, FFprobe, catalog validation and the two Python safety/provenance tests passed in run [42341098346](https://github.com/Nolane-x/video/actions/runs/42341098346). It produced **115 distinct audio files** in a ZIP of **397,657,285 bytes** (SHA-256 `5be9ea8cbcf5daf9e848e190447a4c79480045c164b2ba9a8ce9f173f5b1257b`).
+
+| Source family | Audio files |
+|---|---:|
+| Medieval Weapon Textures, part 1 | 25 |
+| Medieval Weapon Textures, part 2 | 19 |
+| Medieval Weapon Impacts, part 1 | 29 |
+| Medieval Weapon Impacts, part 2 | 19 |
+| Six Horses Galloping By | 1 |
+| Crowd Shouting/Speaking Ambience | 1 |
+| Blacksmith's Hammer | 1 |
+| Thwack Sounds | 20 |
+| **Total** | **115** |
+
+The first build reached package creation and passed the content checks, but its Release-upload step failed because the workflow's `GH_TOKEN` interpolation contained an erroneous literal escape character. That was corrected in commit `e074b689f5046d195b31dc4b41a6d886d758380e`; retry run [42341335341](https://github.com/Nolane-x/video/actions/runs/42341335341) is the release-publication attempt. Until that run succeeds, treat the source ZIP as built in Actions but **not yet published as a GitHub Release**.
+
+The current catalog state is `ACQUIRED_AND_PROBED_NOT_HUMAN_AUDITIONED`: **0/115** human-auditioned and **0/115** approved for a final mix. FFprobe confirms decodability/metadata, not quality or suitability. The 25-second horse file is one gallop pass, not a cavalry gait library. The crowd sample is a designed group-voice effect, not a historical battlefield recording. Weapon packs provide useful handling, bow/arrow and weapon-contact variety, but do not close the shield/armour/tack gaps.
+
+Manifest: `tools/audio/illustrated_history_foley_sources.json`  
+Build workflow: `.github/workflows/build-illustrated-history-foley-library.yml`  
+Acquisition notes: `docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md`
 
 ## Avoid false confidence from metadata tags
 
