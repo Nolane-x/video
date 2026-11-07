@@ -1,0 +1,124 @@
+name: Ain Jalut · Split and deliver verified master
+
+on:
+  push:
+    branches:
+      - 'squire/ain-jalut-1260'
+    paths:
+      - '.github/workflows/squire-ain-jalut-artifact-handoff.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  split-and-package:
+    name: Split master video and package review assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_ARTIFACT_ID: "13574292037"
+      SOURCE_RUN_ID: "42369566150"
+      MASTER_NAME: "The Day the Mongols Were Stopped at Ain Jalut.mp4"
+    steps:
+      - name: Download the already verified production artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/Nolane-x/video/actions/artifacts/$SOURCE_ARTIFACT_ID/zip" \
+            --output "$RUNNER_TEMP/verified-master-artifact.zip"
+          unzip -q "$RUNNER_TEMP/verified-master-artifact.zip" -d "$RUNNER_TEMP/verified-master"
+          test -s "$RUNNER_TEMP/verified-master/$MASTER_NAME"
+          echo "SOURCE_ARTIFACT_BYTES=$(stat -c%s "$RUNNER_TEMP/verified-master-artifact.zip")"
+          echo "MASTER_VIDEO_BYTES=$(stat -c%s "$RUNNER_TEMP/verified-master/$MASTER_NAME")"
+
+      - name: Split the MP4 into connector-safe parts and prepare the review pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/verified-master"
+          VIDEO="$ROOT/$MASTER_NAME"
+          PARTS="$RUNNER_TEMP/ain-jalut-video-parts"
+          REVIEW="$RUNNER_TEMP/ain-jalut-review"
+          mkdir -p "$PARTS" "$REVIEW"
+
+          # 400 MiB keeps each independently downloadable artifact below 512 MiB.
+          split --bytes=400M --numeric-suffixes=0 --suffix-length=2 \
+            "$VIDEO" "$PARTS/video.part-"
+          PART_COUNT=$(find "$PARTS" -maxdepth 1 -type f -name 'video.part-*' | wc -l)
+          if [ "$PART_COUNT" -lt 1 ] || [ "$PART_COUNT" -gt 2 ]; then
+            echo "Unexpected video split count: $PART_COUNT" >&2
+            exit 1
+          fi
+          if [ "$PART_COUNT" -eq 1 ]; then
+            printf 'No second MP4 part is required.\n' > "$PARTS/NO-SECOND-PART.txt"
+          fi
+          {
+            echo "Ain Jalut verified MP4 delivery"
+            echo "Source workflow run: $SOURCE_RUN_ID"
+            echo "Source artifact ID: $SOURCE_ARTIFACT_ID"
+            echo "Master filename: $MASTER_NAME"
+            echo "Master bytes: $(stat -c%s "$VIDEO")"
+            echo "Master SHA-256: $(sha256sum "$VIDEO" | cut -d' ' -f1)"
+            echo "Part count: $PART_COUNT"
+            for part in "$PARTS"/video.part-*; do
+              [ -f "$part" ] || continue
+              echo "$(basename "$part") bytes=$(stat -c%s "$part") sha256=$(sha256sum "$part" | cut -d' ' -f1)"
+            done
+          } > "$REVIEW/VIDEO-PARTS-MANIFEST.txt"
+
+          # Put preview, audio, subtitles, thumbnail and full technical evidence
+          # in a separate review artifact that is also below the download cap.
+          for file in \
+            "preview-45s.mp4" "thumbnail.png" "final-mix.wav" \
+            "narration-timeline.wav" "QA-REPORT.md" "QA-REPORT.json" \
+            "alignment-report.json" "voice-manifest.json" "voice-selection.json" \
+            "FOLEY-SOURCE-MANIFEST.json" "captions.srt" "captions.vtt" \
+            "01-SCRIPT.md" "research.md" "SHA256SUMS.txt" "h2-timeline.zip"; do
+            if [ -f "$ROOT/$file" ]; then
+              cp "$ROOT/$file" "$REVIEW/"
+            fi
+          done
+          if [ -d "$ROOT/contact-sheets" ]; then
+            cp -a "$ROOT/contact-sheets" "$REVIEW/contact-sheets"
+          fi
+          test -s "$REVIEW/preview-45s.mp4"
+          test -s "$REVIEW/thumbnail.png"
+          test -s "$REVIEW/QA-REPORT.json"
+          du -sh "$PARTS" "$REVIEW"
+          echo "PART_COUNT=$PART_COUNT" >> "$GITHUB_ENV"
+
+      - name: Upload MP4 part 00
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-jalut-video-part-00
+          path: ${{ runner.temp }}/ain-jalut-video-parts/video.part-00
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload MP4 part 01 or no-part marker
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-jalut-video-part-01
+          path: |
+            ${{ runner.temp }}/ain-jalut-video-parts/video.part-01
+            ${{ runner.temp }}/ain-jalut-video-parts/NO-SECOND-PART.txt
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload preview, audio, thumbnail and QA review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-jalut-review-package
+          path: ${{ runner.temp }}/ain-jalut-review/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
