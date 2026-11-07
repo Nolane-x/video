@@ -60,3 +60,8 @@ Use the Cannae five-shot cue plan in \`docs/audio/CANNAE_45S_AUDIO_CUE_PLAN.json
 
 
 The CC0 v0.3.0 pack includes modern orchestral score candidates. Treat them as optional music beds that still require human audition and historical/style review; do not imply they are period-authentic. The Cannae cue map lists candidates but leaves asset approvals empty.
+
+
+## Environmental sound coverage — v0.4.0
+
+The v0.4.0 CC0 pack adds five modern field-recorded environment beds: birds-before-rain in an Adelaide park, a small park river with wildlife, open-field wind, Vistula River waves and indoor howling wind. The recording context is part of the asset metadata and must guide use. These are not historical reconstructions; choose them only as neutral ambience when the scene matches. Do not imply they were recorded at the historical location. Human audition and the review validator remain required before cue approval.
