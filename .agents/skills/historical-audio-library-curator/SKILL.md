@@ -63,3 +63,8 @@ Never infer audition from metadata or decoder success. The validator checks asse
 ## CC0 score-candidate coverage — v0.3.0
 
 The current audition edition includes three real orchestral score sources: Eye of the Storm (Indieteur, WAV), The Final Battle (skrjablin, OGG) and Prepare to fight (Basil, MP3). They have CC0 item-level source pages but are modern cinematic/game-style recordings, not historical-period performances. Listen in context; do not auto-select by title or genre tag. Keep them separate from Foley and record review decisions against the source SHA-256.
+
+
+## Environmental ambience — v0.4.0 candidates
+
+The next CC0 audition pack adds five context-labelled recordings: park birds before rain, a small park river with birds/frogs, open-field wind, five-minute Vistula River waves and interior howling wind. These are modern recordings from Adelaide public parks, the Vistula and an indoor building; they are not period-authentic or location-specific reconstructions. Choose them only when the sound context fits. Keep bird ambience out of battle scenes by default; do not call Vistula river waves ocean surf; use indoor howling wind only for sheltered/interior shots. Verify that the v0.4.0 Actions build and Release succeeded before using the pack; audition each exact file and validate the exported review JSON against the matching catalog.
