@@ -187,19 +187,23 @@
       "intended_use": "battle-intro cue; test pacing and tonal fit"
     }
   ],
-  "source_pack_status": "BUILD_PENDING_NOT_YET_RELEASED",
+  "source_pack_status": "BUILT_VALIDATED_GITHUB_RELEASE_PUBLISHED",
   "source_pack_delivery": {
-    "type": "github_release_pending",
-    "expected_source_count": 16,
-    "expected_previous_asset_count": 118,
-    "new_ambience_candidates": [
-      "oga_park_ambience_birds",
-      "oga_park_ambience_river",
-      "oga_park_ambience_wind",
-      "oga_vistula_river_waves",
-      "commons_howling_wind_building"
-    ],
-    "release_published": false,
+    "type": "github_release",
+    "run_id": 42349383012,
+    "run_url": "https://github.com/Nolane-x/video/actions/runs/42349383012",
+    "release_url": "https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.4.0",
+    "zip_url": "https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.4.0/nolane-illustrated-history-foley-v0.4.0.zip",
+    "zip_name": "nolane-illustrated-history-foley-v0.4.0.zip",
+    "source_count": 16,
+    "asset_count": 123,
+    "inner_zip_size_bytes": 642950284,
+    "inner_zip_sha256": "aa4254441768314086b5229aac19597a0a176bb9ad5d93ae3805fa9f96fd6c74",
+    "actions_fallback_artifact_id": 13565181166,
+    "actions_fallback_artifact_name": "illustrated-history-foley-cc0-34",
+    "actions_fallback_size_bytes": 643407737,
+    "actions_fallback_expires_at": "2027-02-05T07:00:05Z",
+    "actions_fallback_outer_sha256": "d3987a0a23d9980b8ef68ebb223bf1629bc4a179c4c6b28d23b6b2bff364e389",
     "human_auditioned": 0,
     "approved_for_final_mix": 0
   },
@@ -264,6 +268,9 @@
       "verify_Cannae_and_Aufidus_pronunciation",
       "check_timing_against_45s_edit",
       "human_approval_before_final_render"
-    ]
+    ],
+    "script_path": "docs/audio/CANNAE_45S_NARRATION_SCRIPT.md",
+    "duration_target_seconds": 45,
+    "shot_count": 5
   }
 }
