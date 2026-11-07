@@ -1,0 +1,120 @@
+name: Build illustrated-history CC0 Foley library
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/samurai-cinematic-audio-v1
+    paths:
+      - "tools/audio/illustrated_history_foley_sources.json"
+      - "tools/audio/build_illustrated_history_foley_bundle.py"
+      - "tools/audio/test_illustrated_history_foley_bundle.py"
+      - "docs/audio/ILLUSTRATED_HISTORY_FOLEY_ACQUISITION.md"
+      - ".github/workflows/build-illustrated-history-foley-library.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: illustrated-history-foley-library
+  cancel-in-progress: false
+
+jobs:
+  acquire-index-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install 7-Zip and FFmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y p7zip-full ffmpeg
+          command -v 7z || command -v 7zz
+          ffprobe -version
+
+      - name: Test safe extraction, provenance and approval gates
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/audio/build_illustrated_history_foley_bundle.py
+          python -m unittest discover -s tools/audio -p "test_illustrated_history_foley_bundle.py" -v
+
+      - name: Acquire the exact item-level CC0 source packs
+        run: |
+          set -euo pipefail
+          python tools/audio/build_illustrated_history_foley_bundle.py \
+            --manifest tools/audio/illustrated_history_foley_sources.json \
+            --download-dir "$RUNNER_TEMP/illustrated-history-foley-downloads" \
+            --output-dir build/illustrated-history-foley \
+            --download
+
+      - name: Validate catalog, media streams and human-audition gate
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("build/illustrated-history-foley")
+          report = json.loads((root / "build-report.json").read_text(encoding="utf-8"))
+          catalog = json.loads((root / "package" / "catalog.json").read_text(encoding="utf-8"))
+          assert report["source_count"] == 8, report
+          assert report["audio_asset_count"] >= 20, report
+          assert report["human_auditioned"] == 0
+          assert report["approved_for_final_mix"] == 0
+          assert catalog["summary"]["audio_asset_count"] == report["audio_asset_count"]
+          assert all(item["license"] == "CC0-1.0" for item in catalog["assets"])
+          assert all(item["human_auditioned"] is False for item in catalog["assets"])
+          assert all(item["approved_for_final_mix"] is False for item in catalog["assets"])
+          assert all(item.get("duration_seconds", 0) > 0 for item in catalog["assets"])
+          assert (root / report["package"]).is_file()
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publish the curated source pack as a versioned GitHub Release
+        env:
+          GH_TOKEN: \${{ github.token }}
+          RELEASE_TAG: nolane-illustrated-history-foley-v0.1.0
+        run: |
+          set -euo pipefail
+          NOTES="$RUNNER_TEMP/foley-release-notes.md"
+          cat > "$NOTES" <<'EOF'
+          # Illustrated History Foley — CC0 source pack
+
+          Targeted, source-backed Foley acquisition for historical/cartoon video production.
+
+          Includes CC0 weapon handling and weapon-impact collections, six-horse gallop, crowd-shout layer, blacksmith hammer and generic impacts. The ZIP carries a per-file provenance catalog and offline audition page.
+
+          Every sound is initially marked NOT HUMAN-AUDITIONED and NOT APPROVED FOR FINAL MIX. A successful CI build only proves download, extraction and media decoding.
+          EOF
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Nolane Illustrated History Foley CC0 v0.1.0" \
+              --notes-file "$NOTES"
+          fi
+          gh release upload "$RELEASE_TAG" \
+            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.1.0.zip \
+            build/illustrated-history-foley/build-report.json \
+            build/illustrated-history-foley/download-manifest.json \
+            build/illustrated-history-foley/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url,assets
+
+      - name: Upload offline audition bundle and evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: illustrated-history-foley-cc0-\${{ github.run_number }}
+          path: |
+            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.1.0.zip
+            build/illustrated-history-foley/package/catalog.json
+            build/illustrated-history-foley/package/AUDIO_PREVIEW.html
+            build/illustrated-history-foley/package/source-register.json
+            build/illustrated-history-foley/build-report.json
+            build/illustrated-history-foley/download-manifest.json
+            build/illustrated-history-foley/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
