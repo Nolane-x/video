@@ -1,8 +1,8 @@
-# Nolane Video Command Center v1.0.0
+# Nolane Video Command Center v1.0.1
 
 One private front door for Nolane video production. It includes **33 internal skills**, **37 core specialist plugins**, and **1 genre-specific H2 Squire specialist** (38 separately activated specialist plugins total).
 
-## What's new in v1.0.0
+## What's new in v1.0.1
 
 - Adds a dedicated **illustrated-history-animation-director** for expressive 2D/cartoon history: character rigs, pose-led acting, prop choreography, moving environments, parallax, motivated camera paths, animated maps and information graphics.
 - Adds **historical-audio-library-curator** with source-first recorded Foley/ambience/music, rights separation, exact attribution, SHA-256 and human audition gates.
@@ -34,7 +34,7 @@ The source map also tracks the Sonniss GDC 2026 bundle as `private_production_on
 
 The plugin bundles `references/HISTORICAL_FOLEY_COVERAGE_AUDIT.md`: current direct matches, broad tag-only suggestions and gaps such as hoofbeats/cavalry, bow/arrow, shield/spear and battlefield crowd cues. For historical Foley searches prefer `--direct-only` and inspect the candidate audio yourself.
 
-The CC0 Audition Edition v0.2.0 adds `AUDIO_PREVIEW.html`. Listen to each exact file, mark it heard and choose keep/reject, fit rating and notes. Export `nolane-foley-review-decisions.json`; browser decisions are local until exported. Validate against the exact package catalog before making a final-mix shortlist:
+The CC0 Foley + Score Audition Edition v0.3.0 adds `AUDIO_PREVIEW.html`. Listen to each exact file, mark it heard and choose keep/reject, fit rating and notes. Export `nolane-foley-review-decisions.json`; browser decisions are local until exported. Validate against the exact package catalog before making a final-mix shortlist:
 
 ```bash
 python tools/audio/validate_foley_review_decisions.py \
@@ -68,3 +68,6 @@ The Command Center does not invisibly activate other private plugins. Host-contr
 - License boundaries remain per component and per media record. Preserve third-party notices and verify fonts, assets, runtimes, music and sound files separately.
 
 See `references/ILLUSTRATED_HISTORY_MOTION_SYSTEM.md` for the complete shot/motion standard. See SKILL-CATALOG.md and the plugin registries for internal skills and explicit specialist handoffs.
+
+
+The v0.3.0 source pack includes three item-level CC0 music candidates: Eye of the Storm (WAV), The Final Battle (OGG) and Prepare to fight (MP3). They are modern orchestral/game-style recordings, not period-authentic music; audition them in edit context and keep them unapproved until a person chooses them.
