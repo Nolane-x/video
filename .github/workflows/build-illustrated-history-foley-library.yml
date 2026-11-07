@@ -72,9 +72,27 @@ jobs:
           print(json.dumps(report, ensure_ascii=False, indent=2))
           PY
 
+      - name: Upload offline audition bundle and evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: illustrated-history-foley-cc0-${{ github.run_number }}
+          path: |
+            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.1.0.zip
+            build/illustrated-history-foley/package/catalog.json
+            build/illustrated-history-foley/package/AUDIO_PREVIEW.html
+            build/illustrated-history-foley/package/source-register.json
+            build/illustrated-history-foley/build-report.json
+            build/illustrated-history-foley/download-manifest.json
+            build/illustrated-history-foley/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+
       - name: Publish the curated source pack as a versioned GitHub Release
+        id: publish-release
+        continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.NOLANE_RELEASE_TOKEN || github.token }}
           RELEASE_TAG: nolane-illustrated-history-foley-v0.1.0
         run: |
           set -euo pipefail
@@ -103,18 +121,22 @@ jobs:
             --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url,assets
 
-      - name: Upload offline audition bundle and evidence
-        uses: actions/upload-artifact@v7
-        with:
-          name: illustrated-history-foley-cc0-\${{ github.run_number }}
-          path: |
-            build/illustrated-history-foley/nolane-illustrated-history-foley-v0.1.0.zip
-            build/illustrated-history-foley/package/catalog.json
-            build/illustrated-history-foley/package/AUDIO_PREVIEW.html
-            build/illustrated-history-foley/package/source-register.json
-            build/illustrated-history-foley/build-report.json
-            build/illustrated-history-foley/download-manifest.json
-            build/illustrated-history-foley/SHA256SUMS.txt
-          if-no-files-found: error
-          retention-days: 90
-          compression-level: 0
+      - name: Record release publication result
+        if: always()
+        env:
+          RELEASE_OUTCOME: ${{ steps.publish-release.outcome }}
+        run: |
+          set -euo pipefail
+          if [ "$RELEASE_OUTCOME" = "success" ]; then
+            {
+              echo "## Foley Release"
+              echo "Published \`nolane-illustrated-history-foley-v0.1.0\` successfully."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## Foley Release"
+              echo "The package artifact was uploaded, but GitHub Release publication was denied."
+              echo "For a persistent Release, add a fine-grained PAT as repository Actions secret \`NOLANE_RELEASE_TOKEN\` with Contents: write access to this repository, then rerun this workflow."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::The offline audition artifact is available; persistent Release publication needs NOLANE_RELEASE_TOKEN with Contents: write."
+          fi
