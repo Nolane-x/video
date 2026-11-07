@@ -43,3 +43,8 @@ Every key shot names camera path, subject/prop action, depth layers and edit mot
 ## Foley + score pack delivery status — verified
 
 The v0.3.0 pack is published as a permanent GitHub Release: https://github.com/Nolane-x/video/releases/tag/nolane-illustrated-history-foley-v0.3.0. It contains 118 audio files from 11 CC0 source entries. Its ZIP SHA-256 is `d6eb13df0ebd4f17084d95993708f26bfb4fd86e9c4e9776e6454e04b190a7bd`. All cues remain un-auditioned/unapproved until reviewed with the offline console and validator.
+
+
+## v0.4.0 ambience route
+
+The illustrated-history CC0 pack is expanding beyond Foley and score to include five modern field-recorded environment candidates: birds before rain, river/wildlife, open-field wind, Vistula River waves and interior howling wind. Use only after the v0.4.0 release succeeds and a human auditions the exact file. Preserve recording context; never label these as period-specific historical or battlefield recordings.
