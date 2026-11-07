@@ -1,4 +1,4 @@
-# Nolane Video Command Center — internal skill catalog v0.9.9
+# Nolane Video Command Center — internal skill catalog v1.0.0
 
 The Command Center contains **33 internal skills**, a directory of **37 core specialist plugins**, and **1 genre-specific Squire specialist (38 separately activated specialists total)**. Internal skills are the normal entry path. Specialist plugins require explicit host activation; they are not silently invoked. Rendering and release remain evidence-gated.
 
@@ -32,8 +32,8 @@ The Command Center contains **33 internal skills**, a directory of **37 core spe
 - asset-provenance-rights-auditor — verify licenses and attribution without weakening item-level rules.
 
 ## Audio, subtitles and editorial
-- historical-audio-library-curator — search/acquire recordings, use direct-vs-tag-assisted matches, retrieve verified masters, and separate public CC0/PD from project-use/private sources.
-- audio-postproduction-engineer — recorded-sound-first cue design, synchronization, stems, mix and mastering.
+- historical-audio-library-curator — search/acquire recordings, run the offline Foley audition console, export and validate SHA-256-bound human decisions, retrieve verified masters, and separate public CC0/PD from project-use/private sources.
+- audio-postproduction-engineer — recorded-sound-first cue design, human-audition evidence gates, synchronization, stems, mix and mastering.
 - video-audio-speech-engineer — optional local speech/audio-ML lane.
 - speech-caption-alignment-engineer — speech alignment and subtitle timing.
 - video-caption-qa-engineer — timed-text manifests and EN/VI readability.
