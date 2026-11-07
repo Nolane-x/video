@@ -5,7 +5,7 @@ description: Edit narration, select and mix real music/sound recordings, design 
 # Audio Postproduction Engineer
 
 ## Source-first workflow
-1. Read audio-library/README.md, SOURCES.json, the Build 76 preview catalogue and Meta Open Sound preview catalogue.
+1. Read audio-library/README.md, SOURCES.json, audio-library/generated/preview-catalog.json and audio-library/generated/meta-preview-catalog.json before unpacking archives.
 2. Search with python tools/audio/search_audio_resources.py by action, material, surface, distance and emotion. Use --kind foley or --kind instrument and --direct-only for strict matching.
 3. Consult the historical Foley coverage audit and the illustrated-history CC0 acquisition record.
 4. Compare and listen to multiple exact files. A filename, source tag or FFprobe result is not a listening approval.
