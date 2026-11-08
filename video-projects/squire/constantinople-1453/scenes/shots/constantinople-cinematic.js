@@ -1,5 +1,5 @@
 import { E, registerTemplate, clamp, lerp, ease, rng, alpha, noise, glow, circle, seg, poly, linGrad } from '/engine/core.js';
-import { bg, formation, drawPeople, prop, drawThing, camera, overlays, effects, flag, castle, cloud } from '/packs/squire/pack.js';
+import { bg, formation, drawPeople, prop, drawThing, camera, overlays, flag, castle, cloud } from '/packs/squire/pack.js';
 
 const W=()=>E.W, H=()=>E.H;
 const BLUE='#536b83', RED='#9c493c', GOLD='#d1ad68', STONE='#b9a98c', INK='#241f20';
