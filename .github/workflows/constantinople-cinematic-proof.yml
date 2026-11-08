@@ -6,7 +6,6 @@ on:
       - 'cinematic/constantinople-bombard-proof'
     paths:
       - 'tools/blender/render_constantinople_bombardment.py'
-      - '.github/workflows/constantinople-cinematic-proof.yml'
   workflow_dispatch:
 
 permissions:
@@ -39,7 +38,7 @@ jobs:
           name: video-voice-assets-42448341267
           path: voice-assets
           run-id: 42448341267
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify voice integrity and prepare exact narration excerpt
         shell: bash
         run: |
@@ -71,13 +70,21 @@ jobs:
             "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
           for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
           sha256sum media/* | tee media/SHA256SUMS.txt
+      - name: Compile scene script and run one-frame Blender smoke render
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/blender/render_constantinople_bombardment.py
+          mkdir -p out
+          BLENDER_SMOKE_ONLY=1 SMOKE_OUTPUT="$PWD/out/constantinople-smoke.png" \
+            blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-smoke.log
+          test -s out/constantinople-smoke.png
       - name: Render illustrative 3D scene at native 240fps
         shell: bash
         env:
-          BLENDER_OUTPUT: \${{ github.workspace }}/picture-only.mp4
+          BLENDER_OUTPUT: ${{ github.workspace }}/picture-only.mp4
         run: |
           set -euo pipefail
-          mkdir -p out
           BLENDER_OUTPUT="$PWD/picture-only.mp4" blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-render.log
           test -s picture-only.mp4
       - name: Mix narration with recorded CC0 score and synchronized cannon effects
@@ -186,7 +193,7 @@ jobs:
       - name: Upload cinematic 3D proof
         uses: actions/upload-artifact@v4
         with:
-          name: constantinople-cinematic-bombardment-proof-\${{ github.run_id }}
+          name: constantinople-cinematic-bombardment-proof-${{ github.run_id }}
           path: out/review/
           if-no-files-found: error
           retention-days: 30
