@@ -122,6 +122,96 @@ jobs:
           PY
           cp models/SHA256SUMS.txt report/
 
+      - name: Install Blender and image tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender libegl1 libgl1 libxkbcommon0 libsm6 python3-pil
+
+      - name: Render source-library model previews under studio lighting
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p models/unpacked report/model-previews
+          unzip -oq models/polyhaven-models.zip -d models/unpacked
+          cat > models/render_model_preview.py <<'PY'
+          import bpy, json, math, os, sys
+          from mathutils import Vector
+          args=sys.argv[sys.argv.index("--")+1:]
+          name,out=args[0],os.path.abspath(args[1])
+          scene=bpy.context.scene
+          scene.frame_set(1)
+          for obj in list(bpy.data.objects):
+              if obj.type in {"CAMERA","LIGHT"}: bpy.data.objects.remove(obj,do_unlink=True)
+          meshes=[o for o in scene.objects if o.type=="MESH" and not o.hide_render]
+          if not meshes: raise RuntimeError(f"{name}: no visible mesh objects")
+          pts=[o.matrix_world @ Vector(corner) for o in meshes for corner in o.bound_box]
+          mn=Vector((min(p.x for p in pts),min(p.y for p in pts),min(p.z for p in pts)))
+          mx=Vector((max(p.x for p in pts),max(p.y for p in pts),max(p.z for p in pts)))
+          center=(mn+mx)*0.5
+          span=max((mx-mn).x,(mx-mn).y,(mx-mn).z,0.1)
+          floor=bpy.data.objects.new("Preview floor",bpy.data.meshes.new("Preview floor mesh"))
+          scene.collection.objects.link(floor)
+          floor.location=(center.x,center.y,mn.z-span*0.035)
+          bpy.context.view_layer.objects.active=floor;floor.select_set(True);floor.select_set(False)
+          bpy.ops.mesh.primitive_plane_add(size=span*7, location=floor.location)
+          plane=bpy.context.object;plane.name="Neutral studio ground"
+          mat=bpy.data.materials.new("Neutral studio ground");mat.diffuse_color=(.075,.085,.10,1);mat.use_nodes=True
+          mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value=(.075,.085,.10,1)
+          mat.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value=.85
+          plane.data.materials.append(mat)
+          def aim(obj,target):
+              obj.rotation_euler=(Vector(target)-obj.location).to_track_quat("-Z","Y").to_euler()
+          cam_data=bpy.data.cameras.new("Asset review camera")
+          cam=bpy.data.objects.new("Asset review camera",cam_data);scene.collection.objects.link(cam)
+          cam.location=center+Vector((span*2.0,-span*2.5,span*1.55));cam_data.lens=52;aim(cam,center);scene.camera=cam
+          def area(n,offset,power,size):
+              d=bpy.data.lights.new(n,"AREA");d.energy=power;d.shape="DISK";d.size=size
+              o=bpy.data.objects.new(n,d);scene.collection.objects.link(o);o.location=center+Vector(offset);aim(o,center)
+          area("Large warm key",(-span*2,-span*1.8,span*2.6),span*span*360,span*1.7)
+          area("Cool fill",(span*2,-span,span*1.2),span*span*160,span*2.2)
+          area("Warm rim",(span*.5,span*2,span*2.3),span*span*290,span*1.4)
+          world=bpy.data.worlds.new("Studio world") if not bpy.data.worlds else bpy.data.worlds[0]
+          scene.world=world;world.use_nodes=True
+          world.node_tree.nodes["Background"].inputs["Color"].default_value=(.13,.16,.21,1)
+          world.node_tree.nodes["Background"].inputs["Strength"].default_value=.34
+          scene.render.engine="BLENDER_EEVEE"
+          scene.eevee.taa_render_samples=16
+          scene.render.resolution_x=960;scene.render.resolution_y=540;scene.render.resolution_percentage=100
+          scene.render.image_settings.file_format="PNG";scene.render.filepath=out
+          scene.view_settings.view_transform="AgX"
+          scene.render.film_transparent=False
+          bpy.ops.render.render(write_still=True)
+          linked_images=sum(1 for im in bpy.data.images if im.source=="FILE" and im.has_data)
+          report={"model":name,"mesh_objects":len(meshes),"materials":len(bpy.data.materials),"image_textures_loaded":linked_images,
+                  "bounds_dimensions":[round(v,4) for v in (mx-mn)],"preview":out}
+          print("MODEL_PREVIEW_REPORT="+json.dumps(report),flush=True)
+          PY
+          for name in cannon_01 modular_fort_01 ship_pinnace lantern_01 barrel_01; do
+            model="models/unpacked/video-asset-library/third-party/polyhaven/models/$name/${name}_1k.blend"
+            if [ ! -f "$model" ]; then
+              echo "Missing expected Poly Haven model: $model" >&2
+              exit 1
+            fi
+            blender --background "$model" --python models/render_model_preview.py -- "$name" "report/model-previews/$name.png"
+          done
+          python - <<'PY'
+          from PIL import Image,ImageOps,ImageDraw
+          from pathlib import Path
+          ps=sorted(Path("report/model-previews").glob("*.png"))
+          assert len(ps)==5, f"Expected 5 model previews, got {len(ps)}"
+          cells=[]
+          for p in ps:
+              im=Image.open(p).convert("RGB"); im.thumbnail((640,360))
+              cell=Image.new("RGB",(660,400),(20,24,30))
+              cell.paste(im,((660-im.width)//2,26))
+              ImageDraw.Draw(cell).text((14,8),p.stem,fill="white")
+              cells.append(cell)
+          cols=2;rows=(len(cells)+cols-1)//cols
+          out=Image.new("RGB",(cols*660,rows*400),(10,12,16))
+          for i,im in enumerate(cells): out.paste(im,((i%cols)*660,(i//cols)*400))
+          out.save("report/polyhaven-model-previews.jpg",quality=92)
+          PY
+
       - name: Upload compact research result
         uses: actions/upload-artifact@v4
         with:
