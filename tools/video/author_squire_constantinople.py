@@ -17,6 +17,23 @@ def cue(root, names, at=.25, gain=-9):
             return [{"name":name,"at":at,"gain":gain}]
     return []
 
+def sfx_for_shot(tpl, args, index, root):
+    """Shot-aware cues; artillery report and wall impact follow the bespoke animation beats."""
+    if tpl=="wall_battery":
+        fire_at=float(args.get("fireAt",.52))
+        return cue(root,["cannon_fire"],at=fire_at,gain=-8) + cue(root,["siege_impact"],at=fire_at+1.02,gain=-7)
+    if tpl=="last_assault":
+        if index%3==0: return cue(root,["arrow_whoosh"],at=.28,gain=-10)
+        if index%3==1: return cue(root,["sword_clash"],at=.62,gain=-8)
+        return cue(root,["battle_roar"],at=.18,gain=-13)
+    if tpl in {"city_interior","command_camp"}:
+        return cue(root,["sword_clash"],at=.52,gain=-11) if index%4==0 else cue(root,["battle_roar"],at=.24,gain=-14)
+    if tpl=="relief_galleys":
+        return cue(root,["wind_loop"],at=0,gain=-16)
+    if tpl=="ship_portage":
+        return cue(root,["battle_roar"],at=.36,gain=-16) if index%4==0 else []
+    return cue(root,["wind_loop"],at=0,gain=-19) if index%5==0 else []
+
 def progress_phase(p, text):
     t=text.casefold()
     if p < .075 or any(k in t for k in ("final assault","last assault","janissar","ladder","before dawn","twenty-ninth of may")):
@@ -133,7 +150,7 @@ def main():
         shot["tpl"]=tpl
         shot["args"]=visual
         shot["in"]={"type":"fade","dur":.18} if i==0 else ({"type":transitions[i%len(transitions)],"dur":.13,"dir":1 if i%2 else -1} if transitions[i%len(transitions)]!="cut" else {"type":"cut"})
-        shot["sfx"]=cue(sfx_root,["siege_impact","battle_roar","arrow_whoosh"] if tpl in {"last_assault","wall_battery"} else (["sword_clash","battle_roar"] if tpl in {"city_interior","command_camp"} else ["wind_loop"]),at=.18,gain=-12 if tpl not in {"last_assault","wall_battery"} else -8)
+        shot["sfx"]=sfx_for_shot(tpl,visual,i,sfx_root)
         shot["notes"]="Composite visual reconstruction; no invented eyewitness quotation or exact unverified tactical count."
         usage[tpl]=usage.get(tpl,0)+1; last=tpl
     custom_count=sum(usage.get(x,0) for x in CUSTOM)

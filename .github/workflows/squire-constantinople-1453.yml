@@ -201,12 +201,14 @@ jobs:
         run: |
           set -euo pipefail
           ROOT="$RUNNER_TEMP/constantinople-foley"
-          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/weapon-impact" "$ROOT/weapon-textures"
+          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/weapon-impact" "$ROOT/weapon-textures" "$ROOT/battle-at-sea"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/crowd_shouting_0.ogg" -o "$ROOT/crowd/crowd_shouting.ogg"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/park_ambience_wind.wav" -o "$ROOT/wind/park_ambience_wind.wav"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o "$ROOT/score/Eye_of_the_Storm.wav"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_weapon_on_weapon_1_of_2.7z" -o "$ROOT/weapon-impact/weapon-impact.7z"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_textures_1_of_2.7z" -o "$ROOT/weapon-textures/weapon-textures.7z"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o "$ROOT/battle-at-sea/cannon_fire_1.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o "$ROOT/battle-at-sea/cannon_hit_wall_no_splash.ogg"
           7z x -y -o"$ROOT/weapon-impact" "$ROOT/weapon-impact/weapon-impact.7z"
           7z x -y -o"$ROOT/weapon-textures" "$ROOT/weapon-textures/weapon-textures.7z"
           python tools/video/import_squire_constantinople_foley.py --source-root "$ROOT" --kit "$SQUIRE_KIT" --project "$SQUIRE_PROJECT"
