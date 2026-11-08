@@ -388,5 +388,12 @@ notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
 notes.write("Illustrative reconstruction of a 15th-century Ottoman bombard and the Theodosian walls. Generic gun design; not a verified replica of Orban's exact cannon. Generic composite people, not portraits or authenticated uniforms. One impact does not destroy the city. Narration: 00:03:40.760–00:04:19.900. 1920x1080 native 240fps.\\n")
 scene.frame_set(1)
 print("CONSTANTINOPLE 3D PROOF",bpy.app.version_string,"frames",END,"fps",FPS,"objects",len(scene.objects),"output",scene.render.filepath,flush=True)
-bpy.ops.render.render(animation=True)
-print("CONSTANTINOPLE 3D PROOF RENDER FINISHED",flush=True)
+if os.environ.get("BLENDER_SMOKE_ONLY") == "1":
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.filepath = os.path.abspath(os.environ.get("SMOKE_OUTPUT", "out/constantinople-smoke.png"))
+    os.makedirs(os.path.dirname(scene.render.filepath), exist_ok=True)
+    bpy.ops.render.render(write_still=True)
+    print("CONSTANTINOPLE ONE-FRAME SMOKE FINISHED", flush=True)
+else:
+    bpy.ops.render.render(animation=True)
+    print("CONSTANTINOPLE 3D PROOF RENDER FINISHED",flush=True)
