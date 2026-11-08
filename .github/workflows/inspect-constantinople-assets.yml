@@ -127,12 +127,76 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y blender libegl1 libgl1 libxkbcommon0 libsm6 python3-pil
 
+      - name: Resolve and download Poly Haven models from the official API
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p models/downloaded
+          python - <<'PY'
+          import json, os, hashlib, urllib.request
+          from pathlib import Path, PurePosixPath
+          from urllib.parse import urlparse
+          assets = ["cannon_01", "modular_fort_01", "ship_pinnace", "lantern_01", "barrel_01"]
+          root = Path("models/downloaded")
+          manifest = {"provider":"Poly Haven","license":"CC0-1.0","assets":[]}
+          def fetch(url):
+              req=urllib.request.Request(url,headers={"User-Agent":"Nolane-x-video/asset-audit"})
+              with urllib.request.urlopen(req,timeout=90) as response: return response.read()
+          def collect_includes(node, path=""):
+              found=[]
+              if isinstance(node,dict):
+                  if isinstance(node.get("url"),str):
+                      found.append((path or urlparse(node["url"]).path.rsplit("/",1)[-1],node))
+                  else:
+                      for key,value in node.items():
+                          if key in {"url","md5","size"}: continue
+                          found.extend(collect_includes(value,str(key) if not path else f"{path}/{key}"))
+              elif isinstance(node,list):
+                  for i,value in enumerate(node): found.extend(collect_includes(value,f"{path}/{i}"))
+              return found
+          for asset in assets:
+              data=json.loads(fetch(f"https://api.polyhaven.com/files/{asset}"))
+              branch=data.get("blend")
+              if not isinstance(branch,dict) or not branch:
+                  raise RuntimeError(f"{asset}: no Blender file branch in API response")
+              choices=[]
+              for resolution,formats in branch.items():
+                  if isinstance(formats,dict) and isinstance(formats.get("blend"),dict) and formats["blend"].get("url"):
+                      info=formats["blend"]; size=int(info.get("size",0))
+                      choices.append((resolution,size,info))
+              if not choices: raise RuntimeError(f"{asset}: no downloadable .blend variant")
+              resolution,size,main=sorted(choices,key=lambda x:(0 if x[0]=="1k" else 1,x[1]))[0]
+              asset_dir=root/asset;asset_dir.mkdir(parents=True,exist_ok=True)
+              filename=PurePosixPath(urlparse(main["url"]).path).name
+              if not filename.lower().endswith(".blend"): raise RuntimeError(f"{asset}: unexpected model URL {main['url']}")
+              target=asset_dir/filename
+              blob=fetch(main["url"]);target.write_bytes(blob)
+              if size and len(blob)!=size: raise RuntimeError(f"{asset}: size mismatch {len(blob)} != {size}")
+              md5=main.get("md5")
+              if md5 and hashlib.md5(blob).hexdigest()!=md5: raise RuntimeError(f"{asset}: MD5 mismatch")
+              includes=[]
+              for rel,meta in collect_includes(main.get("include",{})):
+                  relpath=PurePosixPath(rel)
+                  if relpath.is_absolute() or ".." in relpath.parts: raise RuntimeError(f"Unsafe include path: {rel}")
+                  if not isinstance(meta,dict) or not meta.get("url"): continue
+                  dest=asset_dir.joinpath(*relpath.parts)
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  raw=fetch(meta["url"]);dest.write_bytes(raw)
+                  expected=meta.get("size")
+                  if expected and len(raw)!=int(expected): raise RuntimeError(f"{asset}: include size mismatch {rel}")
+                  if meta.get("md5") and hashlib.md5(raw).hexdigest()!=meta["md5"]: raise RuntimeError(f"{asset}: include MD5 mismatch {rel}")
+                  includes.append({"path":rel,"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()})
+              manifest["assets"].append({"id":asset,"resolution":resolution,"file":str(target),"bytes":len(blob),
+                  "sha256":hashlib.sha256(blob).hexdigest(),"includes":includes})
+              print(f"POLYHAVEN_MODEL_READY {asset} {resolution} {len(blob)} bytes {len(includes)} dependencies",flush=True)
+          Path("models/downloaded/manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
+          PY
+
       - name: Render source-library model previews under studio lighting
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p models/unpacked report/model-previews
-          unzip -oq models/polyhaven-models.zip -d models/unpacked
+          mkdir -p report/model-previews
           cat > models/render_model_preview.py <<'PY'
           import bpy, json, math, os, sys
           from mathutils import Vector
@@ -186,15 +250,14 @@ jobs:
                   "bounds_dimensions":[round(v,4) for v in (mx-mn)],"preview":out}
           print("MODEL_PREVIEW_REPORT="+json.dumps(report),flush=True)
           PY
-          for spec in cannon_01:cannon_01_1k.blend modular_fort_01:modular_fort_01_1k.blend ship_pinnace:ship_pinnace_1k.blend lantern_01:Lantern_01_1k.blend barrel_01:Barrel_01_1k.blend; do
-            IFS=: read -r name filename <<< "$spec"
-            model="models/unpacked/video-asset-library/third-party/polyhaven/models/$name/$filename"
-            if [ ! -f "$model" ]; then
-              echo "Missing expected Poly Haven model: $model" >&2
-              exit 1
-            fi
-            blender --background "$model" --python models/render_model_preview.py -- "$name" "report/model-previews/$name.png"
-          done
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          manifest=json.loads(Path("models/downloaded/manifest.json").read_text())
+          for asset in manifest["assets"]:
+              model=asset["file"]
+              subprocess.run(["blender","--background",model,"--python","models/render_model_preview.py","--",asset["id"],f"report/model-previews/{asset['id']}.png"],check=True)
+          PY
           python - <<'PY'
           from PIL import Image,ImageOps,ImageDraw
           from pathlib import Path
