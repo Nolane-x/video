@@ -29,6 +29,26 @@ def choose_voice(manifest):
     vieneu=[r for r in rows if "vieneu" in str(r.get("engine","")).casefold()]
     if vieneu:return sorted(vieneu,key=lambda r:(r.get("display_name",""),r.get("id","")))[0],"Eligible English VieNeu fallback."
     raise RuntimeError("No eligible English voice passed rights, watermark and signal checks.")
+MAX_RENDERED_CHUNKS = 280
+MAX_CHUNK_CHARS = 360
+
+def predict_voicestudio_chunks(text):
+    """Mirror VoiceStudio's sentence/360-character splitter before dispatch."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?\u3002\uff01\uff1f])\s+|\n+", normalized) if part.strip()]
+    total = 0
+    for sentence in sentences:
+        remaining = sentence
+        while len(remaining) > MAX_CHUNK_CHARS:
+            cut = remaining.rfind(" ", 0, MAX_CHUNK_CHARS + 1)
+            if cut < max(40, MAX_CHUNK_CHARS // 2):
+                cut = MAX_CHUNK_CHARS
+            total += 1
+            remaining = remaining[cut:].strip()
+        if remaining:
+            total += 1
+    return total
+
 def clean_script(path):
     raw=path.read_text(encoding="utf-8").replace("\r\n","\n").strip()
     raw=re.sub(r"\n+\d[\d,]* words\..*$","",raw,flags=re.S).strip()
@@ -39,16 +59,19 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument("--script",required=True);ap.add_argument("--output",required=True);ap.add_argument("--metadata",required=True);ap.add_argument("--manifest")
     a=ap.parse_args();manifest=read_manifest(a.manifest);voice,rationale=choose_voice(manifest);paras=clean_script(Path(a.script))
     segments=[{"id":f"p{i:03d}","text":p,"pause_ms_after":360 if i<len(paras) else 0} for i,p in enumerate(paras,1)]
+    predicted_chunks=sum(predict_voicestudio_chunks(x["text"]) for x in segments)
+    if predicted_chunks > MAX_RENDERED_CHUNKS:
+        raise ValueError(f"VoiceStudio would receive {predicted_chunks} chunks; bounded limit is {MAX_RENDERED_CHUNKS}")
     engine=str(voice.get("engine","")).casefold()
     engine="vieneu" if "vieneu" in engine else ("kokoro" if "kokoro" in engine else "")
     if not engine:raise RuntimeError(f"Unsupported voice engine: {voice.get('engine')!r}")
     chars=sum(len(x["text"]) for x in segments)
     if chars>30000:raise ValueError(f"Script exceeds 30,000 characters: {chars}")
     job={"schema_version":1,"job_id":"constantinople-1453-hfr-longform","title":"53 Days to the End of an Empire","language":"en","engine":engine,"voice_id":voice["id"],"segments":segments}
-    meta={"schema_version":1,"manifest_built_at":manifest.get("built_at"),"voice_id":voice["id"],"display_name":voice.get("display_name"),"engine":voice.get("engine"),"upstream_quality_grade":voice.get("upstream_quality_grade"),"rights":voice.get("rights"),"signal_checks":voice.get("signal_checks"),"watermark":voice.get("watermark"),"rationale":rationale,"paragraph_count":len(segments),"script_characters":chars,"no_real_person_impersonation":True}
+    meta={"schema_version":1,"manifest_built_at":manifest.get("built_at"),"voice_id":voice["id"],"display_name":voice.get("display_name"),"engine":voice.get("engine"),"upstream_quality_grade":voice.get("upstream_quality_grade"),"rights":voice.get("rights"),"signal_checks":voice.get("signal_checks"),"watermark":voice.get("watermark"),"rationale":rationale,"paragraph_count":len(segments),"script_characters":chars,"predicted_tts_chunks":predicted_chunks,"tts_chunk_cap":MAX_RENDERED_CHUNKS,"no_real_person_impersonation":True}
     Path(a.output).write_text(json.dumps(job,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     Path(a.metadata).write_text(json.dumps(meta,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(f"Voice contract ok: {voice['id']} | {len(segments)} paragraphs | {chars} chars")
+    print(f"Voice contract ok: {voice['id']} | {len(segments)} paragraphs | {chars} chars | {predicted_chunks}/{MAX_RENDERED_CHUNKS} TTS chunks")
 if __name__=="__main__":
     try:raise SystemExit(main())
     except Exception as e:print(f"[constantinople-voice] {type(e).__name__}: {e}",file=sys.stderr);raise SystemExit(1)
