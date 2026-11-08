@@ -1,0 +1,27 @@
+{
+  "title": "53 Days to the End of an Empire",
+  "aspect": "16:9",
+  "resolution": "1080p",
+  "fps": 240,
+  "style": "flat",
+  "captions": true,
+  "captionStyle": "squire",
+  "bars": "none",
+  "fadeIn": 0.18,
+  "fadeOut": 0.7,
+  "pack": "squire",
+  "lang": "en",
+  "music": {
+    "enabled": true,
+    "gainDb": -14
+  },
+  "sfx": {
+    "enabled": true,
+    "gainDb": -6
+  },
+  "loudness": -14,
+  "maxrate": "48M",
+  "bufsize": "96M",
+  "crf": 18,
+  "renderPreset": "slow"
+}
