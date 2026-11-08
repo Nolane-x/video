@@ -71,7 +71,7 @@ jobs:
           report={
             "source_run_id":42449792684,
             "source_artifact":"squire-constantinople-1453-240fps-42449792684",
-            "master_file":Path("MASTER_SOURCE_PATH.txt").read_text().strip(),
+            "master_file":Path("review/MASTER_SOURCE_PATH.txt").read_text().strip(),
             "resolution":[int(v["width"]),int(v["height"])],
             "r_frame_rate":v.get("r_frame_rate"),
             "avg_frame_rate":v.get("avg_frame_rate"),
@@ -81,7 +81,7 @@ jobs:
             "audio_codec":a.get("codec_name"),
             "audio_sample_rate":a.get("sample_rate"),
             "audio_channels":a.get("channels"),
-            "master_bytes":Path(Path("MASTER_SOURCE_PATH.txt").read_text().strip()).stat().st_size,
+            "master_bytes":Path(Path("review/MASTER_SOURCE_PATH.txt").read_text().strip()).stat().st_size,
             "review_status":"Technical report and source master retained; artistic sign-off remains pending."
           }
           Path("review/inspection-summary.json").write_text(json.dumps(report,indent=2)+"\n")
