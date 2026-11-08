@@ -1,0 +1,279 @@
+name: Squire · Constantinople 1453 · Native 240 FPS
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-240fps'
+    paths:
+      - '.github/workflows/squire-constantinople-1453.yml'
+      - 'integrations/h2-squire-studio/kit/**'
+      - 'video-projects/squire/constantinople-1453/**'
+      - 'tools/video/author_squire_constantinople.py'
+      - 'tools/video/prepare_squire_constantinople_voice_job.py'
+      - 'tools/video/import_squire_constantinople_foley.py'
+      - 'tools/video/qa_squire_constantinople.py'
+      - 'tests/test_squire_constantinople.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-constantinople-1453-hfr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-voice:
+    name: Select eligible English narrator and validate script
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      job_json: ${{ steps.prepare.outputs.job_json }}
+      voice_id: ${{ steps.prepare.outputs.voice_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Prepare 2,473-word narration with VoiceStudio rights manifest
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/video/prepare_squire_constantinople_voice_job.py \
+            --script video-projects/squire/constantinople-1453/01-SCRIPT.md \
+            --output "$RUNNER_TEMP/voice-job.json" \
+            --metadata "$RUNNER_TEMP/voice-selection.json"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])
+          job=json.loads((root/"voice-job.json").read_text(encoding="utf-8"))
+          meta=json.loads((root/"voice-selection.json").read_text(encoding="utf-8"))
+          print("voice_id="+meta["voice_id"])
+          print("job_json<<VOICE_JOB_EOF")
+          print(json.dumps(job,ensure_ascii=False,separators=(",",":")))
+          print("VOICE_JOB_EOF")
+          PY
+      - name: Preserve exact narrator selection
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-voice-selection-${{ github.run_id }}
+          path: ${{ runner.temp }}/voice-selection.json
+          if-no-files-found: error
+          retention-days: 30
+
+  voiceover:
+    name: Synthesize and verify English narration
+    needs: prepare-voice
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
+    with:
+      job_json: ${{ needs.prepare-voice.outputs.job_json }}
+    permissions:
+      contents: read
+
+  render-squire:
+    name: Align, author, render native 240fps, mix and QA
+    needs: [prepare-voice, voiceover]
+    if: ${{ needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download verified VoiceStudio assets
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voice-assets
+      - name: Download the exact narrator selection record
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-voice-selection-${{ github.run_id }}
+          path: voice-assets
+      - name: Install FFmpeg, archive tools and alignment dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg p7zip-full curl unzip
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check \
+            'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' \
+            'pyloudnorm>=0.1.1' 'faster-whisper==1.2.1'
+      - name: Verify voice provenance, PCM-24 master and AudioSeal
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s voice-assets/narration.wav
+          test -s voice-assets/manifest.json
+          test -s voice-assets/captions.srt
+          test -s voice-assets/captions.vtt
+          test -s voice-assets/voice-selection.json
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("voice-assets")
+          m=json.loads((p/"manifest.json").read_text(encoding="utf-8"))
+          selected=json.loads((p/"voice-selection.json").read_text(encoding="utf-8"))
+          a=m["audio"]
+          digest=hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()
+          assert digest==a["sha256"], "VoiceStudio WAV SHA-256 mismatch"
+          assert m["voice_id"]==selected["voice_id"], "Selected and rendered voices differ"
+          assert a["sample_rate"]==48000 and a["channels"]==1 and a["subtype"]=="PCM_24", a
+          assert a["watermark"]["status"]=="verified" and a["checks"]=="passed", a
+          assert a["duration_seconds"]>650, f"Narration must exceed 10:50: {a['duration_seconds']}"
+          print("Verified voice master:",m["voice_id"],a["duration_seconds"])
+          PY
+      - name: Align narration to word timestamps
+        run: python tools/video/align_voicestudio_voiceover.py --artifact-dir voice-assets --model small
+      - name: Compile production code and run focused tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/video/prepare_squire_constantinople_voice_job.py \
+            tools/video/author_squire_constantinople.py \
+            tools/video/import_squire_constantinople_foley.py \
+            tools/video/qa_squire_constantinople.py \
+            tests/test_squire_constantinople.py
+          python tests/test_squire_constantinople.py
+      - name: Verify H2 Squire runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          test -s "$KIT/render.mjs"
+          test -s "$KIT/engine/core.js"
+          test -s "$KIT/packs/squire/pack.js"
+          test -s "$KIT/packs/squire/templates.js"
+          test -s "$KIT/tools/mix.py"
+          echo "SQUIRE_KIT=$KIT" >> "$GITHUB_ENV"
+      - name: Create Squire project and bind narration timeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$SQUIRE_KIT"
+          PROJ="$KIT/projects/constantinople-1453"
+          python "$KIT/tools/new_project.py" \
+            --name constantinople-1453 \
+            --title "53 Days to the End of an Empire" \
+            --aspect 16:9 --resolution 1080p --style flat --pack squire --lang en
+          cp video-projects/squire/constantinople-1453/config.json "$PROJ/config.json"
+          cp video-projects/squire/constantinople-1453/01-SCRIPT.md "$PROJ/story/narration.txt"
+          cp video-projects/squire/constantinople-1453/story/bible.md "$PROJ/story/bible.md"
+          cp video-projects/squire/constantinople-1453/story/03-VISUAL-DIRECTION.md "$PROJ/story/03-VISUAL-DIRECTION.md"
+          cp video-projects/squire/constantinople-1453/story/05-PACKAGING.md "$PROJ/story/05-PACKAGING.md"
+          cp video-projects/squire/constantinople-1453/scenes/shots/*.js "$PROJ/scenes/shots/"
+          cp voice-assets/h2-timeline/timeline/voice.wav "$PROJ/timeline/voice.wav"
+          cp voice-assets/h2-timeline/timeline/blocks.json \
+             voice-assets/h2-timeline/timeline/lines.json \
+             voice-assets/h2-timeline/timeline/words.json \
+             voice-assets/h2-timeline/timeline/transcript.txt "$PROJ/timeline/"
+          cp voice-assets/h2-timeline/alignment-report.json "$PROJ/story/alignment-report.json"
+          cp voice-assets/manifest.json "$PROJ/story/voice-manifest.json"
+          cp voice-assets/voice-selection.json "$PROJ/story/voice-selection.json"
+          cp voice-assets/captions.srt "$PROJ/story/captions.srt"
+          cp voice-assets/captions.vtt "$PROJ/story/captions.vtt"
+          echo "SQUIRE_PROJECT=$PROJ" >> "$GITHUB_ENV"
+      - name: Install Squire runtime and Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Build audio runtime and underscore beds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python audio/build_audio.py
+          python tools/doctor.py
+      - name: Download and import CC0 audio candidates with item-level provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/constantinople-foley"
+          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/weapon-impact" "$ROOT/weapon-textures"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/crowd_shouting_0.ogg" -o "$ROOT/crowd/crowd_shouting.ogg"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/park_ambience_wind.wav" -o "$ROOT/wind/park_ambience_wind.wav"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o "$ROOT/score/Eye_of_the_Storm.wav"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_weapon_on_weapon_1_of_2.7z" -o "$ROOT/weapon-impact/weapon-impact.7z"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_textures_1_of_2.7z" -o "$ROOT/weapon-textures/weapon-textures.7z"
+          7z x -y -o"$ROOT/weapon-impact" "$ROOT/weapon-impact/weapon-impact.7z"
+          7z x -y -o"$ROOT/weapon-textures" "$ROOT/weapon-textures/weapon-textures.7z"
+          python tools/video/import_squire_constantinople_foley.py --source-root "$ROOT" --kit "$SQUIRE_KIT" --project "$SQUIRE_PROJECT"
+      - name: Draft voice-timed shots and author detailed 1453 sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/draft_shots.py --project projects/constantinople-1453 --min 0.8 --max 2.2 --force
+          cd "$GITHUB_WORKSPACE"
+          python tools/video/author_squire_constantinople.py --project "$SQUIRE_PROJECT"
+      - name: Validate every shot and render contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453 --check --scale 0.25 2>&1 | tee projects/constantinople-1453/build/check.log
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' projects/constantinople-1453/build/check.log; then
+            echo "Scene scan found a missing or broken shot."
+            exit 1
+          fi
+          node render.mjs --project projects/constantinople-1453 --sheet --scale 0.4 --at 0.48 2>&1 | tee projects/constantinople-1453/build/contact-sheet.log
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' projects/constantinople-1453/build/contact-sheet.log; then
+            echo "Contact sheet found a missing or broken shot."
+            exit 1
+          fi
+      - name: Render 12-second native 240fps motion proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453 --from 0 --to 12 --workers 2 --crf 18 --maxrate 48M --bufsize 96M 2>&1 | tee projects/constantinople-1453/build/preview.log
+          ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,avg_frame_rate,nb_frames -of json projects/constantinople-1453/build/preview.mp4
+      - name: Render the complete 1080p native 240fps master
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453 --workers 4 --crf 18 --maxrate 48M --bufsize 96M --preset slow 2>&1 | tee projects/constantinople-1453/build/full-render.log
+      - name: Mix narration, score and recorded sound-effect candidates; build thumbnail
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/mix.py --project projects/constantinople-1453
+          node render.mjs --project projects/constantinople-1453 --thumb
+      - name: Run strict HFR QA and assemble delivery bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/video/qa_squire_constantinople.py --project "$SQUIRE_PROJECT" --voice-assets "$GITHUB_WORKSPACE/voice-assets"
+          mkdir -p "$RUNNER_TEMP/constantinople-delivery"
+          cp -a "$SQUIRE_PROJECT/out/." "$RUNNER_TEMP/constantinople-delivery/"
+          cp -a "$SQUIRE_PROJECT/build/sheets" "$RUNNER_TEMP/constantinople-delivery/contact-sheets"
+          cp "$SQUIRE_PROJECT/build/preview.mp4" "$RUNNER_TEMP/constantinople-delivery/preview-12s-240fps.mp4"
+          cp "$SQUIRE_PROJECT/build/mix.wav" "$RUNNER_TEMP/constantinople-delivery/final-mix.wav"
+          cp "$SQUIRE_PROJECT/timeline/voice.wav" "$RUNNER_TEMP/constantinople-delivery/narration-timeline.wav"
+          cp "$SQUIRE_PROJECT/story/QA-REPORT.md" "$SQUIRE_PROJECT/story/QA-REPORT.json" "$RUNNER_TEMP/constantinople-delivery/"
+          cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-manifest.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$RUNNER_TEMP/constantinople-delivery/"
+          cp "$SQUIRE_PROJECT/story/FOLEY-SOURCE-MANIFEST.json" "$RUNNER_TEMP/constantinople-delivery/"
+          cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$RUNNER_TEMP/constantinople-delivery/"
+          cp video-projects/squire/constantinople-1453/01-SCRIPT.md video-projects/squire/constantinople-1453/story/research.md "$RUNNER_TEMP/constantinople-delivery/"
+          (cd "$RUNNER_TEMP/constantinople-delivery" && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload native 240fps film master and review assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-1453-240fps-${{ github.run_id }}
+          path: ${{ runner.temp }}/constantinople-delivery/
+          if-no-files-found: error
+          retention-days: 30
