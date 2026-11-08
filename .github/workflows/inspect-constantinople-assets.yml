@@ -80,10 +80,12 @@ jobs:
               if key not in seen: seen.add(key);unique.append(row)
           result["records"]=unique
           manifest=json.loads(Path("source-shards/history-foley-manifest.json").read_text())
+          manifest_rows=(manifest.get("assets",[]) if isinstance(manifest,dict) else manifest if isinstance(manifest,list) else [])
           result["history_foley_manifest_summary"]={
-            "keys":list(manifest)[:25],
-            "asset_count":len(manifest.get("assets",[])) if isinstance(manifest.get("assets"),list) else None,
-            "manifest_excerpt":manifest if len(json.dumps(manifest))<6000 else None
+            "json_type":type(manifest).__name__,
+            "keys":list(manifest)[:25] if isinstance(manifest,dict) else [],
+            "asset_count":len(manifest_rows),
+            "manifest_excerpt":manifest if len(json.dumps(manifest))<6000 else manifest_rows[:30]
           }
           Path("report").mkdir(exist_ok=True)
           Path("report/historical-asset-candidates.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n")
