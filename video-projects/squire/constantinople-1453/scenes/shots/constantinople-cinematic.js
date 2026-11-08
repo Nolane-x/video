@@ -228,7 +228,7 @@ function cityPanorama(g,t,a){
 }
 registerTemplate('city_panorama',{draw(g,lt,info){camera(g,lt,info,()=>cityPanorama(g,lt,{...info.args,info}));}});
 registerTemplate('command_camp',{draw(g,lt,info){camera(g,lt,info,()=>{drawCamp(g,lt);for(let i=0;i<8;i++)flag(g,80+i*250,620,140,{color:i%2?RED:BLUE,t:lt,lw:2});dust(g,lt,1200,870,88,40);});}});
-registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>drawCityInterior(g,lt));}});
+registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>{drawCityInterior(g,lt);drawHero(g,lt,info,{x:.3,y:.98,h:.6,face:'tired',pose:'carry',walk:true,speed:.22});});}});
 registerTemplate('wall_battery',{draw(g,lt,info){
   const a=info.args||{},fireAt=a.fireAt??.52,age=lt-fireAt,impact=fireAt+1.02;
   camera(g,lt,info,()=>{
@@ -331,8 +331,8 @@ registerTemplate('aftermath_city',{draw(g,lt,info){
 
 // Character-led set pieces added after first proof review. The defender is a recurring
 // scale/continuity anchor; each template stages a different physical action and setting.
-function drawHero(g,t,info,{x=.3,y=.97,h=.62,face='determined',pose='guard',flip=false,weapon='spear'}={}){
-  drawPeople(g,t,info,[{preset:'byzantineYou',x,y,h,face,pose,flip,weapon,
+function drawHero(g,t,info,{x=.3,y=.97,h=.62,face='determined',pose='guard',flip=false,weapon='spear',walk=false,speed=1,dir=1}={}){
+  drawPeople(g,t,info,[{preset:'byzantineYou',x,y,h,face,pose,flip,weapon,walk,speed,dir,
     shield:{type:'round',color:BLUE,charge:'cross',chargeColor:GOLD}}],.94,.66);
 }
 function drawNightWatch(g,t,info){
