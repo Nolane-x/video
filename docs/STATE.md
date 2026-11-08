@@ -1,3 +1,13 @@
+# Constantinople 3D bombardment proof — parallel-render status (2026-11-08)
+
+- Separate proof branch: `cinematic/constantinople-bombard-parallel`, source commit `7ff887df793aecc855e0a4ddad96ac1e4c478171`. Blender script now accepts global frame ranges with `BLENDER_FRAME_START/END`; no frame numbers or keyframes are rebased between workers.
+- Parallel workflow [run #1 / 42464843252](https://github.com/Nolane-x/video/actions/runs/42464843252) launched 18 workers, each assigned a disjoint contiguous range of 522 frames (last range 520). At the latest check all 18 workers had passed setup and were inside the compile/render step. The assemble job must verify all 9,394 frames, 1920x1080, and exact CFR 240/240 before publishing the stitched proof.
+- Prior sequential workflow [run #3 / 42461960154](https://github.com/Nolane-x/video/actions/runs/42461960154) passed its Blender smoke render and entered the complete animation render, but its CPU log reached only frame 195 after roughly 35 minutes. That showed the single-worker design was not viable under its 180-minute job timeout. It has no completed video artifact; retain as diagnostic evidence, not delivery.
+- The 3D scene is an illustrative Eevee reconstruction with 1,107 objects: Ottoman bombard, carriage, wall masonry, crew, defenders, smoke, ballistics, impact/debris, and repair activity. The exact historical gun design is not verified as Orban's original bombard. Audio uses the verified VoiceStudio excerpt and modern CC0 candidate score/effects; human listening approval is still outstanding.
+- The 3D result is only a 39.14-second bombardment proof, not the complete 53-day film. Do not grant artistic approval until the rendered file is downloaded, reviewed at normal speed, frames/contact sheet examined, motion/staging judged, audio listened to, and narration sync verified.
+
+---
+
 # Video Studio — current state snapshot
 
 ## Squire film candidate — 53 Days to the End of an Empire (2026-11-08, latest check)
@@ -10,7 +20,7 @@
 - First static redesign gate [run 42455367429](https://github.com/Nolane-x/video/actions/runs/42455367429) passed. It confirmed syntax, authoring tests and scene registrations.
 - Current redesign branch: `squire/constantinople-1453-redesign`. Latest code commit `28e7a5f0168c54d8895aa3c16f333b6cd26d68e8`. New patches: dynamic pose/face/look timing via `poseAt/faceAt/lookAt`; remove Byzantine protagonist from Ottoman gun crew; unarmed/walking post-conquest state; faction-aware city-fall frame; disable baked captions in long form and preserve SRT/VTT sidecars; force 240/240 CFR re-encoding for the proof montage.
 - Latest static CI [run 42459027136](https://github.com/Nolane-x/video/actions/runs/42459027136) passed on commit `28e7a5f0168c54d8895aa3c16f333b6cd26d68e8`.
-- Latest proof [run 42459027169](https://github.com/Nolane-x/video/actions/runs/42459027169) is in progress on the same commit. Last observed step: narration word alignment (the verified VoiceStudio artifacts were downloaded and checked). It will re-author all actual shots, scan every scene, mix audio and render a new proof from each custom template. It is not a full-film render.
+- Latest redesign proof [run 42459027169](https://github.com/Nolane-x/video/actions/runs/42459027169) completed successfully; artifact `13609059158` is 1920x1080, 37.383 seconds, 8,969 frames, exact CFR 240/240. Technical render pass only: visual inspection still finds a flat vector-like look and repeated formations, so it is not artistic approval or final delivery.
 - Audio candidate manifest lists individual CC0 sources and SHA-256 values, but all tracks have `human_auditioned=false` and `approved_for_final_mix=false`. Music is modern cinematic/game composition, not a historical 1453 performance; SFX are generic recordings, not actual siege recordings. Human audition is a required publication gate.
 - Next: finish run 42459027169; download its artifact; inspect the new montage and contact sheets; verify exact `r_frame_rate=240/1` and `avg_frame_rate=240/1`; correct remaining P1 motion/staging problems. Preserve the full master render run. Only port the accepted redesign to a new full-render candidate after proof is credible. Full-length normal-speed picture/audio review remains mandatory before publication.
 
