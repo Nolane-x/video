@@ -151,7 +151,7 @@ def scene_args(phase, i, p, text):
                 "people": [dict(hero, x=.25, y=.96, h=.58, pose="point"),
                            {"preset": "ottomanInfantry", "x": .76, "y": .94, "h": .42,
                             "face": "determined", "pose": "push", "walk": True, "dir": 1}],
-                "props": [{"kind": "rope", "x": .55, "y": .78, "s": .4},
+                "props": [{"kind": "spear", "x": .55, "y": .78, "s": .4},
                           {"kind": "flag", "x": .82, "y": .55, "s": .22, "color": RED}],
                 "fx": [{"kind": "dust", "at": .2, "x": .56, "y": .81, "s": .12}]}
     if phase == "tunnel":
@@ -231,9 +231,9 @@ def main():
                 if i < 3 and phase == "night":
                     visual["signs"] = [{"text": "YOU", "x": .5, "y": .12, "at": .2, "size": 38}]
             elif tpl == "item":
-                keywords = [("stone shot", "rock"), ("chain", "chain"), ("arrow", "arrow"),
+                keywords = [("stone shot", "rock"), ("chain", "shield"), ("arrow", "arrow"),
                             ("helmet", "helmet"), ("shield", "shield"), ("sword", "sword"),
-                            ("powder", "barrel"), ("torch", "torch"), ("ship", "tree"), ("gun", "spear")]
+                            ("powder", "barrel"), ("torch", "torch"), ("ship", "flag"), ("gun", "spear")]
                 thing = next((v for k, v in keywords if k in text.casefold()), "spear")
                 visual = {"thing": {"kind": thing, "s": .64, "anim": "spin" if i % 2 else "drop"},
                           "bg": "castle" if phase in {"inside", "guns", "repair"} else "plain",
