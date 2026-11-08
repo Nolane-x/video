@@ -1,0 +1,217 @@
+name: Squire · Constantinople 1453 · Cinematic redesign proof
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-redesign'
+    paths:
+      - '.github/workflows/squire-constantinople-redesign-proof.yml'
+      - 'tools/video/author_squire_constantinople.py'
+      - 'tools/video/import_squire_constantinople_foley.py'
+      - 'tools/video/render_squire_constantinople_redesign_proof.py'
+      - 'video-projects/squire/constantinople-1453/**'
+      - 'integrations/h2-squire-studio/kit/**'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-constantinople-redesign-proof
+  cancel-in-progress: true
+
+jobs:
+  render-scene-proof:
+    name: Render one moving 240fps shot from each custom scene
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      VOICE_RUN_ID: "42448341267"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download verified VoiceStudio narration and its provenance
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-42448341267
+          path: voice-assets
+          run-id: 42448341267
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download exact narrator-selection record
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-voice-selection-42448341267
+          path: voice-assets
+          run-id: 42448341267
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install FFmpeg, archive tools and alignment dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg p7zip-full curl unzip
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check \
+            'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' \
+            'pyloudnorm>=0.1.1' 'faster-whisper==1.2.1'
+      - name: Verify the reused narrator artifact and AudioSeal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("voice-assets")
+          m=json.loads((p/"manifest.json").read_text(encoding="utf-8"))
+          selected=json.loads((p/"voice-selection.json").read_text(encoding="utf-8"))
+          a=m["audio"]
+          digest=hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()
+          assert digest==a["sha256"], "VoiceStudio WAV SHA-256 mismatch"
+          assert m["voice_id"]==selected["voice_id"], "Selected and rendered voices differ"
+          assert a["sample_rate"]==48000 and a["channels"]==1 and a["subtype"]=="PCM_24", a
+          assert a["watermark"]["status"]=="verified" and a["checks"]=="passed", a
+          assert a["duration_seconds"]>650, a
+          print("Verified existing voice master:",m["voice_id"],a["duration_seconds"])
+          PY
+      - name: Align narration to word timestamps
+        run: python tools/video/align_voicestudio_voiceover.py --artifact-dir voice-assets --model small
+      - name: Compile redesign code and run authoring tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/video/prepare_squire_constantinople_voice_job.py \
+            tools/video/author_squire_constantinople.py \
+            tools/video/import_squire_constantinople_foley.py \
+            tools/video/qa_squire_constantinople.py \
+            tools/video/render_squire_constantinople_redesign_proof.py \
+            tests/test_squire_constantinople.py
+          python tests/test_squire_constantinople.py
+          node --check video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js
+      - name: Verify H2 Squire runtime and create project
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          test -s "$KIT/render.mjs"
+          test -s "$KIT/engine/core.js"
+          test -s "$KIT/packs/squire/pack.js"
+          test -s "$KIT/packs/squire/templates.js"
+          echo "SQUIRE_KIT=$KIT" >> "$GITHUB_ENV"
+          python "$KIT/tools/new_project.py" \
+            --name constantinople-1453-redesign-proof \
+            --title "53 Days to the End of an Empire — Redesign Proof" \
+            --aspect 16:9 --resolution 1080p --style flat --pack squire --lang en
+          PROJ="$KIT/projects/constantinople-1453-redesign-proof"
+          cp video-projects/squire/constantinople-1453/config.json "$PROJ/config.json"
+          cp video-projects/squire/constantinople-1453/01-SCRIPT.md "$PROJ/story/narration.txt"
+          cp video-projects/squire/constantinople-1453/story/bible.md "$PROJ/story/bible.md"
+          cp video-projects/squire/constantinople-1453/story/03-VISUAL-DIRECTION.md "$PROJ/story/03-VISUAL-DIRECTION.md"
+          cp video-projects/squire/constantinople-1453/story/05-PACKAGING.md "$PROJ/story/05-PACKAGING.md"
+          cp video-projects/squire/constantinople-1453/scenes/shots/*.js "$PROJ/scenes/shots/"
+          cp voice-assets/h2-timeline/timeline/voice.wav "$PROJ/timeline/voice.wav"
+          cp voice-assets/h2-timeline/timeline/blocks.json \
+             voice-assets/h2-timeline/timeline/lines.json \
+             voice-assets/h2-timeline/timeline/words.json \
+             voice-assets/h2-timeline/timeline/transcript.txt "$PROJ/timeline/"
+          cp voice-assets/h2-timeline/alignment-report.json "$PROJ/story/alignment-report.json"
+          cp voice-assets/manifest.json "$PROJ/story/voice-manifest.json"
+          cp voice-assets/voice-selection.json "$PROJ/story/voice-selection.json"
+          cp voice-assets/captions.srt "$PROJ/story/captions.srt"
+          cp voice-assets/captions.vtt "$PROJ/story/captions.vtt"
+          echo "SQUIRE_PROJECT=$PROJ" >> "$GITHUB_ENV"
+      - name: Install Squire runtime and Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Build Squire audio runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python audio/build_audio.py
+          python tools/doctor.py
+      - name: Acquire and import recorded CC0 music and Foley candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/constantinople-foley"
+          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/music" "$ROOT/weapon-impact" "$ROOT/weapon-textures" "$ROOT/battle-at-sea"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/crowd_shouting_0.ogg" -o "$ROOT/crowd/crowd_shouting.ogg"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/park_ambience_wind.wav" -o "$ROOT/wind/park_ambience_wind.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o "$ROOT/score/Eye_of_the_Storm.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/esa_0.ogg" -o "$ROOT/music/esa_0.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Loop_The_Bards_Tale.wav" -o "$ROOT/music/Loop_The_Bards_Tale.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Exploration_0.mp3" -o "$ROOT/music/Exploration_0.mp3"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/war%20theme%20ver%202_0.ogg" -o "$ROOT/music/war theme ver 2_0.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/emotional_piano_2.ogg" -o "$ROOT/music/emotional_piano_2.ogg"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_weapon_on_weapon_1_of_2.7z" -o "$ROOT/weapon-impact/weapon-impact.7z"
+          curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_textures_1_of_2.7z" -o "$ROOT/weapon-textures/weapon-textures.7z"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o "$ROOT/battle-at-sea/cannon_fire_1.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o "$ROOT/battle-at-sea/cannon_hit_wall_no_splash.ogg"
+          7z x -y -o"$ROOT/weapon-impact" "$ROOT/weapon-impact/weapon-impact.7z"
+          7z x -y -o"$ROOT/weapon-textures" "$ROOT/weapon-textures/weapon-textures.7z"
+          python tools/video/import_squire_constantinople_foley.py --source-root "$ROOT" --kit "$SQUIRE_KIT" --project "$SQUIRE_PROJECT"
+      - name: Draft voice-timed shots and author redesigned scenes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/draft_shots.py --project projects/constantinople-1453-redesign-proof --min 0.8 --max 2.2 --force
+          cd "$GITHUB_WORKSPACE"
+          python tools/video/author_squire_constantinople.py --project "$SQUIRE_PROJECT"
+      - name: Scan all scenes and publish contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453-redesign-proof --check --scale 0.25 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-check.log"
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' "$SQUIRE_PROJECT/build/redesign-check.log"; then
+            echo "Scene scan found a missing or broken shot."
+            exit 1
+          fi
+          node render.mjs --project projects/constantinople-1453-redesign-proof --sheet --scale 0.4 --at 0.72 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-contact-sheet.log"
+          if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' "$SQUIRE_PROJECT/build/redesign-contact-sheet.log"; then
+            echo "Contact sheets found a missing or broken shot."
+            exit 1
+          fi
+      - name: Mix narration, recorded score and Foley for proof audio
+        run: python "$SQUIRE_KIT/tools/mix.py" --project "$SQUIRE_PROJECT" --no-video
+      - name: Render moving proof from all bespoke templates at native 240fps
+        run: |
+          python tools/video/render_squire_constantinople_redesign_proof.py \
+            --project "$SQUIRE_PROJECT" --kit "$SQUIRE_KIT" \
+            --output "$SQUIRE_PROJECT/build/redesign-motion-proof.mp4" --workers 2
+      - name: Assemble review bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/constantinople-redesign-review"
+          mkdir -p "$OUT/contact-sheets"
+          cp "$SQUIRE_PROJECT/build/redesign-motion-proof.mp4" "$OUT/constantinople-redesign-motion-proof-240fps.mp4"
+          cp "$SQUIRE_PROJECT/build/redesign-motion-proof.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/build/redesign-check.log" "$OUT/"
+          cp "$SQUIRE_PROJECT/build/redesign-contact-sheet.log" "$OUT/"
+          cp -a "$SQUIRE_PROJECT/build/sheets/." "$OUT/contact-sheets/"
+          cp "$SQUIRE_PROJECT/story/shots.json" "$OUT/shots.json"
+          cp "$SQUIRE_PROJECT/story/AUDIO-SOURCE-MANIFEST.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$OUT/"
+          cp video-projects/squire/constantinople-1453/01-SCRIPT.md "$OUT/"
+          (cd "$OUT" && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload redesigned 240fps moving proof and complete review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-redesign-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/constantinople-redesign-review/
+          if-no-files-found: error
+          retention-days: 30
