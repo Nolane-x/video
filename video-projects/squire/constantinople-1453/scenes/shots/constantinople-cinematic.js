@@ -1,8 +1,41 @@
 import { E, registerTemplate, clamp, lerp, ease, rng, alpha, noise, glow, circle, seg, poly, linGrad } from '/engine/core.js';
-import { bg, formation, drawPeople, prop, drawThing, camera, overlays, flag, castle, cloud } from '/packs/squire/pack.js';
+import { bg, formation, drawPeople, prop, drawThing, camera, overlays, flag, castle, cloud, CAST } from '/packs/squire/pack.js';
 
 const W=()=>E.W, H=()=>E.H;
 const BLUE='#536b83', RED='#9c493c', GOLD='#d1ad68', STONE='#b9a98c', INK='#241f20';
+
+// Period-specific visual presets for this film; Squire's stock Greek/Roman and Norman kits
+// are not used as stand-ins for 15th-century Byzantine or Ottoman soldiers.
+Object.assign(CAST, {
+  byzantineGuard: {
+    ...CAST.knight14, helmet:'bascinet', visor:'up', body:'mail', arms:'mail', legs:'mail',
+    tunicColor:'#536b83', tabard:true, tabardColor:'#425a73', cape:'#30455a',
+    shield:{type:'round',color:'#536b83',charge:'cross',chargeColor:'#d1ad68'}, weapon:'spear'
+  },
+  byzantineArcher: {
+    ...CAST.crossbowman, helmet:'coif', body:'gambeson', tunicColor:'#536b83',
+    tabard:false, legs:'cloth', legColor:'#495466', weapon:'crossbow', shield:null, scarf:'#8495a2'
+  },
+  ottomanInfantry: {
+    ...CAST.peasant, helmet:'turban', body:'mail', tunicColor:'#8e4739',
+    skirt:.55, legs:'mail', weapon:'spear', shield:{type:'round',color:'#725743'},
+    scarf:'#c5a36f', beard:'stubble'
+  },
+  ottomanArcher: {
+    ...CAST.englishArcher, helmet:'turban', body:'gambeson', tunicColor:'#8e4739',
+    tabard:false, legs:'cloth', legColor:'#49342f', weapon:'bow', shield:null, scarf:'#c5a36f'
+  },
+  ottomanElite: {
+    ...CAST.knight13, helmet:'turban', body:'mail', tunicColor:'#873e33',
+    tabard:true, tabardColor:'#c4a36c', legs:'mail', weapon:'sword',
+    shield:{type:'round',color:'#765744',charge:'circle',chargeColor:'#d1ad68'}
+  },
+  ottomanCommander: {
+    ...CAST.king, helmet:'turban', hair:'short', hairColor:'#302522', beard:'full',
+    body:'robe', tunicColor:'#873e33', cape:'#512b27', legs:'cloth',
+    legColor:'#382d2b', shield:null, weapon:'sword', crownOn:false, charge:null
+  }
+});
 
 function path(g,pts,fill,stroke=INK,lw=5){
   g.beginPath(); g.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
@@ -127,7 +160,7 @@ function drawCityInterior(g,t){
   // people crossing through the street
   drawPeople(g,t,{dur:6,globalT:t,start:0,args:{}},[
     {preset:'peasant',x:.20,y:.92,h:.32,face:'worried',pose:'run',walk:true,dir:1,speed:1.4},
-    {preset:'greek',x:.48,y:.91,h:.38,face:'worried',pose:'run',walk:true,dir:-1,speed:1.1,flip:true},
+    {preset:'byzantineGuard',x:.48,y:.91,h:.38,face:'worried',pose:'run',walk:true,dir:-1,speed:1.1,flip:true},
     {preset:'peasant',x:.74,y:.93,h:.31,face:'worried',pose:'walk',walk:true,dir:1,speed:.8}
   ],.93,.3);
   // smoke and warm windows
@@ -143,9 +176,9 @@ function drawCamp(g,t){
   g.fillStyle='#c4ad83';g.fillRect(635,625,660,55);line(g,[[660,654],[1270,654]],'#6d593e',3);
   for(let i=0;i<6;i++)circle(g,690+i*108,650,6,'#8b543f');
   drawPeople(g,t,{dur:6,globalT:t,start:0,args:{}},[
-    {preset:'knight12',x:.47,y:.85,h:.52,face:'determined',pose:'guard'},
-    {preset:'greek',x:.66,y:.86,h:.43,face:'neutral',pose:'point'},
-    {preset:'greek',x:.33,y:.86,h:.40,face:'neutral',pose:'guard'}
+    {preset:'ottomanCommander',x:.47,y:.85,h:.52,face:'determined',pose:'guard'},
+    {preset:'ottomanElite',x:.66,y:.86,h:.43,face:'neutral',pose:'point'},
+    {preset:'ottomanElite',x:.33,y:.86,h:.40,face:'neutral',pose:'guard'}
   ],.93,.5);
 }
 function wallBase(g,t,breach=0){
@@ -181,8 +214,8 @@ function cityPanorama(g,t,a){
   g.fillStyle='#7e6d58';g.fillRect(0,850,W(),230);
   for(let x=0;x<W();x+=85){g.fillStyle='#b29e7e';g.fillRect(x,820,55,65);}
   drawPeople(g,t,{dur:6,globalT:t,start:0,args:{}},[
-    {preset:'greek',x:.27,y:.87,h:.40,face:'determined',pose:'guard'},
-    {preset:'greek',x:.76,y:.88,h:.43,face:'worried',pose:'guard',flip:true}
+    {preset:'byzantineGuard',x:.27,y:.87,h:.40,face:'determined',pose:'guard'},
+    {preset:'byzantineGuard',x:.76,y:.88,h:.43,face:'worried',pose:'guard',flip:true}
   ],.93,.4);
   if(a.chain){line(g,[[250,950],[600,895],[960,910],[1280,860],[1620,900]],'#28292a',12);for(let i=0;i<24;i++)circle(g,260+i*58,940-Math.sin(i/23*Math.PI)*55,7,'#5d5c56');}
   overlays(g,t,{...a.info,dur:6,args:a});
@@ -195,12 +228,12 @@ registerTemplate('wall_battery',{draw(g,lt,info){
   camera(g,lt,info,()=>{
     wallBase(g,lt,lt>impact?clamp((lt-impact)/.35):0);
     // two defensive formations in depth
-    formation(g,{preset:'greek',rows:3,cols:17,x0:.56,x1:.99,yFront:.78,yBack:.61,hFront:.18,hBack:.075,face:'determined',seed:71,t:lt,flip:true});
+    formation(g,{preset:'byzantineGuard',rows:3,cols:17,x0:.56,x1:.99,yFront:.78,yBack:.61,hFront:.18,hBack:.075,face:'determined',seed:71,t:lt,flip:true});
     cannon(g,330,870,1.5,age,age>=0);
     drawPeople(g,lt,info,[
-      {preset:'greek',x:.18,y:.94,h:.39,face:'determined',pose:'run',walk:true,dir:1,speed:.65},
-      {preset:'greek',x:.32,y:.94,h:.36,face:'worried',pose:'guard'},
-      {preset:'greek',x:.49,y:.93,h:.42,face:'worried',pose:'run',walk:true,dir:1,speed:.4}
+      {preset:'byzantineGuard',x:.18,y:.94,h:.39,face:'determined',pose:'run',walk:true,dir:1,speed:.65},
+      {preset:'byzantineGuard',x:.32,y:.94,h:.36,face:'worried',pose:'guard'},
+      {preset:'byzantineGuard',x:.49,y:.93,h:.42,face:'worried',pose:'run',walk:true,dir:1,speed:.4}
     ],.93,.42);
     if(age>0&&age<1.05){const q=clamp(age/1.05),bx=470+q*910,by=705-210*Math.sin(q*Math.PI);
       circle(g,bx,by,16+q*2,'#1b1a19');if(age>.72)glow(g,1430,580,210,'#e7b56d',.35);}
@@ -244,7 +277,7 @@ registerTemplate('ship_portage',{draw(g,lt,info){
     ship(g,x,y,1.08,lt,{sail:'#d8ccb1',banner:RED,heading:1});
     // ropes under load and hauling crews
     for(let i=0;i<6;i++){const hx=90+i*110,hy=830+(i%2)*36;line(g,[[hx,hy],[x-105, y-20+i*8]],'#44372b',4);circle(g,hx,hy,5,'#302923');}
-    formation(g,{preset:'greek',rows:3,cols:13,x0:.02,x1:.42,yFront:.98,yBack:.82,hFront:.16,hBack:.08,face:'determined',march:.55,seed:21,t:lt});
+    formation(g,{preset:'ottomanInfantry',rows:3,cols:13,x0:.02,x1:.42,yFront:.98,yBack:.82,hFront:.16,hBack:.08,face:'determined',march:.55,seed:21,t:lt});
     // far shoreline and harbour city
     path(g,[[0,390],[400,420],[780,390],[1180,430],[1500,390],[1920,420],[1920,530],[0,530]],'#66776b',null,0);
     for(let i=0;i<14;i++){const xx=i*145;g.fillStyle='#a68e72';g.fillRect(xx,400,75,95);path(g,[[xx-6,400],[xx+37,355],[xx+81,400]],'#715c4e',null,0);}
@@ -257,16 +290,16 @@ registerTemplate('last_assault',{draw(g,lt,info){
     wallBase(g,lt,1);
     // smoke behind the wall and a wall of approaching infantry
     smoke(g,lt,1220,430,4);smoke(g,lt,1580,470,17);
-    formation(g,{preset:'greek',presets:['greek','knight12'],rows:5,cols:18,x0:.02,x1:.77,yFront:.99,yBack:.75,hFront:.20,hBack:.07,face:'determined',march:.24,seed:45,t:lt});
-    formation(g,{preset:'englishArcher',rows:3,cols:14,x0:.05,x1:.71,yFront:.78,yBack:.66,hFront:.11,hBack:.06,face:'determined',seed:48,t:lt,flip:true});
+    formation(g,{preset:'ottomanInfantry',presets:['ottomanInfantry','ottomanElite'],rows:5,cols:18,x0:.02,x1:.77,yFront:.99,yBack:.75,hFront:.20,hBack:.07,face:'determined',march:.24,seed:45,t:lt});
+    formation(g,{preset:'ottomanArcher',rows:3,cols:14,x0:.05,x1:.71,yFront:.78,yBack:.66,hFront:.11,hBack:.06,face:'determined',seed:48,t:lt,flip:true});
     // ladders rise in staggered beats
     for(let i=0;i<5;i++){const x=1160+i*155, rise=clamp((lt-.35-i*.18)/1.15);drawLadder(g,x,810,330*rise,lt,i);}
     // attackers climbing at different phases
     const climbers=[];
-    for(let i=0;i<7;i++){const q=clamp((lt-.7-i*.16)/2.0);climbers.push({preset:'greek',x:(.62+i*.055),y:.76-q*.29,h:.23,face:'determined',pose:'run',walk:true,dir:1,speed:.5,flip:true});}
+    for(let i=0;i<7;i++){const q=clamp((lt-.7-i*.16)/2.0);climbers.push({preset:'ottomanInfantry',x:(.62+i*.055),y:.76-q*.29,h:.23,face:'determined',pose:'run',walk:true,dir:1,speed:.5,flip:true});}
     drawPeople(g,lt,info,climbers,.93,.25);
     // defenders at the parapet and falling masonry
-    formation(g,{preset:'knight12',rows:2,cols:14,x0:.58,x1:.98,yFront:.46,yBack:.41,hFront:.12,hBack:.075,face:'worried',seed:81,t:lt,flip:true});
+    formation(g,{preset:'byzantineGuard',rows:2,cols:14,x0:.58,x1:.98,yFront:.46,yBack:.41,hFront:.12,hBack:.075,face:'worried',seed:81,t:lt,flip:true});
     arrowStorm(g,lt,23);
     for(let i=0;i<5;i++){const p=(lt*.8+i*.21)%1,x=1300+i*110+Math.sin(lt*3+i)*18,y=420+p*340;circle(g,x,y,4+p*7,alpha('#d0b99a',1-p));}
     if(lt>1.3){glow(g,1450,680,160,'#e68d4f',.23);dust(g,lt-1.3,1510,710,5,65);}
