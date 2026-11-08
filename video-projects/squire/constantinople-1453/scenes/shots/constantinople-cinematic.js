@@ -285,7 +285,7 @@ registerTemplate('ship_portage',{draw(g,lt,info){
     // ropes under load and hauling crews
     for(let i=0;i<6;i++){const hx=90+i*110,hy=830+(i%2)*36;line(g,[[hx,hy],[x-105, y-20+i*8]],'#44372b',4);circle(g,hx,hy,5,'#302923');}
     formation(g,{preset:'ottomanInfantry',rows:3,cols:13,x0:.02,x1:.42,yFront:.98,yBack:.82,hFront:.16,hBack:.08,face:'determined',march:.55,seed:21,t:lt});
-    drawPeople(g,lt,info,[{preset:'ottomanInfantry',x:.14,y:.97,h:.38,pose:'push',walk:true,dir:1,face:'determined'},{preset:'ottomanInfantry',x:.35,y:.97,h:.4,pose:'carry',walk:true,dir:1,face:'strained'}],.94,.4);
+    drawPeople(g,lt,info,[{preset:'ottomanInfantry',x:.14,y:.97,h:.38,pose:'push',walk:true,dir:1,face:'determined'},{preset:'ottomanInfantry',x:.35,y:.97,h:.4,pose:'carry',walk:true,dir:1,face:'tired'}],.94,.4);
     drawHero(g,lt,info,{x:.82,y:.98,h:.56,face:'worried',pose:'point',flip:true});
     // far shoreline and harbour city
     path(g,[[0,390],[400,420],[780,390],[1180,430],[1500,390],[1920,420],[1920,530],[0,530]],'#66776b',null,0);
@@ -322,7 +322,7 @@ registerTemplate('aftermath_city',{draw(g,lt,info){
     // transition from panic into a changed city: dust and slow movement
     gradient(g,0,H(),[[0,'rgba(20,24,33,.0)'],[1,'rgba(20,20,23,.28)']]);
     smoke(g,lt,350,385,31);smoke(g,lt,1510,420,32);
-    drawHero(g,lt,info,{x:.32,y:.98,h:.62,face:'tired',pose:'walk',flip:false});
+    drawHero(g,lt,info,{x:.32,y:.98,h:.62,face:'tired',pose:'walk',walk:true,speed:.18,flip:false});
     drawPeople(g,lt,info,[{preset:'peasant',x:.72,y:.96,h:.38,face:'sad',pose:'walk',walk:true,dir:1}],.94,.4);
     for(let i=0;i<9;i++){const x=150+i*205;circle(g,x,900+Math.sin(lt+i)*3,4,'#c8b391');}
   });
@@ -366,7 +366,7 @@ function drawGunCrew(g,t,info,a){
   if(age>=0&&age<.42){glow(g,465,695,260,'#ffbd66',.75);path(g,[[420,730],[385,540],[485,585],[550,455],[530,735]],'#fff2cf',null,0);}
   if(age>=.1&&age<1.6){const q=clamp((age-.1)/1.5),x=630+q*880,y=640-230*Math.sin(q*Math.PI);circle(g,x,y,18,'#211f1d');}
   if(age>=1.02){dust(g,t-1.02,1510,560,91,88,'#d5c1a5');smoke(g,t-1.02,1500,545,92);glow(g,1500,570,195,'#e0b16c',.28);}
-  drawHero(g,t,info,{x:.28,y:.98,h:.55,face:age>1?'shocked':'focused',pose:age>0?'cower':'brace'});
+  drawHero(g,t,info,{x:.28,y:.98,h:.55,face:age>1?'shocked':'determined',pose:age>0?'cower':'brace'});
 }
 function drawRepairWall(g,t,info,a){
   const beat=a.beat||'rebuild';
