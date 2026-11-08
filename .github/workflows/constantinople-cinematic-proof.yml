@@ -29,7 +29,7 @@ jobs:
       - name: Install Blender and FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg
+          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
           blender --version | head -n 2
           ffmpeg -version | head -n 1
       - name: Download verified VoiceStudio narration
