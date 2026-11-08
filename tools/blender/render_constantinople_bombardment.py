@@ -5,6 +5,7 @@ Illustrative historical reconstruction, not a literal replica of Orban's exact g
 import bpy, math, os
 from mathutils import Vector
 
+ # CI installs libEGL/libGL so headless Eevee can run on the Actions CPU runner.
 FPS=240
 DURATION=39.14
 END=round(FPS*DURATION)
