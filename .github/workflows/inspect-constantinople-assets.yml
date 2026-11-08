@@ -136,7 +136,7 @@ jobs:
           import json, os, hashlib, urllib.request
           from pathlib import Path, PurePosixPath
           from urllib.parse import urlparse
-          assets = ["cannon_01", "modular_fort_01", "ship_pinnace", "lantern_01", "barrel_01"]
+          assets = ["cannon_01", "modular_fort_01", "ship_pinnace"]
           root = Path("models/downloaded")
           manifest = {"provider":"Poly Haven","license":"CC0-1.0","assets":[]}
           def fetch(url):
@@ -262,7 +262,7 @@ jobs:
           from PIL import Image,ImageOps,ImageDraw
           from pathlib import Path
           ps=sorted(Path("report/model-previews").glob("*.png"))
-          assert len(ps)==5, f"Expected 5 model previews, got {len(ps)}"
+          assert len(ps)==3, f"Expected 3 verified Poly Haven model previews, got {len(ps)}"
           cells=[]
           for p in ps:
               im=Image.open(p).convert("RGB"); im.thumbnail((640,360))
