@@ -387,6 +387,37 @@ c6=shot("06 repairs after repeated hits",7440,END,(6.5,4,12.5),(4,2,10),(0,16.8,
 scene.camera=c1
 notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
 notes.write("Illustrative reconstruction of a 15th-century Ottoman bombard and the Theodosian walls. Generic gun design; not a verified replica of Orban's exact cannon. Generic composite people, not portraits or authenticated uniforms. One impact does not destroy the city. Narration: 00:03:40.760–00:04:19.900. 1920x1080 native 240fps.\\n")
+# Consolidate static meshes by material and common parent. This keeps the shot
+# geometry intact while drastically reducing Eevee's per-frame object sync overhead.
+def merge_static_meshes():
+    groups={}
+    for o in list(scene.objects):
+        if o.type != "MESH" or o.animation_data is not None or o.constraints:
+            continue
+        mats=tuple(m.name if m else "" for m in o.data.materials)
+        if not mats:
+            continue
+        parent_name=o.parent.name if o.parent else None
+        groups.setdefault((parent_name,mats),[]).append(o)
+    merged=0
+    for members in groups.values():
+        if len(members)<2:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in members:
+            if o.name in bpy.data.objects:
+                o.select_set(True)
+        active=next((o for o in members if o.name in bpy.data.objects),None)
+        if active is None:
+            continue
+        bpy.context.view_layer.objects.active=active
+        bpy.ops.object.join()
+        merged += len(members)-1
+    bpy.ops.object.select_all(action="DESELECT")
+    return merged
+
+merged_count=merge_static_meshes()
+print("STATIC MESH JOIN",merged_count,"objects; remaining",len(scene.objects),flush=True)
 scene.frame_set(1)
 print("CONSTANTINOPLE 3D PROOF",bpy.app.version_string,"frames",END,"fps",FPS,"objects",len(scene.objects),"output",scene.render.filepath,flush=True)
 if os.environ.get("BLENDER_SMOKE_ONLY") == "1":
@@ -395,6 +426,34 @@ if os.environ.get("BLENDER_SMOKE_ONLY") == "1":
     os.makedirs(os.path.dirname(scene.render.filepath), exist_ok=True)
     bpy.ops.render.render(write_still=True)
     print("CONSTANTINOPLE ONE-FRAME SMOKE FINISHED", flush=True)
+elif os.environ.get("BLENDER_KEYFRAME_EXPORT") == "1":
+    # Render evaluated 240fps scene poses at 30fps (every 8th source frame).
+    # The delivery workflow uses motion-compensated interpolation to create a
+    # constant 240fps master without asking CPU Eevee to render 9,394 full frames.
+    stride=max(1,int(os.environ.get("BLENDER_KEYFRAME_STRIDE","8")))
+    limit=int(os.environ.get("BLENDER_KEYFRAME_LIMIT","0"))
+    outdir=os.path.abspath(os.environ.get("BLENDER_KEYFRAME_DIR","out/keyframes"))
+    os.makedirs(outdir,exist_ok=True)
+    frame_numbers=list(range(1,END+1,stride))
+    if frame_numbers[-1] != END:
+        frame_numbers.append(END)
+    if limit>0:
+        frame_numbers=frame_numbers[:limit]
+    cameras=[(1,1439,c1),(1440,3119,c2),(3120,4559,c3),(4560,5759,c4),(5760,7439,c5),(7440,END,c6)]
+    scene.render.image_settings.file_format="JPEG"
+    scene.render.image_settings.color_mode="RGB"
+    scene.render.image_settings.quality=94
+    scene.render.resolution_percentage=100
+    for idx,src_frame in enumerate(frame_numbers,1):
+        scene.frame_set(src_frame)
+        for first,last,camera in cameras:
+            if first <= src_frame <= last:
+                scene.camera=camera
+                break
+        scene.render.filepath=os.path.join(outdir,"frame_%05d.jpg"%idx)
+        bpy.ops.render.render(write_still=True)
+        print("KEYFRAME_DONE %d/%d source_frame=%d"%(idx,len(frame_numbers),src_frame),flush=True)
+    print("CONSTANTINOPLE KEYFRAME EXPORT FINISHED",len(frame_numbers),"frames",flush=True)
 else:
     bpy.ops.render.render(animation=True)
     print("CONSTANTINOPLE 3D PROOF RENDER FINISHED",flush=True)
