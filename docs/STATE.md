@@ -1,5 +1,18 @@
 # Video Studio — current state snapshot
 
+## Squire film candidate — 53 Days to the End of an Empire (2026-11-08)
+
+- Project: `video-projects/squire/constantinople-1453/`, an English-language 1453 siege animation. Narration uses a fictional composite defender; disputed ship-portage details, Giustiniani's withdrawal and Constantine XI's death circumstances are qualified.
+- Original full-render branch: `squire/constantinople-1453-240fps`, source commit `a65d369ae07984469306dd80839c7d96f74bbb1d`. Actions [#16 / 42449792684](https://github.com/Nolane-x/video/actions/runs/42449792684) was last observed in the full 1080p native 240fps master-render step. It reuses the verified VoiceStudio narration. Preserve this run and its artifacts; do not cancel it while preparing the redesign.
+- Voice source: [VoiceStudio artifact run #15 / 42448341267](https://github.com/Nolane-x/video/actions/runs/42448341267), approximately 15:56, PCM-24 48 kHz mono, matching SHA-256 manifest, AudioSeal and provenance checks passed. Do not regenerate unless required.
+- First HFR proof: [run #16](https://github.com/Nolane-x/video/actions/runs/42449792684), 12 seconds, 1920x1080, 240fps, 2,880 frames; visually inspected. It proved native high-rate sampling, but the visual grammar was too repetitive and character-light. **Not approved as final quality.**
+- Separate redesign branch: `squire/constantinople-1453-redesign`. It restores a recurring fictional Byzantine defender (`byzantineYou`), adds six new bespoke scenes (final night, gun crew, wall repair, Golden Horn, tunnel/countermine, church refuge), varies action/insert/diagram coverage and extends QA with hero continuity, real template registration and repetition gates.
+- Redesign authoring test: 350-shot fixture generated 265 bespoke-template shots across 17 used templates; recurring defender registered in 288/350 shots; 12/12 tests passed. Static CI: [run 42455367429](https://github.com/Nolane-x/video/actions/runs/42455367429) passed Python compilation, authoring tests, JavaScript parsing and template-registration checks.
+- Moving proof workflow: [run 42455340264](https://github.com/Nolane-x/video/actions/runs/42455340264) reuses the exact VoiceStudio artifact and renders a representative moving clip from each bespoke template. Last observed stage: narration word alignment. It does not render the 16-minute full master.
+- Audio candidate manifest marks all CC0 recordings as technically imported but **not human-auditioned / not approved for publication**. Music is modern cinematic/game composition, not 1453 period music; SFX are generic candidate recordings, not actual siege recordings.
+- Next gates: (1) finish and inspect redesigned moving proof/contact sheets; (2) correct runtime/staging/action/audio mismatches; (3) preserve current base render result; (4) only then decide whether to port accepted redesign onto the full-render branch and render a new full 240fps master; (5) full-length normal-speed picture/audio review remains mandatory. Never equate a green workflow, contact sheet or frame-rate probe with artistic approval.
+
+
 ## Verified asset-library state — 50 GB target reached (2026-10-31)
 
 - **The global unique-resource target is complete.** The SHA-256-deduplicated cumulative index reports **53,975,967,320 unique resource bytes (53.976 GB decimal / 50.260 GiB)** across **9 published asset-library Releases** — **107.95%** of the exact 50,000,000,000-byte goal, exceeding it by **3,975,967,320 bytes (3.976 GB)**.
