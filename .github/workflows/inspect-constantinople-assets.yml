@@ -186,8 +186,9 @@ jobs:
                   "bounds_dimensions":[round(v,4) for v in (mx-mn)],"preview":out}
           print("MODEL_PREVIEW_REPORT="+json.dumps(report),flush=True)
           PY
-          for name in cannon_01 modular_fort_01 ship_pinnace lantern_01 barrel_01; do
-            model="models/unpacked/video-asset-library/third-party/polyhaven/models/$name/${name}_1k.blend"
+          for spec in cannon_01:cannon_01_1k.blend modular_fort_01:modular_fort_01_1k.blend ship_pinnace:ship_pinnace_1k.blend lantern_01:Lantern_01_1k.blend barrel_01:Barrel_01_1k.blend; do
+            IFS=: read -r name filename <<< "$spec"
+            model="models/unpacked/video-asset-library/third-party/polyhaven/models/$name/$filename"
             if [ ! -f "$model" ]; then
               echo "Missing expected Poly Haven model: $model" >&2
               exit 1
