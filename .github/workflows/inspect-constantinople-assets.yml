@@ -156,19 +156,19 @@ jobs:
               return found
           for asset in assets:
               data=json.loads(fetch(f"https://api.polyhaven.com/files/{asset}"))
-              branch=data.get("blend")
+              branch=data.get("gltf")
               if not isinstance(branch,dict) or not branch:
-                  raise RuntimeError(f"{asset}: no Blender file branch in API response")
+                  raise RuntimeError(f"{asset}: no glTF branch in API response")
               choices=[]
               for resolution,formats in branch.items():
-                  if isinstance(formats,dict) and isinstance(formats.get("blend"),dict) and formats["blend"].get("url"):
-                      info=formats["blend"]; size=int(info.get("size",0))
+                  if isinstance(formats,dict) and isinstance(formats.get("gltf"),dict) and formats["gltf"].get("url"):
+                      info=formats["gltf"]; size=int(info.get("size",0))
                       choices.append((resolution,size,info))
-              if not choices: raise RuntimeError(f"{asset}: no downloadable .blend variant")
+              if not choices: raise RuntimeError(f"{asset}: no downloadable glTF variant")
               resolution,size,main=sorted(choices,key=lambda x:(0 if x[0]=="1k" else 1,x[1]))[0]
               asset_dir=root/asset;asset_dir.mkdir(parents=True,exist_ok=True)
               filename=PurePosixPath(urlparse(main["url"]).path).name
-              if not filename.lower().endswith(".blend"): raise RuntimeError(f"{asset}: unexpected Blender model URL {main['url']}")
+              if not filename.lower().endswith((".gltf",".glb")): raise RuntimeError(f"{asset}: unexpected glTF URL {main['url']}")
               target=asset_dir/filename
               blob=fetch(main["url"]);target.write_bytes(blob)
               if size and len(blob)!=size: raise RuntimeError(f"{asset}: size mismatch {len(blob)} != {size}")
@@ -201,7 +201,9 @@ jobs:
           import bpy, json, math, os, sys
           from mathutils import Vector
           args=sys.argv[sys.argv.index("--")+1:]
-          name,out=args[0],os.path.abspath(args[1])
+          model,name,out=args[0],args[1],os.path.abspath(args[2])
+          bpy.ops.wm.read_factory_settings(use_empty=True)
+          bpy.ops.import_scene.gltf(filepath=os.path.abspath(model))
           scene=bpy.context.scene
           scene.frame_set(1)
           for obj in list(bpy.data.objects):
@@ -256,7 +258,7 @@ jobs:
           manifest=json.loads(Path("models/downloaded/manifest.json").read_text())
           for asset in manifest["assets"]:
               model=asset["file"]
-              subprocess.run(["blender","--background",model,"--python","models/render_model_preview.py","--",asset["id"],f"report/model-previews/{asset['id']}.png"],check=True)
+              subprocess.run(["blender","--background","--python","models/render_model_preview.py","--",model,asset["id"],f"report/model-previews/{asset['id']}.png"],check=True)
           PY
           python - <<'PY'
           from PIL import Image,ImageOps,ImageDraw
