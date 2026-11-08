@@ -14,7 +14,7 @@ thumb({
     {preset:'englishArcher',full:true,x:.17,y:.94,h:.72,body:'gambeson',helmet:'cap',tunicColor:'#9c493c',face:'angry',weapon:'sword'}
   ],
   symbols:[
-    {kind:'cannon',x:.51,y:.68,r:.25,color:'#9c493c'},
+    {kind:'!',x:.51,y:.68,r:.25,color:'#e24c3c'},
     {kind:'arrow',x:.50,y:.28,to:[.75,.38],color:'#e3c28b',r:.17}
   ],
   title:[
