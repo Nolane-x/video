@@ -1,0 +1,81 @@
+name: Inspect the existing asset library for Constantinople 3D props
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-hybrid-240fps'
+    paths:
+      - '.github/workflows/inspect-constantinople-3d-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the verified Build 76 asset index
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-all-errors \
+            'https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/ASSET_INDEX.json' \
+            -o /tmp/ASSET_INDEX.json
+          curl -fL --retry 4 --retry-all-errors \
+            'https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/ASSET_BUNDLES.json' \
+            -o /tmp/ASSET_BUNDLES.json
+          ls -lh /tmp/ASSET_INDEX.json /tmp/ASSET_BUNDLES.json
+
+      - name: Search model metadata for siege-era props and environments
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+
+          index=json.loads(Path("/tmp/ASSET_INDEX.json").read_text(encoding="utf-8"))
+          bundles=json.loads(Path("/tmp/ASSET_BUNDLES.json").read_text(encoding="utf-8"))
+          terms=re.compile(r"cannon|bombard|siege|medieval|castle|fortress|fortification|wall|tower|ship|boat|galley|sail|soldier|warrior|armor|armour|weapon|sword|spear|shield|arrow|catapult|trebuchet|crossbow|helmet|horse|ox|wagon|cart|tent|torch|barrel|wooden|stone|brick|ruin|church|byzant|ottoman|roman|ancient",re.I)
+          exts=(".blend",".glb",".gltf",".fbx",".obj",".abc",".usd",".usdz")
+          candidates=[]
+          def walk(node, trail="$"):
+              if isinstance(node,dict):
+                  strings=[(str(k),v) for k,v in node.items() if isinstance(v,(str,int,float))]
+                  blob=" ".join(f"{k}={v}" for k,v in strings)
+                  has_model=any(str(v).lower().split("?")[0].endswith(exts) for _,v in strings)
+                  matched=bool(terms.search(blob))
+                  if has_model and matched:
+                      candidates.append({"json_path":trail,"record":node})
+                  for k,v in node.items(): walk(v,trail+"."+str(k))
+              elif isinstance(node,list):
+                  for i,v in enumerate(node): walk(v,trail+f"[{i}]")
+          walk(index)
+          bundles_summary={"top_keys":list(bundles)[:30] if isinstance(bundles,dict) else type(bundles).__name__}
+          report={
+            "source_release":"video-asset-library-build-41184526545",
+            "index_top_level_keys":list(index)[:50] if isinstance(index,dict) else type(index).__name__,
+            "index_candidate_model_records":len(candidates),
+            "candidates":candidates[:300],
+            "bundle_catalog_summary":bundles_summary,
+            "selection_note":"Candidates are discovery only. Before importing any file, verify its exact source, license, archive path, dependency set and SHA-256. This report does not assert that every result is appropriate for 1453."
+          }
+          Path("out/constantinople-3d-asset-candidates.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print("Model candidates:",len(candidates))
+          for row in candidates[:100]:
+              print(json.dumps(row["record"],ensure_ascii=False)[:1400])
+          print("Bundle catalog keys:",bundles_summary)
+          PY
+
+      - name: Upload filtered asset discovery report
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-3d-asset-candidates
+          path: out/constantinople-3d-asset-candidates.json
+          if-no-files-found: error
+          retention-days: 30
