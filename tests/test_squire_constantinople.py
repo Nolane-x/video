@@ -48,7 +48,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         root=Path("/fixtures")
         defs=foley.source_definitions(root)
         self.assertEqual(defs["siege_impact"][0],root/"battle-at-sea"/"cannon_hit_wall_no_splash.ogg")
-        self.assertEqual(defs["cannon_fire"][0],root/"battle-at-sea"/"cannon_fire.ogg")
+        self.assertEqual(defs["cannon_fire"][0],root/"battle-at-sea"/"cannon_fire_1.ogg")
     def test_arrow_impact_is_not_mislabeled_from_fletching_texture(self):
         defs=foley.source_definitions(Path("/fixtures"))
         self.assertNotIn("arrow_thunk",defs)
