@@ -303,7 +303,28 @@ jobs:
           set -euo pipefail
           cd "$SQUIRE_KIT"
           node render.mjs --project projects/constantinople-1453 --from 0 --to 12 --workers 2 --crf 18 --maxrate 48M --bufsize 96M 2>&1 | tee projects/constantinople-1453/build/preview.log
-          ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,avg_frame_rate,nb_frames -of json projects/constantinople-1453/build/preview.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,avg_frame_rate,nb_frames -of json projects/constantinople-1453/build/preview.mp4 > "$RUNNER_TEMP/preview-ffprobe.json"
+      - name: Assemble independently reviewable motion proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          REVIEW="$RUNNER_TEMP/constantinople-motion-review"
+          mkdir -p "$REVIEW/contact-sheets"
+          cp "$SQUIRE_PROJECT/build/preview.mp4" "$REVIEW/preview-12s-native-240fps.mp4"
+          cp "$RUNNER_TEMP/preview-ffprobe.json" "$REVIEW/preview-ffprobe.json"
+          cp "$SQUIRE_PROJECT/build/check.log" "$REVIEW/scene-scan.log"
+          cp "$SQUIRE_PROJECT/build/contact-sheet.log" "$REVIEW/contact-sheet.log"
+          cp -a "$SQUIRE_PROJECT/build/sheets/." "$REVIEW/contact-sheets/"
+          cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$REVIEW/"
+          cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$REVIEW/"
+          (cd "$REVIEW" && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload 12-second motion proof and contact sheets for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-motion-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/constantinople-motion-review/
+          if-no-files-found: error
+          retention-days: 30
       - name: Render the complete 1080p native 240fps master
         shell: bash
         run: |
