@@ -396,5 +396,26 @@ if os.environ.get("BLENDER_SMOKE_ONLY") == "1":
     bpy.ops.render.render(write_still=True)
     print("CONSTANTINOPLE ONE-FRAME SMOKE FINISHED", flush=True)
 else:
+    # Distributed render: each Actions worker renders a disjoint slice of the
+    # same global timeline. Keyframes and camera motion remain on global frame
+    # numbers, so concatenation reconstructs the exact original 240fps clock.
+    chunk_start = int(os.environ.get("BLENDER_FRAME_START", "1"))
+    chunk_end = int(os.environ.get("BLENDER_FRAME_END", str(END)))
+    if chunk_start < 1 or chunk_end > END or chunk_start > chunk_end:
+        raise ValueError(f"Invalid render range {chunk_start}..{chunk_end}; timeline is 1..{END}")
+    scene.render.frame_map_old = 100
+    scene.render.frame_map_new = 100
+    scene.frame_start = chunk_start
+    scene.frame_end = chunk_end
+    print(
+        "CONSTANTINOPLE CHUNK READY",
+        "start", chunk_start,
+        "end", chunk_end,
+        "frames", chunk_end - chunk_start + 1,
+        "fps", FPS,
+        "objects", len(scene.objects),
+        "output", scene.render.filepath,
+        flush=True,
+    )
     bpy.ops.render.render(animation=True)
-    print("CONSTANTINOPLE 3D PROOF RENDER FINISHED",flush=True)
+    print("CONSTANTINOPLE CHUNK RENDER FINISHED", chunk_start, chunk_end, flush=True)
