@@ -17,15 +17,21 @@ foley=load_module("import_squire_constantinople_foley",ROOT/"tools"/"video"/"imp
 class ConstantinopleAuthorTests(unittest.TestCase):
     def test_chapter_classifier(self):
         self.assertEqual(mod.progress_phase(.01,"The final assault begins"),"final")
-        self.assertEqual(mod.progress_phase(.52,"Four Christian ships approach the Golden Horn"),"sea")
+        self.assertEqual(mod.progress_phase(.02,"At midnight, the walls are still standing"),"night")
+        self.assertEqual(mod.progress_phase(.52,"Four Christian ships approach the Golden Horn"),"convoy")
         self.assertEqual(mod.progress_phase(.68,"Ships are hauled overland on rollers"),"portage")
         self.assertEqual(mod.progress_phase(.38,"The cannon fires against the wall"),"guns")
+        self.assertEqual(mod.progress_phase(.40,"Repair crews carry timber and masonry"),"repair")
+        self.assertEqual(mod.progress_phase(.62,"Defenders listen beneath the wall as miners dig"),"tunnel")
+        self.assertEqual(mod.progress_phase(.50,"The chain across the Golden Horn blocks the harbour"),"sea")
     def test_custom_templates_are_registered_in_author(self):
-        for name in ("city_panorama","wall_battery","relief_galleys","ship_portage","last_assault","aftermath_city"):
+        for name in ("final_night","city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"):
             self.assertIn(name,mod.CUSTOM)
     def test_story_phase_changes(self):
         self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"scene"),"command_camp")
         self.assertEqual(mod.choose_template(.57,"Four ships break through",42,{},"scene"),"relief_galleys")
+        self.assertEqual(mod.choose_template(.42,"Repair crews rebuild the breached wall",41,{},"scene"),"repair_wall")
+        self.assertEqual(mod.choose_template(.64,"The miners dig under the wall",70,{},"scene"),"tunnel_cutaway")
     def test_siege_audio_source_is_real_cc0_cannon_wall_impact(self):
         root=Path("/fixtures")
         defs=foley.source_definitions(root)
