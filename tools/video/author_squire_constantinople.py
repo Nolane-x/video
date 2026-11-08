@@ -322,7 +322,7 @@ def main():
         shot["sfx"] = sfx_for_shot(tpl, visual, i, sfx_root)
         shot["notes"] = "Character-led composite reconstruction; action beat is distinct and disputed details remain qualified."
         # Bespoke cinematic templates explicitly stage the same defender in their scene code.
-        hero_templates = CUSTOM - {"command_camp"}
+        hero_templates = CUSTOM - {"command_camp","gun_crew"}
         if tpl in hero_templates or (isinstance(visual, dict) and HERO in json.dumps(visual)):
             hero_count += 1
         usage[tpl] = usage.get(tpl, 0) + 1
@@ -355,8 +355,8 @@ def main():
     cfg = load(cfg_path, {})
     cfg.update({"title": "53 Days to the End of an Empire", "aspect": "16:9", "resolution": "1080p",
                 "fps": 240, "style": "flat", "captions": True, "captionStyle": "squire", "bars": "none",
-                "pack": "squire", "lang": "en", "music": {"enabled": True, "gainDb": -12},
-                "sfx": {"enabled": True, "gainDb": -6}, "loudness": -14, "maxrate": "48M",
+                "pack": "squire", "lang": "en", "captions": False, "music": {"enabled": True, "gainDb": -12},
+                "sfx": {"enabled": True, "gainDb": -6}, "captions": False, "loudness": -14, "maxrate": "48M",
                 "bufsize": "96M", "crf": 18, "renderPreset": "slow", "duration": round(duration, 3)})
     cfg_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"CONSTANTINOPLE HFR SHOTS: {len(shots)} | {duration:.1f}s | {custom_count} bespoke custom shots | {len(usage)} templates | hero {hero_count} shots | 240fps")
