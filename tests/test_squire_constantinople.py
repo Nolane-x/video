@@ -25,6 +25,21 @@ class ConstantinopleAuthorTests(unittest.TestCase):
     def test_story_phase_changes(self):
         self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"scene"),"command_camp")
         self.assertEqual(mod.choose_template(.57,"Four ships break through",42,{},"scene"),"relief_galleys")
+    def test_siege_audio_source_is_real_cc0_cannon_wall_impact(self):
+        root=Path("/fixtures")
+        defs=foley.source_definitions(root)
+        self.assertEqual(defs["siege_impact"][0],root/"battle-at-sea"/"cannon_hit_wall_no_splash.ogg")
+        self.assertEqual(defs["cannon_fire"][0],root/"battle-at-sea"/"cannon_fire_1.ogg")
+    def test_fletching_is_not_mislabeled_as_arrow_impact(self):
+        self.assertNotIn("arrow_thunk",foley.source_definitions(Path("/fixtures")))
+    def test_cannon_fire_and_wall_impact_are_synced_to_animation(self):
+        root=Path("/fixtures/sfx")
+        cues=mod.sfx_for_shot("wall_battery",{"fireAt":.47},0,root)
+        self.assertEqual([(c["name"],c["at"]) for c in cues],[("cannon_fire",.47),("siege_impact",1.49)])
+    def test_last_assault_uses_close_combat_cues_not_cannon_wall_impact(self):
+        root=Path("/fixtures/sfx")
+        cues=mod.sfx_for_shot("last_assault",{},0,root)
+        self.assertNotIn("siege_impact",[c["name"] for c in cues])
     def test_siege_impact_uses_actual_cc0_wall_impact_not_sword_clash_search(self):
         root=Path("/fixtures")
         defs=foley.source_definitions(root)
