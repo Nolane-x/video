@@ -102,7 +102,7 @@ try {
     // quet nhanh toan video tim loi (khong xuat file): moi 3 khung ve 1 lan o kich thuoc nho
     const { page, info } = await openPlayer(browser, args.style); report(info);
     const errs = new Set(); page.on('console', (m) => { if (m.type() === 'error' && /SHOT|IMPORT/.test(m.text())) errs.add(m.text().slice(0, 200)); });
-    for (let f = 0; f < info.frames; f += 3) await page.evaluate((f) => window.renderFrame(f, { q: 0.3 }).then(() => 0), f);
+    const step = Math.max(3, Math.floor(info.fps / 8)); for (let f = 0; f < info.frames; f += step) await page.evaluate((f) => window.renderFrame(f, { q: 0.3 }).then(() => 0), f);
     console.log(errs.size ? 'LOI:\n' + [...errs].join('\n') : 'Khong co loi trong ' + info.frames + ' khung.');
   } else if (args.sheet || args.stills) {
     const { page, info } = await openPlayer(browser, args.style); report(info);
