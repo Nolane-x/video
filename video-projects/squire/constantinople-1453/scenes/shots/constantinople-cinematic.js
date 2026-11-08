@@ -228,7 +228,7 @@ function cityPanorama(g,t,a){
 }
 registerTemplate('city_panorama',{draw(g,lt,info){camera(g,lt,info,()=>cityPanorama(g,lt,{...info.args,info}));}});
 registerTemplate('command_camp',{draw(g,lt,info){camera(g,lt,info,()=>{drawCamp(g,lt);for(let i=0;i<8;i++)flag(g,80+i*250,620,140,{color:i%2?RED:BLUE,t:lt,lw:2});dust(g,lt,1200,870,88,40);});}});
-registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>{drawCityInterior(g,lt);drawHero(g,lt,info,{x:.3,y:.98,h:.6,face:'tired',pose:'carry',walk:true,speed:.22});});}});
+registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>{drawCityInterior(g,lt);drawHero(g,lt,info,{x:.3,y:.98,h:.6,face:'tired',pose:'walk',walk:true,speed:.22,weapon:null,shield:null,poseAt:[[0,'walk'],[1.0,'carry'],[1.8,'walk']]});});}});
 registerTemplate('wall_battery',{draw(g,lt,info){
   const a=info.args||{},fireAt=a.fireAt??.52,age=lt-fireAt,impact=fireAt+1.02;
   camera(g,lt,info,()=>{
@@ -266,7 +266,7 @@ registerTemplate('relief_galleys',{draw(g,lt,info){
     const ix=1650-lt*105;ship(g,ix,700,.72,lt,{sail:'#ad9276',banner:RED,heading:-1});
     for(let i=0;i<24;i++){const x=1000+i*39,y=500+Math.sin(lt*4+i)*80;line(g,[[x,y],[x-40,y+13]],'#282524',3,.65);}
     if(lt>1.1){for(let i=0;i<7;i++)dust(g,lt-1.1,1260+i*35,720,20+i,12,'#b8d4d4');}
-    drawHero(g,lt,info,{x:.18,y:.98,h:.57,face:'worried',pose:'point'});
+    drawHero(g,lt,info,{x:.18,y:.98,h:.57,face:'worried',pose:'point',poseAt:[[0,'point'],[.7,'guard'],[1.45,'pointUp']],faceAt:[[0,'worried'],[1.2,'determined']]});
     if(a.label){g.fillStyle='rgba(15,29,38,.65)';g.fillRect(65,65,620,92);g.fillStyle='#fff4de';g.font='800 44px sans-serif';g.fillText(a.label,100,126);}
   });
 }});
@@ -286,7 +286,7 @@ registerTemplate('ship_portage',{draw(g,lt,info){
     for(let i=0;i<6;i++){const hx=90+i*110,hy=830+(i%2)*36;line(g,[[hx,hy],[x-105, y-20+i*8]],'#44372b',4);circle(g,hx,hy,5,'#302923');}
     formation(g,{preset:'ottomanInfantry',rows:3,cols:13,x0:.02,x1:.42,yFront:.98,yBack:.82,hFront:.16,hBack:.08,face:'determined',march:.55,seed:21,t:lt});
     drawPeople(g,lt,info,[{preset:'ottomanInfantry',x:.14,y:.97,h:.38,pose:'push',walk:true,dir:1,face:'determined'},{preset:'ottomanInfantry',x:.35,y:.97,h:.4,pose:'carry',walk:true,dir:1,face:'tired'}],.94,.4);
-    drawHero(g,lt,info,{x:.82,y:.98,h:.56,face:'worried',pose:'point',flip:true});
+    drawHero(g,lt,info,{x:.82,y:.98,h:.56,face:'worried',pose:'point',flip:true,poseAt:[[0,'point'],[.65,'brace'],[1.3,'push']],faceAt:[[0,'worried'],[1.0,'determined']]});
     // far shoreline and harbour city
     path(g,[[0,390],[400,420],[780,390],[1180,430],[1500,390],[1920,420],[1920,530],[0,530]],'#66776b',null,0);
     for(let i=0;i<14;i++){const xx=i*145;g.fillStyle='#a68e72';g.fillRect(xx,400,75,95);path(g,[[xx-6,400],[xx+37,355],[xx+81,400]],'#715c4e',null,0);}
@@ -331,9 +331,11 @@ registerTemplate('aftermath_city',{draw(g,lt,info){
 
 // Character-led set pieces added after first proof review. The defender is a recurring
 // scale/continuity anchor; each template stages a different physical action and setting.
-function drawHero(g,t,info,{x=.3,y=.97,h=.62,face='determined',pose='guard',flip=false,weapon='spear',walk=false,speed=1,dir=1}={}){
-  drawPeople(g,t,info,[{preset:'byzantineYou',x,y,h,face,pose,flip,weapon,walk,speed,dir,
-    shield:{type:'round',color:BLUE,charge:'cross',chargeColor:GOLD}}],.94,.66);
+function drawHero(g,t,info,{x=.3,y=.97,h=.62,face='determined',pose='guard',flip=false,weapon='spear',
+  walk=false,speed=1,dir=1,poseAt,faceAt,lookAt,to,from,moveAt,dur,enter,exit,fall,lean,
+  shield={type:'round',color:BLUE,charge:'cross',chargeColor:GOLD}}={}){
+  const actor={preset:'byzantineYou',x,y,h,face,pose,flip,weapon,walk,speed,dir,poseAt,faceAt,lookAt,to,from,moveAt,dur,enter,exit,fall,lean,shield};
+  drawPeople(g,t,info,[actor],.94,.66);
 }
 function drawNightWatch(g,t,info){
   gradient(g,0,H(),[[0,'#111a2a'],[.48,'#293443'],[1,'#514237']]);
@@ -347,7 +349,7 @@ function drawNightWatch(g,t,info){
   for(let i=0;i<13;i++){const x=90+i*145;glow(g,x,650+Math.sin(t*2+i)*5,65,'#f3a34a',.18);circle(g,x,650+Math.sin(t*2+i)*5,6,'#f5b65e');}
   // Far Ottoman camp is a horizon of fires and silhouettes, not a flat empty field.
   for(let i=0;i<30;i++){const x=25+i*67,y=620+(i%4)*13;path(g,[[x,y],[x+20,y-45-(i%3)*12],[x+43,y]],i%2?'#6e4736':'#59473c',null,0);}
-  drawHero(g,t,info,{x:.35,y:.97,h:.68,face:'tired',pose:'guard'});
+  drawHero(g,t,info,{x:.35,y:.97,h:.68,face:'tired',pose:'guard',poseAt:[[0,'guard'],[1.05,'point'],[2.15,'brace']],faceAt:[[0,'tired'],[1.05,'worried'],[2.15,'determined']],lookAt:[[0,.1],[.95,.6],[1.9,-.3]]});
   drawPeople(g,t,info,[{preset:'byzantineGuard',x:.78,y:.96,h:.47,face:'worried',pose:'look',flip:true}],.94,.5);
   smoke(g,t,1180,500,51);smoke(g,t,1580,520,52);
 }
@@ -366,7 +368,7 @@ function drawGunCrew(g,t,info,a){
   if(age>=0&&age<.42){glow(g,465,695,260,'#ffbd66',.75);path(g,[[420,730],[385,540],[485,585],[550,455],[530,735]],'#fff2cf',null,0);}
   if(age>=.1&&age<1.6){const q=clamp((age-.1)/1.5),x=630+q*880,y=640-230*Math.sin(q*Math.PI);circle(g,x,y,18,'#211f1d');}
   if(age>=1.02){dust(g,t-1.02,1510,560,91,88,'#d5c1a5');smoke(g,t-1.02,1500,545,92);glow(g,1500,570,195,'#e0b16c',.28);}
-  drawHero(g,t,info,{x:.28,y:.98,h:.55,face:age>1?'shocked':'determined',pose:age>0?'cower':'brace'});
+  // Enemy gun crew is kept on the Ottoman side; no Byzantine protagonist is placed beside the siege cannon.
 }
 function drawRepairWall(g,t,info,a){
   const beat=a.beat||'rebuild';
@@ -402,7 +404,7 @@ function drawGoldenHorn(g,t,info,a){
   g.stroke();g.strokeStyle='#b8a98e';g.lineWidth=4;g.stroke();g.restore();
   for(let i=0;i<3;i++){const x=((t*(75+i*13)+i*680-260)%(W()+700))-200;ship(g,x,740+i*58,.66+i*.07,t,{banner:i%2?BLUE:RED,heading:1,sail:'#d7c9b0'});}
   // A harbour watchman reacts as the chain is threatened.
-  drawHero(g,t,info,{x:.22,y:.98,h:.61,pose:'point',face:'worried'});
+  drawHero(g,t,info,{x:.22,y:.98,h:.61,pose:'point',face:'worried',poseAt:[[0,'point'],[.8,'guard'],[1.55,'pointUp']],faceAt:[[0,'worried'],[1.4,'determined']],lookAt:[[0,.5],[.8,-.2],[1.4,.6]]});
   drawPeople(g,t,info,[{preset:'byzantineArcher',x:.75,y:.96,h:.43,pose:'aim',face:'determined',flip:true}],.94,.45);
   if(a.beat==='chain'){glow(g,960,730,130,'#d8bf8d',.22);}
 }
@@ -422,7 +424,7 @@ function drawTunnelCutaway(g,t,info,a){
   ],.94,.34);
   for(let i=0;i<22;i++){const q=(t*.6+i*.12)%1;circle(g,610+Math.sin(i*2)*155+q*80,740+q*135,3+q*5,alpha('#c7a57b',1-q));}
   glow(g,1200,800,100,'#e38f45',.15+.1*Math.sin(t*6));
-  drawHero(g,t,info,{x:.25,y:.96,h:.54,pose:'kneel',face:'worried'});
+  drawHero(g,t,info,{x:.25,y:.96,h:.54,pose:'kneel',face:'worried',poseAt:[[0,'kneel'],[1.1,'brace'],[1.85,'guard']],faceAt:[[0,'worried'],[1.5,'determined']]});
   if(hit<.08)for(let i=0;i<5;i++)circle(g,1080+i*20,760,6,'#b9a17a');
 }
 function drawChurchRefuge(g,t,info,a){
