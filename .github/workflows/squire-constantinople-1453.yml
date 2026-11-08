@@ -30,8 +30,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  resolve-voice-artifact:
+    name: Resolve optional reusable VoiceStudio artifact
+    runs-on: ubuntu-24.04
+    outputs:
+      reuse_run_id: ${{ steps.resolve.outputs.reuse_run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: resolve
+        shell: bash
+        env:
+          INPUT_RUN_ID: ${{ inputs.voice_artifact_run_id }}
+        run: |
+          set -euo pipefail
+          run_id="$INPUT_RUN_ID"
+          if [[ -z "$run_id" && -f video-projects/squire/constantinople-1453/reuse-voice-run.json ]]; then
+            run_id="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("video-projects/squire/constantinople-1453/reuse-voice-run.json").read_text())
+          print(data["run_id"])
+          PY
+          )"
+          fi
+          if [[ -n "$run_id" && ! "$run_id" =~ ^[0-9]+$ ]]; then
+            echo "voice artifact run ID must contain digits only"
+            exit 1
+          fi
+          echo "reuse_run_id=$run_id" >> "$GITHUB_OUTPUT"
+          if [[ -n "$run_id" ]]; then echo "Reusing verified VoiceStudio assets from run $run_id"; else echo "No reusable voice artifact; a fresh narration will be generated."; fi
+
   prepare-voice:
-    if: ${{ inputs.voice_artifact_run_id == '' }}
+    needs: resolve-voice-artifact
+    if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id == '' }}
     name: Select eligible English narrator and validate script
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -72,9 +103,9 @@ jobs:
           retention-days: 30
 
   voiceover:
-    if: ${{ inputs.voice_artifact_run_id == '' }}
+    if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id == '' }}
     name: Synthesize and verify English narration
-    needs: prepare-voice
+    needs: [resolve-voice-artifact, prepare-voice]
     uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@018b93c9c4a3fedf45a20d8685d163fa8c7ce6ea
     with:
       job_json: ${{ needs.prepare-voice.outputs.job_json }}
@@ -83,8 +114,8 @@ jobs:
 
   render-squire:
     name: Align, author, render native 240fps, mix and QA
-    needs: [prepare-voice, voiceover]
-    if: ${{ always() && ((needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success') || inputs.voice_artifact_run_id != '') }}
+    needs: [resolve-voice-artifact, prepare-voice, voiceover]
+    if: ${{ always() && ((needs.resolve-voice-artifact.outputs.reuse_run_id != '') || (needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
@@ -95,41 +126,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate prior VoiceStudio artifact run ID
-        if: ${{ inputs.voice_artifact_run_id != '' }}
-        shell: bash
-        env:
-          VOICE_RUN_ID: ${{ inputs.voice_artifact_run_id }}
-        run: |
-          set -euo pipefail
-          [[ "$VOICE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "voice_artifact_run_id must contain digits only"; exit 1; }
       - name: Download verified VoiceStudio assets from this run
-        if: ${{ inputs.voice_artifact_run_id == '' }}
+        if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id == '' }}
         uses: actions/download-artifact@v4
         with:
           name: video-voice-assets-${{ github.run_id }}
           path: voice-assets
       - name: Download verified VoiceStudio assets from a prior run
-        if: ${{ inputs.voice_artifact_run_id != '' }}
+        if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id != '' }}
         uses: actions/download-artifact@v4
         with:
-          name: video-voice-assets-${{ inputs.voice_artifact_run_id }}
+          name: video-voice-assets-${{ needs.resolve-voice-artifact.outputs.reuse_run_id }}
           path: voice-assets
-          run-id: ${{ inputs.voice_artifact_run_id }}
+          run-id: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download the exact narrator selection record from this run
-        if: ${{ inputs.voice_artifact_run_id == '' }}
+        if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id == '' }}
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-voice-selection-${{ github.run_id }}
           path: voice-assets
       - name: Download the exact narrator selection record from a prior run
-        if: ${{ inputs.voice_artifact_run_id != '' }}
+        if: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id != '' }}
         uses: actions/download-artifact@v4
         with:
-          name: squire-constantinople-voice-selection-${{ inputs.voice_artifact_run_id }}
+          name: squire-constantinople-voice-selection-${{ needs.resolve-voice-artifact.outputs.reuse_run_id }}
           path: voice-assets
-          run-id: ${{ inputs.voice_artifact_run_id }}
+          run-id: ${{ needs.resolve-voice-artifact.outputs.reuse_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install FFmpeg, archive tools and alignment dependencies
         shell: bash
