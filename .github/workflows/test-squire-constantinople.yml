@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - squire/constantinople-1453-240fps
+      - squire/constantinople-1453-musicfix
     paths:
       - '.github/workflows/test-squire-constantinople.yml'
       - 'tools/video/import_squire_constantinople_foley.py'

@@ -39,6 +39,22 @@ def main():
     assert aud["sample_rate"]==48000 and aud["channels"]==1 and aud["subtype"]=="PCM_24"
     assert sha(wav)==aud["sha256"] and sha(timeline)==aud["sha256"]
     assert (assets/"captions.srt").stat().st_size>100 and (assets/"captions.vtt").stat().st_size>100
+    # Verify all story beds are real CC0 recordings, never procedural placeholders.
+    audio_manifest_path=p/"story"/"AUDIO-SOURCE-MANIFEST.json"
+    assert audio_manifest_path.is_file(),"Recorded-audio provenance manifest missing"
+    audio_manifest=json.loads(audio_manifest_path.read_text(encoding="utf-8"))
+    required_beds={"bed_mystery","bed_wonder","bed_curious","bed_tension","bed_war","bed_emotional"}
+    audio_rows={row["alias"]:row for row in audio_manifest.get("assets",[])}
+    assert required_beds.issubset(audio_rows),f"Missing recorded score assets: {sorted(required_beds-set(audio_rows))}"
+    kit=p.parents[1];music_dir=kit/"audio"/"music"
+    for alias in sorted(required_beds):
+        row=audio_rows[alias]
+        assert row["license"]=="CC0-1.0",f"Music bed lacks exact CC0 record: {alias}"
+        assert row["human_auditioned"] is False and row["approved_for_final_mix"] is False,"Do not fabricate human audio approval"
+        converted=kit/row["converted_path"]
+        assert converted.is_file() and sha(converted)==row["converted_sha256"],f"Music asset checksum mismatch: {alias}"
+        available=list(music_dir.glob(f"{alias}_*.wav"))
+        assert len(available)==1 and available[0].name.endswith("_recorded_cc0.wav"),f"Procedural or duplicate bed still selectable: {alias} {available}"
     words=json.loads((p/"timeline"/"words.json").read_text(encoding="utf-8"))
     alignment=json.loads((p/"story"/"alignment-report.json").read_text(encoding="utf-8"))
     assert len(words)>=1800,f"Narration word timeline short: {len(words)}"
@@ -69,7 +85,7 @@ def main():
     measurement=json.loads(hits[-1]);integrated=float(measurement["input_i"]);peak=float(measurement["input_tp"])
     assert -15.7<=integrated<=-12.3,f"LUFS outside target: {integrated}"
     assert peak<=-1.0,f"True peak too high: {peak}"
-    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"final_sha256":sha(final),"final_bytes":final.stat().st_size,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
+    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
     (p/"story"/"QA-REPORT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     lines=["# Constantinople 1453 — 240 fps technical report","",f"- Status: {report['status']}","- Artistic sign-off: pending full human review",f"- Duration: {report['duration_seconds']:.2f}s","- Picture: 1920×1080 / native 240 fps / {frames} frames",f"- Shots: {len(shots)} total; {custom_count} bespoke scene shots",f"- Unique sampled frames: {unique}/{len(hashes)}",f"- Sound: AAC stereo / 48 kHz / {integrated:.2f} LUFS / {peak:.2f} dBTP",f"- SHA-256: {report['final_sha256']}","","240 fps is verified in the encoded stream. A 60 Hz display cannot show 240 distinct refreshes per second; the master preserves the additional temporal samples for supported playback and slow-motion editorial use."]
     (p/"story"/"QA-REPORT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")

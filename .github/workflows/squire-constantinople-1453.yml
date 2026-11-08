@@ -14,6 +14,12 @@ on:
       - 'tools/video/qa_squire_constantinople.py'
       - 'tests/test_squire_constantinople.py'
   workflow_dispatch:
+    inputs:
+      voice_artifact_run_id:
+        description: "Reuse a successful VoiceStudio artifact from an earlier video workflow run (optional)."
+        required: false
+        type: string
+        default: ""
 
 permissions:
   actions: read
@@ -25,6 +31,7 @@ concurrency:
 
 jobs:
   prepare-voice:
+    if: ${{ inputs.voice_artifact_run_id == '' }}
     name: Select eligible English narrator and validate script
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -65,6 +72,7 @@ jobs:
           retention-days: 30
 
   voiceover:
+    if: ${{ inputs.voice_artifact_run_id == '' }}
     name: Synthesize and verify English narration
     needs: prepare-voice
     uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@018b93c9c4a3fedf45a20d8685d163fa8c7ce6ea
@@ -76,7 +84,7 @@ jobs:
   render-squire:
     name: Align, author, render native 240fps, mix and QA
     needs: [prepare-voice, voiceover]
-    if: ${{ needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success' }}
+    if: ${{ always() && ((needs.prepare-voice.result == 'success' && needs.voiceover.result == 'success') || inputs.voice_artifact_run_id != '') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
@@ -87,16 +95,42 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download verified VoiceStudio assets
+      - name: Validate prior VoiceStudio artifact run ID
+        if: ${{ inputs.voice_artifact_run_id != '' }}
+        shell: bash
+        env:
+          VOICE_RUN_ID: ${{ inputs.voice_artifact_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$VOICE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "voice_artifact_run_id must contain digits only"; exit 1; }
+      - name: Download verified VoiceStudio assets from this run
+        if: ${{ inputs.voice_artifact_run_id == '' }}
         uses: actions/download-artifact@v4
         with:
           name: video-voice-assets-${{ github.run_id }}
           path: voice-assets
-      - name: Download the exact narrator selection record
+      - name: Download verified VoiceStudio assets from a prior run
+        if: ${{ inputs.voice_artifact_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-${{ inputs.voice_artifact_run_id }}
+          path: voice-assets
+          run-id: ${{ inputs.voice_artifact_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download the exact narrator selection record from this run
+        if: ${{ inputs.voice_artifact_run_id == '' }}
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-voice-selection-${{ github.run_id }}
           path: voice-assets
+      - name: Download the exact narrator selection record from a prior run
+        if: ${{ inputs.voice_artifact_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-voice-selection-${{ inputs.voice_artifact_run_id }}
+          path: voice-assets
+          run-id: ${{ inputs.voice_artifact_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install FFmpeg, archive tools and alignment dependencies
         shell: bash
         run: |
@@ -201,10 +235,15 @@ jobs:
         run: |
           set -euo pipefail
           ROOT="$RUNNER_TEMP/constantinople-foley"
-          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/weapon-impact" "$ROOT/weapon-textures" "$ROOT/battle-at-sea"
+          mkdir -p "$ROOT/crowd" "$ROOT/wind" "$ROOT/score" "$ROOT/music" "$ROOT/weapon-impact" "$ROOT/weapon-textures" "$ROOT/battle-at-sea"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/crowd_shouting_0.ogg" -o "$ROOT/crowd/crowd_shouting.ogg"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/park_ambience_wind.wav" -o "$ROOT/wind/park_ambience_wind.wav"
-          curl -fL --retry 3 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o "$ROOT/score/Eye_of_the_Storm.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o "$ROOT/score/Eye_of_the_Storm.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/esa_0.ogg" -o "$ROOT/music/esa_0.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Loop_The_Bards_Tale.wav" -o "$ROOT/music/Loop_The_Bards_Tale.wav"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Exploration_0.mp3" -o "$ROOT/music/Exploration_0.mp3"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/war%20theme%20ver%202_0.ogg" -o "$ROOT/music/war theme ver 2_0.ogg"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/emotional_piano_2.ogg" -o "$ROOT/music/emotional_piano_2.ogg"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_weapon_on_weapon_1_of_2.7z" -o "$ROOT/weapon-impact/weapon-impact.7z"
           curl -fL --retry 3 "https://opengameart.org/sites/default/files/medieval_sfx_textures_1_of_2.7z" -o "$ROOT/weapon-textures/weapon-textures.7z"
           curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o "$ROOT/battle-at-sea/cannon_fire_1.ogg"
@@ -268,7 +307,7 @@ jobs:
           cp "$SQUIRE_PROJECT/timeline/voice.wav" "$RUNNER_TEMP/constantinople-delivery/narration-timeline.wav"
           cp "$SQUIRE_PROJECT/story/QA-REPORT.md" "$SQUIRE_PROJECT/story/QA-REPORT.json" "$RUNNER_TEMP/constantinople-delivery/"
           cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-manifest.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$RUNNER_TEMP/constantinople-delivery/"
-          cp "$SQUIRE_PROJECT/story/FOLEY-SOURCE-MANIFEST.json" "$RUNNER_TEMP/constantinople-delivery/"
+          cp "$SQUIRE_PROJECT/story/AUDIO-SOURCE-MANIFEST.json" "$RUNNER_TEMP/constantinople-delivery/"
           cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$RUNNER_TEMP/constantinople-delivery/"
           cp video-projects/squire/constantinople-1453/01-SCRIPT.md video-projects/squire/constantinople-1453/story/research.md "$RUNNER_TEMP/constantinople-delivery/"
           (cd "$RUNNER_TEMP/constantinople-delivery" && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)

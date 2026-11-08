@@ -52,5 +52,34 @@ class ConstantinopleAuthorTests(unittest.TestCase):
     def test_arrow_impact_is_not_mislabeled_from_fletching_texture(self):
         defs=foley.source_definitions(Path("/fixtures"))
         self.assertNotIn("arrow_thunk",defs)
+    def test_every_story_music_bed_uses_an_exact_cc0_recording(self):
+        root=Path("/fixtures")
+        defs=foley.source_definitions(root)
+        expected={
+            "bed_mystery":"esa_0.ogg",
+            "bed_wonder":"Loop_The_Bards_Tale.wav",
+            "bed_curious":"Exploration_0.mp3",
+            "bed_tension":"war theme ver 2_0.ogg",
+            "bed_war":"Eye_of_the_Storm.wav",
+            "bed_emotional":"emotional_piano_2.ogg",
+        }
+        self.assertTrue(set(expected).issubset(defs))
+        for alias,filename in expected.items():
+            src,channels,creator,url,note=defs[alias]
+            expected_path=root/"score"/filename if alias=="bed_war" else root/"music"/filename
+            self.assertEqual(src,expected_path)
+            self.assertEqual(channels,2)
+            self.assertTrue(creator)
+            self.assertIn("opengameart.org/content/",url)
+    def test_recorded_beds_replace_procedural_files_with_unique_aliases(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);music=root/"music";sfx=root/"sfx"
+            music.mkdir();sfx.mkdir()
+            generated=music/"bed_mystery_Em_80bpm.wav"
+            generated.touch()
+            dst=foley.destination_for("bed_mystery",music,sfx)
+            self.assertEqual(dst,music/"bed_mystery_recorded_cc0.wav")
+            self.assertFalse(generated.exists())
+            self.assertEqual(foley.destination_for("cannon_fire",music,sfx),sfx/"cannon_fire.wav")
 
 if __name__=="__main__":unittest.main()

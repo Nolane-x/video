@@ -164,16 +164,16 @@ def main():
     story["shot_counts"]=usage
     story["shots"]=shots
     story["music"]=[
-      {"start":0,"end":round(duration*.08,3),"bed":"mystery","gainDb":-3},
-      {"start":round(duration*.08,3),"end":round(duration*.28,3),"bed":"wonder","gainDb":-2},
-      {"start":round(duration*.28,3),"end":round(duration*.48,3),"bed":"curious","gainDb":-2},
-      {"start":round(duration*.48,3),"end":round(duration*.72,3),"bed":"tension","gainDb":-1},
-      {"start":round(duration*.72,3),"end":round(duration*.91,3),"bed":"war","gainDb":-1},
-      {"start":round(duration*.91,3),"end":round(duration,3),"bed":"emotional","gainDb":-3}
+      {"start":0,"end":round(duration*.055,3),"bed":"mystery","gainDb":-1},
+      {"start":round(duration*.055,3),"end":round(duration*.27,3),"bed":"wonder","gainDb":-1},
+      {"start":round(duration*.27,3),"end":round(duration*.46,3),"bed":"curious","gainDb":-1},
+      {"start":round(duration*.46,3),"end":round(duration*.72,3),"bed":"tension","gainDb":0},
+      {"start":round(duration*.72,3),"end":round(duration*.91,3),"bed":"war","gainDb":0},
+      {"start":round(duration*.91,3),"end":round(duration,3),"bed":"emotional","gainDb":-2}
     ]
     path.write_text(json.dumps(story,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     cfg_path=project/"config.json"; cfg=load(cfg_path,{})
-    cfg.update({"title":"53 Days to the End of an Empire","aspect":"16:9","resolution":"1080p","fps":240,"style":"flat","captions":True,"captionStyle":"squire","bars":"none","pack":"squire","lang":"en","music":{"enabled":True,"gainDb":-14},"sfx":{"enabled":True,"gainDb":-6},"loudness":-14,"maxrate":"48M","bufsize":"96M","crf":18,"renderPreset":"slow","duration":round(duration,3)})
+    cfg.update({"title":"53 Days to the End of an Empire","aspect":"16:9","resolution":"1080p","fps":240,"style":"flat","captions":True,"captionStyle":"squire","bars":"none","pack":"squire","lang":"en","music":{"enabled":True,"gainDb":-12},"sfx":{"enabled":True,"gainDb":-6},"loudness":-14,"maxrate":"48M","bufsize":"96M","crf":18,"renderPreset":"slow","duration":round(duration,3)})
     cfg_path.write_text(json.dumps(cfg,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"CONSTANTINOPLE HFR SHOTS: {len(shots)} | {duration:.1f}s | {custom_count} bespoke custom shots | {len(templates)} templates | 240fps native")
     print("SHOT COUNTS:",json.dumps(usage,sort_keys=True))
