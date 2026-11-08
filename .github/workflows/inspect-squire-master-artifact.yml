@@ -48,7 +48,7 @@ jobs:
           test -s "$MASTER"
           echo "Master file: $MASTER"
           ffprobe -v error -show_streams -show_format -of json "$MASTER" > review/master-ffprobe.json
-          cp "$MASTER" review/MASTER_SOURCE_PATH.txt
+          printf '%s\n' "$MASTER" > review/MASTER_SOURCE_PATH.txt
           for f in master-bundle/QA-REPORT.json master-bundle/QA-REPORT.md master-bundle/SHA256SUMS.txt master-bundle/captions.srt master-bundle/captions.vtt master-bundle/thumbnail.png; do
             if [ -f "$f" ]; then cp "$f" review/; fi
           done
@@ -60,7 +60,7 @@ jobs:
             -c:a aac -b:a 96k -movflags +faststart review/whole-film-review-proxy-30fps.mp4
           # One frame every 25 seconds provides a whole-film visual map.
           ffmpeg -hide_banner -v error -y -i "$MASTER" \
-            -vf "fps=1/25,scale=480:-2:flags=lanczos,tile=5x6:padding=8:margin=8" \
+            -vf "fps=1/25,scale=480:-2:flags=lanczos,tile=5x8:padding=8:margin=8" \
             -frames:v 1 review/whole-film-contact-sheet.jpg
           python - <<'PY'
           import json
