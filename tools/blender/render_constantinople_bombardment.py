@@ -40,7 +40,7 @@ scene.render.film_transparent=False
 scene.render.threads_mode="FIXED"
 scene.render.threads=max(2,min(8,os.cpu_count() or 4))
 if hasattr(scene,"eevee"):
-    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=8
+    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=2
     if hasattr(scene.eevee,"use_gtao"): scene.eevee.use_gtao=True
     if hasattr(scene.eevee,"gtao_distance"): scene.eevee.gtao_distance=3.0
     if hasattr(scene.eevee,"gtao_factor"): scene.eevee.gtao_factor=1.2

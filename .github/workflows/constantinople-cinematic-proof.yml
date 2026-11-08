@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: constantinople-cinematic-bombardment-proof
+  group: constantinople-cinematic-bombardment-proof-t2
   cancel-in-progress: false
 
 jobs:
