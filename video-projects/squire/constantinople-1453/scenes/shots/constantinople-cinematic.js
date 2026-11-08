@@ -219,10 +219,19 @@ function cityPanorama(g,t,a){
   // near foreground parapet and watch post
   g.fillStyle='#7e6d58';g.fillRect(0,850,W(),230);
   for(let x=0;x<W();x+=85){g.fillStyle='#b29e7e';g.fillRect(x,820,55,65);}
-  drawPeople(g,t,{dur:6,globalT:t,start:0,args:{}},[
-    {preset:'byzantineYou',x:.27,y:.87,h:.58,face:'determined',pose:'guard'},
-    {preset:'byzantineGuard',x:.76,y:.88,h:.43,face:'worried',pose:'guard',flip:true}
-  ],.93,.4);
+  const ri=a.info||{dur:6,globalT:t,start:0,args:{}};
+  if(a.fall){
+    drawHero(g,t,ri,{x:.27,y:.97,h:.56,face:'tired',pose:'walk',walk:true,speed:.2,
+      weapon:null,shield:null,poseAt:[[0,'walk'],[1.25,'carry'],[2.8,'walk']]});
+    drawPeople(g,t,ri,[
+      {preset:'ottomanElite',x:.78,y:.92,h:.45,face:'determined',pose:'guard',flip:true},
+      {preset:'peasant',x:.61,y:.96,h:.38,face:'worried',pose:'run',walk:true,dir:1,speed:.42}
+    ],.93,.4);
+  } else {
+    drawHero(g,t,ri,{x:.27,y:.87,h:.56,face:'determined',pose:'guard',
+      poseAt:[[0,'guard'],[1.35,'point'],[2.9,'guard']]});
+    drawPeople(g,t,ri,[{preset:'byzantineGuard',x:.76,y:.88,h:.43,face:'worried',pose:'guard',flip:true}],.93,.4);
+  }
   if(a.chain){line(g,[[250,950],[600,895],[960,910],[1280,860],[1620,900]],'#28292a',12);for(let i=0;i<24;i++)circle(g,260+i*58,940-Math.sin(i/23*Math.PI)*55,7,'#5d5c56');}
   overlays(g,t,{...a.info,dur:6,args:a});
 }
@@ -237,7 +246,8 @@ registerTemplate('wall_battery',{draw(g,lt,info){
     formation(g,{preset:'byzantineGuard',rows:3,cols:17,x0:.56,x1:.99,yFront:.78,yBack:.61,hFront:.18,hBack:.075,face:'determined',seed:71,t:lt,flip:true});
     cannon(g,330,870,1.5,age+.55,age>=0);
     drawPeople(g,lt,info,[
-      {preset:'byzantineYou',x:.18,y:.96,h:.57,face:'determined',pose:'run',walk:true,dir:1,speed:.65},
+      {preset:'byzantineYou',x:.18,y:.96,h:.57,face:'determined',pose:'run',walk:true,dir:1,speed:.65,
+        poseAt:[[0,'run'],[.72,'brace'],[1.45,'guard']],faceAt:[[0,'determined'],[.78,'worried'],[1.45,'determined']]},
       {preset:'byzantineGuard',x:.32,y:.94,h:.36,face:'worried',pose:'guard'},
       {preset:'byzantineGuard',x:.49,y:.93,h:.42,face:'worried',pose:'run',walk:true,dir:1,speed:.4}
     ],.93,.42);
@@ -307,7 +317,8 @@ registerTemplate('last_assault',{draw(g,lt,info){
     const climbers=[];
     for(let i=0;i<7;i++){const q=clamp((lt-.7-i*.16)/2.0);climbers.push({preset:'ottomanInfantry',x:(.62+i*.055),y:.76-q*.29,h:.23,face:'determined',pose:'run',walk:true,dir:1,speed:.5,flip:true});}
     drawPeople(g,lt,info,climbers,.93,.25);
-    drawHero(g,lt,info,{x:.25,y:.99,h:.61,face:'determined',pose:'brace'});
+    drawHero(g,lt,info,{x:.25,y:.99,h:.61,face:'determined',pose:'guard',
+      poseAt:[[0,'guard'],[.65,'brace'],[1.25,'thrust'],[1.9,'brace']],faceAt:[[0,'determined'],[1.25,'angry']]});
     // defenders at the parapet and falling masonry
     formation(g,{preset:'byzantineGuard',rows:2,cols:14,x0:.58,x1:.98,yFront:.46,yBack:.41,hFront:.12,hBack:.075,face:'worried',seed:81,t:lt,flip:true});
     arrowStorm(g,lt,23);
@@ -322,7 +333,8 @@ registerTemplate('aftermath_city',{draw(g,lt,info){
     // transition from panic into a changed city: dust and slow movement
     gradient(g,0,H(),[[0,'rgba(20,24,33,.0)'],[1,'rgba(20,20,23,.28)']]);
     smoke(g,lt,350,385,31);smoke(g,lt,1510,420,32);
-    drawHero(g,lt,info,{x:.32,y:.98,h:.62,face:'tired',pose:'walk',walk:true,speed:.18,flip:false});
+    drawHero(g,lt,info,{x:.32,y:.98,h:.62,face:'tired',pose:'walk',walk:true,speed:.18,flip:false,weapon:null,shield:null,
+      poseAt:[[0,'walk'],[.9,'carry'],[1.8,'walk']],faceAt:[[0,'tired'],[1.0,'worried']]});
     drawPeople(g,lt,info,[{preset:'peasant',x:.72,y:.96,h:.38,face:'sad',pose:'walk',walk:true,dir:1}],.94,.4);
     for(let i=0;i<9;i++){const x=150+i*205;circle(g,x,900+Math.sin(lt+i)*3,4,'#c8b391');}
   });
@@ -391,7 +403,8 @@ function drawRepairWall(g,t,info,a){
     {preset:'peasant',x:.52,y:.95,h:.38,face:'worried',pose:'carry',walk:true,dir:1,speed:.25}
   ],.94,.48);
   for(let i=0;i<20;i++){const q=(t*.7+i*.13)%1,x=1460+Math.sin(i*4)*95+q*36,y=560+q*250;circle(g,x,y,3+q*5,alpha('#c6ae8e',1-q));}
-  drawHero(g,t,info,{x:.24,y:.98,h:.57,face:'strained',pose:'brace'});
+  drawHero(g,t,info,{x:.24,y:.98,h:.57,face:'strained',pose:'carry',walk:true,speed:.24,dir:1,
+    poseAt:[[0,'carry'],[.78,'brace'],[1.55,'push']],faceAt:[[0,'strained'],[1.25,'determined']]});
 }
 function drawGoldenHorn(g,t,info,a){
   gradient(g,0,H(),[[0,'#8299a2'],[.3,'#c5c1ac'],[.56,'#446b7a'],[1,'#102c3d']]);
@@ -446,7 +459,8 @@ function drawChurchRefuge(g,t,info,a){
     {preset:'peasant',x:.52,y:.96,h:.39,face:'worried',pose:'carry',walk:true,dir:-1,speed:.3},
     {preset:'lady',x:.84,y:.94,h:.38,face:'sad',pose:'hold'}
   ],.94,.45);
-  drawHero(g,t,info,{x:.27,y:.98,h:.61,face:'tired',pose:'kneel'});
+  drawHero(g,t,info,{x:.27,y:.98,h:.61,face:'tired',pose:'kneel',
+    poseAt:[[0,'kneel'],[.75,'beg'],[1.45,'kneel']],faceAt:[[0,'tired'],[.75,'sad'],[1.45,'worried']]});
   if(a.beat==='candle'){for(let i=0;i<4;i++)glow(g,500+i*290,700,120,'#ffc66b',.18);}
 }
 registerTemplate('final_night',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>{drawNightWatch(g,lt,info);if(a.beat==='dawn')gradient(g,0,H(),[[0,'rgba(189,126,83,0)'],[.45,'rgba(209,151,101,.22)'],[1,'rgba(24,27,34,0)']]);});}});
