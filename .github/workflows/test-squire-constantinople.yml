@@ -1,0 +1,34 @@
+name: Test Squire Constantinople production helpers
+
+on:
+  push:
+    branches:
+      - squire/constantinople-1453-240fps
+    paths:
+      - '.github/workflows/test-squire-constantinople.yml'
+      - 'tools/video/import_squire_constantinople_foley.py'
+      - 'tools/video/author_squire_constantinople.py'
+      - 'tests/test_squire_constantinople.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-squire-constantinople-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Compile and run Squire production regression tests
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/author_squire_constantinople.py tools/video/import_squire_constantinople_foley.py tests/test_squire_constantinople.py
+          python tests/test_squire_constantinople.py
