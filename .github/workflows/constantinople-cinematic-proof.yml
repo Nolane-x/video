@@ -1,4 +1,4 @@
-name: Constantinople · cinematic 3D bombardment proof
+name: Constantinople · cinematic 3D bombardment proof (chunked)
 
 on:
   push:
@@ -17,29 +17,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  cinematic-proof:
+  prepare:
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 35
     env:
       VOICE_RUN_ID: "42448341267"
       VOICE_START: "220.760"
       CLIP_DURATION: "39.140"
     steps:
       - uses: actions/checkout@v7
-      - name: Install Blender and FFmpeg
+      - name: Install media tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
-          blender --version | head -n 2
-          ffmpeg -version | head -n 1
-      - name: Download verified VoiceStudio narration
+          sudo apt-get install -y ffmpeg
+      - name: Download and verify VoiceStudio narration
         uses: actions/download-artifact@v4
         with:
           name: video-voice-assets-42448341267
           path: voice-assets
           run-id: 42448341267
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify voice integrity and prepare exact narration excerpt
+      - name: Prepare narration excerpt and recorded CC0 sound assets
         shell: bash
         run: |
           set -euo pipefail
@@ -49,70 +47,158 @@ jobs:
           p=Path("voice-assets")
           m=json.loads((p/"manifest.json").read_text(encoding="utf-8"))
           a=m["audio"]
-          digest=hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()
-          assert digest==a["sha256"], "VoiceStudio SHA-256 mismatch"
+          assert hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()==a["sha256"]
           assert a["sample_rate"]==48000 and a["channels"]==1 and a["subtype"]=="PCM_24"
           assert a["watermark"]["status"]=="verified" and a["checks"]=="passed"
-          print("Verified VoiceStudio source:",m["voice_id"],a["duration_seconds"],digest)
+          print("Verified narrator:",m["voice_id"])
           PY
-          ffmpeg -hide_banner -v error -y -ss "$VOICE_START" -i voice-assets/narration.wav \
-            -t "$CLIP_DURATION" -ar 48000 -ac 2 -c:a pcm_s24le out-voice.wav
-      - name: Acquire recorded CC0 score and bombardment effects
-        shell: bash
-        run: |
-          set -euo pipefail
+          ffmpeg -hide_banner -v error -y -ss "$VOICE_START" -i voice-assets/narration.wav -t "$CLIP_DURATION" -ar 48000 -ac 2 -c:a pcm_s24le out-voice.wav
           mkdir -p media
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o media/score.wav
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o media/cannon_fire.ogg
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o media/score.wav
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o media/cannon_fire.ogg
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
           for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
           sha256sum media/* | tee media/SHA256SUMS.txt
-      - name: Compile scene script and run one-frame Blender smoke render
+      - name: Upload prepared audio assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-prepared-media
+          path: |
+            out-voice.wav
+            media/
+            voice-assets/captions.srt
+            voice-assets/manifest.json
+          if-no-files-found: error
+          retention-days: 3
+
+  render:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { chunk: "01", start: 1, end: 1566 }
+          - { chunk: "02", start: 1567, end: 3132 }
+          - { chunk: "03", start: 3133, end: 4698 }
+          - { chunk: "04", start: 4699, end: 6264 }
+          - { chunk: "05", start: 6265, end: 7830 }
+          - { chunk: "06", start: 7831, end: 9394 }
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Blender runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
+          blender --version | head -n 2
+      - name: Compile and smoke-test scene construction
+        if: matrix.chunk == '01'
         shell: bash
         run: |
           set -euo pipefail
           python -m py_compile tools/blender/render_constantinople_bombardment.py
           mkdir -p out
-          BLENDER_SMOKE_ONLY=1 SMOKE_OUTPUT="$PWD/out/constantinople-smoke.png" \
-            blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-smoke.log
-          test -s out/constantinople-smoke.png
-      - name: Render illustrative 3D scene at native 240fps
+          BLENDER_FRAME_START=1 BLENDER_FRAME_END=1 BLENDER_SMOKE_ONLY=1 SMOKE_OUTPUT="$PWD/out/smoke.png" blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/smoke.log
+          test -s out/smoke.png
+      - name: Compile scene script
+        if: matrix.chunk != '01'
+        run: python -m py_compile tools/blender/render_constantinople_bombardment.py
+      - name: Render native 240fps frame range
         shell: bash
         env:
-          BLENDER_OUTPUT: ${{ github.workspace }}/picture-only.mp4
+          BLENDER_FRAME_START: ${{ matrix.start }}
+          BLENDER_FRAME_END: ${{ matrix.end }}
+          BLENDER_OUTPUT: ${{ github.workspace }}/chunk-${{ matrix.chunk }}.mp4
         run: |
           set -euo pipefail
-          BLENDER_OUTPUT="$PWD/picture-only.mp4" blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-render.log
-          test -s picture-only.mp4
-      - name: Mix narration with recorded CC0 score and synchronized cannon effects
-        shell: bash
+          blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee "chunk-${{ matrix.chunk }}.log"
+          test -s "chunk-${{ matrix.chunk }}.mp4"
+          ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,avg_frame_rate,nb_frames,width,height -of json "chunk-${{ matrix.chunk }}.mp4" > "chunk-${{ matrix.chunk }}.json"
+          python - <<'PY'
+          import json,os
+          j=json.load(open("chunk-${{ matrix.chunk }}.json"))
+          v=j["streams"][0]
+          expected=int(os.environ["BLENDER_FRAME_END"])-int(os.environ["BLENDER_FRAME_START"])+1
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v["nb_frames"])==expected,(v,expected)
+          print("CHUNK TECH PASS",expected,"frames")
+          PY
+      - name: Upload rendered chunk
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-bombard-chunk-${{ matrix.chunk }}
+          path: |
+            chunk-${{ matrix.chunk }}.mp4
+            chunk-${{ matrix.chunk }}.json
+            chunk-${{ matrix.chunk }}.log
+          if-no-files-found: error
+          retention-days: 7
+
+  package:
+    needs: [prepare, render]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install FFmpeg
         run: |
-          set -euo pipefail
-          ffmpeg -hide_banner -v error -y -i out-voice.wav -stream_loop -1 -i media/score.wav \
-            -i media/cannon_fire.ogg -i media/cannon_impact.ogg \
-            -filter_complex \
-            "[1:a]atrim=0:39.140,asetpts=N/SR/TB,volume=0.14[score]; \
-             [2:a]adelay=19000|19000,volume=0.75,highpass=f=90,lowpass=f=9000[fire]; \
-             [3:a]adelay=25300|25300,volume=0.85,highpass=f=55,lowpass=f=6500[impact]; \
-             [0:a]volume=1.0[voice]; \
-             [voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0, \
-             loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
-            -map "[out]" -t 39.140 -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
-          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i out-audio.m4a \
-            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 39.140 \
-            -movflags +faststart constantinople-cinematic-bombardment-240fps.mp4
-      - name: Export subtitle excerpt and verify CFR 240 master
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Download prepared media
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-prepared-media
+          path: prepared
+      - name: Download all rendered chunks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-bombard-chunk-*
+          path: chunks
+          merge-multiple: true
+      - name: Join chunks, mix sound and verify the 240fps master
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json
           from pathlib import Path
-          src=Path("voice-assets/captions.srt").read_text(encoding="utf-8-sig")
-          offset=220.760
+          files=sorted(Path("chunks").glob("chunk-*.mp4"))
+          assert len(files)==6, [str(p) for p in files]
+          Path("concat.txt").write_text("".join(f"file '{p.resolve()}'\\n" for p in files),encoding="utf-8")
+          print("Joining",*[p.name for p in files])
+          PY
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
+          ffmpeg -hide_banner -v error -y -i prepared/out-voice.wav -stream_loop -1 -i prepared/media/score.wav \
+            -i prepared/media/cannon_fire.ogg -i prepared/media/cannon_impact.ogg \
+            -filter_complex "[1:a]atrim=0:39.140,asetpts=N/SR/TB,volume=0.14[score];[2:a]adelay=19000|19000,volume=0.75,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=25300|25300,volume=0.85,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t 39.140 -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
+          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i out-audio.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 39.140 -movflags +faststart constantinople-cinematic-bombardment-240fps.mp4
+          ffprobe -v error -show_streams -show_format -of json constantinople-cinematic-bombardment-240fps.mp4 > metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p="constantinople-cinematic-bombardment-240fps.mp4"
+          j=json.load(open("metadata.json"))
+          v=next(x for x in j["streams"] if x["codec_type"]=="video")
+          a=next(x for x in j["streams"] if x["codec_type"]=="audio")
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v.get("nb_frames",0))==9394,v
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert 39.0<=float(j["format"]["duration"])<=39.3,j["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("MASTER TECHNICAL PASS:",v["width"],"x",v["height"],v["avg_frame_rate"],v["nb_frames"],"frames")
+          PY
+      - name: Build captions, contact sheet and evidence manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("prepared/voice-assets/captions.srt").read_text(encoding="utf-8-sig")
+          offset=220.760; duration=39.140
           def sec(v):
               h,m,s=v.split(":"); q,ms=s.split(",")
               return int(h)*3600+int(m)*60+int(q)+int(ms)/1000
@@ -120,80 +206,32 @@ jobs:
               v=max(0,v); h=int(v//3600); m=int(v%3600//60); s=int(v%60); ms=round((v-int(v))*1000)
               if ms==1000: s+=1; ms=0
               return f"{h:02}:{m:02}:{s:02},{ms:03}"
-          out=[]; counter=0
+          out=[]; n=0
           for block in src.strip().split("\n\n"):
               lines=block.splitlines()
               if len(lines)<3 or " --> " not in lines[1]: continue
               a,b=map(sec,lines[1].split(" --> "))
-              if b<=offset or a>=offset+39.140: continue
-              counter+=1
-              out.extend([str(counter),f"{stamp(max(0,a-offset))} --> {stamp(min(offset+39.140,b)-offset)}",*lines[2:],""])
-          Path("captions.srt").write_text("\n".join(out),encoding="utf-8")
-          Path("RECONSTRUCTION-NOTES.txt").write_text(
-            "Illustrative 3D reconstruction; not a literal replica of the exact Orban bombard.\\n"
-            "Narration: 00:03:40.760–00:04:19.900. Captions separate.\\n"
-            "CC0 modern score and recorded cannon candidates; human audition still required.\\n",encoding="utf-8")
+              if b<=offset or a>=offset+duration: continue
+              n+=1; out.extend([str(n),f"{stamp(max(0,a-offset))} --> {stamp(min(offset+duration,b)-offset)}",*lines[2:],""])
+          Path("review/captions.srt").write_text("\n".join(out),encoding="utf-8")
+          Path("review/RECONSTRUCTION-NOTES.txt").write_text("Illustrative 3D reconstruction; generic large bombard design, not an authenticated replica of Orban's exact gun.\nHuman visual review and audio audition remain pending.\n",encoding="utf-8")
           PY
-          ffprobe -v error -show_streams -show_format -of json constantinople-cinematic-bombardment-240fps.mp4 > out/metadata.json
+          ffmpeg -hide_banner -v error -y -i constantinople-cinematic-bombardment-240fps.mp4 -vf "fps=1/2,scale=480:-1,tile=4x5" -frames:v 1 review/contact-sheet.jpg
+          cp metadata.json review/
           python - <<'PY'
-          import json,subprocess
-          p="constantinople-cinematic-bombardment-240fps.mp4"
-          j=json.load(open("out/metadata.json"))
-          v=next(x for x in j["streams"] if x["codec_type"]=="video")
-          a=next(x for x in j["streams"] if x["codec_type"]=="audio")
-          assert (v["width"],v["height"])==(1920,1080),v
-          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
-          assert int(v.get("nb_frames",0))>=9300,v
-          assert a["sample_rate"]=="48000" and a["channels"]==2,a
-          d=float(j["format"]["duration"]); assert 39.0<=d<=39.3,d
-          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
-          print("TECHNICAL PASS:",v["width"],"x",v["height"],v["avg_frame_rate"],v["nb_frames"],"frames",d,"sec")
-          PY
-      - name: Build contact sheet and provenance report
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p out/review
-          ffmpeg -hide_banner -v error -y -i constantinople-cinematic-bombardment-240fps.mp4 \
-            -vf "fps=1/2,scale=480:-1,tile=4x5" -frames:v 1 out/review/contact-sheet.jpg
-          python - <<'PY'
-          import hashlib,json,subprocess
+          import hashlib,json
           from pathlib import Path
-          def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
-          meta=json.load(open("out/metadata.json"))
-          v=next(x for x in meta["streams"] if x["codec_type"]=="video")
-          a=next(x for x in meta["streams"] if x["codec_type"]=="audio")
-          voice=json.loads(Path("voice-assets/manifest.json").read_text())
-          report={
-           "status":"RENDERED_3D_PROOF_PENDING_HUMAN_VISUAL_AND_AUDIO_REVIEW",
-           "project":"53 Days to the End of an Empire",
-           "sequence":"The great bombard — loading, firing, wall impact and repair",
-           "classification":"illustrative 3D historical reconstruction, not archival footage",
-           "engine":"Blender Eevee",
-           "blender_version":subprocess.check_output(["blender","--version"],text=True).splitlines()[0],
-           "dimensions":[v["width"],v["height"]],"fps":v["r_frame_rate"],"avg_frame_rate":v["avg_frame_rate"],
-           "frames":int(v["nb_frames"]),"duration_seconds":float(meta["format"]["duration"]),
-           "video_codec":v["codec_name"],"audio_codec":a["codec_name"],
-           "audio_sample_rate":a["sample_rate"],"audio_channels":a["channels"],
-           "narration":{"voice_id":voice["voice_id"],"source_sha256":voice["audio"]["sha256"],
-             "source_time_start":220.760,"excerpt_duration":39.140},
-           "audio_assets":[
-             {"name":"Eye of the Storm","url":"https://opengameart.org/content/eye-of-the-storm-0","license":"CC0-1.0","sha256":sha("media/score.wav"),"human_auditioned":False},
-             {"name":"Cannon fire 1","url":"https://opengameart.org/content/battle-at-sea","license":"CC0-1.0","sha256":sha("media/cannon_fire.ogg"),"human_auditioned":False},
-             {"name":"Cannon impact","url":"https://opengameart.org/content/battle-at-sea","license":"CC0-1.0","sha256":sha("media/cannon_impact.ogg"),"human_auditioned":False}],
-           "limitations":["Generic large-bombard design, not a verified replica of Orban's exact gun.",
-             "CC0 score and effects are modern candidate recordings; human audition is still required.",
-             "This is a 39-second proof, not the complete film."],
-           "sha256_video":sha("constantinople-cinematic-bombardment-240fps.mp4")}
-          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
+          p=Path("constantinople-cinematic-bombardment-240fps.mp4")
+          j=json.load(open("metadata.json"));v=next(x for x in j["streams"] if x["codec_type"]=="video")
+          report={"status":"TECHNICAL_PASS_PENDING_HUMAN_REVIEW","description":"Illustrative 3D historical bombardment reconstruction, not archival footage","resolution":"1920x1080","fps":"240/1","frames":int(v["nb_frames"]),"duration_seconds":float(j["format"]["duration"]),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"artistic_signoff":"pending","audio_audition":"pending"}
+          Path("review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
           PY
-          cp constantinople-cinematic-bombardment-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/review/
-          cp out/metadata.json out/blender-render.log out/review/
-          (cd out/review && sha256sum * > SHA256SUMS.txt)
-      - name: Upload cinematic 3D proof
+          cp constantinople-cinematic-bombardment-240fps.mp4 review/
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - name: Upload final review package
         uses: actions/upload-artifact@v4
         with:
           name: constantinople-cinematic-bombardment-proof-${{ github.run_id }}
-          path: out/review/
+          path: review/
           if-no-files-found: error
           retention-days: 30
