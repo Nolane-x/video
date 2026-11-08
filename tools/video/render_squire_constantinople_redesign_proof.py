@@ -73,11 +73,14 @@ def main() -> int:
     concat.write_text("".join(f"file '{p.as_posix().replace(chr(39),chr(39)+chr(92)+chr(39)+chr(39))}'\n" for p in clips),encoding="utf-8")
     output.parent.mkdir(parents=True,exist_ok=True)
     run(["ffmpeg","-hide_banner","-v","error","-y","-f","concat","-safe","0","-i",str(concat),
-         "-c","copy","-movflags","+faststart",str(output)])
+         "-vf","fps=240","-r","240","-fps_mode","cfr","-c:v","libx264","-preset","veryfast","-crf","18",
+         "-pix_fmt","yuv420p","-video_track_timescale","240000","-c:a","aac","-b:a","192k","-ar","48000",
+         "-ac","2","-movflags","+faststart",str(output)])
     final=probe(output)
     video=next(x for x in final["streams"] if x.get("codec_type")=="video")
     audio=next(x for x in final["streams"] if x.get("codec_type")=="audio")
-    if video.get("r_frame_rate")!="240/1": raise SystemExit("Montage lost native 240fps.")
+    if video.get("r_frame_rate")!="240/1" or video.get("avg_frame_rate")!="240/1":
+        raise SystemExit(f"Montage is not constant 240fps: r={video.get('r_frame_rate')} avg={video.get('avg_frame_rate')}")
     decode=subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",str(output),"-f","null","-"],capture_output=True,text=True)
     if decode.returncode or decode.stderr.strip(): raise SystemExit(f"Proof decode error: {decode.stderr[-1200:]}")
     report={
