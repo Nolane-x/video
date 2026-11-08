@@ -8,6 +8,7 @@ on:
       - '.github/workflows/squire-constantinople-redesign-check.yml'
       - 'tools/video/author_squire_constantinople.py'
       - 'tools/video/qa_squire_constantinople.py'
+      - 'tools/video/render_squire_constantinople_redesign_proof.py'
       - 'video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js'
       - 'tests/test_squire_constantinople.py'
 
@@ -34,7 +35,7 @@ jobs:
       - name: Compile Python authoring and QA modules
         run: |
           set -euo pipefail
-          python -m py_compile tools/video/author_squire_constantinople.py tools/video/qa_squire_constantinople.py tests/test_squire_constantinople.py
+          python -m py_compile tools/video/author_squire_constantinople.py tools/video/qa_squire_constantinople.py tools/video/render_squire_constantinople_redesign_proof.py tests/test_squire_constantinople.py
       - name: Run focused production tests
         run: python tests/test_squire_constantinople.py
       - name: Parse every custom Squire scene
