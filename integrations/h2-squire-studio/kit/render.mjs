@@ -139,7 +139,7 @@ try {
       const out = path.join(BUILD, `part_${String(k).padStart(2, '0')}.mp4`); parts[k] = out;
       const br = k === 0 ? browser : await launch();
       const { page } = await openPlayer(br, args.style);
-      const enc = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', String(info.fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-preset', preview ? 'veryfast' : 'medium', '-crf', String(args.crf || 20), '-maxrate', '8M', '-bufsize', '16M', '-tune', 'animation', '-pix_fmt', 'yuv420p', '-r', String(info.fps), out], { stdio: ['pipe', 'inherit', 'inherit'] });
+      const enc = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', String(info.fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-preset', preview ? 'veryfast' : String(args.preset || _cfg.renderPreset || 'slow'), '-crf', String(args.crf || _cfg.crf || 18), '-maxrate', String(args.maxrate || _cfg.maxrate || '48M'), '-bufsize', String(args.bufsize || _cfg.bufsize || '96M'), '-tune', 'animation', '-pix_fmt', 'yuv420p', '-r', String(info.fps), out], { stdio: ['pipe', 'inherit', 'inherit'] });
       for (let f = a; f < b; f++) {
         const d = await page.evaluate((f) => window.renderFrame(f, { q: 0.93 }), f);
         if (!enc.stdin.write(b64(d))) await new Promise((r) => enc.stdin.once('drain', r));
