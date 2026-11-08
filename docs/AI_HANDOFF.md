@@ -1,5 +1,20 @@
 # AI session handoff
 
+## Current active film work — Constantinople 1453 (2026-11-08 latest)
+
+User wants the film completed at high quality: more detailed image content, stronger motion, good story, 1920×1080, native 240 FPS, English narration/captions; GitHub Actions runner, no local Electron build. Don't claim completion from a green CI job.
+
+- Original full-render source lane: `squire/constantinople-1453-240fps`; full render [run 42449792684](https://github.com/Nolane-x/video/actions/runs/42449792684) remains in the complete 1080p native 240fps master render step, no full artifact/conclusion at last check. Preserve.
+- Voice artifact: [run 42448341267](https://github.com/Nolane-x/video/actions/runs/42448341267), 15:56 PCM-24 / 48 kHz mono, hash/AudioSeal/narrator selection verified. Reuse.
+- Actual first redesign shotbook: 586 shots, 957.9s, 442 custom-template shots, 20 distinct templates used, longest same-template run 3. Test fixture 350 shots: 265 bespoke, recurring defender 288, 12/12 tests passed.
+- First redesign motion proof [run 42455340264](https://github.com/Nolane-x/video/actions/runs/42455340264), artifact ID `13607786821`; it rendered 14 different custom templates, 36.59s, 8,776 frames. Downloaded and reviewed: still visually too static, big captions overlaid bottom, hero pose largely fixed, and faction placement wrong in gun crew. Its stream had per-segment 240fps but concat avg 239.9966, not exact CFR. This is not an acceptable final proof.
+- Current branch: `squire/constantinople-1453-redesign`, latest source commit `28e7a5f0168c54d8895aa3c16f333b6cd26d68e8`. It adds `poseAt/faceAt/lookAt` choreographies, removes protagonist from Ottoman cannon crew, shows unarmed defender after conquest, changes city-panorama faction composition at city fall, disables baked-in long-form captions (retain SRT/VTT) and re-encodes montage to strict CFR 240fps.
+- Static gate [run 42459027136](https://github.com/Nolane-x/video/actions/runs/42459027136) passed on latest commit.
+- Current moving proof [run 42459027169](https://github.com/Nolane-x/video/actions/runs/42459027169) is in progress; last observed stage is narration alignment after voice download/manifest verification. It rerenders representative clips from each bespoke template and contact sheets; not the full film.
+- Audio rights: current sound manifest verifies CC0 source/license/hash, but human audition and final approval are false for every asset. Do not call it publication-ready.
+- Next: inspect proof #42459027169 after completion, especially moving action, captions absent from picture, voice/foley sync, per-template composition, CFR 240fps. Fix visual P1s. Do not cancel base render #42449792684. Once proof is credible, create a separate full-render candidate on latest accepted source; keep base and redesign distinct. Full-length watch/listen and timecoded defect log are required.
+
+
 ## Current active film work — Constantinople 1453 (2026-11-08)
 
 User instruction: continue producing a substantially better long-form history film; do not claim completion from a green CI job. The requested render is in GitHub Actions, not local Electron/local rendering. Keep English narration and captions, 1920x1080, native 240fps.
