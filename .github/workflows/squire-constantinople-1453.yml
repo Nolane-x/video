@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: squire-constantinople-1453-hfr-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   prepare-voice:
