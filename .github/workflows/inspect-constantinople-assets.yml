@@ -1,0 +1,129 @@
+name: Inspect historical assets for Constantinople documentary
+
+on:
+  push:
+    branches:
+      - 'inspect/constantinople-asset-candidates'
+    paths:
+      - '.github/workflows/inspect-constantinople-assets.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inspect-constantinople-asset-candidates
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download existing indexed historical and 3D asset manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source-shards models
+          BASE="https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545"
+          for f in asset-shard--wikimedia.json asset-shard--met.json asset-shard--rijksmuseum.json asset-shard--loc.json asset-shard--polyhaven.json asset-shard--ambientcg.json asset-shard--kenney.json; do
+            curl -fL --retry 3 "$BASE/$f" -o "source-shards/$f"
+          done
+          curl -fL --retry 3 "$BASE/video-assets-polyhaven-3d-models-001.zip" -o models/polyhaven-models.zip
+          curl -fL --retry 3 "$BASE/video-assets-ambientcg-3d-models-001.zip" -o models/ambientcg-models.zip
+          curl -fL --retry 3 "$BASE/video-assets-kenney-3d-models-001.zip" -o models/kenney-models.zip
+          curl -fL --retry 3 "https://github.com/Nolane-x/video/releases/download/nolane-illustrated-history-foley-v0.4.0/download-manifest.json" -o source-shards/history-foley-manifest.json
+          sha256sum source-shards/* models/* > models/SHA256SUMS.txt
+
+      - name: Build source-backed candidate report and inspect model archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          terms=[
+            "constantinople","byzantine","ottoman","1453","istanbul",
+            "theodosian","hagia sophia","golden horn","mehmed","orban",
+            "rumeli hisari","byzantine empire","siege of constantinople"
+          ]
+          def walk(x, source, out):
+              if isinstance(x,dict):
+                  strings=[]
+                  for k,v in x.items():
+                      if isinstance(v,(str,int,float)): strings.append(f"{k}: {v}")
+                  blob=" | ".join(strings).lower()
+                  hit=[t for t in terms if t in blob]
+                  if hit and any(k.lower() in x for k in ("title","name","filename","label","original","url","source_url","image_url","file_url")):
+                      keep={}
+                      for k,v in x.items():
+                          kl=k.lower()
+                          if any(w in kl for w in ("title","name","file","url","license","right","creator","author","credit","date","description","category","source","id","sha256","type","mime")):
+                              if isinstance(v,(str,int,float,bool)) or v is None: keep[k]=v
+                              elif isinstance(v,dict):
+                                  keep[k]={kk:vv for kk,vv in v.items() if isinstance(vv,(str,int,float,bool)) or vv is None}
+                      out.append({"source_shard":source,"matched_terms":hit,"record":keep})
+                  for v in x.values(): walk(v,source,out)
+              elif isinstance(x,list):
+                  for v in x: walk(v,source,out)
+          result={"query_terms":terms,"records":[]}
+          for p in Path("source-shards").glob("asset-shard--*.json"):
+              if "history-foley" in p.name: continue
+              try: data=json.loads(p.read_text(encoding="utf-8"))
+              except Exception as e:
+                  result.setdefault("parse_errors",[]).append({"file":p.name,"error":str(e)});continue
+              walk(data,p.name,result["records"])
+          # Deduplicate repeated nested records while preserving the source.
+          seen=set(); unique=[]
+          for row in result["records"]:
+              key=json.dumps(row,sort_keys=True,ensure_ascii=False)
+              if key not in seen: seen.add(key);unique.append(row)
+          result["records"]=unique
+          manifest=json.loads(Path("source-shards/history-foley-manifest.json").read_text())
+          result["history_foley_manifest_summary"]={
+            "keys":list(manifest)[:25],
+            "asset_count":len(manifest.get("assets",[])) if isinstance(manifest.get("assets"),list) else None,
+            "manifest_excerpt":manifest if len(json.dumps(manifest))<6000 else None
+          }
+          Path("report").mkdir(exist_ok=True)
+          Path("report/historical-asset-candidates.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n")
+          lines=["# Existing asset-library candidates for the Constantinople 1453 film","",
+            "This report searches the repository's pinned asset-library release manifests. A match is only a candidate; the asset's license and provenance must still be respected.","",
+            f"- Manifest candidates matched: {len(unique)}"]
+          for row in unique[:100]:
+              rec=row["record"]
+              title=rec.get("title") or rec.get("name") or rec.get("filename") or rec.get("label") or "(untitled)"
+              lines += [f"## {title}",f"- Source shard: {row['source_shard']}",f"- Matched terms: {', '.join(row['matched_terms'])}"]
+              for k in ("url","source_url","image_url","file_url","license","rights","creator","artist","date","description","category","mime_type","sha256","id"):
+                  if k in rec: lines.append(f"- {k}: {str(rec[k])[:500]}")
+              lines.append("")
+          Path("report/historical-asset-candidates.md").write_text("\n".join(lines)+"\n")
+          print(f"Historical candidates: {len(unique)}")
+          PY
+          for z in models/*.zip; do
+            n=$(basename "$z" .zip)
+            unzip -Z -1 "$z" > "report/$n-files.txt"
+          done
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          rows=[]
+          for p in Path("report").glob("*-files.txt"):
+              entries=p.read_text(errors="replace").splitlines()
+              exts={}
+              for e in entries:
+                  ext=Path(e).suffix.lower() or "[no extension]"
+                  exts[ext]=exts.get(ext,0)+1
+              rows.append({"archive":p.stem,"file_count":len(entries),"extensions":exts,
+                "sample_entries":entries[:160]})
+          Path("report/3d-model-archive-index.json").write_text(json.dumps(rows,indent=2)+"\n")
+          PY
+          cp models/SHA256SUMS.txt report/
+
+      - name: Upload compact research result
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-historical-asset-candidates-${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 30
