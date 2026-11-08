@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import importlib.util
 import unittest
+import tempfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -33,9 +34,12 @@ class ConstantinopleAuthorTests(unittest.TestCase):
     def test_fletching_is_not_mislabeled_as_arrow_impact(self):
         self.assertNotIn("arrow_thunk",foley.source_definitions(Path("/fixtures")))
     def test_cannon_fire_and_wall_impact_are_synced_to_animation(self):
-        root=Path("/fixtures/sfx")
-        cues=mod.sfx_for_shot("wall_battery",{"fireAt":.47},0,root)
-        self.assertEqual([(c["name"],c["at"]) for c in cues],[("cannon_fire",.47),("siege_impact",1.49)])
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            (root/"cannon_fire.wav").touch()
+            (root/"siege_impact.wav").touch()
+            cues=mod.sfx_for_shot("wall_battery",{"fireAt":.47},0,root)
+            self.assertEqual([(c["name"],c["at"]) for c in cues],[("cannon_fire",.47),("siege_impact",1.49)])
     def test_last_assault_uses_close_combat_cues_not_cannon_wall_impact(self):
         root=Path("/fixtures/sfx")
         cues=mod.sfx_for_shot("last_assault",{},0,root)

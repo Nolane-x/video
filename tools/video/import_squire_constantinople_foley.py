@@ -12,13 +12,19 @@ def sha(p):
         for b in iter(lambda:f.read(1024*1024),b""):h.update(b)
     return h.hexdigest()
 def audio_files(root):return sorted(p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in EXTS)
-def pick(root,*terms):
+def pick(root,*terms,exclude=()):
     rows=[]
     for p in audio_files(root):
-        stem=p.stem.casefold();score=sum(3 for t in terms if t in stem)
+        stem=p.stem.casefold()
+        if any(term in stem for term in exclude):continue
+        score=sum(3 for t in terms if t in stem)
         if score:rows.append((score,p.stat().st_size,p))
     if not rows:raise FileNotFoundError(f"No exact-ish cue match in {root}: {terms}")
     rows.sort(key=lambda x:(-x[0],-x[1],str(x[2])));return rows[0][2]
+
+def optional_pick(root,*terms,exclude=()):
+    try:return pick(root,*terms,exclude=exclude)
+    except FileNotFoundError:return None
 
 def source_definitions(root: Path):
     """Explicit CC0 cue map; never infer a cannon impact from a sword archive or arrow fletching."""
@@ -29,10 +35,10 @@ def source_definitions(root: Path):
       "battle_roar":(root/"crowd"/"crowd_shouting.ogg",1,"StarNinjas","https://opengameart.org/content/crowd-shoutingspeaking-ambience","Designed group-voice layer; not a medieval field recording."),
       "wind_loop":(root/"wind"/"park_ambience_wind.wav",1,"Thimras","https://opengameart.org/content/park-ambiences","Modern open-field wind recording; not period-specific."),
       "bed_war":(root/"score"/"Eye_of_the_Storm.wav",2,"Indieteur","https://opengameart.org/content/eye-of-the-storm-0","Modern orchestral score candidate; not historically authentic music."),
-      "sword_clash":(pick(root/"weapon-impact","clash","sword","blade"),1,"Ben Jaszczak & Brian Nelson",weapon_page,"Recorded weapon contact; exact take requires human audition."),
+      "sword_clash":(optional_pick(root/"weapon-impact","clash","sword","blade","metal"),1,"Ben Jaszczak & Brian Nelson",weapon_page,"Recorded weapon contact; exact take requires human audition."),
       "siege_impact":(root/"battle-at-sea"/"cannon_hit_wall_no_splash.ogg",1,"Thimras",impact_page,"CC0 recorded stone-wall impact candidate; not a recording of the 1453 siege."),
       "cannon_fire":(root/"battle-at-sea"/"cannon_fire_1.ogg",1,"Thimras",impact_page,"CC0 recorded cannon-fire effect candidate; not a historically exact 1453 artillery recording."),
-      "arrow_whoosh":(pick(root/"weapon-textures","crossbow","bolt","pass","arrow"),1,"Ben Jaszczak & Brian Nelson",texture_page,"Recorded projectile pass/handling texture; not an arrow impact.")
+      "arrow_whoosh":(optional_pick(root/"weapon-textures","crossbow","bolt","pass","approach","flight",exclude=("fletch","string","draw","handling")),1,"Ben Jaszczak & Brian Nelson",texture_page,"Recorded projectile pass/handling texture; not an arrow impact.")
     }
 
 def convert(src,dst,channels=1):
@@ -45,6 +51,9 @@ def main():
     defs=source_definitions(r)
     rows=[]
     for alias,(src,ch,creator,url,note) in defs.items():
+        if src is None:
+            print(f"Skipping optional cue {alias}: no suitable source file in the selected CC0 archive.")
+            continue
         if not src.is_file():raise FileNotFoundError(f"Missing source for {alias}: {src}")
         dst=(music/"bed_war_100bpm.wav") if alias=="bed_war" else (sfx/f"{alias}.wav")
         if alias=="bed_war":
