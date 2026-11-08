@@ -9,6 +9,10 @@ from mathutils import Vector
 FPS=240
 DURATION=39.14
 END=round(FPS*DURATION)
+FRAME_START=int(os.environ.get("BLENDER_FRAME_START","1"))
+FRAME_END=int(os.environ.get("BLENDER_FRAME_END",str(END)))
+if not (1 <= FRAME_START <= FRAME_END <= END):
+    raise ValueError(f"Invalid render frame range {FRAME_START}..{FRAME_END}; film range is 1..{END}")
 OUT=os.environ.get("BLENDER_OUTPUT","out/constantinople-bombardment-picture.mp4")
 
 bpy.ops.object.select_all(action="SELECT")
@@ -20,8 +24,8 @@ scene.render.resolution_y=1080
 scene.render.resolution_percentage=100
 scene.render.fps=FPS
 scene.render.fps_base=1.0
-scene.frame_start=1
-scene.frame_end=END
+scene.frame_start=FRAME_START
+scene.frame_end=FRAME_END
 scene.render.image_settings.file_format="FFMPEG"
 scene.render.ffmpeg.format="MPEG4"
 scene.render.ffmpeg.codec="H264"
@@ -387,8 +391,8 @@ c6=shot("06 repairs after repeated hits",7440,END,(6.5,4,12.5),(4,2,10),(0,16.8,
 scene.camera=c1
 notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
 notes.write("Illustrative reconstruction of a 15th-century Ottoman bombard and the Theodosian walls. Generic gun design; not a verified replica of Orban's exact cannon. Generic composite people, not portraits or authenticated uniforms. One impact does not destroy the city. Narration: 00:03:40.760–00:04:19.900. 1920x1080 native 240fps.\\n")
-scene.frame_set(1)
-print("CONSTANTINOPLE 3D PROOF",bpy.app.version_string,"frames",END,"fps",FPS,"objects",len(scene.objects),"output",scene.render.filepath,flush=True)
+scene.frame_set(FRAME_START)
+print("CONSTANTINOPLE 3D PROOF",bpy.app.version_string,"frames",f"{FRAME_START}-{FRAME_END} / {END}","fps",FPS,"objects",len(scene.objects),"output",scene.render.filepath,flush=True)
 if os.environ.get("BLENDER_SMOKE_ONLY") == "1":
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = os.path.abspath(os.environ.get("SMOKE_OUTPUT", "out/constantinople-smoke.png"))
