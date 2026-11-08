@@ -24,9 +24,26 @@ def main():
     shots=story.get("shots") or [];duration=float(story.get("duration",0))
     assert duration>650,f"Film too short: {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
-    custom={"city_panorama","command_camp","city_interior","wall_battery","relief_galleys","ship_portage","last_assault","aftermath_city"}
+    custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city"}
     custom_count=sum(1 for s in shots if s.get("tpl") in custom)
     assert custom_count>=220,f"Not enough bespoke siege animation shots: {custom_count}"
+    hero=story.get("hero_character") or {}
+    assert hero.get("preset")=="byzantineYou", "Recurring fictional defender continuity record missing."
+    assert int(hero.get("shot_count",0))>=int(len(shots)*.48), "Recurring defender is absent from too many shots."
+    scene_file=p/"scenes"/"shots"/"constantinople-cinematic.js"
+    assert scene_file.is_file(), "Bespoke cinematic scene source missing."
+    scene_source=scene_file.read_text(encoding="utf-8")
+    for template in custom:
+        assert f"registerTemplate('{template}'" in scene_source, f"Template is not registered: {template}"
+    run_length=1
+    max_run=1
+    for previous,current in zip(shots,shots[1:]):
+        if current.get("tpl")==previous.get("tpl"):
+            run_length+=1
+            max_run=max(max_run,run_length)
+        else:
+            run_length=1
+    assert max_run<=3, f"Too many consecutive identical templates: {max_run}"
     for s in shots:
         assert s.get("args") is not None,f"No authored args: {s.get('id')}"
         assert float(s["end"])>float(s["start"]),f"Bad shot timing: {s.get('id')}"
