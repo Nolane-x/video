@@ -1,0 +1,40 @@
+name: Stop redundant Squire master rerender
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-240fps'
+    paths:
+      - '.github/workflows/stop-redundant-squire-rerender.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel-duplicate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Cancel docs-only duplicate of the already completed master
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run_id = 42471421353;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id
+            });
+            core.info(JSON.stringify({
+              run_id,
+              name: run.name,
+              head_sha: run.head_sha,
+              status: run.status,
+              conclusion: run.conclusion
+            }));
+            if (run.status === "queued" || run.status === "in_progress") {
+              await github.rest.actions.cancelWorkflowRun({ owner, repo, run_id });
+              core.notice("Cancelled duplicate render. The completed master and review artifacts are unchanged.");
+            } else {
+              core.notice("No cancellation needed; the duplicate run is already complete.");
+            }
