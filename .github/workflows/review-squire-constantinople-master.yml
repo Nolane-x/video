@@ -1,0 +1,179 @@
+name: Review Squire Constantinople master without re-rendering
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-240fps'
+    paths:
+      - '.github/workflows/review-squire-constantinople-master.yml'
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Completed Squire master run to review"
+        required: true
+        type: string
+        default: "42449792684"
+      artifact_name:
+        description: "Exact master artifact name"
+        required: true
+        type: string
+        default: "squire-constantinople-1453-240fps-42449792684"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-master-review
+  cancel-in-progress: false
+
+jobs:
+  make-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      SOURCE_RUN_ID: \${{ inputs.source_run_id || '42449792684' }}
+      SOURCE_ARTIFACT: \${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the already-rendered 2GB master bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: \${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
+          path: \${{ runner.temp }}/master-source
+          run-id: \${{ inputs.source_run_id || '42449792684' }}
+          github-token: \${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install review utilities
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pil
+
+      - name: Identify master, verify metadata and build full-film contact sheet
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, subprocess, hashlib
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFont
+
+          root=Path(os.environ["RUNNER_TEMP"])/"master-source"
+          review=Path(os.environ["RUNNER_TEMP"])/"master-review"
+          review.mkdir(parents=True,exist_ok=True)
+          mp4s=sorted(root.rglob("*.mp4"),key=lambda p:p.stat().st_size,reverse=True)
+          if not mp4s: raise SystemExit("No MP4 found in downloaded master artifact")
+          master=mp4s[0]
+          probe=json.loads(subprocess.check_output([
+            "ffprobe","-v","error","-show_streams","-show_format","-of","json",str(master)
+          ],text=True))
+          video=next(s for s in probe["streams"] if s.get("codec_type")=="video")
+          audio=next((s for s in probe["streams"] if s.get("codec_type")=="audio"),None)
+          duration=float(probe["format"]["duration"])
+          if (int(video["width"]),int(video["height"]))!=(1920,1080):
+            raise SystemExit(f"Master resolution mismatch: {video.get('width')}x{video.get('height')}")
+          if video.get("r_frame_rate")!="240/1" or video.get("avg_frame_rate")!="240/1":
+            raise SystemExit(f"Master is not verified CFR 240: {video.get('r_frame_rate')} / {video.get('avg_frame_rate')}")
+          if duration<650: raise SystemExit(f"Master too short: {duration:.2f}s")
+
+          # Preserve the upstream technical report and sidecar captions if present.
+          for pattern in ("QA-REPORT.json","QA-REPORT.md","captions.srt","captions.vtt","SHA256SUMS.txt"):
+            candidates=list(root.rglob(pattern))
+            if candidates:
+              (review/pattern).write_bytes(candidates[0].read_bytes())
+
+          # Sample 30 evenly spaced moments by seeking, rather than decoding the entire
+          # 240fps master a second time.
+          sample_dir=review/"frames"
+          sample_dir.mkdir(exist_ok=True)
+          times=[duration*(i+0.5)/30 for i in range(30)]
+          frames=[]
+          for i,t in enumerate(times):
+            out=sample_dir/f"frame-{i+1:02d}.jpg"
+            subprocess.run([
+              "ffmpeg","-hide_banner","-loglevel","error","-y","-ss",f"{t:.3f}",
+              "-i",str(master),"-frames:v","1","-vf","scale=480:270:force_original_aspect_ratio=decrease",
+              "-q:v","3",str(out)
+            ],check=True)
+            im=Image.open(out).convert("RGB")
+            tile=Image.new("RGB",(480,300),(18,20,24))
+            tile.paste(im,((480-im.width)//2,0))
+            d=ImageDraw.Draw(tile)
+            d.text((12,278),f"{t:07.2f}s",fill=(245,245,245),font=ImageFont.load_default())
+            frames.append(tile)
+          cols=5; rows=(len(frames)+cols-1)//cols
+          sheet=Image.new("RGB",(cols*480,rows*300),(8,10,14))
+          for i,im in enumerate(frames):
+            sheet.paste(im,((i%cols)*480,(i//cols)*300))
+          sheet.save(review/"full-film-contact-sheet.jpg",quality=92)
+
+          info={
+            "source_run_id":os.environ["SOURCE_RUN_ID"],
+            "source_artifact":os.environ["SOURCE_ARTIFACT"],
+            "master_relative_path":str(master.relative_to(root)),
+            "master_bytes":master.stat().st_size,
+            "duration_seconds":duration,
+            "video":{
+              "codec":video.get("codec_name"),"width":video.get("width"),"height":video.get("height"),
+              "r_frame_rate":video.get("r_frame_rate"),"avg_frame_rate":video.get("avg_frame_rate"),
+              "nb_frames":video.get("nb_frames"),"pixel_format":video.get("pix_fmt")
+            },
+            "audio":None if audio is None else {
+              "codec":audio.get("codec_name"),"sample_rate":audio.get("sample_rate"),
+              "channels":audio.get("channels")
+            },
+            "sample_times_seconds":times,
+            "review_proxy_note":"The review proxy is downscaled to 960x540 at 30fps for convenient full-film viewing; it does not replace or modify the 1080p240 master."
+          }
+          (review/"source-metadata.json").write_text(json.dumps(info,indent=2)+"\n")
+          print(json.dumps(info,indent=2))
+          PY
+
+      - name: Create a lightweight full-length viewing copy and native-HFR excerpts
+        shell: bash
+        run: |
+          set -euo pipefail
+          MASTER="$(find "$RUNNER_TEMP/master-source" -type f -name '*.mp4' -printf '%s %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)"
+          REVIEW="$RUNNER_TEMP/master-review"
+          DURATION="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$MASTER")"
+          python - "$MASTER" "$REVIEW" "$DURATION" <<'PY'
+          import sys,subprocess
+          from pathlib import Path
+          master=Path(sys.argv[1]); out=Path(sys.argv[2]); duration=float(sys.argv[3])
+          subprocess.run([
+            "ffmpeg","-hide_banner","-v","error","-y","-i",str(master),
+            "-map","0:v:0","-map","0:a:0?","-vf","fps=30,scale=960:-2",
+            "-c:v","libx264","-preset","veryfast","-crf","26","-maxrate","1800k","-bufsize","3600k",
+            "-c:a","aac","-b:a","128k","-movflags","+faststart",
+            str(out/"full-film-review-540p30.mp4")
+          ],check=True)
+          for label,t in [
+            ("opening",min(20,max(0,duration-4))),
+            ("middle",max(0,duration*0.5-2)),
+            ("ending",max(0,duration-6))
+          ]:
+            subprocess.run([
+              "ffmpeg","-hide_banner","-v","error","-y","-ss",f"{t:.3f}","-i",str(master),
+              "-t","4","-an","-c:v","libx264","-preset","veryfast","-crf","20",
+              "-pix_fmt","yuv420p","-r","240","-fps_mode","cfr",
+              str(out/f"native-1080p240-{label}.mp4")
+            ],check=True)
+          PY
+          rm -rf "$REVIEW/frames"
+
+      - name: Hash review bundle
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/master-review"
+          find . -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          du -ah . | sort -h | tail -n 20
+
+      - name: Upload lightweight full-film review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-master-review-\${{ github.run_id }}
+          path: \${{ runner.temp }}/master-review/
+          if-no-files-found: error
+          retention-days: 30
