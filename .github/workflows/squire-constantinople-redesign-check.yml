@@ -1,0 +1,55 @@
+name: Squire · Constantinople 1453 · Redesign static gates
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-redesign'
+    paths:
+      - '.github/workflows/squire-constantinople-redesign-check.yml'
+      - 'tools/video/author_squire_constantinople.py'
+      - 'tools/video/qa_squire_constantinople.py'
+      - 'video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js'
+      - 'tests/test_squire_constantinople.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: squire-constantinople-redesign-check
+  cancel-in-progress: true
+
+jobs:
+  author-and-scene-validation:
+    name: Validate shot direction, scene syntax and continuity gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile Python authoring and QA modules
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/author_squire_constantinople.py tools/video/qa_squire_constantinople.py tests/test_squire_constantinople.py
+      - name: Run focused production tests
+        run: python tests/test_squire_constantinople.py
+      - name: Parse every custom Squire scene
+        run: node --check video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js
+      - name: Verify every authorable cinematic scene is registered
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import importlib.util
+          root=Path('.')
+          spec=importlib.util.spec_from_file_location('author',root/'tools/video/author_squire_constantinople.py')
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          source=(root/'video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js').read_text()
+          missing=sorted(name for name in mod.CUSTOM if f"registerTemplate('{name}'" not in source)
+          assert not missing, f"Unregistered scene templates: {missing}"
+          assert 'byzantineYou' in source, 'Recurring defender preset missing'
+          print(f"Registered {len(mod.CUSTOM)} story-specific templates; recurring defender preset present.")
+          PY
