@@ -44,10 +44,10 @@ def sfx_for_shot(tpl, args, index, root):
 
 def progress_phase(p, text):
     t = text.casefold()
-    if p < .055:
-        return "night"
     if any(k in t for k in ("final assault", "last assault", "janissar", "ladder", "twenty-ninth of may", "just before dawn")):
         return "final"
+    if p < .055:
+        return "night"
     if any(k in t for k in ("hauled overland", "overland", "rollers", "ships are appearing inside", "ships inside", "lowered into the inlet")):
         return "portage"
     if any(k in t for k in ("four christian ships", "four ships", "relief ships", "convoy", "ottoman fleet", "christian ships are approaching", "ships fight their way")):
@@ -321,7 +321,9 @@ def main():
             if transitions[i % len(transitions)] != "cut" else {"type": "cut"})
         shot["sfx"] = sfx_for_shot(tpl, visual, i, sfx_root)
         shot["notes"] = "Character-led composite reconstruction; action beat is distinct and disputed details remain qualified."
-        if tpl == "close" or (isinstance(visual, dict) and HERO in json.dumps(visual)):
+        # Bespoke cinematic templates explicitly stage the same defender in their scene code.
+        hero_templates = CUSTOM - {"command_camp"}
+        if tpl in hero_templates or (isinstance(visual, dict) and HERO in json.dumps(visual)):
             hero_count += 1
         usage[tpl] = usage.get(tpl, 0) + 1
         last = tpl
