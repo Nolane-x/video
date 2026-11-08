@@ -2,6 +2,9 @@
 import importlib.util
 import unittest
 import tempfile
+import json
+import sys
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -32,6 +35,41 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(mod.choose_template(.57,"Four ships break through",42,{},"scene"),"relief_galleys")
         self.assertEqual(mod.choose_template(.42,"Repair crews rebuild the breached wall",41,{},"scene"),"repair_wall")
         self.assertEqual(mod.choose_template(.64,"The miners dig under the wall",70,{},"scene"),"tunnel_cutaway")
+
+    def test_full_authoring_stays_character_led_and_avoids_long_template_runs(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            project=root/"work"/"kit"/"projects"/"constantinople"
+            (project/"story").mkdir(parents=True)
+            (root/"work"/"kit"/"audio"/"sfx").mkdir(parents=True)
+            lines=[
+                "At midnight, the walls are still standing",
+                "The Ottoman army approaches from the hills",
+                "The city walls have protected the capital for centuries",
+                "The cannon fires and stone strikes the wall",
+                "Repair crews carry timber and masonry",
+                "The chain across the Golden Horn blocks the harbour",
+                "Four Christian ships break through the Ottoman fleet",
+                "Ships are hauled overland on rollers",
+                "Miners dig beneath the wall as defenders listen",
+                "Families pray inside the churches",
+                "The final assault begins before dawn",
+                "The city falls and the people flee through the streets",
+            ]
+            shots=[{"id":f"s{i+1:03d}","start":i*2.0,"end":(i+1)*2.0,"line":lines[i%len(lines)]} for i in range(350)]
+            (project/"story"/"shots.json").write_text(json.dumps({"duration":700,"shots":shots}),encoding="utf-8")
+            with patch.object(sys,"argv",["author_squire_constantinople.py","--project",str(project)]):
+                self.assertEqual(mod.main(),0)
+            result=json.loads((project/"story"/"shots.json").read_text(encoding="utf-8"))
+            self.assertGreaterEqual(result["hero_character"]["shot_count"],168)
+            self.assertGreaterEqual(sum(result["shot_counts"].get(x,0) for x in mod.CUSTOM),220)
+            run=1; longest=1
+            for prev,cur in zip(result["shots"],result["shots"][1:]):
+                run=run+1 if cur["tpl"]==prev["tpl"] else 1
+                longest=max(longest,run)
+            self.assertLessEqual(longest,3)
+            self.assertEqual(result["hero_character"]["preset"],"byzantineYou")
+
     def test_siege_audio_source_is_real_cc0_cannon_wall_impact(self):
         root=Path("/fixtures")
         defs=foley.source_definitions(root)
