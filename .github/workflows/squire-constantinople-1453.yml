@@ -67,7 +67,7 @@ jobs:
   voiceover:
     name: Synthesize and verify English narration
     needs: prepare-voice
-    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@8461c961e6e0fa5630dc7689afe42fbc38485072
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@018b93c9c4a3fedf45a20d8685d163fa8c7ce6ea
     with:
       job_json: ${{ needs.prepare-voice.outputs.job_json }}
     permissions:
