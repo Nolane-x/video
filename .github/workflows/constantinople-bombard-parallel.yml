@@ -1,0 +1,285 @@
+name: Constantinople · parallel native-240fps 3D proof
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-bombard-parallel'
+    paths:
+      - 'tools/blender/render_constantinople_bombardment.py'
+      - '.github/workflows/constantinople-bombard-parallel.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-bombard-parallel-proof
+  cancel-in-progress: false
+
+jobs:
+  render:
+    name: Render global frames ${{ matrix.chunk }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Blender and FFmpeg runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
+          blender --version | head -n 2
+      - name: Compile and render one disjoint range on the global 240fps timeline
+        shell: bash
+        env:
+          CHUNK_INDEX: ${{ matrix.chunk }}
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/blender/render_constantinople_bombardment.py
+          CHUNK_START=$((1 + CHUNK_INDEX * 522))
+          CHUNK_END=$((CHUNK_START + 521))
+          if [ "$CHUNK_END" -gt 9394 ]; then CHUNK_END=9394; fi
+          printf 'Chunk %s: frames %s..%s\n' "$CHUNK_INDEX" "$CHUNK_START" "$CHUNK_END"
+          BLENDER_FRAME_START="$CHUNK_START" \
+          BLENDER_FRAME_END="$CHUNK_END" \
+          BLENDER_OUTPUT="$PWD/chunk-$CHUNK_INDEX.mp4" \
+            blender -b --python tools/blender/render_constantinople_bombardment.py \
+            2>&1 | tee "chunk-$CHUNK_INDEX.log"
+          test -s "chunk-$CHUNK_INDEX.mp4"
+          ffprobe -v error -count_frames -select_streams v:0 \
+            -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_read_frames \
+            -of json "chunk-$CHUNK_INDEX.mp4" > "chunk-$CHUNK_INDEX.json"
+          CHUNK_INDEX="$CHUNK_INDEX" CHUNK_START="$CHUNK_START" CHUNK_END="$CHUNK_END" \
+          python3 - <<'PY'
+          import json, os
+          p = f"chunk-{os.environ['CHUNK_INDEX']}.json"
+          s = json.load(open(p))["streams"][0]
+          expected = int(os.environ["CHUNK_END"]) - int(os.environ["CHUNK_START"]) + 1
+          assert (s["width"], s["height"]) == (1920, 1080), s
+          assert s["r_frame_rate"] == "240/1", s
+          assert s["avg_frame_rate"] == "240/1", s
+          assert int(s["nb_read_frames"]) == expected, (expected, s)
+          print("CHUNK TECHNICAL PASS", expected, "frames at strict CFR 240")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-bombard-chunk-${{ matrix.chunk }}
+          path: |
+            chunk-${{ matrix.chunk }}.mp4
+            chunk-${{ matrix.chunk }}.log
+            chunk-${{ matrix.chunk }}.json
+          if-no-files-found: error
+          retention-days: 5
+
+  assemble:
+    name: Stitch, add verified narration/audio and QA the complete proof
+    needs: render
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install FFmpeg and verification tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Download all 18 rendered frame ranges
+        uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-bombard-chunk-*
+          path: rendered-chunks
+          merge-multiple: true
+      - name: Verify exact chunk coverage and stitch in timeline order
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          base = Path("rendered-chunks")
+          concat = []
+          total = 0
+          for i in range(18):
+              video = base / f"chunk-{i}.mp4"
+              meta = json.loads((base / f"chunk-{i}.json").read_text())
+              s = meta["streams"][0]
+              start = 1 + i * 522
+              end = min(start + 521, 9394)
+              expected = end - start + 1
+              assert video.is_file() and video.stat().st_size > 100_000, str(video)
+              assert (s["width"], s["height"]) == (1920, 1080), s
+              assert s["r_frame_rate"] == "240/1" and s["avg_frame_rate"] == "240/1", s
+              assert int(s["nb_read_frames"]) == expected, (i, expected, s)
+              total += expected
+              concat.append(f"file '{video.resolve().as_posix()}'")
+              print(f"Verified chunk {i:02d}: {start}-{end} ({expected} frames)")
+          assert total == 9394, total
+          Path("chunks.txt").write_text("\n".join(concat) + "\n")
+          print("Exact coverage:", total, "frames; no gaps or overlaps")
+          PY
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i chunks.txt \
+            -map 0:v:0 -c:v copy -movflags +faststart stitched-picture.mp4
+      - name: Download and verify the original VoiceStudio narration artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-42448341267
+          path: voice-assets
+          run-id: 42448341267
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify voice provenance and prepare the precise excerpt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          p = Path("voice-assets")
+          m = json.loads((p / "manifest.json").read_text(encoding="utf-8"))
+          a = m["audio"]
+          digest = hashlib.sha256((p / "narration.wav").read_bytes()).hexdigest()
+          assert digest == a["sha256"], "VoiceStudio SHA-256 mismatch"
+          assert a["sample_rate"] == 48000 and a["channels"] == 1 and a["subtype"] == "PCM_24"
+          assert a["watermark"]["status"] == "verified" and a["checks"] == "passed"
+          print("Verified VoiceStudio:", m["voice_id"], digest)
+          PY
+          ffmpeg -hide_banner -v error -y -ss 220.760 -i voice-assets/narration.wav \
+            -t 39.140 -ar 48000 -ac 2 -c:a pcm_s24le out-voice.wav
+      - name: Acquire recorded CC0 score and cannon effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p media
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o media/score.wav
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o media/cannon_fire.ogg
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
+          for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
+          sha256sum media/* | tee media/SHA256SUMS.txt
+      - name: Mix voice, recorded score and synchronized cannon effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -v error -y -i out-voice.wav -stream_loop -1 -i media/score.wav \
+            -i media/cannon_fire.ogg -i media/cannon_impact.ogg \
+            -filter_complex \
+            "[1:a]atrim=0:39.140,asetpts=N/SR/TB,volume=0.14[score]; \
+             [2:a]adelay=19000|19000,volume=0.75,highpass=f=90,lowpass=f=9000[fire]; \
+             [3:a]adelay=25300|25300,volume=0.85,highpass=f=55,lowpass=f=6500[impact]; \
+             [0:a]volume=1.0[voice]; \
+             [voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0, \
+             loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t 39.140 -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
+          ffmpeg -hide_banner -v error -y -i stitched-picture.mp4 -i out-audio.m4a \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy \
+            -movflags +faststart constantinople-cinematic-bombardment-240fps.mp4
+      - name: Export subtitle excerpt and enforce full CFR 240 delivery checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          src = Path("voice-assets/captions.srt").read_text(encoding="utf-8-sig")
+          offset = 220.760
+          def sec(v):
+              h, m, s = v.split(":"); q, ms = s.split(",")
+              return int(h)*3600 + int(m)*60 + int(q) + int(ms)/1000
+          def stamp(v):
+              v=max(0,v); h=int(v//3600); m=int(v%3600//60); s=int(v%60); ms=round((v-int(v))*1000)
+              if ms==1000: s+=1; ms=0
+              return f"{h:02}:{m:02}:{s:02},{ms:03}"
+          out=[]; counter=0
+          for block in src.strip().split("\n\n"):
+              lines=block.splitlines()
+              if len(lines)<3 or " --> " not in lines[1]: continue
+              a,b=map(sec,lines[1].split(" --> "))
+              if b<=offset or a>=offset+39.140: continue
+              counter+=1
+              out.extend([str(counter),f"{stamp(max(0,a-offset))} --> {stamp(min(offset+39.140,b)-offset)}",*lines[2:],""])
+          Path("captions.srt").write_text("\n".join(out),encoding="utf-8")
+          Path("RECONSTRUCTION-NOTES.txt").write_text(
+              "Illustrative 3D reconstruction, not a literal replica of Orban's exact bombard.\n"
+              "Narration excerpt: 00:03:40.760–00:04:19.900. Captions are separate.\n"
+              "CC0 modern score/effect candidates require human audition before publication.\n",
+              encoding="utf-8")
+          PY
+          ffprobe -v error -count_frames -show_streams -show_format -of json \
+            constantinople-cinematic-bombardment-240fps.mp4 > metadata.json
+          python3 - <<'PY'
+          import json, subprocess
+          p = "constantinople-cinematic-bombardment-240fps.mp4"
+          j = json.load(open("metadata.json"))
+          v = next(x for x in j["streams"] if x["codec_type"] == "video")
+          a = next(x for x in j["streams"] if x["codec_type"] == "audio")
+          assert (v["width"], v["height"]) == (1920, 1080), v
+          assert v["r_frame_rate"] == "240/1" and v["avg_frame_rate"] == "240/1", v
+          assert int(v["nb_read_frames"]) == 9394, v
+          assert a["sample_rate"] == "48000" and a["channels"] == 2, a
+          d = float(j["format"]["duration"])
+          assert 39.0 <= d <= 39.3, d
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("FULL PROOF TECHNICAL PASS: 1920x1080 CFR 240, 9394 frames, 48kHz stereo")
+          PY
+      - name: Build contact sheet, hashes and provenance report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          ffmpeg -hide_banner -v error -y -i constantinople-cinematic-bombardment-240fps.mp4 \
+            -vf "fps=1/2,scale=480:-1,tile=5x4" -frames:v 1 review/contact-sheet.jpg
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          meta=json.load(open("metadata.json"))
+          v=next(x for x in meta["streams"] if x["codec_type"]=="video")
+          a=next(x for x in meta["streams"] if x["codec_type"]=="audio")
+          voice=json.loads(Path("voice-assets/manifest.json").read_text())
+          chunks=[]
+          for i in range(18):
+              p=Path("rendered-chunks")/f"chunk-{i}.mp4"
+              chunks.append({"index":i,"file":p.name,"sha256":sha(p)})
+          report={
+            "status":"RENDERED_3D_PROOF_PENDING_HUMAN_VISUAL_AND_AUDIO_REVIEW",
+            "project":"53 Days to the End of an Empire",
+            "sequence":"The great bombard — loading, firing, wall impact and repair",
+            "classification":"illustrative 3D historical reconstruction, not archival footage",
+            "engine":"Blender Eevee, 18-way global-frame chunk render",
+            "blender_version":subprocess.check_output(["blender","--version"],text=True).splitlines()[0],
+            "dimensions":[v["width"],v["height"]],
+            "fps":v["r_frame_rate"],"avg_frame_rate":v["avg_frame_rate"],
+            "frames":int(v["nb_read_frames"]),"duration_seconds":float(meta["format"]["duration"]),
+            "video_codec":v["codec_name"],"audio_codec":a["codec_name"],
+            "audio_sample_rate":a["sample_rate"],"audio_channels":a["channels"],
+            "narration":{"voice_id":voice["voice_id"],"source_sha256":voice["audio"]["sha256"],
+              "source_time_start":220.760,"excerpt_duration":39.140},
+            "audio_assets":[
+              {"name":"Eye of the Storm","url":"https://opengameart.org/content/eye-of-the-storm-0",
+               "license":"CC0-1.0","sha256":sha("media/score.wav"),"human_auditioned":False},
+              {"name":"Cannon fire 1","url":"https://opengameart.org/content/battle-at-sea",
+               "license":"CC0-1.0","sha256":sha("media/cannon_fire.ogg"),"human_auditioned":False},
+              {"name":"Cannon impact","url":"https://opengameart.org/content/battle-at-sea",
+               "license":"CC0-1.0","sha256":sha("media/cannon_impact.ogg"),"human_auditioned":False}],
+            "render_chunks":chunks,
+            "limitations":["Illustrative large-bombard design, not a verified replica of Orban's exact gun.",
+              "Modern CC0 audio candidates need human audition.",
+              "This is a 39-second proof, not the complete film."],
+            "sha256_video":sha("constantinople-cinematic-bombardment-240fps.mp4")
+          }
+          Path("review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
+          PY
+          cp constantinople-cinematic-bombardment-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt metadata.json review/
+          cp rendered-chunks/chunk-*.json rendered-chunks/chunk-*.log review/
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-cinematic-bombardment-parallel-proof-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
