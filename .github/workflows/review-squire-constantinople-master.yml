@@ -32,18 +32,18 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      SOURCE_RUN_ID: \${{ inputs.source_run_id || '42449792684' }}
-      SOURCE_ARTIFACT: \${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
+      SOURCE_RUN_ID: ${{ inputs.source_run_id || '42449792684' }}
+      SOURCE_ARTIFACT: ${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Download the already-rendered 2GB master bundle
         uses: actions/download-artifact@v4
         with:
-          name: \${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
-          path: \${{ runner.temp }}/master-source
-          run-id: \${{ inputs.source_run_id || '42449792684' }}
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          name: ${{ inputs.artifact_name || 'squire-constantinople-1453-240fps-42449792684' }}
+          path: ${{ runner.temp }}/master-source
+          run-id: ${{ inputs.source_run_id || '42449792684' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install review utilities
         run: |
@@ -173,7 +173,7 @@ jobs:
       - name: Upload lightweight full-film review package
         uses: actions/upload-artifact@v4
         with:
-          name: squire-constantinople-master-review-\${{ github.run_id }}
-          path: \${{ runner.temp }}/master-review/
+          name: squire-constantinople-master-review-${{ github.run_id }}
+          path: ${{ runner.temp }}/master-review/
           if-no-files-found: error
           retention-days: 30
