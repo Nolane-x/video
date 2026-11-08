@@ -312,7 +312,8 @@ def main():
                 visual["beat"] = ("watch", "torch", "dread", "dawn")[i % 4]
             elif tpl == "city_panorama":
                 visual["chain"] = phase == "sea"
-                visual["damage"] = .12 if p > .25 else 0
+                visual["fall"] = p > .82
+                visual["damage"] = min(.72, .08 + max(0,p-.25)*.72)
 
         shot["tpl"] = tpl
         shot["args"] = visual
@@ -354,7 +355,7 @@ def main():
     cfg_path = project / "config.json"
     cfg = load(cfg_path, {})
     cfg.update({"title": "53 Days to the End of an Empire", "aspect": "16:9", "resolution": "1080p",
-                "fps": 240, "style": "flat", "captions": True, "captionStyle": "squire", "bars": "none",
+                "fps": 240, "style": "flat", "captions": False, "captionStyle": "squire", "bars": "none",
                 "pack": "squire", "lang": "en", "captions": False, "music": {"enabled": True, "gainDb": -12},
                 "sfx": {"enabled": True, "gainDb": -6}, "captions": False, "loudness": -14, "maxrate": "48M",
                 "bufsize": "96M", "crf": 18, "renderPreset": "slow", "duration": round(duration, 3)})
