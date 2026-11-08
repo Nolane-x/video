@@ -1,0 +1,112 @@
+name: Fast visual inspection of Squire Constantinople master
+
+on:
+  push:
+    branches:
+      - 'squire/constantinople-1453-240fps'
+    paths:
+      - '.github/workflows/fast-review-squire-constantinople.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-master-fast-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download completed master bundle from run 42449792684
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-1453-240fps-42449792684
+          path: source
+          run-id: 42449792684
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install FFmpeg and Pillow
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pil
+
+      - name: Produce contact sheet, QA evidence and native-HFR extracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          from PIL import Image,ImageDraw,ImageFont
+
+          root=Path("source")
+          out=Path("fast-review")
+          out.mkdir(parents=True,exist_ok=True)
+          mp4s=sorted(root.rglob("*.mp4"),key=lambda p:p.stat().st_size,reverse=True)
+          if not mp4s: raise SystemExit("No master MP4 found")
+          master=mp4s[0]
+          probe=json.loads(subprocess.check_output(["ffprobe","-v","error","-show_streams","-show_format","-of","json",str(master)],text=True))
+          v=next(x for x in probe["streams"] if x.get("codec_type")=="video")
+          a=next((x for x in probe["streams"] if x.get("codec_type")=="audio"),None)
+          duration=float(probe["format"]["duration"])
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert duration>650,duration
+
+          for pattern in ("QA-REPORT.json","QA-REPORT.md","captions.srt","captions.vtt"):
+              files=list(root.rglob(pattern))
+              if files: (out/pattern).write_bytes(files[0].read_bytes())
+
+          samples=[]
+          for i in range(30):
+              t=duration*(i+.5)/30
+              p=out/f"frame-{i+1:02d}.jpg"
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",f"{t:.3f}","-i",str(master),
+                 "-frames:v","1","-vf","scale=480:270:force_original_aspect_ratio=decrease","-q:v","3",str(p)],check=True)
+              frame=Image.open(p).convert("RGB")
+              tile=Image.new("RGB",(480,300),(12,14,18))
+              tile.paste(frame,((480-frame.width)//2,0))
+              ImageDraw.Draw(tile).text((12,278),f"{t:.2f}s",fill=(245,245,245),font=ImageFont.load_default())
+              samples.append(tile)
+          sheet=Image.new("RGB",(2400,1800),(6,8,12))
+          for i,tile in enumerate(samples): sheet.paste(tile,((i%5)*480,(i//5)*300))
+          sheet.save(out/"full-film-contact-sheet.jpg",quality=93)
+
+          extracts=[]
+          for label,t in [("opening",min(20,duration-4)),("middle",max(0,duration*.5-2)),("ending",max(0,duration-6))]:
+              target=out/f"native-1080p240-{label}.mp4"
+              subprocess.run(["ffmpeg","-hide_banner","-v","error","-y","-ss",f"{t:.3f}","-i",str(master),"-t","4","-an",
+                "-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","240","-fps_mode","cfr",str(target)],check=True)
+              extracts.append({"label":label,"start_seconds":t,"file":target.name,"bytes":target.stat().st_size})
+          report={
+            "source_run_id":42449792684,
+            "master_file":str(master.relative_to(root)),
+            "master_bytes":master.stat().st_size,
+            "duration_seconds":duration,
+            "resolution":[v["width"],v["height"]],
+            "fps":{"r":v["r_frame_rate"],"avg":v["avg_frame_rate"],"frames":v.get("nb_frames")},
+            "audio":None if not a else {"codec":a.get("codec_name"),"sample_rate":a.get("sample_rate"),"channels":a.get("channels")},
+            "contact_sheet_samples":30,
+            "native_hfr_extracts":extracts,
+            "note":"The contact sheet samples the whole film; excerpts retain 1080p/240fps. No re-render or modification was made to the source master."
+          }
+          (out/"inspection-manifest.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          PY
+          rm -f fast-review/frame-*.jpg
+          (cd fast-review && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload fast visual inspection package
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-master-fast-review
+          path: fast-review/
+          if-no-files-found: error
+          retention-days: 30
