@@ -235,7 +235,7 @@ registerTemplate('wall_battery',{draw(g,lt,info){
     wallBase(g,lt,lt>impact?clamp((lt-impact)/.35):0);
     // two defensive formations in depth
     formation(g,{preset:'byzantineGuard',rows:3,cols:17,x0:.56,x1:.99,yFront:.78,yBack:.61,hFront:.18,hBack:.075,face:'determined',seed:71,t:lt,flip:true});
-    cannon(g,330,870,1.5,age,age>=0);
+    cannon(g,330,870,1.5,age+.55,age>=0);
     drawPeople(g,lt,info,[
       {preset:'byzantineYou',x:.18,y:.96,h:.57,face:'determined',pose:'run',walk:true,dir:1,speed:.65},
       {preset:'byzantineGuard',x:.32,y:.94,h:.36,face:'worried',pose:'guard'},
@@ -355,7 +355,7 @@ function drawGunCrew(g,t,info,a){
   wallBase(g,t,0);
   // Gun is staged at foreground scale; the crew loads, braces, fires, and reacts.
   const fireAt=a.fireAt??.65,age=t-fireAt;
-  cannon(g,475,895,2.0,age,age>=0);
+  cannon(g,475,895,2.0,age+.55,age>=0);
   drawPeople(g,t,info,[
     {preset:'ottomanInfantry',x:.13,y:.96,h:.45,face:'determined',pose:'carry',walk:true,dir:1,speed:.45},
     {preset:'ottomanInfantry',x:.66,y:.96,h:.43,face:'determined',pose:'push',walk:true,dir:-1,speed:.32},
