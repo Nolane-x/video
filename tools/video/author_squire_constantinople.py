@@ -133,7 +133,7 @@ def main():
         shot["tpl"]=tpl
         shot["args"]=visual
         shot["in"]={"type":"fade","dur":.18} if i==0 else ({"type":transitions[i%len(transitions)],"dur":.13,"dir":1 if i%2 else -1} if transitions[i%len(transitions)]!="cut" else {"type":"cut"})
-        shot["sfx"]=cue(sfx_root,["battle_roar","wind_loop"] if tpl in {"last_assault","wall_battery","relief_galleys"} else (["sword_clash","battle_roar"] if tpl in {"city_interior","command_camp"} else ["wind_loop"]),at=.18,gain=-12 if tpl not in {"last_assault","wall_battery"} else -8)
+        shot["sfx"]=cue(sfx_root,["siege_impact","battle_roar","arrow_whoosh"] if tpl in {"last_assault","wall_battery"} else (["sword_clash","battle_roar"] if tpl in {"city_interior","command_camp"} else ["wind_loop"]),at=.18,gain=-12 if tpl not in {"last_assault","wall_battery"} else -8)
         shot["notes"]="Composite visual reconstruction; no invented eyewitness quotation or exact unverified tactical count."
         usage[tpl]=usage.get(tpl,0)+1; last=tpl
     custom_count=sum(usage.get(x,0) for x in CUSTOM)
@@ -148,11 +148,11 @@ def main():
     story["shots"]=shots
     story["music"]=[
       {"start":0,"end":round(duration*.08,3),"bed":"mystery","gainDb":-3},
-      {"start":round(duration*.08,3),"end":round(duration*.28,3),"bed":"ancient","gainDb":-2},
-      {"start":round(duration*.28,3),"end":round(duration*.48,3),"bed":"medieval","gainDb":-2},
-      {"start":round(duration*.48,3),"end":round(duration*.72,3),"bed":"suspense","gainDb":-1},
+      {"start":round(duration*.08,3),"end":round(duration*.28,3),"bed":"wonder","gainDb":-2},
+      {"start":round(duration*.28,3),"end":round(duration*.48,3),"bed":"curious","gainDb":-2},
+      {"start":round(duration*.48,3),"end":round(duration*.72,3),"bed":"tension","gainDb":-1},
       {"start":round(duration*.72,3),"end":round(duration*.91,3),"bed":"war","gainDb":-1},
-      {"start":round(duration*.91,3),"end":round(duration,3),"bed":"somber","gainDb":-3}
+      {"start":round(duration*.91,3),"end":round(duration,3),"bed":"emotional","gainDb":-3}
     ]
     path.write_text(json.dumps(story,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     cfg_path=project/"config.json"; cfg=load(cfg_path,{})
