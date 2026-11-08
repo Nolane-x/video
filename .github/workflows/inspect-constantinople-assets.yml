@@ -125,7 +125,7 @@ jobs:
       - name: Install Blender and image tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender libegl1 libgl1 libxkbcommon0 libsm6 python3-pil
+          sudo apt-get install -y blender libegl1 libgl1 libxkbcommon0 libsm6 python3-pil python3-numpy
 
       - name: Resolve and download Poly Haven models from the official API
         shell: bash
