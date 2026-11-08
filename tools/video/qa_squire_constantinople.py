@@ -20,7 +20,7 @@ def main():
     assert final.is_file() and final.stat().st_size>300_000,f"Missing/undersized final: {final}"
     assert preview.is_file() and preview.stat().st_size>50_000,"Missing 240fps moving proof"
     assert thumb.is_file() and thumb.stat().st_size>10_000,"Missing thumbnail"
-    assert (p/"build"/"sheets").glob("sheet_*.jpg"),"Contact sheets missing"
+    assert any((p/"build"/"sheets").glob("sheet_*.jpg")),"Contact sheets missing"
     shots=story.get("shots") or [];duration=float(story.get("duration",0))
     assert duration>650,f"Film too short: {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
