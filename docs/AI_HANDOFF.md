@@ -1,5 +1,18 @@
 # AI session handoff
 
+## Current active film work — Constantinople 1453 (2026-11-08)
+
+User instruction: continue producing a substantially better long-form history film; do not claim completion from a green CI job. The requested render is in GitHub Actions, not local Electron/local rendering. Keep English narration and captions, 1920x1080, native 240fps.
+
+- Original source lane: `squire/constantinople-1453-240fps`; full render [run 42449792684](https://github.com/Nolane-x/video/actions/runs/42449792684) was last observed rendering the complete 1080p 240fps master. Preserve the prior candidate rather than overwrite it.
+- Voice: reuse [run 42448341267](https://github.com/Nolane-x/video/actions/runs/42448341267) artifact. WAV/manifest/captions/narrator-selection are verified; no fresh TTS needed.
+- First proof was visually assessed: 240 fps metadata/sample check passed, but scenes relied on repeated vector formations and lacked a consistent protagonist. This is a creative defect, not a frame-rate defect.
+- Work-in-progress redesign: branch `squire/constantinople-1453-redesign`, latest known commit `3dc6027ed65007a58e5a953f709a7d95ae6f4c90`. It introduces a recurring `byzantineYou` defender, 14 custom Squire templates, six additional set-pieces and 350-shot authoring tests. Static gate [run 42455367429](https://github.com/Nolane-x/video/actions/runs/42455367429) passed. A 350-shot fixture yields 265 custom shots, 288 hero shots and 17 templates used.
+- Proof-only workflow [run 42455340264](https://github.com/Nolane-x/video/actions/runs/42455340264) is in progress; it reuses VoiceStudio assets, imports recorded CC0 candidates, scans all shots, builds contact sheets and renders one moving 240fps sample from every custom template. It must not be treated as a full-film render.
+- Foley/music provenance: candidates are CC0 itemized and SHA-256 verified, but human audition=0 and publication approval=0. Preserve this caveat until the mix is heard and reviewed.
+- Next: check run 42455340264; inspect its montage at full motion and all contact sheets. Fix defects in the redesign branch only. Do not touch the original full render until it finishes or fails. After review, port accepted changes to the full-render lane (or a fresh candidate branch) and start the long master only when the proof is credible.
+
+
 ## Asset-library handoff — 2026-10-30
 
 Continue this workstream separately from the film projects below.
