@@ -1,0 +1,100 @@
+name: Inspect completed Constantinople master
+
+on:
+  push:
+    branches:
+      - 'inspect/squire-master-artifact'
+    paths:
+      - '.github/workflows/inspect-squire-master-artifact.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: inspect-squire-master-artifact
+  cancel-in-progress: false
+
+jobs:
+  inspect-master:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg and archive tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg unzip
+          ffmpeg -version | head -n 1
+
+      - name: Download the completed 2GB master artifact from the earlier run
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-1453-240fps-42449792684
+          path: master-bundle
+          run-id: 42449792684
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Probe master, create whole-film contact sheet and review proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          echo "MASTER ARTIFACT INVENTORY"
+          find master-bundle -maxdepth 3 -type f -printf '%s %p\n' | sort -nr | tee review/inventory.txt
+          MASTER="$(find master-bundle -type f -iname '*.mp4' -printf '%s %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)"
+          test -n "$MASTER"
+          test -s "$MASTER"
+          echo "Master file: $MASTER"
+          ffprobe -v error -show_streams -show_format -of json "$MASTER" > review/master-ffprobe.json
+          cp "$MASTER" review/MASTER_SOURCE_PATH.txt
+          for f in master-bundle/QA-REPORT.json master-bundle/QA-REPORT.md master-bundle/SHA256SUMS.txt master-bundle/captions.srt master-bundle/captions.vtt master-bundle/thumbnail.png; do
+            if [ -f "$f" ]; then cp "$f" review/; fi
+          done
+          if [ -d master-bundle/contact-sheets ]; then cp -a master-bundle/contact-sheets review/; fi
+          # A full-duration, lower-bitrate proxy preserves normal-speed pacing for review.
+          ffmpeg -hide_banner -y -i "$MASTER" \
+            -vf "fps=30,scale=960:-2:flags=lanczos,format=yuv420p" \
+            -c:v libx264 -preset veryfast -crf 27 -maxrate 1400k -bufsize 2800k \
+            -c:a aac -b:a 96k -movflags +faststart review/whole-film-review-proxy-30fps.mp4
+          # One frame every 25 seconds provides a whole-film visual map.
+          ffmpeg -hide_banner -v error -y -i "$MASTER" \
+            -vf "fps=1/25,scale=480:-2:flags=lanczos,tile=5x6:padding=8:margin=8" \
+            -frames:v 1 review/whole-film-contact-sheet.jpg
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("review/master-ffprobe.json").read_text())
+          v=next(s for s in p["streams"] if s["codec_type"]=="video")
+          a=next((s for s in p["streams"] if s["codec_type"]=="audio"),{})
+          report={
+            "source_run_id":42449792684,
+            "source_artifact":"squire-constantinople-1453-240fps-42449792684",
+            "master_file":Path("MASTER_SOURCE_PATH.txt").read_text().strip(),
+            "resolution":[int(v["width"]),int(v["height"])],
+            "r_frame_rate":v.get("r_frame_rate"),
+            "avg_frame_rate":v.get("avg_frame_rate"),
+            "frames":int(v.get("nb_frames") or 0),
+            "duration_seconds":float(p["format"]["duration"]),
+            "video_codec":v.get("codec_name"),
+            "audio_codec":a.get("codec_name"),
+            "audio_sample_rate":a.get("sample_rate"),
+            "audio_channels":a.get("channels"),
+            "master_bytes":Path(Path("MASTER_SOURCE_PATH.txt").read_text().strip()).stat().st_size,
+            "review_status":"Technical report and source master retained; artistic sign-off remains pending."
+          }
+          Path("review/inspection-summary.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          assert report["resolution"]==[1920,1080]
+          assert report["r_frame_rate"]=="240/1" and report["avg_frame_rate"]=="240/1"
+          assert report["frames"]>150000
+          PY
+
+      - name: Upload small independent inspection bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-master-inspection-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
