@@ -173,8 +173,8 @@ def weighted_mesh(name,verts,faces,material,weight_fn,solidify=0.0):
 
 # Caftan body: a shaped, slightly flared robe, open at the neck and hem.
 ring_fracs=[0,.09,.22,.36,.50,.64,.77,.88,1.0]
-ring_rx=[.255,.27,.26,.225,.23,.25,.285,max(.29,shoulder_span*.64),.185]
-ring_ry=[.138,.145,.14,.122,.128,.14,.154,.154,.108]
+ring_rx=[.30,.32,.315,.29,.30,.335,.365,max(.37,shoulder_span*.78),.23]
+ring_ry=[.17,.175,.17,.15,.16,.18,.20,.20,.14]
 ring_z=[bottom_z+(top_z-bottom_z)*v for v in ring_fracs]
 seg=40;verts=[];faces=[]
 for ri,z in enumerate(ring_z):
@@ -206,7 +206,7 @@ for ri in range(rows):
     width=.148*(.94+.06*v)
     for ci in range(cols):
         u=ci/(cols-1);x=cx+(u*2-1)*width
-        y=cy-.153-.018*(1-((u*2-1)**2)) + .010*v
+        y=cy-.222-.020*(1-((u*2-1)**2)) + .010*v
         apron_verts.append((x,y,z))
 for ri in range(rows-1):
     for ci in range(cols-1):
@@ -224,8 +224,8 @@ for i in range(major):
     t=math.tau*i/major
     for j in range(minor):
         a=math.tau*j/minor
-        belt_verts.append((cx+(.232+.021*math.cos(a))*math.cos(t),
-                           cy+(.137+.021*math.cos(a))*math.sin(t),
+        belt_verts.append((cx+(.285+.023*math.cos(a))*math.cos(t),
+                           cy+(.174+.023*math.cos(a))*math.sin(t),
                            hip.z-.055+.022*math.sin(a)))
 for i in range(major):
     for j in range(minor):
@@ -239,8 +239,8 @@ for i in range(major):
     t=math.tau*i/major
     for j in range(8):
         a=math.tau*j/8
-        hem_verts.append((cx+(.291+.009*math.cos(a))*math.cos(t),
-                          cy+(.162+.009*math.cos(a))*math.sin(t),
+        hem_verts.append((cx+(.34+.009*math.cos(a))*math.cos(t),
+                          cy+(.192+.009*math.cos(a))*math.sin(t),
                           bottom_z+.045+.009*math.sin(a)))
 for i in range(major):
     for j in range(8):
@@ -262,15 +262,15 @@ wrapmat=woven_mat("Saffron and umber linen turban",(0.34,.245,.12),.96)
 head_bone=bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.20)))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.062);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.18)))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.065);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
     curve=bpy.data.curves.new("Five-turn wrapped linen turban","CURVE");curve.dimensions="3D";curve.resolution_u=2
     spl=curve.splines.new("POLY");count=320;spl.points.add(count-1)
     for i,pt in enumerate(spl.points):
-        u=i/(count-1);ang=math.tau*5*u
+        u=i/(count-1);ang=math.tau*4*u
         rx=.137-.018*u;ry=.143-.018*u
-        z=hp.z+.13+.145*u
+        z=hp.z+.08+.22*u
         pt.co=(hp.x+rx*math.cos(ang),hp.y+ry*math.sin(ang),z,1)
     curve.bevel_depth=.021;curve.bevel_resolution=5
     wrap=bpy.data.objects.new("Five-turn linen turban wrap",curve);scene.collection.objects.link(wrap)
@@ -330,6 +330,6 @@ close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.l
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male base rig with a bespoke rig-weighted olive wool caftan, separate arm sleeves, leather artillery apron, waist belt and five-turn linen turban. Illustrative 15th-century workwear adaptation, not an authenticated uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male base rig with a bespoke rig-weighted wool caftan over a rigged linen under-tunic, leather artillery apron, waist belt and four-turn linen turban. Illustrative 15th-century workwear adaptation, not an authenticated uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
