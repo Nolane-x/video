@@ -9,3 +9,5 @@ Re-run after fixing crew facing, foreground cannonball visibility, and wide fram
 Retry after preserving canonical morph state and recolouring textured garments.
 
 Run selective diagnostic stills with the trousers mesh and Body mesh hidden independently.
+
+Retry mesh isolation smoke after removing the unnecessary FFmpeg install from the preparation job.
