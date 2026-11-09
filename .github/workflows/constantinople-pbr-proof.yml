@@ -143,10 +143,14 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - { id: "01", start: 1, end: 960 }
-          - { id: "02", start: 961, end: 1920 }
-          - { id: "03", start: 1921, end: 2880 }
-          - { id: "04", start: 2881, end: 3840 }
+          - { id: "01", start: 1, end: 480 }
+          - { id: "02", start: 481, end: 960 }
+          - { id: "03", start: 961, end: 1440 }
+          - { id: "04", start: 1441, end: 1920 }
+          - { id: "05", start: 1921, end: 2400 }
+          - { id: "06", start: 2401, end: 2880 }
+          - { id: "07", start: 2881, end: 3360 }
+          - { id: "08", start: 3361, end: 3840 }
     steps:
       - uses: actions/checkout@v4
       - name: Install Blender and FFmpeg
@@ -176,7 +180,7 @@ jobs:
           v=json.load(open(p))["streams"][0]
           assert (v["width"],v["height"])==(1920,1080),v
           assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
-          assert int(v["nb_frames"])==960,v
+          assert int(v["nb_frames"])==480,v
           print("PBR chunk passed:",os.environ.get("BLENDER_FRAME_START"),os.environ.get("BLENDER_FRAME_END"),v)
           PY
       - uses: actions/upload-artifact@v4
@@ -207,10 +211,10 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t files < <(find chunks -name 'chunk-*.mp4' -type f | sort)
-          test "${#files[@]}" -eq 4
+          test "${#files[@]}" -eq 8
           : > concat.txt
           for f in "${files[@]}"; do printf "file '%s'\n" "$PWD/$f" >> concat.txt; done
-          test "$(wc -l < concat.txt)" -eq 4
+          test "$(wc -l < concat.txt)" -eq 8
           ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
           ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav \
             -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg \
