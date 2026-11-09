@@ -197,10 +197,7 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
     for src in source_meshes:
         mesh=src.copy();mesh.data=src.data.copy();scene.collection.objects.link(mesh)
         world_matrix=src.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world_matrix
-        if mesh.data.shape_keys and morphs:
-            blocks=mesh.data.shape_keys.key_blocks
-            for key_name,value in morphs.items():
-                if blocks.get(key_name):blocks[key_name].value=float(value)
+        # Preserve the canonical morph weights validated in the standalone character proof.
         for mod in mesh.modifiers:
             if mod.type=="ARMATURE":mod.object=arm
         if not any(mod.type=="ARMATURE" for mod in mesh.modifiers) and len(mesh.vertex_groups):
@@ -212,21 +209,29 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
             if not bs:continue
             lower=material.name.lower()
             tint=None
-            if any(tag in lower for tag in ("muted brown-red wool","trenchcoat","earth-red wool caftan")):
-                tint=(.30,.16,.075) if side=="ottoman" else (.11,.19,.30)
+            if any(tag in lower for tag in ("trenchcoat","earth-red wool caftan")):
+                tint=(.31,.145,.065) if side=="ottoman" else (.12,.19,.29)
+            elif any(tag in lower for tag in ("cloth_jeans","wool-trousers")):
+                tint=(.105,.075,.045) if side=="ottoman" else (.095,.115,.15)
+            elif any(tag in lower for tag in ("cloth_shirt","under-tunic")):
+                tint=(.48,.315,.16) if side=="ottoman" else (.34,.39,.46)
+            elif any(tag in lower for tag in ("cloth_boots","leather-boots")):
+                tint=(.065,.031,.012)
             elif "artillery apron" in lower and side=="byzantine":
                 tint=(.075,.10,.14)
             if tint is not None:
                 sock=bs.inputs.get("Base Color")
                 if sock:
-                    linked=list(sock.links)
-                    if linked:
-                        source=linked[0].from_socket
+                    links=variant.node_tree.links
+                    old_links=list(sock.links)
+                    if old_links:
+                        source_socket=old_links[0].from_socket
+                        for link in old_links:links.remove(link)
                         mix=variant.node_tree.nodes.new("ShaderNodeMixRGB")
                         mix.blend_type="MULTIPLY";mix.inputs[0].default_value=1.0
                         mix.inputs[2].default_value=(*tint,1.0)
-                        variant.node_tree.links.new(source,mix.inputs[1])
-                        variant.node_tree.links.new(mix.outputs[0],sock)
+                        links.new(source_socket,mix.inputs[1])
+                        links.new(mix.outputs[0],sock)
                     else:
                         col=sock.default_value
                         sock.default_value=(col[0]*tint[0],col[1]*tint[1],col[2]*tint[2],col[3])
@@ -242,12 +247,12 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
           "meshes",len(source_meshes),flush=True)
     return actor_root,arm
 
-crew("Powder handler",-3.45,-10.15,"ottoman","idle_breathe_Armature",scale=1.10,morphs={"age_old":.55,"face_nose_width_incr":.25})
-crew("Rammer",3.45,-10.0,"ottoman","walk_Armature",scale=1.10,walk_to=(3.9,-9.25),morphs={"muscle_max":.65,"weight_min":.2})
-crew("Carriage brace",-4.35,-7.4,"ottoman","idle_look_Armature",scale=1.08,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
-crew("Carriage hauler",4.35,-7.3,"ottoman","walk_Armature",scale=1.08,walk_to=(4.7,-6.7),morphs={"muscle_max":.4,"age_old":.25})
-crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_old":.35,"face_nose_width_decr":.25})
-crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
+crew("Powder handler",-3.45,-10.15,"ottoman","idle_breathe_Armature",scale=1.10)
+crew("Rammer",3.45,-10.0,"ottoman","walk_Armature",scale=1.10,walk_to=(3.9,-9.25))
+crew("Carriage brace",-4.35,-7.4,"ottoman","idle_look_Armature",scale=1.08)
+crew("Carriage hauler",4.35,-7.3,"ottoman","walk_Armature",scale=1.08,walk_to=(4.7,-6.7))
+crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0)
+crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98)
 for obj in crew_source:bpy.data.objects.remove(obj,do_unlink=True)
 assert len(CREW_RECORDS)==6 and len({r["armature"] for r in CREW_RECORDS})==6
 with open(os.path.join(os.path.dirname(OUTPUT) or ".","crew-manifest.json"),"w") as fp:
