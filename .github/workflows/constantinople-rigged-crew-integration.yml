@@ -82,7 +82,7 @@ jobs:
           path: inputs
       - name: Render 4-second rigged crew integration preview
         env:
-          HISTORICAL_ASSETS: inputs/historical-assets/models
+          HISTORICAL_ASSETS: inputs/historical-assets
           CHARACTER_GLB: inputs/character/ottoman-artillery-crew-cc0.glb
           BLENDER_FRAME_START: '1'
           BLENDER_FRAME_END: '120'
