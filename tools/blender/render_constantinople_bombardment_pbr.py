@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+"""PBR-assisted Constantinople bombardment proof. Blender 4.x, native 240fps."""
+import bpy, math, os
+from mathutils import Vector
+
+FPS = 240
+TOTAL_FRAMES = 2880
+START = int(os.environ.get("BLENDER_FRAME_START", "1"))
+END = int(os.environ.get("BLENDER_FRAME_END", str(TOTAL_FRAMES)))
+OUTPUT = os.environ.get("BLENDER_OUTPUT", "out/chunk.mp4")
+ASSETS = os.environ.get("HISTORICAL_ASSETS", "historical-assets")
+SMOKE_ONLY = os.environ.get("BLENDER_SMOKE_ONLY", "0") == "1"
+
+bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.delete(use_global=False)
+scene = bpy.context.scene
+scene.frame_start, scene.frame_end = 1, TOTAL_FRAMES
+scene.render.engine = "BLENDER_EEVEE"
+scene.eevee.taa_render_samples = 16
+scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
+scene.render.resolution_percentage = 100
+scene.render.fps, scene.render.fps_base = FPS, 1.0
+scene.render.image_settings.color_mode = "RGBA"
+scene.render.filepath = os.path.abspath(OUTPUT)
+scene.render.image_settings.file_format = "FFMPEG"
+scene.render.ffmpeg.format = "MPEG4"
+scene.render.ffmpeg.codec = "H264"
+scene.render.ffmpeg.constant_rate_factor = "HIGH"
+scene.render.ffmpeg.ffmpeg_preset = "GOOD"
+scene.render.ffmpeg.video_bitrate = 38000
+scene.render.ffmpeg.maxrate = 48000
+scene.render.ffmpeg.buffersize = 80000
+scene.render.threads_mode = "FIXED"
+scene.render.threads = max(1, min(4, int(os.environ.get("BLENDER_THREADS", "2"))))
+scene.render.use_file_extension = True
+scene.view_settings.view_transform = "AgX"
+scene.view_settings.look = "AgX - Medium High Contrast"
+scene.view_settings.exposure, scene.view_settings.gamma = 0.0, 1.0
+scene.world.color = (0.055, 0.07, 0.09)
+
+def mat_basic(name, color, metallic=0.0, roughness=0.7, alpha=1.0, emission=0.0):
+    m = bpy.data.materials.new(name); m.diffuse_color = (*color, alpha); m.use_nodes = True
+    bs = m.node_tree.nodes.get("Principled BSDF")
+    bs.inputs["Base Color"].default_value = (*color, alpha)
+    bs.inputs["Metallic"].default_value = metallic; bs.inputs["Roughness"].default_value = roughness
+    bs.inputs["Alpha"].default_value = alpha
+    if emission:
+        bs.inputs["Emission Color"].default_value = (*color, 1); bs.inputs["Emission Strength"].default_value = emission
+    if alpha < 1:
+        try: m.blend_method = "BLEND"
+        except: pass
+    return m
+
+def cube(name, loc, scale, mat, bevel=0.0):
+    bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
+    o=bpy.context.object; o.name=name; o.dimensions=scale
+    bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
+    if mat: o.data.materials.append(mat)
+    if bevel:
+        b=o.modifiers.new("Worn arris","BEVEL"); b.width=bevel; b.segments=2
+        o.modifiers.new("Weighted normals","WEIGHTED_NORMAL")
+    return o
+
+def cyl(name, loc, radius, depth, mat, vertices=32, bevel=0.0):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=vertices,radius=radius,depth=depth,location=loc)
+    o=bpy.context.object; o.name=name
+    if mat:o.data.materials.append(mat)
+    if bevel:
+        b=o.modifiers.new("Rounded edges","BEVEL"); b.width=bevel; b.segments=2
+        o.modifiers.new("Weighted normals","WEIGHTED_NORMAL")
+    return o
+
+def sphere(name, loc, scale, mat, segments=20, rings=12):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=segments,ring_count=rings,location=loc)
+    o=bpy.context.object;o.name=name;o.scale=scale
+    if mat:o.data.materials.append(mat)
+    return o
+
+def between(name,a,b,r,mat,vertices=16):
+    a,b=Vector(a),Vector(b);d=b-a
+    o=cyl(name,(a+b)*.5,r,d.length,mat,vertices,.008)
+    o.rotation_euler=d.to_track_quat("Z","Y").to_euler()
+    return o
+
+def key(o,prop,f,v):
+    setattr(o,prop,v);o.keyframe_insert(data_path=prop,frame=f)
+
+def smooth(o):
+    if o.animation_data and o.animation_data.action:
+        for fc in o.animation_data.action.fcurves:
+            for k in fc.keyframe_points:
+                k.interpolation="BEZIER";k.handle_left_type="AUTO_CLAMPED";k.handle_right_type="AUTO_CLAMPED"
+
+# Load actual CC0 PBR stone maps. The fort model is used as a material source;
+# the wall geometry is staged as an illustrative composite, not an exact measured replica.
+fort_path=os.path.join(ASSETS,"models/downloaded/modular_fort_01/modular_fort_01_1k.gltf")
+before=set(bpy.data.objects);bpy.ops.import_scene.gltf(filepath=fort_path)
+fort_objs=[o for o in bpy.data.objects if o not in before]
+fort_mats={m.name:m for m in bpy.data.materials if m.name.startswith("modular_fort_01_")}
+wall_mat=next((m for n,m in fort_mats.items() if "wall" in n),None)
+trim_mat=next((m for n,m in fort_mats.items() if "trim" in n),None)
+plaster_mat=next((m for n,m in fort_mats.items() if "plaster" in n),None)
+for o in fort_objs:bpy.data.objects.remove(o,do_unlink=True)
+if wall_mat is None: wall_mat=mat_basic("Fallback limestone",(0.43,.39,.32),roughness=.9)
+if trim_mat is None: trim_mat=wall_mat
+if plaster_mat is None: plaster_mat=wall_mat
+
+bronze=mat_basic("Aged bronze",(.16,.095,.045),.78,.3)
+oak=mat_basic("Weathered oak",(.15,.075,.035),.05,.82)
+iron=mat_basic("Forged iron",(.065,.075,.075),.72,.42)
+shotmat=mat_basic("Rough limestone shot",(.27,.26,.23),0,.95)
+earth=mat_basic("Damp trampled earth",(.10,.078,.056),0,.96)
+red=mat_basic("Muted Ottoman crimson",(.18,.035,.025),0,.92)
+blue=mat_basic("Byzantine deep blue",(.035,.07,.12),0,.92)
+skin=mat_basic("Skin in shadow",(.24,.14,.095),0,.88)
+smoke=mat_basic("Powder smoke translucent",(.19,.18,.17),0,1,.22)
+dust=mat_basic("Limestone dust",(.52,.45,.35),0,1,.18)
+fire=mat_basic("Powder ignition", (1,.28,.045),.05,.25,1,12)
+
+# Ground, layered stone wall, battlements and towers.
+cube("Trampled siege earth",(0,2,-.55),(60,70,1),earth,.12)
+cube("Wall inner core",(0,16,3.4),(25,1.7,6.8),wall_mat,.08)
+for row in range(5):
+    z=.65+row*1.27
+    for col in range(15):
+        x=-11.2+col*1.6+(.8 if row%2 else 0)
+        if row in (2,3) and 6<=col<=8: continue
+        b=cube("Ashlar wall block",(x,15.03,z),(1.54,.42,1.18),wall_mat,.035)
+        if (row+col)%3==0:b.rotation_euler[1]=math.radians((col%3-1)*1.1)
+for x in (-11.8,11.8):
+    cyl("Round wall tower",(x,16,4),1.72,8,plaster_mat,48,.08)
+    cyl("Tower stone rim",(x,16,7.95),1.92,.48,trim_mat,48,.04)
+    for i in range(12):
+        a=i*math.tau/12
+        b=cube("Tower merlon",(x+1.83*math.cos(a),16+1.83*math.sin(a),8.5),(.6,.6,.82),trim_mat,.04)
+        b.rotation_euler[2]=a
+cube("Wall walk",(0,14.15,6.45),(23.4,1.25,.45),trim_mat,.05)
+for x in range(-11,12,2):cube("Parapet merlon",(x,14.9,7.25),(.92,.66,1.1),trim_mat,.05)
+for x in (-2.4,0,2.4):
+    between("Scaffold upright",(x,15.8,.1),(x,15.8,6.5),.11,oak,12)
+    between("Scaffold crossbeam",(x-1.2,15.8,2.5),(x+1.2,15.8,2.5),.08,oak,12)
+    between("Scaffold brace",(x-1,15.8,.5),(x+1,15.8,3),.055,iron,10)
+
+# Import the textured Poly Haven cannon as a single animated assembly.
+cannon_path=os.path.join(ASSETS,"models/downloaded/cannon_01/cannon_01_1k.gltf")
+before=set(bpy.data.objects);bpy.ops.import_scene.gltf(filepath=cannon_path)
+parts=[o for o in bpy.data.objects if o not in before]
+gun=bpy.data.objects.new("CC0 Poly Haven cannon assembly root",None);scene.collection.objects.link(gun)
+for o in parts:
+    mw=o.matrix_world.copy();o.parent=gun;o.matrix_world=mw
+gun.location=(0,-7,0);gun.rotation_euler=(0,0,math.pi);gun.scale=(4,4,4)
+bpy.context.view_layer.update()
+bbox=[gun.matrix_world@Vector(c) for o in parts if o.type=="MESH" for c in o.bound_box]
+if bbox:gun.location.z+=-min(v.z for v in bbox)+.12
+base=gun.location.copy()
+for f,loc in [(1,base),(1400,base),(1460,base+Vector((0,-.42,.08))),(1500,base+Vector((0,-.7,0))),(1560,base+Vector((0,-.25,0))),(1680,base)]:
+    key(gun,"location",f,loc)
+smooth(gun)
+
+# Distant crew silhouettes only; close-ups stay on the actual textured gun and stonework.
+def crew(name,x,y,side):
+    cloth=red if side=="ottoman" else blue
+    body=cube(name+" wool coat",(x,y,1.0),(.62,.42,1.45),cloth,.1)
+    sphere(name+" head",(x,y,1.94),(.22,.22,.27),skin,16,10)
+    sphere(name+" helmet or turban",(x,y,2.12),(.26,.25,.18),oak if side=="ottoman" else iron,16,8)
+    for s in (-1,1):
+        between(name+" arm",(x+s*.24,y,1.6),(x+s*.48,y-.1,1.12),.105,cloth,10)
+        between(name+" leg",(x+s*.16,y,.35),(x+s*.18,y-.08,-.12),.13,iron,10)
+    for f,dx in [(1,0),(1450,0),(1500,.1),(1600,0),(END,0)]:key(body,"location",f,(x+dx,y,1.0))
+    smooth(body)
+crew("Powder crew",-2.1,-8.5,"ottoman")
+crew("Rammer crew",2.1,-8.1,"ottoman")
+crew("Carriage brace",-3,-6.5,"ottoman")
+crew("Carriage hauler",3,-6.7,"ottoman")
+crew("Wall defender",-3.2,13.2,"byzantine")
+crew("Wall defender",3,13.4,"byzantine")
+for x in (-4,4.2):
+    cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
+    cyl("Cask iron hoop",(x,-8.5,.42),.51,.09,iron,24,.01)
+    cyl("Cask iron hoop",(x,-8.5,.85),.51,.09,iron,24,.01)
+for i in range(5):sphere("Spare stone shot",(-5+i*.58,-10.3,.52),(.24,.24,.24),shotmat,16,10)
+
+# Ballistic shot, recoil, flash, smoke, wall impact and debris.
+ball=sphere("Heavy limestone cannon shot",(0,-1.7,2.55),(.46,.46,.46),shotmat,24,16)
+for f,loc in [(1,(0,-1.7,2.55)),(1450,(0,-1.7,2.55)),(1500,(0,-1.2,2.95)),
+              (1650,(0,2.2,4.4)),(1850,(.45,7,6)),(2070,(.8,11.5,5.3)),
+              (2250,(1,14.65,3.2)),(2300,(1,15.2,2.4)),(END,(1,15.2,2.4))]:
+    key(ball,"location",f,loc)
+smooth(ball)
+flash=sphere("Muzzle flash",(0,-1.5,2.9),(.08,.08,.08),fire,16,10)
+for f,s in [(1,(.001,)*3),(1460,(.001,)*3),(1500,(1.45,)*3),(1512,(.65,)*3),(1545,(.001,)*3)]:
+    key(flash,"scale",f,s)
+smooth(flash)
+ld=bpy.data.lights.new("Cannon muzzle flash","POINT");ld.energy=0;ld.color=(1,.28,.06);ld.shadow_soft_size=2.5
+lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects.link(lo);lo.location=(0,-1.4,3)
+for f,e in [(1,0),(1495,0),(1500,7200),(1510,2500),(1545,0)]:key(ld,"energy",f,e)
+smoke_puffs=[]
+for i in range(24):
+    p=sphere("Powder smoke plume",(0,-1.1,3.1),(.1,.1,.1),smoke,16,10)
+    a=i*2.399;start=Vector((0,-1.1,3.1))
+    end=start+Vector((math.cos(a)*(.8+(i%5)*.2),1.2+(i%6)*.42,1.5+(i%7)*.3))
+    for f,loc,sc in [(1,start,(.001,)*3),(1500,start,(.12,)*3),(1590,end,(.55+(i%4)*.16,)*3),
+                     (1800,end+Vector((0,1,1)),(.85+(i%3)*.2,)*3),(2050,end+Vector((0,2.5,1.6)),(.001,)*3)]:
+        key(p,"location",f,loc);key(p,"scale",f,sc)
+    smooth(p);smoke_puffs.append(p)
+for i in range(34):
+    a=i*2.399;start=Vector((1,15,3))
+    end=start+Vector((math.cos(a)*(1+(i%5)*.36),-1-(i%4)*.3,.7+(i%6)*.3))
+    b=cube("Flying broken ashlar",start,(.22+(i%3)*.08,.20,.2+(i%4)*.04),trim_mat,.015)
+    for f,loc in [(1,start),(2240,start),(2300,end),(2460,end+Vector((0,-.7,-1.5))),(2600,end+Vector((0,-1,-2.2)))]:
+        key(b,"location",f,loc)
+    for f,rot in [(1,(0,0,0)),(2300,(a,.3,a)),(2600,(a+1.5,1,a+1.2))]:key(b,"rotation_euler",f,rot)
+    smooth(b)
+for i in range(22):
+    a=i*2.399;p=sphere("Impact dust cloud",(1,15,3.4),(.12,.12,.12),dust,14,8)
+    end=(1+math.cos(a)*(1.4+(i%4)*.38),14.3+math.sin(a)*.55,4.2+(i%6)*.36)
+    for f,loc,sc in [(1,(1,15,3.4),(.001,)*3),(2290,(1,15,3.4),(.001,)*3),
+                     (2300,(1,15,3.4),(.18,)*3),(2480,end,(.8+(i%3)*.2,)*3),(2690,end+Vector((0,0,.5)),(.001,)*3)]:
+        key(p,"location",f,loc);key(p,"scale",f,sc)
+    smooth(p)
+
+# Plain standards: no invented heraldry.
+for idx,x in enumerate((-8.5,8.5)):
+    cyl("Camp standard pole",(x,-11,4.2),.055,8.2,oak,12)
+    banner=cube("Plain crimson banner",(x+.8,-11,6.2),(1.5,.08,1.8),red,.02)
+    key(banner,"rotation_euler",1,(0,0,0));key(banner,"rotation_euler",END,(.08,.04,.10 if idx else -.12));smooth(banner)
+
+world=scene.world;world.use_nodes=True
+world.node_tree.nodes.get("Background").inputs["Color"].default_value=(.16,.20,.25,1)
+world.node_tree.nodes.get("Background").inputs["Strength"].default_value=.35
+def area(name,loc,energy,color,size,target):
+    d=bpy.data.lights.new(name,"AREA");d.energy=energy;d.color=color;d.shape="DISK";d.size=size
+    o=bpy.data.objects.new(name,d);scene.collection.objects.link(o);o.location=loc
+    o.rotation_euler=(Vector(target)-o.location).to_track_quat("-Z","Y").to_euler();return o
+sd=bpy.data.lights.new("Dawn sun","SUN");sd.energy=2.1;sd.angle=math.radians(12);sd.color=(1,.73,.52)
+sun=bpy.data.objects.new("Dawn sun",sd);scene.collection.objects.link(sun);sun.rotation_euler=(math.radians(32),math.radians(-18),math.radians(-25))
+area("Warm key",(-10,-12,18),2400,(1,.76,.55),10,(0,5,3))
+area("Cool sky fill",(10,-2,13),1600,(.52,.68,.86),12,(0,7,4))
+area("Wall rim",(0,22,14),2000,(1,.58,.34),9,(0,15,4))
+area("Bronze highlight",(-6,-5,5),900,(1,.52,.24),4,(0,-4,2))
+
+def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
+    bpy.ops.object.camera_add(location=la);cam=bpy.context.object;cam.name=name;cam.data.lens=lens;cam.data.sensor_width=36
+    target=bpy.data.objects.new(name+" focus",None);scene.collection.objects.link(target);target.location=ta
+    c=cam.constraints.new(type="TRACK_TO");c.target=target;c.track_axis="TRACK_NEGATIVE_Z";c.up_axis="UP_Y"
+    key(cam,"location",start,la);key(cam,"location",end,lb);key(target,"location",start,ta);key(target,"location",end,tb)
+    smooth(cam);smooth(target);cam.data.dof.use_dof=True;cam.data.dof.focus_object=target;cam.data.dof.aperture_fstop=3.8
+    marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
+    return cam
+cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
+cam2=camera_shot("02 gun crew and wall",601,1200,(8.4,-17,7.4),(5.4,-15,6),(0,-3,2.1),(0,2,2.8),38,"02 — SLOW TO LOAD")
+cam3=camera_shot("03 recoil and smoke",1201,1800,(-5.5,-11,4.8),(-3,-8.5,4),(0,-3.5,2.8),(0,-1.8,3.1),48,"03 — FIRE")
+cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
+cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
+scene.camera=cam1
+for f,loc in [(1480,(-3.02,-8.58,4.02)),(1500,(-2.85,-8.42,4.14)),(1520,(-3.12,-8.72,3.90)),(1560,(-3,-8.6,4))]:
+    key(cam3,"location",f,loc)
+smooth(cam3)
+for f,loc in [(2300,(8.05,8.35,6.68)),(2320,(8.3,8.65,6.92)),(2350,(7.9,8.2,6.55)),(2420,(8.1,8.4,6.8))]:
+    key(cam5,"location",f,loc)
+smooth(cam5)
+
+notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
+notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinople in 1453. Hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets. Generic gun stand-in, not an authenticated replica of Orban's great bombard. Wall is an illustrative modular arrangement, not a measured reconstruction of the Theodosian walls. Human silhouettes are not authenticated costumes or portraits. Native 1920x1080 at 240fps.\n")
+scene.frame_set(START)
+print("CONSTANTINOPLE PBR PROOF",bpy.app.version_string,"frames",f"{START}-{END}/{TOTAL_FRAMES}","objects",len(scene.objects),"cannon parts",len(parts),"wall material",wall_mat.name if wall_mat else "fallback",flush=True)
+if SMOKE_ONLY:
+    scene.render.image_settings.file_format="PNG";scene.render.filepath=os.path.abspath(os.environ.get("SMOKE_OUTPUT","out/pbr-smoke.png"))
+    os.makedirs(os.path.dirname(scene.render.filepath),exist_ok=True)
+    bpy.ops.render.render(write_still=True);print("PBR ONE-FRAME SMOKE FINISHED",flush=True)
+else:
+    os.makedirs(os.path.dirname(os.path.abspath(OUTPUT)),exist_ok=True)
+    bpy.ops.render.render(animation=True);print("PBR PROOF RENDER FINISHED",flush=True)
