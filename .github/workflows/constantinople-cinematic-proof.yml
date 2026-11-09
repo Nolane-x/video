@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   prepare:
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
@@ -72,6 +73,7 @@ jobs:
           retention-days: 3
 
   render:
+    if: false
     needs: prepare
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -138,6 +140,7 @@ jobs:
           retention-days: 7
 
   package:
+    if: always()
     needs: [prepare, render]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -152,11 +155,15 @@ jobs:
         with:
           name: constantinople-prepared-media
           path: prepared
+          run-id: 42563882176
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download all rendered chunks
         uses: actions/download-artifact@v4
         with:
           pattern: constantinople-bombard-chunk-*
           path: chunks
+          run-id: 42563882176
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           merge-multiple: true
       - name: Join chunks, mix sound and verify the 240fps master
         shell: bash
@@ -166,7 +173,7 @@ jobs:
           from pathlib import Path
           files=sorted(Path("chunks").glob("chunk-*.mp4"))
           assert len(files)==6, [str(p) for p in files]
-          Path("concat.txt").write_text("".join(f"file '{p.resolve()}'\n" for p in files),encoding="utf-8")
+          Path("concat.txt").write_text("\n".join(f"file '{p.resolve()}'" for p in files) + "\n",encoding="utf-8")
           print("Joining",*[p.name for p in files])
           PY
           ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
