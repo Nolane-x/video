@@ -311,6 +311,8 @@ cam2=camera_shot("02 gun crew and wall",1,120,(8.4,-17,7.4),(5.4,-15,6),(0,-3,2.
 cam3=camera_shot("03 recoil and smoke",1201,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
+for marker in list(scene.timeline_markers):
+    if marker.camera is not cam2:scene.timeline_markers.remove(marker)
 scene.camera=cam2
 for f,loc in [(1480,(-3.02,-8.58,4.02)),(1500,(-2.85,-8.42,4.14)),(1520,(-3.12,-8.72,3.90)),(1560,(-3,-8.6,4))]:
     key(cam3,"location",f,loc)
