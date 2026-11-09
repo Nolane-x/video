@@ -4,7 +4,7 @@ import bpy, math, os
 from mathutils import Vector
 
 FPS = 240
-TOTAL_FRAMES = 2880
+TOTAL_FRAMES = 3840
 START = int(os.environ.get("BLENDER_FRAME_START", "1"))
 END = int(os.environ.get("BLENDER_FRAME_END", str(TOTAL_FRAMES)))
 OUTPUT = os.environ.get("BLENDER_OUTPUT", "out/chunk.mp4")
@@ -20,7 +20,7 @@ scene.eevee.taa_render_samples = 16
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
 scene.render.resolution_percentage = 100
 scene.render.fps, scene.render.fps_base = FPS, 1.0
-scene.render.image_settings.color_mode = "RGBA"
+scene.render.image_settings.color_mode = "RGB"
 scene.render.filepath = os.path.abspath(OUTPUT)
 scene.render.image_settings.file_format = "FFMPEG"
 scene.render.ffmpeg.format = "MPEG4"
