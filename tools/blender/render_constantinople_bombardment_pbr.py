@@ -9,6 +9,7 @@ START = int(os.environ.get("BLENDER_FRAME_START", "1"))
 END = int(os.environ.get("BLENDER_FRAME_END", str(TOTAL_FRAMES)))
 OUTPUT = os.environ.get("BLENDER_OUTPUT", "out/chunk.mp4")
 ASSETS = os.environ.get("HISTORICAL_ASSETS", "historical-assets")
+CHARACTER_GLB = os.environ.get("CHARACTER_GLB", "character/ottoman-artillery-crew-cc0.glb")
 SMOKE_ONLY = os.environ.get("BLENDER_SMOKE_ONLY", "0") == "1"
 
 bpy.ops.object.select_all(action="SELECT")
@@ -16,7 +17,7 @@ bpy.ops.object.delete(use_global=False)
 scene = bpy.context.scene
 scene.frame_start, scene.frame_end = START, END
 scene.render.engine = "BLENDER_EEVEE"
-scene.eevee.taa_render_samples = 8
+scene.eevee.taa_render_samples = 16
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
 scene.render.resolution_percentage = 100
 scene.render.fps, scene.render.fps_base = FPS, 1.0
@@ -159,23 +160,88 @@ for f,loc in [(1,base),(1400,base),(1460,base+Vector((0,-.42,.08))),(1500,base+V
     key(gun,"location",f,loc)
 smooth(gun)
 
-# Distant crew silhouettes only; close-ups stay on the actual textured gun and stonework.
-def crew(name,x,y,side):
-    cloth=red if side=="ottoman" else blue
-    body=cube(name+" wool coat",(x,y,1.0),(.62,.42,1.45),cloth,.1)
-    sphere(name+" head",(x,y,1.94),(.22,.22,.27),skin,16,10)
-    sphere(name+" helmet or turban",(x,y,2.12),(.26,.25,.18),oak if side=="ottoman" else iron,16,8)
-    for s in (-1,1):
-        between(name+" arm",(x+s*.24,y,1.6),(x+s*.48,y-.1,1.12),.105,cloth,10)
-        between(name+" leg",(x+s*.16,y,.35),(x+s*.18,y-.08,-.12),.13,iron,10)
-    for f,dx in [(1,0),(1450,0),(1500,.1),(1600,0),(END,0)]:key(body,"location",f,(x+dx,y,1.0))
-    smooth(body)
-crew("Powder crew",-2.1,-8.5,"ottoman")
-crew("Rammer crew",2.1,-8.1,"ottoman")
-crew("Carriage brace",-3,-6.5,"ottoman")
-crew("Carriage hauler",3,-6.7,"ottoman")
-crew("Wall defender",-3.2,13.2,"byzantine")
-crew("Wall defender",3,13.4,"byzantine")
+# Import the CC0-derived rigged artillery crew. Each performer receives an
+# independent armature/action copy; imported 30fps actions are retimed for the
+# native 240fps scene so they play at natural speed rather than eight times slower.
+crew_before=set(bpy.data.objects)
+if not os.path.isfile(CHARACTER_GLB):
+    raise RuntimeError("Missing rigged crew GLB: "+CHARACTER_GLB)
+bpy.ops.import_scene.gltf(filepath=os.path.abspath(CHARACTER_GLB))
+crew_source=[o for o in bpy.data.objects if o not in crew_before and o.type in {"MESH","ARMATURE"}]
+source_arm=next((o for o in crew_source if o.type=="ARMATURE"),None)
+if source_arm is None:raise RuntimeError("Crew GLB contains no armature")
+source_meshes=[o for o in crew_source if o.type=="MESH"]
+source_actions={a.name:a for a in bpy.data.actions}
+CREW_RECORDS=[]
+
+def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None,morphs=None):
+    actor_root=bpy.data.objects.new(name+" actor root",None);scene.collection.objects.link(actor_root)
+    yaw=(math.pi if side=="ottoman" else 0.0) if yaw is None else yaw
+    arm=source_arm.copy();arm.data=source_arm.data
+    scene.collection.objects.link(arm)
+    arm_world=source_arm.matrix_world.copy();arm.parent=actor_root;arm.matrix_world=arm_world
+    arm.animation_data_clear();arm.animation_data_create()
+    source_action=next((a for n,a in source_actions.items() if n.startswith(action_name)),None)
+    if source_action is None:source_action=next((a for n,a in source_actions.items() if n.startswith("idle_Armature")),None)
+    if source_action:
+        action=source_action.copy();action.name=name+" "+source_action.name+" 240fps"
+        start_frame=float(source_action.frame_range[0])
+        for fc in action.fcurves:
+            for kp in fc.keyframe_points:
+                kp.co.x=start_frame+(kp.co.x-start_frame)*8.0
+                kp.handle_left.x=start_frame+(kp.handle_left.x-start_frame)*8.0
+                kp.handle_right.x=start_frame+(kp.handle_right.x-start_frame)*8.0
+            if not any(mod.type=="CYCLES" for mod in fc.modifiers):
+                cyc=fc.modifiers.new("CYCLES");cyc.mode_before="REPEAT";cyc.mode_after="REPEAT"
+        arm.animation_data.action=action
+    for src in source_meshes:
+        mesh=src.copy();mesh.data=src.data.copy();scene.collection.objects.link(mesh)
+        world_matrix=src.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world_matrix
+        if mesh.data.shape_keys and morphs:
+            blocks=mesh.data.shape_keys.key_blocks
+            for key_name,value in morphs.items():
+                if blocks.get(key_name):blocks[key_name].value=float(value)
+        for mod in mesh.modifiers:
+            if mod.type=="ARMATURE":mod.object=arm
+        if not any(mod.type=="ARMATURE" for mod in mesh.modifiers) and len(mesh.vertex_groups):
+            mod=mesh.modifiers.new("Crew skinning","ARMATURE");mod.object=arm
+        for i,material in enumerate(list(mesh.data.materials)):
+            if material is None:continue
+            variant=material.copy();variant.name=name+" "+material.name;mesh.data.materials[i]=variant
+            bs=next((n for n in variant.node_tree.nodes if n.type=="BSDF_PRINCIPLED"),None) if variant.use_nodes else None
+            if not bs:continue
+            lower=material.name.lower()
+            if "muted brown-red wool" in lower:
+                tint=(.30,.16,.075) if side=="ottoman" else (.11,.19,.30)
+                sock=bs.inputs.get("Base Color")
+                if sock and not sock.is_linked:sock.default_value=(*tint,1)
+            elif "artillery apron" in lower and side=="byzantine":
+                sock=bs.inputs.get("Base Color")
+                if sock and not sock.is_linked:sock.default_value=(.075,.10,.14,1)
+    actor_root.location=(x,y,0);actor_root.rotation_euler=(0,0,yaw);actor_root.scale=(scale,scale,scale)
+    if walk_to is not None:
+        key(actor_root,"location",1,(x,y,0))
+        key(actor_root,"location",1440,(walk_to[0],walk_to[1],0))
+        key(actor_root,"location",END,(walk_to[0],walk_to[1],0))
+        smooth(actor_root)
+    CREW_RECORDS.append({"name":name,"armature":arm.name,"action":arm.animation_data.action.name if arm.animation_data.action else "none",
+                         "mesh_count":len(source_meshes),"side":side,"start":[x,y],"walk_to":walk_to})
+    print("PBR_RIGGED_CREW",name,"action",arm.animation_data.action.name if arm.animation_data.action else "none",
+          "meshes",len(source_meshes),flush=True)
+    return actor_root,arm
+
+crew("Powder handler",-2.1,-8.5,"ottoman","idle_breathe_Armature",morphs={"age_old":.55,"face_nose_width_incr":.25})
+crew("Rammer",2.1,-8.1,"ottoman","walk_Armature",scale=.99,walk_to=(2.6,-7.6),morphs={"muscle_max":.65,"weight_min":.2})
+crew("Carriage brace",-3,-6.5,"ottoman","idle_look_Armature",scale=1.03,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
+crew("Carriage hauler",3,-6.7,"ottoman","walk_Armature",scale=1.01,walk_to=(3.35,-6.0),morphs={"muscle_max":.4,"age_old":.25})
+crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_old":.35,"face_nose_width_decr":.25})
+crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
+for obj in crew_source:bpy.data.objects.remove(obj,do_unlink=True)
+assert len(CREW_RECORDS)==6 and len({r["armature"] for r in CREW_RECORDS})==6
+with open(os.path.join(os.path.dirname(OUTPUT) or ".","crew-manifest.json"),"w") as fp:
+    import json
+    json.dump({"fps":FPS,"crew":CREW_RECORDS},fp,indent=2);fp.write("\\n")
+
 for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
     cyl("Cask iron hoop",(x,-8.5,.42),.51,.09,iron,24,.01)
@@ -248,17 +314,17 @@ for idx,x in enumerate((-8.5,8.5)):
 
 world=scene.world;world.use_nodes=True
 world.node_tree.nodes.get("Background").inputs["Color"].default_value=(.16,.20,.25,1)
-world.node_tree.nodes.get("Background").inputs["Strength"].default_value=.35
+world.node_tree.nodes.get("Background").inputs["Strength"].default_value=.55
 def area(name,loc,energy,color,size,target):
     d=bpy.data.lights.new(name,"AREA");d.energy=energy;d.color=color;d.shape="DISK";d.size=size
     o=bpy.data.objects.new(name,d);scene.collection.objects.link(o);o.location=loc
     o.rotation_euler=(Vector(target)-o.location).to_track_quat("-Z","Y").to_euler();return o
-sd=bpy.data.lights.new("Dawn sun","SUN");sd.energy=2.1;sd.angle=math.radians(12);sd.color=(1,.73,.52)
+sd=bpy.data.lights.new("Dawn sun","SUN");sd.energy=2.8;sd.angle=math.radians(12);sd.color=(1,.73,.52)
 sun=bpy.data.objects.new("Dawn sun",sd);scene.collection.objects.link(sun);sun.rotation_euler=(math.radians(32),math.radians(-18),math.radians(-25))
-area("Warm key",(-10,-12,18),1500,(1,.82,.67),10,(0,5,3))
-area("Cool sky fill",(10,-2,13),1250,(.58,.72,.88),12,(0,7,4))
-area("Wall rim",(0,22,14),1450,(1,.68,.48),9,(0,15,4))
-area("Bronze highlight",(-6,-5,5),900,(1,.52,.24),4,(0,-4,2))
+area("Warm key",(-10,-12,18),2100,(1,.82,.67),10,(0,5,3))
+area("Cool sky fill",(10,-2,13),1900,(.58,.72,.88),12,(0,7,4))
+area("Wall rim",(0,22,14),1950,(1,.68,.48),9,(0,15,4))
+area("Bronze highlight",(-6,-5,5),1400,(1,.52,.24),4,(0,-4,2))
 
 def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     bpy.ops.object.camera_add(location=la);cam=bpy.context.object;cam.name=name;cam.data.lens=lens;cam.data.sensor_width=36
@@ -269,8 +335,8 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
-cam2=camera_shot("02 gun crew and wall",601,1200,(8.4,-17,7.4),(5.4,-15,6),(0,-3,2.1),(0,2,2.8),38,"02 — SLOW TO LOAD")
-cam3=camera_shot("03 recoil and smoke",1201,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
+cam2=camera_shot("02 front-quarter crew and bombard",601,1440,(7.4,-1.8,4.6),(6.3,-3.4,4.0),(0,-7.2,1.25),(.4,-6.5,1.35),38,"02 — CREW AT THE BOMBARD")
+cam3=camera_shot("03 recoil and smoke",1441,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
 scene.camera=cam1
@@ -282,7 +348,7 @@ for f,loc in [(2300,(8.05,8.35,6.68)),(2320,(8.3,8.65,6.92)),(2350,(7.9,8.2,6.55
 smooth(cam5)
 
 notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
-notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinople in 1453. Hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets. Generic gun stand-in, not an authenticated replica of Orban's great bombard. Wall is an illustrative modular arrangement, not a measured reconstruction of the Theodosian walls. Human silhouettes are not authenticated costumes or portraits. Native 1920x1080 at 240fps.\n")
+notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinople in 1453. Hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets. Generic gun stand-in, not an authenticated replica of Orban's great bombard. Wall is an illustrative modular arrangement, not a measured reconstruction of the Theodosian walls. Rigged CC0-derived crew are an illustrative workwear adaptation, not authenticated portraits or uniforms. Native 1920x1080 at 240fps.\n")
 scene.frame_set(START)
 print("CONSTANTINOPLE PBR PROOF",bpy.app.version_string,"frames",f"{START}-{END}/{TOTAL_FRAMES}","objects",len(scene.objects),"cannon parts",len(parts),"wall material",wall_mat.name if wall_mat else "fallback",flush=True)
 if SMOKE_ONLY:
