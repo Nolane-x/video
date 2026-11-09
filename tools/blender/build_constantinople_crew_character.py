@@ -54,6 +54,7 @@ def rebind_import(imported,main_arm,actor_root,label,tint=None):
         if not any(m.type=="ARMATURE" for m in mesh.modifiers) and len(mesh.vertex_groups):
             mod=mesh.modifiers.new("CC0 character skinning","ARMATURE");mod.object=main_arm
         if mesh.name.lower().startswith("icosphere"):
+            if mesh in imported: imported.remove(mesh)
             bpy.data.objects.remove(mesh,do_unlink=True)
             continue
         for m in mesh.data.materials:
