@@ -1,0 +1,113 @@
+name: Constantinople · rigged artillery crew integration preview
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-rigged-crew-integration'
+    paths:
+      - 'tools/blender/render_constantinople_rigged_crew_integration.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-rigged-crew-integration-preview
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified rigged human GLB from the character proof
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-character-proof-42580993765
+          path: character
+          repository: Nolane-x/video
+          run-id: '42580993765'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download verified Poly Haven cannon and fortress PBR assets
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-42578951674
+          path: historical-assets/models
+          repository: Nolane-x/video
+          run-id: '42578951674'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify integration inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s character/ottoman-artillery-crew-cc0.glb
+          test -s historical-assets/models/downloaded/cannon_01/cannon_01_1k.gltf
+          test -s historical-assets/models/downloaded/modular_fort_01/modular_fort_01_1k.gltf
+          test -s character/manifest.json
+          python - <<'PY'
+          import json
+          m=json.load(open('character/manifest.json'))
+          assert m['bones'] >= 50, m
+          assert len(m['actions']) >= 8, m
+          assert m['visual_approval'] == 'pending', m
+          print('Crew source ready:',m['bones'],'bones',len(m['actions']),'actions')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-rigged-crew-inputs-${{ github.run_id }}
+          path: |
+            character/ottoman-artillery-crew-cc0.glb
+            character/manifest.json
+            historical-assets/models/
+          if-no-files-found: error
+          retention-days: 14
+
+  render:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless Blender and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
+      - name: Verify Blender glTF import
+        run: blender --background --python-expr "import numpy; print('Blender NumPy',numpy.__version__)"
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-rigged-crew-inputs-${{ github.run_id }}
+          path: inputs
+      - name: Render 4-second rigged crew integration preview
+        env:
+          HISTORICAL_ASSETS: inputs/historical-assets/models
+          CHARACTER_GLB: inputs/character/ottoman-artillery-crew-cc0.glb
+          BLENDER_FRAME_START: '1'
+          BLENDER_FRAME_END: '120'
+          BLENDER_OUTPUT: out/constantinople-rigged-crew-integration-1080p-30fps.mp4
+          BLENDER_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_rigged_crew_integration.py
+          test -s out/constantinople-rigged-crew-integration-1080p-30fps.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames -of json out/constantinople-rigged-crew-integration-1080p-30fps.mp4 > out/metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p='out/constantinople-rigged-crew-integration-1080p-30fps.mp4'
+          v=json.load(open('out/metadata.json'))['streams'][0]
+          assert (v['width'],v['height'])==(1920,1080),v
+          assert v['r_frame_rate']=='30/1' and v['avg_frame_rate']=='30/1',v
+          assert int(v['nb_frames'])==120,v
+          subprocess.run(['ffmpeg','-hide_banner','-v','error','-i',p,'-f','null','-'],check=True)
+          print('RIGGED CREW PREVIEW PASS',v)
+          PY
+          ffmpeg -hide_banner -v error -y -i out/constantinople-rigged-crew-integration-1080p-30fps.mp4 -vf 'fps=1,scale=640:-1,tile=2x2' -frames:v 1 out/contact-sheet.jpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-rigged-crew-integration-${{ github.run_id }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30
