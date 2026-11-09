@@ -109,30 +109,24 @@ for filename,tint,label in outfit:
     imported=import_gltf(path)
     rebind_import(imported,main_arm,root,label,tint)
 
-# Short dark hair and a wrapped linen headband sit on the actual head-bone position.
-hair_path=os.path.join(ASSETS,"hair_short04.glb")
-if os.path.isfile(hair_path):
-    imported=import_gltf(hair_path)
-    rebind_import(imported,main_arm,root,"crew-hair",(0.055,0.04,0.025))
-
 wrapmat=mat("Dark ochre linen turban",(0.32,0.20,0.09),0,.97)
 
 # A fuller linen cap covers the scalp, retaining only the side hair around the temples.
 head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.055))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.132,.143,.073);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.155))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.134,.146,.052);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
     # One diagonal wrapping strip, rising around the crown instead of stacked flat torus rings.
     curve=bpy.data.curves.new("Turban diagonal linen wrap","CURVE");curve.dimensions="3D";curve.resolution_u=2
     spl=curve.splines.new("POLY");count=160;spl.points.add(count-1)
     for i,pt in enumerate(spl.points):
-        t=i/(count-1);ang=t*math.pi*2*1.18
-        radius=.137-.013*t
-        z=hp.z-.005+.090*t
+        t=i/(count-1);ang=math.pi+t*math.pi*2
+        radius=.145-.012*t
+        z=hp.z+.125+.045*t
         pt.co=(hp.x+radius*math.cos(ang),hp.y+radius*math.sin(ang),z,1)
-    curve.bevel_depth=.012;curve.bevel_resolution=4
+    curve.bevel_depth=.018;curve.bevel_resolution=4
     wrap=bpy.data.objects.new("Diagonal turban cloth wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
     bpy.context.view_layer.objects.active=wrap;wrap.select_set(True);bpy.ops.object.convert(target="MESH")
     wrap=bpy.context.object;wrap.name="Diagonal turban cloth wrap mesh"
@@ -191,6 +185,6 @@ close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.l
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male outer coat recoloured in a brighter rust-red wool palette, over-tunic, trousers, leather boots and a one-turn diagonal linen turban. Illustrative adaptation, not an authenticated Ottoman uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male outer coat recoloured in rust-brown wool, over-tunic, trousers, leather boots and a raised single-turn linen turban. Body morphs normalized to male; illustrative adaptation, not an authenticated Ottoman uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
