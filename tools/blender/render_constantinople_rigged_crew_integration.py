@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PBR-assisted Constantinople bombardment proof. Blender 4.x, native 240fps."""
-import bpy, math, os
+import bpy, math, os, json
 from mathutils import Vector
 
 FPS = 30
@@ -166,6 +166,7 @@ crew_source=[o for o in bpy.data.objects if o not in before and o.type in {"MESH
 source_arm=next((o for o in crew_source if o.type=="ARMATURE"),None)
 assert source_arm is not None,"rigged CC0 crew GLB has no armature"
 source_meshes=[o for o in crew_source if o.type=="MESH"]
+CREW_RECORDS=[]
 def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None,morphs=None):
     root=bpy.data.objects.new(name+" actor root",None);scene.collection.objects.link(root)
     yaw=(math.pi if side=="ottoman" else 0.0) if yaw is None else yaw
@@ -203,6 +204,13 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
         key(root,"location",1,(x,y,0));key(root,"location",120,(walk_to[0],walk_to[1],0));smooth(root)
     else:
         root.location=(x,y,0)
+    CREW_RECORDS.append({
+        "name":name,"root":root.name,"armature":arm.name,
+        "action":action.name if action else "none","mesh_count":len(source_meshes),
+        "location":[float(v) for v in root.location],
+        "rotation_z":float(root.rotation_euler.z),
+        "scale":float(scale),"morphs":morphs or {}
+    })
     print("RIGGED_CREW",name,"action",action.name if action else "none","meshes",len(source_meshes),flush=True)
     return root,arm
 crew("Powder crew",-2.1,-8.5,"ottoman","idle_breathe_Armature",morphs={"age_old":.55,"face_nose_width_incr":.25})
@@ -213,6 +221,12 @@ crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_ol
 crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
 # Remove the unused source import after all six independent performers have been cloned.
 for o in crew_source:bpy.data.objects.remove(o,do_unlink=True)
+assert len(CREW_RECORDS)==6,CREW_RECORDS
+assert len({r["armature"] for r in CREW_RECORDS})==6,CREW_RECORDS
+os.makedirs(os.path.dirname(OUTPUT) or ".",exist_ok=True)
+with open(os.path.join(os.path.dirname(OUTPUT) or ".","crew-manifest.json"),"w") as fp:
+    json.dump({"fps":FPS,"frames":END-START+1,"crew":CREW_RECORDS},fp,indent=2)
+    fp.write("\\n")
 
 for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
