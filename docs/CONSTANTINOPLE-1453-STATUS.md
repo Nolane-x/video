@@ -32,13 +32,16 @@ The next proof uses:
 - Poly Haven CC0 cannon mesh and modular-fort PBR material maps, downloaded from a separately verified asset artifact.
 - SHA-256 verification of the imported model and texture files before render.
 - 16-second English narration excerpt from the gun/bombard section, with a matching SRT sidecar.
-- 1920×1080 native 240 fps, 3,840 frames, divided into four resumable chunks.
+- 1920×1080 native 240 fps, 3,840 frames, divided into four resumable chunks; Eevee TAA reduced from 16 to 8 samples so a 960-frame chunk has a better chance of completing inside the 120-minute runner limit.
 - Camera grammar: bronze/cannon macro reveal → crew/wall wide → recoil and smoke → projectile flight → wall impact/debris.
-- Human figures remain distant silhouettes; no close-up toy faces.
+- Loose accessory cannonballs embedded in the asset are hidden; the live projectile, muzzle flame and powder smoke are positioned from the imported barrel's evaluated world-space bounds instead of hard-coded screen coordinates.
+- Human figures remain distant silhouettes; no close-up toy faces. The PBR cannon still uses the generic Poly Haven field-cannon mesh, so it is not visually equivalent to Orban's colossal bronze bombard.
 - The cannon is a generic visual stand-in, not an authenticated replica of Orban's great bombard. The wall is an illustrative composite, not a measured reconstruction of the Theodosian walls.
 
 Workflow: `.github/workflows/constantinople-pbr-proof.yml`.
 Scene script: `tools/blender/render_constantinople_bombardment_pbr.py`.
+Latest run: [42576367909](https://github.com/Nolane-x/video/actions/runs/42576367909) — source preparation and smoke frame passed; four 240 fps chunks are rendering. It is not yet a completed deliverable.
+Latest scene commit: `1c8cb59d25e7a1cc8b395c11eae08331f176cbdf`.
 
 ## Release gates
 
