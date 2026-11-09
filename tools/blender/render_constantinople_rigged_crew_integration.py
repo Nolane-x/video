@@ -207,7 +207,8 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
     CREW_RECORDS.append({
         "name":name,"root":root.name,"armature":arm.name,
         "action":action.name if action else "none","mesh_count":len(source_meshes),
-        "location":[float(v) for v in root.location],
+        "location_start":[float(x),float(y),0.0],
+        "location_end":[float(v) for v in (walk_to if walk_to is not None else (x,y,0))],
         "rotation_z":float(root.rotation_euler.z),
         "scale":float(scale),"morphs":morphs or {}
     })
