@@ -1,0 +1,251 @@
+name: Constantinople · PBR bombardment proof · native 240fps
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-pbr-proof'
+    paths:
+      - 'tools/blender/render_constantinople_bombardment_pbr.py'
+      - '.github/workflows/constantinople-pbr-proof.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-pbr-proof-v1
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Download verified 48kHz narration excerpt and recorded CC0 audio
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-prepared-media
+          path: source-audio
+          repository: Nolane-x/video
+          run-id: "42563882176"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download Poly Haven CC0 cannon and fortress PBR assets
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-historical-asset-candidates-42493141420
+          path: historical-assets
+          repository: Nolane-x/video
+          run-id: "42493141420"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify asset checksums and prepare 16-second narration mix
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f historical-assets/models/downloaded/cannon_01/cannon_01_1k.gltf
+          test -f historical-assets/models/downloaded/modular_fort_01/modular_fort_01_1k.gltf
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path("historical-assets/models/downloaded/manifest.json")
+          m=json.loads(p.read_text())
+          assert m["provider"]=="Poly Haven" and m["license"]=="CC0-1.0"
+          for asset in m["assets"]:
+              if asset["id"] not in ("cannon_01","modular_fort_01"): continue
+              root=p.parent.parent
+              fp=root/asset["file"]
+              assert hashlib.sha256(fp.read_bytes()).hexdigest()==asset["sha256"],fp
+              for entry in asset["includes"]:
+                  q=fp.parent/entry["path"]
+                  assert q.is_file() and hashlib.sha256(q.read_bytes()).hexdigest()==entry["sha256"],q
+          print("Poly Haven CC0 model and texture checksums verified")
+          PY
+          mkdir -p prepared
+          ffmpeg -hide_banner -v error -y -i source-audio/out-voice.wav -t 16 -ar 48000 -ac 2 -c:a pcm_s24le prepared/voice-16s.wav
+          cp source-audio/media/score.wav source-audio/media/cannon_fire.ogg source-audio/media/cannon_impact.ogg prepared/
+          cat > prepared/captions.srt <<'SRT'
+          1
+          00:00:00,000 --> 00:00:04,000
+          He is associated with the production of very large bombards.
+
+          2
+          00:00:04,140 --> 00:00:06,300
+          These are not modern cannons.
+
+          3
+          00:00:06,440 --> 00:00:09,640
+          They are enormous, slow, difficult weapons.
+
+          4
+          00:00:09,780 --> 00:00:14,500
+          They take time to load, require specialised crews, and cannot fire rapidly.
+          SRT
+          cp historical-assets/models/downloaded/manifest.json prepared/POLYHAVEN-ASSET-MANIFEST.json
+          sha256sum prepared/* > prepared/SHA256SUMS.txt
+      - name: Upload immutable PBR model inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload excerpt audio and captions
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-source-audio-${{ github.run_id }}
+          path: prepared/
+          if-no-files-found: error
+          retention-days: 14
+
+  smoke:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and headless graphics libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models
+      - name: Render a real PBR assembly smoke frame at firing moment
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          BLENDER_FRAME_START: "1500"
+          BLENDER_FRAME_END: "1500"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-smoke.png
+          BLENDER_THREADS: "2"
+        run: |
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-smoke.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-smoke-${{ github.run_id }}
+          path: out/pbr-smoke.png
+          if-no-files-found: error
+          retention-days: 14
+
+  render:
+    needs: [prepare, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { id: "01", start: 1, end: 960 }
+          - { id: "02", start: 961, end: 1920 }
+          - { id: "03", start: 1921, end: 2880 }
+          - { id: "04", start: 2881, end: 3840 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models
+      - name: Render assigned 1080p native 240fps chunk
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          BLENDER_FRAME_START: ${{ matrix.start }}
+          BLENDER_FRAME_END: ${{ matrix.end }}
+          BLENDER_OUTPUT: out/chunk-${{ matrix.id }}.mp4
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s "out/chunk-${{ matrix.id }}.mp4"
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames -of json "out/chunk-${{ matrix.id }}.mp4" > "out/chunk-${{ matrix.id }}.json"
+          python - <<'PY'
+          import json,os
+          p="out/chunk-${{ matrix.id }}.json"
+          v=json.load(open(p))["streams"][0]
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v["nb_frames"])==960,v
+          print("PBR chunk passed:",os.environ.get("BLENDER_FRAME_START"),os.environ.get("BLENDER_FRAME_END"),v)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-chunk-${{ matrix.id }}-${{ github.run_id }}
+          path: out/chunk-${{ matrix.id }}.mp4
+          if-no-files-found: error
+          retention-days: 14
+
+  package:
+    needs: [prepare, render]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-pbr-chunk-*-${{ github.run_id }}
+          path: chunks
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-audio-${{ github.run_id }}
+          path: audio
+      - name: Join, mix, validate and package the PBR proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find chunks -name 'chunk-*.mp4' -type f | sort)
+          test "${#files[@]}" -eq 4
+          : > concat.txt
+          for f in "${files[@]}"; do printf "file '%s'\n" "$PWD/$f" >> concat.txt; done
+          test "$(wc -l < concat.txt)" -eq 4
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
+          ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav \
+            -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg \
+            -filter_complex "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.16[music];[2:a]adelay=6250|6250,volume=0.85,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=9580|9580,volume=0.9,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][music][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k audio-mix.m4a
+          mkdir -p review
+          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i audio-mix.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          cp audio/captions.srt review/captions.srt
+          ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p="review/constantinople-pbr-bombardment-1080p-240fps.mp4"
+          j=json.load(open("review/metadata.json"))
+          v=next(s for s in j["streams"] if s["codec_type"]=="video")
+          a=next(s for s in j["streams"] if s["codec_type"]=="audio")
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v.get("nb_frames",0))==3840,v
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert abs(float(j["format"]["duration"])-16.0)<0.08,j["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("PBR MASTER TECHNICAL PASS",v["width"],v["height"],v["avg_frame_rate"],v["nb_frames"])
+          PY
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "fps=30,scale=960:540" -c:v libx264 -preset veryfast -crf 23 -an review/review-proxy-30fps-960x540.mp4
+          ffmpeg -hide_banner -v error -y -i review/review-proxy-30fps-960x540.mp4 -vf "fps=1,scale=480:-1,tile=4x4" -frames:v 1 review/contact-sheet.jpg
+          cat > review/RECONSTRUCTION-NOTES.txt <<'TXT'
+          Illustrative reconstruction of a short Ottoman artillery sequence at Constantinople in 1453.
+          The hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets.
+          The gun is a generic stand-in, not an authenticated replica of Orban's great bombard.
+          The wall layout is illustrative, not a measured reconstruction of the Theodosian walls.
+          Human figures are distant silhouettes, not authenticated costumes or portraits.
+          Native output is 1920x1080 at 240 fps. Technical validation is not artistic sign-off.
+          TXT
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-bombardment-proof-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
