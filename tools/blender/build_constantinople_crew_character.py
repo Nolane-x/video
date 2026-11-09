@@ -123,9 +123,9 @@ if head_bone:
     samples=360;verts=[];faces=[]
     arm_inv=main_arm.matrix_world.inverted()
     def ribbon_center(u):
-        angle=math.pi*.5+math.tau*3.0*u
-        rx=.121-.012*u;ry=.132-.012*u
-        z=hp.z+.066+.128*u
+        angle=math.pi*.5+math.tau*4.0*u
+        rx=.124-.055*u;ry=.135-.058*u
+        z=hp.z+.060+.150*u
         return Vector((hp.x+rx*math.cos(angle),hp.y+ry*math.sin(angle),z))
     for i in range(samples):
         u=i/(samples-1);center=ribbon_center(u)
@@ -138,7 +138,7 @@ if head_bone:
         normal=tangent.cross(width_axis).normalized()
         # Two width edges and front/back thickness produce a cloth-like flat band.
         for sw,sn in ((-1,-1),(-1,1),(1,1),(1,-1)):
-            p=center+width_axis*(sw*.023)+normal*(sn*.006)
+            p=center+width_axis*(sw*.017)+normal*(sn*.005)
             verts.append(tuple(arm_inv @ p))
     for i in range(samples-1):
         base=i*4;nxt=(i+1)*4
