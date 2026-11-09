@@ -14,7 +14,7 @@ SMOKE_ONLY = os.environ.get("BLENDER_SMOKE_ONLY", "0") == "1"
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
 scene = bpy.context.scene
-scene.frame_start, scene.frame_end = 1, TOTAL_FRAMES
+scene.frame_start, scene.frame_end = START, END
 scene.render.engine = "BLENDER_EEVEE"
 scene.eevee.taa_render_samples = 16
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
