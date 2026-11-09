@@ -118,6 +118,8 @@ if head_bone:
         pt.co=(hp.x+radius*math.cos(ang),hp.y+radius*math.sin(ang),z,1)
     curve.bevel_depth=.018;curve.bevel_resolution=4
     wrap=bpy.data.objects.new("Diagonal turban cloth wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
+    bpy.context.view_layer.objects.active=wrap;wrap.select_set(True);bpy.ops.object.convert(target="MESH")
+    wrap=bpy.context.object;wrap.name="Diagonal turban cloth wrap mesh"
     # Attach the headwear to the moving head bone, preserving its evaluated world placement.
     for obj in (cap,wrap):
         wm=obj.matrix_world.copy();obj.parent=main_arm;obj.parent_type="BONE";obj.parent_bone="head";obj.matrix_world=wm
