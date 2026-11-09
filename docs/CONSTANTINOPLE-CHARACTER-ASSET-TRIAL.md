@@ -28,13 +28,17 @@ Replace the primitive block-figure artillery crew with anatomically proportioned
 - v6 run [42580993765](https://github.com/Nolane-x/video/actions/runs/42580993765): 53 bones and 12 actions, but the coat remained dark and modern; the turban still read as a coiled tube. Not approved.
 - v7 run [42581411336](https://github.com/Nolane-x/video/actions/runs/42581411336): the brighter coat and slimmer wrap did not fix the body proportions. Inspecting the exported GLB showed all 92 morph-target weights defaulting to 1, simultaneously enabling both male/female morphs, body extremes and blink/look targets.
 
-## Current revision (v8)
-- `set_male_morph_state()` now resets all shape-key values to 0 across the body, hair and clothing meshes, then enables only `gender_male=1`. It explicitly disables blink and look-down targets.
-- This is intended to correct the chest/garment distortion and closed-eye appearance caused by the GLB node's default morph weights. The outfit remains the same illustrative outer coat, tunic, trousers, boots and turban; visual review is still required.
-- Latest check: [42581802475](https://github.com/Nolane-x/video/actions/runs/42581802475), running the corrected Blender build/render at last check. Script commit `2e4321917389aa7b860f6b429ba4aadfc09c739b`.
-- Do not integrate the character until the v8 full-body/close-up images and action deformation are inspected.
+## Visual decision (v9)
+- Run [42582204551](https://github.com/Nolane-x/video/actions/runs/42582204551) succeeded: 53 bones, 12 actions, 30,869 vertices and 55,032 triangles. The hat no longer covers the eyes; the face is visible and the male morph defaults are correct.
+- The exported GLB was parsed independently: 10 morph-bearing meshes all have `gender_male=1`, `gender_female=0`, `blink_left/right=0`, `look_down=0`, and `breast_cup_max=0`.
+- Visual approval is limited: usable as a background/midground artillery crew asset. It is not a hero close-up asset or an authenticated Ottoman uniform; the coat/headwear remain generic historical adaptations.
+
+## Integration handoff
+- Use character artifact `constantinople-crew-character-proof-42582204551` (artifact ID `13657109082`).
+- The 30 fps, four-second integration test is in branch `cinematic/constantinople-rigged-crew-integration`; the test duplicates six independent armatures and varies body morphs/actions.
+- Do not replace the long-form master. Review the integration proof before upgrading any full-length 240 fps shots.
 ## Integration gate
-Review both v8 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
+Review the v9 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
 
 ## Script and workflow
 - `tools/blender/build_constantinople_crew_character.py`
