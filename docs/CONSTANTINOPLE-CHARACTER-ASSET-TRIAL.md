@@ -37,7 +37,7 @@ Review both v5 previews, verify the 53-bone rig and animation tracks, check clot
 - `.github/workflows/constantinople-human-asset-proof.yml`
 
 ## Next checks
-1. Confirm the tunic silhouette, diagonal linen wrap, hands and boots read cleanly in both full-body and close-up views.
+1. Confirm the male outer garment, diagonal linen wrap, hands and boots read cleanly in both full-body and close-up views.
 2. Check imported `idle`, `walk` and `run` actions at 30 fps; final documentary renders will be sampled at 240 fps.
 3. When integrated, keep character roots/armatures independent so each performer can use a different action and screen position.
 4. Preserve the source license manifest and file checksums alongside any rendered proof.
