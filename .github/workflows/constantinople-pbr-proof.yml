@@ -176,6 +176,32 @@ jobs:
         run: |
           blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
           test -s out/pbr-smoke-fire.png
+      - name: Diagnostic A — hide trousers to identify lower-body spike
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "wool-trousers"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-trousers.png
+          BLENDER_THREADS: "2"
+        run: |
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-trousers.png
+      - name: Diagnostic B — hide body mesh to identify lower-body spike
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "Body"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-body.png
+          BLENDER_THREADS: "2"
+        run: |
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-body.png
       - uses: actions/upload-artifact@v4
         with:
           name: constantinople-pbr-smoke-${{ github.run_id }}
