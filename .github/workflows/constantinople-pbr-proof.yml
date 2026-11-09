@@ -29,8 +29,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Download verified 48kHz narration excerpt and recorded CC0 audio
         uses: actions/download-artifact@v4
         with:
@@ -88,7 +86,7 @@ jobs:
           print("Poly Haven CC0 model and texture checksums verified")
           PY
           mkdir -p prepared
-          ffmpeg -hide_banner -v error -y -i source-audio/out-voice.wav -t 16 -ar 48000 -ac 2 -c:a pcm_s24le prepared/voice-16s.wav
+          cp source-audio/out-voice.wav prepared/voice-16s.wav
           cp source-audio/media/score.wav source-audio/media/cannon_fire.ogg source-audio/media/cannon_impact.ogg prepared/
           cat > prepared/captions.srt <<'SRT'
           1
