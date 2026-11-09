@@ -21,16 +21,18 @@ Replace the primitive block-figure artillery crew with anatomically proportioned
 - v3 run [42578085824](https://github.com/Nolane-x/video/actions/runs/42578085824): leather apron and straps were too blocky/large; not approved.
 - v4 run [42579017921](https://github.com/Nolane-x/video/actions/runs/42579017921): 53 bones, 12 actions, 31,874 vertices, 56,114 triangles; the apron read as a flat shield and the modern coat remained; not approved. The full-body preview was inspected.
 
-## Current revision (v5)
-- Replace the modern trenchcoat with the CC0-derived `clothing_dress.glb` (long tunic/skirt assembly), recoloured as muted wool, layered with shirt, trousers and boots.
-- Remove the flat procedural apron, the cube powder pouch and the extra leather belt; the selected tunic asset includes its own belt.
-- Replace stacked torus rings with a fuller cloth cap and one diagonal wrap strip, convert the wrap curve to mesh for GLB export, and parent headwear to the head bone.
-- Sample a midpoint idle pose and use eye-level full-body/close-up cameras.
-- Latest check: [42580571283](https://github.com/Nolane-x/video/actions/runs/42580571283), still building the character proof at last check. Script commit `b55aacb913971b6533d98796ed1cab15260180c0`; workflow commit `fb925cd608d2c3c772857558c84f88afae6225e9`.
-- The outfit remains an illustrative historical adaptation, not authenticated 15th-century Ottoman clothing.
+## Visual decisions
+- v5 run [42580571283](https://github.com/Nolane-x/video/actions/runs/42580571283): 53 bones, 12 actions, 31,167 vertices, 54,906 triangles; visually rejected because the female-derived dress bodice creates an implausible chest shape and the turban disappears when bone-parented. Do not use this costume.
+
+## Current revision (v6)
+- Restore male `clothing_trenchcoat.glb` as the long outer garment, recoloured to warm earth-red wool over the shirt, trousers and boots. This remains a generic adaptation, not an authenticated caftan.
+- Replace direct bone parenting of the turban with a one-bone vertex group (`head`) and an Armature modifier so the wrap keeps its evaluated position and follows head motion.
+- Remove duplicate animation setup that reset the selected pose to frame 1. Use the midpoint of `idle_look` for both previews, with eye-level cameras.
+- Latest check: [42580993765](https://github.com/Nolane-x/video/actions/runs/42580993765), queued/in progress at last check. Script commit `f8b4f787ca961617328613c6edfb2415fd18fb96`; workflow asset-list commit `9edd39c6104702af65bf9b18f10acf90104065e9`.
+- Do not approve this outfit until the new images are visually inspected.
 
 ## Integration gate
-Review both v5 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
+Review both v6 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
 
 ## Script and workflow
 - `tools/blender/build_constantinople_crew_character.py`
