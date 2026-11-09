@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a CC0 MakeHuman-derived medieval artillery crew character proof in Blender."""
 import bpy, json, os, math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ASSETS=os.environ.get("CHARACTER_ASSETS","character-assets")
 OUT=os.environ.get("CHARACTER_OUTPUT","character-proof")
@@ -114,7 +114,7 @@ bones=main_arm.data.bones
 def bone_point(name,which="head"):
     b=bones.get(name)
     if b is None: raise RuntimeError("Missing expected rig bone: "+name)
-    return Vector(getattr(b,which+"_local"))
+    return main_arm.matrix_world @ Vector(getattr(b,which+"_local"))
 hip=bone_point("pelvis")
 sp1=bone_point("spine_01")
 sp2=bone_point("spine_02")
@@ -153,7 +153,9 @@ belt_mat=mat("Dark hand-cut leather belt",(.075,.034,.016),0,.84)
 brass_mat=mat("Worn brass fastenings",(.34,.22,.075),.72,.38)
 
 def weighted_mesh(name,verts,faces,material,weight_fn,solidify=0.0):
-    md=bpy.data.meshes.new(name+" mesh");md.from_pydata(verts,[],faces);md.update()
+    arm_inv=main_arm.matrix_world.inverted()
+    local_verts=[tuple(arm_inv @ Vector(v)) for v in verts]
+    md=bpy.data.meshes.new(name+" mesh");md.from_pydata(local_verts,[],faces);md.update()
     obj=bpy.data.objects.new(name,md);scene.collection.objects.link(obj)
     obj.parent=root;obj.matrix_world=main_arm.matrix_world.copy()
     obj.data.materials.append(material)
@@ -199,7 +201,7 @@ def sleeve_mesh(side):
     upper=bones.get("upperarm_"+side);lower=bones.get("lowerarm_"+side)
     if upper is None or lower is None:return
     p0=Vector(upper.head_local);p1=Vector(upper.tail_local);p2=Vector(lower.tail_local)
-    points=[p0,p1,p2];verts=[];faces=[];weights=[]
+    points=[p0,p1,p2];verts=[];faces=[];weights=[];ring_centers=[]
     radii=[.132,.112,.078];steps_per_segment=5;radial=16
     for si in range(2):
         a=points[si];b=points[si+1];direction=(b-a).normalized()
@@ -216,7 +218,8 @@ def sleeve_mesh(side):
                 ang=math.tau*j/radial
                 q=center+axis1*(math.cos(ang)*radius)+axis2*(math.sin(ang)*radius)
                 verts.append(tuple(q))
-            weights.append((si,t))
+            if j==0:ring_centers.append(center.copy())
+        weights.append((si,t))
     ring_count=len(weights)
     for ri in range(ring_count-1):
         for j in range(radial):
@@ -225,7 +228,7 @@ def sleeve_mesh(side):
             faces.append((a,b,c,d))
     def sleeve_weights(v):
         # Smooth influence overlap at the elbow joint.
-        nearest=min(range(ring_count),key=lambda i:abs(verts[i*radial][2]-v.z))
+        nearest=min(range(ring_count),key=lambda i:(ring_centers[i]-v).length)
         si,t=weights[nearest]
         if si==0 and t>.72:return [("upperarm_"+side,.55),("lowerarm_"+side,.45)]
         if si==1 and t<.28:return [("upperarm_"+side,.35),("lowerarm_"+side,.65)]
@@ -297,15 +300,15 @@ wrapmat=woven_mat("Saffron and umber linen turban",(0.34,.245,.12),.96)
 head_bone=bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.012)))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.077);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.092)))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.067);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
     curve=bpy.data.curves.new("Five-turn wrapped linen turban","CURVE");curve.dimensions="3D";curve.resolution_u=2
     spl=curve.splines.new("POLY");count=320;spl.points.add(count-1)
     for i,pt in enumerate(spl.points):
         u=i/(count-1);ang=math.tau*5*u
         rx=.137-.018*u;ry=.143-.018*u
-        z=hp.z-.045+.19*u
+        z=hp.z+.025+.135*u
         pt.co=(hp.x+rx*math.cos(ang),hp.y+ry*math.sin(ang),z,1)
     curve.bevel_depth=.021;curve.bevel_resolution=5
     wrap=bpy.data.objects.new("Five-turn linen turban wrap",curve);scene.collection.objects.link(wrap)
