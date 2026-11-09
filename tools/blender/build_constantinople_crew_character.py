@@ -86,7 +86,7 @@ root.location=(0,0,0)
 outfit=[("clothing_shirt.glb",(0.62,0.48,0.29),"under-tunic"),
         ("clothing_jeans.glb",(0.22,0.14,0.075),"wool-trousers"),
         ("clothing_boots.glb",(0.32,0.16,0.055),"leather-boots"),
-        ("clothing_trenchcoat.glb",(0.44,0.28,0.13),"long-wool-coat")]
+        ("clothing_dress.glb",(0.34,0.19,0.075),"wool-tunic")]
 for filename,tint,label in outfit:
     path=os.path.join(ASSETS,filename)
     if not os.path.isfile(path):continue
@@ -99,54 +99,39 @@ if os.path.isfile(hair_path):
     imported=import_gltf(hair_path)
     rebind_import(imported,main_arm,root,"crew-hair",(0.055,0.04,0.025))
 
-wrapmat=mat("Faded linen head wrap",(0.29,0.22,0.13),0,.95)
-beltmat=mat("Dark worn leather belt",(0.12,0.055,0.022),0,.9)
-ironmat=mat("Blackened iron buckle",(0.07,0.075,0.072),.78,.38)
-apronmat=mat("Oiled leather work apron",(0.13,0.068,0.027),0,.92)
+wrapmat=mat("Dark ochre linen turban",(0.29,0.19,0.085),0,.97)
 
-# A cloth cap closes the top of the head; several wrapped bands read as folded linen.
+# A fuller linen cap covers the scalp, retaining only the side hair around the temples.
 head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=(hp.x,hp.y,hp.z+.025))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.122,.132,.048);cap.data.materials.append(wrapmat);cap.parent=root
-    for zoff,scale in [(-.018,1.0),(0,.94),(.018,.84)]:
-        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.118*scale,minor_radius=.014,location=(hp.x,hp.y,hp.z+zoff))
-        band=bpy.context.object;band.name="Linen turban wrapped folds";band.data.materials.append(wrapmat);band.parent=root
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.055))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.139,.151,.082);cap.data.materials.append(wrapmat)
+    for poly in cap.data.polygons:poly.use_smooth=True
+    # One diagonal wrapping strip, rising around the crown instead of stacked flat torus rings.
+    curve=bpy.data.curves.new("Turban diagonal linen wrap","CURVE");curve.dimensions="3D";curve.resolution_u=2
+    spl=curve.splines.new("POLY");count=160;spl.points.add(count-1)
+    for i,pt in enumerate(spl.points):
+        t=i/(count-1);ang=t*math.pi*2*2.15
+        radius=.145-.022*t
+        z=hp.z-.015+.125*t
+        pt.co=(hp.x+radius*math.cos(ang),hp.y+radius*math.sin(ang),z,1)
+    curve.bevel_depth=.018;curve.bevel_resolution=4
+    wrap=bpy.data.objects.new("Diagonal turban cloth wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
+    # Attach the headwear to the moving head bone, preserving its evaluated world placement.
+    for obj in (cap,wrap):
+        wm=obj.matrix_world.copy();obj.parent=main_arm;obj.parent_type="BONE";obj.parent_bone="head";obj.matrix_world=wm
 
-# The leather belt sits outside the coat; the apron covers the coat opening as workwear.
-pelvis=main_arm.data.bones.get("pelvis")
-waist_z=((pelvis.head_local.z+pelvis.tail_local.z)*.5) if pelvis else .98
-bpy.ops.mesh.primitive_torus_add(major_segments=64,minor_segments=12,major_radius=.238,minor_radius=.022,location=(0,-.015,waist_z))
-belt=bpy.context.object;belt.name="Outer leather waist belt";belt.scale=(1.0,.90,1.0);belt.data.materials.append(beltmat);belt.parent=root
-bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.285,waist_z))
-buckle=bpy.context.object;buckle.name="Iron belt buckle";buckle.dimensions=(.075,.024,.055)
-bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);buckle.data.materials.append(ironmat);buckle.parent=root
+# Attach the imported animation clips and sample a relaxed mid-idle pose for the stills.
+scene.render.fps=30;scene.render.fps_base=1
+actions=sorted([a.name for a in bpy.data.actions])
+if main_arm.animation_data is None:main_arm.animation_data_create()
+idle=next((a for a in bpy.data.actions if "idle" in a.name.lower() and "breathe" not in a.name.lower()),None)
+if idle:
+    main_arm.animation_data.action=idle
+    mid=int((idle.frame_range[0]+idle.frame_range[1])*.5)
+    scene.frame_set(mid)
 
-# A short, curved gunner apron hangs from the waist instead of covering the torso like a shield.
-nx,nz=9,6
-verts=[]
-for row in range(nz):
-    v=row/(nz-1);z=1.12-v*.56;width=.145+.035*v
-    for col in range(nx):
-        u=col/(nx-1);x=(u-.5)*2*width
-        fold=.009*math.sin(u*math.pi*6+v*3)+.004*math.sin(u*math.pi*11-v*4)
-        y=-.265-.018*(1-(2*u-1)**2)-fold
-        verts.append((x,y,z))
-faces=[]
-for row in range(nz-1):
-    for col in range(nx-1):
-        q=row*nx+col;faces.append((q,q+1,q+1+nx,q+nx))
-apron_mesh=bpy.data.meshes.new("Short apron folded quad mesh");apron_mesh.from_pydata(verts,[],faces);apron_mesh.update()
-apron=bpy.data.objects.new("Artillery crew short leather apron",apron_mesh);scene.collection.objects.link(apron);apron.data.materials.append(apronmat)
-for poly in apron.data.polygons:poly.use_smooth=True
-solid=apron.modifiers.new("Apron leather thickness","SOLIDIFY");solid.thickness=.01;solid.offset=0
-sub=apron.modifiers.new("Soft apron folds","SUBSURF");sub.levels=1;sub.render_levels=1
-apron.parent=root
-
-bpy.ops.mesh.primitive_cube_add(size=1,location=(.215,-.21,.96))
-pouch=bpy.context.object;pouch.name="Small powder pouch";pouch.dimensions=(.085,.075,.11)
-bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);pouch.data.materials.append(beltmat);pouch.parent=root
 # Keep source scene timing at 30 fps for this still-frame asset proof; the final documentary is sampled at 240 fps.
 scene.render.fps=30;scene.render.fps_base=1
 actions=sorted([a.name for a in bpy.data.actions])
@@ -163,8 +148,8 @@ def area(name,loc,energy,color,size,target):
 area("Large soft key",(-3,-4,6),650,(1,.81,.62),4,(0,0,1))
 area("Cool fill",(4,-2,3.8),380,(.62,.73,.9),3,(0,0,1))
 area("Warm rim",(0,3,5),850,(1,.58,.32),3,(0,0,1))
-bpy.ops.object.camera_add(location=(1.8,-4.1,2.4));cam=bpy.context.object;cam.name="Crew full-body camera";cam.data.lens=58
-target=Vector((0,0,1.0));cam.rotation_euler=(target-cam.location).to_track_quat("-Z","Y").to_euler();scene.camera=cam
+bpy.ops.object.camera_add(location=(1.8,-5.6,1.75));cam=bpy.context.object;cam.name="Crew full-body camera";cam.data.lens=58
+target=Vector((0,0,.92));cam.rotation_euler=(target-cam.location).to_track_quat("-Z","Y").to_euler();scene.camera=cam
 
 # Export a self-contained GLB and a review still for reuse in the siege scene.
 for o in bpy.context.selected_objects:o.select_set(False)
@@ -175,11 +160,11 @@ glb_out=os.path.join(OUT,"ottoman-artillery-crew-cc0.glb")
 bpy.ops.export_scene.gltf(filepath=glb_out,export_format="GLB",use_selection=True,export_animations=True,export_skins=True)
 scene.render.image_settings.file_format="PNG";scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-preview.png"))
 scene.frame_set(1);bpy.ops.render.render(write_still=True)
-bpy.ops.object.camera_add(location=(1.25,-2.7,1.95));closecam=bpy.context.object;closecam.name="Crew face and torso close-up";closecam.data.lens=72
-close_target=Vector((0,0,1.48));closecam.rotation_euler=(close_target-closecam.location).to_track_quat("-Z","Y").to_euler();scene.camera=closecam
+bpy.ops.object.camera_add(location=(1.0,-3.05,1.65));closecam=bpy.context.object;closecam.name="Crew face and torso close-up";closecam.data.lens=72
+close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.location).to_track_quat("-Z","Y").to_euler();scene.camera=closecam
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"Recoloured generic coat/trousers/boots and procedural linen wrap; illustrative Ottoman artillery crew, not an authenticated historical uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long tunic garment recoloured as muted wool, trousers, leather boots and a procedural linen turban. Illustrative historical adaptation, not authenticated Ottoman uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
