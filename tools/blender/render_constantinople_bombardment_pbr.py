@@ -183,25 +183,44 @@ for x in (-4,4.2):
 for i in range(5):sphere("Spare stone shot",(-5+i*.58,-10.3,.52),(.24,.24,.24),shotmat,16,10)
 
 # Ballistic shot, recoil, flash, smoke, wall impact and debris.
-ball=sphere("Heavy limestone cannon shot",(0,-1.7,2.55),(.46,.46,.46),shotmat,24,16)
-for f,loc in [(1,(0,-1.7,2.55)),(1450,(0,-1.7,2.55)),(1500,(0,-1.2,2.95)),
-              (1650,(0,2.2,4.4)),(1850,(.45,7,6)),(2070,(.8,11.5,5.3)),
-              (2250,(1,14.65,3.2)),(2300,(1,15.2,2.4)),(END,(1,15.2,2.4))]:
-    key(ball,"location",f,loc)
+# Derive the muzzle from the imported barrel mesh, rather than guessing screen-space coordinates.
+barrel_obj=next((o for o in parts if o.type=="MESH" and "barrel" in o.name.lower()),None)
+bpy.context.view_layer.update()
+if barrel_obj:
+    barrel_corners=[barrel_obj.matrix_world @ Vector(v) for v in barrel_obj.bound_box]
+    front_y=max(v.y for v in barrel_corners)
+    muzzle=Vector((sum(v.x for v in barrel_corners)/len(barrel_corners),front_y,
+                   sum(v.z for v in barrel_corners)/len(barrel_corners)))
+else:
+    muzzle=Vector((0,-1.7,2.55))
+shot_dir=Vector((0,1,0))
+shot_start=muzzle-shot_dir*.42
+impact=Vector((1,15.2,2.4))
+span=impact-muzzle
+ball=sphere("Heavy limestone cannon shot",shot_start,(.34,.34,.34),shotmat,24,16)
+trajectory=[(1,shot_start),(1450,shot_start),(1500,muzzle+shot_dir*.24),
+            (1650,muzzle+span*.25+Vector((0,0,1.65))),
+            (1850,muzzle+span*.53+Vector((0,0,2.8))),
+            (2070,muzzle+span*.80+Vector((0,0,2.1))),
+            (2250,Vector((1,14.65,3.2))),(2300,impact),(END,impact)]
+for f,loc in trajectory:key(ball,"location",f,loc)
 smooth(ball)
-flash=sphere("Muzzle flash",(0,-1.5,2.9),(.08,.08,.08),fire,16,10)
-for f,s in [(1,(.001,)*3),(1460,(.001,)*3),(1500,(.45,.75,.45)),(1512,(.24,.42,.24)),(1545,(.001,)*3)]:
+# Tapered directional fire is aligned to the true muzzle axis.
+bpy.ops.mesh.primitive_cone_add(vertices=32,radius1=.30,radius2=.012,depth=1.0,location=muzzle+shot_dir*.5)
+flash=bpy.context.object;flash.name="Directional muzzle flame"
+flash.rotation_euler=shot_dir.to_track_quat("Z","Y").to_euler();flash.data.materials.append(fire)
+for f,s in [(1,(.001,)*3),(1460,(.001,)*3),(1500,(.70,.82,.70)),(1512,(.38,.48,.38)),(1545,(.001,)*3)]:
     key(flash,"scale",f,s)
 smooth(flash)
-ld=bpy.data.lights.new("Cannon muzzle flash","POINT");ld.energy=0;ld.color=(1,.28,.06);ld.shadow_soft_size=2.5
-lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects.link(lo);lo.location=(0,-1.4,3)
-for f,e in [(1,0),(1495,0),(1500,2400),(1510,900),(1545,0)]:key(ld,"energy",f,e)
+ld=bpy.data.lights.new("Cannon muzzle flash","POINT");ld.energy=0;ld.color=(1,.29,.08);ld.shadow_soft_size=2.0
+lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects.link(lo);lo.location=muzzle+shot_dir*.28
+for f,e in [(1,0),(1495,0),(1500,1450),(1510,420),(1545,0)]:key(ld,"energy",f,e)
 smoke_puffs=[]
 for i in range(24):
-    p=sphere("Powder smoke plume",(0,-1.1,3.1),(.1,.1,.1),smoke,16,10)
-    a=i*2.399;start=Vector((0,-1.1,3.1))
-    end=start+Vector((math.cos(a)*(.8+(i%5)*.2),1.2+(i%6)*.42,1.5+(i%7)*.3))
-    for f,loc,sc in [(1,start,(.001,)*3),(1500,start,(.12,)*3),(1590,end,(.55+(i%4)*.16,)*3),
+    origin=muzzle+shot_dir*.2
+    p=sphere("Powder smoke plume",origin,(.1,.1,.1),smoke,16,10)
+    a=i*2.399;end=origin+Vector((math.cos(a)*(.8+(i%5)*.2),1.2+(i%6)*.42,1.5+(i%7)*.3))
+    for f,loc,sc in [(1,origin,(.001,)*3),(1500,origin,(.12,)*3),(1590,end,(.55+(i%4)*.16,)*3),
                      (1800,end+Vector((0,1,1)),(.85+(i%3)*.2,)*3),(2050,end+Vector((0,2.5,1.6)),(.001,)*3)]:
         key(p,"location",f,loc);key(p,"scale",f,sc)
     smooth(p);smoke_puffs.append(p)
