@@ -54,7 +54,7 @@ jobs:
           assert m["provider"]=="Poly Haven" and m["license"]=="CC0-1.0"
           for asset in m["assets"]:
               if asset["id"] not in ("cannon_01","modular_fort_01"): continue
-              root=p.parent.parent
+              root=p.parent.parent.parent
               fp=root/asset["file"]
               assert hashlib.sha256(fp.read_bytes()).hexdigest()==asset["sha256"],fp
               for entry in asset["includes"]:
