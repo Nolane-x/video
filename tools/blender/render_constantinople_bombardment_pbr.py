@@ -10,6 +10,7 @@ END = int(os.environ.get("BLENDER_FRAME_END", str(TOTAL_FRAMES)))
 OUTPUT = os.environ.get("BLENDER_OUTPUT", "out/chunk.mp4")
 ASSETS = os.environ.get("HISTORICAL_ASSETS", "historical-assets")
 CHARACTER_GLB = os.environ.get("CHARACTER_GLB", "character/ottoman-artillery-crew-cc0.glb")
+CREW_HIDE_TAG = os.environ.get("CREW_HIDE_TAG", "").strip().lower()
 SMOKE_ONLY = os.environ.get("BLENDER_SMOKE_ONLY", "0") == "1"
 
 bpy.ops.object.select_all(action="SELECT")
@@ -196,6 +197,9 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
         arm.animation_data.action=action
     for src in source_meshes:
         mesh=src.copy();mesh.data=src.data.copy();scene.collection.objects.link(mesh)
+        if CREW_HIDE_TAG and CREW_HIDE_TAG in src.name.lower():
+            mesh.hide_render=True
+            print("DIAGNOSTIC_HIDE_CREW_MESH",src.name,flush=True)
         world_matrix=src.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world_matrix
         # Preserve the canonical morph weights validated in the standalone character proof.
         for mod in mesh.modifiers:
