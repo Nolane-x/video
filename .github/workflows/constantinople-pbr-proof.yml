@@ -1,19 +1,18 @@
-name: Constantinople · PBR bombardment proof · native 240fps
+name: Constantinople · rigged crew PBR proof · native 240fps
 
 on:
   push:
     branches:
-      - 'cinematic/constantinople-pbr-proof'
+      - 'cinematic/constantinople-pbr-rigged-crew'
     paths:
-      - 'tools/blender/render_constantinople_bombardment_pbr.py'
-      - '.github/workflows/constantinople-pbr-proof.yml'
+      - 'tools/blender/run-pbr-rigged-crew.trigger'
 
 permissions:
   actions: read
   contents: read
 
 concurrency:
-  group: constantinople-pbr-proof-v1
+  group: constantinople-pbr-rigged-crew-v1
   cancel-in-progress: true
 
 jobs:
@@ -40,12 +39,30 @@ jobs:
           repository: Nolane-x/video
           run-id: "42493141420"
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download rigged CC0 artillery character proof v13
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-character-proof-42587659245
+          path: character
+          repository: Nolane-x/video
+          run-id: "42587659245"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify asset checksums and prepare 16-second narration mix
         shell: bash
         run: |
           set -euo pipefail
           test -f historical-assets/models/downloaded/cannon_01/cannon_01_1k.gltf
           test -f historical-assets/models/downloaded/modular_fort_01/modular_fort_01_1k.gltf
+          test -s character/ottoman-artillery-crew-cc0.glb
+          test -s character/manifest.json
+          (cd character && sha256sum -c SHA256SUMS.txt)
+          python - <<'PY'
+          import json
+          m=json.load(open("character/manifest.json"))
+          assert m["bones"] >= 50 and len(m["actions"]) >= 10, m
+          assert m["visual_approval"] == "pending", m
+          print("Rigged CC0 crew input verified:",m["bones"],"bones",len(m["actions"]),"actions")
+          PY
           python - <<'PY'
           import json,hashlib
           from pathlib import Path
@@ -91,6 +108,13 @@ jobs:
           path: historical-assets/models/
           if-no-files-found: error
           retention-days: 14
+      - name: Upload immutable rigged crew input
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character/
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload excerpt audio and captions
         uses: actions/upload-artifact@v4
         with:
@@ -115,9 +139,18 @@ jobs:
         with:
           name: constantinople-pbr-source-assets-${{ github.run_id }}
           path: historical-assets/models
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character
       - name: Render a real PBR assembly smoke frame at firing moment
         env:
           HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
           BLENDER_FRAME_START: "1500"
           BLENDER_FRAME_END: "1500"
           BLENDER_SMOKE_ONLY: "1"
@@ -164,6 +197,7 @@ jobs:
       - name: Render assigned 1080p native 240fps chunk
         env:
           HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
           BLENDER_FRAME_START: ${{ matrix.start }}
           BLENDER_FRAME_END: ${{ matrix.end }}
           BLENDER_OUTPUT: out/chunk-${{ matrix.id }}.mp4
