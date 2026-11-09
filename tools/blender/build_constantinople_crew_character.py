@@ -23,6 +23,20 @@ def import_gltf(path):
     bpy.ops.import_scene.gltf(filepath=os.path.abspath(path))
     return [o for o in bpy.data.objects if o not in before]
 
+def set_male_morph_state(objects):
+    """The upstream GLB stores morph weights in its node defaults. Reset all of them before rendering."""
+    for obj in objects:
+        if obj.type!="MESH" or not obj.data.shape_keys:
+            continue
+        blocks=obj.data.shape_keys.key_blocks
+        for key in blocks[1:]:
+            key.value=0.0
+        if blocks.get("gender_male"):
+            blocks["gender_male"].value=1.0
+        for name in ("blink_left","blink_right","look_left","look_right","look_down"):
+            if blocks.get(name):
+                blocks[name].value=0.0
+
 def apply_tint(mat,tint):
     if not mat.use_nodes: mat.use_nodes=True
     nodes=mat.node_tree.nodes;links=mat.node_tree.links
@@ -57,6 +71,7 @@ def rebind_import(imported,main_arm,actor_root,label,tint=None):
             if mesh in imported: imported.remove(mesh)
             bpy.data.objects.remove(mesh,do_unlink=True)
             continue
+        set_male_morph_state([mesh])
         for m in mesh.data.materials:
             if m and tint:apply_tint(m,tint)
         world=mesh.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world
@@ -71,6 +86,7 @@ def rebind_import(imported,main_arm,actor_root,label,tint=None):
 # Import a rigged, textured MakeHuman-derived body with baked idle/walk/run animation tracks.
 body_path=os.path.join(ASSETS,"base_body_anim.glb")
 base=import_gltf(body_path)
+set_male_morph_state(base)
 main_arm=next((o for o in base if o.type=="ARMATURE"),None)
 assert main_arm is not None,"base_body_anim.glb did not contain an armature"
 body_meshes=[o for o in base if o.type=="MESH"]
