@@ -7,3 +7,5 @@ Re-run after texture-aware costume tint, crew spacing, cannonball staging, and c
 Re-run after fixing crew facing, foreground cannonball visibility, and wide framing.
 
 Retry after preserving canonical morph state and recolouring textured garments.
+
+Run selective diagnostic stills with the trousers mesh and Body mesh hidden independently.
