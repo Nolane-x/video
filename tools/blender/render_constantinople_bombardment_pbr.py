@@ -176,7 +176,7 @@ CREW_RECORDS=[]
 
 def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None,morphs=None):
     actor_root=bpy.data.objects.new(name+" actor root",None);scene.collection.objects.link(actor_root)
-    yaw=(math.pi if side=="ottoman" else 0.0) if yaw is None else yaw
+    yaw=(0.0 if side=="ottoman" else math.pi) if yaw is None else yaw
     arm=source_arm.copy();arm.data=source_arm.data
     scene.collection.objects.link(arm)
     arm_world=source_arm.matrix_world.copy();arm.parent=actor_root;arm.matrix_world=arm_world
@@ -242,10 +242,10 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
           "meshes",len(source_meshes),flush=True)
     return actor_root,arm
 
-crew("Powder handler",-3.15,-9.1,"ottoman","idle_breathe_Armature",scale=1.04,morphs={"age_old":.55,"face_nose_width_incr":.25})
-crew("Rammer",3.25,-9.0,"ottoman","walk_Armature",scale=1.04,walk_to=(3.8,-8.1),morphs={"muscle_max":.65,"weight_min":.2})
-crew("Carriage brace",-4.1,-6.0,"ottoman","idle_look_Armature",scale=1.06,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
-crew("Carriage hauler",4.1,-6.0,"ottoman","walk_Armature",scale=1.04,walk_to=(4.45,-5.4),morphs={"muscle_max":.4,"age_old":.25})
+crew("Powder handler",-3.45,-10.15,"ottoman","idle_breathe_Armature",scale=1.10,morphs={"age_old":.55,"face_nose_width_incr":.25})
+crew("Rammer",3.45,-10.0,"ottoman","walk_Armature",scale=1.10,walk_to=(3.9,-9.25),morphs={"muscle_max":.65,"weight_min":.2})
+crew("Carriage brace",-4.35,-7.4,"ottoman","idle_look_Armature",scale=1.08,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
+crew("Carriage hauler",4.35,-7.3,"ottoman","walk_Armature",scale=1.08,walk_to=(4.7,-6.7),morphs={"muscle_max":.4,"age_old":.25})
 crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_old":.35,"face_nose_width_decr":.25})
 crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
 for obj in crew_source:bpy.data.objects.remove(obj,do_unlink=True)
@@ -258,7 +258,7 @@ for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
     cyl("Cask iron hoop",(x,-8.5,.42),.51,.09,iron,24,.01)
     cyl("Cask iron hoop",(x,-8.5,.85),.51,.09,iron,24,.01)
-for i in range(5):sphere("Spare stone shot",(5.1+i*.32,-5.1,.25),(.17,.17,.17),shotmat,24,16)
+# Spare shot rack is staged outside this camera pass; keep the loading lane clear.
 
 # Ballistic shot, recoil, flash, smoke, wall impact and debris.
 # Derive the muzzle from the imported barrel mesh, rather than guessing screen-space coordinates.
@@ -282,6 +282,7 @@ trajectory=[(1,shot_start),(1450,shot_start),(1500,muzzle+shot_dir*.24),
             (2070,muzzle+span*.80+Vector((0,0,2.1))),
             (2250,Vector((1,14.65,3.2))),(2300,impact),(END,impact)]
 for f,loc in trajectory:key(ball,"location",f,loc)
+for f,sc in [(1,(.001,)*3),(1440,(.001,)*3),(1490,(.23,)*3),(1500,(.23,)*3),(2300,(.23,)*3),(END,(.23,)*3)]:key(ball,"scale",f,sc)
 smooth(ball)
 # Tapered directional fire is aligned to the true muzzle axis.
 bpy.ops.mesh.primitive_cone_add(vertices=32,radius1=.30,radius2=.012,depth=1.0,location=muzzle+shot_dir*.5)
@@ -347,12 +348,12 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
-cam2=camera_shot("02 front-quarter crew and bombard",601,1440,(7.8,-13.8,4.3),(6.5,-12.8,4.0),(-.2,-7.6,1.35),(.2,-7.2,1.45),42,"02 — CREW AT THE BOMBARD")
-cam3=camera_shot("03 recoil and smoke",1441,1800,(-6.5,-15,5.0),(-4.0,-12,4.5),(0,-7.2,2.15),(0,-6.2,2.35),42,"03 — FIRE")
+cam2=camera_shot("02 wide crew and bombard",601,1440,(9.0,-21.5,6.2),(7.2,-19.0,5.8),(-.1,-7.8,1.35),(.2,-7.0,1.55),38,"02 — CREW AT THE BOMBARD")
+cam3=camera_shot("03 crew, recoil and smoke",1441,1800,(8.4,-19.0,5.8),(6.4,-17.5,5.4),(.1,-7.8,2.25),(.3,-7.2,2.45),40,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
 scene.camera=cam1
-for f,loc in [(1480,(-5.5,-13.8,4.9)),(1500,(-5.0,-13.2,4.8)),(1520,(-5.4,-13.6,4.7)),(1560,(-5.2,-13.4,4.9))]:
+for f,loc in [(1480,(8.2,-18.7,5.7)),(1500,(7.9,-18.2,5.5)),(1520,(7.6,-18.0,5.3)),(1560,(7.4,-17.8,5.2))]:
     key(cam3,"location",f,loc)
 smooth(cam3)
 for f,loc in [(2300,(8.05,8.35,6.68)),(2320,(8.3,8.65,6.92)),(2350,(7.9,8.2,6.55)),(2420,(8.1,8.4,6.8))]:
