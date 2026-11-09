@@ -178,7 +178,7 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
     if action is None:action=next((a for a in bpy.data.actions if a.name.startswith("idle_Armature")),None)
     if action:arm.animation_data.action=action
     for src in source_meshes:
-        mesh=src.copy();mesh.data=src.data
+        mesh=src.copy();mesh.data=src.data.copy()
         scene.collection.objects.link(mesh)
         world=src.matrix_world.copy();mesh.parent=root;mesh.matrix_world=world
         for mod in mesh.modifiers:
