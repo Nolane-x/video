@@ -101,24 +101,34 @@ beltmat=mat("Dark worn leather belt",(0.12,0.055,0.022),0,.9)
 ironmat=mat("Blackened iron buckle",(0.07,0.075,0.072),.78,.38)
 apronmat=mat("Oiled leather work apron",(0.13,0.068,0.027),0,.92)
 
-# Pull the belt clear of the coat and lay a stitched work apron over its open front.
+# A cloth cap closes the top of the head; several wrapped bands read as folded linen.
+head_bone=main_arm.data.bones.get("head")
+if head_bone:
+    hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=(hp.x,hp.y,hp.z+.025))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.135,.145,.075);cap.data.materials.append(wrapmat);cap.parent=root
+    for zoff,scale in [(-.025,1.0),(0,.94),(.025,.84)]:
+        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.126*scale,minor_radius=.018,location=(hp.x,hp.y,hp.z+zoff))
+        band=bpy.context.object;band.name="Linen turban wrapped folds";band.data.materials.append(wrapmat);band.parent=root
+
+# The leather belt sits outside the coat; the apron covers the coat opening as workwear.
 pelvis=main_arm.data.bones.get("pelvis")
 waist_z=((pelvis.head_local.z+pelvis.tail_local.z)*.5) if pelvis else .98
 bpy.ops.mesh.primitive_torus_add(major_segments=64,minor_segments=12,major_radius=.238,minor_radius=.022,location=(0,-.015,waist_z))
 belt=bpy.context.object;belt.name="Outer leather waist belt";belt.scale=(1.0,.90,1.0);belt.data.materials.append(beltmat);belt.parent=root
-bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.26,waist_z))
+bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.285,waist_z))
 buckle=bpy.context.object;buckle.name="Iron belt buckle";buckle.dimensions=(.075,.024,.055)
 bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);buckle.data.materials.append(ironmat);buckle.parent=root
 
-# Dense quad apron with shallow vertical folds; it covers the modern coat opening and reads as gun-work clothing.
-nx,nz= nine, seven
+# Dense quad apron with shallow folds, raised slightly in front of the coat.
+nx,nz=9,7
 verts=[]
 for row in range(nz):
     v=row/(nz-1);z=1.42-v*.88;width=.21+.055*v
     for col in range(nx):
         u=col/(nx-1);x=(u-.5)*2*width
         fold=.012*math.sin(u*math.pi*6+v*3.5)+.006*math.sin(u*math.pi*11-v*5)
-        y=-.255-fold
+        y=-.32-fold
         verts.append((x,y,z))
 faces=[]
 for row in range(nz-1):
@@ -137,28 +147,11 @@ def strap(name,points,material,width=.026):
     spl=curve.splines.new("BEZIER");spl.bezier_points.add(len(points)-1)
     for bp,co in zip(spl.bezier_points,points):bp.co=co;bp.handle_left_type="AUTO";bp.handle_right_type="AUTO"
     obj=bpy.data.objects.new(name,curve);scene.collection.objects.link(obj);obj.data.materials.append(material);obj.parent=root;return obj
-strap("Left apron shoulder strap",[(-.17,-.17,1.55),(-.19,-.25,1.28),(-.20,-.26,1.05)],beltmat)
-strap("Right apron shoulder strap",[(.17,-.17,1.55),(.19,-.25,1.28),(.20,-.26,1.05)],beltmat)
-bpy.ops.mesh.primitive_cube_add(size=1,location=(.265,-.18,.97))
+strap("Left apron shoulder strap",[(-.17,-.18,1.55),(-.19,-.29,1.28),(-.20,-.33,1.05)],beltmat)
+strap("Right apron shoulder strap",[(.17,-.18,1.55),(.19,-.29,1.28),(.20,-.33,1.05)],beltmat)
+bpy.ops.mesh.primitive_cube_add(size=1,location=(.27,-.29,.97))
 pouch=bpy.context.object;pouch.name="Powder pouch";pouch.dimensions=(.12,.10,.16)
 bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);pouch.data.materials.append(beltmat);pouch.parent=root
-head_bone=main_arm.data.bones.get("head")
-if head_bone:
-    hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    # A cloth cap closes the top of the head; folded bands sit around it like wrapped linen.
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=(hp.x,hp.y,hp.z+.045))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.135,.145,.075);cap.data.materials.append(wrapmat);cap.parent=root
-    for zoff,scale in [(-.015,1.0),(.012,.92),(.038,.78)]:
-        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.126*scale,minor_radius=.018,location=(hp.x,hp.y,hp.z+zoff))
-        band=bpy.context.object;band.name="Linen turban wrapped folds";band.data.materials.append(wrapmat);band.parent=root
-# A continuous waist belt and front buckle help the modern generic coat read as a period work robe.
-pelvis=main_arm.data.bones.get("pelvis")
-waist_z=((pelvis.head_local.z+pelvis.tail_local.z)*.5) if pelvis else .98
-bpy.ops.mesh.primitive_torus_add(major_segments=64,minor_segments=10,major_radius=.238,minor_radius=.022,location=(0,0,waist_z))
-belt=bpy.context.object;belt.name="Leather waist belt";belt.scale=(1.0,.88,1.0);belt.data.materials.append(beltmat);belt.parent=root
-bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.26,waist_z))
-buckle=bpy.context.object;buckle.name="Iron belt buckle";buckle.dimensions=(.075,.022,.055)
-bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);buckle.data.materials.append(ironmat);buckle.parent=root
 
 # Keep source scene timing at 30 fps for this still-frame asset proof; the final documentary is sampled at 240 fps.
 scene.render.fps=30;scene.render.fps_base=1
