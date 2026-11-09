@@ -211,7 +211,7 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
             bs=next((n for n in variant.node_tree.nodes if n.type=="BSDF_PRINCIPLED"),None) if variant.use_nodes else None
             if not bs:continue
             lower=material.name.lower()
-            if "muted brown-red wool" in lower:
+            if any(tag in lower for tag in ("muted brown-red wool","trenchcoat","earth-red wool caftan")):
                 tint=(.30,.16,.075) if side=="ottoman" else (.11,.19,.30)
                 sock=bs.inputs.get("Base Color")
                 if sock and not sock.is_linked:sock.default_value=(*tint,1)
