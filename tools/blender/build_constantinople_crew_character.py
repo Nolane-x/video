@@ -146,8 +146,8 @@ def woven_mat(name,color,rough=.88):
         if sheen:sheen.default_value=.22
     return m
 
-caftan_mat=woven_mat("Ottoman-workwear muted olive wool",(0.19,.235,.145),.93)
-caftan_trim=woven_mat("Wool caftan edging",(0.38,.27,.13),.9)
+caftan_mat=woven_mat("Ottoman-workwear muted brown-red wool",(.205,.115,.058),.93)
+caftan_trim=woven_mat("Wool caftan edging",(.42,.275,.105),.9)
 leather_mat=woven_mat("Oiled oxhide artillery apron",(0.105,.047,.022),.96)
 belt_mat=mat("Dark hand-cut leather belt",(.075,.034,.016),0,.84)
 brass_mat=mat("Worn brass fastenings",(.34,.22,.075),.72,.38)
@@ -173,8 +173,8 @@ def weighted_mesh(name,verts,faces,material,weight_fn,solidify=0.0):
 
 # Caftan body: a shaped, slightly flared robe, open at the neck and hem.
 ring_fracs=[0,.09,.22,.36,.50,.64,.77,.88,1.0]
-ring_rx=[.285,.30,.285,.245,.245,.27,.31,max(.31,shoulder_span*.69),.205]
-ring_ry=[.155,.16,.155,.138,.142,.155,.17,.17,.125]
+ring_rx=[.255,.27,.26,.225,.23,.25,.285,max(.29,shoulder_span*.64),.185]
+ring_ry=[.138,.145,.14,.122,.128,.14,.154,.154,.108]
 ring_z=[bottom_z+(top_z-bottom_z)*v for v in ring_fracs]
 seg=40;verts=[];faces=[]
 for ri,z in enumerate(ring_z):
@@ -195,56 +195,18 @@ def robe_weights(v):
     return [("spine_03",.76),("neck_01",.24)]
 weighted_mesh("Long olive wool caftan",verts,faces,caftan_mat,robe_weights,.012)
 
-# Separate tapered sleeves follow the upper-arm and forearm bones rather than
-# freezing as rigid cylinders when the imported walk/ramming actions play.
-def sleeve_mesh(side):
-    upper=bones.get("upperarm_"+side);lower=bones.get("lowerarm_"+side)
-    if upper is None or lower is None:return
-    p0=Vector(upper.head_local);p1=Vector(upper.tail_local);p2=Vector(lower.tail_local)
-    points=[p0,p1,p2];verts=[];faces=[];weights=[];ring_centers=[]
-    radii=[.132,.112,.078];steps_per_segment=5;radial=16
-    for si in range(2):
-        a=points[si];b=points[si+1];direction=(b-a).normalized()
-        ref=Vector((0,1,0))
-        axis1=direction.cross(ref)
-        if axis1.length<.001:axis1=direction.cross(Vector((1,0,0)))
-        axis1.normalize();axis2=direction.cross(axis1).normalized()
-        for k in range(steps_per_segment+(1 if si==1 else 0)):
-            t=k/steps_per_segment
-            center=a.lerp(b,t)
-            global_t=(si+t)/2
-            radius=radii[si]*(1-t)+radii[si+1]*t
-            for j in range(radial):
-                ang=math.tau*j/radial
-                q=center+axis1*(math.cos(ang)*radius)+axis2*(math.sin(ang)*radius)
-                verts.append(tuple(q))
-            ring_centers.append(center.copy())
-            weights.append((si,t))
-    ring_count=len(weights)
-    for ri in range(ring_count-1):
-        for j in range(radial):
-            a=ri*radial+j;b=ri*radial+(j+1)%radial
-            c=(ri+1)*radial+(j+1)%radial;d=(ri+1)*radial+j
-            faces.append((a,b,c,d))
-    def sleeve_weights(v):
-        # Smooth influence overlap at the elbow joint.
-        nearest=min(range(ring_count),key=lambda i:(ring_centers[i]-v).length)
-        si,t=weights[nearest]
-        if si==0 and t>.72:return [("upperarm_"+side,.55),("lowerarm_"+side,.45)]
-        if si==1 and t<.28:return [("upperarm_"+side,.35),("lowerarm_"+side,.65)]
-        return [("upperarm_"+side,1.0)] if si==0 else [("lowerarm_"+side,1.0)]
-    weighted_mesh("Wool caftan sleeve "+side,verts,faces,caftan_mat,sleeve_weights,.01)
-sleeve_mesh("l");sleeve_mesh("r")
+# The imported rigged under-tunic already supplies fitted sleeves. Avoid a second
+# procedural sleeve shell: it caused visible detached loops around the elbows.
 
 # Leather smith's apron, broad waist belt and brass buckle.
 apron_verts=[];apron_faces=[];cols=8;rows=7
-apron_top=hip.z+.025;apron_bottom=hip.z-.48
+apron_top=hip.z+.01;apron_bottom=hip.z-.405
 for ri in range(rows):
     v=ri/(rows-1);z=apron_top+(apron_bottom-apron_top)*v
-    width=.205*(.92+.08*v)
+    width=.148*(.94+.06*v)
     for ci in range(cols):
         u=ci/(cols-1);x=cx+(u*2-1)*width
-        y=cy-.166-.028*(1-((u*2-1)**2)) + .012*v
+        y=cy-.153-.018*(1-((u*2-1)**2)) + .010*v
         apron_verts.append((x,y,z))
 for ri in range(rows-1):
     for ci in range(cols-1):
@@ -262,8 +224,8 @@ for i in range(major):
     t=math.tau*i/major
     for j in range(minor):
         a=math.tau*j/minor
-        belt_verts.append((cx+(.255+.022*math.cos(a))*math.cos(t),
-                           cy+(.151+.022*math.cos(a))*math.sin(t),
+        belt_verts.append((cx+(.232+.021*math.cos(a))*math.cos(t),
+                           cy+(.137+.021*math.cos(a))*math.sin(t),
                            hip.z-.055+.022*math.sin(a)))
 for i in range(major):
     for j in range(minor):
@@ -287,10 +249,10 @@ for i in range(major):
 weighted_mesh("Wool caftan hem piping",hem_verts,hem_faces,caftan_trim,lambda v:[("pelvis",.8),("thigh_l",.1),("thigh_r",.1)],.003)
 
 # A small brass buckle on the apron-facing side of the belt.
-buckle_verts=[(cx-.035,cy-.198,hip.z-.09),(cx+.035,cy-.198,hip.z-.09),
-              (cx+.035,cy-.198,hip.z-.02),(cx-.035,cy-.198,hip.z-.02),
-              (cx-.035,cy-.176,hip.z-.09),(cx+.035,cy-.176,hip.z-.09),
-              (cx+.035,cy-.176,hip.z-.02),(cx-.035,cy-.176,hip.z-.02)]
+buckle_verts=[(cx-.032,cy-.181,hip.z-.085),(cx+.032,cy-.181,hip.z-.085),
+              (cx+.032,cy-.181,hip.z-.02),(cx-.032,cy-.181,hip.z-.02),
+              (cx-.032,cy-.158,hip.z-.085),(cx+.032,cy-.158,hip.z-.085),
+              (cx+.032,cy-.158,hip.z-.02),(cx-.032,cy-.158,hip.z-.02)]
 buckle_faces=[(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)]
 weighted_mesh("Worn brass belt buckle",buckle_verts,buckle_faces,brass_mat,lambda v:[("pelvis",1.0)],.002)
 
@@ -300,15 +262,15 @@ wrapmat=woven_mat("Saffron and umber linen turban",(0.34,.245,.12),.96)
 head_bone=bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.092)))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.067);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.20)))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.062);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
     curve=bpy.data.curves.new("Five-turn wrapped linen turban","CURVE");curve.dimensions="3D";curve.resolution_u=2
     spl=curve.splines.new("POLY");count=320;spl.points.add(count-1)
     for i,pt in enumerate(spl.points):
         u=i/(count-1);ang=math.tau*5*u
         rx=.137-.018*u;ry=.143-.018*u
-        z=hp.z+.025+.135*u
+        z=hp.z+.13+.145*u
         pt.co=(hp.x+rx*math.cos(ang),hp.y+ry*math.sin(ang),z,1)
     curve.bevel_depth=.021;curve.bevel_resolution=5
     wrap=bpy.data.objects.new("Five-turn linen turban wrap",curve);scene.collection.objects.link(wrap)
