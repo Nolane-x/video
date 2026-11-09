@@ -123,9 +123,9 @@ if head_bone:
     samples=360;verts=[];faces=[]
     arm_inv=main_arm.matrix_world.inverted()
     def ribbon_center(u):
-        angle=math.pi*.5+math.tau*4.0*u
-        rx=.124-.055*u;ry=.135-.058*u
-        z=hp.z+.060+.150*u
+        angle=math.pi*.5+math.tau*2.2*u
+        rx=.126-.030*u;ry=.138-.032*u
+        z=hp.z+.055+.170*u
         return Vector((hp.x+rx*math.cos(angle),hp.y+ry*math.sin(angle),z))
     for i in range(samples):
         u=i/(samples-1);center=ribbon_center(u)
@@ -138,7 +138,7 @@ if head_bone:
         normal=tangent.cross(width_axis).normalized()
         # Two width edges and front/back thickness produce a cloth-like flat band.
         for sw,sn in ((-1,-1),(-1,1),(1,1),(1,-1)):
-            p=center+width_axis*(sw*.017)+normal*(sn*.005)
+            p=center+width_axis*(sw*.043)+normal*(sn*.0045)
             verts.append(tuple(arm_inv @ p))
     for i in range(samples-1):
         base=i*4;nxt=(i+1)*4
@@ -150,7 +150,7 @@ if head_bone:
     for poly in md.polygons:poly.use_smooth=True
     vg=wrap.vertex_groups.new(name="head");vg.add([v.index for v in md.vertices],1.0,"REPLACE")
     mod=wrap.modifiers.new("Turban ribbon follows head rig","ARMATURE");mod.object=main_arm
-    sol=wrap.modifiers.new("Linen band thickness","SOLIDIFY");sol.thickness=.002;sol.offset=0
+    sol=wrap.modifiers.new("Linen band thickness","SOLIDIFY");sol.thickness=.0025;sol.offset=0
 
 # Sample the middle of a relaxed breathing action and lift the head slightly for a neutral standing portrait.
 scene.render.fps=30;scene.render.fps_base=1
