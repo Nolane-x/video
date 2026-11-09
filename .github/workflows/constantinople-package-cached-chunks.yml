@@ -1,0 +1,126 @@
+name: Constantinople · recover and package cached Blender chunks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/constantinople-package-cached-chunks.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-cached-chunk-package
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SOURCE_RUN_ID: "42487879116"
+      CLIP_DURATION: "39.140"
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Download prepared voice and recorded CC0 audio
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-prepared-media
+          path: prepared
+          repository: Nolane-x/video
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download all six already-rendered Blender chunks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-bombard-chunk-*
+          path: chunks
+          merge-multiple: true
+          repository: Nolane-x/video
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify chunk boundaries and concatenate without re-encoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          chunks=sorted(Path("chunks").glob("chunk-*.mp4"))
+          assert len(chunks)==6, [str(x) for x in chunks]
+          expected=[1566,1566,1566,1566,1566,1564]
+          for p,n in zip(chunks,expected):
+              d=json.loads(subprocess.check_output(["ffprobe","-v","error","-select_streams","v:0","-show_entries","stream=width,height,r_frame_rate,avg_frame_rate,nb_frames","-of","json",str(p)]))
+              v=d["streams"][0]
+              assert (v["width"],v["height"])==(1920,1080), (p,v)
+              assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1", (p,v)
+              assert int(v["nb_frames"])==n, (p,v,n)
+          PY
+          : > concat.txt
+          for f in "$PWD"/chunks/chunk-*.mp4; do
+            printf "file '%s'\n" "$f" >> concat.txt
+          done
+          test "$(wc -l < concat.txt)" -eq 6
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
+
+      - name: Mix narration, recorded score and synchronized cannon effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -v error -y -i prepared/out-voice.wav -stream_loop -1 -i prepared/media/score.wav \
+            -i prepared/media/cannon_fire.ogg -i prepared/media/cannon_impact.ogg \
+            -filter_complex "[1:a]atrim=0:39.140,asetpts=N/SR/TB,volume=0.14[score];[2:a]adelay=19000|19000,volume=0.75,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=25300|25300,volume=0.85,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t "$CLIP_DURATION" -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
+          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i out-audio.m4a \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t "$CLIP_DURATION" \
+            -movflags +faststart constantinople-cinematic-bombardment-240fps.mp4
+
+      - name: Verify CFR master and create lightweight review proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          ffprobe -v error -show_streams -show_format -of json constantinople-cinematic-bombardment-240fps.mp4 > review/metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p="constantinople-cinematic-bombardment-240fps.mp4"
+          j=json.load(open("review/metadata.json"))
+          v=next(x for x in j["streams"] if x["codec_type"]=="video")
+          a=next(x for x in j["streams"] if x["codec_type"]=="audio")
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v.get("nb_frames",0))==9394,v
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert 39.0<=float(j["format"]["duration"])<=39.3,j["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("MASTER TECHNICAL PASS:",v["width"],"x",v["height"],v["avg_frame_rate"],v["nb_frames"],"frames")
+          PY
+          cp constantinople-cinematic-bombardment-240fps.mp4 review/
+          ffmpeg -hide_banner -v error -y -i constantinople-cinematic-bombardment-240fps.mp4 -vf "fps=30,scale=960:540" -c:v libx264 -preset veryfast -crf 24 -an review/review-proxy-30fps-960x540.mp4
+          ffmpeg -hide_banner -v error -y -i review/review-proxy-30fps-960x540.mp4 -vf "fps=1/2,scale=480:-1,tile=4x5" -frames:v 1 review/contact-sheet.jpg
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("review/constantinople-cinematic-bombardment-240fps.mp4")
+          j=json.load(open("review/metadata.json"));v=next(x for x in j["streams"] if x["codec_type"]=="video")
+          report={"status":"TECHNICAL_PASS_PENDING_HUMAN_REVIEW","source_run_id":42487879116,"description":"Illustrative 3D historical bombardment reconstruction, not archival footage","resolution":"1920x1080","fps":"240/1","frames":int(v["nb_frames"]),"duration_seconds":float(j["format"]["duration"]),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"artistic_signoff":"pending","audio_audition":"pending"}
+          Path("review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
+          Path("review/RECONSTRUCTION-NOTES.txt").write_text("Illustrative 3D reconstruction; generic bombardment design, not an authenticated replica of Orban's exact gun. Six chunks were recovered from a completed render stage and packaged separately. Human visual review and audio audition remain pending.\n")
+          PY
+          (cd review && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload recovered cinematic proof and review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-cinematic-bombardment-recovered-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
