@@ -13,6 +13,7 @@ Replace the primitive crew silhouettes in the 3D bombardment stage with independ
 - Four Ottoman artillery crew positions around the cannon: breathing/idle-look and in-place walking actions.
 - Two Byzantine defenders on the wall, facing the cannon.
 - Each copy can use separate body morphs (age, weight, muscle, facial shape) and a different animation without sharing armature pose state.
+- `crew-manifest.json` records the six actor roots, unique armature names, action names, mesh counts, transforms and morph choices; the QA gate requires six independent armatures.
 - Short proof: 1920×1080, 30 fps, 120 frames (4 seconds). This is only a composition and deformation test; the target documentary render remains 1920×1080 at native 240 fps.
 
 ## Workflow
