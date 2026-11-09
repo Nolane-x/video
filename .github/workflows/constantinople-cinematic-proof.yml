@@ -166,7 +166,7 @@ jobs:
           from pathlib import Path
           files=sorted(Path("chunks").glob("chunk-*.mp4"))
           assert len(files)==6, [str(p) for p in files]
-          Path("concat.txt").write_text("".join(f"file '{p.resolve()}'\\n" for p in files),encoding="utf-8")
+          Path("concat.txt").write_text("".join(f"file '{p.resolve()}'\n" for p in files),encoding="utf-8")
           print("Joining",*[p.name for p in files])
           PY
           ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
