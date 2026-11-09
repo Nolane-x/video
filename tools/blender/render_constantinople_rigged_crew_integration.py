@@ -227,7 +227,7 @@ assert len({r["armature"] for r in CREW_RECORDS})==6,CREW_RECORDS
 os.makedirs(os.path.dirname(OUTPUT) or ".",exist_ok=True)
 with open(os.path.join(os.path.dirname(OUTPUT) or ".","crew-manifest.json"),"w") as fp:
     json.dump({"fps":FPS,"frames":END-START+1,"crew":CREW_RECORDS},fp,indent=2)
-    fp.write("\\n")
+    fp.write("\n")
 
 for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
