@@ -5,7 +5,7 @@ on:
     branches:
       - 'cinematic/constantinople-rigged-crew-integration'
     paths:
-      - 'tools/blender/render_constantinople_rigged_crew_integration.py'
+      - 'tools/blender/run-crew-integration.trigger'
   workflow_dispatch:
 
 permissions:
