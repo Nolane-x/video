@@ -83,10 +83,10 @@ for o in list(base):
 root.location=(0,0,0)
 
 # Outfit layers: recolour the long coat to undyed wool/earth, darken trousers and leather footwear.
-outfit=[("clothing_shirt.glb",(0.62,0.48,0.29),"under-tunic"),
-        ("clothing_jeans.glb",(0.22,0.14,0.075),"wool-trousers"),
-        ("clothing_boots.glb",(0.32,0.16,0.055),"leather-boots"),
-        ("clothing_dress.glb",(0.34,0.19,0.075),"wool-tunic")]
+outfit=[("clothing_shirt.glb",(0.62,0.45,0.25),"under-tunic"),
+        ("clothing_jeans.glb",(0.25,0.15,0.07),"wool-trousers"),
+        ("clothing_boots.glb",(0.38,0.18,0.065),"leather-boots"),
+        ("clothing_trenchcoat.glb",(0.95,0.55,0.24),"earth-red wool caftan")]
 for filename,tint,label in outfit:
     path=os.path.join(ASSETS,filename)
     if not os.path.isfile(path):continue
@@ -120,26 +120,26 @@ if head_bone:
     wrap=bpy.data.objects.new("Diagonal turban cloth wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
     bpy.context.view_layer.objects.active=wrap;wrap.select_set(True);bpy.ops.object.convert(target="MESH")
     wrap=bpy.context.object;wrap.name="Diagonal turban cloth wrap mesh"
-    # Attach the headwear to the moving head bone, preserving its evaluated world placement.
+    # Parent to the shared actor root and skin rigidly to the head bone with a one-bone armature modifier.
     for obj in (cap,wrap):
-        wm=obj.matrix_world.copy();obj.parent=main_arm;obj.parent_type="BONE";obj.parent_bone="head";obj.matrix_world=wm
+        wm=obj.matrix_world.copy();obj.parent=root;obj.matrix_world=wm
+        vg=obj.vertex_groups.new(name="head")
+        vg.add([v.index for v in obj.data.vertices],1.0,"REPLACE")
+        mod=obj.modifiers.new("Turban follows head rig","ARMATURE");mod.object=main_arm
 
-# Attach the imported animation clips and sample a relaxed mid-idle pose for the stills.
+# Sample the middle of a relaxed look-around action so the face is not frozen with eyes closed.
 scene.render.fps=30;scene.render.fps_base=1
 actions=sorted([a.name for a in bpy.data.actions])
 if main_arm.animation_data is None:main_arm.animation_data_create()
-idle=next((a for a in bpy.data.actions if "idle" in a.name.lower() and "breathe" not in a.name.lower()),None)
+idle=next((a for a in bpy.data.actions if "idle_look" in a.name.lower()),None)
+if idle is None:
+    idle=next((a for a in bpy.data.actions if "idle" in a.name.lower() and "breathe" not in a.name.lower()),None)
 if idle:
     main_arm.animation_data.action=idle
     mid=int((idle.frame_range[0]+idle.frame_range[1])*.5)
-    scene.frame_set(mid)
-
-# Keep source scene timing at 30 fps for this still-frame asset proof; the final documentary is sampled at 240 fps.
-scene.render.fps=30;scene.render.fps_base=1
-actions=sorted([a.name for a in bpy.data.actions])
-if main_arm.animation_data is None:main_arm.animation_data_create()
-idle=next((a for a in bpy.data.actions if "idle" in a.name.lower()),None)
-if idle:main_arm.animation_data.action=idle
+else:
+    mid=1
+scene.frame_set(mid)
 
 ground=mat("Warm limestone studio floor",(.18,.16,.13),0,.95)
 bpy.ops.mesh.primitive_plane_add(size=20,location=(0,0,-.02));floor=bpy.context.object;floor.name="Ground";floor.data.materials.append(ground)
@@ -161,12 +161,12 @@ bpy.context.view_layer.objects.active=main_arm
 glb_out=os.path.join(OUT,"ottoman-artillery-crew-cc0.glb")
 bpy.ops.export_scene.gltf(filepath=glb_out,export_format="GLB",use_selection=True,export_animations=True,export_skins=True)
 scene.render.image_settings.file_format="PNG";scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-preview.png"))
-scene.frame_set(1);bpy.ops.render.render(write_still=True)
+scene.frame_set(mid);bpy.ops.render.render(write_still=True)
 bpy.ops.object.camera_add(location=(1.0,-3.05,1.65));closecam=bpy.context.object;closecam.name="Crew face and torso close-up";closecam.data.lens=72
 close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.location).to_track_quat("-Z","Y").to_euler();scene.camera=closecam
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long tunic garment recoloured as muted wool, trousers, leather boots and a procedural linen turban. Illustrative historical adaptation, not authenticated Ottoman uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male trenchcoat pattern recoloured as an earth-red wool outer caftan, over-tunic, trousers, leather boots and a procedural linen turban. This is an illustrative adaptation, not an authenticated Ottoman uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
