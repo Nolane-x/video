@@ -5,3 +5,5 @@ Repeat the two-frame smoke with explicit camera selection for still rendering.
 Re-run after texture-aware costume tint, crew spacing, cannonball staging, and camera revisions.
 
 Re-run after fixing crew facing, foreground cannonball visibility, and wide framing.
+
+Retry after preserving canonical morph state and recolouring textured garments.
