@@ -17,7 +17,7 @@ bpy.ops.object.delete(use_global=False)
 scene = bpy.context.scene
 scene.frame_start, scene.frame_end = START, END
 scene.render.engine = "BLENDER_EEVEE"
-scene.eevee.taa_render_samples = 8
+scene.eevee.taa_render_samples = 16
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
 scene.render.resolution_percentage = 100
 scene.render.fps, scene.render.fps_base = FPS, 1.0
@@ -195,10 +195,13 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
                 variant=mat.copy();variant.name=name+" "+mat.name
                 mesh.data.materials[i]=variant
                 bs=next((n for n in variant.node_tree.nodes if n.type=="BSDF_PRINCIPLED"),None) if variant.use_nodes else None
-                if bs and "trenchcoat" in mat.name.lower():
-                    tint=(.42,.19,.075) if side=="ottoman" else (.19,.23,.28)
+                if bs and any(tag in mat.name.lower() for tag in ("trenchcoat","olive wool caftan","wool caftan")):
+                    tint=(.28,.22,.105) if side=="ottoman" else (.105,.18,.29)
                     sock=bs.inputs.get("Base Color")
                     if sock and not sock.is_linked:sock.default_value=(*tint,1)
+                if bs and "artillery apron" in mat.name.lower():
+                    sock=bs.inputs.get("Base Color")
+                    if sock and not sock.is_linked:sock.default_value=((.12,.052,.025,1) if side=="ottoman" else (.075,.09,.12,1))
     root.rotation_euler=(0,0,yaw);root.scale=(scale,scale,scale)
     if walk_to is not None:
         key(root,"location",1,(x,y,0));key(root,"location",120,(walk_to[0],walk_to[1],0));smooth(root)
@@ -318,11 +321,11 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     target=bpy.data.objects.new(name+" focus",None);scene.collection.objects.link(target);target.location=ta
     c=cam.constraints.new(type="TRACK_TO");c.target=target;c.track_axis="TRACK_NEGATIVE_Z";c.up_axis="UP_Y"
     key(cam,"location",start,la);key(cam,"location",end,lb);key(target,"location",start,ta);key(target,"location",end,tb)
-    smooth(cam);smooth(target);cam.data.dof.use_dof=True;cam.data.dof.focus_object=target;cam.data.dof.aperture_fstop=3.8
+    smooth(cam);smooth(target);cam.data.dof.use_dof=True;cam.data.dof.focus_object=target;cam.data.dof.aperture_fstop=5.6
     marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
-cam2=camera_shot("02 gun crew and wall",1,120,(8.4,-17,7.4),(5.4,-15,6),(0,-3,2.1),(0,2,2.8),38,"02 — SLOW TO LOAD")
+cam2=camera_shot("02 front-quarter crew and bombard",1,120,(7.4,-1.8,4.6),(6.3,-3.4,4.0),(0,-7.2,1.25),(.4,-6.5,1.35),38,"02 — CREW AT THE BOMBARD")
 cam3=camera_shot("03 recoil and smoke",1201,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
@@ -337,7 +340,7 @@ for f,loc in [(2300,(8.05,8.35,6.68)),(2320,(8.3,8.65,6.92)),(2350,(7.9,8.2,6.55
 smooth(cam5)
 
 notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
-notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinople in 1453. Hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets. Generic gun stand-in, not an authenticated replica of Orban's great bombard. Wall is an illustrative modular arrangement, not a measured reconstruction of the Theodosian walls. Human silhouettes are not authenticated costumes or portraits. Native 1920x1080 at 240fps.\n")
+notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinople in 1453. Hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets. Generic gun stand-in, not an authenticated replica of Orban's great bombard. Wall is an illustrative modular arrangement, not a measured reconstruction of the Theodosian walls. Crew are rigged CC0 base characters with an illustrative Ottoman workwear adaptation; not authenticated portraits or uniforms. Native 1920x1080 at 240fps.\n")
 scene.frame_set(START)
 print("CONSTANTINOPLE RIGGED CREW INTEGRATION",bpy.app.version_string,"frames",f"{START}-{END}/{TOTAL_FRAMES}","objects",len(scene.objects),"cannon parts",len(parts),"wall material",wall_mat.name if wall_mat else "fallback",flush=True)
 if SMOKE_ONLY:
