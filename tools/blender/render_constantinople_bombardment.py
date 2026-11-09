@@ -31,7 +31,7 @@ scene.render.ffmpeg.format="MPEG4"
 scene.render.ffmpeg.codec="H264"
 scene.render.ffmpeg.constant_rate_factor="HIGH"
 scene.render.ffmpeg.ffmpeg_preset="GOOD"
-scene.render.ffmpeg.video_bitrate=32000
+scene.render.ffmpeg.video_bitrate=48000
 scene.render.ffmpeg.maxrate=48000
 scene.render.ffmpeg.buffersize=96000
 scene.render.filepath=os.path.abspath(OUT)
@@ -40,7 +40,7 @@ scene.render.film_transparent=False
 scene.render.threads_mode="FIXED"
 scene.render.threads=max(2,min(8,os.cpu_count() or 4))
 if hasattr(scene,"eevee"):
-    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=2
+    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=4
     if hasattr(scene.eevee,"use_gtao"): scene.eevee.use_gtao=True
     if hasattr(scene.eevee,"gtao_distance"): scene.eevee.gtao_distance=3.0
     if hasattr(scene.eevee,"gtao_factor"): scene.eevee.gtao_factor=1.2
@@ -273,6 +273,30 @@ for name,loc,sc in specs:
     else:
         key(r,"location",2000,(x,y,z));key(r,"location",4200,(x,y-.3,z));key(r,"location",4650,(x,y-.75,z))
     smooth(r)
+
+# Give every artillery role a readable physical beat, not only a translated root.
+# Bracing, recoil and command gestures are deliberately restrained at this scale.
+for name, root in crew:
+    key(root,"rotation_euler",1,(0,0,0))
+    if "brace" in name:
+        sign=-1 if "left" in name else 1
+        for f,rot in [(4050,(.02,0,sign*.025)),(4380,(.10,0,sign*.04)),(4500,(-.13,0,sign*.07)),(4560,(-.06,0,sign*.03)),(4700,(0,0,0))]:
+            key(root,"rotation_euler",f,rot)
+    elif "hauler" in name:
+        sign=-1 if "left" in name else 1
+        for f,rot in [(3000,(.03,0,sign*.02)),(3600,(.12,0,sign*.045)),(4300,(.05,0,sign*.02)),(4620,(0,0,0))]:
+            key(root,"rotation_euler",f,rot)
+    elif "powder" in name:
+        for f,rot in [(1,(0,0,0)),(1600,(.02,0,.08)),(2100,(.07,0,-.10)),(3000,(0,0,0))]:
+            key(root,"rotation_euler",f,rot)
+    elif "rammer" in name or "loader" in name:
+        for f,rot in [(1,(0,0,0)),(1800,(.09,0,-.06)),(3000,(.13,0,.04)),(3900,(.03,0,0)),(4560,(-.10,0,0)),(4700,(0,0,0))]:
+            key(root,"rotation_euler",f,rot)
+    else:
+        for f,rot in [(1,(0,0,0)),(2000,(0,0,.10)),(4200,(0,0,-.10)),(4650,(0,0,0))]:
+            key(root,"rotation_euler",f,rot)
+    smooth(root)
+
 # Byzantine wall defenders: smaller, separate from Ottoman gun crews.
 for i,x in enumerate([-5,-2.5,0,3.8,6.2]):
     r=person("Byzantine wall defender %02d"%i,(x,17,6.5),"byzantine",.82)
@@ -389,6 +413,21 @@ c4=shot("04 stone shot flight",4560,5759,(4.2,.5,9),(3,9,7),(0,6,5.2),(1,13.5,5.
 c5=shot("05 wall impact",5760,7439,(10.5,8,7.8),(8,11.5,5.6),(1.5,17.3,3.8),(1.7,17.3,3.6),46,"SHOT 05 — WALL IMPACT")
 c6=shot("06 repairs after repeated hits",7440,END,(6.5,4,12.5),(4,2,10),(0,16.8,3.2),(1,16.8,3),42,"SHOT 06 — THE REPAIR NEVER ENDS")
 scene.camera=c1
+
+# Camera reacts to the two physical impacts. These impulses are brief and
+# restrained so the action reads as weight, not handheld jitter for its own sake.
+for f,loc in [
+    (4380,(-3.12,-10.94,3.92)),(4480,(-3.10,-10.91,3.94)),
+    (4500,(-3.02,-10.80,4.03)),(4520,(-3.17,-10.97,3.86)),
+    (4559,(-3.00,-11.00,3.90))]:
+    key(c3,"location",f,loc)
+smooth(c3)
+for f,loc in [
+    (6240,(9.78,9.18,7.12)),(6280,(9.74,9.11,7.10)),
+    (6300,(9.91,9.27,7.23)),(6330,(9.54,9.02,7.02)),
+    (6370,(9.70,9.15,7.09)),(6430,(9.66,9.17,7.08))]:
+    key(c5,"location",f,loc)
+smooth(c5)
 notes=bpy.data.texts.new("RECONSTRUCTION-NOTES.txt")
 notes.write("Illustrative reconstruction of a 15th-century Ottoman bombard and the Theodosian walls. Generic gun design; not a verified replica of Orban's exact cannon. Generic composite people, not portraits or authenticated uniforms. One impact does not destroy the city. Narration: 00:03:40.760–00:04:19.900. 1920x1080 native 240fps.\\n")
 scene.frame_set(FRAME_START)
