@@ -1,0 +1,99 @@
+name: Constantinople · CC0 human character asset proof
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-human-asset-proof'
+    paths:
+      - 'tools/blender/build_constantinople_crew_character.py'
+      - '.github/workflows/constantinople-human-asset-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: constantinople-human-character-proof
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download MakeHuman-derived CC0 body, clothing, hair and license manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p character-assets
+          base='https://raw.githubusercontent.com/kblood/CharacterCreator/master/output'
+          for file in base_body_anim.glb clothing_shirt.glb clothing_jeans.glb clothing_boots.glb clothing_trenchcoat.glb hair_short04.glb asset_licenses.json; do
+            curl -fL --retry 2 --retry-delay 2 "$base/$file" -o "character-assets/$file"
+          done
+          curl -fL --retry 2 --retry-delay 2 'https://raw.githubusercontent.com/kblood/CharacterCreator/master/LICENSE-NOTES.md' -o character-assets/LICENSE-NOTES.md
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          root=Path('character-assets')
+          manifest=json.loads((root/'asset_licenses.json').read_text())
+          allowed={'CC0','project-original'}
+          bad=[x for x in manifest if x.get('license') not in allowed]
+          assert not bad, bad[:5]
+          required=['base_body_anim.glb','clothing_shirt.glb','clothing_jeans.glb','clothing_boots.glb','clothing_trenchcoat.glb','hair_short04.glb']
+          missing=[n for n in required if not (root/n).is_file() or (root/n).stat().st_size<10000]
+          assert not missing, missing
+          report={'provider':'kblood/CharacterCreator','output_license':'CC0-1.0/project-original per upstream asset_licenses.json','files':{n:{'bytes':(root/n).stat().st_size,'sha256':hashlib.sha256((root/n).read_bytes()).hexdigest()} for n in required},'license_entries':len(manifest)}
+          (root/'provenance.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+          (cd character-assets && sha256sum *.glb asset_licenses.json LICENSE-NOTES.md provenance.json > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-source-assets-${{ github.run_id }}
+          path: character-assets/
+          if-no-files-found: error
+          retention-days: 14
+
+  smoke:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless Blender and GLTF importer dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
+      - name: Verify Blender GLTF importer
+        run: blender --background --python-expr "import numpy; print('Blender NumPy',numpy.__version__)"
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-source-assets-${{ github.run_id }}
+          path: character-assets
+      - name: Build, rig-check and render the CC0 artillery crew character
+        env:
+          CHARACTER_ASSETS: character-assets
+          CHARACTER_OUTPUT: character-proof
+        run: |
+          set -euo pipefail
+          mkdir -p character-proof
+          blender --background --threads 2 --python tools/blender/build_constantinople_crew_character.py
+          test -s character-proof/ottoman-artillery-crew-cc0.glb
+          test -s character-proof/crew-preview.png
+          python - <<'PY'
+          import json
+          r=json.load(open('character-proof/manifest.json'))
+          assert r['bones']>=40, r
+          assert r['vertices']>=15000, r
+          assert r['triangles']>=20000, r
+          assert r['actions'], r
+          print('CHARACTER ASSET PASS',r['bones'],'bones',r['vertices'],'vertices',r['triangles'],'triangles',r['actions'])
+          PY
+          (cd character-proof && sha256sum * > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-character-proof-${{ github.run_id }}
+          path: character-proof/
+          if-no-files-found: error
+          retention-days: 30
