@@ -40,7 +40,7 @@ The next proof uses:
 
 Workflow: `.github/workflows/constantinople-pbr-proof.yml`.
 Scene script: `tools/blender/render_constantinople_bombardment_pbr.py`.
-Latest run: [42578951674](https://github.com/Nolane-x/video/actions/runs/42578951674) — source preparation and PBR smoke frame passed; eight 240 fps chunks are being rendered, with the first four active. Latest log samples show chunk 01 at frame 130 and chunks 02–04 around frames 543, 1023 and 1502. These are still rendering; no packaged 16-second movie exists yet.
+Latest run: [42578951674](https://github.com/Nolane-x/video/actions/runs/42578951674) — source preparation and PBR smoke frame passed; eight 240 fps chunks are being rendered, with the first four active. Latest log samples show chunk 01 at frame 329 and chunks 02–04 at frames 609, 1154 and 1568. These are still rendering; no packaged 16-second movie exists yet.
 Latest scene commit: `1c8cb59d25e7a1cc8b395c11eae08331f176cbdf`; workflow commit: `82714c6453d09e1b7f9159b56d420adcafda26c5`.
 
 ## Release gates
