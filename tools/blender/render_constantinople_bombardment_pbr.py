@@ -211,13 +211,25 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
             bs=next((n for n in variant.node_tree.nodes if n.type=="BSDF_PRINCIPLED"),None) if variant.use_nodes else None
             if not bs:continue
             lower=material.name.lower()
+            tint=None
             if any(tag in lower for tag in ("muted brown-red wool","trenchcoat","earth-red wool caftan")):
                 tint=(.30,.16,.075) if side=="ottoman" else (.11,.19,.30)
-                sock=bs.inputs.get("Base Color")
-                if sock and not sock.is_linked:sock.default_value=(*tint,1)
             elif "artillery apron" in lower and side=="byzantine":
+                tint=(.075,.10,.14)
+            if tint is not None:
                 sock=bs.inputs.get("Base Color")
-                if sock and not sock.is_linked:sock.default_value=(.075,.10,.14,1)
+                if sock:
+                    linked=list(sock.links)
+                    if linked:
+                        source=linked[0].from_socket
+                        mix=variant.node_tree.nodes.new("ShaderNodeMixRGB")
+                        mix.blend_type="MULTIPLY";mix.inputs[0].default_value=1.0
+                        mix.inputs[2].default_value=(*tint,1.0)
+                        variant.node_tree.links.new(source,mix.inputs[1])
+                        variant.node_tree.links.new(mix.outputs[0],sock)
+                    else:
+                        col=sock.default_value
+                        sock.default_value=(col[0]*tint[0],col[1]*tint[1],col[2]*tint[2],col[3])
     actor_root.location=(x,y,0);actor_root.rotation_euler=(0,0,yaw);actor_root.scale=(scale,scale,scale)
     if walk_to is not None:
         key(actor_root,"location",1,(x,y,0))
@@ -230,10 +242,10 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
           "meshes",len(source_meshes),flush=True)
     return actor_root,arm
 
-crew("Powder handler",-2.1,-8.5,"ottoman","idle_breathe_Armature",morphs={"age_old":.55,"face_nose_width_incr":.25})
-crew("Rammer",2.1,-8.1,"ottoman","walk_Armature",scale=.99,walk_to=(2.6,-7.6),morphs={"muscle_max":.65,"weight_min":.2})
-crew("Carriage brace",-3,-6.5,"ottoman","idle_look_Armature",scale=1.03,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
-crew("Carriage hauler",3,-6.7,"ottoman","walk_Armature",scale=1.01,walk_to=(3.35,-6.0),morphs={"muscle_max":.4,"age_old":.25})
+crew("Powder handler",-3.15,-9.1,"ottoman","idle_breathe_Armature",scale=1.04,morphs={"age_old":.55,"face_nose_width_incr":.25})
+crew("Rammer",3.25,-9.0,"ottoman","walk_Armature",scale=1.04,walk_to=(3.8,-8.1),morphs={"muscle_max":.65,"weight_min":.2})
+crew("Carriage brace",-4.1,-6.0,"ottoman","idle_look_Armature",scale=1.06,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
+crew("Carriage hauler",4.1,-6.0,"ottoman","walk_Armature",scale=1.04,walk_to=(4.45,-5.4),morphs={"muscle_max":.4,"age_old":.25})
 crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_old":.35,"face_nose_width_decr":.25})
 crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
 for obj in crew_source:bpy.data.objects.remove(obj,do_unlink=True)
@@ -246,7 +258,7 @@ for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
     cyl("Cask iron hoop",(x,-8.5,.42),.51,.09,iron,24,.01)
     cyl("Cask iron hoop",(x,-8.5,.85),.51,.09,iron,24,.01)
-for i in range(5):sphere("Spare stone shot",(-5+i*.58,-10.3,.52),(.24,.24,.24),shotmat,16,10)
+for i in range(5):sphere("Spare stone shot",(5.1+i*.32,-5.1,.25),(.17,.17,.17),shotmat,24,16)
 
 # Ballistic shot, recoil, flash, smoke, wall impact and debris.
 # Derive the muzzle from the imported barrel mesh, rather than guessing screen-space coordinates.
@@ -263,7 +275,7 @@ shot_dir=Vector((0,1,0))
 shot_start=muzzle-shot_dir*.42
 impact=Vector((1,15.2,2.4))
 span=impact-muzzle
-ball=sphere("Heavy limestone cannon shot",shot_start,(.34,.34,.34),shotmat,24,16)
+ball=sphere("Heavy limestone cannon shot",shot_start,(.23,.23,.23),shotmat,32,24)
 trajectory=[(1,shot_start),(1450,shot_start),(1500,muzzle+shot_dir*.24),
             (1650,muzzle+span*.25+Vector((0,0,1.65))),
             (1850,muzzle+span*.53+Vector((0,0,2.8))),
@@ -331,16 +343,16 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     target=bpy.data.objects.new(name+" focus",None);scene.collection.objects.link(target);target.location=ta
     c=cam.constraints.new(type="TRACK_TO");c.target=target;c.track_axis="TRACK_NEGATIVE_Z";c.up_axis="UP_Y"
     key(cam,"location",start,la);key(cam,"location",end,lb);key(target,"location",start,ta);key(target,"location",end,tb)
-    smooth(cam);smooth(target);cam.data.dof.use_dof=True;cam.data.dof.focus_object=target;cam.data.dof.aperture_fstop=3.8
+    smooth(cam);smooth(target);cam.data.dof.use_dof=True;cam.data.dof.focus_object=target;cam.data.dof.aperture_fstop=5.6
     marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
-cam2=camera_shot("02 front-quarter crew and bombard",601,1440,(7.4,-1.8,4.6),(6.3,-3.4,4.0),(0,-7.2,1.25),(.4,-6.5,1.35),38,"02 — CREW AT THE BOMBARD")
-cam3=camera_shot("03 recoil and smoke",1441,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
+cam2=camera_shot("02 front-quarter crew and bombard",601,1440,(7.8,-13.8,4.3),(6.5,-12.8,4.0),(-.2,-7.6,1.35),(.2,-7.2,1.45),42,"02 — CREW AT THE BOMBARD")
+cam3=camera_shot("03 recoil and smoke",1441,1800,(-6.5,-15,5.0),(-4.0,-12,4.5),(0,-7.2,2.15),(0,-6.2,2.35),42,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
 scene.camera=cam1
-for f,loc in [(1480,(-3.02,-8.58,4.02)),(1500,(-2.85,-8.42,4.14)),(1520,(-3.12,-8.72,3.90)),(1560,(-3,-8.6,4))]:
+for f,loc in [(1480,(-5.5,-13.8,4.9)),(1500,(-5.0,-13.2,4.8)),(1520,(-5.4,-13.6,4.7)),(1560,(-5.2,-13.4,4.9))]:
     key(cam3,"location",f,loc)
 smooth(cam3)
 for f,loc in [(2300,(8.05,8.35,6.68)),(2320,(8.3,8.65,6.92)),(2350,(7.9,8.2,6.55)),(2420,(8.1,8.4,6.8))]:
