@@ -24,15 +24,17 @@ Replace the primitive block-figure artillery crew with anatomically proportioned
 ## Visual decisions
 - v5 run [42580571283](https://github.com/Nolane-x/video/actions/runs/42580571283): 53 bones, 12 actions, 31,167 vertices, 54,906 triangles; visually rejected because the female-derived dress bodice creates an implausible chest shape and the turban disappears when bone-parented. Do not use this costume.
 
-## Current revision (v6)
-- Restore male `clothing_trenchcoat.glb` as the long outer garment, recoloured to warm earth-red wool over the shirt, trousers and boots. This remains a generic adaptation, not an authenticated caftan.
-- Replace direct bone parenting of the turban with a one-bone vertex group (`head`) and an Armature modifier so the wrap keeps its evaluated position and follows head motion.
-- Remove duplicate animation setup that reset the selected pose to frame 1. Use the midpoint of `idle_look` for both previews, with eye-level cameras.
-- Latest check: [42580993765](https://github.com/Nolane-x/video/actions/runs/42580993765), queued/in progress at last check. Script commit `f8b4f787ca961617328613c6edfb2415fd18fb96`; workflow asset-list commit `9edd39c6104702af65bf9b18f10acf90104065e9`.
-- Do not approve this outfit until the new images are visually inspected.
+## Visual decisions
+- v6 run [42580993765](https://github.com/Nolane-x/video/actions/runs/42580993765): 53 bones and 12 actions, but the coat remained dark and modern; the turban still read as a coiled tube. Not approved.
+- v7 run [42581411336](https://github.com/Nolane-x/video/actions/runs/42581411336): the brighter coat and slimmer wrap did not fix the body proportions. Inspecting the exported GLB showed all 92 morph-target weights defaulting to 1, simultaneously enabling both male/female morphs, body extremes and blink/look targets.
 
+## Current revision (v8)
+- `set_male_morph_state()` now resets all shape-key values to 0 across the body, hair and clothing meshes, then enables only `gender_male=1`. It explicitly disables blink and look-down targets.
+- This is intended to correct the chest/garment distortion and closed-eye appearance caused by the GLB node's default morph weights. The outfit remains the same illustrative outer coat, tunic, trousers, boots and turban; visual review is still required.
+- Latest check: [42581802475](https://github.com/Nolane-x/video/actions/runs/42581802475), running the corrected Blender build/render at last check. Script commit `2e4321917389aa7b860f6b429ba4aadfc09c739b`.
+- Do not integrate the character until the v8 full-body/close-up images and action deformation are inspected.
 ## Integration gate
-Review both v6 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
+Review both v8 previews, verify the 53-bone rig and animation tracks, check clothing/body intersections at idle and walk, then import into the separate PBR bombardment branch. Do not modify the long-form master until a representative shot is approved.
 
 ## Script and workflow
 - `tools/blender/build_constantinople_crew_character.py`
