@@ -16,7 +16,7 @@ bpy.ops.object.delete(use_global=False)
 scene = bpy.context.scene
 scene.frame_start, scene.frame_end = START, END
 scene.render.engine = "BLENDER_EEVEE"
-scene.eevee.taa_render_samples = 16
+scene.eevee.taa_render_samples = 8
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
 scene.render.resolution_percentage = 100
 scene.render.fps, scene.render.fps_base = FPS, 1.0
@@ -145,6 +145,10 @@ before=set(bpy.data.objects);bpy.ops.import_scene.gltf(filepath=cannon_path)
 parts=[o for o in bpy.data.objects if o not in before]
 gun=bpy.data.objects.new("CC0 Poly Haven cannon assembly root",None);scene.collection.objects.link(gun)
 for o in parts:
+    if "ball_" in o.name.lower():
+        o.hide_render=True
+        o.hide_viewport=True
+        continue
     mw=o.matrix_world.copy();o.parent=gun;o.matrix_world=mw
 gun.location=(0,-7,0);gun.rotation_euler=(0,0,math.pi);gun.scale=(4,4,4)
 bpy.context.view_layer.update()
@@ -232,9 +236,9 @@ def area(name,loc,energy,color,size,target):
     o.rotation_euler=(Vector(target)-o.location).to_track_quat("-Z","Y").to_euler();return o
 sd=bpy.data.lights.new("Dawn sun","SUN");sd.energy=2.1;sd.angle=math.radians(12);sd.color=(1,.73,.52)
 sun=bpy.data.objects.new("Dawn sun",sd);scene.collection.objects.link(sun);sun.rotation_euler=(math.radians(32),math.radians(-18),math.radians(-25))
-area("Warm key",(-10,-12,18),2400,(1,.76,.55),10,(0,5,3))
-area("Cool sky fill",(10,-2,13),1600,(.52,.68,.86),12,(0,7,4))
-area("Wall rim",(0,22,14),2000,(1,.58,.34),9,(0,15,4))
+area("Warm key",(-10,-12,18),1500,(1,.82,.67),10,(0,5,3))
+area("Cool sky fill",(10,-2,13),1250,(.58,.72,.88),12,(0,7,4))
+area("Wall rim",(0,22,14),1450,(1,.68,.48),9,(0,15,4))
 area("Bronze highlight",(-6,-5,5),900,(1,.52,.24),4,(0,-4,2))
 
 def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
@@ -247,7 +251,7 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
 cam2=camera_shot("02 gun crew and wall",601,1200,(8.4,-17,7.4),(5.4,-15,6),(0,-3,2.1),(0,2,2.8),38,"02 — SLOW TO LOAD")
-cam3=camera_shot("03 recoil and smoke",1201,1800,(-5.5,-11,4.8),(-3,-8.5,4),(0,-3.5,2.8),(0,-1.8,3.1),48,"03 — FIRE")
+cam3=camera_shot("03 recoil and smoke",1201,1800,(-8,-15,6.2),(-4.5,-11,5.2),(0,-4,2.6),(0,-1.8,3.1),36,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
 scene.camera=cam1
