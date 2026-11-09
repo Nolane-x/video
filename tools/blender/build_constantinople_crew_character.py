@@ -54,8 +54,8 @@ def rebind_import(imported,main_arm,actor_root,label,tint=None):
         if not any(m.type=="ARMATURE" for m in mesh.modifiers) and len(mesh.vertex_groups):
             mod=mesh.modifiers.new("CC0 character skinning","ARMATURE");mod.object=main_arm
         if mesh.name.lower().startswith("icosphere"):
-            mesh.hide_render=True
-            mesh.hide_viewport=True
+            bpy.data.objects.remove(mesh,do_unlink=True)
+            continue
         for m in mesh.data.materials:
             if m and tint:apply_tint(m,tint)
         world=mesh.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world
@@ -74,8 +74,10 @@ main_arm=next((o for o in base if o.type=="ARMATURE"),None)
 assert main_arm is not None,"base_body_anim.glb did not contain an armature"
 body_meshes=[o for o in base if o.type=="MESH"]
 root=bpy.data.objects.new("Ottoman artillery crew root",None);scene.collection.objects.link(root)
-for o in base:
+for o in list(base):
     if o.type=="EMPTY":bpy.data.objects.remove(o,do_unlink=True);continue
+    if o.type=="MESH" and o.name.lower().startswith("icosphere"):
+        bpy.data.objects.remove(o,do_unlink=True);continue
     world=o.matrix_world.copy();o.parent=root;o.matrix_world=world
 root.location=(0,0,0)
 
@@ -83,7 +85,7 @@ root.location=(0,0,0)
 outfit=[("clothing_shirt.glb",(0.62,0.48,0.29),"under-tunic"),
         ("clothing_jeans.glb",(0.22,0.14,0.075),"wool-trousers"),
         ("clothing_boots.glb",(0.32,0.16,0.055),"leather-boots"),
-        ("clothing_trenchcoat.glb",(0.38,0.22,0.095),"long-wool-coat")]
+        ("clothing_trenchcoat.glb",(0.44,0.28,0.13),"long-wool-coat")]
 for filename,tint,label in outfit:
     path=os.path.join(ASSETS,filename)
     if not os.path.isfile(path):continue
@@ -96,7 +98,7 @@ if os.path.isfile(hair_path):
     imported=import_gltf(hair_path)
     rebind_import(imported,main_arm,root,"crew-hair",(0.055,0.04,0.025))
 
-wrapmat=mat("Faded linen head wrap",(0.44,0.34,0.21),0,.95)
+wrapmat=mat("Faded linen head wrap",(0.29,0.22,0.13),0,.95)
 beltmat=mat("Dark worn leather belt",(0.12,0.055,0.022),0,.9)
 ironmat=mat("Blackened iron buckle",(0.07,0.075,0.072),.78,.38)
 apronmat=mat("Oiled leather work apron",(0.13,0.068,0.027),0,.92)
@@ -106,9 +108,9 @@ head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=(hp.x,hp.y,hp.z+.025))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.135,.145,.075);cap.data.materials.append(wrapmat);cap.parent=root
-    for zoff,scale in [(-.025,1.0),(0,.94),(.025,.84)]:
-        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.126*scale,minor_radius=.018,location=(hp.x,hp.y,hp.z+zoff))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.122,.132,.048);cap.data.materials.append(wrapmat);cap.parent=root
+    for zoff,scale in [(-.018,1.0),(0,.94),(.018,.84)]:
+        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.118*scale,minor_radius=.014,location=(hp.x,hp.y,hp.z+zoff))
         band=bpy.context.object;band.name="Linen turban wrapped folds";band.data.materials.append(wrapmat);band.parent=root
 
 # The leather belt sits outside the coat; the apron covers the coat opening as workwear.
@@ -120,39 +122,30 @@ bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.285,waist_z))
 buckle=bpy.context.object;buckle.name="Iron belt buckle";buckle.dimensions=(.075,.024,.055)
 bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);buckle.data.materials.append(ironmat);buckle.parent=root
 
-# Dense quad apron with shallow folds, raised slightly in front of the coat.
-nx,nz=9,7
+# A short, curved gunner apron hangs from the waist instead of covering the torso like a shield.
+nx,nz=9,6
 verts=[]
 for row in range(nz):
-    v=row/(nz-1);z=1.42-v*.88;width=.21+.055*v
+    v=row/(nz-1);z=1.12-v*.56;width=.145+.035*v
     for col in range(nx):
         u=col/(nx-1);x=(u-.5)*2*width
-        fold=.012*math.sin(u*math.pi*6+v*3.5)+.006*math.sin(u*math.pi*11-v*5)
-        y=-.32-fold
+        fold=.009*math.sin(u*math.pi*6+v*3)+.004*math.sin(u*math.pi*11-v*4)
+        y=-.265-.018*(1-(2*u-1)**2)-fold
         verts.append((x,y,z))
 faces=[]
 for row in range(nz-1):
     for col in range(nx-1):
-        a=row*nx+col;faces.append((a,a+1,a+1+nx,a+nx))
-apron_mesh=bpy.data.meshes.new("Leather apron folded quad mesh");apron_mesh.from_pydata(verts,[],faces);apron_mesh.update()
-apron=bpy.data.objects.new("Artillery crew leather apron",apron_mesh);scene.collection.objects.link(apron);apron.data.materials.append(apronmat)
+        q=row*nx+col;faces.append((q,q+1,q+1+nx,q+nx))
+apron_mesh=bpy.data.meshes.new("Short apron folded quad mesh");apron_mesh.from_pydata(verts,[],faces);apron_mesh.update()
+apron=bpy.data.objects.new("Artillery crew short leather apron",apron_mesh);scene.collection.objects.link(apron);apron.data.materials.append(apronmat)
 for poly in apron.data.polygons:poly.use_smooth=True
-solid=apron.modifiers.new("Apron leather thickness","SOLIDIFY");solid.thickness=.012;solid.offset=0
+solid=apron.modifiers.new("Apron leather thickness","SOLIDIFY");solid.thickness=.01;solid.offset=0
 sub=apron.modifiers.new("Soft apron folds","SUBSURF");sub.levels=1;sub.render_levels=1
 apron.parent=root
 
-# Two shoulder straps and a small powder/ignition pouch.
-def strap(name,points,material,width=.026):
-    curve=bpy.data.curves.new(name,"CURVE");curve.dimensions="3D";curve.bevel_depth=width;curve.bevel_resolution=3
-    spl=curve.splines.new("BEZIER");spl.bezier_points.add(len(points)-1)
-    for bp,co in zip(spl.bezier_points,points):bp.co=co;bp.handle_left_type="AUTO";bp.handle_right_type="AUTO"
-    obj=bpy.data.objects.new(name,curve);scene.collection.objects.link(obj);obj.data.materials.append(material);obj.parent=root;return obj
-strap("Left apron shoulder strap",[(-.17,-.18,1.55),(-.19,-.29,1.28),(-.20,-.33,1.05)],beltmat)
-strap("Right apron shoulder strap",[(.17,-.18,1.55),(.19,-.29,1.28),(.20,-.33,1.05)],beltmat)
-bpy.ops.mesh.primitive_cube_add(size=1,location=(.27,-.29,.97))
-pouch=bpy.context.object;pouch.name="Powder pouch";pouch.dimensions=(.12,.10,.16)
+bpy.ops.mesh.primitive_cube_add(size=1,location=(.215,-.21,.96))
+pouch=bpy.context.object;pouch.name="Small powder pouch";pouch.dimensions=(.085,.075,.11)
 bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);pouch.data.materials.append(beltmat);pouch.parent=root
-
 # Keep source scene timing at 30 fps for this still-frame asset proof; the final documentary is sampled at 240 fps.
 scene.render.fps=30;scene.render.fps_base=1
 actions=sorted([a.name for a in bpy.data.actions])
