@@ -219,7 +219,7 @@ def sleeve_mesh(side):
                 q=center+axis1*(math.cos(ang)*radius)+axis2*(math.sin(ang)*radius)
                 verts.append(tuple(q))
             ring_centers.append(center.copy())
-        weights.append((si,t))
+            weights.append((si,t))
     ring_count=len(weights)
     for ri in range(ring_count-1):
         for j in range(radial):
