@@ -111,29 +111,46 @@ for filename,tint,label in outfit:
 
 wrapmat=mat("Dark ochre linen turban",(.32,.20,.09),0,.97)
 
-# A fitted cloth crown with a compact spiral wrap. The lower edge sits just
-# above the brow; the spiral rises around the skull instead of forming a flat hat.
+# Fit a domed cloth crown, then wind one broad, flattened linen ribbon around it.
+# A mesh ribbon (not a round curve) avoids the stacked-sausage appearance.
 head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
     bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.13))
-    cap=bpy.context.object;cap.name="Fitted linen turban crown";cap.scale=(.122,.134,.055);cap.data.materials.append(wrapmat)
+    cap=bpy.context.object;cap.name="Fitted linen turban crown";cap.scale=(.115,.122,.072);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
-    curve=bpy.data.curves.new("Spiral linen turban wrap","CURVE");curve.dimensions="3D";curve.resolution_u=3
-    spl=curve.splines.new("POLY");count=220;spl.points.add(count-1)
-    for i,pt in enumerate(spl.points):
-        t=i/(count-1);ang=math.pi+t*math.tau*2.5
-        radius=.126-.012*t
-        z=hp.z+.076+.112*t
-        pt.co=(hp.x+radius*math.cos(ang),hp.y+radius*math.sin(ang),z,1)
-    curve.bevel_depth=.021;curve.bevel_resolution=5
-    wrap=bpy.data.objects.new("Spiral linen turban wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
-    bpy.context.view_layer.objects.active=wrap;wrap.select_set(True);bpy.ops.object.convert(target="MESH")
-    wrap=bpy.context.object;wrap.name="Spiral linen turban wrap mesh"
-    for obj in (cap,wrap):
-        wm=obj.matrix_world.copy();obj.parent=root;obj.matrix_world=wm
-        vg=obj.vertex_groups.new(name="head");vg.add([v.index for v in obj.data.vertices],1.0,"REPLACE")
-        mod=obj.modifiers.new("Turban follows head rig","ARMATURE");mod.object=main_arm
+
+    samples=360;verts=[];faces=[]
+    arm_inv=main_arm.matrix_world.inverted()
+    def ribbon_center(u):
+        angle=math.pi*.5+math.tau*3.0*u
+        rx=.121-.012*u;ry=.132-.012*u
+        z=hp.z+.066+.128*u
+        return Vector((hp.x+rx*math.cos(angle),hp.y+ry*math.sin(angle),z))
+    for i in range(samples):
+        u=i/(samples-1);center=ribbon_center(u)
+        before=ribbon_center(max(0.0,u-.001));after=ribbon_center(min(1.0,u+.001))
+        tangent=(after-before).normalized()
+        up=Vector((0,0,1))
+        width_axis=up-tangent*tangent.dot(up)
+        if width_axis.length<.001:width_axis=Vector((1,0,0))
+        width_axis.normalize()
+        normal=tangent.cross(width_axis).normalized()
+        # Two width edges and front/back thickness produce a cloth-like flat band.
+        for sw,sn in ((-1,-1),(-1,1),(1,1),(1,-1)):
+            p=center+width_axis*(sw*.023)+normal*(sn*.006)
+            verts.append(tuple(arm_inv @ p))
+    for i in range(samples-1):
+        base=i*4;nxt=(i+1)*4
+        for j in range(4):
+            faces.append((base+j,base+(j+1)%4,nxt+(j+1)%4,nxt+j))
+    md=bpy.data.meshes.new("Woven turban ribbon mesh");md.from_pydata(verts,[],faces);md.update()
+    wrap=bpy.data.objects.new("Continuous woven linen turban ribbon",md);scene.collection.objects.link(wrap)
+    wrap.parent=root;wrap.matrix_world=main_arm.matrix_world.copy();wrap.data.materials.append(wrapmat)
+    for poly in md.polygons:poly.use_smooth=True
+    vg=wrap.vertex_groups.new(name="head");vg.add([v.index for v in md.vertices],1.0,"REPLACE")
+    mod=wrap.modifiers.new("Turban ribbon follows head rig","ARMATURE");mod.object=main_arm
+    sol=wrap.modifiers.new("Linen band thickness","SOLIDIFY");sol.thickness=.002;sol.offset=0
 
 # Sample the middle of a relaxed breathing action and lift the head slightly for a neutral standing portrait.
 scene.render.fps=30;scene.render.fps_base=1
