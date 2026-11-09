@@ -58,7 +58,6 @@ def cube(name, loc, scale, mat, bevel=0.0):
     if mat: o.data.materials.append(mat)
     if bevel:
         b=o.modifiers.new("Worn arris","BEVEL"); b.width=bevel; b.segments=2
-        o.modifiers.new("Weighted normals","WEIGHTED_NORMAL")
     return o
 
 def cyl(name, loc, radius, depth, mat, vertices=32, bevel=0.0):
@@ -213,7 +212,7 @@ for i in range(34):
     smooth(b)
 for i in range(22):
     a=i*2.399;p=sphere("Impact dust cloud",(1,15,3.4),(.12,.12,.12),dust,14,8)
-    end=(1+math.cos(a)*(1.4+(i%4)*.38),14.3+math.sin(a)*.55,4.2+(i%6)*.36)
+    end=Vector((1+math.cos(a)*(1.4+(i%4)*.38),14.3+math.sin(a)*.55,4.2+(i%6)*.36))
     for f,loc,sc in [(1,(1,15,3.4),(.001,)*3),(2290,(1,15,3.4),(.001,)*3),
                      (2300,(1,15,3.4),(.18,)*3),(2480,end,(.8+(i%3)*.2,)*3),(2690,end+Vector((0,0,.5)),(.001,)*3)]:
         key(p,"location",f,loc);key(p,"scale",f,sc)
