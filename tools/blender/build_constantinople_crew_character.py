@@ -53,6 +53,9 @@ def rebind_import(imported,main_arm,actor_root,label,tint=None):
             mod.object=main_arm
         if not any(m.type=="ARMATURE" for m in mesh.modifiers) and len(mesh.vertex_groups):
             mod=mesh.modifiers.new("CC0 character skinning","ARMATURE");mod.object=main_arm
+        if mesh.name.lower().startswith("icosphere"):
+            mesh.hide_render=True
+            mesh.hide_viewport=True
         for m in mesh.data.materials:
             if m and tint:apply_tint(m,tint)
         world=mesh.matrix_world.copy();mesh.parent=actor_root;mesh.matrix_world=world
@@ -77,10 +80,10 @@ for o in base:
 root.location=(0,0,0)
 
 # Outfit layers: recolour the long coat to undyed wool/earth, darken trousers and leather footwear.
-outfit=[("clothing_shirt.glb",(0.48,0.39,0.25),"under-tunic"),
-        ("clothing_jeans.glb",(0.12,0.085,0.052),"wool-trousers"),
-        ("clothing_boots.glb",(0.20,0.095,0.035),"leather-boots"),
-        ("clothing_trenchcoat.glb",(0.24,0.12,0.045),"long-wool-coat")]
+outfit=[("clothing_shirt.glb",(0.62,0.48,0.29),"under-tunic"),
+        ("clothing_jeans.glb",(0.22,0.14,0.075),"wool-trousers"),
+        ("clothing_boots.glb",(0.32,0.16,0.055),"leather-boots"),
+        ("clothing_trenchcoat.glb",(0.38,0.22,0.095),"long-wool-coat")]
 for filename,tint,label in outfit:
     path=os.path.join(ASSETS,filename)
     if not os.path.isfile(path):continue
@@ -93,17 +96,26 @@ if os.path.isfile(hair_path):
     imported=import_gltf(hair_path)
     rebind_import(imported,main_arm,root,"crew-hair",(0.055,0.04,0.025))
 
-wrapmat=mat("Faded linen head wrap",(0.34,0.27,0.17),0,.95)
-beltmat=mat("Dark worn leather belt",(0.075,0.035,0.016),0,.9)
+wrapmat=mat("Faded linen head wrap",(0.44,0.34,0.21),0,.95)
+beltmat=mat("Dark worn leather belt",(0.12,0.055,0.022),0,.9)
 ironmat=mat("Blackened iron buckle",(0.07,0.075,0.072),.78,.38)
 head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.115,minor_radius=.035,location=(hp.x,hp.y,hp.z+.035))
-    turban=bpy.context.object;turban.name="Crew linen head wrap";turban.data.materials.append(wrapmat);turban.parent=root
-    for zoff,scale in [(-.02,1.0),(.01,.92),(.04,.82)]:
-        bpy.ops.mesh.primitive_torus_add(major_segments=40,minor_segments=10,major_radius=.112*scale,minor_radius=.022,location=(hp.x,hp.y,hp.z+zoff))
-        band=bpy.context.object;band.name="Wrapped linen folds";band.data.materials.append(wrapmat);band.parent=root
+    # A cloth cap closes the top of the head; folded bands sit around it like wrapped linen.
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=(hp.x,hp.y,hp.z+.045))
+    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.135,.145,.075);cap.data.materials.append(wrapmat);cap.parent=root
+    for zoff,scale in [(-.015,1.0),(.012,.92),(.038,.78)]:
+        bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=.126*scale,minor_radius=.018,location=(hp.x,hp.y,hp.z+zoff))
+        band=bpy.context.object;band.name="Linen turban wrapped folds";band.data.materials.append(wrapmat);band.parent=root
+# A continuous waist belt and front buckle help the modern generic coat read as a period work robe.
+pelvis=main_arm.data.bones.get("pelvis")
+waist_z=((pelvis.head_local.z+pelvis.tail_local.z)*.5) if pelvis else .98
+bpy.ops.mesh.primitive_torus_add(major_segments=64,minor_segments=10,major_radius=.178,minor_radius=.018,location=(0,0,waist_z))
+belt=bpy.context.object;belt.name="Leather waist belt";belt.scale=(1.0,.88,1.0);belt.data.materials.append(beltmat);belt.parent=root
+bpy.ops.mesh.primitive_cube_add(size=1,location=(0,-.16,waist_z))
+buckle=bpy.context.object;buckle.name="Iron belt buckle";buckle.dimensions=(.075,.022,.055)
+bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);buckle.data.materials.append(ironmat);buckle.parent=root
 
 # Keep source scene timing at 30 fps for this still-frame asset proof; the final documentary is sampled at 240 fps.
 scene.render.fps=30;scene.render.fps_base=1
@@ -121,7 +133,7 @@ def area(name,loc,energy,color,size,target):
 area("Large soft key",(-3,-4,6),650,(1,.81,.62),4,(0,0,1))
 area("Cool fill",(4,-2,3.8),380,(.62,.73,.9),3,(0,0,1))
 area("Warm rim",(0,3,5),850,(1,.58,.32),3,(0,0,1))
-bpy.ops.object.camera_add(location=(2.8,-5.7,2.65));cam=bpy.context.object;cam.name="Crew portrait camera";cam.data.lens=55
+bpy.ops.object.camera_add(location=(1.8,-4.1,2.4));cam=bpy.context.object;cam.name="Crew full-body camera";cam.data.lens=58
 target=Vector((0,0,1.0));cam.rotation_euler=(target-cam.location).to_track_quat("-Z","Y").to_euler();scene.camera=cam
 
 # Export a self-contained GLB and a review still for reuse in the siege scene.
@@ -133,6 +145,9 @@ glb_out=os.path.join(OUT,"ottoman-artillery-crew-cc0.glb")
 bpy.ops.export_scene.gltf(filepath=glb_out,export_format="GLB",use_selection=True,export_animations=True,export_skins=True)
 scene.render.image_settings.file_format="PNG";scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-preview.png"))
 scene.frame_set(1);bpy.ops.render.render(write_still=True)
+bpy.ops.object.camera_add(location=(1.25,-2.7,1.95));closecam=bpy.context.object;closecam.name="Crew face and torso close-up";closecam.data.lens=72
+close_target=Vector((0,0,1.48));closecam.rotation_euler=(close_target-closecam.location).to_track_quat("-Z","Y").to_euler();scene.camera=closecam
+scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
 report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"Recoloured generic coat/trousers/boots and procedural linen wrap; illustrative Ottoman artillery crew, not an authenticated historical uniform."}
