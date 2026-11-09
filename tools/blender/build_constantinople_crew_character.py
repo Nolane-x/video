@@ -140,6 +140,14 @@ if idle:
 else:
     mid=1
 scene.frame_set(mid)
+head_pose=main_arm.pose.bones.get("head")
+if head_pose:
+    head_pose.rotation_mode="XYZ"
+    head_pose.rotation_euler.x -= math.radians(10)
+neck_pose=main_arm.pose.bones.get("neck_01")
+if neck_pose:
+    neck_pose.rotation_mode="XYZ"
+    neck_pose.rotation_euler.x -= math.radians(3)
 
 ground=mat("Warm limestone studio floor",(.18,.16,.13),0,.95)
 bpy.ops.mesh.primitive_plane_add(size=20,location=(0,0,-.02));floor=bpy.context.object;floor.name="Ground";floor.data.materials.append(ground)
