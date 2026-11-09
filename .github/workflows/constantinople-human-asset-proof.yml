@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           mkdir -p character-assets
           base='https://raw.githubusercontent.com/kblood/CharacterCreator/master/output'
-          for file in base_body_anim.glb clothing_shirt.glb clothing_jeans.glb clothing_boots.glb clothing_trenchcoat.glb hair_short04.glb asset_licenses.json; do
+          for file in base_body_anim.glb clothing_shirt.glb clothing_jeans.glb clothing_boots.glb clothing_dress.glb hair_short04.glb asset_licenses.json; do
             curl -fL --retry 2 --retry-delay 2 "$base/$file" -o "character-assets/$file"
           done
           curl -fL --retry 2 --retry-delay 2 'https://raw.githubusercontent.com/kblood/CharacterCreator/master/LICENSE-NOTES.md' -o character-assets/LICENSE-NOTES.md
@@ -40,7 +40,7 @@ jobs:
           allowed={'CC0','project-original'}
           bad=[x for x in manifest if x.get('license') not in allowed]
           assert not bad, bad[:5]
-          required=['base_body_anim.glb','clothing_shirt.glb','clothing_jeans.glb','clothing_boots.glb','clothing_trenchcoat.glb','hair_short04.glb']
+          required=['base_body_anim.glb','clothing_shirt.glb','clothing_jeans.glb','clothing_boots.glb','clothing_dress.glb','hair_short04.glb']
           missing=[n for n in required if not (root/n).is_file() or (root/n).stat().st_size<10000]
           assert not missing, missing
           report={'provider':'kblood/CharacterCreator','output_license':'CC0-1.0/project-original per upstream asset_licenses.json','files':{n:{'bytes':(root/n).stat().st_size,'sha256':hashlib.sha256((root/n).read_bytes()).hexdigest()} for n in required},'license_entries':len(manifest)}
