@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# CI packaging retry trigger; reuse rendered native-240fps chunks.
 """Native-240fps cinematic 3D sequence: the great bombard at Constantinople.
 Illustrative historical reconstruction, not a literal replica of Orban's exact gun.
 """
