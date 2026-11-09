@@ -66,7 +66,6 @@ def cyl(name, loc, radius, depth, mat, vertices=32, bevel=0.0):
     if mat:o.data.materials.append(mat)
     if bevel:
         b=o.modifiers.new("Rounded edges","BEVEL"); b.width=bevel; b.segments=2
-        o.modifiers.new("Weighted normals","WEIGHTED_NORMAL")
     return o
 
 def sphere(name, loc, scale, mat, segments=20, rings=12):
