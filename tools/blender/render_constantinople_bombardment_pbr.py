@@ -240,7 +240,7 @@ for obj in crew_source:bpy.data.objects.remove(obj,do_unlink=True)
 assert len(CREW_RECORDS)==6 and len({r["armature"] for r in CREW_RECORDS})==6
 with open(os.path.join(os.path.dirname(OUTPUT) or ".","crew-manifest.json"),"w") as fp:
     import json
-    json.dump({"fps":FPS,"crew":CREW_RECORDS},fp,indent=2);fp.write("\\n")
+    json.dump({"fps":FPS,"crew":CREW_RECORDS},fp,indent=2);fp.write("\n")
 
 for x in (-4,4.2):
     cyl("Powder cask",(x,-8.5,.65),.48,1.2,oak,24,.04)
