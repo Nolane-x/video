@@ -5,7 +5,7 @@ Replace the primitive crew silhouettes in the 3D bombardment stage with independ
 
 ## Inputs
 - Character source: `kblood/CharacterCreator` generated outputs, CC0/project-original per the upstream `asset_licenses.json` and `LICENSE-NOTES.md`.
-- Character artifact expected from run [42581802475](https://github.com/Nolane-x/video/actions/runs/42581802475), once its smoke build completes.
+- Character artifact expected from run [42582204551](https://github.com/Nolane-x/video/actions/runs/42582204551), smoke build passed and the morph weights were independently checked.
 - Cannon/fortress models and textures: verified Poly Haven CC0 asset artifact from run [42578951674](https://github.com/Nolane-x/video/actions/runs/42578951674).
 
 ## Scene integration
