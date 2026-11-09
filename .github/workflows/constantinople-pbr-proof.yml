@@ -6,6 +6,13 @@ on:
       - 'cinematic/constantinople-pbr-rigged-crew'
     paths:
       - 'tools/blender/run-pbr-rigged-crew.trigger'
+  workflow_dispatch:
+    inputs:
+      full_render:
+        description: Render all eight native 240fps chunks after the smoke frame is approved
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -164,6 +171,7 @@ jobs:
           retention-days: 14
 
   render:
+    if: github.event_name == 'workflow_dispatch' && inputs.full_render
     needs: [prepare, smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -225,6 +233,7 @@ jobs:
           retention-days: 14
 
   package:
+    if: github.event_name == 'workflow_dispatch' && inputs.full_render
     needs: [prepare, render]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
