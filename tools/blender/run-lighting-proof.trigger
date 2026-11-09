@@ -1,0 +1,1 @@
+Single-frame lighting A/B test against PBR chunk 01.
