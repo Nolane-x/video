@@ -41,7 +41,7 @@ The next proof uses:
 Workflow: `.github/workflows/constantinople-pbr-proof.yml`.
 Scene script: `tools/blender/render_constantinople_bombardment_pbr.py`.
 Latest run: [42578951674](https://github.com/Nolane-x/video/actions/runs/42578951674) — source preparation and PBR smoke frame passed; chunk 01 completed (480/480) and passed 1920×1080, CFR 240/1, 480-frame QA. Chunks 02–04 are still rendering; latest log samples show frames 741, 1219 and 1699. Chunks 05–08 remain queued. No packaged 16-second movie exists yet.
-- Chunk 01 contact sheet was visually inspected: the bronze/iron cannon and wooden carriage carry real PBR detail, but the macro shot is very dark and its camera move reads too slowly. This is a visual-review note for the next iteration, not an approval.
+- Chunk 01 contact sheet was visually inspected: the bronze/iron cannon and wooden carriage carry real PBR detail, but the macro shot is very dark and its camera move reads too slowly. A separate one-frame light comparison is running in [42583918974](https://github.com/Nolane-x/video/actions/runs/42583918974) with stronger world fill, sun, key, fill and rim values. This is a visual-review note for the next iteration, not an approval.
 Latest scene commit: `1c8cb59d25e7a1cc8b395c11eae08331f176cbdf`; workflow commit: `82714c6453d09e1b7f9159b56d420adcafda26c5`.
 
 ## Rigged human crew integration
