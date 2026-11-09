@@ -169,7 +169,6 @@ source_meshes=[o for o in crew_source if o.type=="MESH"]
 def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None):
     root=bpy.data.objects.new(name+" actor root",None);scene.collection.objects.link(root)
     yaw=(math.pi if side=="ottoman" else 0.0) if yaw is None else yaw
-    root.location=(x,y,0);root.rotation_euler=(0,0,yaw);root.scale=(scale,scale,scale)
     arm=source_arm.copy();arm.data=source_arm.data
     scene.collection.objects.link(arm)
     arm_world=source_arm.matrix_world.copy();arm.parent=root;arm.matrix_world=arm_world
@@ -195,8 +194,11 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
                     tint=(.42,.19,.075) if side=="ottoman" else (.19,.23,.28)
                     sock=bs.inputs.get("Base Color")
                     if sock and not sock.is_linked:sock.default_value=(*tint,1)
+    root.rotation_euler=(0,0,yaw);root.scale=(scale,scale,scale)
     if walk_to is not None:
         key(root,"location",1,(x,y,0));key(root,"location",120,(walk_to[0],walk_to[1],0));smooth(root)
+    else:
+        root.location=(x,y,0)
     print("RIGGED_CREW",name,"action",action.name if action else "none","meshes",len(source_meshes),flush=True)
     return root,arm
 crew("Powder crew",-2.1,-8.5,"ottoman","idle_breathe_Armature")
