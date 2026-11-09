@@ -113,7 +113,7 @@ blue=mat_basic("Byzantine deep blue",(.035,.07,.12),0,.92)
 skin=mat_basic("Skin in shadow",(.24,.14,.095),0,.88)
 smoke=mat_basic("Powder smoke translucent",(.19,.18,.17),0,1,.22)
 dust=mat_basic("Limestone dust",(.52,.45,.35),0,1,.18)
-fire=mat_basic("Powder ignition", (1,.28,.045),.05,.25,1,12)
+fire=mat_basic("Powder ignition", (.98,.16,.025),0,.38,1,4.2)
 
 # Ground, layered stone wall, battlements and towers.
 cube("Trampled siege earth",(0,2,-.55),(60,70,1),earth,.12)
@@ -186,12 +186,12 @@ for f,loc in [(1,(0,-1.7,2.55)),(1450,(0,-1.7,2.55)),(1500,(0,-1.2,2.95)),
     key(ball,"location",f,loc)
 smooth(ball)
 flash=sphere("Muzzle flash",(0,-1.5,2.9),(.08,.08,.08),fire,16,10)
-for f,s in [(1,(.001,)*3),(1460,(.001,)*3),(1500,(1.45,)*3),(1512,(.65,)*3),(1545,(.001,)*3)]:
+for f,s in [(1,(.001,)*3),(1460,(.001,)*3),(1500,(.45,.75,.45)),(1512,(.24,.42,.24)),(1545,(.001,)*3)]:
     key(flash,"scale",f,s)
 smooth(flash)
 ld=bpy.data.lights.new("Cannon muzzle flash","POINT");ld.energy=0;ld.color=(1,.28,.06);ld.shadow_soft_size=2.5
 lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects.link(lo);lo.location=(0,-1.4,3)
-for f,e in [(1,0),(1495,0),(1500,7200),(1510,2500),(1545,0)]:key(ld,"energy",f,e)
+for f,e in [(1,0),(1495,0),(1500,2400),(1510,900),(1545,0)]:key(ld,"energy",f,e)
 smoke_puffs=[]
 for i in range(24):
     p=sphere("Powder smoke plume",(0,-1.1,3.1),(.1,.1,.1),smoke,16,10)
