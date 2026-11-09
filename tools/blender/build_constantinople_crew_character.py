@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a CC0 MakeHuman-derived medieval artillery crew character proof in Blender."""
 import bpy, json, os, math
-from mathutils import Vector, Matrix
+from mathutils import Vector
 
 ASSETS=os.environ.get("CHARACTER_ASSETS","character-assets")
 OUT=os.environ.get("CHARACTER_OUTPUT","character-proof")
@@ -98,185 +98,38 @@ for o in list(base):
     world=o.matrix_world.copy();o.parent=root;o.matrix_world=world
 root.location=(0,0,0)
 
-# Base layers only. The modern trenchcoat is deliberately excluded.
-outfit=[("clothing_shirt.glb",(0.72,0.54,0.31),"linen-under-tunic"),
+# Outfit layers: recolour the long coat to undyed wool/earth, darken trousers and leather footwear.
+outfit=[("clothing_shirt.glb",(0.72,0.54,0.31),"under-tunic"),
         ("clothing_jeans.glb",(0.25,0.15,0.07),"wool-trousers"),
-        ("clothing_boots.glb",(0.38,0.18,0.065),"leather-boots")]
+        ("clothing_boots.glb",(0.38,0.18,0.065),"leather-boots"),
+        ("clothing_trenchcoat.glb",(2.2,0.78,0.38),"earth-red wool caftan")]
 for filename,tint,label in outfit:
     path=os.path.join(ASSETS,filename)
     if not os.path.isfile(path):continue
     imported=import_gltf(path)
     rebind_import(imported,main_arm,root,label,tint)
 
-# Build a historically inspired layered wool caftan over the rig. This is an
-# illustrative work garment, not a claim to reproduce a documented uniform.
-bones=main_arm.data.bones
-def bone_point(name,which="head"):
-    b=bones.get(name)
-    if b is None: raise RuntimeError("Missing expected rig bone: "+name)
-    return main_arm.matrix_world @ Vector(getattr(b,which+"_local"))
-hip=bone_point("pelvis")
-sp1=bone_point("spine_01")
-sp2=bone_point("spine_02")
-sp3=bone_point("spine_03")
-neck=bone_point("neck_01")
-sh_l=bone_point("upperarm_l")
-sh_r=bone_point("upperarm_r")
-shoulder_span=abs(sh_l.x-sh_r.x)
-cx=(hip.x+sp2.x)*.5
-cy=hip.y
-bottom_z=hip.z-.60
-top_z=min(neck.z-.055,sp3.z+.035)
-if top_z-bottom_z<.72:
-    bottom_z=hip.z-.52
-    top_z=sp3.z+.10
+wrapmat=mat("Dark ochre linen turban",(.32,.20,.09),0,.97)
 
-def woven_mat(name,color,rough=.88):
-    m=mat(name,color,0,rough)
-    nodes=m.node_tree.nodes;links=m.node_tree.links
-    bs=next((n for n in nodes if n.type=="BSDF_PRINCIPLED"),None)
-    if bs:
-        noise=nodes.new("ShaderNodeTexNoise");noise.inputs["Scale"].default_value=74
-        noise.inputs["Detail"].default_value=3.0;noise.inputs["Roughness"].default_value=.78
-        bump=nodes.new("ShaderNodeBump");bump.inputs["Strength"].default_value=.16
-        bump.inputs["Distance"].default_value=.018
-        links.new(noise.outputs["Fac"],bump.inputs["Height"])
-        links.new(bump.outputs["Normal"],bs.inputs["Normal"])
-        sheen=bs.inputs.get("Sheen Weight")
-        if sheen:sheen.default_value=.22
-    return m
-
-caftan_mat=woven_mat("Ottoman-workwear muted brown-red wool",(.205,.115,.058),.93)
-caftan_trim=woven_mat("Wool caftan edging",(.42,.275,.105),.9)
-leather_mat=woven_mat("Oiled oxhide artillery apron",(0.105,.047,.022),.96)
-belt_mat=mat("Dark hand-cut leather belt",(.075,.034,.016),0,.84)
-brass_mat=mat("Worn brass fastenings",(.34,.22,.075),.72,.38)
-
-def weighted_mesh(name,verts,faces,material,weight_fn,solidify=0.0):
-    arm_inv=main_arm.matrix_world.inverted()
-    local_verts=[tuple(arm_inv @ Vector(v)) for v in verts]
-    md=bpy.data.meshes.new(name+" mesh");md.from_pydata(local_verts,[],faces);md.update()
-    obj=bpy.data.objects.new(name,md);scene.collection.objects.link(obj)
-    obj.parent=root;obj.matrix_world=main_arm.matrix_world.copy()
-    obj.data.materials.append(material)
-    groups={}
-    for idx,v in enumerate(verts):
-        for bone_name,weight in weight_fn(Vector(v)):
-            if weight<=0 or bones.get(bone_name) is None:continue
-            if bone_name not in groups:groups[bone_name]=obj.vertex_groups.new(name=bone_name)
-            groups[bone_name].add([idx],float(weight),"REPLACE")
-    arm_mod=obj.modifiers.new(name+" skin","ARMATURE");arm_mod.object=main_arm
-    if solidify:
-        sol=obj.modifiers.new(name+" cloth thickness","SOLIDIFY");sol.thickness=solidify;sol.offset=0
-    for poly in md.polygons:poly.use_smooth=True
-    return obj
-
-# Caftan body: a shaped, slightly flared robe, open at the neck and hem.
-ring_fracs=[0,.09,.22,.36,.50,.64,.77,.88,1.0]
-ring_rx=[.30,.32,.315,.29,.30,.335,.365,max(.37,shoulder_span*.78),.23]
-ring_ry=[.17,.175,.17,.15,.16,.18,.20,.20,.14]
-ring_z=[bottom_z+(top_z-bottom_z)*v for v in ring_fracs]
-seg=40;verts=[];faces=[]
-for ri,z in enumerate(ring_z):
-    for j in range(seg):
-        a=math.tau*j/seg
-        verts.append((cx+ring_rx[ri]*math.cos(a),cy+ring_ry[ri]*math.sin(a),z))
-for ri in range(len(ring_z)-1):
-    for j in range(seg):
-        a=ri*seg+j;b=ri*seg+(j+1)%seg
-        c=(ri+1)*seg+(j+1)%seg;d=(ri+1)*seg+j
-        faces.append((a,b,c,d))
-def robe_weights(v):
-    z=v.z
-    if z<hip.z-.22:return [("pelvis",.55),("thigh_l",.225),("thigh_r",.225)]
-    if z<sp1.z:return [("pelvis",.62),("spine_01",.38)]
-    if z<sp2.z:return [("spine_01",.55),("spine_02",.45)]
-    if z<sp3.z:return [("spine_02",.58),("spine_03",.42)]
-    return [("spine_03",.76),("neck_01",.24)]
-weighted_mesh("Long olive wool caftan",verts,faces,caftan_mat,robe_weights,.012)
-
-# The imported rigged under-tunic already supplies fitted sleeves. Avoid a second
-# procedural sleeve shell: it caused visible detached loops around the elbows.
-
-# Leather smith's apron, broad waist belt and brass buckle.
-apron_verts=[];apron_faces=[];cols=8;rows=7
-apron_top=hip.z+.01;apron_bottom=hip.z-.405
-for ri in range(rows):
-    v=ri/(rows-1);z=apron_top+(apron_bottom-apron_top)*v
-    width=.148*(.94+.06*v)
-    for ci in range(cols):
-        u=ci/(cols-1);x=cx+(u*2-1)*width
-        y=cy-.222-.020*(1-((u*2-1)**2)) + .010*v
-        apron_verts.append((x,y,z))
-for ri in range(rows-1):
-    for ci in range(cols-1):
-        a=ri*cols+ci;b=a+1;c=b+cols;d=a+cols
-        apron_faces.append((a,b,c,d))
-def apron_weights(v):
-    t=(apron_top-v.z)/max(.001,apron_top-apron_bottom)
-    if t>.78:return [("pelvis",.58),("thigh_l",.21),("thigh_r",.21)]
-    return [("pelvis",.88),("spine_01",.12)]
-weighted_mesh("Leather artillery loading apron",apron_verts,apron_faces,leather_mat,apron_weights,.014)
-
-# Elliptical belt and stitched hem piping.
-belt_verts=[];belt_faces=[];major=64;minor=10
-for i in range(major):
-    t=math.tau*i/major
-    for j in range(minor):
-        a=math.tau*j/minor
-        belt_verts.append((cx+(.285+.023*math.cos(a))*math.cos(t),
-                           cy+(.174+.023*math.cos(a))*math.sin(t),
-                           hip.z-.055+.022*math.sin(a)))
-for i in range(major):
-    for j in range(minor):
-        a=i*minor+j;b=i*minor+(j+1)%minor
-        c=((i+1)%major)*minor+(j+1)%minor;d=((i+1)%major)*minor+j
-        belt_faces.append((a,b,c,d))
-weighted_mesh("Wide leather waist belt",belt_verts,belt_faces,belt_mat,lambda v:[("pelvis",1.0)],.006)
-# Thin trim along the robe hem makes its silhouette read as a tailored caftan.
-hem_verts=[];hem_faces=[]
-for i in range(major):
-    t=math.tau*i/major
-    for j in range(8):
-        a=math.tau*j/8
-        hem_verts.append((cx+(.34+.009*math.cos(a))*math.cos(t),
-                          cy+(.192+.009*math.cos(a))*math.sin(t),
-                          bottom_z+.045+.009*math.sin(a)))
-for i in range(major):
-    for j in range(8):
-        a=i*8+j;b=i*8+(j+1)%8;c=((i+1)%major)*8+(j+1)%8;d=((i+1)%major)*8+j
-        hem_faces.append((a,b,c,d))
-weighted_mesh("Wool caftan hem piping",hem_verts,hem_faces,caftan_trim,lambda v:[("pelvis",.8),("thigh_l",.1),("thigh_r",.1)],.003)
-
-# A small brass buckle on the apron-facing side of the belt.
-buckle_verts=[(cx-.032,cy-.181,hip.z-.085),(cx+.032,cy-.181,hip.z-.085),
-              (cx+.032,cy-.181,hip.z-.02),(cx-.032,cy-.181,hip.z-.02),
-              (cx-.032,cy-.158,hip.z-.085),(cx+.032,cy-.158,hip.z-.085),
-              (cx+.032,cy-.158,hip.z-.02),(cx-.032,cy-.158,hip.z-.02)]
-buckle_faces=[(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)]
-weighted_mesh("Worn brass belt buckle",buckle_verts,buckle_faces,brass_mat,lambda v:[("pelvis",1.0)],.002)
-
-# Replace the single floating ring with a wrapped linen turban: a low cloth cap
-# plus five descending-to-rising spiral turns, all skinned to the head bone.
-wrapmat=woven_mat("Saffron and umber linen turban",(0.34,.245,.12),.96)
-head_bone=bones.get("head")
+# A fitted cloth crown with a compact spiral wrap. The lower edge sits just
+# above the brow; the spiral rises around the skull instead of forming a flat hat.
+head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=hp+Vector((0,0,.18)))
-    cap=bpy.context.object;cap.name="Linen turban crown";cap.scale=(.126,.132,.065);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.13))
+    cap=bpy.context.object;cap.name="Fitted linen turban crown";cap.scale=(.122,.134,.055);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
-    curve=bpy.data.curves.new("Five-turn wrapped linen turban","CURVE");curve.dimensions="3D";curve.resolution_u=2
-    spl=curve.splines.new("POLY");count=320;spl.points.add(count-1)
+    curve=bpy.data.curves.new("Spiral linen turban wrap","CURVE");curve.dimensions="3D";curve.resolution_u=3
+    spl=curve.splines.new("POLY");count=220;spl.points.add(count-1)
     for i,pt in enumerate(spl.points):
-        u=i/(count-1);ang=math.tau*4*u
-        rx=.137-.018*u;ry=.143-.018*u
-        z=hp.z+.08+.22*u
-        pt.co=(hp.x+rx*math.cos(ang),hp.y+ry*math.sin(ang),z,1)
+        t=i/(count-1);ang=math.pi+t*math.tau*2.5
+        radius=.126-.012*t
+        z=hp.z+.076+.112*t
+        pt.co=(hp.x+radius*math.cos(ang),hp.y+radius*math.sin(ang),z,1)
     curve.bevel_depth=.021;curve.bevel_resolution=5
-    wrap=bpy.data.objects.new("Five-turn linen turban wrap",curve);scene.collection.objects.link(wrap)
-    wrap.data.materials.append(wrapmat)
+    wrap=bpy.data.objects.new("Spiral linen turban wrap",curve);scene.collection.objects.link(wrap);wrap.data.materials.append(wrapmat)
     bpy.context.view_layer.objects.active=wrap;wrap.select_set(True);bpy.ops.object.convert(target="MESH")
-    wrap=bpy.context.object;wrap.name="Five-turn linen turban mesh"
+    wrap=bpy.context.object;wrap.name="Spiral linen turban wrap mesh"
     for obj in (cap,wrap):
         wm=obj.matrix_world.copy();obj.parent=root;obj.matrix_world=wm
         vg=obj.vertex_groups.new(name="head");vg.add([v.index for v in obj.data.vertices],1.0,"REPLACE")
@@ -330,6 +183,6 @@ close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.l
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived male base rig with a bespoke rig-weighted wool caftan over a rigged linen under-tunic, leather artillery apron, waist belt and four-turn linen turban. Illustrative 15th-century workwear adaptation, not an authenticated uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long earth-red wool overcoat, linen under-tunic, trousers, leather boots and a fitted spiral linen headcloth. Illustrative 15th-century adaptation, not an authenticated Ottoman uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
