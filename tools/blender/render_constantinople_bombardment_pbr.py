@@ -352,6 +352,14 @@ notes.write("Illustrative 3D reconstruction of Ottoman artillery at Constantinop
 scene.frame_set(START)
 print("CONSTANTINOPLE PBR PROOF",bpy.app.version_string,"frames",f"{START}-{END}/{TOTAL_FRAMES}","objects",len(scene.objects),"cannon parts",len(parts),"wall material",wall_mat.name if wall_mat else "fallback",flush=True)
 if SMOKE_ONLY:
+    # Still-frame rendering does not reliably apply timeline camera markers.
+    # Explicitly select the camera assigned to the requested sequence interval.
+    if START <= 600: scene.camera=cam1
+    elif START <= 1440: scene.camera=cam2
+    elif START <= 1800: scene.camera=cam3
+    elif START <= 2280: scene.camera=cam4
+    else: scene.camera=cam5
+    print("SMOKE CAMERA",scene.camera.name,"FRAME",START,flush=True)
     scene.render.image_settings.file_format="PNG";scene.render.filepath=os.path.abspath(os.environ.get("SMOKE_OUTPUT","out/pbr-smoke.png"))
     os.makedirs(os.path.dirname(scene.render.filepath),exist_ok=True)
     bpy.ops.render.render(write_still=True);print("PBR ONE-FRAME SMOKE FINISHED",flush=True)
