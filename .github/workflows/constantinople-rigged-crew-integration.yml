@@ -93,6 +93,17 @@ jobs:
           mkdir -p out
           blender --background --threads 2 --python tools/blender/render_constantinople_rigged_crew_integration.py
           test -s out/constantinople-rigged-crew-integration-1080p-30fps.mp4
+          test -s out/crew-manifest.json
+          python - <<'PY'
+          import json
+          m=json.load(open('out/crew-manifest.json'))
+          crew=m['crew']
+          assert m['fps']==30 and m['frames']==120,m
+          assert len(crew)==6,crew
+          assert len({c['armature'] for c in crew})==6,crew
+          assert all(c['action']!='none' and c['mesh_count']>=8 for c in crew),crew
+          print('SIX INDEPENDENT RIGS PASS',[(c['name'],c['action']) for c in crew])
+          PY
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames -of json out/constantinople-rigged-crew-integration-1080p-30fps.mp4 > out/metadata.json
           python - <<'PY'
           import json,subprocess
