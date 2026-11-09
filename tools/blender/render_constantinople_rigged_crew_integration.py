@@ -166,7 +166,7 @@ crew_source=[o for o in bpy.data.objects if o not in before and o.type in {"MESH
 source_arm=next((o for o in crew_source if o.type=="ARMATURE"),None)
 assert source_arm is not None,"rigged CC0 crew GLB has no armature"
 source_meshes=[o for o in crew_source if o.type=="MESH"]
-def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None):
+def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=None,morphs=None):
     root=bpy.data.objects.new(name+" actor root",None);scene.collection.objects.link(root)
     yaw=(math.pi if side=="ottoman" else 0.0) if yaw is None else yaw
     arm=source_arm.copy();arm.data=source_arm.data
@@ -180,6 +180,10 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
         mesh=src.copy();mesh.data=src.data.copy()
         scene.collection.objects.link(mesh)
         world=src.matrix_world.copy();mesh.parent=root;mesh.matrix_world=world
+        if mesh.data.shape_keys and morphs:
+            blocks=mesh.data.shape_keys.key_blocks
+            for key_name,value in morphs.items():
+                if blocks.get(key_name):blocks[key_name].value=float(value)
         for mod in mesh.modifiers:
             if mod.type=="ARMATURE":mod.object=arm
         if not any(mod.type=="ARMATURE" for mod in mesh.modifiers) and len(mesh.vertex_groups):
@@ -201,12 +205,12 @@ def crew(name,x,y,side,action_name="idle_Armature",yaw=None,scale=1.0,walk_to=No
         root.location=(x,y,0)
     print("RIGGED_CREW",name,"action",action.name if action else "none","meshes",len(source_meshes),flush=True)
     return root,arm
-crew("Powder crew",-2.1,-8.5,"ottoman","idle_breathe_Armature")
-crew("Rammer crew",2.1,-8.1,"ottoman","walk_Armature",scale=.98,walk_to=(2.6,-7.6))
-crew("Carriage brace",-3,-6.5,"ottoman","idle_look_Armature",scale=1.03)
-crew("Carriage hauler",3,-6.7,"ottoman","walk_Armature",scale=1.01,walk_to=(3.35,-6.0))
-crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0)
-crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98)
+crew("Powder crew",-2.1,-8.5,"ottoman","idle_breathe_Armature",morphs={"age_old":.55,"face_nose_width_incr":.25})
+crew("Rammer crew",2.1,-8.1,"ottoman","walk_Armature",scale=.98,walk_to=(2.6,-7.6),morphs={"muscle_max":.65,"weight_min":.2})
+crew("Carriage brace",-3,-6.5,"ottoman","idle_look_Armature",scale=1.03,morphs={"weight_max":.35,"face_jaw_width_incr":.3})
+crew("Carriage hauler",3,-6.7,"ottoman","walk_Armature",scale=1.01,walk_to=(3.35,-6.0),morphs={"muscle_max":.4,"age_old":.25})
+crew("Wall defender",-3.2,13.2,"byzantine","idle_Armature",yaw=0,morphs={"age_old":.35,"face_nose_width_decr":.25})
+crew("Wall defender",3,13.4,"byzantine","idle_look_Armature",yaw=0,scale=.98,morphs={"weight_min":.15,"muscle_max":.25})
 # Remove the unused source import after all six independent performers have been cloned.
 for o in crew_source:bpy.data.objects.remove(o,do_unlink=True)
 
