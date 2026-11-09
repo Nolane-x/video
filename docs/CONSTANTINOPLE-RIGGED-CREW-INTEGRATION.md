@@ -20,6 +20,7 @@ Replace the primitive crew silhouettes in the 3D bombardment stage with independ
 - Script: `tools/blender/render_constantinople_rigged_crew_integration.py`.
 - Workflow: `.github/workflows/constantinople-rigged-crew-integration.yml`.
 - The push trigger is gated by `tools/blender/run-crew-integration.trigger` so the proof is not launched until the character artifact exists.
+- Current run: [42582714127](https://github.com/Nolane-x/video/actions/runs/42582714127) — asset preparation passed; the 120-frame Blender render is still running.
 - First premature attempt [42581475804](https://github.com/Nolane-x/video/actions/runs/42581475804) failed only because the v7 character artifact had not finished uploading; the render job was skipped. It did not run Blender.
 
 ## Release gate
