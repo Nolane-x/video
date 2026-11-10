@@ -259,7 +259,7 @@ jobs:
           retention-days: 14
 
   render:
-    if: (github.event_name == 'workflow_dispatch' && inputs.full_render) || (github.event_name == 'push' && contains(github.event.head_commit.modified, 'tools/blender/run-pbr-rigged-crew-full.trigger'))
+    if: (github.event_name == 'workflow_dispatch' && inputs.full_render) || (github.event_name == 'push' && (contains(github.event.head_commit.added, 'tools/blender/run-pbr-rigged-crew-full.trigger') || contains(github.event.head_commit.modified, 'tools/blender/run-pbr-rigged-crew-full.trigger')))
     needs: [prepare, smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -321,7 +321,7 @@ jobs:
           retention-days: 14
 
   package:
-    if: (github.event_name == 'workflow_dispatch' && inputs.full_render) || (github.event_name == 'push' && contains(github.event.head_commit.modified, 'tools/blender/run-pbr-rigged-crew-full.trigger'))
+    if: (github.event_name == 'workflow_dispatch' && inputs.full_render) || (github.event_name == 'push' && (contains(github.event.head_commit.added, 'tools/blender/run-pbr-rigged-crew-full.trigger') || contains(github.event.head_commit.modified, 'tools/blender/run-pbr-rigged-crew-full.trigger')))
     needs: [prepare, render]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
