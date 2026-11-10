@@ -69,7 +69,7 @@ jobs:
   voice:
     name: Generate and verify Adam narration
     needs: prepare
-    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@cc5633f5e7840bfb18f759226c1e76d7b6f0b645
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@5dddd8d42ac3520a61f8ecc6090545e4ff8c4f61
     with:
       job_json: ${{ needs.prepare.outputs.job_json }}
 
