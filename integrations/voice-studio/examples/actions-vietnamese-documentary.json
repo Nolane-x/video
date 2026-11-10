@@ -1,0 +1,123 @@
+{
+  "project": "nolane-actions-vietnamese-documentary",
+  "language": "vi",
+  "cast": {
+    "narrator": {
+      "provider": "korva",
+      "voice": "khanh_vy",
+      "language": "vi",
+      "speed": 1.0,
+      "seed": 4201,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4,
+        "silence_between_chunks": 0.3
+      }
+    },
+    "researcher": {
+      "provider": "korva",
+      "voice": "quang_huy",
+      "language": "vi",
+      "speed": 0.98,
+      "seed": 4202,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4
+      }
+    },
+    "local_voice": {
+      "provider": "korva",
+      "voice": "bao_kim",
+      "language": "vi",
+      "speed": 1.02,
+      "seed": 4203,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4
+      }
+    },
+    "scientist": {
+      "provider": "korva",
+      "voice": "gia_bao",
+      "language": "vi",
+      "speed": 0.96,
+      "seed": 4204,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4
+      }
+    }
+  },
+  "segments": [
+    {
+      "id": "V001",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Ở nơi dòng sông gặp biển lớn, mỗi buổi bình minh đều mở ra một câu chuyện mới. Những con thuyền rời bến, mang theo kinh nghiệm của nhiều thế hệ và niềm hy vọng về một ngày ra khơi bình yên."
+    },
+    {
+      "id": "V002",
+      "speaker_id": "researcher",
+      "slot": "EXPERT",
+      "character": "Nhà nghiên cứu",
+      "text": "Khi phân tích dữ liệu, chúng tôi không chỉ quan sát một con số riêng lẻ. Điều quan trọng là tìm ra quy luật, kiểm tra giả thuyết và xác nhận kết quả bằng nhiều nguồn bằng chứng độc lập."
+    },
+    {
+      "id": "V003",
+      "speaker_id": "local_voice",
+      "slot": "INTERVIEW",
+      "character": "Người dân địa phương",
+      "text": "Tôi sống ở đây từ nhỏ. Mỗi khi gió đổi hướng và mặt nước chuyển màu, chúng tôi biết thời tiết ngoài khơi có thể thay đổi. Những dấu hiệu ấy được truyền lại từ ông bà và vẫn còn rất hữu ích hôm nay."
+    },
+    {
+      "id": "V004",
+      "speaker_id": "scientist",
+      "slot": "EXPERT",
+      "character": "Nhà khoa học",
+      "text": "Công nghệ mới giúp chúng ta dự báo sớm hơn, nhưng mô hình chỉ có giá trị khi dữ liệu đầu vào đáng tin cậy. Chúng ta cần kết hợp quan sát thực địa, phép đo và kinh nghiệm của người dân."
+    },
+    {
+      "id": "V005",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Ngày nay, bản đồ số, cảm biến và hệ thống cảnh báo có thể đưa thông tin đến ngư dân chỉ trong vài giây. Tuy vậy, công nghệ không thay thế con người; nó giúp con người đưa ra quyết định tốt hơn."
+    },
+    {
+      "id": "V006",
+      "speaker_id": "researcher",
+      "slot": "EXPERT",
+      "character": "Nhà nghiên cứu",
+      "text": "Một dự báo cần thể hiện rõ mức độ chắc chắn. Nếu dữ liệu chưa đầy đủ, hệ thống phải nói rõ giới hạn thay vì đưa ra một kết luận có vẻ chính xác nhưng thiếu căn cứ."
+    },
+    {
+      "id": "V007",
+      "speaker_id": "local_voice",
+      "slot": "INTERVIEW",
+      "character": "Người dân địa phương",
+      "text": "Điều chúng tôi cần là thông tin dễ hiểu, đến đúng lúc và có thể dùng được trong thực tế. Một cảnh báo tốt phải giúp mọi người biết nên làm gì tiếp theo."
+    },
+    {
+      "id": "V008",
+      "speaker_id": "scientist",
+      "slot": "EXPERT",
+      "character": "Nhà khoa học",
+      "text": "Đó là lý do mọi công nghệ cần được kiểm nghiệm thường xuyên. Chúng ta phải đo sai số, theo dõi thay đổi của môi trường và cập nhật mô hình khi điều kiện thực tế khác với dự đoán ban đầu."
+    },
+    {
+      "id": "V009",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Giữa nhịp sống không ngừng thay đổi, tri thức khoa học và kinh nghiệm cộng đồng có thể bổ sung cho nhau. Hành trình bảo vệ vùng biển bắt đầu từ việc hiểu đúng những gì đang diễn ra, rồi cùng nhau hành động."
+    },
+    {
+      "id": "V010",
+      "speaker_id": "scientist",
+      "slot": "EXPERT",
+      "character": "Nhà khoa học",
+      "text": "Một kết quả tốt không chỉ nằm trong báo cáo. Nó phải giúp người sử dụng hiểu được bằng chứng, nhận ra rủi ro và lựa chọn giải pháp phù hợp với hoàn cảnh của mình."
+    }
+  ]
+}
