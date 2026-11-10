@@ -45,13 +45,13 @@ jobs:
           repository: Nolane-x/video
           run-id: "42493141420"
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download rigged CC0 artillery character proof v17
+      - name: Download rigged CC0 artillery character proof v18
         uses: actions/download-artifact@v4
         with:
-          name: constantinople-crew-character-proof-42643997119
+          name: constantinople-crew-character-proof-42758746186
           path: character
           repository: Nolane-x/video
-          run-id: "42643997119"
+          run-id: "42758746186"
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify asset checksums and prepare 16-second narration mix
         shell: bash
