@@ -25,3 +25,5 @@ Repeat import-policy smoke after fixing Blender script-relative module lookup. V
 Run the approved rigged PBR smoke after switching to the clean character export (human proof run 42770651003). Verify the 12-mesh performer import, the six-person scene, the camera staging, and the 900/1500 frame stills. The 16-second render remains gated until visual review.
 
 Retry the clean-character smoke after the source artifact run-id and artifact-name pair were synchronized.
+
+Retry clean-character smoke after bounding apt package index refresh and Blender installation on GitHub-hosted runners.
