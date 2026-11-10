@@ -145,6 +145,12 @@ for x in (-2.4,0,2.4):
 cannon_path=os.path.join(ASSETS,"models/downloaded/cannon_01/cannon_01_1k.gltf")
 before=set(bpy.data.objects);bpy.ops.import_scene.gltf(filepath=cannon_path)
 parts=[o for o in bpy.data.objects if o not in before]
+if SMOKE_ONLY:
+    for o in parts:
+        data_name=o.data.name if o.type=="MESH" else ""
+        print("PBR_CANNON_PART",o.name,"DATA",data_name,"TYPE",o.type,
+              "LOC",tuple(round(v,3) for v in o.location),
+              "DIMS",tuple(round(v,3) for v in o.dimensions),flush=True)
 gun=bpy.data.objects.new("CC0 Poly Haven cannon assembly root",None);scene.collection.objects.link(gun)
 for o in parts:
     if "ball_" in o.name.lower():
@@ -172,6 +178,12 @@ crew_source=[o for o in bpy.data.objects if o not in crew_before and o.type in {
 source_arm=next((o for o in crew_source if o.type=="ARMATURE"),None)
 if source_arm is None:raise RuntimeError("Crew GLB contains no armature")
 source_meshes=[o for o in crew_source if o.type=="MESH"]
+if SMOKE_ONLY:
+    for o in source_meshes:
+        print("PBR_CREW_SOURCE_MESH",o.name,"DATA",o.data.name,
+              "LOC",tuple(round(v,3) for v in o.location),
+              "DIMS",tuple(round(v,3) for v in o.dimensions),
+              "MATERIALS",[m.name if m else None for m in o.data.materials],flush=True)
 source_actions={a.name:a for a in bpy.data.actions}
 CREW_RECORDS=[]
 
