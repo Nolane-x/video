@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """PBR-assisted Constantinople bombardment proof. Blender 4.x, native 240fps."""
-import bpy, math, os
+import bpy, math, os, sys
 from mathutils import Vector
+
+# Blender launched from the repository root does not always add this script's
+# directory to sys.path. Resolve the policy module relative to this file.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 from crew_mesh_policy import is_unwanted_crew_mesh
 
 FPS = 240
