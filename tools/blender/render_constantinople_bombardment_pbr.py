@@ -197,7 +197,7 @@ texture_earth(earth)
 red=mat_basic("Muted Ottoman crimson",(.18,.035,.025),0,.92)
 blue=mat_basic("Byzantine deep blue",(.035,.07,.12),0,.92)
 skin=mat_basic("Skin in shadow",(.24,.14,.095),0,.88)
-smoke=cloud_material("Powder smoke — broken noise plume",(.20,.205,.20),.58)
+smoke=cloud_material("Powder smoke — broken noise plume",(.30,.285,.255),.72)
 dust=cloud_material("Limestone dust — broken particulate cloud",(.52,.43,.32),.40)
 fire=mat_basic("Powder ignition", (.98,.16,.025),0,.38,1,4.2)
 
@@ -435,35 +435,36 @@ lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects
 for f,e in [(1,0),(1495,0),(1500,1450),(1510,420),(1545,0)]:key(ld,"energy",f,e)
 smoke_puffs=[]
 random.seed(1453)
-for i in range(36):
+for i in range(48):
     origin=muzzle+shot_dir*.2
     angle=i*2.399
-    radial=random.uniform(.35,1.6)
+    # Push the plume toward the camera as well as above the barrel so it cannot disappear behind the cannon.
+    radial=random.uniform(.35,1.45)
     end=origin+Vector((
         math.cos(angle)*radial,
-        random.uniform(1.0,2.8),
-        random.uniform(1.1,3.3)
+        -random.uniform(.55,3.2),
+        random.uniform(1.4,4.8)
     ))
-    size=random.uniform(.34,.72)
+    size=random.uniform(.58,1.18)
     final_scale=(
-        size*random.uniform(.72,1.55),
-        size*random.uniform(.45,.95),
-        size*random.uniform(.92,1.75)
+        size*random.uniform(.82,1.55),
+        size*random.uniform(.50,.95),
+        size*random.uniform(1.05,1.85)
     )
-    p=sphere("Powder smoke plume — turbulent lobe",origin,(.02,.02,.02),smoke,20,14)
+    p=sphere("Powder smoke plume — turbulent camera-side lobe",origin,(.02,.02,.02),smoke,24,16)
     p.rotation_euler=(random.uniform(-.8,.8),random.uniform(-.8,.8),random.uniform(0,math.tau))
     for f,loc,sc in [
         (1,origin,(.001,)*3),
         (1490,origin,(.001,)*3),
-        (1500,origin,(.10,.08,.11)),
-        (1570,origin.lerp(end,.42),tuple(v*.62 for v in final_scale)),
+        (1500,origin,(.08,.07,.09)),
+        (1570,origin.lerp(end,.46),tuple(v*.66 for v in final_scale)),
         (1690,end,final_scale),
-        (1800,end+Vector((0,.55,.5)),tuple(v*1.18 for v in final_scale)),
-        (2050,end+Vector((0,2.5,1.6)),(.001,)*3)
+        (1800,end+Vector((0,-.45,.7)),tuple(v*1.12 for v in final_scale)),
+        (2050,end+Vector((0,-1.5,2.2)),(.001,)*3)
     ]:
         key(p,"location",f,loc);key(p,"scale",f,sc)
     smooth(p);smoke_puffs.append(p)
-print("SMOKE DETAIL",len(smoke_puffs),"noise-cut irregular plume lobes",flush=True)
+print("SMOKE DETAIL",len(smoke_puffs),"camera-side turbulent plume lobes",flush=True)
 for i in range(34):
     a=i*2.399;start=Vector((1,15,3))
     end=start+Vector((math.cos(a)*(1+(i%5)*.36),-1-(i%4)*.3,.7+(i%6)*.3))
