@@ -394,6 +394,24 @@ jobs:
           subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
           print("PBR MASTER TECHNICAL PASS",v["width"],v["height"],v["avg_frame_rate"],v["nb_frames"])
           PY
+          # Sample the actual moving picture at 10 fps; metadata alone cannot prove motion.
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \\
+            -vf "fps=10,scale=320:180,format=gray" -f framemd5 review/motion-10fps.framemd5
+          python - <<'PY'
+          from pathlib import Path
+          rows=[line for line in Path("review/motion-10fps.framemd5").read_text().splitlines() if line and not line.startswith("#")]
+          hashes=[line.rsplit(",",1)[-1].strip() for line in rows]
+          assert len(hashes)==160, f"Expected 160 ten-fps samples over 16 seconds, got {len(hashes)}"
+          unique=len(set(hashes))
+          assert unique>=120, f"Motion sample too static: {unique}/160 unique frames"
+          print("MOTION SAMPLE PASS",unique,"unique 10fps frames out of",len(hashes))
+          PY
+          # Save full-resolution caption proof frames for all four narration cues.
+          for spec in "02:2.0" "05:5.0" "08:8.0" "12:12.0"; do
+            label="${spec%%:*}"; stamp="${spec##*:}"
+            ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \\
+              -ss "$stamp" -frames:v 1 -vf "scale=960:540" "review/caption-check-$label.jpg"
+          done
           ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "fps=30,scale=960:540" -c:v libx264 -preset veryfast -crf 23 -an review/review-proxy-30fps-960x540.mp4
           ffmpeg -hide_banner -v error -y -i review/review-proxy-30fps-960x540.mp4 -vf "fps=1,scale=480:-1,tile=4x4" -frames:v 1 review/contact-sheet.jpg
           cat > review/RECONSTRUCTION-NOTES.txt <<'TXT'
