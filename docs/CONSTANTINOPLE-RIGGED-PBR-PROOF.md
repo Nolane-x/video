@@ -34,3 +34,14 @@ Do not start the full 3,840-frame PBR render until:
 ## Workflow safety
 
 The PBR branch is isolated as `cinematic/constantinople-pbr-rigged-crew`. Pushes to the smoke trigger run only the bounded still-image checks. The eight-chunk 240fps render and packaging jobs are gated behind an explicit full-render dispatch/trigger. Keep that gate closed until the visual gate above is met.
+
+
+## Latest integration correction — 2026-11-10
+
+- Root cause of the white lower-body blocks: the imported crew GLB contained an unmaterialed `Icosphere` helper mesh (1.902 × 2.0 × 2.0 units). It was duplicated with each performer. Hiding the body, trousers, caftan, tunic and boots independently did not remove it.
+- `tools/blender/crew_mesh_policy.py` now rejects named Icosphere leftovers and oversized material-free helper meshes. The PBR renderer applies this policy before duplicating the performer. Four regression tests pass in the PBR workflow.
+- Character build run [42770651003](https://github.com/Nolane-x/video/actions/runs/42770651003) succeeded: 53 bones, 12 actions, 30,389 vertices, 54,088 triangles. The new GLB contains 12 named render meshes and no Icosphere; the manifest records an empty rejected-mesh list. The standalone stills remain pending artistic approval; use this asset only for background/midground figures, not hero close-ups.
+- PBR integration smoke [42770641096](https://github.com/Nolane-x/video/actions/runs/42770641096) passed with the renderer-side filter. Log evidence shows the unwanted Icosphere was dropped before the six performers were duplicated; each performer was assembled from 12 meshes. The reviewed 900-frame still no longer contains the large white blocks. Frame 1500 also renders the cannon firing flash.
+- A clean-artifact integration smoke is running in [42771291837](https://github.com/Nolane-x/video/actions/runs/42771291837), using the output of character run 42770651003. Do not begin the 3,840-frame render until this run passes and its two stills are reviewed.
+- Packaging now validates the four cue times and burns readable captions into the MP4 while keeping the SRT sidecar. A local FFmpeg filter test preserved 1920×1080, 240/1 fps and 240 frames for a one-second sample; the full 16-second package step has not yet been run.
+- The next full candidate is still a technical proof, not an approved film. After the smoke gate, inspect the 30fps proxy, 4 caption-check stills, 10fps unique-frame motion sample and full audio/video before any release decision.
