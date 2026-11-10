@@ -87,9 +87,9 @@ def cloud_material(name, color, max_alpha):
     links.new(colors.outputs["Color"], bsdf.inputs["Base Color"])
 
     opacity = nodes.new("ShaderNodeMapRange")
-    opacity.inputs["From Min"].default_value = .24
-    opacity.inputs["From Max"].default_value = .82
-    opacity.inputs["To Min"].default_value = .012
+    opacity.inputs["From Min"].default_value = .18
+    opacity.inputs["From Max"].default_value = .78
+    opacity.inputs["To Min"].default_value = .025
     opacity.inputs["To Max"].default_value = max_alpha
     opacity.clamp = True
     links.new(noise.outputs["Fac"], opacity.inputs["Value"])
@@ -197,28 +197,33 @@ texture_earth(earth)
 red=mat_basic("Muted Ottoman crimson",(.18,.035,.025),0,.92)
 blue=mat_basic("Byzantine deep blue",(.035,.07,.12),0,.92)
 skin=mat_basic("Skin in shadow",(.24,.14,.095),0,.88)
-smoke=cloud_material("Powder smoke — broken noise volume",(.20,.205,.20),.42)
-dust=cloud_material("Limestone dust — broken particulate cloud",(.52,.43,.32),.34)
+smoke=cloud_material("Powder smoke — broken noise plume",(.20,.205,.20),.58)
+dust=cloud_material("Limestone dust — broken particulate cloud",(.52,.43,.32),.40)
 fire=mat_basic("Powder ignition", (.98,.16,.025),0,.38,1,4.2)
 
 # Ground, layered stone wall, battlements and towers.
 cube("Trampled siege earth",(0,2,-.55),(60,70,1),earth,.12)
 
-# Scatter low rubble outside the gun crew's working lane. A fixed seed keeps renders reproducible.
+# Scatter compact, angular rubble outside the gun crew's working lane.
+# Keep fragments embedded in the mud; avoid the oversized, coin-like rocks from the first QA pass.
 rubble_mat=mat_basic("Wet broken limestone rubble",(.19,.17,.135),0,.94)
 random.seed(1453)
 rubble_count=0
-for i in range(72):
+for i in range(42):
     x=random.uniform(-22.0,22.0)
     y=random.uniform(-27.0,12.0)
     if abs(x)<3.4 and -14.0<y<-3.0:
         continue
-    radius=random.uniform(.10,.34)
-    rock=sphere("Scattered siege-ground rubble",(x,y,-.015),
-                (radius*random.uniform(1.0,2.5),radius,radius*random.uniform(.28,.62)),
-                rubble_mat,12,8)
-    rock.rotation_euler[2]=random.uniform(0,math.tau)
-    rock.rotation_euler[1]=random.uniform(-.18,.18)
+    length=random.uniform(.13,.32)
+    width=random.uniform(.09,.24)
+    height=random.uniform(.065,.15)
+    rock=cube("Angular siege-ground rubble",(x,y,-.035),
+              (length,width,height),rubble_mat,min(.024,height*.22))
+    rock.rotation_euler=(
+        random.uniform(-.20,.20),
+        random.uniform(-.20,.20),
+        random.uniform(0,math.tau)
+    )
     rubble_count += 1
 print("GROUND DETAIL",rubble_count,"deterministic rubble pieces",flush=True)
 cube("Wall inner core",(0,16,3.4),(25,1.7,6.8),wall_mat,.08)
