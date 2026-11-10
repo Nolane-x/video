@@ -321,8 +321,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg and subtitle fonts
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
       - uses: actions/download-artifact@v4
         with:
           pattern: constantinople-pbr-chunk-*-${{ github.run_id }}
@@ -349,6 +349,36 @@ jobs:
           mkdir -p review
           ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i audio-mix.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.mp4
           cp audio/captions.srt review/captions.srt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path("review/captions.srt").read_text(encoding="utf-8").strip()
+          blocks=[b for b in re.split(r"\\n\\s*\\n",s) if b.strip()]
+          assert len(blocks)==4, f"Expected four timed narration cues, found {len(blocks)}"
+          previous_end=0.0
+          def seconds(tc):
+              h,m,tail=tc.split(":"); sec,ms=tail.split(",")
+              return int(h)*3600+int(m)*60+int(sec)+int(ms)/1000
+          for block in blocks:
+              lines=block.splitlines()
+              assert len(lines)>=3, lines
+              match=re.fullmatch(r"(\\d{2}:\\d{2}:\\d{2},\\d{3}) --> (\\d{2}:\\d{2}:\\d{2},\\d{3})",lines[1])
+              assert match, lines[1]
+              start,end=map(seconds,match.groups())
+              assert start>=previous_end, (start,previous_end)
+              assert end>start and end<=16.08, (start,end)
+              assert 1.2 <= end-start <= 5.5, (start,end)
+              assert " ".join(lines[2:]).strip(), lines
+              previous_end=end
+          print("CAPTION TIMING PASS: 4 non-overlapping narration cues within 16.08 seconds")
+          PY
+          # Burn readable English captions into the picture; keep the SRT sidecar too.
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \\
+            -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=38,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,MarginV=78,Alignment=2'" \\
+            -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M \\
+            -fps_mode passthrough -c:a copy -movflags +faststart \\
+            review/constantinople-pbr-bombardment-subtitled.tmp.mp4
+          mv review/constantinople-pbr-bombardment-subtitled.tmp.mp4 review/constantinople-pbr-bombardment-1080p-240fps.mp4
           ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
           python - <<'PY'
           import json,subprocess
