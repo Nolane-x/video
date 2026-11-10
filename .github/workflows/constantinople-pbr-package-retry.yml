@@ -1,0 +1,146 @@
+name: Constantinople · repackage verified 240fps chunks
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-pbr-atmosphere-qa'
+    paths:
+      - '.github/workflows/constantinople-pbr-package-retry.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-pbr-package-retry
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Reassemble, caption and QA the existing eight PBR chunks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SOURCE_RUN_ID: '42794077507'
+    steps:
+      - name: Install FFmpeg when unavailable
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg fonts-dejavu-core
+          fi
+      - name: Download the eight already-rendered chunks
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
+        with:
+          pattern: constantinople-pbr-chunk-*-${{ env.SOURCE_RUN_ID }}
+          path: chunks
+          merge-multiple: true
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          repository: Nolane-x/video
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download the original narration, score and effects
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
+        with:
+          name: constantinople-pbr-source-audio-${{ env.SOURCE_RUN_ID }}
+          path: audio
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          repository: Nolane-x/video
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Join chunks and mix synchronized audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find chunks -name 'chunk-*.mp4' -type f | sort)
+          test "${#files[@]}" -eq 8
+          : > concat.txt
+          for f in "${files[@]}"; do printf "file '%s'\n" "$PWD/$f" >> concat.txt; done
+          test "$(wc -l < concat.txt)" -eq 8
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
+          ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg -filter_complex "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.16[music];[2:a]adelay=6250|6250,volume=0.85,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=9580|9580,volume=0.9,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][music][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k audio-mix.m4a
+          mkdir -p review
+          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i audio-mix.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          cp audio/captions.srt review/captions.srt
+      - name: Validate caption timing
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path("review/captions.srt").read_text(encoding="utf-8").strip()
+          blocks=[b for b in re.split(r"\n\s*\n",s) if b.strip()]
+          assert len(blocks)==4, f"Expected four timed narration cues, found {len(blocks)}"
+          previous_end=0.0
+          def seconds(tc):
+              h,m,tail=tc.split(":"); sec,ms=tail.split(",")
+              return int(h)*3600+int(m)*60+int(sec)+int(ms)/1000
+          for block in blocks:
+              lines=block.splitlines()
+              assert len(lines)>=3, lines
+              match=re.fullmatch(r"(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})",lines[1])
+              assert match, lines[1]
+              start,end=map(seconds,match.groups())
+              assert start>=previous_end and end>start and end<=16.08,(start,end,previous_end)
+              assert 1.2<=end-start<=5.5,(start,end)
+              assert " ".join(lines[2:]).strip()
+              previous_end=end
+          print("CAPTION TIMING PASS: 4 non-overlapping cues")
+          PY
+      - name: Burn captions and validate native 240fps master
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=28,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=2,Shadow=1,MarginV=52,Alignment=2'" -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M -fps_mode passthrough -c:a copy -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4
+          mv review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4 review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p="review/constantinople-pbr-bombardment-1080p-240fps.mp4"
+          j=json.load(open("review/metadata.json"))
+          v=next(s for s in j["streams"] if s["codec_type"]=="video")
+          a=next(s for s in j["streams"] if s["codec_type"]=="audio")
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v.get("nb_frames",0))==3840,v
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert abs(float(j["format"]["duration"])-16.0)<0.08,j["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("PBR MASTER TECHNICAL PASS",v["width"],v["height"],v["avg_frame_rate"],v["nb_frames"])
+          PY
+      - name: Prove motion using video frames only
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -map 0:v:0 -an -vf "fps=10,scale=320:180,format=gray" -f framemd5 review/motion-10fps.framemd5
+          python - <<'PY'
+          from pathlib import Path
+          rows=[line for line in Path("review/motion-10fps.framemd5").read_text().splitlines() if line and not line.startswith("#")]
+          hashes=[line.rsplit(",",1)[-1].strip() for line in rows]
+          assert len(hashes)==160, f"Expected 160 video-only samples over 16 seconds, got {len(hashes)}"
+          unique=len(set(hashes))
+          assert unique>=120, f"Motion sample too static: {unique}/160 unique frames"
+          print("MOTION SAMPLE PASS",unique,"unique video frames out of",len(hashes))
+          PY
+      - name: Create review proxy, caption proofs and provenance notes
+        run: |
+          set -euo pipefail
+          for spec in "02:2.0" "05:5.0" "08:8.0" "12:12.0"; do
+            label="${spec%%:*}"; stamp="${spec##*:}"
+            ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -ss "$stamp" -frames:v 1 -vf "scale=960:540" "review/caption-check-$label.jpg"
+          done
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "fps=30,scale=960:540" -c:v libx264 -preset veryfast -crf 23 -an review/review-proxy-30fps-960x540.mp4
+          ffmpeg -hide_banner -v error -y -i review/review-proxy-30fps-960x540.mp4 -vf "fps=1,scale=480:-1,tile=4x4" -frames:v 1 review/contact-sheet.jpg
+          cat > review/RECONSTRUCTION-NOTES.txt <<'TXT'
+          Illustrative reconstruction of a short Ottoman artillery sequence at Constantinople in 1453.
+          The hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets.
+          The gun is a generic stand-in, not an authenticated replica of Orban's great bombard.
+          The wall layout is illustrative, not a measured reconstruction of the Theodosian walls.
+          Rigged CC0-derived crew wear illustrative workwear; they are not authenticated portraits or uniforms.
+          Native output is 1920x1080 at 240 fps. Technical validation is not artistic sign-off.
+          TXT
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - name: Upload packaged 240fps MP4 and QA evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: constantinople-pbr-bombardment-proof-repackaged-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
