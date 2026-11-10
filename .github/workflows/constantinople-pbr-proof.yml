@@ -203,7 +203,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: constantinople-pbr-smoke-${{ github.run_id }}
-          path: out/pbr-smoke-*.png
+          path: out/pbr-*.png
           if-no-files-found: error
           retention-days: 14
 
