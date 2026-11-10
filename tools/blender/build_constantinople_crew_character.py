@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """Build a CC0 MakeHuman-derived medieval artillery crew character proof in Blender."""
-import bpy, json, os, math
+import bpy, json, os, math, sys
 from mathutils import Vector
+
+# Blender may launch from repository root; load the shared policy relative to
+# this builder instead of depending on the current working directory.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 from crew_mesh_policy import is_unwanted_crew_mesh
 
 ASSETS=os.environ.get("CHARACTER_ASSETS","character-assets")
