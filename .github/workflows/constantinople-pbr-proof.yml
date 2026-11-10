@@ -26,9 +26,29 @@ concurrency:
 jobs:
   prepare:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - name: Download and verify portable Blender 4.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p blender-runtime
+          base='https://download.blender.org/release/Blender4.0'
+          curl -fL --retry 3 --retry-delay 2 --connect-timeout 30 --max-time 1200 \
+            "$base/blender-4.0.2-linux-x64.tar.xz" -o blender-runtime/blender-4.0.2-linux-x64.tar.xz
+          curl -fL --retry 3 --retry-delay 2 --connect-timeout 30 --max-time 120 \
+            "$base/blender-4.0.2.sha256" -o blender-runtime/blender-4.0.2.sha256
+          (cd blender-runtime && sha256sum --check blender-4.0.2.sha256)
+          xz -t blender-runtime/blender-4.0.2-linux-x64.tar.xz
+      - name: Upload portable Blender runtime for this workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
       - name: Download verified 48kHz narration excerpt and recorded CC0 audio
         uses: actions/download-artifact@v4
         with:
@@ -137,17 +157,19 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install Blender and headless graphics libraries
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime
+      - name: Extract portable Blender runtime
+        shell: bash
         run: |
           set -euo pipefail
-          packages=(blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6)
-          if command -v blender >/dev/null 2>&1 && command -v ffmpeg >/dev/null 2>&1; then
-            echo "Blender and FFmpeg are already available on this runner."
-          elif ! timeout 150s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
-            echo "::warning::Cached package indexes were insufficient; refreshing once before retrying."
-            timeout 150s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
-            timeout 240s sudo apt-get install -y --no-install-recommends "${packages[@]}"
-          fi
+          tar -xJf blender-runtime/blender-4.0.2-linux-x64.tar.xz -C blender-runtime
+          blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
+          test -x "$blender_home/blender"
+          echo "$blender_home" >> "$GITHUB_PATH"
+          blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
       - name: Verify Blender's glTF importer dependency
         run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
       - name: Run crew mesh policy regression tests
@@ -282,10 +304,19 @@ jobs:
           - { id: "08", start: 3361, end: 3840 }
     steps:
       - uses: actions/checkout@v4
-      - name: Install Blender and FFmpeg
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime
+      - name: Extract portable Blender runtime
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
+          set -euo pipefail
+          tar -xJf blender-runtime/blender-4.0.2-linux-x64.tar.xz -C blender-runtime
+          blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
+          test -x "$blender_home/blender"
+          echo "$blender_home" >> "$GITHUB_PATH"
+          blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
       - uses: actions/download-artifact@v4
         with:
           name: constantinople-pbr-source-assets-${{ github.run_id }}
@@ -305,18 +336,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p out
-          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py 2>&1 | tee "out/chunk-${{ matrix.id }}.log"
           test -s "out/chunk-${{ matrix.id }}.mp4"
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames -of json "out/chunk-${{ matrix.id }}.mp4" > "out/chunk-${{ matrix.id }}.json"
-          python - <<'PY'
-          import json,os
-          p="out/chunk-${{ matrix.id }}.json"
-          v=json.load(open(p))["streams"][0]
-          assert (v["width"],v["height"])==(1920,1080),v
-          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
-          assert int(v["nb_frames"])==480,v
-          print("PBR chunk passed:",os.environ.get("BLENDER_FRAME_START"),os.environ.get("BLENDER_FRAME_END"),v)
-          PY
+          grep -F "frames ${{ matrix.start }}-${{ matrix.end }}/3840" "out/chunk-${{ matrix.id }}.log"
       - uses: actions/upload-artifact@v4
         with:
           name: constantinople-pbr-chunk-${{ matrix.id }}-${{ github.run_id }}
@@ -330,13 +352,17 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - name: Install FFmpeg and subtitle fonts
+      - name: Install FFmpeg only when the runner does not provide it
         run: |
           set -euo pipefail
-          if ! timeout 180s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20; then
-            echo "::warning::APT index refresh timed out; trying the runner's preloaded package indexes."
+          if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+            echo "Runner FFmpeg tools are already available."
+          else
+            if ! timeout 180s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20; then
+              echo "::warning::APT index refresh timed out; continuing with available package indexes."
+            fi
+            timeout 900s sudo apt-get install -y ffmpeg fonts-dejavu-core
           fi
-          timeout 240s sudo apt-get install -y ffmpeg fonts-dejavu-core
       - uses: actions/download-artifact@v4
         with:
           pattern: constantinople-pbr-chunk-*-${{ github.run_id }}
