@@ -3,3 +3,4 @@ Retry full 16-second render after fixing the push trigger predicate to accept ne
 Retry the approved full render with cached-runner package installation first; avoid waiting on network index refresh when Blender and FFmpeg are not preinstalled.
 Retry the full 16-second 240fps review proof using the run-scoped, SHA-256-verified portable Blender 4.0.2 runtime. The smoke job and all eight chunks must consume the same runtime artifact; verify the package and visual QA gates before claiming delivery.
 Retry smoke and full 240fps chunks after adding the minimal headless EGL/OpenGL runtime libraries required by the portable Blender binary. All eight chunks must use the verified Blender artifact and the clean 12-mesh crew asset.
+Full-render workflow is now isolated in .github/workflows/constantinople-pbr-full-render.yml and triggers only on this path; retry the full 8-chunk, 16-second native 240fps render with package/render gated on successful smoke.
