@@ -1,0 +1,70 @@
+name: Squire · inspect renderer and Agincourt authoring sources
+
+on:
+  push:
+    branches:
+      - feature/squire-agincourt-longform
+    paths:
+      - '.github/workflows/squire-inspect-sources.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: squire-inspect-sources
+  cancel-in-progress: false
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout the production branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Extract only source and project authoring files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/squire-source/renderer /tmp/squire-source/project
+          unzip -q integrations/h2-squire-studio/source.zip -d /tmp/squire-source/unpacked-renderer
+          unzip -q video-projects/squire/agincourt-project.zip -d /tmp/squire-source/unpacked-project
+          KIT=/tmp/squire-source/unpacked-renderer/source/skills/lam-video-squire/kit
+          PROJECT=/tmp/squire-source/unpacked-project/agincourt-project
+          test -s "$KIT/render.mjs"
+          test -s "$PROJECT/tools/author_story.py"
+          cp "$KIT/render.mjs" /tmp/squire-source/renderer/
+          cp "$KIT/package.json" /tmp/squire-source/renderer/
+          cp "$KIT/package-lock.json" /tmp/squire-source/renderer/
+          find "$KIT" -maxdepth 3 -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.py' -o -name '*.json' -o -name '*.css' -o -name '*.html' -o -name '*.md' \) \
+            ! -path '*/node_modules/*' ! -path '*/.cache/*' -print0 |
+            while IFS= read -r -d '' f; do
+              rel="${f#"$KIT"/}"
+              mkdir -p "/tmp/squire-source/renderer/$(dirname "$rel")"
+              cp "$f" "/tmp/squire-source/renderer/$rel"
+            done
+          find "$PROJECT" -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.py' -o -name '*.json' -o -name '*.md' -o -name '*.txt' \) -print0 |
+            while IFS= read -r -d '' f; do
+              rel="${f#"$PROJECT"/}"
+              mkdir -p "/tmp/squire-source/project/$(dirname "$rel")"
+              cp "$f" "/tmp/squire-source/project/$rel"
+            done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/squire-source')
+          files=sorted(str(p.relative_to(root)) for p in root.rglob('*') if p.is_file())
+          report={'file_count':len(files),'files':files}
+          (root/'manifest.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'file_count':len(files),'renderer_files':sum(p.startswith('renderer/') for p in files),'project_files':sum(p.startswith('project/') for p in files)},indent=2))
+          PY
+          cp -R /tmp/squire-source/. inspection/
+      - name: Upload inspected renderer and project sources
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: squire-source-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error
+          retention-days: 7
