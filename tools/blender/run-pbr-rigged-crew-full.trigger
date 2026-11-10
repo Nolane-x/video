@@ -1,0 +1,1 @@
+Run the approved eight-chunk 16-second native 240fps PBR bombardment proof. Smoke run 42771796945 passed with the clean 12-mesh crew asset; preserve the exact character, cannon, narration, SRT, subtitle burn-in, motion sample, and 1080p/240fps validation gates. This remains a review candidate, not an artistic sign-off.
