@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: constantinople-pbr-rigged-crew-v1
+  group: constantinople-pbr-rigged-crew-v2
   cancel-in-progress: true
 
 jobs:
