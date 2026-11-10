@@ -187,7 +187,7 @@ jobs:
           test -n "$AUDIO_FILE"
           python tools/prep_voice.py --project projects/agincourt-1415 --single "$AUDIO_FILE" --script "$PROJECT_DOCS/transcript.txt" --whisper small.en --max-pause 0.45 --lead 0.55 --lang en
           python tools/draft_shots.py --project projects/agincourt-1415 --min 1.6 --max 4.0 --lead 0.12
-          python "$PROJECT_DOCS/tools/author_story.py" --project projects/agincourt-1415
+          python "$GITHUB_WORKSPACE/tools/video/author_story_v2.py" --project projects/agincourt-1415
       - name: Validate shot coverage, SFX and music contracts
         working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
         run: |
@@ -243,7 +243,7 @@ jobs:
 
           transcript = Path("projects/agincourt-1415/timeline/transcript.txt").read_text(encoding="utf-8")
           pattern = re.compile(r"^\[\s*(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\]\s+V\d+\s+\w+\s+(.*)$")
-          max_line_chars = 46
+          max_line_chars = 32
           rows = []
           previous_end = 0.0
           parsed_sentences = 0
@@ -368,9 +368,9 @@ jobs:
           FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
           test -n "$FINAL"
           TEMP="projects/agincourt-1415/out/Agincourt-captioned.tmp.mp4"
-          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions.srt:force_style='FontName=DejaVu Sans,FontSize=30,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=2,Shadow=1,MarginV=50,Alignment=2,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions.srt:force_style='FontName=DejaVu Sans,FontSize=18,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0.3,MarginV=24,Alignment=2,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
           mv "$TEMP" "$FINAL"
-          for stamp in 90 180 310 470 580; do
+          for stamp in 91 181 311 471 581; do
             ffmpeg -hide_banner -v error -y -ss "$stamp" -i "$FINAL" -frames:v 1 "projects/agincourt-1415/qa/caption-proof-$stamp.jpg"
           done
           ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "fps=1/20,scale=480:-1,tile=4x4" -frames:v 1 projects/agincourt-1415/qa/caption-contact-sheet.jpg
