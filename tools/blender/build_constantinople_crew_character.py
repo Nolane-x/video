@@ -2,6 +2,7 @@
 """Build a CC0 MakeHuman-derived medieval artillery crew character proof in Blender."""
 import bpy, json, os, math
 from mathutils import Vector
+from crew_mesh_policy import is_unwanted_crew_mesh
 
 ASSETS=os.environ.get("CHARACTER_ASSETS","character-assets")
 OUT=os.environ.get("CHARACTER_OUTPUT","character-proof")
@@ -187,8 +188,22 @@ bpy.ops.object.camera_add(location=(1.8,-5.6,1.75));cam=bpy.context.object;cam.n
 target=Vector((0,0,.92));cam.rotation_euler=(target-cam.location).to_track_quat("-Z","Y").to_euler();scene.camera=cam
 
 # Export a self-contained GLB and a review still for reuse in the siege scene.
+# Remove hidden import helpers as a final gate, even if an upstream GLB changes.
+rejected_import_meshes=[]
+for o in list(bpy.context.scene.objects):
+    if o.type!="MESH":
+        continue
+    material_names=[m.name for m in o.data.materials if m]
+    dimensions=tuple(float(v) for v in o.dimensions)
+    if is_unwanted_crew_mesh(o.name,o.data.name,material_names,dimensions):
+        rejected_import_meshes.append({"object":o.name,"data":o.data.name,"dimensions":dimensions,"materials":material_names})
+        print("DROP_UNWANTED_CHARACTER_MESH",o.name,"DATA",o.data.name,"DIMS",dimensions,flush=True)
+        bpy.data.objects.remove(o,do_unlink=True)
 for o in bpy.context.selected_objects:o.select_set(False)
 export_objs=[o for o in bpy.context.scene.objects if o.type in {"MESH","ARMATURE"} and o.name!="Ground"]
+assert not any(o.type=="MESH" and is_unwanted_crew_mesh(
+    o.name,o.data.name,[m.name for m in o.data.materials if m],tuple(float(v) for v in o.dimensions)
+) for o in export_objs),"Unwanted import helper mesh reached GLB export"
 for o in export_objs:o.select_set(True)
 bpy.context.view_layer.objects.active=main_arm
 glb_out=os.path.join(OUT,"ottoman-artillery-crew-cc0.glb")
@@ -200,6 +215,6 @@ close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.l
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long earth-red wool overcoat, linen under-tunic, trousers, leather boots and a fitted domed linen cap with a narrow spiral headwrap. Illustrative 15th-century adaptation, not an authenticated Ottoman uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long earth-red wool overcoat, linen under-tunic, trousers, leather boots and a fitted domed linen cap with a narrow spiral headwrap. Illustrative 15th-century adaptation, not an authenticated Ottoman uniform.","rejected_import_meshes":rejected_import_meshes}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
