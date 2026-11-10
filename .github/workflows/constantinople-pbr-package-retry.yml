@@ -55,13 +55,10 @@ jobs:
           mapfile -t files < <(find chunks -name 'chunk-*.mp4' -type f | sort)
           test "${#files[@]}" -eq 8
           : > concat.txt
-          for f in "${files[@]}"; do printf "file '%s'\\n" "$PWD/$f" >> concat.txt; done
+          for f in "${files[@]}"; do printf "file '%s'\n" "$PWD/$f" >> concat.txt; done
           test "$(wc -l < concat.txt)" -eq 8
           ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
-          ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav \\
-            -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg \\
-            -filter_complex "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.16[music];[2:a]adelay=6250|6250,volume=0.85,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=9580|9580,volume=0.9,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][music][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \\
-            -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k audio-mix.m4a
+          ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg -filter_complex "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.16[music];[2:a]adelay=6250|6250,volume=0.85,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=9580|9580,volume=0.9,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][music][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k audio-mix.m4a
           mkdir -p review
           ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i audio-mix.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.mp4
           cp audio/captions.srt review/captions.srt
@@ -92,12 +89,8 @@ jobs:
       - name: Burn captions and validate native 240fps master
         run: |
           set -euo pipefail
-          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \\
-            -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=38,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,MarginV=78,Alignment=2'" \\
-            -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M \\
-            -fps_mode passthrough -c:a copy -movflags +faststart \\
-            review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4
-          mv review/constantinople-pbr-bombardment-1080p-240fps.mp4.tmp review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=38,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,MarginV=78,Alignment=2'" -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M -fps_mode passthrough -c:a copy -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4
+          mv review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4 review/constantinople-pbr-bombardment-1080p-240fps.mp4
           ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
           python - <<'PY'
           import json,subprocess
@@ -116,8 +109,7 @@ jobs:
       - name: Prove motion using video frames only
         run: |
           set -euo pipefail
-          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \\
-            -map 0:v:0 -an -vf "fps=10,scale=320:180,format=gray" -f framemd5 review/motion-10fps.framemd5
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -map 0:v:0 -an -vf "fps=10,scale=320:180,format=gray" -f framemd5 review/motion-10fps.framemd5
           python - <<'PY'
           from pathlib import Path
           rows=[line for line in Path("review/motion-10fps.framemd5").read_text().splitlines() if line and not line.startswith("#")]
