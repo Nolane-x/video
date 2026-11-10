@@ -39,7 +39,7 @@ jobs:
             "$base/blender-4.0.2-linux-x64.tar.xz" -o blender-runtime/blender-4.0.2-linux-x64.tar.xz
           curl -fL --retry 3 --retry-delay 2 --connect-timeout 30 --max-time 120 \
             "$base/blender-4.0.2.sha256" -o blender-runtime/blender-4.0.2.sha256
-          (cd blender-runtime && sha256sum --check blender-4.0.2.sha256)
+          (cd blender-runtime && grep -F 'blender-4.0.2-linux-x64.tar.xz' blender-4.0.2.sha256 | sha256sum --check)
           xz -t blender-runtime/blender-4.0.2-linux-x64.tar.xz
       - name: Upload portable Blender runtime for this workflow run
         uses: actions/upload-artifact@v4
