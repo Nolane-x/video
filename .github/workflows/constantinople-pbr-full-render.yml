@@ -1,0 +1,498 @@
+name: Constantinople · full PBR bombardment render · native 240fps
+
+on:
+  push:
+    branches:
+      - 'cinematic/constantinople-pbr-rigged-crew'
+    paths:
+      - 'tools/blender/run-pbr-rigged-crew-full.trigger'
+  workflow_dispatch:
+    inputs:
+      full_render:
+        description: Render all eight native 240fps chunks after the smoke frame is approved
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-pbr-rigged-crew-v2
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify portable Blender 4.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p blender-runtime
+          base='https://download.blender.org/release/Blender4.0'
+          curl -fL --retry 3 --retry-delay 2 --connect-timeout 30 --max-time 1200 \
+            "$base/blender-4.0.2-linux-x64.tar.xz" -o blender-runtime/blender-4.0.2-linux-x64.tar.xz
+          curl -fL --retry 3 --retry-delay 2 --connect-timeout 30 --max-time 120 \
+            "$base/blender-4.0.2.sha256" -o blender-runtime/blender-4.0.2.sha256
+          (cd blender-runtime && grep -F 'blender-4.0.2-linux-x64.tar.xz' blender-4.0.2.sha256 | sha256sum --check)
+          xz -t blender-runtime/blender-4.0.2-linux-x64.tar.xz
+      - name: Upload portable Blender runtime for this workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Download verified 48kHz narration excerpt and recorded CC0 audio
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-prepared-media
+          path: source-audio
+          repository: Nolane-x/video
+          run-id: "42563882176"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download Poly Haven CC0 cannon and fortress PBR assets
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-historical-asset-candidates-42493141420
+          path: historical-assets
+          repository: Nolane-x/video
+          run-id: "42493141420"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download clean rigged CC0 artillery character proof
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-character-proof-42770651003
+          path: character
+          repository: Nolane-x/video
+          run-id: "42770651003"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify asset checksums and prepare 16-second narration mix
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f historical-assets/models/downloaded/cannon_01/cannon_01_1k.gltf
+          test -f historical-assets/models/downloaded/modular_fort_01/modular_fort_01_1k.gltf
+          test -s character/ottoman-artillery-crew-cc0.glb
+          test -s character/manifest.json
+          (cd character && sha256sum -c SHA256SUMS.txt)
+          python - <<'PY'
+          import json
+          m=json.load(open("character/manifest.json"))
+          assert m["bones"] >= 50 and len(m["actions"]) >= 10, m
+          assert m["visual_approval"] == "pending", m
+          assert not any("icosphere" in name.lower() for name in m["meshes"]), m["meshes"]
+          assert m["rejected_import_meshes"] == [], m.get("rejected_import_meshes")
+          print("Clean rigged CC0 crew input verified:",m["bones"],"bones",len(m["actions"]),"actions",len(m["meshes"]),"meshes")
+          PY
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path("historical-assets/models/downloaded/manifest.json")
+          m=json.loads(p.read_text())
+          assert m["provider"]=="Poly Haven" and m["license"]=="CC0-1.0"
+          for asset in m["assets"]:
+              if asset["id"] not in ("cannon_01","modular_fort_01"): continue
+              root=p.parent.parent.parent
+              fp=root/asset["file"]
+              assert hashlib.sha256(fp.read_bytes()).hexdigest()==asset["sha256"],fp
+              for entry in asset["includes"]:
+                  q=fp.parent/entry["path"]
+                  assert q.is_file() and hashlib.sha256(q.read_bytes()).hexdigest()==entry["sha256"],q
+          print("Poly Haven CC0 model and texture checksums verified")
+          PY
+          mkdir -p prepared
+          cp source-audio/out-voice.wav prepared/voice-16s.wav
+          cp source-audio/media/score.wav source-audio/media/cannon_fire.ogg source-audio/media/cannon_impact.ogg prepared/
+          cat > prepared/captions.srt <<'SRT'
+          1
+          00:00:00,000 --> 00:00:04,000
+          He is associated with the production of very large bombards.
+
+          2
+          00:00:04,140 --> 00:00:06,300
+          These are not modern cannons.
+
+          3
+          00:00:06,440 --> 00:00:09,640
+          They are enormous, slow, difficult weapons.
+
+          4
+          00:00:09,780 --> 00:00:14,500
+          They take time to load, require specialised crews, and cannot fire rapidly.
+          SRT
+          cp historical-assets/models/downloaded/manifest.json prepared/POLYHAVEN-ASSET-MANIFEST.json
+          sha256sum prepared/* > prepared/SHA256SUMS.txt
+      - name: Upload immutable PBR model inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload immutable rigged crew input
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload excerpt audio and captions
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-source-audio-${{ github.run_id }}
+          path: prepared/
+          if-no-files-found: error
+          retention-days: 14
+
+  smoke:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime
+      - name: Extract portable Blender runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xJf blender-runtime/blender-4.0.2-linux-x64.tar.xz -C blender-runtime
+          blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
+          test -x "$blender_home/blender"
+          echo "$blender_home" >> "$GITHUB_PATH"
+          export PATH="$blender_home:$PATH"
+          blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
+      - name: Install minimal headless EGL runtime libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(libegl1 libgl1 libxkbcommon0 libsm6 libx11-xcb1 libxrender1 libxi6)
+          if ! ldconfig -p | grep -q 'libEGL.so.1'; then
+            if ! timeout 180s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
+              echo "::warning::Refreshing apt indexes for the small EGL runtime dependency set."
+              timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+              timeout 300s sudo apt-get install -y --no-install-recommends "${packages[@]}"
+            fi
+          fi
+          ldconfig -p | grep -q 'libEGL.so.1'
+      - name: Verify Blender's glTF importer dependency
+        run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
+      - name: Run crew mesh policy regression tests
+        env:
+          PYTHONPATH: tools/blender
+        run: python -m unittest discover -s tests -p 'test_crew_mesh_policy.py' -v
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character
+      - name: Render a real PBR assembly smoke frame at firing moment
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-smoke-crew.png
+          BLENDER_THREADS: "2"
+        run: |
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-smoke-crew.png
+      - name: Render a second smoke frame at the cannon firing moment
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          BLENDER_FRAME_START: "1500"
+          BLENDER_FRAME_END: "1500"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-smoke-fire.png
+          BLENDER_THREADS: "2"
+        run: |
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-smoke-fire.png
+      - name: Diagnostic A — hide trousers to identify lower-body spike
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "wool-trousers"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-trousers.png
+          BLENDER_THREADS: "2"
+        run: |
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-trousers.png
+      - name: Diagnostic B — hide body mesh to identify lower-body spike
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "Body"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-body.png
+          BLENDER_THREADS: "2"
+        run: |
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-body.png
+      - name: Diagnostic C — hide the outer wool caftan
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "earth-red wool caftan"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-caftan.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-caftan.png
+      - name: Diagnostic D — hide the under-tunic
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "under-tunic"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-under-tunic.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-under-tunic.png
+      - name: Diagnostic E — hide leather boots
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "leather-boots"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-boots.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-boots.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-smoke-${{ github.run_id }}
+          path: out/pbr-*.png
+          if-no-files-found: error
+          retention-days: 14
+
+  render:
+    if: needs.smoke.result == 'success' && (github.event_name == 'push' || inputs.full_render == true)
+    needs: [prepare, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { id: "01", start: 1, end: 480 }
+          - { id: "02", start: 481, end: 960 }
+          - { id: "03", start: 961, end: 1440 }
+          - { id: "04", start: 1441, end: 1920 }
+          - { id: "05", start: 1921, end: 2400 }
+          - { id: "06", start: 2401, end: 2880 }
+          - { id: "07", start: 2881, end: 3360 }
+          - { id: "08", start: 3361, end: 3840 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-blender-runtime-${{ github.run_id }}
+          path: blender-runtime
+      - name: Extract portable Blender runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xJf blender-runtime/blender-4.0.2-linux-x64.tar.xz -C blender-runtime
+          blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
+          test -x "$blender_home/blender"
+          echo "$blender_home" >> "$GITHUB_PATH"
+          export PATH="$blender_home:$PATH"
+          blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
+      - name: Install minimal headless EGL runtime libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(libegl1 libgl1 libxkbcommon0 libsm6 libx11-xcb1 libxrender1 libxi6)
+          if ! ldconfig -p | grep -q 'libEGL.so.1'; then
+            if ! timeout 180s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
+              echo "::warning::Refreshing apt indexes for the small EGL runtime dependency set."
+              timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+              timeout 300s sudo apt-get install -y --no-install-recommends "${packages[@]}"
+            fi
+          fi
+          ldconfig -p | grep -q 'libEGL.so.1'
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-assets-${{ github.run_id }}
+          path: historical-assets/models
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-rigged-crew-source-${{ github.run_id }}
+          path: character
+      - name: Render assigned 1080p native 240fps chunk
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          BLENDER_FRAME_START: ${{ matrix.start }}
+          BLENDER_FRAME_END: ${{ matrix.end }}
+          BLENDER_OUTPUT: out/chunk-${{ matrix.id }}.mp4
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py 2>&1 | tee "out/chunk-${{ matrix.id }}.log"
+          test -s "out/chunk-${{ matrix.id }}.mp4"
+          grep -F "frames ${{ matrix.start }}-${{ matrix.end }}/3840" "out/chunk-${{ matrix.id }}.log"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-chunk-${{ matrix.id }}-${{ github.run_id }}
+          path: out/chunk-${{ matrix.id }}.mp4
+          if-no-files-found: error
+          retention-days: 14
+
+  package:
+    if: needs.smoke.result == 'success' && (github.event_name == 'push' || inputs.full_render == true)
+    needs: [prepare, render]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Install FFmpeg only when the runner does not provide it
+        run: |
+          set -euo pipefail
+          if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+            echo "Runner FFmpeg tools are already available."
+          else
+            if ! timeout 180s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20; then
+              echo "::warning::APT index refresh timed out; continuing with available package indexes."
+            fi
+            timeout 900s sudo apt-get install -y ffmpeg fonts-dejavu-core
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-pbr-chunk-*-${{ github.run_id }}
+          path: chunks
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-pbr-source-audio-${{ github.run_id }}
+          path: audio
+      - name: Join, mix, validate and package the PBR proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find chunks -name 'chunk-*.mp4' -type f | sort)
+          test "${#files[@]}" -eq 8
+          : > concat.txt
+          for f in "${files[@]}"; do printf "file '%s'\n" "$PWD/$f" >> concat.txt; done
+          test "$(wc -l < concat.txt)" -eq 8
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i concat.txt -c copy -movflags +faststart picture-only.mp4
+          ffmpeg -hide_banner -v error -y -i audio/voice-16s.wav -stream_loop -1 -i audio/score.wav \
+            -i audio/cannon_fire.ogg -i audio/cannon_impact.ogg \
+            -filter_complex "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.16[music];[2:a]adelay=6250|6250,volume=0.85,highpass=f=90,lowpass=f=9000[fire];[3:a]adelay=9580|9580,volume=0.9,highpass=f=55,lowpass=f=6500[impact];[0:a]volume=1.0[voice];[voice][music][fire][impact]amix=inputs=4:duration=first:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k audio-mix.m4a
+          mkdir -p review
+          ffmpeg -hide_banner -v error -y -i picture-only.mp4 -i audio-mix.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          cp audio/captions.srt review/captions.srt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path("review/captions.srt").read_text(encoding="utf-8").strip()
+          blocks=[b for b in re.split(r"\n\s*\n",s) if b.strip()]
+          assert len(blocks)==4, f"Expected four timed narration cues, found {len(blocks)}"
+          previous_end=0.0
+          def seconds(tc):
+              h,m,tail=tc.split(":"); sec,ms=tail.split(",")
+              return int(h)*3600+int(m)*60+int(sec)+int(ms)/1000
+          for block in blocks:
+              lines=block.splitlines()
+              assert len(lines)>=3, lines
+              match=re.fullmatch(r"(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})",lines[1])
+              assert match, lines[1]
+              start,end=map(seconds,match.groups())
+              assert start>=previous_end, (start,previous_end)
+              assert end>start and end<=16.08, (start,end)
+              assert 1.2 <= end-start <= 5.5, (start,end)
+              assert " ".join(lines[2:]).strip(), lines
+              previous_end=end
+          print("CAPTION TIMING PASS: 4 non-overlapping narration cues within 16.08 seconds")
+          PY
+          # Burn readable English captions into the picture; keep the SRT sidecar too.
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \
+            -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=38,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,MarginV=78,Alignment=2'" \
+            -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M \
+            -fps_mode passthrough -c:a copy -movflags +faststart \
+            review/constantinople-pbr-bombardment-subtitled.tmp.mp4
+          mv review/constantinople-pbr-bombardment-subtitled.tmp.mp4 review/constantinople-pbr-bombardment-1080p-240fps.mp4
+          ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
+          python - <<'PY'
+          import json,subprocess
+          p="review/constantinople-pbr-bombardment-1080p-240fps.mp4"
+          j=json.load(open("review/metadata.json"))
+          v=next(s for s in j["streams"] if s["codec_type"]=="video")
+          a=next(s for s in j["streams"] if s["codec_type"]=="audio")
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v.get("nb_frames",0))==3840,v
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert abs(float(j["format"]["duration"])-16.0)<0.08,j["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
+          print("PBR MASTER TECHNICAL PASS",v["width"],v["height"],v["avg_frame_rate"],v["nb_frames"])
+          PY
+          # Sample the actual moving picture at 10 fps; metadata alone cannot prove motion.
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \
+            -vf "fps=10,scale=320:180,format=gray" -f framemd5 review/motion-10fps.framemd5
+          python - <<'PY'
+          from pathlib import Path
+          rows=[line for line in Path("review/motion-10fps.framemd5").read_text().splitlines() if line and not line.startswith("#")]
+          hashes=[line.rsplit(",",1)[-1].strip() for line in rows]
+          assert len(hashes)==160, f"Expected 160 ten-fps samples over 16 seconds, got {len(hashes)}"
+          unique=len(set(hashes))
+          assert unique>=120, f"Motion sample too static: {unique}/160 unique frames"
+          print("MOTION SAMPLE PASS",unique,"unique 10fps frames out of",len(hashes))
+          PY
+          # Save full-resolution caption proof frames for all four narration cues.
+          for spec in "02:2.0" "05:5.0" "08:8.0" "12:12.0"; do
+            label="${spec%%:*}"; stamp="${spec##*:}"
+            ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 \
+              -ss "$stamp" -frames:v 1 -vf "scale=960:540" "review/caption-check-$label.jpg"
+          done
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "fps=30,scale=960:540" -c:v libx264 -preset veryfast -crf 23 -an review/review-proxy-30fps-960x540.mp4
+          ffmpeg -hide_banner -v error -y -i review/review-proxy-30fps-960x540.mp4 -vf "fps=1,scale=480:-1,tile=4x4" -frames:v 1 review/contact-sheet.jpg
+          cat > review/RECONSTRUCTION-NOTES.txt <<'TXT'
+          Illustrative reconstruction of a short Ottoman artillery sequence at Constantinople in 1453.
+          The hero cannon mesh and modular-fort PBR materials are Poly Haven CC0 assets.
+          The gun is a generic stand-in, not an authenticated replica of Orban's great bombard.
+          The wall layout is illustrative, not a measured reconstruction of the Theodosian walls.
+          Rigged CC0-derived crew wear illustrative workwear; they are not authenticated portraits or uniforms.
+          Native output is 1920x1080 at 240 fps. Technical validation is not artistic sign-off.
+          TXT
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-pbr-bombardment-proof-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
