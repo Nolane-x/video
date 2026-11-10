@@ -116,16 +116,16 @@ wrapmat=mat("Dark ochre linen turban",(.32,.20,.09),0,.97)
 head_bone=main_arm.data.bones.get("head")
 if head_bone:
     hp=main_arm.matrix_world @ ((head_bone.head_local+head_bone.tail_local)*.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.13))
-    cap=bpy.context.object;cap.name="Fitted linen turban crown";cap.scale=(.115,.122,.072);cap.data.materials.append(wrapmat)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(hp.x,hp.y,hp.z+.145))
+    cap=bpy.context.object;cap.name="Fitted linen turban crown";cap.scale=(.112,.121,.075);cap.data.materials.append(wrapmat)
     for poly in cap.data.polygons:poly.use_smooth=True
 
     samples=360;verts=[];faces=[]
     arm_inv=main_arm.matrix_world.inverted()
     def ribbon_center(u):
-        angle=math.pi*.5+math.tau*2.2*u
-        rx=.126-.030*u;ry=.138-.032*u
-        z=hp.z+.055+.170*u
+        angle=math.pi*.5+math.tau*1.5*u
+        rx=.124-.092*u;ry=.136-.098*u
+        z=hp.z+.092+.128*u
         return Vector((hp.x+rx*math.cos(angle),hp.y+ry*math.sin(angle),z))
     for i in range(samples):
         u=i/(samples-1);center=ribbon_center(u)
@@ -138,7 +138,7 @@ if head_bone:
         normal=tangent.cross(width_axis).normalized()
         # Two width edges and front/back thickness produce a cloth-like flat band.
         for sw,sn in ((-1,-1),(-1,1),(1,1),(1,-1)):
-            p=center+width_axis*(sw*.043)+normal*(sn*.0045)
+            p=center+width_axis*(sw*.022)+normal*(sn*.004)
             verts.append(tuple(arm_inv @ p))
     for i in range(samples-1):
         base=i*4;nxt=(i+1)*4
@@ -200,6 +200,6 @@ close_target=Vector((0,0,1.42));closecam.rotation_euler=(close_target-closecam.l
 scene.render.filepath=os.path.abspath(os.path.join(OUT,"crew-closeup.png"));bpy.ops.render.render(write_still=True)
 verts=sum(len(o.data.vertices) for o in export_objs if o.type=="MESH")
 tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in export_objs if o.type=="MESH")
-report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long earth-red wool overcoat, linen under-tunic, trousers, leather boots and a fitted spiral linen headcloth. Illustrative 15th-century adaptation, not an authenticated Ottoman uniform."}
+report={"status":"CHARACTER_ASSET_SMOKE_PASS_PENDING_VISUAL_REVIEW","source":"kblood/CharacterCreator/output","license":"CC0-1.0 for generated output assets per output/asset_licenses.json and LICENSE-NOTES.md","armature":main_arm.name,"bones":len(main_arm.data.bones),"actions":actions,"meshes":[o.name for o in export_objs if o.type=="MESH"],"materials":sorted({m.name for o in export_objs if o.type=="MESH" for m in o.data.materials if m}),"vertices":verts,"triangles":tris,"export_glb":os.path.basename(glb_out),"visual_approval":"pending","costume_note":"CC0-derived long earth-red wool overcoat, linen under-tunic, trousers, leather boots and a fitted domed linen cap with a narrow spiral headwrap. Illustrative 15th-century adaptation, not an authenticated Ottoman uniform."}
 open(os.path.join(OUT,"manifest.json"),"w").write(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2),flush=True)
