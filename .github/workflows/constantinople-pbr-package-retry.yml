@@ -89,7 +89,7 @@ jobs:
       - name: Burn captions and validate native 240fps master
         run: |
           set -euo pipefail
-          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=38,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,MarginV=78,Alignment=2'" -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M -fps_mode passthrough -c:a copy -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4
+          ffmpeg -hide_banner -v error -y -i review/constantinople-pbr-bombardment-1080p-240fps.mp4 -vf "subtitles=review/captions.srt:force_style='FontName=DejaVu Sans,FontSize=28,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=2,Shadow=1,MarginV=52,Alignment=2'" -c:v libx264 -preset medium -crf 17 -maxrate 48M -bufsize 80M -fps_mode passthrough -c:a copy -movflags +faststart review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4
           mv review/constantinople-pbr-bombardment-1080p-240fps.tmp.mp4 review/constantinople-pbr-bombardment-1080p-240fps.mp4
           ffprobe -v error -show_streams -show_format -of json review/constantinople-pbr-bombardment-1080p-240fps.mp4 > review/metadata.json
           python - <<'PY'
