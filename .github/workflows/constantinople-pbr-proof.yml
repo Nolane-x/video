@@ -327,7 +327,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Install FFmpeg and subtitle fonts
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+        run: |
+          set -euo pipefail
+          if ! timeout 180s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20; then
+            echo "::warning::APT index refresh timed out; trying the runner's preloaded package indexes."
+          fi
+          timeout 240s sudo apt-get install -y ffmpeg fonts-dejavu-core
       - uses: actions/download-artifact@v4
         with:
           pattern: constantinople-pbr-chunk-*-${{ github.run_id }}
