@@ -141,6 +141,10 @@ jobs:
           sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
       - name: Verify Blender's glTF importer dependency
         run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
+      - name: Run crew mesh policy regression tests
+        env:
+          PYTHONPATH: tools/blender
+        run: python -m unittest discover -s tests -p 'test_crew_mesh_policy.py' -v
       - uses: actions/download-artifact@v4
         with:
           name: constantinople-pbr-source-assets-${{ github.run_id }}
