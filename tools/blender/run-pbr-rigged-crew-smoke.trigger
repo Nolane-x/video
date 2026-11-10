@@ -19,3 +19,5 @@ Run a focused five-mesh isolation pass before approving the full render: hide th
 Repeat smoke with mesh identity and local bounds diagnostics for imported cannon props and all CC0 crew meshes.
 
 Re-run smoke after filtering unmaterialed oversized crew import helpers; run the new mesh-policy regression tests before Blender scene assembly.
+
+Repeat import-policy smoke after fixing Blender script-relative module lookup. Verify the unwanted Icosphere/helper is dropped before crew duplication.
