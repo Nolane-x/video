@@ -169,6 +169,7 @@ jobs:
           blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
           test -x "$blender_home/blender"
           echo "$blender_home" >> "$GITHUB_PATH"
+          export PATH="$blender_home:$PATH"
           blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
       - name: Verify Blender's glTF importer dependency
         run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
@@ -316,6 +317,7 @@ jobs:
           blender_home="$PWD/blender-runtime/blender-4.0.2-linux-x64"
           test -x "$blender_home/blender"
           echo "$blender_home" >> "$GITHUB_PATH"
+          export PATH="$blender_home:$PATH"
           blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
       - uses: actions/download-artifact@v4
         with:
