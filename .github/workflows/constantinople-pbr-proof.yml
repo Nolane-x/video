@@ -51,7 +51,7 @@ jobs:
           name: constantinople-crew-character-proof-42758746186
           path: character
           repository: Nolane-x/video
-          run-id: "42758746186"
+          run-id: "42770651003"
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify asset checksums and prepare 16-second narration mix
         shell: bash
