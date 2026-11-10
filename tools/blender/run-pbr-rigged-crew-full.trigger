@@ -2,3 +2,4 @@ Run the approved eight-chunk 16-second native 240fps PBR bombardment proof. Smok
 Retry full 16-second render after fixing the push trigger predicate to accept newly added as well as modified files. Smoke run 42772227982 passed.
 Retry the approved full render with cached-runner package installation first; avoid waiting on network index refresh when Blender and FFmpeg are not preinstalled.
 Retry the full 16-second 240fps review proof using the run-scoped, SHA-256-verified portable Blender 4.0.2 runtime. The smoke job and all eight chunks must consume the same runtime artifact; verify the package and visual QA gates before claiming delivery.
+Retry smoke and full 240fps chunks after adding the minimal headless EGL/OpenGL runtime libraries required by the portable Blender binary. All eight chunks must use the verified Blender artifact and the clean 12-mesh crew asset.
