@@ -140,10 +140,14 @@ jobs:
       - name: Install Blender and headless graphics libraries
         run: |
           set -euo pipefail
-          if ! timeout 180s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20; then
-            echo "::warning::APT index refresh timed out; trying the runner's preloaded package indexes."
+          packages=(blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6)
+          if command -v blender >/dev/null 2>&1 && command -v ffmpeg >/dev/null 2>&1; then
+            echo "Blender and FFmpeg are already available on this runner."
+          elif ! timeout 150s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
+            echo "::warning::Cached package indexes were insufficient; refreshing once before retrying."
+            timeout 150s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+            timeout 240s sudo apt-get install -y --no-install-recommends "${packages[@]}"
           fi
-          timeout 300s sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
       - name: Verify Blender's glTF importer dependency
         run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
       - name: Run crew mesh policy regression tests
