@@ -45,3 +45,12 @@ The PBR branch is isolated as `cinematic/constantinople-pbr-rigged-crew`. Pushes
 - A clean-artifact integration smoke is running in [42771291837](https://github.com/Nolane-x/video/actions/runs/42771291837), using the output of character run 42770651003. Do not begin the 3,840-frame render until this run passes and its two stills are reviewed.
 - Packaging now validates the four cue times and burns readable captions into the MP4 while keeping the SRT sidecar. A local FFmpeg filter test preserved 1920×1080, 240/1 fps and 240 frames for a one-second sample; the full 16-second package step has not yet been run.
 - The next full candidate is still a technical proof, not an approved film. After the smoke gate, inspect the 30fps proxy, 4 caption-check stills, 10fps unique-frame motion sample and full audio/video before any release decision.
+
+
+## Runtime reliability correction — 2026-11-10
+
+- Full-render run [42772227982](https://github.com/Nolane-x/video/actions/runs/42772227982) passed preparation and smoke, but the 8-chunk matrix and package were skipped because the trigger predicate checked only modified paths. The predicate now checks both added and modified paths.
+- Runs [42788001530](https://github.com/Nolane-x/video/actions/runs/42788001530) and [42788666145](https://github.com/Nolane-x/video/actions/runs/42788666145) did not reach Blender rendering: apt stalled while downloading the 35.9 MB Blender data archive as part of a 225 MB / 183-package install, then exited with timeout 124.
+- To avoid repeating that large install on the smoke and eight render runners, the workflow now downloads the official Blender 4.0.2 Linux x64 archive once in `prepare`, verifies its SHA-256 against the official release checksum, checks the xz archive, and uploads it as a run-scoped runtime artifact. Smoke and each render chunk download and extract that same immutable runtime.
+- Package only attempts FFmpeg installation if the hosted runner does not already provide `ffmpeg` and `ffprobe`; this occurs once after all chunks, not once per render worker.
+- The portable-runtime workflow has not yet passed a new run. Its first smoke is the verification gate; do not describe the full video as rendered until all eight chunks and the package artifact are present and validated.
