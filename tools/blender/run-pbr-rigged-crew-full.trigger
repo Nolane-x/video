@@ -1,3 +1,4 @@
 Run the approved eight-chunk 16-second native 240fps PBR bombardment proof. Smoke run 42771796945 passed with the clean 12-mesh crew asset; preserve the exact character, cannon, narration, SRT, subtitle burn-in, motion sample, and 1080p/240fps validation gates. This remains a review candidate, not an artistic sign-off.
 Retry full 16-second render after fixing the push trigger predicate to accept newly added as well as modified files. Smoke run 42772227982 passed.
 Retry the approved full render with cached-runner package installation first; avoid waiting on network index refresh when Blender and FFmpeg are not preinstalled.
+Retry the full 16-second 240fps review proof using the run-scoped, SHA-256-verified portable Blender 4.0.2 runtime. The smoke job and all eight chunks must consume the same runtime artifact; verify the package and visual QA gates before claiming delivery.
