@@ -60,6 +60,7 @@ jobs:
           (root/'manifest.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({'file_count':len(files),'renderer_files':sum(p.startswith('renderer/') for p in files),'project_files':sum(p.startswith('project/') for p in files)},indent=2))
           PY
+          mkdir -p inspection
           cp -R /tmp/squire-source/. inspection/
       - name: Upload inspected renderer and project sources
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
