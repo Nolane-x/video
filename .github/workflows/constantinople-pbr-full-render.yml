@@ -211,12 +211,12 @@ jobs:
           mkdir -p out
           blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
           test -s out/pbr-smoke-crew.png
-      - name: Render a second smoke frame at the cannon firing moment
+      - name: Render a developed smoke plume after the cannon firing moment
         env:
           HISTORICAL_ASSETS: historical-assets
           CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
-          BLENDER_FRAME_START: "1500"
-          BLENDER_FRAME_END: "1500"
+          BLENDER_FRAME_START: "1690"
+          BLENDER_FRAME_END: "1690"
           BLENDER_SMOKE_ONLY: "1"
           SMOKE_OUTPUT: out/pbr-smoke-fire.png
           BLENDER_THREADS: "2"
