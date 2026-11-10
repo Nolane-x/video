@@ -171,6 +171,19 @@ jobs:
           echo "$blender_home" >> "$GITHUB_PATH"
           export PATH="$blender_home:$PATH"
           blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
+      - name: Install minimal headless EGL runtime libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(libegl1 libgl1 libxkbcommon0 libsm6 libx11-xcb1 libxrender1 libxi6)
+          if ! ldconfig -p | grep -q 'libEGL.so.1'; then
+            if ! timeout 180s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
+              echo "::warning::Refreshing apt indexes for the small EGL runtime dependency set."
+              timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+              timeout 300s sudo apt-get install -y --no-install-recommends "${packages[@]}"
+            fi
+          fi
+          ldconfig -p | grep -q 'libEGL.so.1'
       - name: Verify Blender's glTF importer dependency
         run: blender --background --python-expr "import numpy; print('Blender numpy', numpy.__version__)"
       - name: Run crew mesh policy regression tests
@@ -319,6 +332,19 @@ jobs:
           echo "$blender_home" >> "$GITHUB_PATH"
           export PATH="$blender_home:$PATH"
           blender --background --python-expr "import bpy, numpy; print('Portable Blender', bpy.app.version_string, 'NumPy', numpy.__version__)"
+      - name: Install minimal headless EGL runtime libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(libegl1 libgl1 libxkbcommon0 libsm6 libx11-xcb1 libxrender1 libxi6)
+          if ! ldconfig -p | grep -q 'libEGL.so.1'; then
+            if ! timeout 180s sudo apt-get install -y --no-install-recommends "${packages[@]}"; then
+              echo "::warning::Refreshing apt indexes for the small EGL runtime dependency set."
+              timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+              timeout 300s sudo apt-get install -y --no-install-recommends "${packages[@]}"
+            fi
+          fi
+          ldconfig -p | grep -q 'libEGL.so.1'
       - uses: actions/download-artifact@v4
         with:
           name: constantinople-pbr-source-assets-${{ github.run_id }}
