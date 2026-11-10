@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PBR-assisted Constantinople bombardment proof. Blender 4.x, native 240fps."""
-import bpy, math, os, sys
+import bpy, math, os, random, sys
 from mathutils import Vector
 
 # Blender launched from the repository root does not always add this script's
@@ -60,6 +60,82 @@ def mat_basic(name, color, metallic=0.0, roughness=0.7, alpha=1.0, emission=0.0)
         except: pass
     return m
 
+def cloud_material(name, color, max_alpha):
+    """Noise-cut transparent material so smoke reads as a broken plume, not glass spheres."""
+    material = bpy.data.materials.new(name)
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+    bsdf.inputs["Roughness"].default_value = .98
+    bsdf.inputs["Metallic"].default_value = 0.0
+
+    coords = nodes.new("ShaderNodeTexCoord")
+    noise = nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = 3.6
+    noise.inputs["Detail"].default_value = 5.2
+    noise.inputs["Roughness"].default_value = .76
+    noise.inputs["Distortion"].default_value = .28
+    links.new(coords.outputs["Generated"], noise.inputs["Vector"])
+
+    colors = nodes.new("ShaderNodeValToRGB")
+    colors.color_ramp.elements[0].position = .22
+    colors.color_ramp.elements[0].color = tuple(c * .60 for c in color) + (1.0,)
+    colors.color_ramp.elements[1].position = .82
+    colors.color_ramp.elements[1].color = tuple(min(1.0, c * 1.18) for c in color) + (1.0,)
+    links.new(noise.outputs["Fac"], colors.inputs["Fac"])
+    links.new(colors.outputs["Color"], bsdf.inputs["Base Color"])
+
+    opacity = nodes.new("ShaderNodeMapRange")
+    opacity.inputs["From Min"].default_value = .24
+    opacity.inputs["From Max"].default_value = .82
+    opacity.inputs["To Min"].default_value = .012
+    opacity.inputs["To Max"].default_value = max_alpha
+    opacity.clamp = True
+    links.new(noise.outputs["Fac"], opacity.inputs["Value"])
+    links.new(opacity.outputs["Result"], bsdf.inputs["Alpha"])
+    try:
+        material.blend_method = "HASHED"
+        material.shadow_method = "HASHED"
+    except Exception:
+        pass
+    return material
+
+
+def texture_earth(material):
+    """Add mottled mud color and fine bump detail to the siege ground."""
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+    coords = nodes.new("ShaderNodeTexCoord")
+
+    broad = nodes.new("ShaderNodeTexNoise")
+    broad.inputs["Scale"].default_value = 6.5
+    broad.inputs["Detail"].default_value = 5.0
+    broad.inputs["Roughness"].default_value = .78
+    links.new(coords.outputs["Generated"], broad.inputs["Vector"])
+
+    colors = nodes.new("ShaderNodeValToRGB")
+    colors.color_ramp.elements[0].position = .24
+    colors.color_ramp.elements[0].color = (.035, .028, .022, 1)
+    colors.color_ramp.elements[1].position = .78
+    colors.color_ramp.elements[1].color = (.22, .16, .105, 1)
+    links.new(broad.outputs["Fac"], colors.inputs["Fac"])
+    links.new(colors.outputs["Color"], bsdf.inputs["Base Color"])
+
+    fine = nodes.new("ShaderNodeTexNoise")
+    fine.inputs["Scale"].default_value = 38.0
+    fine.inputs["Detail"].default_value = 3.5
+    fine.inputs["Roughness"].default_value = .82
+    links.new(coords.outputs["Generated"], fine.inputs["Vector"])
+    bump = nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = .24
+    bump.inputs["Distance"].default_value = .10
+    links.new(fine.outputs["Fac"], bump.inputs["Height"])
+    links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    bsdf.inputs["Roughness"].default_value = .94
+
+
 def cube(name, loc, scale, mat, bevel=0.0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
     o=bpy.context.object; o.name=name; o.dimensions=scale
@@ -116,16 +192,35 @@ bronze=mat_basic("Aged bronze",(.16,.095,.045),.78,.3)
 oak=mat_basic("Weathered oak",(.15,.075,.035),.05,.82)
 iron=mat_basic("Forged iron",(.065,.075,.075),.72,.42)
 shotmat=mat_basic("Rough limestone shot",(.27,.26,.23),0,.95)
-earth=mat_basic("Damp trampled earth",(.10,.078,.056),0,.96)
+earth=mat_basic("Damp trampled earth — procedural mud",(.10,.078,.056),0,.96)
+texture_earth(earth)
 red=mat_basic("Muted Ottoman crimson",(.18,.035,.025),0,.92)
 blue=mat_basic("Byzantine deep blue",(.035,.07,.12),0,.92)
 skin=mat_basic("Skin in shadow",(.24,.14,.095),0,.88)
-smoke=mat_basic("Powder smoke translucent",(.19,.18,.17),0,1,.22)
-dust=mat_basic("Limestone dust",(.52,.45,.35),0,1,.18)
+smoke=cloud_material("Powder smoke — broken noise volume",(.20,.205,.20),.42)
+dust=cloud_material("Limestone dust — broken particulate cloud",(.52,.43,.32),.34)
 fire=mat_basic("Powder ignition", (.98,.16,.025),0,.38,1,4.2)
 
 # Ground, layered stone wall, battlements and towers.
 cube("Trampled siege earth",(0,2,-.55),(60,70,1),earth,.12)
+
+# Scatter low rubble outside the gun crew's working lane. A fixed seed keeps renders reproducible.
+rubble_mat=mat_basic("Wet broken limestone rubble",(.19,.17,.135),0,.94)
+random.seed(1453)
+rubble_count=0
+for i in range(72):
+    x=random.uniform(-22.0,22.0)
+    y=random.uniform(-27.0,12.0)
+    if abs(x)<3.4 and -14.0<y<-3.0:
+        continue
+    radius=random.uniform(.10,.34)
+    rock=sphere("Scattered siege-ground rubble",(x,y,-.015),
+                (radius*random.uniform(1.0,2.5),radius,radius*random.uniform(.28,.62)),
+                rubble_mat,12,8)
+    rock.rotation_euler[2]=random.uniform(0,math.tau)
+    rock.rotation_euler[1]=random.uniform(-.18,.18)
+    rubble_count += 1
+print("GROUND DETAIL",rubble_count,"deterministic rubble pieces",flush=True)
 cube("Wall inner core",(0,16,3.4),(25,1.7,6.8),wall_mat,.08)
 for row in range(5):
     z=.65+row*1.27
@@ -334,14 +429,36 @@ ld=bpy.data.lights.new("Cannon muzzle flash","POINT");ld.energy=0;ld.color=(1,.2
 lo=bpy.data.objects.new("Cannon muzzle flash light",ld);scene.collection.objects.link(lo);lo.location=muzzle+shot_dir*.28
 for f,e in [(1,0),(1495,0),(1500,1450),(1510,420),(1545,0)]:key(ld,"energy",f,e)
 smoke_puffs=[]
-for i in range(24):
+random.seed(1453)
+for i in range(36):
     origin=muzzle+shot_dir*.2
-    p=sphere("Powder smoke plume",origin,(.1,.1,.1),smoke,16,10)
-    a=i*2.399;end=origin+Vector((math.cos(a)*(.8+(i%5)*.2),1.2+(i%6)*.42,1.5+(i%7)*.3))
-    for f,loc,sc in [(1,origin,(.001,)*3),(1500,origin,(.12,)*3),(1590,end,(.55+(i%4)*.16,)*3),
-                     (1800,end+Vector((0,1,1)),(.85+(i%3)*.2,)*3),(2050,end+Vector((0,2.5,1.6)),(.001,)*3)]:
+    angle=i*2.399
+    radial=random.uniform(.35,1.6)
+    end=origin+Vector((
+        math.cos(angle)*radial,
+        random.uniform(1.0,2.8),
+        random.uniform(1.1,3.3)
+    ))
+    size=random.uniform(.34,.72)
+    final_scale=(
+        size*random.uniform(.72,1.55),
+        size*random.uniform(.45,.95),
+        size*random.uniform(.92,1.75)
+    )
+    p=sphere("Powder smoke plume — turbulent lobe",origin,(.02,.02,.02),smoke,20,14)
+    p.rotation_euler=(random.uniform(-.8,.8),random.uniform(-.8,.8),random.uniform(0,math.tau))
+    for f,loc,sc in [
+        (1,origin,(.001,)*3),
+        (1490,origin,(.001,)*3),
+        (1500,origin,(.10,.08,.11)),
+        (1570,origin.lerp(end,.42),tuple(v*.62 for v in final_scale)),
+        (1690,end,final_scale),
+        (1800,end+Vector((0,.55,.5)),tuple(v*1.18 for v in final_scale)),
+        (2050,end+Vector((0,2.5,1.6)),(.001,)*3)
+    ]:
         key(p,"location",f,loc);key(p,"scale",f,sc)
     smooth(p);smoke_puffs.append(p)
+print("SMOKE DETAIL",len(smoke_puffs),"noise-cut irregular plume lobes",flush=True)
 for i in range(34):
     a=i*2.399;start=Vector((1,15,3))
     end=start+Vector((math.cos(a)*(1+(i%5)*.36),-1-(i%4)*.3,.7+(i%6)*.3))
@@ -387,8 +504,8 @@ def camera_shot(name,start,end,la,lb,ta,tb,lens,label):
     marker=scene.timeline_markers.new(label,frame=start);marker.camera=cam
     return cam
 cam1=camera_shot("01 bronze macro reveal",1,600,(4.4,-13,4.2),(1.7,-10.5,3.6),(0,-5,2.8),(0,-3.4,2.8),58,"01 — THE GREAT BOMBARD")
-cam2=camera_shot("02 wide crew and bombard",601,1440,(9.0,-21.5,6.2),(7.2,-19.0,5.8),(-.1,-7.8,1.35),(.2,-7.0,1.55),38,"02 — CREW AT THE BOMBARD")
-cam3=camera_shot("03 crew, recoil and smoke",1441,1800,(8.4,-19.0,5.8),(6.4,-17.5,5.4),(.1,-7.8,2.25),(.3,-7.2,2.45),40,"03 — FIRE")
+cam2=camera_shot("02 wide crew and bombard",601,1440,(9.0,-21.5,6.2),(7.2,-19.0,5.8),(-.1,-7.8,1.55),(.2,-7.0,1.7),42,"02 — CREW AT THE BOMBARD")
+cam3=camera_shot("03 crew, recoil and smoke",1441,1800,(8.4,-19.0,5.8),(6.4,-17.5,5.4),(.1,-7.8,2.25),(.3,-7.2,2.45),44,"03 — FIRE")
 cam4=camera_shot("04 projectile flight",1801,2280,(3,-1,9),(3.7,7.5,7),(0,5,4.5),(1,12,4.8),52,"04 — STONE SHOT")
 cam5=camera_shot("05 wall impact",2281,END,(8.2,8.5,6.8),(6,11.8,5.5),(1,15.5,3.4),(1,15.5,3.1),45,"05 — THE WALL")
 scene.camera=cam1
