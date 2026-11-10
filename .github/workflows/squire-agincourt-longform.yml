@@ -367,7 +367,7 @@ jobs:
           PY
           FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
           test -n "$FINAL"
-          TEMP="\${FINAL%.mp4}.captioned.tmp.mp4"
+          TEMP="projects/agincourt-1415/out/Agincourt-captioned.tmp.mp4"
           ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions.srt:force_style='FontName=DejaVu Sans,FontSize=30,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=2,Shadow=1,MarginV=50,Alignment=2,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
           mv "$TEMP" "$FINAL"
           for stamp in 90 180 310 470 580; do
