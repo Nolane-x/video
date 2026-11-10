@@ -3,9 +3,10 @@ name: Constantinople · full PBR bombardment render · native 240fps
 on:
   push:
     branches:
-      - 'cinematic/constantinople-pbr-rigged-crew'
+      - 'cinematic/constantinople-pbr-atmosphere-qa'
     paths:
-      - 'tools/blender/run-pbr-rigged-crew-full.trigger'
+      - 'tools/blender/run-pbr-atmosphere-smoke.trigger'
+      - 'tools/blender/render_constantinople_bombardment_pbr.py'
   workflow_dispatch:
     inputs:
       full_render:
@@ -19,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: constantinople-pbr-rigged-crew-v2
+  group: constantinople-pbr-atmosphere-qa
   cancel-in-progress: true
 
 jobs:
@@ -298,7 +299,7 @@ jobs:
           retention-days: 14
 
   render:
-    if: needs.smoke.result == 'success' && (github.event_name == 'push' || inputs.full_render == true)
+    if: needs.smoke.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.full_render == true
     needs: [prepare, smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -374,7 +375,7 @@ jobs:
           retention-days: 14
 
   package:
-    if: needs.smoke.result == 'success' && (github.event_name == 'push' || inputs.full_render == true)
+    if: needs.smoke.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.full_render == true
     needs: [prepare, render]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
