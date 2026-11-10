@@ -200,6 +200,48 @@ jobs:
         run: |
           blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
           test -s out/pbr-diagnostic-no-body.png
+      - name: Diagnostic C — hide the outer wool caftan
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "earth-red wool caftan"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-caftan.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-caftan.png
+      - name: Diagnostic D — hide the under-tunic
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "under-tunic"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-under-tunic.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-under-tunic.png
+      - name: Diagnostic E — hide leather boots
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          CREW_HIDE_TAG: "leather-boots"
+          BLENDER_FRAME_START: "900"
+          BLENDER_FRAME_END: "900"
+          BLENDER_SMOKE_ONLY: "1"
+          SMOKE_OUTPUT: out/pbr-diagnostic-no-boots.png
+          BLENDER_THREADS: "2"
+        run: |
+          set -euo pipefail
+          blender --background --threads 2 --python tools/blender/render_constantinople_bombardment_pbr.py
+          test -s out/pbr-diagnostic-no-boots.png
       - uses: actions/upload-artifact@v4
         with:
           name: constantinople-pbr-smoke-${{ github.run_id }}
