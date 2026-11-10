@@ -11,3 +11,5 @@ Retry after preserving canonical morph state and recolouring textured garments.
 Run selective diagnostic stills with the trousers mesh and Body mesh hidden independently.
 
 Retry mesh isolation smoke after removing the unnecessary FFmpeg install from the preparation job.
+
+Repeat the crew/firing smoke proof and publish both lower-body diagnostic PNGs for visual comparison.
