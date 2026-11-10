@@ -6,7 +6,6 @@ on:
       - 'cinematic/constantinople-pbr-rigged-crew'
     paths:
       - 'tools/blender/run-pbr-rigged-crew-smoke.trigger'
-      - 'tools/blender/run-pbr-rigged-crew-full.trigger'
   workflow_dispatch:
     inputs:
       full_render:
