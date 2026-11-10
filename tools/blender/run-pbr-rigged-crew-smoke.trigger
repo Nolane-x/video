@@ -27,3 +27,5 @@ Run the approved rigged PBR smoke after switching to the clean character export 
 Retry the clean-character smoke after the source artifact run-id and artifact-name pair were synchronized.
 
 Retry clean-character smoke after bounding apt package index refresh and Blender installation on GitHub-hosted runners.
+
+Start the v2 concurrency smoke after separating retries from the stalled v1 runner group.
