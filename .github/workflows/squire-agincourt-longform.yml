@@ -66,10 +66,16 @@ jobs:
           print('job_json=' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
           PY
 
+  voice:
+    name: Generate and verify Adam narration
+    needs: prepare
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@fcae323796dae4038357c1cccc5f67761367292d
+    with:
+      job_json: ${{ needs.prepare.outputs.job_json }}
+
   render:
     name: Squire 1080p animation, mix and final QA
-    needs:
-      - prepare
+    needs: [prepare, voice]
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     env:
@@ -85,37 +91,29 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Download the verified Agincourt narration artifact
+      - name: Download the verified same-run VoiceStudio narration artifact
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
         with:
-          name: video-voice-assets-42806729117
+          name: video-voice-assets-${{ github.run_id }}
           path: voice-assets
-          run-id: "42806729117"
-          repository: Nolane-x/video
-          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify narration hash, audio format and watermark provenance
-        env:
-          EXPECTED_WAV_SHA256: 4a2e4b60263cac4b665000f4580661d4322cbd71b3729034b9185988d5498aba
         run: |
           python - <<'PY'
-          import hashlib
-          import json
-          import os
+          import hashlib, json
           from pathlib import Path
-          root = Path("voice-assets")
-          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-          audio = manifest["audio"]
-          wav = root / "narration.wav"
+          root = Path('voice-assets')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          audio = manifest['audio']
+          wav = root / 'narration.wav'
           digest = hashlib.sha256(wav.read_bytes()).hexdigest()
-          assert manifest["job_id"] == "agincourt-1415-animated-longform"
-          assert manifest["engine"] == "vieneu"
-          assert manifest["voice_id"] == "en-vieneu-v3turbo-adam-3f0c9b"
-          assert audio["sample_rate"] == 48000 and audio["channels"] == 1
-          assert audio["subtype"] == "PCM_24" and audio["checks"] == "passed"
-          assert audio["watermark"]["status"] == "verified"
-          assert audio["watermark"]["block_count"] == 21
-          assert digest == audio["sha256"] == os.environ["EXPECTED_WAV_SHA256"]
-          print(f"Verified reused narration: {audio['duration_seconds']}s, 48kHz mono PCM-24, SHA-256 {digest}")
+          assert manifest['job_id'] == 'agincourt-1415-animated-longform'
+          assert manifest['engine'] == 'vieneu'
+          assert manifest['voice_id'] == 'en-vieneu-v3turbo-adam-3f0c9b'
+          assert audio['sample_rate'] == 48000 and audio['channels'] == 1
+          assert audio['subtype'] == 'PCM_24' and audio['checks'] == 'passed'
+          assert audio['watermark']['status'] == 'verified'
+          assert digest == audio['sha256']
+          print(f"Verified same-run narration: {audio['duration_seconds']}s, 48kHz mono PCM-24, SHA-256 {digest}")
           print(f"AudioSeal verified: {audio['watermark']['block_count']} blocks")
           PY
       - name: Set up Node.js
@@ -234,6 +232,148 @@ jobs:
       - name: Mix narration, procedural score and motivated SFX
         working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
         run: python tools/mix.py --project projects/agincourt-1415
+      - name: Generate word-aligned captions and burn readable subtitles into the master
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          set -euo pipefail
+          mkdir -p projects/agincourt-1415/qa
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          transcript = Path("projects/agincourt-1415/timeline/transcript.txt").read_text(encoding="utf-8")
+          pattern = re.compile(r"^\[\s*(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\]\s+V\d+\s+\w+\s+(.*)$")
+          max_line_chars = 46
+          rows = []
+          previous_end = 0.0
+          parsed_sentences = 0
+
+          def wrap_caption(value):
+              result, pending = [], ""
+              for word in value.split():
+                  candidate = f"{pending} {word}".strip()
+                  if len(candidate) <= max_line_chars:
+                      pending = candidate
+                  else:
+                      if pending:
+                          result.append(pending)
+                      if len(word) > max_line_chars:
+                          raise ValueError(f"Word exceeds subtitle line width: {word!r}")
+                      pending = word
+              if pending:
+                  result.append(pending)
+              return result
+
+          def fits(value):
+              wrapped = wrap_caption(value)
+              return 1 <= len(wrapped) <= 2 and all(len(line) <= max_line_chars for line in wrapped)
+
+          for line_number, line in enumerate(transcript.splitlines(), 1):
+              match = pattern.match(line)
+              if not match:
+                  continue
+              parsed_sentences += 1
+              raw_start, raw_end, sentence = match.groups()
+              start = max(0.0, float(raw_start), previous_end)
+              end = float(raw_end)
+              sentence = sentence.strip()
+              if not sentence or end <= start:
+                  raise ValueError(f"Invalid aligned transcript timing on line {line_number}")
+
+              chunks, pending = [], ""
+              for word in sentence.split():
+                  candidate = f"{pending} {word}".strip()
+                  if fits(candidate):
+                      pending = candidate
+                  else:
+                      if pending:
+                          chunks.append(pending)
+                      if not fits(word):
+                          raise ValueError(f"Single word cannot fit subtitle width: {word!r}")
+                      pending = word
+              if pending:
+                  chunks.append(pending)
+
+              counts = [len(chunk.split()) for chunk in chunks]
+              total_words = sum(counts)
+              cursor = start
+              for index, (chunk, count) in enumerate(zip(chunks, counts)):
+                  cue_end = end if index == len(chunks) - 1 else cursor + (end - start) * count / total_words
+                  rows.append({"start": cursor, "end": cue_end, "text": chunk})
+                  cursor = cue_end
+              previous_end = end
+
+          if parsed_sentences != 192:
+              raise SystemExit(f"Expected 192 Whisper-aligned sentences, parsed {parsed_sentences}")
+
+          # Merge very short adjacent cues where the speech gap and two-line limit allow it.
+          changed = True
+          while changed:
+              changed = False
+              for index, row in enumerate(rows):
+                  if row["end"] - row["start"] >= 0.8:
+                      continue
+                  if index + 1 < len(rows):
+                      nxt = rows[index + 1]
+                      combined = row["text"] + " " + nxt["text"]
+                      if nxt["start"] - row["end"] <= 0.45 and fits(combined):
+                          row["text"], row["end"] = combined, nxt["end"]
+                          rows.pop(index + 1)
+                          changed = True
+                          break
+                  if index > 0:
+                      prev = rows[index - 1]
+                      combined = prev["text"] + " " + row["text"]
+                      if row["start"] - prev["end"] <= 0.45 and fits(combined):
+                          prev["text"], prev["end"] = combined, row["end"]
+                          rows.pop(index)
+                          changed = True
+                          break
+
+          def timestamp(seconds, vtt=False):
+              millis = max(0, round(seconds * 1000))
+              hours, remainder = divmod(millis, 3_600_000)
+              minutes, remainder = divmod(remainder, 60_000)
+              secs, ms = divmod(remainder, 1000)
+              return f"{hours:02d}:{minutes:02d}:{secs:02d}{'.' if vtt else ','}{ms:03d}"
+
+          srt, vtt = [], ["WEBVTT", ""]
+          previous_end = 0.0
+          for index, row in enumerate(rows, 1):
+              if row["start"] < previous_end - 0.002 or row["end"] <= row["start"]:
+                  raise SystemExit(f"Overlapping or invalid caption cue: {row}")
+              wrapped = wrap_caption(row["text"])
+              if len(wrapped) > 2:
+                  raise SystemExit(f"Caption exceeds two lines: {row['text']}")
+              cue_text = "\n".join(wrapped)
+              srt.extend([str(index), f"{timestamp(row['start'])} --> {timestamp(row['end'])}", cue_text, ""])
+              vtt.extend([f"{timestamp(row['start'], True)} --> {timestamp(row['end'], True)}", cue_text, ""])
+              previous_end = row["end"]
+
+          qa = Path("projects/agincourt-1415/qa")
+          (qa / "captions.srt").write_text("\n".join(srt), encoding="utf-8")
+          (qa / "captions.vtt").write_text("\n".join(vtt), encoding="utf-8")
+          report = {
+              "status": "generated-from-word-aligned-transcript",
+              "source_sentences": parsed_sentences,
+              "caption_cues": len(rows),
+              "maximum_line_characters": max(len(line) for row in rows for line in wrap_caption(row["text"])),
+              "maximum_lines_per_cue": max(len(wrap_caption(row["text"])) for row in rows),
+              "short_cues_below_0_8s": sum(row["end"] - row["start"] < 0.8 for row in rows),
+              "last_caption_end_seconds": round(rows[-1]["end"], 3),
+          }
+          (qa / "caption-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(report, indent=2))
+          PY
+          FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
+          test -n "$FINAL"
+          TEMP="\${FINAL%.mp4}.captioned.tmp.mp4"
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions.srt:force_style='FontName=DejaVu Sans,FontSize=42,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,MarginV=64,Alignment=2,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
+          mv "$TEMP" "$FINAL"
+          for stamp in 90 180 310 470 580; do
+            ffmpeg -hide_banner -v error -y -ss "$stamp" -i "$FINAL" -frames:v 1 "projects/agincourt-1415/qa/caption-proof-$stamp.jpg"
+          done
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "fps=1/20,scale=480:-1,tile=4x4" -frames:v 1 projects/agincourt-1415/qa/caption-contact-sheet.jpg
       - name: Validate final MP4 and create QA report
         working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
         run: |
@@ -274,6 +414,9 @@ jobs:
           cp projects/agincourt-1415/story/shots.json "$GITHUB_WORKSPACE/deliverables/agincourt-1415/shots.json"
           cp projects/agincourt-1415/timeline/transcript.txt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/voice-timing-transcript.txt"
           cp "$GITHUB_WORKSPACE/voice-assets/manifest.json" "$GITHUB_WORKSPACE/deliverables/agincourt-1415/voice-manifest.json"
+          cp projects/agincourt-1415/qa/captions.srt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/captions.srt"
+          cp projects/agincourt-1415/qa/captions.vtt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/captions.vtt"
+          cp projects/agincourt-1415/qa/caption-report.json "$GITHUB_WORKSPACE/deliverables/agincourt-1415/caption-report.json"
       - name: Upload final video and production evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
