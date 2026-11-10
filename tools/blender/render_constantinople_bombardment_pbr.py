@@ -2,6 +2,7 @@
 """PBR-assisted Constantinople bombardment proof. Blender 4.x, native 240fps."""
 import bpy, math, os
 from mathutils import Vector
+from crew_mesh_policy import is_unwanted_crew_mesh
 
 FPS = 240
 TOTAL_FRAMES = 3840
@@ -175,6 +176,17 @@ if not os.path.isfile(CHARACTER_GLB):
     raise RuntimeError("Missing rigged crew GLB: "+CHARACTER_GLB)
 bpy.ops.import_scene.gltf(filepath=os.path.abspath(CHARACTER_GLB))
 crew_source=[o for o in bpy.data.objects if o not in crew_before and o.type in {"MESH","ARMATURE"}]
+for candidate in list(crew_source):
+    if candidate.type != "MESH":
+        continue
+    material_names=[m.name for m in candidate.data.materials if m]
+    dimensions=tuple(float(v) for v in candidate.dimensions)
+    if is_unwanted_crew_mesh(candidate.name,candidate.data.name,material_names,dimensions):
+        print("DROP_UNWANTED_CREW_MESH",candidate.name,"DATA",candidate.data.name,
+              "DIMS",tuple(round(v,3) for v in dimensions),
+              "MATERIALS",material_names,flush=True)
+        bpy.data.objects.remove(candidate,do_unlink=True)
+        crew_source.remove(candidate)
 source_arm=next((o for o in crew_source if o.type=="ARMATURE"),None)
 if source_arm is None:raise RuntimeError("Crew GLB contains no armature")
 source_meshes=[o for o in crew_source if o.type=="MESH"]
