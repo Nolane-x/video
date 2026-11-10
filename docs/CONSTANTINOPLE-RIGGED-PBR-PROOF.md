@@ -54,3 +54,10 @@ The PBR branch is isolated as `cinematic/constantinople-pbr-rigged-crew`. Pushes
 - To avoid repeating that large install on the smoke and eight render runners, the workflow now downloads the official Blender 4.0.2 Linux x64 archive once in `prepare`, verifies its SHA-256 against the official release checksum, checks the xz archive, and uploads it as a run-scoped runtime artifact. Smoke and each render chunk download and extract that same immutable runtime.
 - Package only attempts FFmpeg installation if the hosted runner does not already provide `ffmpeg` and `ffprobe`; this occurs once after all chunks, not once per render worker.
 - The portable-runtime workflow has not yet passed a new run. Its first smoke is the verification gate; do not describe the full video as rendered until all eight chunks and the package artifact are present and validated.
+
+
+### Portable runtime integration note
+
+- Run [42791870324](https://github.com/Nolane-x/video/actions/runs/42791870324) verified and uploaded the official 277.6 MB Blender 4.0.2 Linux archive; smoke downloaded/extracted it, imported `bpy` and NumPy, and passed the four mesh-policy tests.
+- The first render attempt reached full scene assembly and loaded all six performers with 12 meshes each, then aborted because the hosted runner did not have `libEGL.so.1`. The workflow now installs only the small headless EGL/OpenGL/X11 runtime libraries on smoke and render workers, rather than reinstalling Blender and its 225 MB dependency tree.
+- The EGL-library fix has not yet passed a new smoke run. Full render remains gated until it does.
