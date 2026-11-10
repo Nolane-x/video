@@ -17,3 +17,5 @@ Repeat the crew/firing smoke proof and publish both lower-body diagnostic PNGs f
 Run a focused five-mesh isolation pass before approving the full render: hide the outer caftan, under-tunic and boots independently, alongside the existing trousers and Body diagnostics. Compare the six images at frame 900 to identify which imported mesh produces the faceted lower-body mass.
 
 Repeat smoke with mesh identity and local bounds diagnostics for imported cannon props and all CC0 crew meshes.
+
+Re-run smoke after filtering unmaterialed oversized crew import helpers; run the new mesh-policy regression tests before Blender scene assembly.
