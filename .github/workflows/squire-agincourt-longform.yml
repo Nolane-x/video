@@ -66,18 +66,10 @@ jobs:
           print('job_json=' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
           PY
 
-  voice:
-    name: Generate and verify Adam narration
-    needs: prepare
-    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@5dddd8d42ac3520a61f8ecc6090545e4ff8c4f61
-    with:
-      job_json: ${{ needs.prepare.outputs.job_json }}
-
   render:
     name: Squire 1080p animation, mix and final QA
     needs:
       - prepare
-      - voice
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     env:
@@ -93,11 +85,39 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Download verified VoiceStudio output
+      - name: Download the verified Agincourt narration artifact
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
         with:
-          name: video-voice-assets-${{ github.run_id }}
+          name: video-voice-assets-42806729117
           path: voice-assets
+          run-id: "42806729117"
+          repository: Nolane-x/video
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify narration hash, audio format and watermark provenance
+        env:
+          EXPECTED_WAV_SHA256: 4a2e4b60263cac4b665000f4580661d4322cbd71b3729034b9185988d5498aba
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          root = Path("voice-assets")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          audio = manifest["audio"]
+          wav = root / "narration.wav"
+          digest = hashlib.sha256(wav.read_bytes()).hexdigest()
+          assert manifest["job_id"] == "agincourt-1415-animated-longform"
+          assert manifest["engine"] == "vieneu"
+          assert manifest["voice_id"] == "en-vieneu-v3turbo-adam-3f0c9b"
+          assert audio["sample_rate"] == 48000 and audio["channels"] == 1
+          assert audio["subtype"] == "PCM_24" and audio["checks"] == "passed"
+          assert audio["watermark"]["status"] == "verified"
+          assert audio["watermark"]["block_count"] == 21
+          assert digest == audio["sha256"] == os.environ["EXPECTED_WAV_SHA256"]
+          print(f"Verified reused narration: {audio['duration_seconds']}s, 48kHz mono PCM-24, SHA-256 {digest}")
+          print(f"AudioSeal verified: {audio['watermark']['block_count']} blocks")
+          PY
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -112,7 +132,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg libsndfile1 libgl1 libglib2.0-0 libgomp1
       - name: Restore renderer and speech-alignment caches
-        uses: actions/cache@0c45773b623bea8c8e75f6c82d208c3cf94ea4f9 # v4.2.1
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: |
             .cache/huggingface
