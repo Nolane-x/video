@@ -13,3 +13,5 @@ Run selective diagnostic stills with the trousers mesh and Body mesh hidden inde
 Retry mesh isolation smoke after removing the unnecessary FFmpeg install from the preparation job.
 
 Repeat the crew/firing smoke proof and publish both lower-body diagnostic PNGs for visual comparison.
+
+Run a focused five-mesh isolation pass before approving the full render: hide the outer caftan, under-tunic and boots independently, alongside the existing trousers and Body diagnostics. Compare the six images at frame 900 to identify which imported mesh produces the faceted lower-body mass.
