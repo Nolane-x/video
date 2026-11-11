@@ -107,10 +107,14 @@ jobs:
             "https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz" \
             -o "$ARCHIVE"
           echo "f6f8a35568815b7a99e0c513d7c6593262422986047068db190980c4bc186865  $ARCHIVE" | sha256sum --check -
-          tar -xJf "$ARCHIVE" --wildcards --no-anchored '*/bin/ffmpeg' '*/bin/ffprobe' -C "$TOOLS"
+          tar -xJf "$ARCHIVE" -C "$TOOLS"
           FF_BIN="$(find "$TOOLS" -type f -name ffmpeg -print -quit)"
           PROBE_BIN="$(find "$TOOLS" -type f -name ffprobe -print -quit)"
-          test -n "$FF_BIN" && test -n "$PROBE_BIN"
+          if [[ -z "$FF_BIN" || -z "$PROBE_BIN" ]]; then
+            echo "FFmpeg binaries not found in the verified archive. Archive file listing:"
+            tar -tJf "$ARCHIVE" | head -n 80
+            exit 1
+          fi
           mkdir -p "$TOOLS/bin"
           install -m 0755 "$FF_BIN" "$TOOLS/bin/ffmpeg"
           install -m 0755 "$PROBE_BIN" "$TOOLS/bin/ffprobe"
