@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
       - "Squire · Constantinople 1453 · Cinematic redesign proof"
+      - "Squire · Constantinople 1453 · Segmented 240fps master"
     types:
       - completed
     branches:
