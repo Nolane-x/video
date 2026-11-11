@@ -5,7 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SPEC = importlib.util.spec_from_file_location("reflow", Path(__file__).with_name("reflow_squire_captions.py"))
+SCRIPT = Path(__file__).resolve().parents[1] / "tools" / "video" / "reflow_squire_captions.py"
+SPEC = importlib.util.spec_from_file_location("reflow", SCRIPT)
 reflow = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = reflow
 assert SPEC.loader
