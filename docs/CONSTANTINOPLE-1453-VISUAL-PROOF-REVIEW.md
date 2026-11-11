@@ -58,3 +58,10 @@ The generated shotbook contains 583 shots over 957.9 seconds (15:57.9). The 14 b
 
 **Technical proof: passed. Artistic approval: not granted.**  
 The current 16-minute master render must complete its strict technical QA first. Preserve the existing previous master as a rollback artifact. Do not merge or replace the release/default branch on the strength of this proof alone.
+
+
+## Additional subtitle and audio measurement
+
+- Local ffprobe verification of the downloaded proof confirms 37.383 seconds, 8,969 encoded frames, 1920×1080, H.264 at constant 240/1 fps, plus AAC stereo 48 kHz.
+- Proof mix measurement: -14.30 LUFS integrated, -3.24 dBTP true peak, 2.10 LU loudness range. This is a safe technical level for the proof, not approval of the music or Foley choices.
+- The delivered SRT sidecar has 238 cues. In its text payload, 113 lines exceed 56 characters and the longest line is 154 characters. Reflow sidecar cues to a maximum of two balanced lines (target roughly 42–48 characters per line), preserve original cue timing, and verify no overlaps before final delivery. This is a sidecar formatting issue; it does not by itself prove that the burn-in caption renderer overflowed.
