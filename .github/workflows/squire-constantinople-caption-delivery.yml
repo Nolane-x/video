@@ -79,7 +79,7 @@ jobs:
           cue_speeds = []
           for cue in parse_subtitles(root / "readable" / "captions.srt", "srt"):
               seconds = cue.end - cue.start
-              visible_text = cue.text.replace("\\n", " ")
+              visible_text = cue.text.replace("\n", " ")
               cue_speeds.append({
                   "cps": len(visible_text) / seconds,
                   "wpm": len(visible_text.split()) / seconds * 60
