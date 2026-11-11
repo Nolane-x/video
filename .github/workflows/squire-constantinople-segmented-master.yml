@@ -446,7 +446,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p = json.loads(Path("'"$RUNNER_TEMP"'/master-silent-probe.json").read_text(encoding="utf-8"))
+          p = json.loads((Path(__import__("os").environ["RUNNER_TEMP"]) / "master-silent-probe.json").read_text(encoding="utf-8"))
           v = next(s for s in p["streams"] if s.get("codec_type") == "video")
           frames = int(v.get("nb_read_frames") or v.get("nb_frames") or 0)
           duration = float(p["format"]["duration"])
