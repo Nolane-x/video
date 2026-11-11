@@ -1,4 +1,5 @@
 name: Squire · Constantinople 1453 · Cinematic redesign proof
+# Explicit [full-render] commit messages enable the gated full 16-minute master render.
 
 on:
   push:
