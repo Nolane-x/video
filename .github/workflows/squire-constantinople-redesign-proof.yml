@@ -170,9 +170,9 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           python tools/video/author_squire_constantinople.py --project "$SQUIRE_PROJECT"
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
-          cfg=json.loads(Path("$SQUIRE_PROJECT/config.json").read_text(encoding="utf-8"))
+          cfg=json.loads((Path(os.environ["SQUIRE_PROJECT"])/"config.json").read_text(encoding="utf-8"))
           assert cfg["fps"] == 240, cfg
           assert cfg["style"] == "dusk", cfg
           assert cfg["captions"] is True, cfg
