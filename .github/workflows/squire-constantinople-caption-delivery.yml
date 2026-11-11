@@ -1,0 +1,126 @@
+name: Squire · Constantinople 1453 · Readable caption delivery
+
+on:
+  workflow_run:
+    workflows:
+      - "Squire · Constantinople 1453 · Cinematic redesign proof"
+    types:
+      - completed
+    branches:
+      - squire/constantinople-1453-redesign
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-constantinople-caption-delivery-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  deliver-readable-captions:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the tested caption reflow utility
+        uses: actions/checkout@v4
+        with:
+          ref: 9dfc996d0586aaac49999bd6d7ad3adb7893c077
+          path: caption-tool
+          persist-credentials: false
+
+      - name: Download captions from the successful master artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-1453-redesign-240fps-${{ github.event.workflow_run.id }}
+          path: source
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reflow captions and verify both delivery formats
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s source/captions.srt
+          test -s source/captions.vtt
+          mkdir -p delivery/original
+          cp source/captions.srt source/captions.vtt delivery/original/
+          python caption-tool/tools/video/reflow_squire_captions.py \
+            --srt source/captions.srt \
+            --vtt source/captions.vtt \
+            --output-dir delivery/readable
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          root = Path("delivery")
+          report_path = root / "readable" / "CAPTION-REFLOW-REPORT.json"
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          for kind in ("srt", "vtt"):
+              row = report[kind]
+              assert row["status"] == "pass", (kind, row)
+              assert row["max_line_chars_after"] <= 42, (kind, row)
+              assert row["max_lines_per_cue_after"] <= 2, (kind, row)
+              assert row["preserved_words"] > 0, (kind, row)
+          assert report["srt"]["preserved_words"] == report["vtt"]["preserved_words"]
+          assert (root / "readable" / "captions.srt").is_file()
+          assert (root / "readable" / "captions.vtt").is_file()
+
+          files = sorted(p for p in root.rglob("*") if p.is_file())
+          manifest = {
+              "status": "pass",
+              "source_run_id": os.environ["SOURCE_RUN_ID"],
+              "source_branch": os.environ["SOURCE_BRANCH"],
+              "source_commit": os.environ["SOURCE_SHA"],
+              "caption_policy": {
+                  "max_characters_per_line": 42,
+                  "max_lines_per_cue": 2,
+                  "original_captions_preserved": True,
+                  "word_order_preserved": True,
+                  "cue_split_timestamps": "proportional estimates within original cue boundaries; not phoneme-level forced alignment"
+              },
+              "srt": report["srt"],
+              "vtt": report["vtt"],
+              "files": {
+                  str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                  for p in files
+              }
+          }
+          (root / "CAPTION-DELIVERY-MANIFEST.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8"
+          )
+          (root / "README.md").write_text(
+              "# Constantinople 1453 — readable caption sidecars\n\n"
+              "The original SRT/VTT are preserved in original/. "
+              "The reflowed, easier-to-read versions are in readable/.\n\n"
+              "The reflow keeps every source word in order, limits lines to 42 characters "
+              "and cues to two lines. When a source cue must be split, internal timestamps "
+              "are estimated proportionally inside that cue; they are not phoneme-level "
+              "forced alignment. The original cue boundaries and inter-cue gaps are preserved.\n",
+              encoding="utf-8"
+          )
+          print(json.dumps({
+              "status": "PASS",
+              "source_run_id": os.environ["SOURCE_RUN_ID"],
+              "srt_cues": report["srt"]["output_cues"],
+              "vtt_cues": report["vtt"]["output_cues"],
+              "words_preserved": report["srt"]["preserved_words"],
+              "max_line_chars": 42,
+              "max_lines": 2
+          }, indent=2))
+          PY
+
+      - name: Upload readable captions as a separate lightweight artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-1453-readable-captions-${{ github.event.workflow_run.id }}
+          path: delivery/
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 30
