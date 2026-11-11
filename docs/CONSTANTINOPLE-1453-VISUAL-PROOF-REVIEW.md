@@ -65,3 +65,22 @@ The current 16-minute master render must complete its strict technical QA first.
 - Local ffprobe verification of the downloaded proof confirms 37.383 seconds, 8,969 encoded frames, 1920×1080, H.264 at constant 240/1 fps, plus AAC stereo 48 kHz.
 - Proof mix measurement: -14.30 LUFS integrated, -3.24 dBTP true peak, 2.10 LU loudness range. This is a safe technical level for the proof, not approval of the music or Foley choices.
 - The delivered SRT sidecar has 238 cues. In its text payload, 113 lines exceed 56 characters and the longest line is 154 characters. Reflow sidecar cues to a maximum of two balanced lines (target roughly 42–48 characters per line), preserve original cue timing, and verify no overlaps before final delivery. This is a sidecar formatting issue; it does not by itself prove that the burn-in caption renderer overflowed.
+
+
+## Implemented caption-sidecar repair
+
+Added `tools/video/reflow_squire_captions.py` and `tests/test_squire_caption_reflow.py` on this branch. The utility verifies SRT/VTT source parity, splits long paragraph captions at word boundaries, balances the resulting cue groups, and preserves each original cue's outer start/end time and the gaps between source cues.
+
+Measured against the VoiceStudio subtitle sidecars used for this film:
+- Source cues: 238; reflowed cues: 294
+- Longest source line: 154 characters; longest output line: 42 characters
+- Every output cue: at most 2 lines
+- All 2,473 words preserved, in source order
+- No overlaps; original timeline endpoints and inter-cue gaps retained
+- Minimum output cue duration: 0.88 seconds
+- Four unit tests pass locally
+
+Command:
+`python tools/video/reflow_squire_captions.py --srt voice-assets/captions.srt --vtt voice-assets/captions.vtt --output-dir reflowed-captions`
+
+This is a sidecar fix and does not require re-encoding the video. The in-flight GitHub Actions render uses the commit it checked out at start; this newly added utility is for the next delivery assembly/review and did not modify the active render workflow.
