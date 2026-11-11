@@ -30,6 +30,8 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+      - name: Validate Agincourt authoring source before CPU narration
+        run: python -m py_compile tools/video/author_story_v3.py
       - name: Verify source and project package digests
         run: |
           sha256sum --check <<'EOF'
@@ -187,7 +189,7 @@ jobs:
           test -n "$AUDIO_FILE"
           python tools/prep_voice.py --project projects/agincourt-1415 --single "$AUDIO_FILE" --script "$PROJECT_DOCS/transcript.txt" --whisper small.en --max-pause 0.45 --lead 0.55 --lang en
           python tools/draft_shots.py --project projects/agincourt-1415 --min 1.6 --max 4.0 --lead 0.12
-          python "$GITHUB_WORKSPACE/tools/video/author_story_v2.py" --project projects/agincourt-1415
+          python "$GITHUB_WORKSPACE/tools/video/author_story_v3.py" --project projects/agincourt-1415
       - name: Validate shot coverage, SFX and music contracts
         working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
         run: |
@@ -337,7 +339,7 @@ jobs:
               secs, ms = divmod(remainder, 1000)
               return f"{hours:02d}:{minutes:02d}:{secs:02d}{'.' if vtt else ','}{ms:03d}"
 
-          srt, vtt = [], ["WEBVTT", ""]
+          srt, vtt, burn_srt = [], ["WEBVTT", ""], []
           previous_end = 0.0
           for index, row in enumerate(rows, 1):
               if row["start"] < previous_end - 0.002 or row["end"] <= row["start"]:
@@ -346,15 +348,20 @@ jobs:
               if len(wrapped) > 2:
                   raise SystemExit(f"Caption exceeds two lines: {row['text']}")
               cue_text = "\n".join(wrapped)
-              srt.extend([str(index), f"{timestamp(row['start'])} --> {timestamp(row['end'])}", cue_text, ""])
+              start_stamp, end_stamp = timestamp(row['start']), timestamp(row['end'])
+              srt.extend([str(index), f"{start_stamp} --> {end_stamp}", cue_text, ""])
+              burn_srt.extend([str(index), f"{start_stamp} --> {end_stamp}", r"{\an8}" + cue_text, ""])
               vtt.extend([f"{timestamp(row['start'], True)} --> {timestamp(row['end'], True)}", cue_text, ""])
               previous_end = row["end"]
 
           qa = Path("projects/agincourt-1415/qa")
           (qa / "captions.srt").write_text("\n".join(srt), encoding="utf-8")
           (qa / "captions.vtt").write_text("\n".join(vtt), encoding="utf-8")
+          (qa / "captions-burn.srt").write_text("\n".join(burn_srt), encoding="utf-8")
           report = {
               "status": "generated-from-word-aligned-transcript",
+              "burn_in_position": "top-center (ASS an8 override)",
+              "burn_in_font_size": 20,
               "source_sentences": parsed_sentences,
               "caption_cues": len(rows),
               "maximum_line_characters": max(len(line) for row in rows for line in wrap_caption(row["text"])),
@@ -368,7 +375,7 @@ jobs:
           FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
           test -n "$FINAL"
           TEMP="projects/agincourt-1415/out/Agincourt-captioned.tmp.mp4"
-          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions.srt:force_style='FontName=DejaVu Sans,FontSize=18,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0.3,MarginV=24,Alignment=2,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions-burn.srt:force_style='FontName=DejaVu Sans,FontSize=20,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1.5,Shadow=0.4,MarginV=30,Alignment=8,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
           mv "$TEMP" "$FINAL"
           for stamp in 91 181 311 471 581; do
             ffmpeg -hide_banner -v error -y -ss "$stamp" -i "$FINAL" -frames:v 1 "projects/agincourt-1415/qa/caption-proof-$stamp.jpg"
