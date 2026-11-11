@@ -84,17 +84,16 @@ jobs:
         run: |
           set -euo pipefail
           echo "Dependency setup started at $(date -u --iso-8601=seconds)"
-          for tool in ffmpeg curl unzip; do
-            command -v "$tool" || { echo "Required runner image tool missing: $tool"; exit 1; }
+          timeout 8m sudo apt-get update \
+            -o Acquire::Retries=2 \
+            -o Acquire::http::Timeout=30 \
+            -o Acquire::https::Timeout=30
+          timeout 10m sudo apt-get install -y --no-install-recommends \
+            ffmpeg p7zip-full curl unzip
+          for tool in ffmpeg 7z curl unzip; do
+            command -v "$tool"
           done
-          if ! command -v 7z >/dev/null 2>&1; then
-            echo "7z missing; installing only p7zip-full with bounded apt operations"
-            timeout 8m sudo apt-get update \
-              -o Acquire::Retries=2 \
-              -o Acquire::http::Timeout=30 \
-              -o Acquire::https::Timeout=30
-            timeout 8m sudo apt-get install -y p7zip-full
-          fi
+          ffmpeg -version | head -n 1
           7z | head -n 2 || true
           timeout 25m python -m pip install --disable-pip-version-check --no-input \
             --retries 2 --timeout 45 \
@@ -181,7 +180,7 @@ jobs:
           set -euo pipefail
           cd "$SQUIRE_KIT"
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          timeout 20m npx playwright install --with-deps chromium
           python audio/build_audio.py
           python tools/doctor.py
 
@@ -312,11 +311,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          timeout 8m sudo apt-get update \
+            -o Acquire::Retries=2 \
+            -o Acquire::http::Timeout=30 \
+            -o Acquire::https::Timeout=30
+          timeout 10m sudo apt-get install -y --no-install-recommends ffmpeg
           cd integrations/h2-squire-studio/kit
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          timeout 20m npx playwright install --with-deps chromium
 
       - name: Download and restore prepared project bundle
         uses: actions/download-artifact@v4
@@ -407,8 +409,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          timeout 8m sudo apt-get update \
+            -o Acquire::Retries=2 \
+            -o Acquire::http::Timeout=30 \
+            -o Acquire::https::Timeout=30
+          timeout 10m sudo apt-get install -y --no-install-recommends ffmpeg
           python -m pip install --upgrade pip
           python -m pip install --disable-pip-version-check \
             'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' 'pyloudnorm>=0.1.1'
@@ -442,7 +447,7 @@ jobs:
           KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
           cd "$KIT"
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          timeout 20m npx playwright install --with-deps chromium
           tar -xzf "$GITHUB_WORKSPACE/prepared/constantinople-prepared-project.tar.gz" -C "$KIT"
           cd "$GITHUB_WORKSPACE"
           python - <<'PY'
