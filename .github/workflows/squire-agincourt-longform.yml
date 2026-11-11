@@ -8,6 +8,7 @@ on:
       - '.github/workflows/squire-agincourt-longform.yml'
       - 'integrations/h2-squire-studio/**'
       - 'video-projects/squire/**'
+      - 'tools/video/author_story_v3.py'
   workflow_dispatch:
 
 permissions:
