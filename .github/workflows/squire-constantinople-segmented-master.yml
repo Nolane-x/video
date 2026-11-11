@@ -76,25 +76,16 @@ jobs:
           run-id: 42448341267
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install bounded authoring, alignment and media dependencies
+      - name: Install authoring and alignment Python dependencies
         shell: bash
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: "1"
           PIP_DEFAULT_TIMEOUT: "45"
         run: |
           set -euo pipefail
-          echo "Dependency setup started at $(date -u --iso-8601=seconds)"
-          timeout 8m sudo apt-get update \
-            -o Acquire::Retries=2 \
-            -o Acquire::http::Timeout=30 \
-            -o Acquire::https::Timeout=30
-          timeout 10m sudo apt-get install -y --no-install-recommends \
-            ffmpeg p7zip-full curl unzip
-          for tool in ffmpeg 7z curl unzip; do
-            command -v "$tool"
-          done
-          ffmpeg -version | head -n 1
-          7z | head -n 2 || true
+          command -v curl
+          command -v tar
+          command -v 7z
           timeout 25m python -m pip install --disable-pip-version-check --no-input \
             --retries 2 --timeout 45 \
             'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' \
@@ -104,7 +95,37 @@ jobs:
           for name in ("numpy", "scipy", "soundfile", "pyloudnorm", "faster-whisper"):
               print(name, md.version(name))
           PY
-          echo "Dependency setup finished at $(date -u --iso-8601=seconds)"
+
+      - name: Install checksum-pinned static FFmpeg and FFprobe
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOOLS="$GITHUB_WORKSPACE/.tools/ffmpeg"
+          ARCHIVE="$RUNNER_TEMP/ffmpeg-master-latest-linux64-gpl.tar.xz"
+          mkdir -p "$TOOLS"
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 900 \
+            "https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz" \
+            -o "$ARCHIVE"
+          echo "f6f8a35568815b7a99e0c513d7c6593262422986047068db190980c4bc186865  $ARCHIVE" | sha256sum --check -
+          tar -xJf "$ARCHIVE" --wildcards --no-anchored '*/bin/ffmpeg' '*/bin/ffprobe' -C "$TOOLS"
+          FF_BIN="$(find "$TOOLS" -type f -name ffmpeg -print -quit)"
+          PROBE_BIN="$(find "$TOOLS" -type f -name ffprobe -print -quit)"
+          test -n "$FF_BIN" && test -n "$PROBE_BIN"
+          mkdir -p "$TOOLS/bin"
+          install -m 0755 "$FF_BIN" "$TOOLS/bin/ffmpeg"
+          install -m 0755 "$PROBE_BIN" "$TOOLS/bin/ffprobe"
+          echo "$TOOLS/bin" >> "$GITHUB_PATH"
+          "$TOOLS/bin/ffmpeg" -version | head -n 1
+          "$TOOLS/bin/ffprobe" -version | head -n 1
+
+      - name: Upload reusable FFmpeg toolchain for render shards
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
+          path: .tools/ffmpeg/bin/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
       - name: Verify narrator checksum, sample rate, channels and watermark
         shell: bash
@@ -180,7 +201,7 @@ jobs:
           set -euo pipefail
           cd "$SQUIRE_KIT"
           npm install --no-audit --no-fund
-          timeout 20m npx playwright install --with-deps chromium
+          timeout 20m npx playwright install chromium
           python audio/build_audio.py
           python tools/doctor.py
 
@@ -311,20 +332,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 8m sudo apt-get update \
-            -o Acquire::Retries=2 \
-            -o Acquire::http::Timeout=30 \
-            -o Acquire::https::Timeout=30
-          timeout 10m sudo apt-get install -y --no-install-recommends ffmpeg
           cd integrations/h2-squire-studio/kit
           npm install --no-audit --no-fund
-          timeout 20m npx playwright install --with-deps chromium
+          timeout 20m npx playwright install chromium
 
       - name: Download and restore prepared project bundle
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-prepared-${{ github.run_id }}
           path: prepared
+
+      - name: Download shared static FFmpeg toolchain
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
+          path: .tools/ffmpeg/bin
+
+      - name: Add FFmpeg and FFprobe to PATH
+        run: echo "$GITHUB_WORKSPACE/.tools/ffmpeg/bin" >> "$GITHUB_PATH"
 
       - name: Render this exact frame interval at native 240fps
         env:
@@ -409,11 +434,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 8m sudo apt-get update \
-            -o Acquire::Retries=2 \
-            -o Acquire::http::Timeout=30 \
-            -o Acquire::https::Timeout=30
-          timeout 10m sudo apt-get install -y --no-install-recommends ffmpeg
           python -m pip install --upgrade pip
           python -m pip install --disable-pip-version-check \
             'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' 'pyloudnorm>=0.1.1'
@@ -426,6 +446,15 @@ jobs:
         with:
           name: squire-constantinople-prepared-${{ github.run_id }}
           path: prepared
+
+      - name: Download shared static FFmpeg toolchain
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
+          path: .tools/ffmpeg/bin
+
+      - name: Add FFmpeg and FFprobe to PATH
+        run: echo "$GITHUB_WORKSPACE/.tools/ffmpeg/bin" >> "$GITHUB_PATH"
 
       - uses: actions/download-artifact@v4
         with:
@@ -447,7 +476,7 @@ jobs:
           KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
           cd "$KIT"
           npm install --no-audit --no-fund
-          timeout 20m npx playwright install --with-deps chromium
+          timeout 20m npx playwright install chromium
           tar -xzf "$GITHUB_WORKSPACE/prepared/constantinople-prepared-project.tar.gz" -C "$KIT"
           cd "$GITHUB_WORKSPACE"
           python - <<'PY'
