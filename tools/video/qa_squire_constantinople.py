@@ -17,12 +17,14 @@ def main():
     title=cfg["title"];safe=re.sub(r'[\\/:*?"<>|]',"",title).strip()
     final=p/"out"/(safe+".mp4");preview=p/"build"/"preview.mp4";thumb=p/"out"/"thumbnail.png"
     assert cfg.get("fps")==FPS,f"Project config must be {FPS} fps"
+    assert cfg.get("style")=="dusk",f"Cinematic grade must be dusk, got {cfg.get('style')!r}"
+    assert cfg.get("captions") is True,"Readable on-frame captions must be enabled"
     assert final.is_file() and final.stat().st_size>300_000,f"Missing/undersized final: {final}"
     assert preview.is_file() and preview.stat().st_size>50_000,"Missing 240fps moving proof"
     assert thumb.is_file() and thumb.stat().st_size>10_000,"Missing thumbnail"
     assert any((p/"build"/"sheets").glob("sheet_*.jpg")),"Contact sheets missing"
     shots=story.get("shots") or [];duration=float(story.get("duration",0))
-    assert duration>650,f"Film too short: {duration:.1f}s"
+    assert 945<=duration<=975,f"Expected a 16-minute film (15:45–16:15), got {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
     custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city"}
     custom_count=sum(1 for s in shots if s.get("tpl") in custom)
@@ -56,6 +58,7 @@ def main():
     assert aud["sample_rate"]==48000 and aud["channels"]==1 and aud["subtype"]=="PCM_24"
     assert sha(wav)==aud["sha256"] and sha(timeline)==aud["sha256"]
     assert (assets/"captions.srt").stat().st_size>100 and (assets/"captions.vtt").stat().st_size>100
+    assert (p/"story"/"captions.srt").is_file() and (p/"story"/"captions.vtt").is_file(),"Project caption sidecars are missing"
     # Verify all story beds are real CC0 recordings, never procedural placeholders.
     audio_manifest_path=p/"story"/"AUDIO-SOURCE-MANIFEST.json"
     assert audio_manifest_path.is_file(),"Recorded-audio provenance manifest missing"
@@ -102,7 +105,7 @@ def main():
     measurement=json.loads(hits[-1]);integrated=float(measurement["input_i"]);peak=float(measurement["input_tp"])
     assert -15.7<=integrated<=-12.3,f"LUFS outside target: {integrated}"
     assert peak<=-1.0,f"True peak too high: {peak}"
-    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
+    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"style":cfg.get("style"),"captions_enabled":cfg.get("captions"),"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
     (p/"story"/"QA-REPORT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     lines=["# Constantinople 1453 — 240 fps technical report","",f"- Status: {report['status']}","- Artistic sign-off: pending full human review",f"- Duration: {report['duration_seconds']:.2f}s","- Picture: 1920×1080 / native 240 fps / {frames} frames",f"- Shots: {len(shots)} total; {custom_count} bespoke scene shots",f"- Unique sampled frames: {unique}/{len(hashes)}",f"- Sound: AAC stereo / 48 kHz / {integrated:.2f} LUFS / {peak:.2f} dBTP",f"- SHA-256: {report['final_sha256']}","","240 fps is verified in the encoded stream. A 60 Hz display cannot show 240 distinct refreshes per second; the master preserves the additional temporal samples for supported playback and slow-motion editorial use."]
     (p/"story"/"QA-REPORT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")

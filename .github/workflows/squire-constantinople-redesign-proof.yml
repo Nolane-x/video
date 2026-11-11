@@ -12,6 +12,12 @@ on:
       - 'video-projects/squire/constantinople-1453/**'
       - 'integrations/h2-squire-studio/kit/**'
   workflow_dispatch:
+    inputs:
+      full_render:
+        description: Render the complete 15:57.9 native 240fps film after the cinematic proof passes
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -25,7 +31,7 @@ jobs:
   render-scene-proof:
     name: Render one moving 240fps shot from each custom scene
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 360
     env:
       VOICE_RUN_ID: "42448341267"
     steps:
@@ -224,4 +230,52 @@ jobs:
           name: squire-constantinople-redesign-proof-${{ github.run_id }}
           path: ${{ runner.temp }}/constantinople-redesign-review/
           if-no-files-found: error
+          retention-days: 30
+      - name: Render complete 15:57.9 1080p native 240fps master
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-render]')) || (github.event_name == 'workflow_dispatch' && inputs.full_render == true) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453-redesign-proof --style dusk --workers 4 --crf 18 --maxrate 48M --bufsize 96M --preset slow 2>&1 | tee projects/constantinople-1453-redesign-proof/build/full-render.log
+          test -s projects/constantinople-1453-redesign-proof/build/video_silent.mp4
+      - name: Mix narration, recorded score and Foley; build cinematic thumbnail
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-render]')) || (github.event_name == 'workflow_dispatch' && inputs.full_render == true) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          python tools/mix.py --project projects/constantinople-1453-redesign-proof
+          node render.mjs --project projects/constantinople-1453-redesign-proof --thumb --style dusk
+      - name: Run strict long-form 240fps QA and assemble final delivery
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-render]')) || (github.event_name == 'workflow_dispatch' && inputs.full_render == true) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/video/qa_squire_constantinople.py --project "$SQUIRE_PROJECT" --voice-assets "$GITHUB_WORKSPACE/voice-assets"
+          OUT="$RUNNER_TEMP/constantinople-1453-redesign-final"
+          mkdir -p "$OUT/contact-sheets"
+          cp -a "$SQUIRE_PROJECT/out/." "$OUT/"
+          cp -a "$SQUIRE_PROJECT/build/sheets/." "$OUT/contact-sheets/"
+          cp "$SQUIRE_PROJECT/build/redesign-motion-proof.mp4" "$OUT/redesign-motion-proof-240fps.mp4"
+          cp "$SQUIRE_PROJECT/build/preview.mp4" "$OUT/native-240fps-preview-segment.mp4"
+          cp "$SQUIRE_PROJECT/build/full-render.log" "$OUT/"
+          cp "$SQUIRE_PROJECT/build/mix.wav" "$OUT/final-mix.wav"
+          cp "$SQUIRE_PROJECT/timeline/voice.wav" "$OUT/narration-timeline.wav"
+          cp "$SQUIRE_PROJECT/story/QA-REPORT.md" "$SQUIRE_PROJECT/story/QA-REPORT.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/alignment-report.json" "$SQUIRE_PROJECT/story/voice-manifest.json" "$SQUIRE_PROJECT/story/voice-selection.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/AUDIO-SOURCE-MANIFEST.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/captions.srt" "$SQUIRE_PROJECT/story/captions.vtt" "$OUT/"
+          cp "$SQUIRE_PROJECT/story/shots.json" "$SQUIRE_PROJECT/config.json" "$OUT/"
+          cp video-projects/squire/constantinople-1453/01-SCRIPT.md "$OUT/"
+          cp video-projects/squire/constantinople-1453/story/bible.md "$OUT/story-bible.md"
+          (cd "$OUT" && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload complete 16-minute 1080p native 240fps master and QA
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-render]')) || (github.event_name == 'workflow_dispatch' && inputs.full_render == true) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-1453-redesign-240fps-${{ github.run_id }}
+          path: ${{ runner.temp }}/constantinople-1453-redesign-final/
+          if-no-files-found: error
+          compression-level: 0
           retention-days: 30
