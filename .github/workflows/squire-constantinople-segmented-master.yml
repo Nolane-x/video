@@ -76,16 +76,36 @@ jobs:
           run-id: 42448341267
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install authoring, alignment and media dependencies
+      - name: Install bounded authoring, alignment and media dependencies
         shell: bash
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+          PIP_DEFAULT_TIMEOUT: "45"
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg p7zip-full curl unzip
-          python -m pip install --upgrade pip
-          python -m pip install --disable-pip-version-check \
+          echo "Dependency setup started at $(date -u --iso-8601=seconds)"
+          for tool in ffmpeg curl unzip; do
+            command -v "$tool" || { echo "Required runner image tool missing: $tool"; exit 1; }
+          done
+          if ! command -v 7z >/dev/null 2>&1; then
+            echo "7z missing; installing only p7zip-full with bounded apt operations"
+            timeout 8m sudo apt-get update \
+              -o Acquire::Retries=2 \
+              -o Acquire::http::Timeout=30 \
+              -o Acquire::https::Timeout=30
+            timeout 8m sudo apt-get install -y p7zip-full
+          fi
+          7z | head -n 2 || true
+          timeout 25m python -m pip install --disable-pip-version-check --no-input \
+            --retries 2 --timeout 45 \
             'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' \
             'pyloudnorm>=0.1.1' 'faster-whisper==1.2.1'
+          python - <<'PY'
+          import importlib.metadata as md
+          for name in ("numpy", "scipy", "soundfile", "pyloudnorm", "faster-whisper"):
+              print(name, md.version(name))
+          PY
+          echo "Dependency setup finished at $(date -u --iso-8601=seconds)"
 
       - name: Verify narrator checksum, sample rate, channels and watermark
         shell: bash
