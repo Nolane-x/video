@@ -312,7 +312,7 @@ def main():
                      'blocks': [{'x': .20, 'y': .50, 'w': .25, 'h': .55, 'rows': 10, 'cols': 8, 'side': 'red', 'cell': .024, 'seed': 162},
                                 {'x': .76, 'y': .50, 'w': .34, 'h': .70, 'rows': 12, 'cols': 15, 'side': 'blue', 'cell': .022, 'seed': 163,
                                  'path': [[0, .70, .50], [.8, .62, .50], [1.8, .55, .50]]}],
-                     'arrows': [{'from': [.82, .47], 'to': [.49, .47], 'at': .25, 'w': 10, 'color': '#d14c42}],
+                     'arrows': [{'from': [.82, .47], 'to': [.49, .47], 'at': .25, 'w': 10, 'color': '#d14c42'}],
                      'dust': [{'x': .55, 'y': .50, 's': .18, 'at': .7}, {'x': .47, 'y': .62, 's': .12, 'at': 1.2}],
                      'fog': [.40, .64], 'move': 'in', 'moveAmt': .055}
         elif i == 7:
@@ -388,7 +388,7 @@ def main():
     write(config_path,config)
     from collections import Counter
     counts=Counter(s['tpl'] for s in shots)
-    print('SQUIRE V2:',len(shots),'shots;',round(duration,2),'seconds;',dict(counts))
+    print('SQUIRE V3:',len(shots),'shots;',round(duration,2),'seconds;',dict(counts))
 
 if __name__=='__main__':
     main()
