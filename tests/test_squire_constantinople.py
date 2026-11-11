@@ -69,6 +69,10 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 longest=max(longest,run)
             self.assertLessEqual(longest,3)
             self.assertEqual(result["hero_character"]["preset"],"byzantineYou")
+            cfg=json.loads((project/"config.json").read_text(encoding="utf-8"))
+            self.assertEqual(cfg["style"],"dusk")
+            self.assertTrue(cfg["captions"])
+            self.assertEqual(cfg["captionStyle"],"squire")
 
     def test_siege_audio_source_is_real_cc0_cannon_wall_impact(self):
         root=Path("/fixtures")

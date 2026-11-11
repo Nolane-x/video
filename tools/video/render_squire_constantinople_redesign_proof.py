@@ -48,7 +48,7 @@ def main() -> int:
     for i,item in enumerate(selected,1):
         segment=proof_dir/f"{i:02d}-{item['template']}.mp4"
         print(f"[{i}/{len(selected)}] {item['template']} — {item['shot_id']} {item['start']:.2f}s–{item['end']:.2f}s",flush=True)
-        run(["node",str(kit/"render.mjs"),"--project",str(project),
+        run(["node",str(kit/"render.mjs"),"--project",str(project),"--style","dusk",
              "--from",str(item["start"]),"--to",str(item["end"]),
              "--workers",str(a.workers),"--crf","18","--maxrate","48M","--bufsize","96M","--preset","veryfast"])
         rendered=project/"build"/"preview.mp4"
@@ -87,6 +87,8 @@ def main() -> int:
         "status":"RENDERED_TECHNICAL_PROOF_NOT_ARTISTIC_APPROVAL",
         "project":"53 Days to the End of an Empire",
         "render_engine":"H2 Squire",
+        "style":"dusk",
+        "captions":True,
         "resolution":[int(video["width"]),int(video["height"])],
         "fps":video["r_frame_rate"],
         "avg_frame_rate":video.get("avg_frame_rate"),

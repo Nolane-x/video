@@ -169,17 +169,27 @@ jobs:
           python tools/draft_shots.py --project projects/constantinople-1453-redesign-proof --min 0.8 --max 2.2 --force
           cd "$GITHUB_WORKSPACE"
           python tools/video/author_squire_constantinople.py --project "$SQUIRE_PROJECT"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          cfg=json.loads(Path("$SQUIRE_PROJECT/config.json").read_text(encoding="utf-8"))
+          assert cfg["fps"] == 240, cfg
+          assert cfg["style"] == "dusk", cfg
+          assert cfg["captions"] is True, cfg
+          assert cfg["captionStyle"] == "squire", cfg
+          print("ART DIRECTION GATE: dusk cinematic grade + readable Squire captions + native 240fps")
+          PY
       - name: Scan all scenes and publish contact sheets
         shell: bash
         run: |
           set -euo pipefail
           cd "$SQUIRE_KIT"
-          node render.mjs --project projects/constantinople-1453-redesign-proof --check --scale 0.25 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-check.log"
+          node render.mjs --project projects/constantinople-1453-redesign-proof --check --scale 0.25 --style dusk 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-check.log"
           if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' "$SQUIRE_PROJECT/build/redesign-check.log"; then
             echo "Scene scan found a missing or broken shot."
             exit 1
           fi
-          node render.mjs --project projects/constantinople-1453-redesign-proof --sheet --scale 0.4 --at 0.72 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-contact-sheet.log"
+          node render.mjs --project projects/constantinople-1453-redesign-proof --sheet --scale 0.4 --at 0.72 --style dusk 2>&1 | tee "$SQUIRE_PROJECT/build/redesign-contact-sheet.log"
           if grep -E 'LOI:|LOI NAP FILE|THIEU [1-9][0-9]* shot|THIEU MAU|THIEU SHOT' "$SQUIRE_PROJECT/build/redesign-contact-sheet.log"; then
             echo "Contact sheets found a missing or broken shot."
             exit 1

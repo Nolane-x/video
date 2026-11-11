@@ -73,7 +73,7 @@ async function openPlayer(browser, style) {
   await page.goto(`http://127.0.0.1:${PORT}/player.html?${qs}`);
   await page.waitForFunction(() => window.__ready || window.__bootError, null, { timeout: 120000 });
   const err = await page.evaluate(() => window.__bootError); if (err) throw new Error('Khong khoi dong duoc player: ' + err);
-  if (style) await page.evaluate((s) => { window.__setStyle && window.__setStyle(s); }, style);
+  if (style) await page.evaluate((s) => { window.__setStyle && window.__setStyle(s); if (window.__info) window.__info.style = s; }, style);
   const info = await page.evaluate(() => window.__info);
   if (!globalThis.__gpuShown) { globalThis.__gpuShown = 1; try { const r = await page.evaluate(() => { const c = document.createElement('canvas').getContext('webgl'); const e = c && c.getExtension('WEBGL_debug_renderer_info'); return e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'khong ro'; }); console.log('  Card do hoa dang dung: ' + r); } catch {} }
   await page.setViewportSize({ width: Math.min(info.W, 4000), height: Math.min(info.H, 4000) });
