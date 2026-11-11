@@ -58,8 +58,10 @@ jobs:
             --vtt source/captions.vtt \
             --output-dir delivery/readable
           python - <<'PY'
-          import hashlib, json, os
+          import hashlib, json, math, os, statistics, sys
           from pathlib import Path
+          sys.path.insert(0, 'caption-tool/tools/video')
+          from reflow_squire_captions import parse_subtitles
 
           root = Path("delivery")
           report_path = root / "readable" / "CAPTION-REFLOW-REPORT.json"
@@ -73,6 +75,29 @@ jobs:
           assert report["srt"]["preserved_words"] == report["vtt"]["preserved_words"]
           assert (root / "readable" / "captions.srt").is_file()
           assert (root / "readable" / "captions.vtt").is_file()
+
+          cue_speeds = []
+          for cue in parse_subtitles(root / "readable" / "captions.srt", "srt"):
+              seconds = cue.end - cue.start
+              visible_text = cue.text.replace("\\n", " ")
+              cue_speeds.append({
+                  "cps": len(visible_text) / seconds,
+                  "wpm": len(visible_text.split()) / seconds * 60
+              })
+          cps = sorted(x["cps"] for x in cue_speeds)
+          wpm = sorted(x["wpm"] for x in cue_speeds)
+          p95_index = max(0, math.ceil(len(cps) * 0.95) - 1)
+          reading_speed = {
+              "cue_count": len(cue_speeds),
+              "median_characters_per_second": round(statistics.median(cps), 2),
+              "p95_characters_per_second": round(cps[p95_index], 2),
+              "max_characters_per_second": round(max(cps), 2),
+              "median_words_per_minute": round(statistics.median(wpm), 1),
+              "p95_words_per_minute": round(wpm[p95_index], 1),
+              "project_thresholds": {"p95_cps_max": 22, "max_cps_max": 24}
+          }
+          assert reading_speed["p95_characters_per_second"] <= 22, reading_speed
+          assert reading_speed["max_characters_per_second"] <= 24, reading_speed
 
           files = sorted(p for p in root.rglob("*") if p.is_file())
           manifest = {
@@ -89,6 +114,7 @@ jobs:
               },
               "srt": report["srt"],
               "vtt": report["vtt"],
+              "reading_speed": reading_speed,
               "files": {
                   str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in files
@@ -115,7 +141,8 @@ jobs:
               "vtt_cues": report["vtt"]["output_cues"],
               "words_preserved": report["srt"]["preserved_words"],
               "max_line_chars": 42,
-              "max_lines": 2
+              "max_lines": 2,
+              "reading_speed": reading_speed
           }, indent=2))
           PY
 
