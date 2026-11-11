@@ -352,8 +352,15 @@ jobs:
           name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
           path: .tools/ffmpeg/bin
 
-      - name: Add FFmpeg and FFprobe to PATH
-        run: echo "$GITHUB_WORKSPACE/.tools/ffmpeg/bin" >> "$GITHUB_PATH"
+      - name: Restore executable permissions and add FFmpeg to PATH
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOOLS="$GITHUB_WORKSPACE/.tools/ffmpeg/bin"
+          chmod 0755 "$TOOLS/ffmpeg" "$TOOLS/ffprobe"
+          "$TOOLS/ffmpeg" -version | head -n 1
+          "$TOOLS/ffprobe" -version | head -n 1
+          echo "$TOOLS" >> "$GITHUB_PATH"
 
       - name: Render this exact frame interval at native 240fps
         env:
@@ -457,8 +464,15 @@ jobs:
           name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
           path: .tools/ffmpeg/bin
 
-      - name: Add FFmpeg and FFprobe to PATH
-        run: echo "$GITHUB_WORKSPACE/.tools/ffmpeg/bin" >> "$GITHUB_PATH"
+      - name: Restore executable permissions and add FFmpeg to PATH
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOOLS="$GITHUB_WORKSPACE/.tools/ffmpeg/bin"
+          chmod 0755 "$TOOLS/ffmpeg" "$TOOLS/ffprobe"
+          "$TOOLS/ffmpeg" -version | head -n 1
+          "$TOOLS/ffprobe" -version | head -n 1
+          echo "$TOOLS" >> "$GITHUB_PATH"
 
       - uses: actions/download-artifact@v4
         with:
