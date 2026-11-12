@@ -162,8 +162,11 @@ jobs:
             tools/video/import_squire_constantinople_foley.py \
             tools/video/qa_squire_constantinople.py \
             tools/video/render_squire_constantinople_redesign_proof.py \
-            tests/test_squire_constantinople.py
+            tools/video/reflow_squire_captions.py \
+            tests/test_squire_constantinople.py \
+            tests/test_squire_caption_reflow.py
           python tests/test_squire_constantinople.py
+          python tests/test_squire_caption_reflow.py
           node --check video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js
 
       - name: Verify Squire runtime and create project
@@ -195,8 +198,13 @@ jobs:
           cp voice-assets/h2-timeline/alignment-report.json "$PROJ/story/alignment-report.json"
           cp voice-assets/manifest.json "$PROJ/story/voice-manifest.json"
           cp voice-assets/voice-selection.json "$PROJ/story/voice-selection.json"
-          cp voice-assets/captions.srt "$PROJ/story/captions.srt"
-          cp voice-assets/captions.vtt "$PROJ/story/captions.vtt"
+          python "$GITHUB_WORKSPACE/tools/video/reflow_squire_captions.py" \
+            --srt voice-assets/captions.srt \
+            --vtt voice-assets/captions.vtt \
+            --output-dir "$RUNNER_TEMP/constantinople-caption-reflow"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/captions.srt" "$PROJ/story/captions.srt"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/captions.vtt" "$PROJ/story/captions.vtt"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/CAPTION-REFLOW-REPORT.json" "$PROJ/story/"
           echo "SQUIRE_PROJECT=$PROJ" >> "$GITHUB_ENV"
 
       - name: Install Squire, Chromium and build audio runtime
@@ -590,7 +598,7 @@ jobs:
           cp "$PROJ/story/QA-REPORT.md" "$PROJ/story/QA-REPORT.json" "$OUT/"
           cp "$PROJ/story/alignment-report.json" "$PROJ/story/voice-manifest.json" "$PROJ/story/voice-selection.json" "$OUT/"
           cp "$PROJ/story/AUDIO-SOURCE-MANIFEST.json" "$OUT/"
-          cp "$PROJ/story/captions.srt" "$PROJ/story/captions.vtt" "$OUT/"
+          cp "$PROJ/story/captions.srt" "$PROJ/story/captions.vtt" "$PROJ/story/CAPTION-REFLOW-REPORT.json" "$OUT/"
           cp "$PROJ/story/shots.json" "$PROJ/config.json" "$OUT/"
           cp video-projects/squire/constantinople-1453/01-SCRIPT.md "$OUT/"
           cp video-projects/squire/constantinople-1453/story/bible.md "$OUT/story-bible.md"
