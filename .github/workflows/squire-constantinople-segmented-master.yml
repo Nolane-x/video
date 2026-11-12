@@ -7,6 +7,22 @@ on:
     paths:
       - .github/workflows/squire-constantinople-segmented-master.yml
   workflow_dispatch:
+    inputs:
+      reuse_run_id:
+        description: "Optional prior run containing already-verified segment artifacts; leave empty for a full render."
+        required: false
+        type: string
+        default: ""
+      render_only_segment:
+        description: "When reusing prior segments, render only this missing or replaced segment."
+        required: false
+        type: choice
+        options:
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+        default: "3"
 
 permissions:
   actions: write
@@ -22,6 +38,8 @@ env:
   VOICE_RUN_ID: "42448341267"
   EXPECTED_FRAMES: "229896"
   SEGMENT_FRAMES: "57474"
+  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || inputs.reuse_run_id || '' }}
+  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && '3' || inputs.render_only_segment || '3' }}
 
 jobs:
   prepare-project:
@@ -313,6 +331,7 @@ jobs:
 
   render-segments:
     name: Render native 240fps segment ${{ matrix.shard }}
+    if: ${{ (github.event_name == 'push' && matrix.shard == 3) || (github.event_name == 'workflow_dispatch' && (inputs.reuse_run_id == '' || matrix.shard == inputs.render_only_segment)) }}
     needs: prepare-project
     runs-on: ubuntu-24.04
     timeout-minutes: 360
@@ -397,10 +416,13 @@ jobs:
           frames = int(video.get("nb_read_frames") or video.get("nb_frames") or 0)
           duration = float(meta["format"]["duration"])
           assert (int(video["width"]), int(video["height"])) == (1920, 1080), video
+          from fractions import Fraction
+          avg_fps = float(Fraction(video.get("avg_frame_rate", "0")))
           assert video.get("r_frame_rate") == "240/1", video
-          assert video.get("avg_frame_rate") == "240/1", video
+          assert abs(avg_fps - 240.0) <= 0.01, (avg_fps, video)
           assert frames == expected, (frames, expected)
           assert abs(duration - expected / 240) <= 0.02, duration
+          assert abs(frames / duration - 240.0) <= 0.01, (frames, duration)
           f = p / f"constantinople-segment-{os.environ['SEGMENT_INDEX']}.mp4"
           report = {
               "status": "pass",
@@ -411,6 +433,7 @@ jobs:
               "duration_seconds": round(duration, 6),
               "resolution": "1920x1080",
               "fps": 240,
+              "avg_fps": round(avg_fps, 9),
               "bytes": f.stat().st_size,
               "sha256": hashlib.sha256(f.read_bytes()).hexdigest()
           }
@@ -457,9 +480,9 @@ jobs:
           python -m pip install --disable-pip-version-check \
             'numpy>=1.26,<3' 'scipy>=1.11,<2' 'soundfile>=0.12.1' 'pyloudnorm>=0.1.1'
 
-      - name: Download prepared project, four render segments and prior proof
+      - name: Prepare directories for current and reused segment artifacts
         shell: bash
-        run: mkdir -p prepared segments prior-proof
+        run: mkdir -p prepared segments/source segments/current segments prior-proof
 
       - uses: actions/download-artifact@v4
         with:
@@ -482,10 +505,29 @@ jobs:
           "$TOOLS/ffprobe" -version | head -n 1
           echo "$TOOLS" >> "$GITHUB_PATH"
 
-      - uses: actions/download-artifact@v4
+      - name: Download preserved verified segments from the source run
+        if: ${{ env.REUSE_RUN_ID != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: squire-constantinople-segment-*-${{ env.REUSE_RUN_ID }}
+          path: segments/source
+          merge-multiple: true
+          run-id: ${{ env.REUSE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download newly rendered recovery segment
+        if: ${{ env.REUSE_RUN_ID != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-segment-${{ env.RECOVERY_SEGMENT }}-${{ github.run_id }}
+          path: segments/current
+
+      - name: Download all segments from this full-render run
+        if: ${{ env.REUSE_RUN_ID == '' }}
+        uses: actions/download-artifact@v4
         with:
           pattern: squire-constantinople-segment-*-${{ github.run_id }}
-          path: segments
+          path: segments/current
           merge-multiple: true
 
       - uses: actions/download-artifact@v4
@@ -505,6 +547,8 @@ jobs:
           timeout 20m npx playwright install chromium
           tar -xzf "$GITHUB_WORKSPACE/prepared/constantinople-prepared-project.tar.gz" -C "$KIT"
           cd "$GITHUB_WORKSPACE"
+          if [[ -d segments/source ]]; then cp -a segments/source/. segments/; fi
+          cp -a segments/current/. segments/
           python - <<'PY'
           import hashlib, json
           from pathlib import Path
@@ -546,15 +590,19 @@ jobs:
             "$PROJ/build/video_silent.mp4" > "$RUNNER_TEMP/master-silent-probe.json"
           python - <<'PY'
           import json
+          from fractions import Fraction
           from pathlib import Path
           p = json.loads((Path(__import__("os").environ["RUNNER_TEMP"]) / "master-silent-probe.json").read_text(encoding="utf-8"))
           v = next(s for s in p["streams"] if s.get("codec_type") == "video")
           frames = int(v.get("nb_read_frames") or v.get("nb_frames") or 0)
           duration = float(p["format"]["duration"])
+          avg_fps = float(Fraction(v.get("avg_frame_rate", "0")))
           assert (int(v["width"]), int(v["height"])) == (1920, 1080), v
-          assert v.get("r_frame_rate") == "240/1" and v.get("avg_frame_rate") == "240/1", v
+          assert v.get("r_frame_rate") == "240/1", v
+          assert abs(avg_fps - 240.0) <= 0.01, (avg_fps, v)
           assert frames == 229896, (frames, 229896)
           assert abs(duration - 957.9) <= 0.1, duration
+          assert abs(frames / duration - 240.0) <= 0.01, (frames, duration)
           print("Silent master verified:", frames, "frames;", duration, "seconds; 1920x1080@240")
           PY
 
