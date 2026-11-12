@@ -38,8 +38,8 @@ env:
   VOICE_RUN_ID: "42448341267"
   EXPECTED_FRAMES: "229896"
   SEGMENT_FRAMES: "57474"
-  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || inputs.reuse_run_id || '' }}
-  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && '3' || inputs.render_only_segment || '3' }}
+  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || github.event.inputs.reuse_run_id || '' }}
+  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && '3' || github.event.inputs.render_only_segment || '3' }}
 
 jobs:
   prepare-project:
@@ -331,7 +331,6 @@ jobs:
 
   render-segments:
     name: Render native 240fps segment ${{ matrix.shard }}
-    if: ${{ (github.event_name == 'push' && matrix.shard == 3) || (github.event_name == 'workflow_dispatch' && (inputs.reuse_run_id == '' || matrix.shard == inputs.render_only_segment)) }}
     needs: prepare-project
     runs-on: ubuntu-24.04
     timeout-minutes: 360
@@ -354,12 +353,15 @@ jobs:
             end: "957.9"
     steps:
       - uses: actions/checkout@v4
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
 
       - uses: actions/setup-node@v4
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         with:
           node-version: "22"
 
       - name: Install FFmpeg, Chromium and runtime dependencies
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         shell: bash
         run: |
           set -euo pipefail
@@ -368,18 +370,21 @@ jobs:
           timeout 20m npx playwright install chromium
 
       - name: Download and restore prepared project bundle
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-prepared-${{ github.run_id }}
           path: prepared
 
       - name: Download shared static FFmpeg toolchain
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-ffmpeg-tools-${{ github.run_id }}
           path: .tools/ffmpeg/bin
 
       - name: Restore executable permissions and add FFmpeg to PATH
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         shell: bash
         run: |
           set -euo pipefail
@@ -390,6 +395,7 @@ jobs:
           echo "$TOOLS" >> "$GITHUB_PATH"
 
       - name: Render this exact frame interval at native 240fps
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         env:
           SEGMENT_START: ${{ matrix.start }}
           SEGMENT_END: ${{ matrix.end }}
@@ -444,6 +450,7 @@ jobs:
           PY
 
       - name: Upload verified segment and checksum report
+        if: ${{ env.REUSE_RUN_ID == '' || matrix.shard == env.RECOVERY_SEGMENT }}
         uses: actions/upload-artifact@v4
         with:
           name: squire-constantinople-segment-${{ matrix.shard }}-${{ github.run_id }}
