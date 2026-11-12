@@ -61,7 +61,8 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             with patch.object(sys,"argv",["author_squire_constantinople.py","--project",str(project)]):
                 self.assertEqual(mod.main(),0)
             result=json.loads((project/"story"/"shots.json").read_text(encoding="utf-8"))
-            self.assertGreaterEqual(result["hero_character"]["shot_count"],168)
+            self.assertGreaterEqual(result["hero_character"]["shot_count"],int(len(result["shots"])*.22))
+            self.assertLessEqual(result["hero_character"]["shot_count"],int(len(result["shots"])*.42))
             self.assertGreaterEqual(sum(result["shot_counts"].get(x,0) for x in mod.CUSTOM),220)
             run=1; longest=1
             for prev,cur in zip(result["shots"],result["shots"][1:]):
@@ -69,6 +70,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 longest=max(longest,run)
             self.assertLessEqual(longest,3)
             self.assertEqual(result["hero_character"]["preset"],"byzantineYou")
+            self.assertTrue(any(s["args"].get("hero") is False for s in result["shots"] if s["tpl"] in mod.CUSTOM and s["tpl"] not in {"command_camp","gun_crew"}))
             cfg=json.loads((project/"config.json").read_text(encoding="utf-8"))
             self.assertEqual(cfg["style"],"dusk")
             self.assertTrue(cfg["captions"])

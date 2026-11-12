@@ -1,5 +1,5 @@
 import { E, registerTemplate, clamp, lerp, ease, rng, alpha, noise, glow, circle, seg, poly, linGrad } from '/engine/core.js';
-import { bg, formation, drawPeople, prop, drawThing, camera, overlays, flag, castle, cloud, CAST } from '/packs/squire/pack.js';
+import { bg, prop, drawThing, camera, overlays, flag, castle, cloud, CAST } from '/packs/squire/pack.js';
 
 const W=()=>E.W, H=()=>E.H;
 const BLUE='#536b83', RED='#9c493c', GOLD='#d1ad68', STONE='#b9a98c', INK='#241f20';
@@ -9,14 +9,14 @@ const BLUE='#536b83', RED='#9c493c', GOLD='#d1ad68', STONE='#b9a98c', INK='#241f
 Object.assign(CAST, {
   // A recurring fictional defender: one silhouette, costume and shield across the film.
   byzantineYou: {
-    ...CAST.knight15, helmet:'kettle', visor:'none', body:'mail', arms:'mail', legs:'mail',
-    tunicColor:'#536b83', tabard:true, tabardColor:'#536b83', cape:'#30455a',
-    weapon:'spear', shield:{type:'round',color:'#536b83',charge:'cross',chargeColor:'#d1ad68'}
+    ...CAST.knight15, helmet:'bascinet', visor:'up', body:'mail', arms:'mail', legs:'mail',
+    tunicColor:'#536b83', tabard:false, tabardColor:'#536b83', cape:'#30455a',
+    weapon:'spear', shield:{type:'round',color:'#536b83',charge:'eagle',chargeColor:'#d1ad68'}
   },
   byzantineGuard: {
     ...CAST.knight14, helmet:'bascinet', visor:'up', body:'mail', arms:'mail', legs:'mail',
-    tunicColor:'#536b83', tabard:true, tabardColor:'#425a73', cape:'#30455a',
-    shield:{type:'round',color:'#536b83',charge:'cross',chargeColor:'#d1ad68'}, weapon:'spear'
+    tunicColor:'#536b83', tabard:false, tabardColor:'#425a73', cape:'#30455a',
+    shield:{type:'round',color:'#536b83',charge:'eagle',chargeColor:'#d1ad68'}, weapon:'spear'
   },
   byzantineArcher: {
     ...CAST.crossbowman, helmet:'coif', body:'gambeson', tunicColor:'#536b83',
@@ -53,6 +53,160 @@ function line(g,pts,color=INK,lw=4,alphaV=1){
 function gradient(g,y0,y1,stops){
   const gr=g.createLinearGradient(0,y0,0,y1);stops.forEach(([p,c])=>gr.addColorStop(p,c));g.fillStyle=gr;g.fillRect(0,0,W(),H());
 }
+
+function stateAt(info, lt, list, fallback) {
+  let value = fallback;
+  for (const pair of list || []) if (lt >= Number(pair[0])) value = pair[1];
+  return value;
+}
+function drawCinematicActor(g, lt, info, p, gy=.93, dh=.5, distant=false) {
+  const x = p.x === undefined ? .5*W() : (p.x <= 1.5 ? p.x*W() : p.x);
+  const y = p.y === undefined ? gy*H() : (p.y <= 1.5 ? p.y*H() : p.y);
+  const h = p.h === undefined ? dh*H() : (p.h <= 1.5 ? p.h*H() : p.h);
+  if (h < 9 || h > H()*1.2) return;
+  const preset = String(p.preset || "byzantineGuard").toLowerCase();
+  const ottoman = preset.includes("ottoman");
+  const civilian = ["peasant","monk","lady"].some(k => preset.includes(k));
+  const monk = preset.includes("monk");
+  const woman = preset.includes("lady");
+  const blue = "#40566c", blueLight = "#7e929e", red = "#87463c";
+  const tunic = ottoman ? (preset.includes("elite") ? "#744037" : "#8b5141")
+               : civilian ? (monk ? "#574a3c" : woman ? "#887260" : "#65704d") : blue;
+  const cloth = ottoman ? "#c2a77d" : civilian ? "#b69a78" : "#303f52";
+  const steel = "#8c9695", steelLight = "#c0c3b7", leather = "#44352c";
+  const scale = h/680, detail = !distant && h > 130;
+  const pose = stateAt(info, lt, p.poseAt, p.pose || "guard");
+  const seed = Number(p.seed || 0) + (Number(p.x)||0)*13;
+  const flip = p.flip ? -1 : 1;
+  const gait = p.walk ? Math.sin(lt*6.4*(p.speed||1)+seed) : Math.sin(lt*2.0+seed)*.06;
+  const bob = p.walk ? Math.abs(Math.sin(lt*6.4*(p.speed||1)+seed))*h*.006 : Math.sin(lt*2+seed)*h*.002;
+  let shX=-.16, shY=-.48, rhX=.18, rhY=-.47;
+  if (pose==="point" || pose==="pointUp") { rhX=.36; rhY=pose==="pointUp"?-.78:-.59; }
+  if (pose==="thrust") { rhX=.40; rhY=-.62; shX=-.22; }
+  if (pose==="brace") { rhX=.26; rhY=-.44; shX=-.25; shY=-.43; }
+  if (pose==="push") { rhX=.34; rhY=-.48; shX=-.28; shY=-.48; }
+  if (pose==="carry") { rhX=.24; rhY=-.25; shX=-.24; shY=-.3; }
+  if (pose==="kneel") { shY=-.34; rhY=-.35; }
+  if (pose==="run") { rhX=.25+gait*.16; rhY=-.56; shX=-.22-gait*.12; shY=-.4; }
+  const stride=p.walk?gait*h*.038:0;
+  const hipY=pose==="kneel"?-h*.31:-h*.36;
+  g.save();
+  g.translate(x,y+bob); g.scale(flip,1);
+  g.fillStyle="rgba(18,20,22,.26)";
+  g.beginPath(); g.ellipse(0,-h*.012,h*.17,h*.022,0,0,Math.PI*2); g.fill();
+  // Cloak: a separate silhouette with less visual weight than the torso.
+  if(!civilian) path(g,[[-h*.085,-h*.72],[-h*.22,-h*.55],[-h*.17,-h*.26],[-h*.03,-h*.34],[h*.07,-h*.30],[h*.19,-h*.61],[h*.12,-h*.74]],cloth,INK,Math.max(1,h*.006));
+  else path(g,[[-h*.10,-h*.70],[-h*.18,-h*.50],[-h*.22,-h*.04],[h*.22,-h*.04],[h*.18,-h*.50],[h*.10,-h*.70]],tunic,INK,Math.max(1,h*.006));
+  // Adult leg-to-body ratio and grounded boots.
+  const legCol=civilian?tunic:(ottoman?"#51463c":steel);
+  line(g,[[-h*.065,hipY],[-h*.105-stride,-h*.025]],legCol,Math.max(2,h*.066));
+  line(g,[[h*.065,hipY],[h*.105+stride,-h*.025]],legCol,Math.max(2,h*.066));
+  line(g,[[-h*.105-stride,-h*.025],[-h*.16-stride,-h*.018]],leather,Math.max(2,h*.075));
+  line(g,[[h*.105+stride,-h*.025],[h*.16+stride,-h*.018]],leather,Math.max(2,h*.075));
+  // Body is roughly 3.5 heads tall, not the giant-head Squire silhouette.
+  path(g,[[-h*.12,-h*.69],[h*.12,-h*.69],[h*.145,-h*.49],[h*.09,-h*.34],[-h*.09,-h*.34],[-h*.145,-h*.49]],tunic,INK,Math.max(2,h*.009));
+  if(!civilian) {
+    path(g,[[-h*.105,-h*.66],[h*.105,-h*.66],[h*.085,-h*.43],[-h*.085,-h*.43]],steel,INK,Math.max(1,h*.005));
+    if(detail) {
+      for(let r=0;r<4;r++) line(g,[[-h*.075,-h*(.63-r*.047)],[h*.075,-h*(.63-r*.047)]],"#515b5d",Math.max(1,h*.003),.8);
+      line(g,[[-h*.10,-h*.5],[h*.10,-h*.5]],steelLight,Math.max(1,h*.004),.65);
+      line(g,[[-h*.08,-h*.64],[h*.07,-h*.45]],"#d0c8b2",Math.max(1,h*.003),.48);
+    }
+    g.fillStyle="#aa8a54"; g.fillRect(-h*.095,-h*.375,h*.19,h*.026);
+    g.fillStyle=leather; g.fillRect(-h*.018,-h*.40,h*.036,h*.055);
+    g.fillStyle=steelLight; g.strokeStyle=INK; g.lineWidth=Math.max(1,h*.006);
+    g.beginPath();g.ellipse(-h*.135,-h*.65,h*.075,h*.065,-.2,0,Math.PI*2);g.fill();g.stroke();
+    g.beginPath();g.ellipse(h*.135,-h*.65,h*.075,h*.065,.2,0,Math.PI*2);g.fill();g.stroke();
+  } else {
+    line(g,[[-h*.09,-h*.58],[h*.09,-h*.58]],"#cfb995",Math.max(1,h*.006));
+    if(monk){g.fillStyle="#3d332b";g.fillRect(-h*.13,-h*.72,h*.26,h*.05);}
+  }
+  // Arms respond to authored action beats.
+  const leftElbow=[shX*h,-h*.53], leftHand=[shX*h*1.25,shY*h];
+  const rightElbow=[h*.22,-h*.54], rightHand=[rhX*h,rhY*h];
+  line(g,[[-h*.13,-h*.64],leftElbow],civilian?tunic:steel,Math.max(3,h*.075));
+  line(g,[leftElbow,leftHand],civilian?tunic:steelLight,Math.max(3,h*.063));
+  line(g,[[h*.13,-h*.64],rightElbow],civilian?tunic:steel,Math.max(3,h*.075));
+  line(g,[rightElbow,rightHand],civilian?tunic:steelLight,Math.max(3,h*.063));
+  circle(g,leftHand[0],leftHand[1],Math.max(3,h*.035),civilian?"#b98f70":"#9b9c91");
+  circle(g,rightHand[0],rightHand[1],Math.max(3,h*.035),civilian?"#b98f70":"#9b9c91");
+  // Small head: helmet, Ottoman wrapped turban or civilian hood.
+  const headY=-h*.79, hr=h*.078;
+  g.fillStyle=ottoman?"#9b755f":"#b88d70";g.strokeStyle=INK;g.lineWidth=Math.max(1,h*.006);
+  g.beginPath();g.ellipse(0,headY,hr*.77,hr,0,0,Math.PI*2);g.fill();g.stroke();
+  if(!civilian && !ottoman) {
+    g.fillStyle=steel;g.beginPath();g.moveTo(-hr*.92,headY-hr*.1);g.quadraticCurveTo(-hr*.9,headY-hr*1.35,0,headY-hr*1.48);g.quadraticCurveTo(hr*.95,headY-hr*1.25,hr*.9,headY-hr*.08);g.lineTo(hr*.4,headY-hr*.02);g.lineTo(-hr*.55,headY-hr*.02);g.closePath();g.fill();g.stroke();
+    g.strokeStyle=steelLight;g.lineWidth=Math.max(1,h*.004);g.beginPath();g.moveTo(-hr*.78,headY-hr*.45);g.lineTo(hr*.72,headY-hr*.45);g.stroke();
+    g.fillStyle="#252b30";g.fillRect(-hr*.45,headY-hr*.08,hr*.9,hr*.09);
+  } else if(ottoman) {
+    g.fillStyle="#ddc79e";g.beginPath();g.ellipse(0,headY-hr*.52,hr*1.05,hr*.64,0,Math.PI,Math.PI*2);g.fill();g.stroke();
+    line(g,[[-hr*.8,headY-hr*.42],[hr*.8,headY-hr*.42]],"#8a6852",Math.max(1,h*.004));
+  } else {
+    g.fillStyle=monk?"#41382e":(woman?"#9a866f":"#806d56");g.beginPath();g.arc(0,headY,hr*1.1,Math.PI,Math.PI*2);g.lineTo(hr*1.1,headY+hr*.55);g.lineTo(-hr*1.1,headY+hr*.55);g.closePath();g.fill();g.stroke();
+  }
+  if(detail) {
+    line(g,[[-hr*.28,headY+hr*.08],[-hr*.08,headY+hr*.08]],"#2b2825",Math.max(1,h*.005));
+    line(g,[[hr*.08,headY+hr*.08],[hr*.28,headY+hr*.08]],"#2b2825",Math.max(1,h*.005));
+    if(ottoman) line(g,[[0,headY+hr*.25],[0,headY+hr*.48]],"#52392f",Math.max(1,h*.009));
+  }
+  const shieldCfg=p.shield===undefined?!civilian:!!p.shield;
+  if(shieldCfg && !civilian && !distant) {
+    const sx=-h*.205, sy=-h*.47, sr=h*.14, sc=p.shield?.color||(ottoman?"#725744":blue);
+    g.fillStyle=sc;g.strokeStyle="#292b2c";g.lineWidth=Math.max(2,h*.012);
+    g.beginPath();g.ellipse(sx,sy,sr*.78,sr,0,0,Math.PI*2);g.fill();g.stroke();
+    g.strokeStyle="#c7a96a";g.lineWidth=Math.max(1,h*.007);g.beginPath();g.ellipse(sx,sy,sr*.68,sr*.88,0,0,Math.PI*2);g.stroke();
+    if(detail && !ottoman) {
+      line(g,[[sx-sr*.42,sy],[sx-sr*.05,sy-sr*.22],[sx,sy-sr*.05],[sx+sr*.42,sy-sr*.24]],"#d3b66f",Math.max(1,h*.008));
+      line(g,[[sx-sr*.05,sy-sr*.22],[sx-sr*.26,sy+sr*.25],[sx,sy+sr*.2],[sx+sr*.28,sy+sr*.28]],"#d3b66f",Math.max(1,h*.008));
+    }
+  }
+  const weapon=p.weapon===undefined?(preset.includes("archer")?"bow":civilian?null:"spear"):p.weapon;
+  const wx=rightHand[0],wy=rightHand[1];
+  if(weapon==="spear"||weapon==="lance") {
+    line(g,[[wx,wy+h*.02],[wx+h*.035,wy-h*.56]],"#654a32",Math.max(2,h*.012));
+    path(g,[[wx+h*.035,wy-h*.56],[wx-h*.005,wy-h*.63],[wx+h*.075,wy-h*.58]],steelLight,INK,Math.max(1,h*.004));
+  } else if(weapon==="sword"||weapon==="pollaxe") {
+    line(g,[[wx,wy],[wx+h*.06,wy-h*.29]],steelLight,Math.max(2,h*.015));
+    line(g,[[wx-h*.055,wy-h*.045],[wx+h*.08,wy-h*.07]],"#9e8257",Math.max(2,h*.012));
+    line(g,[[wx+h*.06,wy-h*.29],[wx+h*.08,wy-h*.36]],"#f0dfad",Math.max(1,h*.008));
+  } else if(weapon==="bow") {
+    g.beginPath();g.moveTo(wx,wy-h*.22);g.quadraticCurveTo(wx+h*.15,wy-h*.07,wx,wy+h*.02);g.strokeStyle="#59422d";g.lineWidth=Math.max(2,h*.014);g.stroke();
+    line(g,[[wx,wy-h*.22],[wx,wy+h*.02]],"#d7c4a0",Math.max(1,h*.004));
+  } else if(weapon==="torch") {
+    line(g,[[wx,wy],[wx,wy-h*.27]],"#65472d",Math.max(2,h*.018));glow(g,wx,wy-h*.31,h*.13,"#ef9c46",.5);
+  } else if(weapon==="pickaxe"||weapon==="shovel") {
+    line(g,[[wx-h*.04,wy+h*.03],[wx+h*.08,wy-h*.2]],"#61452f",Math.max(2,h*.018));
+    line(g,[[wx-h*.01,wy-h*.18],[wx+h*.14,wy-h*.21]],steelLight,Math.max(2,h*.015));
+  }
+  if(!distant) line(g,[[-h*.10,-h*.65],[-h*.07,-h*.44]],blueLight,Math.max(1,h*.004),.55);
+  g.restore();
+}
+function drawPeople(g, lt, info, actors, gy=.93, dh=.5) {
+  for (let i=0;i<(actors||[]).length;i++) {
+    const actor={...actors[i],seed:actors[i].seed ?? i*17};
+    drawCinematicActor(g,lt,info,actor,gy,dh,false);
+  }
+}
+function formation(g, o={}) {
+  const rows=Math.max(1,o.rows||1), cols=Math.max(1,o.cols||1);
+  const x0=o.x0??0, x1=o.x1??1, yf=o.yFront??.88, yb=o.yBack??.65;
+  const hf=o.hFront??.14, hb=o.hBack??.07, seed=Number(o.seed||0);
+  for(let r=0;r<rows;r++) {
+    const q=rows===1?.5:r/(rows-1), yy=lerp(yf,yb,q), hh=lerp(hf,hb,q);
+    for(let c=0;c<cols;c++) {
+      const u=cols===1?.5:c/(cols-1);
+      const jitter=Math.sin(seed+r*23+c*11)*.004;
+      const preset=o.presets ? o.presets[(r*cols+c)%o.presets.length] : o.preset;
+      drawCinematicActor(g,o.t||0,{dur:6,start:0,args:{}},{
+        preset, x:clamp(x0+(x1-x0)*u+jitter,0,1), y:yy+Math.sin(c*1.7+r)*.002,
+        h:hh, face:o.face, pose:"guard", flip:!!o.flip,
+        weapon:preset&&String(preset).toLowerCase().includes("archer")?"bow":"spear",
+        walk:(o.march||0)>.05, speed:.45+(c%4)*.08, seed:seed+r*cols+c
+      },.94,.4,true);
+    }
+  }
+}
+
 function drawSea(g,t,y=760){
   gradient(g,y,H(),[[0,'#476a79'],[.45,'#254958'],[1,'#142d3a']]);
   for(let j=0;j<28;j++){
@@ -215,7 +369,11 @@ function arrowStorm(g,t,seed=7){
   }
 }
 function cityPanorama(g,t,a){
-  drawCity(g,t,{damage:a.damage??0.08,water:true,chain:!!a.chain});
+  const variant=Math.abs(Number(a.variant)||0)%4;
+  drawCity(g,t,{damage:a.damage??(variant===2?0.28:0.08),water:true,chain:!!a.chain||variant===3});
+  if(variant===1){for(let i=0;i<3;i++){const x=((t*75+i*650+220)%(W()+500))-180;ship(g,x,785+i*46,.48+i*.05,t,{sail:'#d8ccb1',banner:i%2?RED:BLUE});}}
+  if(variant===2){smoke(g,t,1290,420,71);smoke(g,t,1610,440,72);arrowStorm(g,t,73);}
+  if(variant===3){glow(g,930,600,250,'#d6a76a',.18);dust(g,t,1100,710,93,28,'#d4bc95');}
   // near foreground parapet and watch post
   g.fillStyle='#7e6d58';g.fillRect(0,850,W(),230);
   for(let x=0;x<W();x+=85){g.fillStyle='#b29e7e';g.fillRect(x,820,55,65);}
@@ -245,12 +403,14 @@ registerTemplate('wall_battery',{draw(g,lt,info){
     // two defensive formations in depth
     formation(g,{preset:'byzantineGuard',rows:3,cols:17,x0:.56,x1:.99,yFront:.78,yBack:.61,hFront:.18,hBack:.075,face:'determined',seed:71,t:lt,flip:true});
     cannon(g,330,870,1.5,age+.55,age>=0);
-    drawPeople(g,lt,info,[
+    const batteryActors=[
       {preset:'byzantineYou',x:.18,y:.96,h:.57,face:'determined',pose:'run',walk:true,dir:1,speed:.65,
         poseAt:[[0,'run'],[.72,'brace'],[1.45,'guard']],faceAt:[[0,'determined'],[.78,'worried'],[1.45,'determined']]},
       {preset:'byzantineGuard',x:.32,y:.94,h:.36,face:'worried',pose:'guard'},
       {preset:'byzantineGuard',x:.49,y:.93,h:.42,face:'worried',pose:'run',walk:true,dir:1,speed:.4}
-    ],.93,.42);
+    ];
+    if(a.hero===false) batteryActors.shift();
+    drawPeople(g,lt,info,batteryActors,.93,.42);
     if(age>0&&age<1.05){const q=clamp(age/1.05),bx=470+q*910,by=705-210*Math.sin(q*Math.PI);
       circle(g,bx,by,16+q*2,'#1b1a19');if(age>.72)glow(g,1430,580,210,'#e7b56d',.35);}
     if(age>=1.02){dust(g,lt-impact,1500,550,102,75,'#d6c1a0');smoke(g,lt-impact,1490,540,11);}
@@ -345,7 +505,8 @@ registerTemplate('aftermath_city',{draw(g,lt,info){
 // scale/continuity anchor; each template stages a different physical action and setting.
 function drawHero(g,t,info,{x=.3,y=.97,h=.62,face='determined',pose='guard',flip=false,weapon='spear',
   walk=false,speed=1,dir=1,poseAt,faceAt,lookAt,to,from,moveAt,dur,enter,exit,fall,lean,
-  shield={type:'round',color:BLUE,charge:'cross',chargeColor:GOLD}}={}){
+  shield={type:'round',color:BLUE,charge:'eagle',chargeColor:GOLD}}={}){
+  if(info?.args?.hero===false) return;
   const actor={preset:'byzantineYou',x,y,h,face,pose,flip,weapon,walk,speed,dir,poseAt,faceAt,lookAt,to,from,moveAt,dur,enter,exit,fall,lean,shield};
   drawPeople(g,t,info,[actor],.94,.66);
 }

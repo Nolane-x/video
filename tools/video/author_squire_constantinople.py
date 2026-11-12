@@ -82,8 +82,7 @@ def choose_template(p, text, i, usage, last):
     }
     custom = preferred[phase]
 
-    # Deliberate inserts break up repeated wide action scenes and keep the protagonist
-    # present in a majority of narrative shots. Diagrams appear only when geography/tactics matter.
+    # Inserts break up action scenes; the composite defender is a selected POV anchor, not a permanent presenter.
     if phase in {"guns", "repair", "final", "inside"} and i % 8 in (2, 6):
         return "close" if i % 8 == 2 else "item"
     if phase in {"city", "camp", "sea", "portage"} and i % 11 == 5:
@@ -96,12 +95,36 @@ def choose_template(p, text, i, usage, last):
         return "scene"
     return custom
 
-def scene_args(phase, i, p, text):
+def alternate_preset(phase, i, text):
     t = text.casefold()
+    if phase == "camp":
+        return "ottomanCommander" if i % 2 == 0 else "ottomanElite"
+    if phase in {"sea", "convoy"}:
+        return "byzantineArcher" if i % 2 == 0 else "byzantineGuard"
+    if phase == "portage":
+        return "ottomanInfantry" if i % 2 == 0 else "ottomanElite"
+    if phase == "tunnel":
+        return "ottomanInfantry" if i % 2 == 0 else "byzantineGuard"
+    if phase == "inside":
+        if any(k in t for k in ("church", "pray", "priest")):
+            return "monk"
+        return "lady" if i % 3 == 0 else "peasant"
+    if phase == "aftermath":
+        return "peasant" if i % 2 == 0 else "lady"
+    if phase == "guns" and any(k in t for k in ("orban", "gun crew", "cannon crew", "powder")):
+        return "ottomanInfantry"
+    if phase in {"city", "night", "guns", "repair", "final"}:
+        return "byzantineGuard" if i % 2 == 0 else "byzantineArcher"
+    return "byzantineGuard"
+
+
+def scene_args(phase, i, p, text, hero_visible=True):
+    t = text.casefold()
+    lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
     motion = ("in", "left", "right", "out", "up", "down")[i % 6]
     cam = {"move": motion, "moveAmt": .035 if i % 3 else .055,
            "shake": .32 if phase in {"guns", "final", "repair"} and i % 4 == 0 else 0}
-    hero = {"preset": HERO, "x": .32, "y": .96, "h": .63,
+    hero = {"preset": lead_preset, "x": .32, "y": .96, "h": .63,
             "face": "tired" if phase in {"night", "inside"} else "determined",
             "pose": "guard", "weapon": "spear",
             "shield": {"type": "round", "color": BLUE, "charge": "cross", "chargeColor": GOLD}}
@@ -217,10 +240,13 @@ def main():
         text = str(shot.get("line") or "")
         phase = progress_phase(p, text)
         tpl = choose_template(p, text, i, usage, last)
+        # Keep the fictional composite defender in selected POV beats only.
+        hero_visible = (i % 10 in {0, 4, 7}) and phase != "camp"
+        lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
 
         if tpl in STANDARD:
             if tpl == "close":
-                visual = {"preset": HERO if phase != "camp" else "ottomanCommander",
+                visual = {"preset": lead_preset,
                           "x": .5, "y": .5, "R": .255,
                           "face": "scared" if phase in {"final", "night"} else "worried",
                           "pose": "guard" if phase != "camp" else "point",
@@ -269,26 +295,27 @@ def main():
                           "arrows": [{"from": [.2, .65], "to": [.42, .55], "at": .85, "color": RED}],
                           "labels": [{"text": "THE DEFENCE", "x": .5, "y": .18, "size": 36, "at": .25, "color": "#2a2117"}]}
             elif tpl == "split":
-                visual = {"left": {"color": BLUE, "people": [{"preset": HERO, "x": .26, "y": .78, "h": .55, "face": "determined"}]},
+                visual = {"left": {"color": BLUE, "people": [{"preset": lead_preset, "x": .26, "y": .78, "h": .55, "face": "determined"}]},
                           "right": {"color": RED, "people": [{"preset": "ottomanElite", "x": .74, "y": .78, "h": .55, "face": "determined"}]},
                           "labels": [{"text": "DEFENDERS", "x": .25, "y": .14, "size": 43, "at": .2, "color": BLUE},
                                      {"text": "SIEGE ARMY", "x": .75, "y": .14, "size": 43, "at": .8, "color": RED}],
                           "move": "in"}
             elif tpl == "army":
                 visual = {"bg": "hills", "time": "day", "rows": 5, "cols": 18, "preset": "ottomanInfantry",
-                          "enemy": HERO, "march": .28, "flags": [{"x": .2, "color": BLUE}, {"x": .8, "color": RED}],
+                          "enemy": lead_preset, "march": .28, "flags": [{"x": .2, "color": BLUE}, {"x": .8, "color": RED}],
                           "move": "right", "moveAmt": .055,
                           "fx": [{"kind": "dust", "at": .2, "x": .5, "y": .85, "s": .13}]}
             elif tpl == "frame":
                 visual = {"bg": "castle", "people": [
-                    {"preset": HERO, "x": .5, "y": .87, "h": .58, "face": "tired", "pose": "kneel"}],
+                    {"preset": lead_preset, "x": .5, "y": .87, "h": .58, "face": "tired", "pose": "kneel"}],
                     "props": [{"kind": "torch", "x": .18, "y": .72, "s": .24}],
                     "arrows": [], "move": "in"}
             else:
-                visual = scene_args(phase, i, p, text)
+                visual = scene_args(phase, i, p, text, hero_visible)
         else:
             visual = {"move": ("in", "left", "right", "out", "up", "down")[i % 6],
-                      "moveAmt": .035 + (i % 3) * .012, "seed": i}
+                      "moveAmt": .035 + (i % 3) * .012, "seed": i,
+                      "hero": hero_visible, "variant": (i // 2) % 4}
             if tpl in {"wall_battery", "gun_crew"}:
                 visual["fireAt"] = .35 + (i % 4) * .1
                 visual["impactDelay"] = 1.02
@@ -322,9 +349,8 @@ def main():
             if transitions[i % len(transitions)] != "cut" else {"type": "cut"})
         shot["sfx"] = sfx_for_shot(tpl, visual, i, sfx_root)
         shot["notes"] = "Character-led composite reconstruction; action beat is distinct and disputed details remain qualified."
-        # Bespoke cinematic templates explicitly stage the same defender in their scene code.
-        hero_templates = CUSTOM - {"command_camp","gun_crew"}
-        if tpl in hero_templates or (isinstance(visual, dict) and HERO in json.dumps(visual)):
+        # Count the POV character only when the actor is actually selected for the shot.
+        if (tpl in CUSTOM and tpl not in {"command_camp", "gun_crew"} and hero_visible)            or (tpl in STANDARD and HERO in json.dumps(visual)):
             hero_count += 1
         usage[tpl] = usage.get(tpl, 0) + 1
         last = tpl
@@ -332,14 +358,15 @@ def main():
     custom_count = sum(usage.get(x, 0) for x in CUSTOM)
     if custom_count < 220:
         raise ValueError(f"Insufficient bespoke siege shots: {custom_count}")
-    if hero_count < int(len(shots) * .48):
-        raise ValueError(f"The recurring defender must appear in at least 48% of shots; got {hero_count}/{len(shots)}.")
+    hero_ratio = hero_count / len(shots)
+    if not (0.22 <= hero_ratio <= 0.42):
+        raise ValueError(f"POV defender share must stay between 22% and 42%; got {hero_count}/{len(shots)} ({hero_ratio:.1%}).")
 
     story["title"] = "53 Days to the End of an Empire"
     story["genre"] = "historical-military-animation"
-    story["engine"] = "H2 Squire 2D/vector — character-led, bespoke 1453 siege scenes"
+    story["engine"] = "H2 Squire 2D/vector — environment-led historical graphic reconstruction with mature-proportion actors"
     story["fps"] = 240
-    story["hero_character"] = {"preset": HERO, "continuity": "same blue-grey Byzantine defender throughout; fictional composite, not a named historical person", "shot_count": hero_count}
+    story["hero_character"] = {"preset": HERO, "continuity": "fictional composite POV defender; appears in selected narrative beats, not a named historical person", "shot_count": hero_count, "ratio": round(hero_ratio, 4)}
     story["historical_caution"] = "Composite narrator; disputed ship-portage details, Giustiniani sequence and Constantine XI death circumstances are stated cautiously."
     story["shot_counts"] = usage
     story["shots"] = shots
@@ -360,7 +387,7 @@ def main():
                 "sfx": {"enabled": True, "gainDb": -6}, "loudness": -14, "maxrate": "48M",
                 "bufsize": "96M", "crf": 18, "renderPreset": "slow", "duration": round(duration, 3)})
     cfg_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"CONSTANTINOPLE HFR SHOTS: {len(shots)} | {duration:.1f}s | {custom_count} bespoke custom shots | {len(usage)} templates | hero {hero_count} shots | 240fps")
+    print(f"CONSTANTINOPLE HFR SHOTS: {len(shots)} | {duration:.1f}s | {custom_count} bespoke custom shots | {len(usage)} templates | POV hero {hero_count} ({hero_ratio:.1%}) | 240fps")
     print("SHOT COUNTS:", json.dumps(usage, sort_keys=True))
     return 0
 
