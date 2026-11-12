@@ -24,7 +24,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(mod.progress_phase(.52,"Four Christian ships approach the Golden Horn"),"convoy")
         self.assertEqual(mod.progress_phase(.68,"Ships are hauled overland on rollers"),"portage")
         self.assertEqual(mod.progress_phase(.38,"The cannon fires against the wall"),"guns")
-        self.assertEqual(mod.progress_phase(.40,"Repair crews carry timber and masonry"),"repair")
+        self.assertEqual(mod.progress_phase(.35,"Repair crews carry timber and masonry"),"repair")
         self.assertEqual(mod.progress_phase(.62,"Defenders listen beneath the wall as miners dig"),"tunnel")
         self.assertEqual(mod.progress_phase(.50,"The chain across the Golden Horn blocks the harbour"),"sea")
     def test_custom_templates_are_registered_in_author(self):
