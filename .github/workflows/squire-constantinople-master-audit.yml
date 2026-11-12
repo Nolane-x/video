@@ -48,7 +48,7 @@ jobs:
           cp source/captions.srt source/captions.vtt source/CAPTION-REFLOW-REPORT.json review/
           cp source/AUDIO-SOURCE-MANIFEST.json source/alignment-report.json review/
           cp source/voice-manifest.json source/voice-selection.json source/voice-source-manifest.json review/
-          cp source/constantinople-1453-redesign-proof.json review/
+          cp source/redesign-motion-proof.json review/
           cp source/SHA256SUMS.txt review/
           cp source/segment-reports/segment-*.json review/segment-reports/
           cp source/contact-sheets/*.jpg review/contact-sheets/
@@ -84,7 +84,6 @@ jobs:
               "true_peak_dbtp":qa["true_peak_dbtp"],
               "contact_sheets":len(sheets),
               "segment_reports":len(reports),
-              "caption_cues":caption["srt"]["cue_count_after"],
               "caption_words":caption["srt"]["preserved_words"]
           },indent=2))
           PY
