@@ -1,0 +1,194 @@
+name: Squire · Constantinople 1453 · Lightweight visual and audio audit
+
+on:
+  push:
+    branches:
+      - squire/constantinople-1453-redesign
+    paths:
+      - .github/workflows/squire-constantinople-final-audit.yml
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build-audit-pack:
+    name: Extract compact audit pack from verified master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the completed master delivery artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-1453-redesign-240fps-43118548250
+          path: source
+          run-id: 43118548250
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install lightweight audit tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Create review package, whole-film keyframes and audio audition samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, shutil, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+
+          root = Path("source")
+          out = Path("audit")
+          out.mkdir()
+          video = root / "53 Days to the End of an Empire.mp4"
+          required = [
+              video, root / "QA-REPORT.json", root / "QA-REPORT.md",
+              root / "thumbnail.png", root / "native-240fps-preview-segment.mp4",
+              root / "captions.srt", root / "captions.vtt",
+          ]
+          missing = [str(p) for p in required if not p.is_file()]
+          if missing:
+              raise SystemExit("Missing expected master delivery files: " + ", ".join(missing))
+
+          for name in ["QA-REPORT.json", "QA-REPORT.md", "thumbnail.png",
+                       "native-240fps-preview-segment.mp4", "captions.srt", "captions.vtt",
+                       "AUDIO-SOURCE-MANIFEST.json", "alignment-report.json",
+                       "voice-manifest.json", "voice-selection.json", "config.json",
+                       "01-SCRIPT.md", "story-bible.md"]:
+              src = root / name
+              if src.is_file():
+                  shutil.copy2(src, out / src.name)
+
+          report = json.loads((root / "QA-REPORT.json").read_text(encoding="utf-8"))
+          assert report.get("status") == "technical_pass", report
+          assert report.get("fps") == 240 and report.get("frames") == 229896, report
+          assert report.get("resolution") == "1920x1080", report
+
+          sheets = root / "contact-sheets"
+          sheet_files = sorted(p for p in sheets.glob("*") if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}) if sheets.is_dir() else []
+          if not sheet_files:
+              raise SystemExit("No full-project contact sheets found in the delivery package")
+          sheet_out = out / "contact-sheets"
+          sheet_out.mkdir()
+          for item in sheet_files:
+              shutil.copy2(item, sheet_out / item.name)
+
+          tiles = []
+          for item in sheet_files:
+              im = Image.open(item).convert("RGB")
+              im.thumbnail((480, 270))
+              tile = Image.new("RGB", (500, 310), "white")
+              tile.paste(im, ((500-im.width)//2, 8))
+              ImageDraw.Draw(tile).text((10, 282), item.name, fill="black")
+              tiles.append(tile)
+          cols = 3
+          rows = (len(tiles) + cols - 1) // cols
+          overview = Image.new("RGB", (cols*500, rows*310), (32, 32, 32))
+          for idx, tile in enumerate(tiles):
+              overview.paste(tile, ((idx % cols)*500, (idx // cols)*310))
+          overview.save(out / "contact-sheets-overview.jpg", quality=88)
+
+          times = [0, 60, 120, 180, 240, 300, 390, 480, 570, 660, 750, 840, 900, 957]
+          frames = []
+          frame_dir = out / "keyframes"
+          frame_dir.mkdir()
+          for idx, sec in enumerate(times):
+              frame_path = frame_dir / f"frame-{idx:02d}-{sec:03d}s.jpg"
+              subprocess.run([
+                  "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                  "-ss", str(sec), "-i", str(video), "-frames:v", "1",
+                  "-vf", "scale=640:-2", "-q:v", "3", str(frame_path)
+              ], check=True)
+              im = Image.open(frame_path).convert("RGB")
+              im.thumbnail((480, 270))
+              tile = Image.new("RGB", (500, 300), "white")
+              tile.paste(im, ((500-im.width)//2, 5))
+              ImageDraw.Draw(tile).text((10, 280), f"{sec}s", fill="black")
+              frames.append(tile)
+          cols = 3
+          rows = (len(frames) + cols - 1) // cols
+          montage = Image.new("RGB", (cols*500, rows*300), (32, 32, 32))
+          for idx, tile in enumerate(frames):
+              montage.paste(tile, ((idx % cols)*500, (idx // cols)*300))
+          montage.save(out / "whole-film-keyframes.jpg", quality=90)
+
+          audio_inputs = []
+          points = [45, 225, 405, 585, 765]
+          for i, sec in enumerate(points):
+              clip = out / f"audio-audition-{i+1}.wav"
+              subprocess.run([
+                  "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                  "-ss", str(sec), "-t", "15", "-i", str(video),
+                  "-vn", "-ac", "2", "-ar", "48000", "-c:a", "pcm_s16le", str(clip)
+              ], check=True)
+              audio_inputs += ["-i", str(clip)]
+          filters = ";".join(f"[{i}:a]atrim=duration=15,asetpts=PTS-STARTPTS[a{i}]" for i in range(5))
+          filters += ";" + "".join(f"[a{i}]" for i in range(5)) + "concat=n=5:v=0:a=1[aout]"
+          subprocess.run([
+              "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *audio_inputs,
+              "-filter_complex", filters, "-map", "[aout]", "-c:a", "libmp3lame",
+              "-b:a", "192k", str(out / "five-point-audio-audition.mp3")
+          ], check=True)
+          for i in range(5):
+              (out / f"audio-audition-{i+1}.wav").unlink(missing_ok=True)
+
+          review = {
+              "source_run_id": 43118548250,
+              "source_artifact": "squire-constantinople-1453-redesign-240fps-43118548250",
+              "technical_status": report["status"],
+              "artistic_signoff": report.get("artistic_signoff"),
+              "duration_seconds": report["duration_seconds"],
+              "resolution": report["resolution"],
+              "fps": report["fps"],
+              "frames": report["frames"],
+              "shots": report.get("shot_count"),
+              "bespoke_shots": report.get("bespoke_shots"),
+              "contact_sheet_count": len(sheet_files),
+              "keyframe_seconds": times,
+              "audio_audition_seconds": points,
+              "audio_audition_clip_seconds": 15,
+              "human_review_required": True,
+              "limitations": report.get("limitations", [])
+          }
+          (out / "AUDIT-README.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
+          (out / "AUDIT-README.md").write_text(
+              "# Constantinople 1453 — compact review pack\n\n"
+              f"- Technical QA: {report['status']}\n"
+              f"- Artistic sign-off: {report.get('artistic_signoff')}\n"
+              f"- Runtime: {report['duration_seconds']} seconds\n"
+              f"- Picture: {report['resolution']} / {report['fps']} fps / {report['frames']} frames\n"
+              f"- Shotbook: {report.get('shot_count')} shots, {report.get('bespoke_shots')} bespoke\n"
+              f"- Contact sheets: {len(sheet_files)}\n"
+              "- whole-film-keyframes.jpg samples the entire film from beginning to end.\n"
+              "- five-point-audio-audition.mp3 contains five 15-second samples from the final mixed soundtrack.\n"
+              "- The main 6.16 GB master remains in the original Actions artifact; this pack is for inspection only.\n"
+              "- Human watch/listen and artistic approval are still required before public release.\n",
+              encoding="utf-8"
+          )
+          sums = []
+          for p in sorted(out.rglob("*")):
+              if p.is_file():
+                  h = hashlib.sha256(p.read_bytes()).hexdigest()
+                  sums.append(f"{h}  {p.relative_to(out).as_posix()}")
+          (out / "SHA256SUMS.txt").write_text("\n".join(sums) + "\n", encoding="utf-8")
+          print(json.dumps(review, indent=2))
+          print("Compact audit pack size:")
+          subprocess.run(["du", "-sh", str(out)], check=True)
+          PY
+
+      - name: Upload compact visual and audio audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-visual-audit-43118548250
+          path: audit/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
