@@ -51,15 +51,11 @@ def progress_phase(p, text):
     if p < .055:
         return "night"
 
-    # Voice-aligned chapter windows in the approved 957.9-second narration.
-    # This prevents keyword fragmentation from starving major historical set pieces.
-    if 0.385 <= p < 0.433:
-        return "convoy"
-    if 0.437 <= p < 0.478:
-        return "portage"
-    if 0.505 <= p < 0.532:
-        return "tunnel"
+    # The final summary describes the operation retrospectively; do not stage it as a second portage.
+    if p > .93:
+        return "aftermath"
 
+    # Strong event language wins over chapter windows, so explicit text always has priority.
     if any(k in t for k in ("hauled overland", "overland", "rollers", "ships are appearing inside",
                             "ships inside", "lowered into the inlet", "hauled across land",
                             "ships on rollers", "vessels overland")):
@@ -68,6 +64,18 @@ def progress_phase(p, text):
                             "ottoman fleet", "christian ships", "supply ships", "ships with supplies",
                             "ships close the distance", "ships fight their way", "reach the golden horn")):
         return "convoy"
+    if any(k in t for k in ("countermin", "counter-min", "tunnel", "underground", "miners",
+                            "digging below", "dig below", "earth being moved", "beneath the wall",
+                            "counterminers")):
+        return "tunnel"
+
+    # Voice-aligned chapter windows in the approved 957.9-second narration fill split cue fragments.
+    if 0.385 <= p < 0.433:
+        return "convoy"
+    if 0.437 <= p < 0.478:
+        return "portage"
+    if 0.505 <= p < 0.532:
+        return "tunnel"
     if any(k in t for k in ("golden horn", "massive chain", "chain across", "harbour", "harbor", "sea lanes", "strait")):
         return "sea"
     if any(k in t for k in ("countermin", "counter-min", "tunnel", "underground", "miners", "digging below",
@@ -81,8 +89,6 @@ def progress_phase(p, text):
         return "inside"
     if any(k in t for k in ("mehmed", "rumeli", "bosporus", "bosphorus", "sultan", "ottoman army", "ottoman camp", "engineers measure")):
         return "camp"
-    if p > .93:
-        return "aftermath"
     if any(k in t for k in ("city", "walls", "constantinople", "theodosian", "capital", "harbours", "harbors", "empire")):
         return "city"
     return ("city", "camp", "guns", "repair", "sea", "inside", "final")[int(p * 1000) % 7]

@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/squire-constantinople-redesign-proof.yml'
       - 'tools/video/author_squire_constantinople.py'
+      - 'tools/video/qa_squire_constantinople.py'
       - 'tools/video/reflow_squire_captions.py'
       - 'tests/test_squire_constantinople.py'
       - 'tools/video/import_squire_constantinople_foley.py'
