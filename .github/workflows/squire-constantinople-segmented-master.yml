@@ -22,6 +22,7 @@ on:
           - "1"
           - "2"
           - "3"
+          - "none"
         default: "3"
 
 permissions:
@@ -38,8 +39,8 @@ env:
   VOICE_RUN_ID: "42448341267"
   EXPECTED_FRAMES: "229896"
   SEGMENT_FRAMES: "57474"
-  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || github.event.inputs.reuse_run_id || '' }}
-  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && '3' || github.event.inputs.render_only_segment || '3' }}
+  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43223049984' || github.event.inputs.reuse_run_id || '' }}
+  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && 'none' || github.event.inputs.render_only_segment || '3' }}
 
 jobs:
   prepare-project:
@@ -523,7 +524,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download newly rendered recovery segment
-        if: ${{ env.REUSE_RUN_ID != '' }}
+        if: ${{ env.REUSE_RUN_ID != '' && env.RECOVERY_SEGMENT != 'none' }}
         uses: actions/download-artifact@v4
         with:
           name: squire-constantinople-segment-${{ env.RECOVERY_SEGMENT }}-${{ github.run_id }}
