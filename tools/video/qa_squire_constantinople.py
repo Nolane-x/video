@@ -34,7 +34,7 @@ def main():
         assert int(usage.get(template,0))>=minimum,f"Underrepresented {template}: {usage.get(template,0)} < {minimum}"
     assert int(usage.get("city_panorama",0))<=int(len(shots)*.15),f"City panorama overuse: {usage.get('city_panorama')}"
     forbidden={"scene","close","army","split","frame"}
-    assert not (forbidden & set(usage)),f"Generic chibi Squire templates used: {sorted(forbidden & set(usage))}
+    assert not (forbidden & set(usage)),f"Generic chibi Squire templates used: {sorted(forbidden & set(usage))}"
     hero=story.get("hero_character") or {}
     assert hero.get("preset")=="byzantineYou", "Recurring fictional defender continuity record missing."
     hero_ratio=int(hero.get("shot_count",0))/max(1,len(shots))
