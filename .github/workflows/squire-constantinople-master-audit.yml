@@ -1,0 +1,100 @@
+name: Squire · Constantinople 1453 · Compact master review bundle
+
+on:
+  push:
+    branches:
+      - squire/constantinople-1453-redesign
+    paths:
+      - .github/workflows/squire-constantinople-master-audit.yml
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-constantinople-master-audit
+  cancel-in-progress: false
+
+jobs:
+  package-review-material:
+    name: Extract review materials from the verified master artifact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download the successful 5.7GB verified master bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-1453-redesign-240fps-43240302727
+          path: source
+          run-id: 43240302727
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install audio review encoder
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1
+
+      - name: Build compact review package and validate required materials
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/contact-sheets review/segment-reports
+          cp source/QA-REPORT.json source/QA-REPORT.md review/
+          cp source/thumbnail.png review/
+          cp source/native-240fps-preview-segment.mp4 review/
+          cp source/captions.srt source/captions.vtt source/CAPTION-REFLOW-REPORT.json review/
+          cp source/AUDIO-SOURCE-MANIFEST.json source/alignment-report.json review/
+          cp source/voice-manifest.json source/voice-selection.json source/voice-source-manifest.json review/
+          cp source/constantinople-1453-redesign-proof.json review/
+          cp source/SHA256SUMS.txt review/
+          cp source/segment-reports/segment-*.json review/segment-reports/
+          cp source/contact-sheets/*.jpg review/contact-sheets/
+          ffmpeg -hide_banner -v error -y -i source/final-mix.wav \
+            -c:a libmp3lame -b:a 192k -ar 48000 -ac 2 review/final-mix-review.mp3
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("review")
+          qa=json.loads((root/"QA-REPORT.json").read_text(encoding="utf-8"))
+          caption=json.loads((root/"CAPTION-REFLOW-REPORT.json").read_text(encoding="utf-8"))
+          reports=[json.loads(p.read_text(encoding="utf-8")) for p in sorted((root/"segment-reports").glob("segment-*.json"))]
+          assert qa["status"]=="technical_pass", qa
+          assert qa["resolution"]=="1920x1080" and qa["fps"]==240, qa
+          assert qa["frames"]==229896, qa
+          assert len(reports)==4 and sum(x["frames"] for x in reports)==229896, reports
+          assert caption["srt"]["max_line_chars_after"]<=42
+          assert caption["srt"]["max_lines_per_cue_after"]<=2
+          assert caption["srt"]["preserved_words"]==caption["vtt"]["preserved_words"]
+          for name in ("thumbnail.png","native-240fps-preview-segment.mp4","final-mix-review.mp3","captions.srt","captions.vtt"):
+              p=root/name
+              assert p.is_file() and p.stat().st_size>0, name
+          sheets=list((root/"contact-sheets").glob("*.jpg"))
+          assert len(sheets)>=20, len(sheets)
+          print(json.dumps({
+              "status":"review_bundle_pass",
+              "master_qa":qa["status"],
+              "duration_seconds":qa["duration_seconds"],
+              "frames":qa["frames"],
+              "fps":qa["fps"],
+              "shot_count":qa["shot_count"],
+              "lufs":qa["lufs"],
+              "true_peak_dbtp":qa["true_peak_dbtp"],
+              "contact_sheets":len(sheets),
+              "segment_reports":len(reports),
+              "caption_cues":caption["srt"]["cue_count_after"],
+              "caption_words":caption["srt"]["preserved_words"]
+          },indent=2))
+          PY
+          du -sh review
+
+      - name: Upload compact review materials
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-constantinople-master-review-43240302727
+          path: review/
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 30
