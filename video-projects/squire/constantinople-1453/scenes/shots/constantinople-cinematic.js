@@ -394,6 +394,55 @@ function cityPanorama(g,t,a){
   overlays(g,t,{...a.info,dur:6,args:a});
 }
 registerTemplate('city_panorama',{draw(g,lt,info){camera(g,lt,info,()=>cityPanorama(g,lt,{...info.args,info}));}});
+
+function drawActorCloseup(g,t,info,a){
+  const preset=a.actorPreset || (a.hero ? 'byzantineYou' : 'byzantineGuard');
+  gradient(g,0,H(),[[0,'#18212d'],[.42,'#39414b'],[1,'#15191e']]);
+  path(g,[[0,0],[W()*.31,0],[W()*.38,H()],[0,H()]],'#64584b','#292724',7);
+  path(g,[[W()*.72,0],[W(),0],[W(),H()],[W()*.65,H()]],'#51483f','#292724',7);
+  for(let i=0;i<7;i++){
+    const y=130+i*132;
+    line(g,[[W()*.06,y],[W()*.27,y-12]],'#b29b79',7,.36);
+    line(g,[[W()*.76,y-12],[W()*.95,y]],'#b29b79',7,.3);
+  }
+  glow(g,W()*.73,H()*.47,230,'#e0a15c',.22);
+  circle(g,W()*.73,H()*.47,11,'#f0b66e');
+  drawCinematicActor(g,t,info,{
+    preset, x:.55, y:1.23, h:1.08, face:a.expression||'worried',
+    pose:a.pose||'guard', weapon:a.weapon===undefined?'spear':a.weapon,
+    shield:a.hero===false?false:undefined, seed:a.seed||21
+  },.93,.6,false);
+  const vg=g.createRadialGradient(W()*.55,H()*.5,H()*.12,W()*.55,H()*.5,H()*.8);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(5,8,12,.62)');
+  g.fillStyle=vg; g.fillRect(0,0,W(),H());
+}
+registerTemplate('actor_closeup',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawActorCloseup(g,lt,info,a));}});
+
+function drawCityDetail(g,t,info,a){
+  const variant=Math.abs(Number(a.variant)||0)%5;
+  gradient(g,0,H(),[[0,'#6a7880'],[.38,'#c3aa8c'],[1,'#55473d']]);
+  path(g,[[0,520],[0,390],[180,350],[330,410],[510,320],[680,390],[870,305],[1050,380],[1270,315],[1450,390],[1670,330],[1920,380],[1920,650],[0,650]],'#657168',null,0);
+  g.fillStyle='#ae9c82';g.fillRect(670,405,580,210);
+  g.beginPath();g.ellipse(960,405,205,110,0,Math.PI,Math.PI*2);g.fill();
+  g.strokeStyle='#433b34';g.lineWidth=7;g.stroke();
+  for(let i=0;i<5;i++){const x=700+i*116;g.fillStyle='#9b8871';g.fillRect(x,340,27,160);g.beginPath();g.arc(x+13,340,13,Math.PI,0);g.fill();}
+  const wallY=690+(variant%2)*20;
+  path(g,[[0,wallY+70],[0,wallY-90],[260,wallY-130],[540,wallY-70],[850,wallY-150],[1160,wallY-85],[1470,wallY-140],[1920,wallY-55],[1920,H()],[0,H()]],'#968873','#35302c',9);
+  for(let row=0;row<7;row++)for(let col=0;col<24;col++){
+    const x=col*88+(row%2)*42, y=wallY-78+row*58;
+    g.strokeStyle=alpha('#4a4037',.48);g.lineWidth=2;g.strokeRect(x,y,82,52);
+    if((row*17+col*7+variant)%11===0) line(g,[[x+14,y+8],[x+28,y+24],[x+20,y+45]],'#3e3630',3,.64);
+  }
+  if(variant===0){smoke(g,t,1480,405,120);flag(g,1590,660,130,{color:BLUE,t,lw:2});}
+  if(variant===1){drawSea(g,t,wallY+80);for(let i=0;i<2;i++)ship(g,280+i*640+t*24,wallY+15,.38,t,{banner:i?BLUE:RED});}
+  if(variant===2){smoke(g,t,880,470,122);dust(g,t,960,700,123,35,'#d2b58c');}
+  if(variant===3){for(let i=0;i<9;i++){const x=130+i*215;glow(g,x,wallY-120,100,'#e8a85e',.12);}}
+  if(variant===4){for(let i=0;i<8;i++){const x=90+i*260;path(g,[[x,wallY+40],[x+45,wallY-15],[x+90,wallY+40]],'#7c5e4c',null,0);}}
+  if(a.hero===false){
+    if(a.actorPreset && a.actorPreset!=='byzantineYou') drawPeople(g,t,info,[{preset:a.actorPreset,x:.80,y:.99,h:.48,face:'determined',pose:'guard',flip:true}],.94,.48);
+  } else drawHero(g,t,info,{x:.24,y:.99,h:.58,face:'determined',pose:'guard'});
+}
+registerTemplate('city_detail',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawCityDetail(g,lt,info,a));}});
 registerTemplate('command_camp',{draw(g,lt,info){camera(g,lt,info,()=>{drawCamp(g,lt);for(let i=0;i<8;i++)flag(g,80+i*250,620,140,{color:i%2?RED:BLUE,t:lt,lw:2});dust(g,lt,1200,870,88,40);});}});
 registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>{drawCityInterior(g,lt);drawHero(g,lt,info,{x:.3,y:.98,h:.6,face:'tired',pose:'walk',walk:true,speed:.22,weapon:null,shield:null,poseAt:[[0,'walk'],[1.0,'carry'],[1.8,'walk']]});});}});
 registerTemplate('wall_battery',{draw(g,lt,info){

@@ -26,13 +26,19 @@ def main():
     shots=story.get("shots") or [];duration=float(story.get("duration",0))
     assert 945<=duration<=975,f"Expected a 16-minute film (15:45–16:15), got {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
-    custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city"}
+    custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city","actor_closeup","city_detail"}
     custom_count=sum(1 for s in shots if s.get("tpl") in custom)
-    assert custom_count>=220,f"Not enough bespoke siege animation shots: {custom_count}"
+    assert custom_count>=260,f"Not enough bespoke siege animation shots: {custom_count}"
+    usage=story.get("shot_counts",{})
+    for template,minimum in (("relief_galleys",12),("ship_portage",8),("tunnel_cutaway",6)):
+        assert int(usage.get(template,0))>=minimum,f"Underrepresented {template}: {usage.get(template,0)} < {minimum}"
+    assert int(usage.get("city_panorama",0))<=int(len(shots)*.15),f"City panorama overuse: {usage.get('city_panorama')}"
+    forbidden={"scene","close","army","split","frame"}
+    assert not (forbidden & set(usage)),f"Generic chibi Squire templates used: {sorted(forbidden & set(usage))}
     hero=story.get("hero_character") or {}
     assert hero.get("preset")=="byzantineYou", "Recurring fictional defender continuity record missing."
     hero_ratio=int(hero.get("shot_count",0))/max(1,len(shots))
-    assert .22<=hero_ratio<=.42, f"POV defender should be a selected anchor, got {hero_ratio:.1%} of shots."
+    assert .28<=hero_ratio<=.42, f"POV defender should be a selected anchor, got {hero_ratio:.1%} of shots."
     scene_file=p/"scenes"/"shots"/"constantinople-cinematic.js"
     assert scene_file.is_file(), "Bespoke cinematic scene source missing."
     scene_source=scene_file.read_text(encoding="utf-8")
@@ -60,6 +66,11 @@ def main():
     assert sha(wav)==aud["sha256"] and sha(timeline)==aud["sha256"]
     assert (assets/"captions.srt").stat().st_size>100 and (assets/"captions.vtt").stat().st_size>100
     assert (p/"story"/"captions.srt").is_file() and (p/"story"/"captions.vtt").is_file(),"Project caption sidecars are missing"
+    caption_report_path=p/"story"/"CAPTION-REFLOW-REPORT.json"
+    assert caption_report_path.is_file(),"Caption reflow report is missing"
+    caption_report=json.loads(caption_report_path.read_text(encoding="utf-8"))
+    assert caption_report["srt"]["max_line_chars_after"]<=42 and caption_report["srt"]["max_lines_per_cue_after"]<=2,caption_report
+    assert caption_report["srt"]["preserved_words"]==caption_report["vtt"]["preserved_words"],caption_report
     # Verify all story beds are real CC0 recordings, never procedural placeholders.
     audio_manifest_path=p/"story"/"AUDIO-SOURCE-MANIFEST.json"
     assert audio_manifest_path.is_file(),"Recorded-audio provenance manifest missing"
@@ -106,7 +117,7 @@ def main():
     measurement=json.loads(hits[-1]);integrated=float(measurement["input_i"]);peak=float(measurement["input_tp"])
     assert -15.7<=integrated<=-12.3,f"LUFS outside target: {integrated}"
     assert peak<=-1.0,f"True peak too high: {peak}"
-    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"style":cfg.get("style"),"captions_enabled":cfg.get("captions"),"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"pov_hero_shots":int(hero.get("shot_count",0)),"pov_hero_ratio":round(hero_ratio,4),"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
+    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"style":cfg.get("style"),"captions_enabled":cfg.get("captions"),"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"pov_hero_shots":int(hero.get("shot_count",0)),"pov_hero_ratio":round(hero_ratio,4),"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"caption_reflow":caption_report,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
     (p/"story"/"QA-REPORT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     lines=["# Constantinople 1453 — 240 fps technical report","",f"- Status: {report['status']}","- Artistic sign-off: pending full human review",f"- Duration: {report['duration_seconds']:.2f}s","- Picture: 1920×1080 / native 240 fps / {frames} frames",f"- Shots: {len(shots)} total; {custom_count} bespoke scene shots",f"- Recurring POV defender: {hero.get('shot_count',0)} shots ({hero_ratio:.1%})",f"- Unique sampled frames: {unique}/{len(hashes)}",f"- Sound: AAC stereo / 48 kHz / {integrated:.2f} LUFS / {peak:.2f} dBTP",f"- SHA-256: {report['final_sha256']}","","240 fps is verified in the encoded stream. A 60 Hz display cannot show 240 distinct refreshes per second; the master preserves the additional temporal samples for supported playback and slow-motion editorial use."]
     (p/"story"/"QA-REPORT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")

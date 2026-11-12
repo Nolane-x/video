@@ -4,11 +4,13 @@ from __future__ import annotations
 import argparse, json
 from pathlib import Path
 
-STANDARD = {"scene", "close", "army", "top", "map", "plan", "board", "item", "split", "frame", "title", "black"}
+# Actor-led scenes in this film must use the mature-proportion templates below.
+STANDARD = {"top", "map", "plan", "board", "item", "title", "black"}
 CUSTOM = {
     "final_night", "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
-    "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city"
+    "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city",
+    "actor_closeup", "city_detail"
 }
 BLUE, RED, GOLD = "#536b83", "#9c493c", "#d1ad68"
 HERO = "byzantineYou"
@@ -48,13 +50,28 @@ def progress_phase(p, text):
         return "final"
     if p < .055:
         return "night"
-    if any(k in t for k in ("hauled overland", "overland", "rollers", "ships are appearing inside", "ships inside", "lowered into the inlet")):
+
+    # Voice-aligned chapter windows in the approved 957.9-second narration.
+    # This prevents keyword fragmentation from starving major historical set pieces.
+    if 0.385 <= p < 0.433:
+        return "convoy"
+    if 0.437 <= p < 0.478:
         return "portage"
-    if any(k in t for k in ("four christian ships", "four ships", "relief ships", "convoy", "ottoman fleet", "christian ships are approaching", "ships fight their way")):
+    if 0.505 <= p < 0.532:
+        return "tunnel"
+
+    if any(k in t for k in ("hauled overland", "overland", "rollers", "ships are appearing inside",
+                            "ships inside", "lowered into the inlet", "hauled across land",
+                            "ships on rollers", "vessels overland")):
+        return "portage"
+    if any(k in t for k in ("four christian ships", "four ships", "relief ships", "convoy",
+                            "ottoman fleet", "christian ships", "supply ships", "ships with supplies",
+                            "ships close the distance", "ships fight their way", "reach the golden horn")):
         return "convoy"
     if any(k in t for k in ("golden horn", "massive chain", "chain across", "harbour", "harbor", "sea lanes", "strait")):
         return "sea"
-    if any(k in t for k in ("countermin", "counter-min", "tunnel", "underground", "miners", "digging below")):
+    if any(k in t for k in ("countermin", "counter-min", "tunnel", "underground", "miners", "digging below",
+                            "dig below", "earth being moved", "beneath the wall", "counterminers")):
         return "tunnel"
     if any(k in t for k in ("repair crews", "repair team", "builders carry", "timber", "masonry", "repair the wall", "rebuild the wall", "breach is")):
         return "repair"
@@ -72,27 +89,35 @@ def progress_phase(p, text):
 
 def choose_template(p, text, i, usage, last):
     phase = progress_phase(p, text)
+    # Hard cap wide city tableaux. Use a closer environmental shot after the limit.
+    city_panorama_count = usage.get("city_panorama", 0)
     preferred = {
-        "night": "final_night", "city": "city_panorama", "camp": "command_camp",
+        "night": "final_night",
+        "city": "city_detail" if city_panorama_count >= 50 else "city_panorama",
+        "camp": "command_camp",
         "guns": "gun_crew" if i % 2 == 0 else "wall_battery",
-        "repair": "repair_wall", "sea": "golden_horn", "convoy": "relief_galleys",
-        "portage": "ship_portage", "tunnel": "tunnel_cutaway",
+        "repair": "repair_wall",
+        "sea": "golden_horn" if usage.get("golden_horn", 0) < 58 else "city_detail",
+        "convoy": "relief_galleys",
+        "portage": "ship_portage",
+        "tunnel": "tunnel_cutaway",
         "inside": "church_refuge" if any(k in text.casefold() for k in ("church", "pray", "food", "ration")) else "city_interior",
-        "final": "last_assault", "aftermath": "aftermath_city"
+        "final": "last_assault",
+        "aftermath": "aftermath_city"
     }
     custom = preferred[phase]
 
-    # Inserts break up action scenes; the composite defender is a selected POV anchor, not a permanent presenter.
+    # Keep only diagrams/object inserts from the generic pack; never use its chibi actor templates.
     if phase in {"guns", "repair", "final", "inside"} and i % 8 in (2, 6):
-        return "close" if i % 8 == 2 else "item"
+        return "actor_closeup" if i % 8 == 2 else "item"
     if phase in {"city", "camp", "sea", "portage"} and i % 11 == 5:
         return "map" if phase in {"city", "camp", "portage"} else "top"
     if phase in {"guns", "repair", "final", "convoy", "portage"} and i % 13 == 9:
         return "top"
     if phase in {"city", "camp", "inside"} and i % 17 == 12:
-        return "frame" if phase == "inside" else "close"
+        return "city_detail" if phase == "city" else "actor_closeup"
     if last == custom and i % 3 == 0:
-        return "scene"
+        return "actor_closeup"
     return custom
 
 def alternate_preset(phase, i, text):
@@ -241,7 +266,7 @@ def main():
         phase = progress_phase(p, text)
         tpl = choose_template(p, text, i, usage, last)
         # Keep the fictional composite defender in selected POV beats only.
-        hero_visible = (i % 10 in {0, 4, 7}) and phase != "camp"
+        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase != "camp"
         lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
 
         if tpl in STANDARD:
@@ -315,7 +340,8 @@ def main():
         else:
             visual = {"move": ("in", "left", "right", "out", "up", "down")[i % 6],
                       "moveAmt": .035 + (i % 3) * .012, "seed": i,
-                      "hero": hero_visible, "variant": (i // 2) % 4}
+                      "hero": hero_visible, "variant": (i // 2) % 4,
+                      "actorPreset": lead_preset}
             if tpl in {"wall_battery", "gun_crew"}:
                 visual["fireAt"] = .35 + (i % 4) * .1
                 visual["impactDelay"] = 1.02
@@ -337,6 +363,14 @@ def main():
                 visual["beat"] = ("prayer", "candle", "refuge", "departure")[i % 4]
             elif tpl == "final_night":
                 visual["beat"] = ("watch", "torch", "dread", "dawn")[i % 4]
+            elif tpl == "actor_closeup":
+                visual["actorPreset"] = lead_preset
+                visual["hero"] = hero_visible
+                visual["expression"] = ("tired", "worried", "determined", "sad")[i % 4]
+            elif tpl == "city_detail":
+                visual["actorPreset"] = lead_preset
+                visual["hero"] = hero_visible
+                visual["variant"] = (i // 3) % 5
             elif tpl == "city_panorama":
                 visual["chain"] = phase == "sea"
                 visual["fall"] = p > .82
@@ -356,11 +390,22 @@ def main():
         last = tpl
 
     custom_count = sum(usage.get(x, 0) for x in CUSTOM)
-    if custom_count < 220:
+    if custom_count < 260:
         raise ValueError(f"Insufficient bespoke siege shots: {custom_count}")
+    for template, minimum in (("relief_galleys", 12), ("ship_portage", 8), ("tunnel_cutaway", 6)):
+        actual = usage.get(template, 0)
+        if actual < minimum:
+            raise ValueError(f"Underrepresented historical set piece {template}: {actual} shots; require at least {minimum}.")
+    panorama_cap = int(len(shots) * 0.15)
+    if usage.get("city_panorama", 0) > panorama_cap:
+        raise ValueError(f"City panorama overuse: {usage['city_panorama']} > {panorama_cap} shots (15% cap).")
+    forbidden = {"scene", "close", "army", "split", "frame"}
+    used_forbidden = sorted(name for name in forbidden if usage.get(name, 0))
+    if used_forbidden:
+        raise ValueError(f"Generic chibi Squire templates are forbidden in this film: {used_forbidden}")
     hero_ratio = hero_count / len(shots)
-    if not (0.22 <= hero_ratio <= 0.42):
-        raise ValueError(f"POV defender share must stay between 22% and 42%; got {hero_count}/{len(shots)} ({hero_ratio:.1%}).")
+    if not (0.28 <= hero_ratio <= 0.42):
+        raise ValueError(f"POV defender share must stay between 28% and 42%; got {hero_count}/{len(shots)} ({hero_ratio:.1%}).")
 
     story["title"] = "53 Days to the End of an Empire"
     story["genre"] = "historical-military-animation"

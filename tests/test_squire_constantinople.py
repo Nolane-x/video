@@ -31,10 +31,11 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         for name in ("final_night","city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"):
             self.assertIn(name,mod.CUSTOM)
     def test_story_phase_changes(self):
-        self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"scene"),"command_camp")
-        self.assertEqual(mod.choose_template(.57,"Four ships break through",42,{},"scene"),"relief_galleys")
-        self.assertEqual(mod.choose_template(.42,"Repair crews rebuild the breached wall",41,{},"scene"),"repair_wall")
-        self.assertEqual(mod.choose_template(.64,"The miners dig under the wall",70,{},"scene"),"tunnel_cutaway")
+        self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"none"),"command_camp")
+        self.assertEqual(mod.choose_template(.40,"Four ships break through",42,{},"none"),"relief_galleys")
+        self.assertEqual(mod.choose_template(.455,"Mehmed hauls ships overland on rollers",41,{},"none"),"ship_portage")
+        self.assertEqual(mod.choose_template(.515,"The miners dig under the wall",70,{},"none"),"tunnel_cutaway")
+        self.assertEqual(mod.choose_template(.64,"The miners dig under the wall",70,{},"none"),"tunnel_cutaway")
 
     def test_full_authoring_stays_character_led_and_avoids_long_template_runs(self):
         with tempfile.TemporaryDirectory() as td:
@@ -61,15 +62,22 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             with patch.object(sys,"argv",["author_squire_constantinople.py","--project",str(project)]):
                 self.assertEqual(mod.main(),0)
             result=json.loads((project/"story"/"shots.json").read_text(encoding="utf-8"))
-            self.assertGreaterEqual(result["hero_character"]["shot_count"],int(len(result["shots"])*.22))
+            self.assertGreaterEqual(result["hero_character"]["shot_count"],int(len(result["shots"])*.28))
             self.assertLessEqual(result["hero_character"]["shot_count"],int(len(result["shots"])*.42))
-            self.assertGreaterEqual(sum(result["shot_counts"].get(x,0) for x in mod.CUSTOM),220)
+            self.assertGreaterEqual(sum(result["shot_counts"].get(x,0) for x in mod.CUSTOM),260)
+            self.assertGreaterEqual(result["shot_counts"].get("relief_galleys",0),12)
+            self.assertGreaterEqual(result["shot_counts"].get("ship_portage",0),8)
+            self.assertGreaterEqual(result["shot_counts"].get("tunnel_cutaway",0),6)
+            self.assertLessEqual(result["shot_counts"].get("city_panorama",0),int(len(result["shots"])*.15))
+            self.assertFalse({"scene","close","army","split","frame"} & set(result["shot_counts"]))
             run=1; longest=1
             for prev,cur in zip(result["shots"],result["shots"][1:]):
                 run=run+1 if cur["tpl"]==prev["tpl"] else 1
                 longest=max(longest,run)
             self.assertLessEqual(longest,3)
             self.assertEqual(result["hero_character"]["preset"],"byzantineYou")
+            self.assertIn("actor_closeup",mod.CUSTOM)
+            self.assertIn("city_detail",mod.CUSTOM)
             self.assertTrue(any(s["args"].get("hero") is False for s in result["shots"] if s["tpl"] in mod.CUSTOM and s["tpl"] not in {"command_camp","gun_crew"}))
             cfg=json.loads((project/"config.json").read_text(encoding="utf-8"))
             self.assertEqual(cfg["style"],"dusk")

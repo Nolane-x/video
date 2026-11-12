@@ -8,6 +8,8 @@ on:
     paths:
       - '.github/workflows/squire-constantinople-redesign-proof.yml'
       - 'tools/video/author_squire_constantinople.py'
+      - 'tools/video/reflow_squire_captions.py'
+      - 'tests/test_squire_constantinople.py'
       - 'tools/video/import_squire_constantinople_foley.py'
       - 'tools/video/render_squire_constantinople_redesign_proof.py'
       - 'video-projects/squire/constantinople-1453/**'
@@ -130,8 +132,13 @@ jobs:
           cp voice-assets/h2-timeline/alignment-report.json "$PROJ/story/alignment-report.json"
           cp voice-assets/manifest.json "$PROJ/story/voice-manifest.json"
           cp voice-assets/voice-selection.json "$PROJ/story/voice-selection.json"
-          cp voice-assets/captions.srt "$PROJ/story/captions.srt"
-          cp voice-assets/captions.vtt "$PROJ/story/captions.vtt"
+          python "$GITHUB_WORKSPACE/tools/video/reflow_squire_captions.py" \
+            --srt voice-assets/captions.srt \
+            --vtt voice-assets/captions.vtt \
+            --output-dir "$RUNNER_TEMP/constantinople-caption-reflow"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/captions.srt" "$PROJ/story/captions.srt"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/captions.vtt" "$PROJ/story/captions.vtt"
+          cp "$RUNNER_TEMP/constantinople-caption-reflow/CAPTION-REFLOW-REPORT.json" "$PROJ/story/"
           echo "SQUIRE_PROJECT=$PROJ" >> "$GITHUB_ENV"
       - name: Install Squire runtime and Chromium
         shell: bash

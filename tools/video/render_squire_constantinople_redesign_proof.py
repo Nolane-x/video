@@ -8,7 +8,7 @@ CUSTOM = [
     "final_night", "city_panorama", "command_camp", "gun_crew",
     "wall_battery", "repair_wall", "golden_horn", "relief_galleys",
     "ship_portage", "tunnel_cutaway", "church_refuge", "city_interior",
-    "last_assault", "aftermath_city",
+    "last_assault", "aftermath_city", "actor_closeup", "city_detail",
 ]
 
 def run(cmd: list[str]) -> str:
