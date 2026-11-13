@@ -1,0 +1,62 @@
+name: Constantinople - targeted release asset scout
+
+on:
+  push:
+    branches:
+      - cinematic/constantinople-assets
+    paths:
+      - 'tools/video/curate_constantinople_release_assets.py'
+      - '.github/workflows/curate-constantinople-release-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: constantinople-asset-scout
+  cancel-in-progress: false
+
+jobs:
+  scout:
+    name: Search Build 76 catalog without extracting all 66 volumes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Download only the authoritative Build 76 metadata index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p constantinople-asset-scout
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            'https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/ASSET_INDEX.json' \
+            -o "$RUNNER_TEMP/ASSET_INDEX.json"
+          test "$(stat -c %s "$RUNNER_TEMP/ASSET_INDEX.json")" -gt 70000000
+          sha256sum "$RUNNER_TEMP/ASSET_INDEX.json" | tee constantinople-asset-scout/index.sha256
+      - name: Filter Byzantine, Ottoman, siege and museum-object candidates
+        run: |
+          python tools/video/curate_constantinople_release_assets.py \
+            --index "$RUNNER_TEMP/ASSET_INDEX.json" \
+            --output constantinople-asset-scout/ASSET-SHORTLIST.md \
+            --max-candidates 400
+      - name: Record acquisition boundary and checksum the report
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > constantinople-asset-scout/README.md <<'EOF'
+          This report is a metadata-only scout over the existing Build 76 Release index.
+          It does not fetch or extract any of the 66 large ZIP volumes. No candidate
+          is automatically approved; exact source, item-level rights, SHA-256 and
+          visual relevance must be reviewed before the asset is selected for the film.
+          EOF
+          (cd constantinople-asset-scout && sha256sum * > SHA256SUMS.txt)
+      - name: Upload the candidate shortlist and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-build76-asset-scout
+          path: constantinople-asset-scout/
+          if-no-files-found: error
+          retention-days: 30
