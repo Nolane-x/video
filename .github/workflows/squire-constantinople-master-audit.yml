@@ -48,7 +48,8 @@ jobs:
           cp source/captions.srt source/captions.vtt source/CAPTION-REFLOW-REPORT.json review/
           cp source/AUDIO-SOURCE-MANIFEST.json source/alignment-report.json review/
           cp source/voice-manifest.json source/voice-selection.json source/voice-source-manifest.json review/
-          cp source/redesign-motion-proof.json review/
+          cp source/redesign-motion-proof-240fps.mp4 review/
+          cp source/01-SCRIPT.md source/story-bible.md source/shots.json source/config.json review/
           cp source/SHA256SUMS.txt review/
           cp source/segment-reports/segment-*.json review/segment-reports/
           cp source/contact-sheets/*.jpg review/contact-sheets/
