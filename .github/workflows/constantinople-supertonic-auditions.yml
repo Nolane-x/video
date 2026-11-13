@@ -1,0 +1,204 @@
+name: Constantinople · Supertonic-3 English voice auditions
+
+on:
+  push:
+    branches:
+      - cinematic/constantinople-premium-v3
+    paths:
+      - '.github/workflows/constantinople-supertonic-auditions.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-supertonic-auditions
+  cancel-in-progress: false
+
+jobs:
+  audition:
+    name: Render all 10 Supertonic styles against Adam and Kokoro references
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      HF_HOME: /tmp/constantinople-supertonic-hf
+      HF_HUB_CACHE: /tmp/constantinople-supertonic-hf/hub
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HUB_ETAG_TIMEOUT: "30"
+      HF_HUB_DOWNLOAD_TIMEOUT: "180"
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      ORT_NUM_THREADS: "4"
+    steps:
+      - name: Download the exact original Adam and Kokoro reference audition
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-voice-auditions-43390862391
+          path: reference
+          repository: Nolane-x/video
+          run-id: '43390862391'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg and the lightweight CPU ONNX TTS runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check supertonic soundfile numpy
+
+      - name: Render identical opening narration with all ten built-in Supertonic styles
+        run: |
+          mkdir -p dist/supertonic
+          python - <<'PY'
+          import hashlib, importlib.metadata, json, platform, time
+          from pathlib import Path
+          import numpy as np
+          import soundfile as sf
+          from supertonic import TTS
+
+          TEXT = (
+              "At midnight, the walls are still standing. But the city behind them "
+              "has almost run out of strength. You can hear the Ottoman camp beyond "
+              "the dark fields: horses shifting, men calling to one another, the "
+              "creak of carts, the distant thunder of guns. Somewhere in the darkness, "
+              "a cannon crew is preparing the next shot. You have spent fifty-three "
+              "days believing the walls will hold. Tonight, you are no longer certain."
+          )
+          VOICES = ["M1","M2","M3","M4","M5","F1","F2","F3","F4","F5"]
+          root=Path("dist/supertonic")
+          tts=TTS(auto_download=True)
+          assert set(VOICES).issubset(set(tts.voice_style_names)), tts.voice_style_names
+          records=[]
+          for voice in VOICES:
+              print("SUPERTONIC_SYNTHESIS_START",voice,flush=True)
+              style=tts.get_voice_style(voice_name=voice)
+              started=time.time()
+              wav,duration=tts.synthesize(
+                  text=TEXT,
+                  voice_style=style,
+                  total_steps=10,
+                  speed=1.0,
+                  max_chunk_length=300,
+                  silence_duration=0.30,
+                  lang="en",
+                  verbose=False,
+              )
+              arr=np.asarray(wav,dtype=np.float32)
+              arr=np.squeeze(arr)
+              assert arr.ndim==1 and arr.size>0,(voice,arr.shape)
+              assert np.isfinite(arr).all(),voice
+              pcm_path=root/f"{voice}.wav"
+              tts.save_audio(wav,str(pcm_path))
+              info=sf.info(pcm_path)
+              audio,_=sf.read(pcm_path,dtype="float32",always_2d=True)
+              assert info.samplerate==44100,(voice,info.samplerate)
+              assert audio.shape[0] > 10000,(voice,audio.shape)
+              assert info.subtype in {"PCM_16","PCM_24","FLOAT"},(voice,info.subtype)
+              digest=hashlib.sha256(pcm_path.read_bytes()).hexdigest()
+              records.append({
+                  "voice_style":voice,
+                  "file":f"{voice}.wav",
+                  "sample_rate":info.samplerate,
+                  "channels":info.channels,
+                  "subtype":info.subtype,
+                  "duration_seconds":round(info.duration,3),
+                  "sdk_duration_seconds":float(np.asarray(duration).reshape(-1)[0]),
+                  "synthesis_seconds":round(time.time()-started,2),
+                  "sha256":digest,
+                  "model":"Supertone/supertonic-3",
+                  "model_license":"OpenRAIL (per Hugging Face model repository)",
+                  "inference":"ONNX Runtime CPU",
+                  "steps":10,
+                  "speed":1.0,
+                  "language":"en"
+              })
+              print("SUPERTONIC_SYNTHESIS_OK",voice,info.duration,info.samplerate,flush=True)
+          report={
+              "status":"PASS",
+              "project":"53 Days to the End of an Empire",
+              "purpose":"Matched English documentary narration voice audition; not an automatic production selection",
+              "sample_text":TEXT,
+              "sample_text_sha256":hashlib.sha256(TEXT.encode()).hexdigest(),
+              "supertonic_sdk_version":importlib.metadata.version("supertonic"),
+              "python":platform.python_version(),
+              "voices":records,
+              "model_license":"OpenRAIL",
+              "selection_policy":"No voice is selected automatically. Human listening comparison is required.",
+              "production_policy":"Do not replace the film's full narration until an audition is approved and final segment, watermark and rights checks pass."
+          }
+          (root/"SUPERTONIC-AUDITION-REPORT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          (root/"SUPERTONIC-AUDITION-README.md").write_text(
+              "# Constantinople 1453 — Supertonic-3 voice audition\n\n"
+              "All generated voice samples use the same opening paragraph as the Adam/Kokoro comparison. "
+              "The ten built-in Supertonic styles are M1–M5 and F1–F5. They are voice-style IDs, not real-person identities.\n\n"
+              "## Comparison order\n\n"
+              "The listening montage begins with Adam, Kokoro Heart and Kokoro Bella, then continues with "
+              "the ten Supertonic styles in M1–M5 and F1–F5 order.\n\n"
+              "## Reproducibility\n\n"
+              "Supertonic SDK version: " + report["supertonic_sdk_version"] + "\n"
+              "Inference: ONNX Runtime CPU; 10 synthesis steps; speed 1.0; English; 44.1 kHz source WAV.\n\n"
+              "## License and review\n\n"
+              "The Supertonic-3 model weights are marked OpenRAIL on the publisher's Hugging Face repository. "
+              "Review the model license and acceptable-use conditions before commercial publication. "
+              "This set is an audition only; model quality, voice style and commercial suitability have not been human-approved.\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Normalize all audition voices consistently and build the listening montage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/listening
+          cp reference/auditions/old-adam/narration.wav dist/listening/01-adam-original.wav
+          cp reference/auditions/af_heart/narration.wav dist/listening/02-kokoro-heart.wav
+          cp reference/auditions/af_bella/narration.wav dist/listening/03-kokoro-bella.wav
+          python - <<'PY'
+          import subprocess
+          from pathlib import Path
+          root=Path("dist")
+          sources=[
+              root/"listening/01-adam-original.wav",
+              root/"listening/02-kokoro-heart.wav",
+              root/"listening/03-kokoro-bella.wav",
+          ]
+          for voice in ["M1","M2","M3","M4","M5","F1","F2","F3","F4","F5"]:
+              sources.append(root/f"supertonic/{voice}.wav")
+          rows=[]
+          for i,src in enumerate(sources,start=1):
+              dest=root/"listening"/(f"{i:02d}-"+src.stem+".mp3")
+              subprocess.run([
+                  "ffmpeg","-hide_banner","-v","error","-y","-i",str(src),
+                  "-af","loudnorm=I=-18:TP=-1.5:LRA=9",
+                  "-ar","48000","-ac","1","-c:a","libmp3lame","-b:a","192k",str(dest)
+              ],check=True)
+              rows.append(dest)
+          with open(root/"listening/concat.txt","w",encoding="utf-8") as f:
+              for p in rows:f.write("file '"+p.resolve().as_posix()+"'\n")
+          subprocess.run([
+              "ffmpeg","-hide_banner","-v","error","-y","-f","concat","-safe","0",
+              "-i",str(root/"listening/concat.txt"),"-c:a","libmp3lame","-b:a","192k",
+              str(root/"listening/constantinople-voice-audition-montage.mp3")
+          ],check=True)
+          print("AUDITION_MONTAGE_SAMPLES",len(rows))
+          PY
+          (cd dist && sha256sum supertonic/*.wav supertonic/*.json supertonic/*.md listening/*.mp3 > SHA256SUMS.txt)
+          cd dist && zip -qr constantinople-supertonic-voice-audition.zip supertonic listening SHA256SUMS.txt
+
+      - name: Upload the ten-style Supertonic comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-supertonic-voice-auditions-${{ github.run_id }}
+          path: |
+            dist/constantinople-supertonic-voice-audition.zip
+            dist/supertonic/
+            dist/listening/
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 30
