@@ -1,0 +1,435 @@
+name: Squire — Agincourt longform production
+
+on:
+  push:
+    branches:
+      - feature/squire-agincourt-longform
+    paths:
+      - '.github/workflows/squire-agincourt-longform.yml'
+      - 'integrations/h2-squire-studio/**'
+      - 'video-projects/squire/**'
+      - 'tools/video/author_story_v3.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: squire-agincourt-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Validate production package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      job_json: ${{ steps.payload.outputs.job_json }}
+    steps:
+      - name: Checkout production branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate Agincourt authoring source before CPU narration
+        run: python -m py_compile tools/video/author_story_v3.py
+      - name: Verify source and project package digests
+        run: |
+          sha256sum --check <<'EOF'
+          f488ca34213877fedafe2a57e911a55d673d1fede833c5e2300f1bfffea0c697  integrations/h2-squire-studio/source.zip
+          93918d4720b6aa52d61b1ca7a995dbe07949b0b2e579fab8eb19d01f22ebc414  video-projects/squire/agincourt-project.zip
+          EOF
+      - name: Unpack project for voice-job validation
+        run: unzip -q -o video-projects/squire/agincourt-project.zip -d video-projects/squire
+      - name: Validate voice job and publish reusable-workflow input
+        id: payload
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          job_path = Path('video-projects/squire/agincourt-project/voice-job.json')
+          if not job_path.exists():
+              raise SystemExit('Unpack the project archive in the render job; use the committed ZIP here instead.')
+          payload = json.loads(job_path.read_text(encoding='utf-8'))
+          if payload.get('language') != 'en' or payload.get('engine') != 'vieneu':
+              raise SystemExit('Agincourt must use the approved English VieNeu narration profile.')
+          if payload.get('voice_id') != 'en-vieneu-v3turbo-adam-3f0c9b':
+              raise SystemExit('Unexpected narration voice ID.')
+          if not 1 <= len(payload.get('segments', [])) <= 100:
+              raise SystemExit('Voice segment count is outside the accepted range.')
+          if sum(len(s.get('text', '').strip()) for s in payload['segments']) > 30000:
+              raise SystemExit('Narration exceeds VoiceStudio job character limit.')
+          print(f"Validated {payload['job_id']}: {len(payload['segments'])} segments")
+          PY
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('video-projects/squire/agincourt-project/voice-job.json').read_text(encoding='utf-8'))
+          print('job_json=' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
+          PY
+
+  voice:
+    name: Generate and verify Adam narration
+    needs: prepare
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@fcae323796dae4038357c1cccc5f67761367292d
+    with:
+      job_json: ${{ needs.prepare.outputs.job_json }}
+
+  render:
+    name: Squire 1080p animation, mix and final QA
+    needs: [prepare, voice]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_HUB_ETAG_TIMEOUT: '30'
+      HF_HUB_DOWNLOAD_TIMEOUT: '180'
+      HF_HOME: ${{ github.workspace }}/.cache/huggingface
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.cache/ms-playwright
+      OMP_NUM_THREADS: '4'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - name: Checkout production branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Download the verified same-run VoiceStudio narration artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
+        with:
+          name: video-voice-assets-${{ github.run_id }}
+          path: voice-assets
+      - name: Verify narration hash, audio format and watermark provenance
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('voice-assets')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          audio = manifest['audio']
+          wav = root / 'narration.wav'
+          digest = hashlib.sha256(wav.read_bytes()).hexdigest()
+          assert manifest['job_id'] == 'agincourt-1415-animated-longform'
+          assert manifest['engine'] == 'vieneu'
+          assert manifest['voice_id'] == 'en-vieneu-v3turbo-adam-3f0c9b'
+          assert audio['sample_rate'] == 48000 and audio['channels'] == 1
+          assert audio['subtype'] == 'PCM_24' and audio['checks'] == 'passed'
+          assert audio['watermark']['status'] == 'verified'
+          assert digest == audio['sha256']
+          print(f"Verified same-run narration: {audio['duration_seconds']}s, 48kHz mono PCM-24, SHA-256 {digest}")
+          print(f"AudioSeal verified: {audio['watermark']['block_count']} blocks")
+          PY
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install native render dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1 libgl1 libglib2.0-0 libgomp1
+      - name: Restore renderer and speech-alignment caches
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .cache/huggingface
+            .cache/ms-playwright
+          key: squire-linux-2026-11-small-en-v1
+      - name: Extract Squire engine and Agincourt project
+        run: |
+          mkdir -p integrations/h2-squire-studio video-projects/squire
+          unzip -q integrations/h2-squire-studio/source.zip -d integrations/h2-squire-studio
+          unzip -q -o video-projects/squire/agincourt-project.zip -d video-projects/squire
+          test -f integrations/h2-squire-studio/source/skills/lam-video-squire/kit/render.mjs
+          test -f video-projects/squire/agincourt-project/voice-job.json
+      - name: Install Squire Node renderer and Chromium
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Install audio and word-alignment libraries
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check \
+            'numpy<2.3' 'scipy>=1.13,<2' 'soundfile>=0.12.1' \
+            'faster-whisper==1.2.0' 'requests>=2.32,<3' 'pyloudnorm>=0.1.1'
+      - name: Verify faster-whisper runtime import before timeline generation
+        run: |
+          python - <<'PY'
+          import importlib.metadata
+          import sys
+          print("Python:", sys.executable)
+          print("faster-whisper:", importlib.metadata.version("faster-whisper"))
+          print("ctranslate2:", importlib.metadata.version("ctranslate2"))
+          try:
+              from faster_whisper import WhisperModel
+          except Exception:
+              import traceback
+              traceback.print_exc()
+              raise
+          print("PASS: faster_whisper.WhisperModel import is operational")
+          PY
+      - name: Rebuild procedural music and sound library
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          python tools/doctor.py
+          python audio/build_audio.py
+          python tools/doctor.py
+      - name: Create project and prepare voice timeline
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        env:
+          PROJECT_DOCS: ${{ github.workspace }}/video-projects/squire/agincourt-project
+        run: |
+          python tools/new_project.py --name agincourt-1415 --title 'Agincourt 1415 — The Army That Ran Out of Room' --aspect 16:9 --resolution 1080p --style dusk --pack squire --lang en
+          cp "$PROJECT_DOCS/scenes/shots/thumb.js" projects/agincourt-1415/scenes/shots/thumb.js
+          AUDIO_FILE="$(find "$GITHUB_WORKSPACE/voice-assets" -type f -name narration.wav -print -quit)"
+          test -n "$AUDIO_FILE"
+          python tools/prep_voice.py --project projects/agincourt-1415 --single "$AUDIO_FILE" --script "$PROJECT_DOCS/transcript.txt" --whisper small.en --max-pause 0.45 --lead 0.55 --lang en
+          python tools/draft_shots.py --project projects/agincourt-1415 --min 1.6 --max 4.0 --lead 0.12
+          python "$GITHUB_WORKSPACE/tools/video/author_story_v3.py" --project projects/agincourt-1415
+      - name: Validate shot coverage, SFX and music contracts
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          project = Path('projects/agincourt-1415')
+          shots_file = project / 'story/shots.json'
+          data = json.loads(shots_file.read_text(encoding='utf-8'))
+          shots = data.get('shots', [])
+          duration = float(data.get('duration', 0))
+          if len(shots) < 100 or duration < 500:
+              raise SystemExit(f'Long-form coverage too small: {len(shots)} shots / {duration:.1f}s')
+          previous_end = 0.0
+          for shot in shots:
+              start, end = float(shot['start']), float(shot['end'])
+              if end <= start or start < previous_end - 0.08:
+                  raise SystemExit(f'Invalid or overlapping shot timing: {shot.get("id")}')
+              if not shot.get('tpl') or not isinstance(shot.get('args'), dict):
+                  raise SystemExit(f'Missing visual template: {shot.get("id")}')
+              previous_end = end
+          sfx_names = {p.stem for p in Path('audio/sfx').glob('*.wav')}
+          music_names = {p.stem.split('_')[1] for p in Path('audio/music').glob('bed_*.wav')}
+          missing_sfx = sorted({cue['name'] for shot in shots for cue in shot.get('sfx', []) if not any(n == cue['name'] or n.startswith(cue['name'] + '_') for n in sfx_names)})
+          missing_music = sorted({cue['bed'] for cue in data.get('music', []) if cue.get('bed') not in music_names and cue.get('bed') not in ('none','drop')})
+          if missing_sfx or missing_music:
+              raise SystemExit(f'Missing audio assets: SFX={missing_sfx}, music={missing_music}')
+          print(f'PASS: {len(shots)} continuous shots, {duration:.1f}s, {len(music_names)} beds, {len(sfx_names)} SFX')
+          PY
+      - name: Render storyboard contact sheets and scan every third frame
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          node render.mjs --project projects/agincourt-1415 --check --scale 0.25
+          node render.mjs --project projects/agincourt-1415 --sheet --scale 0.48 --at 0.45
+          node render.mjs --project projects/agincourt-1415 --thumb
+      - name: Render first 30 seconds for motion and narration review
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: node render.mjs --project projects/agincourt-1415 --from 0 --to 30 --scale 0.65 --workers 2
+      - name: Render full 1080p picture
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: node render.mjs --project projects/agincourt-1415 --workers 4 --crf 18
+      - name: Mix narration, procedural score and motivated SFX
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: python tools/mix.py --project projects/agincourt-1415
+      - name: Generate word-aligned captions and burn readable subtitles into the master
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          set -euo pipefail
+          mkdir -p projects/agincourt-1415/qa
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          transcript = Path("projects/agincourt-1415/timeline/transcript.txt").read_text(encoding="utf-8")
+          pattern = re.compile(r"^\[\s*(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\]\s+V\d+\s+\w+\s+(.*)$")
+          max_line_chars = 32
+          rows = []
+          previous_end = 0.0
+          parsed_sentences = 0
+
+          def wrap_caption(value):
+              result, pending = [], ""
+              for word in value.split():
+                  candidate = f"{pending} {word}".strip()
+                  if len(candidate) <= max_line_chars:
+                      pending = candidate
+                  else:
+                      if pending:
+                          result.append(pending)
+                      if len(word) > max_line_chars:
+                          raise ValueError(f"Word exceeds subtitle line width: {word!r}")
+                      pending = word
+              if pending:
+                  result.append(pending)
+              return result
+
+          def fits(value):
+              wrapped = wrap_caption(value)
+              return 1 <= len(wrapped) <= 2 and all(len(line) <= max_line_chars for line in wrapped)
+
+          for line_number, line in enumerate(transcript.splitlines(), 1):
+              match = pattern.match(line)
+              if not match:
+                  continue
+              parsed_sentences += 1
+              raw_start, raw_end, sentence = match.groups()
+              start = max(0.0, float(raw_start), previous_end)
+              end = float(raw_end)
+              sentence = sentence.strip()
+              if not sentence or end <= start:
+                  raise ValueError(f"Invalid aligned transcript timing on line {line_number}")
+
+              chunks, pending = [], ""
+              for word in sentence.split():
+                  candidate = f"{pending} {word}".strip()
+                  if fits(candidate):
+                      pending = candidate
+                  else:
+                      if pending:
+                          chunks.append(pending)
+                      if not fits(word):
+                          raise ValueError(f"Single word cannot fit subtitle width: {word!r}")
+                      pending = word
+              if pending:
+                  chunks.append(pending)
+
+              counts = [len(chunk.split()) for chunk in chunks]
+              total_words = sum(counts)
+              cursor = start
+              for index, (chunk, count) in enumerate(zip(chunks, counts)):
+                  cue_end = end if index == len(chunks) - 1 else cursor + (end - start) * count / total_words
+                  rows.append({"start": cursor, "end": cue_end, "text": chunk})
+                  cursor = cue_end
+              previous_end = end
+
+          if parsed_sentences != 192:
+              raise SystemExit(f"Expected 192 Whisper-aligned sentences, parsed {parsed_sentences}")
+
+          # Merge very short adjacent cues where the speech gap and two-line limit allow it.
+          changed = True
+          while changed:
+              changed = False
+              for index, row in enumerate(rows):
+                  if row["end"] - row["start"] >= 0.8:
+                      continue
+                  if index + 1 < len(rows):
+                      nxt = rows[index + 1]
+                      combined = row["text"] + " " + nxt["text"]
+                      if nxt["start"] - row["end"] <= 0.45 and fits(combined):
+                          row["text"], row["end"] = combined, nxt["end"]
+                          rows.pop(index + 1)
+                          changed = True
+                          break
+                  if index > 0:
+                      prev = rows[index - 1]
+                      combined = prev["text"] + " " + row["text"]
+                      if row["start"] - prev["end"] <= 0.45 and fits(combined):
+                          prev["text"], prev["end"] = combined, row["end"]
+                          rows.pop(index)
+                          changed = True
+                          break
+
+          def timestamp(seconds, vtt=False):
+              millis = max(0, round(seconds * 1000))
+              hours, remainder = divmod(millis, 3_600_000)
+              minutes, remainder = divmod(remainder, 60_000)
+              secs, ms = divmod(remainder, 1000)
+              return f"{hours:02d}:{minutes:02d}:{secs:02d}{'.' if vtt else ','}{ms:03d}"
+
+          srt, vtt, burn_srt = [], ["WEBVTT", ""], []
+          previous_end = 0.0
+          for index, row in enumerate(rows, 1):
+              if row["start"] < previous_end - 0.002 or row["end"] <= row["start"]:
+                  raise SystemExit(f"Overlapping or invalid caption cue: {row}")
+              wrapped = wrap_caption(row["text"])
+              if len(wrapped) > 2:
+                  raise SystemExit(f"Caption exceeds two lines: {row['text']}")
+              cue_text = "\n".join(wrapped)
+              start_stamp, end_stamp = timestamp(row['start']), timestamp(row['end'])
+              srt.extend([str(index), f"{start_stamp} --> {end_stamp}", cue_text, ""])
+              burn_srt.extend([str(index), f"{start_stamp} --> {end_stamp}", r"{\an8}" + cue_text, ""])
+              vtt.extend([f"{timestamp(row['start'], True)} --> {timestamp(row['end'], True)}", cue_text, ""])
+              previous_end = row["end"]
+
+          qa = Path("projects/agincourt-1415/qa")
+          (qa / "captions.srt").write_text("\n".join(srt), encoding="utf-8")
+          (qa / "captions.vtt").write_text("\n".join(vtt), encoding="utf-8")
+          (qa / "captions-burn.srt").write_text("\n".join(burn_srt), encoding="utf-8")
+          report = {
+              "status": "generated-from-word-aligned-transcript",
+              "burn_in_position": "top-center (ASS an8 override)",
+              "burn_in_font_size": 20,
+              "source_sentences": parsed_sentences,
+              "caption_cues": len(rows),
+              "maximum_line_characters": max(len(line) for row in rows for line in wrap_caption(row["text"])),
+              "maximum_lines_per_cue": max(len(wrap_caption(row["text"])) for row in rows),
+              "short_cues_below_0_8s": sum(row["end"] - row["start"] < 0.8 for row in rows),
+              "last_caption_end_seconds": round(rows[-1]["end"], 3),
+          }
+          (qa / "caption-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(report, indent=2))
+          PY
+          FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
+          test -n "$FINAL"
+          TEMP="projects/agincourt-1415/out/Agincourt-captioned.tmp.mp4"
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "subtitles=projects/agincourt-1415/qa/captions-burn.srt:force_style='FontName=DejaVu Sans,FontSize=20,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1.5,Shadow=0.4,MarginV=30,Alignment=8,WrapStyle=2'" -c:v libx264 -preset veryfast -crf 17 -maxrate 18M -bufsize 36M -fps_mode passthrough -c:a copy -movflags +faststart "$TEMP"
+          mv "$TEMP" "$FINAL"
+          for stamp in 91 181 311 471 581; do
+            ffmpeg -hide_banner -v error -y -ss "$stamp" -i "$FINAL" -frames:v 1 "projects/agincourt-1415/qa/caption-proof-$stamp.jpg"
+          done
+          ffmpeg -hide_banner -v error -y -i "$FINAL" -vf "fps=1/20,scale=480:-1,tile=4x4" -frames:v 1 projects/agincourt-1415/qa/caption-contact-sheet.jpg
+      - name: Validate final MP4 and create QA report
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          set -euo pipefail
+          FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
+          test -n "$FINAL"
+          mkdir -p projects/agincourt-1415/qa
+          ffprobe -v error -show_entries format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels -of json "$FINAL" > projects/agincourt-1415/qa/ffprobe.json
+          ffmpeg -hide_banner -i "$FINAL" -af ebur128=framelog=verbose -f null - 2> projects/agincourt-1415/qa/ebur128.txt
+          python - "$FINAL" <<'PY'
+          import hashlib, json, sys, subprocess
+          from pathlib import Path
+          final = Path(sys.argv[1])
+          probe = json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels','-of','json',str(final)], text=True))
+          video = next((s for s in probe.get('streams',[]) if s.get('codec_type') == 'video'), None)
+          audio = next((s for s in probe.get('streams',[]) if s.get('codec_type') == 'audio'), None)
+          duration = float(probe.get('format',{}).get('duration',0))
+          if not video or not audio: raise SystemExit('Final master must contain both video and audio streams')
+          if (video.get('width'), video.get('height')) != (1920,1080): raise SystemExit(f'Expected 1920x1080; got {video.get("width")}x{video.get("height")}')
+          if video.get('r_frame_rate') != '24/1': raise SystemExit(f'Expected 24 fps; got {video.get("r_frame_rate")}')
+          if not 500 <= duration <= 700: raise SystemExit(f'Unexpected long-form duration: {duration:.2f}s')
+          digest = hashlib.sha256(final.read_bytes()).hexdigest()
+          report = {'status':'technical-gates-passed','file':final.name,'duration_seconds':round(duration,3),'size_bytes':final.stat().st_size,'video':video,'audio':audio,'sha256':digest,'human_visual_review':'required','human_listening_review':'required'}
+          Path('projects/agincourt-1415/qa/report.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(report,indent=2))
+          PY
+      - name: Package deliverables and review material
+        working-directory: integrations/h2-squire-studio/source/skills/lam-video-squire/kit
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/deliverables/agincourt-1415"
+          FINAL="$(find projects/agincourt-1415/out -maxdepth 1 -type f -name '*.mp4' -print -quit)"
+          cp "$FINAL" "$GITHUB_WORKSPACE/deliverables/agincourt-1415/Agincourt-1415-FINAL-1080p.mp4"
+          cp projects/agincourt-1415/out/thumbnail_1280.jpg "$GITHUB_WORKSPACE/deliverables/agincourt-1415/thumbnail.jpg"
+          cp projects/agincourt-1415/build/preview.mp4 "$GITHUB_WORKSPACE/deliverables/agincourt-1415/preview-first-30-seconds.mp4"
+          cp -R projects/agincourt-1415/build/sheets "$GITHUB_WORKSPACE/deliverables/agincourt-1415/contact-sheets"
+          cp -R projects/agincourt-1415/qa "$GITHUB_WORKSPACE/deliverables/agincourt-1415/qa"
+          cp projects/agincourt-1415/story/shots.json "$GITHUB_WORKSPACE/deliverables/agincourt-1415/shots.json"
+          cp projects/agincourt-1415/timeline/transcript.txt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/voice-timing-transcript.txt"
+          cp "$GITHUB_WORKSPACE/voice-assets/manifest.json" "$GITHUB_WORKSPACE/deliverables/agincourt-1415/voice-manifest.json"
+          cp projects/agincourt-1415/qa/captions.srt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/captions.srt"
+          cp projects/agincourt-1415/qa/captions.vtt "$GITHUB_WORKSPACE/deliverables/agincourt-1415/captions.vtt"
+          cp projects/agincourt-1415/qa/caption-report.json "$GITHUB_WORKSPACE/deliverables/agincourt-1415/caption-report.json"
+      - name: Upload final video and production evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: squire-agincourt-1415-${{ github.run_id }}
+          path: deliverables/agincourt-1415/
+          if-no-files-found: warn
+          retention-days: 14

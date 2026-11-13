@@ -1,0 +1,216 @@
+name: Squire · Agincourt subtitle repair and burn-in
+
+on:
+  push:
+    branches:
+      - 'feature/squire-agincourt-longform'
+    paths:
+      - '.github/workflows/squire-agincourt-caption-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: squire-agincourt-caption-repair
+  cancel-in-progress: false
+
+jobs:
+  captions:
+    name: Align readable captions and remaster the existing Agincourt MP4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Download the technically validated Agincourt candidate
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4.1.8
+        with:
+          name: squire-agincourt-1415-42809755115
+          path: source
+          run-id: '42809755115'
+          repository: Nolane-x/video
+          github-token: \${{ secrets.GITHUB_TOKEN }}
+      - name: Install FFmpeg subtitle fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Generate sentence-timed, readable SRT and VTT captions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          source = Path("source/voice-timing-transcript.txt")
+          text = source.read_text(encoding="utf-8")
+          pattern = re.compile(r"^\[\s*(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\]\s+V\d+\s+\w+\s+(.*)$")
+          max_chunk_chars = 72
+          max_line_chars = 42
+          rows = []
+          previous_end = 0.0
+          parsed_lines = 0
+
+          def split_words(sentence: str):
+              chunks = []
+              pending = ""
+              for word in sentence.split():
+                  candidate = f"{pending} {word}".strip()
+                  if len(candidate) <= max_chunk_chars:
+                      pending = candidate
+                  else:
+                      if pending:
+                          chunks.append(pending)
+                      if len(word) > max_chunk_chars:
+                          raise ValueError(f"Unbreakable caption token: {word!r}")
+                      pending = word
+              if pending:
+                  chunks.append(pending)
+              return chunks
+
+          def wrap_caption(value: str):
+              lines = []
+              pending = ""
+              for word in value.split():
+                  candidate = f"{pending} {word}".strip()
+                  if len(candidate) <= max_line_chars:
+                      pending = candidate
+                  else:
+                      if pending:
+                          lines.append(pending)
+                      pending = word
+              if pending:
+                  lines.append(pending)
+              if len(lines) > 2:
+                  raise ValueError(f"Caption exceeds two lines: {value!r}")
+              return lines
+
+          def stamp(seconds: float, vtt: bool = False):
+              ms = max(0, round(seconds * 1000))
+              hours, rem = divmod(ms, 3_600_000)
+              minutes, rem = divmod(rem, 60_000)
+              secs, millis = divmod(rem, 1000)
+              return f"{hours:02d}:{minutes:02d}:{secs:02d}{'.' if vtt else ','}{millis:03d}"
+
+          for line_number, line in enumerate(text.splitlines(), 1):
+              match = pattern.match(line)
+              if not match:
+                  continue
+              parsed_lines += 1
+              raw_start, raw_end, sentence = match.groups()
+              start, end = max(0.0, float(raw_start)), float(raw_end)
+              sentence = sentence.strip()
+              if not sentence or end <= start:
+                  raise ValueError(f"Invalid transcript timing at line {line_number}")
+              start = max(start, previous_end)
+              if end <= start:
+                  raise ValueError(f"Overlapping/empty transcript timing at line {line_number}")
+              chunks = split_words(sentence)
+              word_counts = [len(chunk.split()) for chunk in chunks]
+              total_words = sum(word_counts)
+              cursor = start
+              for index, (chunk, word_count) in enumerate(zip(chunks, word_counts)):
+                  cue_end = end if index == len(chunks) - 1 else cursor + (end - start) * word_count / total_words
+                  wrapped = wrap_caption(chunk)
+                  rows.append({
+                      "start": round(cursor, 3),
+                      "end": round(cue_end, 3),
+                      "text": "\n".join(wrapped),
+                      "characters": len(chunk),
+                      "line_count": len(wrapped),
+                  })
+                  cursor = cue_end
+              previous_end = end
+
+          if parsed_lines != 192:
+              raise SystemExit(f"Expected 192 aligned transcript sentences, parsed {parsed_lines}")
+          if len(rows) < parsed_lines:
+              raise SystemExit("Caption splitting did not preserve every aligned sentence")
+          if max(row["characters"] for row in rows) > max_chunk_chars:
+              raise SystemExit("Caption chunk exceeds the configured character limit")
+          if max(max(len(line) for line in row["text"].splitlines()) for row in rows) > max_line_chars:
+              raise SystemExit("A caption line exceeds 42 characters")
+          for index, row in enumerate(rows):
+              if row["end"] <= row["start"]:
+                  raise SystemExit(f"Non-positive caption duration: {row}")
+              if index and row["start"] < rows[index - 1]["end"] - 0.002:
+                  raise SystemExit(f"Overlapping subtitle cues: {rows[index - 1]} / {row}")
+
+          srt = []
+          vtt = ["WEBVTT", ""]
+          for index, row in enumerate(rows, 1):
+              srt.extend([
+                  str(index),
+                  f"{stamp(row['start'])} --> {stamp(row['end'])}",
+                  row["text"],
+                  "",
+              ])
+              vtt.extend([
+                  f"{stamp(row['start'], True)} --> {stamp(row['end'], True)}",
+                  row["text"],
+                  "",
+              ])
+          Path("captions.srt").write_text("\n".join(srt), encoding="utf-8")
+          Path("captions.vtt").write_text("\n".join(vtt), encoding="utf-8")
+          report = {
+              "status": "captions-generated-from-word-aligned-transcript",
+              "source_transcript_sentences": parsed_lines,
+              "caption_cues": len(rows),
+              "maximum_caption_characters": max(row["characters"] for row in rows),
+              "maximum_line_characters": max(max(len(line) for line in row["text"].splitlines()) for row in rows),
+              "maximum_lines_per_cue": max(row["line_count"] for row in rows),
+              "last_caption_end_seconds": rows[-1]["end"],
+              "original_video_duration_seconds": 589.083,
+              "caption_readability": "maximum 42 characters per line, maximum two lines",
+          }
+          Path("caption-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(report, indent=2))
+          PY
+      - name: Burn captions into the existing 1080p video
+        run: |
+          set -euo pipefail
+          INPUT='source/Agincourt-1415-FINAL-1080p.mp4'
+          test -s "$INPUT"
+          ffmpeg -hide_banner -v error -y -i "$INPUT" \
+            -vf "subtitles=captions.srt:force_style='FontName=DejaVu Sans,FontSize=42,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,MarginV=64,Alignment=2,WrapStyle=2'" \
+            -c:v libx264 -preset medium -crf 17 -maxrate 18M -bufsize 36M \
+            -fps_mode passthrough -c:a copy -movflags +faststart \
+            Agincourt-1415-CAPTIONED-1080p.mp4
+      - name: Validate captioned master and create caption proof frames
+        run: |
+          set -euo pipefail
+          mkdir -p qa
+          ffprobe -v error -show_streams -show_format -of json Agincourt-1415-CAPTIONED-1080p.mp4 > qa/ffprobe.json
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          probe=json.loads(Path("qa/ffprobe.json").read_text())
+          video=next(s for s in probe["streams"] if s["codec_type"]=="video")
+          audio=next(s for s in probe["streams"] if s["codec_type"]=="audio")
+          duration=float(probe["format"]["duration"])
+          assert (video["width"], video["height"])==(1920,1080), video
+          assert video["r_frame_rate"]=="24/1" and video["avg_frame_rate"]=="24/1", video
+          assert int(video.get("nb_frames",0))==14138, video
+          assert audio["codec_type"]=="audio" and audio["sample_rate"]=="48000" and audio["channels"]==2, audio
+          assert abs(duration-589.083)<0.15, duration
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i","Agincourt-1415-CAPTIONED-1080p.mp4","-f","null","-"],check=True)
+          print("CAPTIONED MASTER PASS", duration, video["width"], video["height"], video["avg_frame_rate"], video["nb_frames"])
+          PY
+          for stamp in 90 180 310 470 580; do
+            ffmpeg -hide_banner -v error -y -ss "$stamp" -i Agincourt-1415-CAPTIONED-1080p.mp4 -frames:v 1 "qa/caption-proof-$stamp.jpg"
+          done
+          ffmpeg -hide_banner -v error -y -i Agincourt-1415-CAPTIONED-1080p.mp4 -vf "fps=1/20,scale=480:-1,tile=4x4" -frames:v 1 qa/caption-contact-sheet.jpg
+          sha256sum Agincourt-1415-CAPTIONED-1080p.mp4 captions.srt captions.vtt > qa/SHA256SUMS.txt
+      - name: Upload captioned Agincourt master and QA evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: squire-agincourt-1415-captioned-\${{ github.run_id }}
+          path: |
+            Agincourt-1415-CAPTIONED-1080p.mp4
+            captions.srt
+            captions.vtt
+            caption-report.json
+            qa/
+          if-no-files-found: error
+          retention-days: 30
