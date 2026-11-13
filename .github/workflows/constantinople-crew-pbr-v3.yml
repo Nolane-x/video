@@ -3,7 +3,7 @@ name: Constantinople · expanded siege camp and city edit · native 240fps
 on:
   push:
     branches:
-      - cinematic/constantinople-premium-v2
+      - cinematic/constantinople-premium-v3
     paths:
       - 'tools/blender/render_constantinople_crew_pbr_v3.py'
       - 'tools/blender/crew_mesh_policy.py'
