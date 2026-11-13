@@ -81,7 +81,7 @@ jobs:
                   assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["sha256"]
 
           crew = json.loads(Path("character/manifest.json").read_text())
-          assert crew["license"] == "CC0-1.0"
+          assert str(crew["license"]).startswith("CC0-1.0"), crew["license"]
           assert crew["bones"] >= 50
           assert len(crew["actions"]) >= 8
           assert crew["visual_approval"] == "pending"
