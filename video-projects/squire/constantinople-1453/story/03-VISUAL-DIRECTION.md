@@ -16,6 +16,9 @@ Not a lecture made from slides. Treat the viewer as physically present in the ci
 
 ## Opening sequence — final night, then rewind
 
+The opening is cut from adjacent voice cues as one continuous event, not classified one subtitle fragment at a time. The intended order is: (1) watchtower/parapet establishing; (2) exhausted defender reaction; (3) Ottoman camp wide; (4) horses, wagons and camp movement detail; (5) distant artillery; (6) cannon crew loading/ramming close-up; (7) defender reaction; (8) layered assault waves at dawn; (9) the first assault, second wave and elite reserve as separate beats; (10) defender logistics — carrying water, stones, arrows and messages; (11) final emotional reaction; (12) city panorama and hard rewind to 6 April 1453. The author must use neighbouring time-aligned lines as context when a clause is split across shots. Event-specific scenes bypass generic map/item/close-up alternation.
+
+
 The first narration passage stays in the final night; it must not be flattened into a repeated watchtower shot. Author the visual progression from the spoken events: exhausted defender on the parapet, distant Ottoman camp and moving fires, horses/wagons and silhouettes, far artillery flashes, a close loading/preparation insert with the cannon crew, the defender's reaction, and the first assault wave at dawn. Use the narration cues to select each scene, then hard-cut to 6 April 1453 for the chronological rewind. The city-side composite defender must never be staged as part of the Ottoman gun crew.
 
 ## Shot requirements

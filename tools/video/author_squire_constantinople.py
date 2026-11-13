@@ -7,7 +7,9 @@ from pathlib import Path
 # Actor-led scenes in this film must use the mature-proportion templates below.
 STANDARD = {"top", "map", "plan", "board", "item", "title", "black"}
 CUSTOM = {
-    "final_night", "night_camp", "night_guns", "night_gun_crew",
+    "final_night", "night_wall_watch", "night_camp", "night_camp_detail",
+    "night_guns", "night_gun_crew", "night_gun_crew_detail",
+    "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve", "defender_supply",
     "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
     "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city",
@@ -32,6 +34,14 @@ def sfx_for_shot(tpl, args, index, root):
         return cue(root, ["cannon_fire"], at=.58, gain=-14)
     if tpl == "night_gun_crew":
         return cue(root, ["cannon_fire"], at=.92, gain=-12)
+    if tpl == "night_gun_crew_detail":
+        return cue(root, ["cannon_fire"], at=.92, gain=-15) + cue(root, ["wind_loop"], at=0, gain=-22)
+    if tpl in {"night_wall_watch", "night_camp_detail"}:
+        return cue(root, ["wind_loop"], at=0, gain=-20) + cue(root, ["battle_roar"], at=.24, gain=-23)
+    if tpl in {"assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve"}:
+        return cue(root, ["battle_roar"], at=.18, gain=-12) + cue(root, ["arrow_whoosh"], at=.56, gain=-17)
+    if tpl == "defender_supply":
+        return cue(root, ["battle_roar"], at=.25, gain=-23) + cue(root, ["wind_loop"], at=0, gain=-22)
     if tpl in {"wall_battery", "gun_crew"}:
         fire_at = float(args.get("fireAt", .52))
         return cue(root, ["cannon_fire"], at=fire_at, gain=-8) + cue(root, ["siege_impact"], at=fire_at + 1.02, gain=-7)
@@ -51,14 +61,92 @@ def sfx_for_shot(tpl, args, index, root):
         return cue(root, ["wind_loop"], at=0, gain=-19) if index % 4 == 0 else []
     return cue(root, ["wind_loop"], at=0, gain=-19) if index % 5 == 0 else []
 
+def opening_context(shots, index, max_gap=3.4):
+    """Join adjacent voice cues only when they are temporally close.
+
+    Voice alignment often splits one clause over two 0.8–2.0s shots. Reading a
+    small local window prevents a keyword on the next cue from being lost.
+    """
+    current = shots[index]
+    midpoint = (float(current["start"]) + float(current["end"])) / 2
+    nearby = []
+    for j in range(max(0, index - 1), min(len(shots), index + 2)):
+        item = shots[j]
+        other_midpoint = (float(item["start"]) + float(item["end"])) / 2
+        if abs(other_midpoint - midpoint) <= max_gap:
+            line = str(item.get("line") or "").strip()
+            if line:
+                nearby.append(line)
+    return " ".join(nearby)
+
+
+def choose_opening_template(text, context_text, index):
+    """Narration-led edit for the opening 53 seconds.
+
+    This deliberately bypasses generic insert cadence and same-template
+    alternation. Important events keep their establishing/action shots.
+    """
+    current = text.casefold()
+    context = context_text.casefold()
+
+    # Assault waves have different staging and must not collapse into watchtower shots.
+    if any(k in context for k in ("the sultan's best troops", "sultan's best", "best troops")):
+        return "elite_reserve"
+    if any(k in context for k in ("second wave", "climb over what remains")):
+        return "assault_second_wave"
+    if any(k in context for k in ("first men may", "not be expected to survive", "first wave")):
+        return "assault_first_wave"
+    if any(k in context for k in ("largest assault", "come in waves", "at dawn")):
+        return "assault_waves"
+
+    # The defender's logistical work is a new visual beat, not another portrait.
+    if any(k in context for k in (
+        "carrying water", "carry water", "stones, arrows", "arrows and messages",
+        "messages wherever", "wall is weakest", "water, stones"
+    )):
+        return "defender_supply"
+
+    # The same gun sequence gets an establishing view followed by a close loading insert.
+    if "preparing the next shot" in context or "prepare the next shot" in context:
+        return "night_gun_crew_detail"
+    if "cannon crew" in context or "gun crew" in context:
+        return "night_gun_crew"
+    if any(k in context for k in ("distant thunder of guns", "thunder of guns", "guns in the darkness")):
+        return "night_guns"
+
+    # Camp establishing first; then horses, carts and moving silhouettes as inserts.
+    if "ottoman camp" in current:
+        return "night_camp"
+    if any(k in context for k in ("horses shifting", "men calling", "creak of carts", "cart wheels")):
+        return "night_camp_detail"
+    if "ottoman camp" in context or "dark fields" in context:
+        return "night_camp"
+
+    if any(k in context for k in (
+        "tonight, you are no longer certain", "no longer certain",
+        "not a famous commander", "almost run out of strength"
+    )):
+        return "actor_closeup"
+    if "one defender among thousands" in context:
+        return "night_wall_watch"
+    if "walls are still standing" in context or "the walls will hold" in context:
+        return "night_wall_watch" if index % 2 else "final_night"
+
+    # Opening and final-paragraph establishing shots.
+    return "final_night"
+
+
 def progress_phase(p, text):
     t = text.casefold()
     if any(k in t for k in (
         "final assault", "last assault", "largest assault", "first wave", "second wave",
         "third wave", "janissar", "ladder", "twenty-ninth of may", "twenty ninth of may",
-        "just before dawn", "first men may not", "the sultan's best troops"
+        "just before dawn", "first men may not", "the sultan's best troops",
+        "not be expected to survive", "climb over what remains"
     )):
         return "final"
+    if any(k in t for k in ("carrying water", "carry water", "stones, arrows", "arrows and messages", "wall is weakest")):
+        return "defender_supply"
     if p < .055:
         # The film opens on the final night, but the narration already contains distinct
         # visual events. Give those events their own scenes instead of forcing every cue
@@ -122,8 +210,10 @@ def progress_phase(p, text):
         return "city"
     return ("city", "camp", "guns", "repair", "sea", "inside", "final")[int(p * 1000) % 7]
 
-def choose_template(p, text, i, usage, last):
-    phase = progress_phase(p, text)
+def choose_template(p, text, i, usage, last, context_text=None):
+    phase = progress_phase(p, context_text or text)
+    if p < .055:
+        return choose_opening_template(text, context_text or text, i)
     # Hard cap wide city tableaux. Use a closer environmental shot after the limit.
     city_panorama_count = usage.get("city_panorama", 0)
     preferred = {
@@ -169,6 +259,10 @@ def choose_template(p, text, i, usage, last):
 
 def alternate_preset(phase, i, text):
     t = text.casefold()
+    if phase in {"elite_reserve"}:
+        return "ottomanElite"
+    if phase in {"assault_waves", "assault_first_wave", "assault_second_wave", "night_guns", "night_gun_crew", "night_gun_crew_detail", "night_camp_detail"}:
+        return "ottomanInfantry"
     if phase == "camp":
         return "ottomanCommander" if i % 2 == 0 else "ottomanElite"
     if phase in {"sea", "convoy"}:
@@ -310,10 +404,15 @@ def main():
             raise ValueError(f"Bad timing in {shot.get('id')}")
         p = ((start + end) / 2) / duration
         text = str(shot.get("line") or "")
-        phase = progress_phase(p, text)
-        tpl = choose_template(p, text, i, usage, last)
-        # Keep the fictional composite defender in selected POV beats only.
-        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase not in {"camp", "night_guns", "night_gun_crew"}
+        context_text = opening_context(shots, i) if start < duration * .055 else text
+        phase = progress_phase(p, context_text)
+        tpl = choose_template(p, text, i, usage, last, context_text=context_text)
+        # Keep the fictional composite defender out of Ottoman artillery and assault formations.
+        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase not in {
+            "camp", "night_guns", "night_gun_crew", "night_camp_detail",
+            "night_gun_crew_detail", "assault_waves", "assault_first_wave",
+            "assault_second_wave", "elite_reserve"
+        }
         lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
 
         if tpl in STANDARD:
@@ -416,6 +515,22 @@ def main():
                 visual["beat"] = ("distant_flash", "silhouette", "smoke", "thunder")[i % 4]
             elif tpl == "night_gun_crew":
                 visual["beat"] = ("powder", "load", "brace", "match")[i % 4]
+            elif tpl == "night_wall_watch":
+                visual["beat"] = ("watch", "torch", "dread", "patrol")[i % 4]
+            elif tpl == "night_camp_detail":
+                visual["beat"] = ("horses", "carts", "movement", "fires")[i % 4]
+            elif tpl == "night_gun_crew_detail":
+                visual["beat"] = ("powder", "stone", "rammer", "match")[i % 4]
+            elif tpl == "assault_waves":
+                visual["beat"] = ("approach", "drums", "ladders", "push")[i % 4]
+            elif tpl == "assault_first_wave":
+                visual["beat"] = ("first_rush", "ladders", "arrows", "brace")[i % 4]
+            elif tpl == "assault_second_wave":
+                visual["beat"] = ("second_wave", "climb", "breach", "push")[i % 4]
+            elif tpl == "elite_reserve":
+                visual["beat"] = ("reserve", "advance", "formation", "command")[i % 4]
+            elif tpl == "defender_supply":
+                visual["beat"] = ("water", "stones", "arrows", "messages")[i % 4]
             elif tpl == "actor_closeup":
                 visual["actorPreset"] = lead_preset
                 visual["hero"] = hero_visible

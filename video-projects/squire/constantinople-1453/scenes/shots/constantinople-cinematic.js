@@ -669,6 +669,180 @@ function drawNightGunCrew(g,t,info,a){
   if(beat==="powder") smoke(g,t,mx-35,650,130);
   if(beat==="brace") line(g,[[700,920],[900,880],[1020,860]],"#b29367",7);
 }
+function drawNightWallWatch(g,t,info,a){
+  const beat=a.beat||"watch";
+  gradient(g,0,H(),[[0,"#101725"],[.42,"#263441"],[1,"#4a3c2d"]]);
+  // The camera is now on the actual land wall: crenellations, tower shadow and the sleeping city.
+  path(g,[[0,520],[190,470],[380,495],[590,420],[790,480],[1010,410],[1240,475],[1460,400],[1680,460],[1920,405],[1920,1080],[0,1080]],"#182630",null,0);
+  for(let i=0;i<12;i++){
+    const x=i*168-45,y=550+(i%3)*24;
+    path(g,[[x,y],[x+16,y-88],[x+58,y-105],[x+102,y-78],[x+120,y]],"#645847","#292823",4);
+    path(g,[[x+12,y-79],[x+108,y-79],[x+108,y-58],[x+12,y-58]],"#938068",null,0);
+    for(let w=0;w<3;w++)line(g,[[x+22+w*29,y-66],[x+22+w*29,y-40]],"#302b26",5,.8);
+  }
+  // Near parapet and a narrow stair opening create a stronger foreground silhouette.
+  path(g,[[0,825],[0,760],[280,730],[530,770],[770,715],[1040,755],[1300,710],[1580,748],[1920,695],[1920,1080],[0,1080]],"#51483d","#211f1c",8);
+  for(let x=0;x<1920;x+=64)path(g,[[x,758],[x+38,751],[x+38,796],[x,804]],"#87745d","#302923",3);
+  for(let i=0;i<10;i++){
+    const x=95+i*190,y=685+(i%3)*22;
+    glow(g,x,y,72,"#f0a451",.14);circle(g,x,y,5,"#f5bb69");
+  }
+  if(beat==="torch"){
+    glow(g,1540,560,260,"#e9a05b",.32);
+    path(g,[[1510,820],[1530,690],[1550,820]],"#372920",null,0);
+    path(g,[[1530,700],[1515,650],[1545,665]],"#f4b05b",null,0);
+  }
+  if(beat==="dread"){
+    for(let i=0;i<4;i++)smoke(g,t+i*.3,1120+i*170,470,180+i);
+    glow(g,1440,620,180,"#e28a4a",.16);
+  }
+  drawHero(g,t,info,{x:beat==="torch"?.58:.32,y:.99,h:beat==="torch"?.82:.64,
+    face:beat==="dread"?"worried":"tired",pose:beat==="patrol"?"walk":"guard",
+    walk:beat==="patrol",speed:.19,dir:1,weapon:"spear",
+    poseAt:[[0,"guard"],[.85,"point"],[1.7,"guard"]],
+    faceAt:[[0,"tired"],[.85,"worried"],[1.7,"determined"]]});
+  drawPeople(g,t,info,[{preset:"byzantineGuard",x:.79,y:.96,h:.39,face:"worried",pose:"look",flip:true}],.94,.41);
+}
+function drawNightCampDetail(g,t,info,a){
+  const beat=a.beat||"horses";
+  gradient(g,0,H(),[[0,"#0f1723"],[.42,"#242d33"],[1,"#463528"]]);
+  path(g,[[0,610],[180,540],[400,590],[620,500],[850,570],[1100,485],[1340,560],[1570,475],[1780,535],[1920,480],[1920,1080],[0,1080]],"#18222b",null,0);
+  // Close A-frame tents give the camera a different scale from the distant camp shot.
+  for(let i=0;i<6;i++){
+    const x=80+i*335, y=645+(i%2)*38, w=135+(i%3)*18;
+    path(g,[[x-w,y],[x,y-150-(i%3)*18],[x+w,y]],i%2?"#6e5038":"#8a6846","#30251e",5);
+    line(g,[[x,y-145],[x,y]],"#b09064",3,.6);
+  }
+  // Horse silhouettes and harnesses; no historically specific tack is asserted.
+  for(let i=0;i<3;i++){
+    const x=360+i*570+Math.sin(t*1.5+i)*10,y=795+(i%2)*20,sc=.8+(i%2)*.15;
+    g.save();g.translate(x,y);g.scale(sc,sc);
+    path(g,[[-85,-48],[-45,-87],[30,-80],[78,-36],[65,10],[-60,10]],"#201e1b","#080a0c",5);
+    circle(g,82,-75,26,"#211f1c");path(g,[[88,-93],[112,-125],[122,-107],[101,-68]],"#211f1c",null,0);
+    line(g,[[-42,0],[-50,66]],"#181716",13);line(g,[[18,0],[25,66]],"#181716",13);
+    line(g,[[58,-28],[82,-2]],"#9a7550",5);line(g,[[75,-72],[110,-65]],"#9a7550",4);
+    circle(g,112,-126,3,"#d8c7a4");g.restore();
+  }
+  // Wagon, turning wheels and canvas bundles: a clear insert for the narrated carts.
+  const cartX=beat==="carts"?980:1250, cartY=880;
+  path(g,[[cartX-120,cartY-76],[cartX+115,cartY-76],[cartX+95,cartY-10],[cartX-100,cartY-10]],"#64492f","#201a15",6);
+  for(const x of [cartX-82,cartX+82]){
+    circle(g,x,cartY+8,48,"#201d19");circle(g,x,cartY+8,34,"#9a744d");
+    for(let spoke=0;spoke<8;spoke++){
+      const an=spoke*Math.PI/4+Math.sin(t)*.12;
+      line(g,[[x,cartY+8],[x+33*Math.cos(an),cartY+8+33*Math.sin(an)]],"#cfaa73",5);
+    }
+  }
+  for(let i=0;i<5;i++)path(g,[[cartX-92+i*42,cartY-78],[cartX-74+i*42,cartY-135],[cartX-42+i*42,cartY-78]],"#92724f",null,0);
+  for(let i=0;i<10;i++){const x=80+i*194,y=575+(i%3)*70;glow(g,x,y,60,"#e8a052",.16);circle(g,x,y,5,"#f4b15c");}
+  for(let i=0;i<4;i++)smoke(g,t+i*.2,350+i*410,470,160+i);
+  drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.16,y:.98,h:.35,face:"tired",pose:"walk",walk:true,dir:1,speed:.15},
+    {preset:"ottomanInfantry",x:.87,y:.97,h:.33,face:"neutral",pose:"carry",walk:true,dir:-1,speed:.12}],.94,.34);
+}
+function drawNightGunCrewDetail(g,t,info,a){
+  const beat=a.beat||"rammer";
+  gradient(g,0,H(),[[0,"#0d1520"],[.43,"#22292f"],[1,"#30241d"]]);
+  // Extreme insert: stone shot, powder charge and rammer are readable as separate actions.
+  path(g,[[0,920],[280,860],[560,890],[850,820],[1200,870],[1510,815],[1920,860],[1920,1080],[0,1080]],"#252625",null,0);
+  glow(g,480,690,250,"#e5a15b",.24);
+  cannon(g,1040,940,2.15,t,false);
+  // Stone shot in a close foreground cradle.
+  circle(g,530,842,78,"#242522");circle(g,518,828,21,"#5e5f59");
+  path(g,[[310,905],[345,790],[470,790],[505,905]],"#735437","#2c2118",8);
+  for(let i=0;i<4;i++)line(g,[[340+i*38,825],[475+i*8,825]],"#ae895b",5,.75);
+  // Powder barrel and wooden rammer cross the frame diagonally.
+  path(g,[[1500,824],[1530,760],[1620,760],[1650,824],[1640,930],[1510,930]],"#64482e","#211b15",7);
+  line(g,[[1510,848],[1640,848]],"#ad8657",6);
+  const rx=beat==="rammer"?Math.sin(t*1.8)*28:0;
+  line(g,[[650+rx,760],[1250+rx,625]],"#785a38",18);
+  line(g,[[650+rx,760],[1250+rx,625]],"#d2b184",4,.72);
+  drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.28,y:.99,h:.43,face:"focused",pose:"push",walk:true,dir:1,speed:.2},
+    {preset:"ottomanInfantry",x:.68,y:.98,h:.41,face:"determined",pose:beat==="match"?"point":"brace",flip:true}],.94,.42);
+  if(beat==="match"){glow(g,1440,620,88,"#ffad55",.55);circle(g,1440,620,8,"#ffe0a1");}
+  if(beat==="powder")smoke(g,t,1530,650,130);
+}
+function drawAssaultWaves(g,t,info,a){
+  const beat=a.beat||"approach";
+  gradient(g,0,H(),[[0,"#a5a09a"],[.38,"#cfb58e"],[1,"#47372b"]]);
+  path(g,[[0,485],[220,420],[470,455],[700,370],[950,430],[1200,365],[1460,430],[1680,370],[1920,410],[1920,1080],[0,1080]],"#756e62",null,0);
+  // Three depth planes visually separate the expendable first ranks from the reserve.
+  formation(g,{preset:"ottomanInfantry",rows:4,cols:18,x0:.02,x1:.82,yFront:.99,yBack:.79,hFront:.20,hBack:.075,face:"determined",march:.36,seed:31,t});
+  formation(g,{preset:"ottomanArcher",rows:2,cols:13,x0:.08,x1:.76,yFront:.73,yBack:.63,hFront:.10,hBack:.06,face:"determined",seed:34,t});
+  formation(g,{preset:"ottomanElite",rows:2,cols:12,x0:.24,x1:.82,yFront:.58,yBack:.51,hFront:.13,hBack:.065,face:"determined",seed:38,t});
+  for(let i=0;i<6;i++){
+    const x=980+i*154+(beat==="push"?Math.sin(t*2+i)*8:0);
+    drawLadder(g,x,820,220+Math.sin(t*1.2+i)*16,t,i);
+  }
+  for(let i=0;i<14;i++)dust(g,t,160+i*120,840,50+i,22,"#c3a47f");
+  for(let i=0;i<8;i++)smoke(g,t+i*.16,1180+i*88,465,20+i);
+  flag(g,440,610,120,{color:RED,t,lw:2});flag(g,1600,610,120,{color:RED,t,lw:2});
+}
+function drawAssaultFirstWave(g,t,info,a){
+  const beat=a.beat||"first_rush";
+  gradient(g,0,H(),[[0,"#b1aaa0"],[.35,"#d3b58b"],[1,"#4b382b"]]);
+  wallBase(g,t,.12);
+  formation(g,{preset:"ottomanInfantry",rows:5,cols:16,x0:.02,x1:.71,yFront:.99,yBack:.70,hFront:.20,hBack:.075,face:"determined",march:.52,seed:43,t});
+  for(let i=0;i<6;i++){const x=930+i*150;drawLadder(g,x,860,290+Math.sin(t*2+i)*18,t,i);}
+  formation(g,{preset:"byzantineGuard",rows:2,cols:13,x0:.58,x1:.99,yFront:.47,yBack:.40,hFront:.12,hBack:.06,face:"worried",seed:46,t,flip:true});
+  drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.72,y:.82,h:.27,face:"determined",pose:"run",walk:true,speed:.5,flip:true},
+    {preset:"byzantineGuard",x:.87,y:.51,h:.28,face:"worried",pose:"brace",flip:true}],.94,.3);
+  arrowStorm(g,t,19);
+  if(beat==="arrows")for(let i=0;i<22;i++)line(g,[[120+i*80,400+(i%4)*28],[160+i*80,375+(i%4)*27]],"#3d3025",3,.75);
+}
+function drawAssaultSecondWave(g,t,info,a){
+  const beat=a.beat||"second_wave";
+  gradient(g,0,H(),[[0,"#a69b8a"],[.4,"#c8aa80"],[1,"#49372b"]]);
+  wallBase(g,t,.58);
+  formation(g,{preset:"ottomanInfantry",rows:4,cols:18,x0:.01,x1:.78,yFront:.99,yBack:.76,hFront:.19,hBack:.075,face:"determined",march:.44,seed:54,t});
+  formation(g,{preset:"ottomanElite",rows:3,cols:13,x0:.15,x1:.86,yFront:.74,yBack:.60,hFront:.15,hBack:.07,face:"determined",seed:57,t});
+  for(let i=0;i<5;i++)drawLadder(g,1060+i*158,850,350,t,i);
+  for(let i=0;i<9;i++)dust(g,t,880+i*110,850,90+i,26,"#d3b48e");
+  drawPeople(g,t,info,[{preset:"ottomanElite",x:.23,y:.91,h:.39,face:"determined",pose:"run",walk:true,speed:.32},
+    {preset:"ottomanElite",x:.43,y:.89,h:.42,face:"focused",pose:"push",walk:true,speed:.26}],.94,.4);
+}
+function drawEliteReserve(g,t,info,a){
+  const beat=a.beat||"reserve";
+  gradient(g,0,H(),[[0,"#9e9184"],[.38,"#c9b18b"],[1,"#433329"]]);
+  path(g,[[0,520],[230,465],[480,505],[720,435],[950,480],[1190,430],[1450,485],[1700,430],[1920,470],[1920,1080],[0,1080]],"#655b50",null,0);
+  // Reserve troops held behind the first two waves; distinct formation from massed infantry.
+  formation(g,{preset:"ottomanElite",rows:4,cols:18,x0:.08,x1:.92,yFront:.95,yBack:.68,hFront:.18,hBack:.075,face:"determined",march:beat==="advance"?.22:0,seed:66,t});
+  for(let i=0;i<6;i++){
+    const x=220+i*292;
+    flag(g,x,520,170,{color:RED,t,lw:3});
+    line(g,[[x,520],[x,430]],"#3d2b20",5);
+  }
+  drawPeople(g,t,info,[{preset:"ottomanCommander",x:.52,y:.79,h:.53,face:"determined",pose:"point"},
+    {preset:"ottomanElite",x:.18,y:.94,h:.39,face:"neutral",pose:"guard",flip:true},
+    {preset:"ottomanElite",x:.82,y:.94,h:.39,face:"neutral",pose:"guard"}],.94,.45);
+  if(beat==="command"){glow(g,980,570,120,"#f2c37b",.22);}
+}
+function drawDefenderSupply(g,t,info,a){
+  const beat=a.beat||"water";
+  gradient(g,0,H(),[[0,"#343b43"],[.42,"#77776f"],[1,"#4c4133"]]);
+  wallBase(g,t,.34);
+  // Foreground stores communicate real defensive labour rather than a generic heroic pose.
+  path(g,[[0,925],[0,855],[300,830],[540,870],[770,820],[1010,855],[1270,810],[1510,850],[1920,805],[1920,1080],[0,1080]],"#5b5042","#29231e",7);
+  for(let i=0;i<4;i++){
+    const x=180+i*480,y=830;
+    if(i%2===0){
+      path(g,[[x-42,y],[x-32,y-96],[x+32,y-96],[x+42,y]],"#806044","#302217",6);
+      line(g,[[x-38,y-72],[x+38,y-72]],"#bd9b6b",5);
+    } else {
+      circle(g,x,y-48,42,"#252522");circle(g,x,y-48,30,"#8b816f");
+    }
+  }
+  const items=[
+    {preset:"byzantineGuard",x:.18,y:.99,h:.49,face:"tired",pose:"carry",walk:true,dir:1,speed:.18},
+    {preset:"byzantineYou",x:.48,y:.99,h:.61,face:"determined",pose:beat==="messages"?"run":"carry",walk:true,dir:1,speed:beat==="messages"?.5:.2},
+    {preset:"byzantineGuard",x:.78,y:.98,h:.43,face:"worried",pose:"carry",walk:true,dir:-1,speed:.16}
+  ];
+  if(beat==="arrows"){
+    for(let i=0;i<4;i++)line(g,[[1230+i*52,600],[1300+i*52,575]],"#523c2a",6);
+  }
+  if(beat==="stones")for(let i=0;i<12;i++)circle(g,1170+i*25,850+(i%2)*13,10,"#625d55");
+  drawPeople(g,t,info,items,.94,.5);
+  dust(g,t,1040,940,77,25,"#bda37f");
+}
 function drawGunCrew(g,t,info,a){
   wallBase(g,t,0);
   // Gun is staged at foreground scale; the crew loads, braces, fires, and reacts.
@@ -767,9 +941,17 @@ function drawChurchRefuge(g,t,info,a){
     poseAt:[[0,'kneel'],[.75,'beg'],[1.45,'kneel']],faceAt:[[0,'tired'],[.75,'sad'],[1.45,'worried']]});
   if(a.beat==='candle'){for(let i=0;i<4;i++)glow(g,500+i*290,700,120,'#ffc66b',.18);}
 }
+registerTemplate('night_wall_watch',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightWallWatch(g,lt,info,a));}});
 registerTemplate('night_camp',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightCamp(g,lt,info,a));}});
+registerTemplate('night_camp_detail',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightCampDetail(g,lt,info,a));}});
 registerTemplate('night_guns',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightGuns(g,lt,info,a));}});
 registerTemplate('night_gun_crew',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightGunCrew(g,lt,info,a));}});
+registerTemplate('night_gun_crew_detail',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightGunCrewDetail(g,lt,info,a));}});
+registerTemplate('assault_waves',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawAssaultWaves(g,lt,info,a));}});
+registerTemplate('assault_first_wave',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawAssaultFirstWave(g,lt,info,a));}});
+registerTemplate('assault_second_wave',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawAssaultSecondWave(g,lt,info,a));}});
+registerTemplate('elite_reserve',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawEliteReserve(g,lt,info,a));}});
+registerTemplate('defender_supply',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawDefenderSupply(g,lt,info,a));}});
 registerTemplate('final_night',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>{drawNightWatch(g,lt,info);if(a.beat==='dawn')gradient(g,0,H(),[[0,'rgba(189,126,83,0)'],[.45,'rgba(209,151,101,.22)'],[1,'rgba(24,27,34,0)']]);});}});
 registerTemplate('gun_crew',{draw(g,lt,info){camera(g,lt,info,()=>drawGunCrew(g,lt,info,info.args||{}));}});
 registerTemplate('repair_wall',{draw(g,lt,info){camera(g,lt,info,()=>drawRepairWall(g,lt,info,info.args||{}));}});

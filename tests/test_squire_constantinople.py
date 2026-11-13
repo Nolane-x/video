@@ -27,23 +27,59 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(mod.progress_phase(.35,"Repair crews carry timber and masonry"),"repair")
         self.assertEqual(mod.progress_phase(.62,"Defenders listen beneath the wall as miners dig"),"tunnel")
         self.assertEqual(mod.progress_phase(.50,"The chain across the Golden Horn blocks the harbour"),"sea")
+    def test_opening_event_context_preserves_split_clauses(self):
+        samples = [
+            ([{"start":0.0,"end":1.0,"line":"At dawn, the largest assault"},
+              {"start":1.0,"end":2.0,"line":"of the siege will begin."}], 1, "assault_waves"),
+            ([{"start":0.0,"end":1.0,"line":"The first men may"},
+              {"start":1.0,"end":2.0,"line":"not be expected to survive."}], 1, "assault_first_wave"),
+            ([{"start":0.0,"end":1.0,"line":"A cannon crew is"},
+              {"start":1.0,"end":2.0,"line":"preparing the next shot."}], 1, "night_gun_crew_detail"),
+            ([{"start":0.0,"end":1.0,"line":"Behind them will come"},
+              {"start":1.0,"end":2.0,"line":"the sultan's best troops."}], 1, "elite_reserve"),
+            ([{"start":0.0,"end":1.0,"line":"carrying water, stones,"},
+              {"start":1.0,"end":2.0,"line":"arrows, and messages wherever"}], 1, "defender_supply"),
+        ]
+        for shots, index, expected in samples:
+            with self.subTest(expected=expected):
+                context=mod.opening_context(shots,index)
+                self.assertEqual(mod.choose_template(.02,shots[index]["line"],index,{},None,context_text=context),expected)
+
+    def test_opening_camp_sequence_alternates_between_establishing_and_detail(self):
+        shots=[
+            {"start":0.0,"end":1.0,"line":"You can hear the Ottoman camp"},
+            {"start":1.0,"end":2.0,"line":"beyond the dark fields: horses shifting,"},
+            {"start":2.0,"end":3.0,"line":"men calling to one another, the creak of carts,"},
+        ]
+        actual=[]
+        for i,s in enumerate(shots):
+            context=mod.opening_context(shots,i)
+            actual.append(mod.choose_template(.02,s["line"],i,{},None,context_text=context))
+        self.assertEqual(actual,["night_camp","night_camp_detail","night_camp_detail"])
+
     def test_opening_final_night_uses_event_specific_scenes(self):
         cases = [
             ("At midnight, the walls are still standing.", "night", "final_night"),
             ("You can hear the Ottoman camp beyond the dark fields.", "night_camp", "night_camp"),
-            ("Horses shifting, men calling, the creak of carts.", "night_camp", "night_camp"),
             ("The distant thunder of guns.", "night_guns", "night_guns"),
-            ("A cannon crew is preparing the next shot.", "night_gun_crew", "night_gun_crew"),
-            ("At dawn, the largest assault of the siege will begin.", "final", "last_assault"),
-            ("The first men may not be expected to survive.", "final", "last_assault"),
+            ("A cannon crew is preparing the next shot.", "night_gun_crew", "night_gun_crew_detail"),
+            ("At dawn, the largest assault of the siege will begin.", "final", "assault_waves"),
+            ("The first men may not be expected to survive.", "final", "assault_first_wave"),
+            ("The sultan's best troops.", "final", "elite_reserve"),
+            ("carrying water, stones, arrows, and messages.", "defender_supply", "defender_supply"),
         ]
         for index, (line, expected_phase, expected_template) in enumerate(cases, start=1):
             with self.subTest(line=line):
-                self.assertEqual(mod.progress_phase(.02, line), expected_phase)
-                self.assertEqual(mod.choose_template(.02, line, index, {}, None), expected_template)
+                self.assertEqual(mod.choose_template(.02, line, index, {}, None, context_text=line), expected_template)
 
     def test_custom_templates_are_registered_in_author(self):
-        for name in ("final_night","night_camp","night_guns","night_gun_crew","city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"):
+        for name in (
+            "final_night","night_wall_watch","night_camp","night_camp_detail",
+            "night_guns","night_gun_crew","night_gun_crew_detail",
+            "assault_waves","assault_first_wave","assault_second_wave","elite_reserve","defender_supply",
+            "city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys",
+            "ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"
+        ):
             self.assertIn(name,mod.CUSTOM)
     def test_story_phase_changes(self):
         self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"none"),"command_camp")
