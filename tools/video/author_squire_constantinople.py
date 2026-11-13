@@ -132,8 +132,9 @@ def choose_opening_template(text, context_text, index):
     if "walls are still standing" in context or "the walls will hold" in context:
         return "night_wall_watch" if index % 2 else "final_night"
 
-    # Opening and final-paragraph establishing shots.
-    return "final_night"
+    # Generic final-night connective lines alternate between two genuinely different
+    # framings; do not let an unclassified cue create a long static-template run.
+    return "night_wall_watch" if index % 2 else "final_night"
 
 
 def progress_phase(p, text):
