@@ -7,7 +7,8 @@ from pathlib import Path
 # Actor-led scenes in this film must use the mature-proportion templates below.
 STANDARD = {"top", "map", "plan", "board", "item", "title", "black"}
 CUSTOM = {
-    "final_night", "city_panorama", "command_camp", "gun_crew", "wall_battery",
+    "final_night", "night_camp", "night_guns", "night_gun_crew",
+    "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
     "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city",
     "actor_closeup", "city_detail"
@@ -25,6 +26,12 @@ def cue(root, names, at=.25, gain=-9):
     return []
 
 def sfx_for_shot(tpl, args, index, root):
+    if tpl == "night_camp":
+        return cue(root, ["battle_roar"], at=.16, gain=-19) + cue(root, ["wind_loop"], at=0, gain=-20)
+    if tpl == "night_guns":
+        return cue(root, ["cannon_fire"], at=.58, gain=-14)
+    if tpl == "night_gun_crew":
+        return cue(root, ["cannon_fire"], at=.92, gain=-12)
     if tpl in {"wall_battery", "gun_crew"}:
         fire_at = float(args.get("fireAt", .52))
         return cue(root, ["cannon_fire"], at=fire_at, gain=-8) + cue(root, ["siege_impact"], at=fire_at + 1.02, gain=-7)
@@ -46,9 +53,31 @@ def sfx_for_shot(tpl, args, index, root):
 
 def progress_phase(p, text):
     t = text.casefold()
-    if any(k in t for k in ("final assault", "last assault", "janissar", "ladder", "twenty-ninth of may", "just before dawn")):
+    if any(k in t for k in (
+        "final assault", "last assault", "largest assault", "first wave", "second wave",
+        "third wave", "janissar", "ladder", "twenty-ninth of may", "twenty ninth of may",
+        "just before dawn", "first men may not", "the sultan's best troops"
+    )):
         return "final"
     if p < .055:
+        # The film opens on the final night, but the narration already contains distinct
+        # visual events. Give those events their own scenes instead of forcing every cue
+        # into the same watchtower tableau until the first-day rewind.
+        if any(k in t for k in (
+            "cannon crew", "gun crew", "preparing the next shot", "prepare the next shot",
+            "stone ball", "loading the gun", "rammer", "powder charge"
+        )):
+            return "night_gun_crew"
+        if any(k in t for k in (
+            "distant thunder of guns", "thunder of guns", "guns in the darkness",
+            "cannon fire", "distant cannon", "bombard", "artillery"
+        )):
+            return "night_guns"
+        if any(k in t for k in (
+            "ottoman camp", "horses shifting", "horses", "men calling", "creak of carts",
+            "carts", "dark fields", "tents spread", "campfires", "camp fires", "fires beyond"
+        )):
+            return "night_camp"
         return "night"
 
     # The final summary describes the operation retrospectively; do not stage it as a second portage.
@@ -99,6 +128,9 @@ def choose_template(p, text, i, usage, last):
     city_panorama_count = usage.get("city_panorama", 0)
     preferred = {
         "night": "final_night",
+        "night_camp": "night_camp",
+        "night_guns": "night_guns",
+        "night_gun_crew": "night_gun_crew",
         "city": "city_detail" if city_panorama_count >= 50 else "city_panorama",
         "camp": "command_camp",
         "guns": "gun_crew" if i % 2 == 0 else "wall_battery",
@@ -272,7 +304,7 @@ def main():
         phase = progress_phase(p, text)
         tpl = choose_template(p, text, i, usage, last)
         # Keep the fictional composite defender in selected POV beats only.
-        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase != "camp"
+        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase not in {"camp", "night_guns", "night_gun_crew"}
         lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
 
         if tpl in STANDARD:
@@ -369,6 +401,12 @@ def main():
                 visual["beat"] = ("prayer", "candle", "refuge", "departure")[i % 4]
             elif tpl == "final_night":
                 visual["beat"] = ("watch", "torch", "dread", "dawn")[i % 4]
+            elif tpl == "night_camp":
+                visual["beat"] = ("horizon", "fires", "movement", "watch")[i % 4]
+            elif tpl == "night_guns":
+                visual["beat"] = ("distant_flash", "silhouette", "smoke", "thunder")[i % 4]
+            elif tpl == "night_gun_crew":
+                visual["beat"] = ("powder", "load", "brace", "match")[i % 4]
             elif tpl == "actor_closeup":
                 visual["actorPreset"] = lead_preset
                 visual["hero"] = hero_visible

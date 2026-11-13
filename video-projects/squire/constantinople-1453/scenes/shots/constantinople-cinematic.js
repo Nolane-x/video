@@ -575,6 +575,100 @@ function drawNightWatch(g,t,info){
   drawPeople(g,t,info,[{preset:'byzantineGuard',x:.78,y:.96,h:.47,face:'worried',pose:'look',flip:true}],.94,.5);
   smoke(g,t,1180,500,51);smoke(g,t,1580,520,52);
 }
+function drawNightCamp(g,t,info,a){
+  const beat=a.beat||"horizon";
+  gradient(g,0,H(),[[0,"#101a2a"],[.42,"#26313b"],[1,"#3a3029"]]);
+  circle(g,1570,150,74,"#cfc6ad");
+  path(g,[[0,570],[180,520],[360,555],[560,465],[780,530],[1010,450],[1240,520],[1490,450],[1710,520],[1920,460],[1920,1080],[0,1080]],"#1b2630",null,0);
+  // Three layers of A-frame tents give the camp a readable horizon rather than one flat line.
+  for(let row=0;row<3;row++){
+    for(let i=0;i<13;i++){
+      const x=i*164-55+(row%2)*58, base=590+row*70+(i%4)*8, scale=0.56+row*.18;
+      const w=54*scale,h=62*scale;
+      path(g,[[x-w,base],[x,base-h],[x+w,base]],(i+row)%2?"#604a39":"#75553e","#302923",3);
+      line(g,[[x,base-h],[x,base]],"#a0845d",2,.55);
+    }
+  }
+  // Small moving fires and smoke sell distance and wind.
+  for(let i=0;i<15;i++){
+    const x=50+i*132, y=585+(i%3)*56;
+    glow(g,x,y,55+(i%3)*12,"#e29a4d",.24);
+    circle(g,x,y,5+(i%2)*2,"#f0b56a");
+    if(i%3===0) smoke(g,t+i*.13,x,y-12,70+i);
+  }
+  // Supply carts sit in the middle ground; their wheels rotate independently.
+  for(let i=0;i<3;i++){
+    const x=360+i*590+Math.sin(t*.45+i)*14, y=868+i%2*12;
+    line(g,[[x-55,y-22],[x+55,y-22]],"#886b48",12);
+    for(const wx of [x-40,x+40]){
+      circle(g,wx,y,25,"#302922");circle(g,wx,y,15,"#b18a59");
+      line(g,[[wx,y-16],[wx,y+16]],"#d0b382",3,.6);
+    }
+  }
+  // The wall-side defender watches the camp from a dark parapet in the foreground.
+  path(g,[[0,925],[0,870],[220,830],[470,870],[720,815],[960,860],[1180,815],[1450,860],[1680,815],[1920,850],[1920,1080],[0,1080]],"#51483d","#211f1d",7);
+  for(let x=0;x<1920;x+=58) path(g,[[x,865],[x+32,856],[x+32,890],[x,900]],"#81705b","#302a25",3);
+  if(a.hero!==false){
+    drawHero(g,t,info,{x:.24,y:.99,h:.57,face:"worried",pose:"point",
+      poseAt:[[0,"point"],[.65,"guard"],[1.3,"point"]],
+      faceAt:[[0,"worried"],[1.1,"tired"]]});
+  }
+  drawPeople(g,t,info,[
+    {preset:"ottomanInfantry",x:.68,y:.92,h:.31,face:"determined",pose:"walk",walk:true,dir:1,speed:.22},
+    {preset:"ottomanInfantry",x:.81,y:.92,h:.28,face:"neutral",pose:"carry",walk:true,dir:1,speed:.17}
+  ],.94,.31);
+  if(beat==="movement") for(let i=0;i<4;i++) dust(g,t,1040+i*70,850,80+i,14,"#baa080");
+}
+function drawNightGuns(g,t,info,a){
+  const beat=a.beat||"distant_flash";
+  gradient(g,0,H(),[[0,"#0d1522"],[.48,"#202c38"],[1,"#332a24"]]);
+  circle(g,1560,138,62,"#cbc2a9");
+  path(g,[[0,620],[170,540],[380,600],[610,500],[840,575],[1080,480],[1300,560],[1540,470],[1770,550],[1920,500],[1920,1080],[0,1080]],"#18222c",null,0);
+  // Distant gun emplacements appear as silhouettes along the ridge.
+  for(let i=0;i<5;i++){
+    const x=150+i*390,y=690+(i%2)*42,scale=.55+(i%3)*.12;
+    line(g,[[x-78*scale,y],[x+72*scale,y]],"#594331",13*scale);
+    line(g,[[x-20*scale,y-8*scale],[x+66*scale,y-50*scale]],"#282724",17*scale);
+    circle(g,x-45*scale,y+3,26*scale,"#242321");
+    circle(g,x+44*scale,y+3,26*scale,"#242321");
+    if(i%2===0){
+      const pulse=(Math.sin(t*3.2+i*1.7)+1)*.5;
+      glow(g,x+88*scale,y-72*scale,66+40*pulse,"#ef9b4d",beat==="distant_flash"?.22+.22*pulse:.10);
+    }
+    smoke(g,t+i*.21,x+90*scale,y-80*scale,100+i);
+  }
+  if(beat==="distant_flash"||beat==="thunder"){
+    const pulse=Math.max(0,Math.sin(t*3.8));
+    glow(g,1230,640,170+90*pulse,"#f0a65d",.18+.22*pulse);
+  }
+  drawPeople(g,t,info,[
+    {preset:"ottomanInfantry",x:.43,y:.96,h:.30,face:"focused",pose:"brace"},
+    {preset:"ottomanInfantry",x:.53,y:.96,h:.29,face:"determined",pose:"carry"}
+  ],.94,.30);
+}
+function drawNightGunCrew(g,t,info,a){
+  const beat=a.beat||"load";
+  gradient(g,0,H(),[[0,"#101722"],[.42,"#252d34"],[1,"#32271f"]]);
+  path(g,[[0,810],[300,765],[600,790],[900,745],[1220,780],[1540,740],[1920,780],[1920,1080],[0,1080]],"#282a29",null,0);
+  glow(g,500,690,240,"#e59a4f",.24);glow(g,1440,700,190,"#df8b42",.17);
+  cannon(g,980,940,2.05,t,false);
+  // Powder barrel, stone shot and a long rammer are separate props with clear silhouettes.
+  path(g,[[355,820],[385,790],[470,790],[495,820],[485,914],[365,914]],"#614530","#211d1a",6);
+  line(g,[[370,842],[480,842]],"#ad865a",5);
+  circle(g,690+(beat==="load"?Math.sin(t*1.4)*30:0),856,32,"#242625");
+  circle(g,680+(beat==="load"?Math.sin(t*1.4)*30:0),844,8,"#77766e");
+  line(g,[[600,790],[1120,710]],"#6f5437",13);
+  line(g,[[600,790],[1120,710]],"#b29367",3,.7);
+  drawPeople(g,t,info,[
+    {preset:"ottomanInfantry",x:.28,y:.96,h:.43,face:"determined",pose:beat==="brace"?"brace":"carry",walk:beat==="load",dir:1,speed:.2},
+    {preset:"ottomanInfantry",x:.66,y:.96,h:.40,face:"focused",pose:beat==="match"?"point":"push",flip:true},
+    {preset:"ottomanElite",x:.82,y:.95,h:.38,face:"neutral",pose:"guard",flip:true}
+  ],.94,.42);
+  const mx=beat==="match"?1270:1420;
+  glow(g,mx,650,82,"#ffad55",.48);circle(g,mx,650,7,"#ffe0a1");
+  if(beat==="powder") smoke(g,t,mx-35,650,130);
+  if(beat==="brace") line(g,[[700,920],[900,880],[1020,860]],"#b29367",7);
+}
 function drawGunCrew(g,t,info,a){
   wallBase(g,t,0);
   // Gun is staged at foreground scale; the crew loads, braces, fires, and reacts.
@@ -673,6 +767,9 @@ function drawChurchRefuge(g,t,info,a){
     poseAt:[[0,'kneel'],[.75,'beg'],[1.45,'kneel']],faceAt:[[0,'tired'],[.75,'sad'],[1.45,'worried']]});
   if(a.beat==='candle'){for(let i=0;i<4;i++)glow(g,500+i*290,700,120,'#ffc66b',.18);}
 }
+registerTemplate('night_camp',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightCamp(g,lt,info,a));}});
+registerTemplate('night_guns',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightGuns(g,lt,info,a));}});
+registerTemplate('night_gun_crew',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawNightGunCrew(g,lt,info,a));}});
 registerTemplate('final_night',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>{drawNightWatch(g,lt,info);if(a.beat==='dawn')gradient(g,0,H(),[[0,'rgba(189,126,83,0)'],[.45,'rgba(209,151,101,.22)'],[1,'rgba(24,27,34,0)']]);});}});
 registerTemplate('gun_crew',{draw(g,lt,info){camera(g,lt,info,()=>drawGunCrew(g,lt,info,info.args||{}));}});
 registerTemplate('repair_wall',{draw(g,lt,info){camera(g,lt,info,()=>drawRepairWall(g,lt,info,info.args||{}));}});

@@ -14,6 +14,10 @@ Not a lecture made from slides. Treat the viewer as physically present in the ci
 8. Final night and assault: no static tableau. Distinct waves approach; ladders rise, attackers climb, defenders push back, arrows cross, torches flicker, smoke drifts, commands pass, Giustiniani is carried away, line breaks.
 9. Aftermath: silence, smoke, damaged walls, people moving through a changed city. End with the city's continued life, not an empty ruin.
 
+## Opening sequence — final night, then rewind
+
+The first narration passage stays in the final night; it must not be flattened into a repeated watchtower shot. Author the visual progression from the spoken events: exhausted defender on the parapet, distant Ottoman camp and moving fires, horses/wagons and silhouettes, far artillery flashes, a close loading/preparation insert with the cannon crew, the defender's reaction, and the first assault wave at dawn. Use the narration cues to select each scene, then hard-cut to 6 April 1453 for the chronological rewind. The city-side composite defender must never be staged as part of the Ottoman gun crew.
+
 ## Shot requirements
 - 550–800 shots expected for the long-form timeline; do not pad with random cuts.
 - Typical shot length 0.9–2.2 seconds, with longer 3–4 second establishing or emotional holds.

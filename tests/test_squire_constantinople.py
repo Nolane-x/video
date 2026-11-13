@@ -27,8 +27,23 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(mod.progress_phase(.35,"Repair crews carry timber and masonry"),"repair")
         self.assertEqual(mod.progress_phase(.62,"Defenders listen beneath the wall as miners dig"),"tunnel")
         self.assertEqual(mod.progress_phase(.50,"The chain across the Golden Horn blocks the harbour"),"sea")
+    def test_opening_final_night_uses_event_specific_scenes(self):
+        cases = [
+            ("At midnight, the walls are still standing.", "night", "final_night"),
+            ("You can hear the Ottoman camp beyond the dark fields.", "night_camp", "night_camp"),
+            ("Horses shifting, men calling, the creak of carts.", "night_camp", "night_camp"),
+            ("The distant thunder of guns.", "night_guns", "night_guns"),
+            ("A cannon crew is preparing the next shot.", "night_gun_crew", "night_gun_crew"),
+            ("At dawn, the largest assault of the siege will begin.", "final", "last_assault"),
+            ("The first men may not be expected to survive.", "final", "last_assault"),
+        ]
+        for index, (line, expected_phase, expected_template) in enumerate(cases, start=1):
+            with self.subTest(line=line):
+                self.assertEqual(mod.progress_phase(.02, line), expected_phase)
+                self.assertEqual(mod.choose_template(.02, line, index, {}, None), expected_template)
+
     def test_custom_templates_are_registered_in_author(self):
-        for name in ("final_night","city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"):
+        for name in ("final_night","night_camp","night_guns","night_gun_crew","city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"):
             self.assertIn(name,mod.CUSTOM)
     def test_story_phase_changes(self):
         self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"none"),"command_camp")
