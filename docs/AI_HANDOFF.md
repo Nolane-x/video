@@ -151,3 +151,25 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Recovery workflow .github/workflows/recover-video-asset-library-release.yml reuses existing 22 shard manifests and remote assets. For another draft, update .github/ASSET_LIBRARY_RECOVERY_REQUEST to the exact draft tag; finalizer rebuilds the metadata, verifies every remote asset, and publishes.
 - Next step: run the next full build using expanded caps. Then create a cumulative cross-release index with SHA-256 deduplication so repeat source items aren't counted twice toward the 50 GB total.
 
+## AI handoff — 2026-11-13, final-night sequence and parallel PBR proof
+
+### Source changes already committed
+
+- Branch: `squire/constantinople-1453-redesign`.
+- Scene/authoring change: `24872b21de69cdc01853bf7ab1fc79ee74baac1b`.
+- Dawn-assault selection correction: `b1bd36e1f2882b8093159dbe4e7bfeb92fd21977`.
+- Files changed: `tools/video/author_squire_constantinople.py`, `tests/test_squire_constantinople.py`, `video-projects/squire/constantinople-1453/scenes/shots/constantinople-cinematic.js`, and `video-projects/squire/constantinople-1453/story/03-VISUAL-DIRECTION.md`.
+- New custom templates: `night_camp`, `night_guns`, `night_gun_crew`. The classifier prioritizes the final assault and the Ottoman camp/artillery beats over the generic first-5.5%-of-film night rule. SFX cues use existing recorded battle/wind/cannon sources where present. The protagonist is not staged in the Ottoman gun crew.
+- Static production suite run [43448502521](https://github.com/Nolane-x/video/actions/runs/43448502521) passed. Cinematic proof run [43448502373](https://github.com/Nolane-x/video/actions/runs/43448502373) was at scene/contact-sheet scanning at last observation; then it must mix proof audio and render the moving 240fps montage. Inspect its artifact rather than assuming visual quality from CI.
+
+### Immediate next actions
+
+1. Finish run 43448502373 and inspect its contact sheets / moving proof. Verify the three new night templates are represented and visually distinct.
+2. Extend `tools/video/render_squire_constantinople_redesign_proof.py`'s `CUSTOM` list with the three new templates. Add a contiguous native-240fps opening preview (target 65 seconds) and a 4×4 contact sheet sampled about every four seconds; copy both into the review artifact. Keep this a proof, not a full-master render.
+3. Extend `progress_phase` to classify “To understand that night, we have to return to the morning of the sixth of April” as the first-day `camp` chapter, and add a regression test that `choose_template` produces `command_camp` for that rewind cue.
+4. Inspect the assembled PBR v4 result from [run 43439300571](https://github.com/Nolane-x/video/actions/runs/43439300571), compare to v3 [run 43437648364](https://github.com/Nolane-x/video/actions/runs/43437648364), and decide whether the 16-second 3D proof is useful or needs a narrower close-up / less empty foreground. Both are parallel technical candidates and neither replaces the Squire master.
+5. Keep the Supertonic voice set from [run 43438201324](https://github.com/Nolane-x/video/actions/runs/43438201324) as an audition only. It contains Adam, Kokoro Heart/Bella and M1–M5/F1–F5; the model is OpenRAIL-licensed. Do not switch the actual narration without explicit human selection and a full voice review.
+
+### Non-negotiable review status
+
+The existing long-form 240fps master remains the known-good technical archive, not an artistic approval. Do not trigger `[full-render]`, overwrite the master, or declare the redesigned film complete until the contiguous opening preview, every custom scene's motion/contact behavior, the full sound mix and the complete film have been reviewed.
