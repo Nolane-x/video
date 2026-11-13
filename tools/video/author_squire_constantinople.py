@@ -232,6 +232,7 @@ def choose_template(p, text, i, usage, last, context_text=None):
         "tunnel": "tunnel_cutaway",
         "inside": "church_refuge" if any(k in text.casefold() for k in ("church", "pray", "food", "ration")) else "city_interior",
         "final": "last_assault",
+        "defender_supply": "defender_supply",
         "aftermath": "aftermath_city"
     }
     custom = preferred[phase]
