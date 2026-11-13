@@ -29,7 +29,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: constantinople-crew-pbr-v2-assets-43403606672
-          path: historical-assets/models
+          path: historical-assets
           repository: Nolane-x/video
           run-id: '43403606672'
           github-token: ${{ secrets.GITHUB_TOKEN }}
