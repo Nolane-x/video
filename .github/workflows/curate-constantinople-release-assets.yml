@@ -36,12 +36,18 @@ jobs:
             -o "$RUNNER_TEMP/ASSET_INDEX.json"
           test "$(stat -c %s "$RUNNER_TEMP/ASSET_INDEX.json")" -gt 70000000
           sha256sum "$RUNNER_TEMP/ASSET_INDEX.json" | tee constantinople-asset-scout/index.sha256
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20             'https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/CUMULATIVE_ASSET_DOWNLOADS.json'             -o "$RUNNER_TEMP/CUMULATIVE_ASSET_DOWNLOADS.json"
+          test "$(stat -c %s "$RUNNER_TEMP/CUMULATIVE_ASSET_DOWNLOADS.json")" -gt 70000000
+          sha256sum "$RUNNER_TEMP/CUMULATIVE_ASSET_DOWNLOADS.json" | tee constantinople-asset-scout/download-map.sha256
       - name: Filter Byzantine, Ottoman, siege and museum-object candidates
         run: |
           python tools/video/curate_constantinople_release_assets.py \
             --index "$RUNNER_TEMP/ASSET_INDEX.json" \
             --output constantinople-asset-scout/ASSET-SHORTLIST.md \
             --max-candidates 400
+      - name: Resolve exact resource paths to release ZIP volume metadata
+        run: |
+          python tools/video/lookup_constantinople_asset_volumes.py             --map "$RUNNER_TEMP/CUMULATIVE_ASSET_DOWNLOADS.json"             --output constantinople-asset-scout/VOLUME-LOOKUP.json
       - name: Record acquisition boundary and checksum the report
         shell: bash
         run: |
