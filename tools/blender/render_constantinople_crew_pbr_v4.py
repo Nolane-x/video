@@ -184,7 +184,7 @@ for x,y,w,d,h in [
 cube("Great church nave",(0,27.5,4.2),(15.5,9.0,8.4),city_plaster,.18)
 for wx in (-5.8,-3.9,-2.0,0,2.0,3.9,5.8):
     cube("Great church narrow facade window",(wx,22.92,4.4),(.62,.07,2.05),city_window,.12)
-cube("Great church main doorway",(0,22.91,1.8),(1.55,.08,3.2),city_shadow,.18)
+cube("Great church main doorway",(0,22.91,1.8),(1.55,.08,3.2),city_stone,.18)
 for x in (-5.2,5.2):
     sphere("Church semi-dome",(x,27.2,9.0),(3.0,3.4,2.0),city_dome,28,16)
 cyl("Church central drum",(0,27.5,9.2),4.3,2.0,city_stone,48,.08)
