@@ -145,6 +145,15 @@ def choose_template(p, text, i, usage, last):
     }
     custom = preferred[phase]
 
+    # The dawn assault is a major narrative event, not a decorative insert.
+    # Keep its first wave in the full battlefield composition even when the
+    # deterministic insert cadence would otherwise choose "item" or a close-up.
+    if phase == "final" and any(k in text.casefold() for k in (
+        "largest assault", "first wave", "second wave", "third wave",
+        "first men may not", "the sultan's best troops"
+    )):
+        return "last_assault"
+
     # Keep only diagrams/object inserts from the generic pack; never use its chibi actor templates.
     if phase in {"guns", "repair", "final", "inside"} and i % 8 in (2, 6):
         return "actor_closeup" if i % 8 == 2 else "item"
