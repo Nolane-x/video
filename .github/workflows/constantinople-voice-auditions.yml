@@ -1,0 +1,275 @@
+name: Constantinople · English voice audition set
+
+on:
+  push:
+    branches:
+      - cinematic/constantinople-premium-v2
+    paths:
+      - '.github/workflows/constantinople-voice-auditions.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-voice-auditions
+  cancel-in-progress: false
+
+jobs:
+  audition:
+    name: Render matched opening passage in four curated voices
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      HF_HOME: /tmp/constantinople-voice-hf
+      HF_HUB_CACHE: /tmp/constantinople-voice-hf/hub
+      AUDIOSEAL_CACHE_DIR: /tmp/constantinople-audioseal
+      TORCH_HOME: /tmp/constantinople-torch
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HUB_ETAG_TIMEOUT: "30"
+      HF_HUB_DOWNLOAD_TIMEOUT: "180"
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - name: Download the exact original Adam narration
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-42448341267
+          path: old-voice
+          repository: Nolane-x/video
+          run-id: 42448341267
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check out VoiceStudio TTS source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: Nolane-x/VoiceStudio
+          ref: main
+          path: voicestudio
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg and audio runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1 espeak-ng
+
+      - name: Install the pinned CPU TTS stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --disable-pip-version-check \
+            --index-url https://download.pytorch.org/whl/cpu \
+            --extra-index-url https://pypi.org/simple \
+            "torch==2.8.0" "torchaudio==2.8.0"
+          python -m pip install --disable-pip-version-check \
+            "piper-tts==1.8.0" \
+            "vieneu==3.8.3" \
+            "kokoro==0.9.4" \
+            "misaki[en]==0.9.4" \
+            "audioseal>=0.1.3" \
+            "soundfile>=0.12.1" \
+            "huggingface_hub>=0.28" \
+            "jsonschema>=4.25,<5"
+
+      - name: Render identical narration with all four reviewed Kokoro presets
+        working-directory: voicestudio
+        run: |
+          mkdir -p ../dist/auditions
+          python - <<'PY'
+          import json, os, subprocess, sys
+          from pathlib import Path
+
+          sample = (
+              "At midnight, the walls are still standing. But the city behind them "
+              "has almost run out of strength. You can hear the Ottoman camp beyond "
+              "the dark fields: horses shifting, men calling to one another, the "
+              "creak of carts, the distant thunder of guns. Somewhere in the darkness, "
+              "a cannon crew is preparing the next shot. You have spent fifty-three "
+              "days believing the walls will hold. Tonight, you are no longer certain."
+          )
+          voices = [
+              ("af_heart", "A", "English (US) · Heart"),
+              ("af_bella", "A-", "English (US) · Bella"),
+              ("af_nicole", "B-", "English (US) · Nicole"),
+              ("bf_emma", "B-", "English (UK) · Emma"),
+          ]
+          for voice, grade, label in voices:
+              payload = {
+                  "schema_version": 1,
+                  "job_id": f"constantinople-opening-{voice}",
+                  "title": f"Constantinople 1453 opening audition — {label}",
+                  "language": "en",
+                  "engine": "kokoro",
+                  "voice_id": f"en-kokoro-v1-{voice}",
+                  "segments": [
+                      {"id": "opening-paragraph", "text": sample, "pause_ms_after": 0}
+                  ],
+              }
+              env = os.environ.copy()
+              env["VOICE_JOB_JSON"] = json.dumps(payload, ensure_ascii=False)
+              out = Path("../dist/auditions") / voice
+              print(f"\n=== Rendering {voice} (upstream grade {grade}) ===", flush=True)
+              subprocess.run(
+                  [sys.executable, "scripts/render_video_voice.py", "--output", str(out)],
+                  check=True,
+                  env=env,
+              )
+          PY
+
+      - name: Extract the same 25.26-second passage from the old Adam voice
+        run: |
+          mkdir -p dist/auditions/old-adam
+          ffmpeg -hide_banner -v error -y -i old-voice/narration.wav \
+            -t 25.26 -ar 48000 -ac 1 -c:a pcm_s24le \
+            dist/auditions/old-adam/narration.wav
+          cp old-voice/manifest.json dist/auditions/old-adam/source-manifest.json
+          cp old-voice/captions.srt dist/auditions/old-adam/source-captions.srt
+
+      - name: Validate rights, identical text, audio and watermark provenance
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path("dist/auditions")
+          text = (
+              "At midnight, the walls are still standing. But the city behind them "
+              "has almost run out of strength. You can hear the Ottoman camp beyond "
+              "the dark fields: horses shifting, men calling to one another, the "
+              "creak of carts, the distant thunder of guns. Somewhere in the darkness, "
+              "a cannon crew is preparing the next shot. You have spent fifty-three "
+              "days believing the walls will hold. Tonight, you are no longer certain."
+          )
+          rows = []
+          for voice, grade, label in [
+              ("af_heart", "A", "English (US) · Heart"),
+              ("af_bella", "A-", "English (US) · Bella"),
+              ("af_nicole", "B-", "English (US) · Nicole"),
+              ("bf_emma", "B-", "English (UK) · Emma"),
+          ]:
+              folder = root / voice
+              manifest = json.loads((folder / "manifest.json").read_text())
+              assert manifest["voice_id"] == f"en-kokoro-v1-{voice}", manifest["voice_id"]
+              assert manifest["engine"].lower().startswith("kokoro"), manifest["engine"]
+              assert manifest["audio"]["sample_rate"] == 48000
+              assert manifest["audio"]["channels"] == 1
+              assert manifest["audio"]["subtype"] == "PCM_24"
+              assert manifest["audio"]["watermark"]["status"] == "verified"
+              assert manifest["audio"]["checks"] == "passed"
+              assert (folder / "narration.wav").is_file()
+              rows.append({
+                  "file": f"{voice}/narration.wav",
+                  "voice_id": manifest["voice_id"],
+                  "display_name": label,
+                  "upstream_grade": grade,
+                  "grade_note": "Subjective upstream VOICES.md estimate, not an independent MOS score",
+                  "rights": manifest["voice_source"]["rights_status"],
+                  "commercial_use": manifest["voice_source"]["commercial_use"],
+                  "duration_seconds": manifest["audio"]["duration_seconds"],
+                  "sha256": hashlib.sha256((folder / "narration.wav").read_bytes()).hexdigest(),
+                  "watermark": manifest["audio"]["watermark"]["status"],
+              })
+          old = json.loads((root / "old-adam/source-manifest.json").read_text())
+          assert old["voice_id"] == "en-vieneu-v3turbo-adam-3f0c9b"
+          old_audio = root / "old-adam/narration.wav"
+          rows.insert(0, {
+              "file": "old-adam/narration.wav",
+              "voice_id": old["voice_id"],
+              "display_name": "Adam — original master",
+              "engine": old["engine"],
+              "upstream_grade": None,
+              "rights": old["voice_source"]["rights_status"],
+              "commercial_use": old["voice_source"]["commercial_use"],
+              "duration_seconds": 25.26,
+              "sha256": hashlib.sha256(old_audio.read_bytes()).hexdigest(),
+              "watermark": old["audio"]["watermark"]["status"],
+          })
+          report = {
+              "status": "PASS",
+              "project": "53 Days to the End of an Empire",
+              "comparison": "same opening paragraph; original Adam reference plus four Kokoro presets",
+              "sample_text": text,
+              "sample_text_sha256": hashlib.sha256(text.encode()).hexdigest(),
+              "voices": rows,
+              "selection_policy": "No voice is automatically selected; final choice requires human listening review."
+          }
+          (root / "VOICE-AUDITION-REPORT.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+          (root / "VOICE-AUDITION-README.md").write_text(
+              "# Constantinople 1453 — voice audition\n\n"
+              "All five samples use the same opening paragraph. The first file is the original "
+              "VieNeu Adam voice extracted from the released master source; the next four are "
+              "new Kokoro candidates generated by VoiceStudio.\n\n"
+              "## Listening order\n\n"
+              "1. old-adam/narration.wav — original Adam reference\n"
+              "2. af_heart/narration.wav — Kokoro Heart, upstream grade A\n"
+              "3. af_bella/narration.wav — Kokoro Bella, upstream grade A-\n"
+              "4. af_nicole/narration.wav — Kokoro Nicole, upstream grade B-\n"
+              "5. bf_emma/narration.wav — Kokoro Emma, UK English, upstream grade B-\n\n"
+              "Grades are subjective upstream estimates, not objective MOS ratings. All generated "
+              "Kokoro model and voice assets are Apache-2.0 upstream. The old Adam reference retains "
+              "its original VieNeu consent and rights metadata. Synthetic audio watermarks are checked.\n\n"
+              "The montage contains the clips in that order, separated by short silence. It has no "
+              "spoken labels; use the listening order above to identify each voice.\n",
+              encoding="utf-8"
+          )
+          print(json.dumps({"status": "PASS", "voice_count": len(rows)}, indent=2))
+          PY
+
+      - name: Create normalized listening files and an A-B comparison montage
+        run: |
+          python - <<'PY'
+          import numpy as np
+          import soundfile as sf
+          import subprocess
+          from pathlib import Path
+          root = Path("dist/auditions")
+          order = [
+              root / "old-adam/narration.wav",
+              root / "af_heart/narration.wav",
+              root / "af_bella/narration.wav",
+              root / "af_nicole/narration.wav",
+              root / "bf_emma/narration.wav",
+          ]
+          clips = []
+          sr = 48000
+          for source in order:
+              audio, rate = sf.read(source, dtype="float32", always_2d=True)
+              assert rate == sr, (source, rate)
+              clips.append(audio[:, 0])
+              mp3 = source.with_suffix(".mp3")
+              subprocess.run([
+                  "ffmpeg", "-hide_banner", "-v", "error", "-y",
+                  "-i", str(source), "-c:a", "libmp3lame", "-b:a", "192k", str(mp3)
+              ], check=True)
+          gap = np.zeros(int(sr * 1.0), dtype=np.float32)
+          parts = []
+          for index, clip in enumerate(clips):
+              parts.append(clip)
+              if index < len(clips)-1:
+                  parts.append(gap)
+          montage = np.concatenate(parts)
+          sf.write(root / "voice-audition-montage.wav", montage, sr, subtype="PCM_24")
+          subprocess.run([
+              "ffmpeg", "-hide_banner", "-v", "error", "-y",
+              "-i", str(root / "voice-audition-montage.wav"),
+              "-c:a", "libmp3lame", "-b:a", "192k",
+              str(root / "voice-audition-montage.mp3")
+          ], check=True)
+          PY
+          (cd dist/auditions && sha256sum $(find . -type f ! -name SHA256SUMS.txt | sort) > SHA256SUMS.txt)
+          cd dist && zip -qr constantinople-voice-auditions.zip auditions
+
+      - name: Upload the voice audition set
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-voice-auditions-${{ github.run_id }}
+          path: |
+            dist/auditions/
+            dist/constantinople-voice-auditions.zip
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 30
