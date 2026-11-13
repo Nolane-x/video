@@ -1,0 +1,422 @@
+name: Constantinople · expanded siege camp and city edit · native 240fps
+
+on:
+  push:
+    branches:
+      - cinematic/constantinople-premium-v2
+    paths:
+      - 'tools/blender/render_constantinople_crew_pbr_v3.py'
+      - 'tools/blender/crew_mesh_policy.py'
+      - '.github/workflows/constantinople-crew-pbr-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: constantinople-crew-pbr-v3
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Acquire and verify CC0 models, rigged crew and audio
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified Poly Haven PBR models
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v2-assets-43403606672
+          path: historical-assets/models
+          repository: Nolane-x/video
+          run-id: '43403606672'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download CC0-derived rigged artillery crew
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v2-character-43403606672
+          path: character
+          repository: Nolane-x/video
+          run-id: '43403606672'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download verified 16-second narration, score and cannon Foley
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v2-audio-43403606672
+          path: source-audio
+          repository: Nolane-x/video
+          run-id: '43403606672'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify exact assets, redistribution rights and source checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s historical-assets/models/downloaded/cannon_01/cannon_01_1k.gltf
+          test -s historical-assets/models/downloaded/modular_fort_01/modular_fort_01_1k.gltf
+          test -s character/ottoman-artillery-crew-cc0.glb
+          test -s source-audio/voice-16s.wav
+          test -s source-audio/score.wav
+          test -s source-audio/cannon_fire.ogg
+          test -s source-audio/cannon_impact.ogg
+          (cd source-audio && sed 's#prepared/##g' SHA256SUMS.txt | sha256sum -c -)
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          root = Path("historical-assets")
+          manifest = json.loads((root / "models/downloaded/manifest.json").read_text())
+          assert manifest["provider"] == "Poly Haven"
+          assert manifest["license"] == "CC0-1.0"
+          for asset in manifest["assets"]:
+              if asset["id"] not in {"cannon_01", "modular_fort_01"}:
+                  continue
+              main = root / asset["file"]
+              assert main.is_file()
+              assert hashlib.sha256(main.read_bytes()).hexdigest() == asset["sha256"]
+              for entry in asset["includes"]:
+                  path = main.parent / entry["path"]
+                  assert path.is_file()
+                  assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["sha256"]
+
+          crew = json.loads(Path("character/manifest.json").read_text())
+          assert str(crew["license"]).startswith("CC0-1.0"), crew["license"]
+          assert crew["bones"] >= 50
+          assert len(crew["actions"]) >= 8
+          assert crew["visual_approval"] == "pending"
+          print("POLY HAVEN CC0 MODEL + TEXTURE CHECKSUMS PASS")
+          print("RIGGED CREW SOURCE PASS:", crew["bones"], "bones;", len(crew["actions"]), "actions")
+          PY
+      - name: Upload immutable PBR assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-assets-${{ github.run_id }}
+          path: historical-assets/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload immutable rigged character
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-character-${{ github.run_id }}
+          path: character/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload immutable audio inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-audio-${{ github.run_id }}
+          path: source-audio/
+          if-no-files-found: error
+          retention-days: 14
+
+  smoke:
+    name: Full-resolution smoke frame — six independent character rigs and eight camera beats
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless Blender and import dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
+          blender --background --python-expr "import numpy; print('Blender NumPy', numpy.__version__)"
+          blender --version | head -n 2
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-assets-${{ github.run_id }}
+          path: historical-assets
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-character-${{ github.run_id }}
+          path: character
+      - name: Compile scene and crew mesh policy
+        run: python -m py_compile tools/blender/render_constantinople_crew_pbr_v3.py tools/blender/crew_mesh_policy.py
+      - name: Render a smoke frame from the actual crew-and-bombard camera
+        env:
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          BLENDER_FRAME_START: '900'
+          BLENDER_FRAME_END: '900'
+          BLENDER_SMOKE_ONLY: '1'
+          SMOKE_OUTPUT: out/crew-bombardment-smoke.png
+          BLENDER_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          blender --background --threads 2 --python tools/blender/render_constantinople_crew_pbr_v3.py 2>&1 | tee out/blender-smoke.log
+          test -s out/crew-bombardment-smoke.png
+          test -s out/crew-manifest.json
+          python - <<'PY'
+          import json
+          m = json.load(open("out/crew-manifest.json"))
+          crew = m["crew"]
+          assert m["fps"] == 240, m
+          assert len(crew) == 6, crew
+          assert len({x["armature"] for x in crew}) == 6, crew
+          assert all(x["action"] != "none" for x in crew), crew
+          assert all(x["mesh_count"] >= 8 for x in crew), crew
+          print("SIX INDEPENDENT ANIMATED RIGS PASS")
+          for x in crew:
+              print(x["name"], x["side"], x["action"])
+          PY
+      - name: Upload full-resolution integration smoke frame
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-smoke-${{ github.run_id }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30
+
+  render:
+    name: Render frame range ${{ matrix.id }} — ${{ matrix.start }} to ${{ matrix.end }}
+    needs: [prepare, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { id: "01", start: 1, end: 480 }
+          - { id: "02", start: 481, end: 960 }
+          - { id: "03", start: 961, end: 1440 }
+          - { id: "04", start: 1441, end: 1920 }
+          - { id: "05", start: 1921, end: 2400 }
+          - { id: "06", start: 2401, end: 2880 }
+          - { id: "07", start: 2881, end: 3360 }
+          - { id: "08", start: 3361, end: 3840 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and headless OpenGL runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1 libxkbcommon0 libsm6
+          blender --background --python-expr "import numpy; print('Blender NumPy', numpy.__version__)"
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-assets-${{ github.run_id }}
+          path: historical-assets
+      - uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-character-${{ github.run_id }}
+          path: character
+      - name: Compile and render one disjoint 240fps frame range
+        shell: bash
+        env:
+          FRAME_START: ${{ matrix.start }}
+          FRAME_END: ${{ matrix.end }}
+          CHUNK_ID: ${{ matrix.id }}
+          HISTORICAL_ASSETS: historical-assets
+          CHARACTER_GLB: character/ottoman-artillery-crew-cc0.glb
+          BLENDER_THREADS: '3'
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python -m py_compile tools/blender/render_constantinople_crew_pbr_v3.py tools/blender/crew_mesh_policy.py
+          BLENDER_FRAME_START="$FRAME_START" \
+          BLENDER_FRAME_END="$FRAME_END" \
+          BLENDER_OUTPUT="$PWD/out/chunk-$CHUNK_ID.mp4" \
+          blender --background --threads 3 --python tools/blender/render_constantinople_crew_pbr_v3.py 2>&1 | tee "out/render-$CHUNK_ID.log"
+          test -s "out/chunk-$CHUNK_ID.mp4"
+          test -s out/crew-manifest.json
+          ffprobe -v error -count_frames -select_streams v:0 \
+            -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_read_frames \
+            -of json "out/chunk-$CHUNK_ID.mp4" > "out/chunk-$CHUNK_ID.json"
+          FRAME_START="$FRAME_START" FRAME_END="$FRAME_END" CHUNK_ID="$CHUNK_ID" \
+          python - <<'PY'
+          import json, os
+          p = f"out/chunk-{os.environ['CHUNK_ID']}.json"
+          v = json.load(open(p))["streams"][0]
+          expected = int(os.environ["FRAME_END"]) - int(os.environ["FRAME_START"]) + 1
+          assert (v["width"], v["height"]) == (1920, 1080), v
+          assert v["r_frame_rate"] == "240/1" and v["avg_frame_rate"] == "240/1", v
+          assert int(v["nb_read_frames"]) == expected == 480, (expected, v)
+          crew = json.load(open("out/crew-manifest.json"))["crew"]
+          assert len(crew) == 6 and len({x["armature"] for x in crew}) == 6, crew
+          print("CHUNK PASS:", expected, "frames at native CFR 240")
+          print("CREW PASS:", [(x["name"], x["action"]) for x in crew])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-chunk-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            out/chunk-${{ matrix.id }}.mp4
+            out/chunk-${{ matrix.id }}.json
+            out/crew-manifest.json
+            out/render-${{ matrix.id }}.log
+          if-no-files-found: error
+          retention-days: 14
+
+  assemble:
+    name: Assemble, mix and strictly QA the complete 16-second 240fps proof
+    needs: [render, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Download the eight disjoint rendered frame ranges
+        uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-crew-pbr-v3-chunk-*-${{ github.run_id }}
+          path: rendered-chunks
+          merge-multiple: true
+      - name: Download exact audio source and captions
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-audio-${{ github.run_id }}
+          path: source-audio
+      - name: Download crew source licence record
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-character-${{ github.run_id }}
+          path: character
+      - name: Verify exact 3,840-frame coverage and concatenate without re-encoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("rendered-chunks")
+          concat, total = [], 0
+          for i in range(1, 9):
+              name = f"{i:02d}"
+              video = root / f"chunk-{name}.mp4"
+              meta = json.loads((root / f"chunk-{name}.json").read_text())
+              stream = meta["streams"][0]
+              start, end = 1 + (i - 1) * 480, i * 480
+              assert video.is_file() and video.stat().st_size > 100_000, video
+              assert (stream["width"], stream["height"]) == (1920, 1080), stream
+              assert stream["r_frame_rate"] == "240/1" and stream["avg_frame_rate"] == "240/1", stream
+              assert int(stream["nb_read_frames"]) == 480, stream
+              total += 480
+              concat.append(f"file '{video.resolve().as_posix()}'")
+              print(f"Verified {name}: frames {start}–{end}")
+          assert total == 3840, total
+          Path("chunks.txt").write_text("\n".join(concat) + "\n")
+          print("NO GAPS OR OVERLAPS:", total)
+          PY
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 -i chunks.txt \
+            -map 0:v:0 -c:v copy -movflags +faststart picture-only.mp4
+      - name: Mix original narration with the CC0 score and synchronized cannon Foley
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -v error -y \
+            -i source-audio/voice-16s.wav \
+            -stream_loop -1 -i source-audio/score.wav \
+            -i source-audio/cannon_fire.ogg \
+            -i source-audio/cannon_impact.ogg \
+            -filter_complex \
+            "[1:a]atrim=0:16,asetpts=N/SR/TB,volume=0.14[score]; \
+             [2:a]adelay=6250|6250,volume=0.75,highpass=f=90,lowpass=f=9000[fire]; \
+             [3:a]adelay=9580|9580,volume=0.85,highpass=f=55,lowpass=f=6500[impact]; \
+             [0:a]volume=1.0[voice]; \
+             [voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0, \
+             loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map "[out]" -t 16 -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
+          ffmpeg -hide_banner -v error -y \
+            -i picture-only.mp4 -i out-audio.m4a \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 16 \
+            -movflags +faststart constantinople-crew-pbr-v3-240fps.mp4
+      - name: Verify the complete native-240fps picture and final audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp source-audio/captions.srt captions.srt
+          ffprobe -v error -count_frames -show_streams -show_format -of json \
+            constantinople-crew-pbr-v3-240fps.mp4 > metadata.json
+          python - <<'PY'
+          import json, subprocess
+          p = "constantinople-crew-pbr-v3-240fps.mp4"
+          meta = json.load(open("metadata.json"))
+          video = next(x for x in meta["streams"] if x["codec_type"] == "video")
+          audio = next(x for x in meta["streams"] if x["codec_type"] == "audio")
+          assert (video["width"], video["height"]) == (1920, 1080), video
+          assert video["r_frame_rate"] == "240/1" and video["avg_frame_rate"] == "240/1", video
+          assert int(video["nb_read_frames"]) == 3840, video
+          assert audio["sample_rate"] == "48000" and audio["channels"] == 2, audio
+          assert 15.99 <= float(meta["format"]["duration"]) <= 16.02, meta["format"]
+          subprocess.run(["ffmpeg", "-hide_banner", "-v", "error", "-i", p, "-f", "null", "-"], check=True)
+          print("TECHNICAL PASS: 1920x1080 CFR 240; 3,840 frames; 48kHz stereo")
+          PY
+      - name: Build review proxy, contact sheet, manifest and checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          ffmpeg -hide_banner -v error -y -i constantinople-crew-pbr-v3-240fps.mp4 \
+            -vf "fps=30,scale=960:540" -an -c:v libx264 -preset veryfast -crf 23 \
+            review/review-proxy-30fps-960x540.mp4
+          ffmpeg -hide_banner -v error -y -i constantinople-crew-pbr-v3-240fps.mp4 \
+            -vf "fps=1,scale=480:-1,tile=4x4" -frames:v 1 review/contact-sheet.jpg
+          cp constantinople-crew-pbr-v3-240fps.mp4 captions.srt metadata.json review/
+          cp rendered-chunks/crew-manifest.json review/
+          cp rendered-chunks/render-01.log review/
+          cp source-audio/POLYHAVEN-ASSET-MANIFEST.json review/
+          cp character/manifest.json review/character-source-manifest.json
+          cat > review/RECONSTRUCTION-NOTES.txt <<'NOTES'
+          Constantinople 1453 — 16-second rigged PBR bombardment proof.
+          Hero cannon and modular-fort stone PBR materials: Poly Haven, CC0-1.0.
+          Six independently rigged CC0-derived crew performers are driven by separate 53-bone armatures and animation actions.
+          The crew clothing is an illustrative 15th-century adaptation, not an authenticated Ottoman uniform or portrait.
+          Cannon geometry is a generic CC0 stand-in, not a verified replica of Orban's exact bombard.
+          The modular wall, Byzantine city silhouette and siege camp are illustrative, not measured reconstructions of Constantinople.
+          Picture is natively rendered at 1920x1080 CFR 240 fps; no frame interpolation.
+          This is a 16-second premium proof, not the complete 15:57 film. Human artistic and perceptual audio review remain required.
+          NOTES
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          p = Path("review/constantinople-crew-pbr-v3-240fps.mp4")
+          meta = json.loads(Path("metadata.json").read_text())
+          video = next(x for x in meta["streams"] if x["codec_type"] == "video")
+          audio = next(x for x in meta["streams"] if x["codec_type"] == "audio")
+          crew = json.loads(Path("review/crew-manifest.json").read_text())["crew"]
+          report = {
+            "status": "TECHNICAL_PASS_PENDING_HUMAN_ARTISTIC_REVIEW",
+            "project": "53 Days to the End of an Empire",
+            "sequence": "The siege — camp, crew, bombardment, breach and Constantinople skyline",
+            "dimensions": [video["width"], video["height"]],
+            "fps": video["r_frame_rate"],
+            "avg_frame_rate": video["avg_frame_rate"],
+            "frames": int(video["nb_read_frames"]),
+            "duration_seconds": float(meta["format"]["duration"]),
+            "video_codec": video["codec_name"],
+            "audio_codec": audio["codec_name"],
+            "audio_sample_rate": audio["sample_rate"],
+            "audio_channels": audio["channels"],
+            "native_240fps": True,
+            "interpolated": False,
+            "crew_count": len(crew),
+            "independent_armatures": len({x["armature"] for x in crew}),
+            "crew_actions": [x["action"] for x in crew],
+            "character_license": "CC0-1.0 generated output; source manifest included",
+            "cannon_and_fort_license": "CC0-1.0 Poly Haven",
+            "artistic_signoff": "pending",
+            "audio_audition": "pending",
+            "limitations": [
+              "The cannon is a generic CC0 stand-in, not an authenticated Orban bombard.",
+              "The wall layout is illustrative, not a surveyed Theodosian reconstruction.",
+              "The costume is an adaptation, not an authenticated Ottoman uniform.",
+              "A 16-second proof does not establish artistic approval of the full film."
+            ],
+            "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+            "bytes": p.stat().st_size
+          }
+          Path("review/QA-REPORT.json").write_text(json.dumps(report, indent=2) + "\n")
+          PY
+          (cd review && sha256sum * > SHA256SUMS.txt)
+      - name: Upload the rigged PBR 240fps review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-crew-pbr-v3-240fps-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
