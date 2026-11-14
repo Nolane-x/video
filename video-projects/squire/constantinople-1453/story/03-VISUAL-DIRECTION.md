@@ -49,3 +49,8 @@ Captions remain in the lower safe area and never cover the main face, weapon con
 
 ## Historical caution
 A siege reconstruction can show plausible spatial relationships but is not a literal reconstruction of every movement. Do not add exact troop counts, exact cannon dimensions or invented quotes unless the research ledger supports them.
+
+
+## First-day encampment and artillery movement
+
+After the rewind to 6 April 1453, the first army-establishing shots follow the narrated actions in order: wide encampment with rows of tents; standards moving over the camp; oxen hauling heavy guns along a rough approach road; engineers measuring ground and preparing positions; then close artillery and wall-battery shots. Do not use Golden Horn / relief-fleet / last-assault templates for these first-day setup lines. Any Castle Kit siege tower, ram or trebuchet used later is a CC0 illustrative prop, not authenticated Ottoman/Byzantine equipment from 1453 and must not be captioned as such.

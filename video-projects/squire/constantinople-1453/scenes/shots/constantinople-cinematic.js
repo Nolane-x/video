@@ -327,7 +327,7 @@ function drawCityInterior(g,t){
   for(let i=0;i<5;i++){const x=180+i*380,y=385-(i%2)*100;glow(g,x,y,115,'#f49b48',.16);g.fillStyle='#e0ae63';g.fillRect(x-12,y-20,24,40);}
   smoke(g,t,1460,430,30);smoke(g,t,520,420,21);
 }
-function drawCamp(g,t){
+function drawCamp(g,t,beat='tents'){
   gradient(g,0,H(),[[0,'#161d2a'],[.48,'#39414a'],[1,'#524539']]);
   for(let i=0;i<12;i++){const x=i*170-40;path(g,[[x,620],[x+42,510-(i%3)*22],[x+190,620]],i%2?'#7d6550':'#8e7559','#302922',4);line(g,[[x+115,620],[x+115,525]],'#3c3026',5);}
   for(let i=0;i<7;i++){glow(g,120+i*270,600,110,'#e59a4b',.21);}
@@ -340,7 +340,101 @@ function drawCamp(g,t){
     {preset:'ottomanElite',x:.66,y:.86,h:.43,face:'neutral',pose:'point'},
     {preset:'ottomanElite',x:.33,y:.86,h:.40,face:'neutral',pose:'guard'}
   ],.93,.5);
+  if(beat==='engineers'){
+    // Measuring rope and survey rods make the engineering preparation a distinct beat.
+    line(g,[[290,810],[1610,745]],'#d2bd90',5,.85);
+    for(let i=0;i<9;i++){const x=380+i*145;line(g,[[x,788-i*4],[x,710-i*4]],'#c0a276',6,.8);}
+    line(g,[[560,735],[1360,735]],'#e0c99c',3,.75);
+    for(let i=0;i<5;i++)circle(g,610+i*165,735,8,'#b98d5a');
+  }
+  if(beat==='supply'){
+    for(let i=0;i<5;i++){
+      const x=140+i*360,y=930-(i%2)*18;
+      circle(g,x,y,38,'#4a3426');circle(g,x,y-4,29,'#876341');
+      line(g,[[x-28,y-28],[x+28,y-28]],'#c1a171',5,.8);
+      path(g,[[x-78,y+55],[x+78,y+55],[x+63,y+86],[x-64,y+86]],'#76563a','#302218',4);
+    }
+  }
+  if(beat==='march'){
+    drawPeople(g,t,{dur:6,globalT:t,start:0,args:{}},[
+      {preset:'ottomanInfantry',x:.16,y:.97,h:.34,face:'determined',pose:'walk',walk:true,dir:1,speed:.22},
+      {preset:'ottomanInfantry',x:.83,y:.96,h:.33,face:'neutral',pose:'carry',walk:true,dir:-1,speed:.16}
+    ],.94,.34);
+    dust(g,t,980,875,83,32,'#bda37f');
+  }
+  if(beat==='tents'){
+    for(let i=0;i<6;i++)smoke(g,t+i*.14,240+i*270,505-(i%2)*32,31+i);
+    for(let i=0;i<7;i++)glow(g,140+i*270,620,86,'#e7a45f',.12);
+  }
 }
+function drawArtilleryHaul(g,t,info,a){
+  const beat=a.beat||"departure";
+  gradient(g,0,H(),[[0,"#78818a"],[.38,"#c4b094"],[1,"#60503d"]]);
+  // Distant siege camp and broken earth establish the approach road.
+  path(g,[[0,520],[180,450],[390,500],[650,420],[870,485],[1110,410],[1390,480],[1630,420],[1920,460],[1920,1080],[0,1080]],"#766b5b",null,0);
+  for(let i=0;i<11;i++){
+    const x=45+i*184,y=565+(i%3)*30;
+    path(g,[[x-45,y],[x,y-74-(i%3)*9],[x+48,y]],i%2?"#806447":"#6b543e","#33281f",3);
+    if(i%2===0)glow(g,x,y-5,48,"#d99450",.12);
+  }
+  // Rutted muddy road creates a strong foreground vanishing line.
+  path(g,[[0,860],[370,790],[760,830],[1140,735],[1530,780],[1920,700],[1920,1080],[0,1080]],"#544638",null,0);
+  for(let i=0;i<20;i++){
+    const x=i*104-20,y=915+(i%4)*24;
+    line(g,[[x,y],[x+125,y-28-(i%3)*7]],"#b39a78",5,.35);
+  }
+  // Heavy timber carriage and cannon are illustrative, not an authenticated Orban design.
+  cannon(g,1335,865,1.72,t,false);
+  function ox(x,y,scale,phase){
+    const step=Math.sin(t*4.6+phase)*12;
+    const bob=Math.sin(t*2.3+phase)*3;
+    g.save();g.translate(x,y);g.scale(scale,scale);
+    path(g,[[-112,-52+bob],[-86,-104+bob],[-16,-120+bob],[66,-102+bob],[111,-54+bob],[91,-4],[24,18],[-81,7]],"#4f3a2b","#211a14",7);
+    path(g,[[63,-96+bob],[106,-128+bob],[142,-116+bob],[128,-72+bob],[87,-58+bob]],"#604733","#211a14",6);
+    circle(g,133,-103+bob,5,"#181615");
+    path(g,[[104,-128+bob],[92,-163+bob],[74,-174+bob],[83,-145+bob]],"#433125","#201913",5);
+    path(g,[[121,-127+bob],[145,-154+bob],[161,-159+bob],[143,-130+bob]],"#433125","#201913",5);
+    path(g,[[-85,-100+bob],[-108,-134+bob],[-83,-124+bob]],"#493528",null,0);
+    for(let i=0;i<4;i++){
+      const lx=-68+i*42;
+      const stride=(i%2?step:-step)*.38;
+      line(g,[[lx,-5+bob],[lx+stride,50]],"#2b211a",15);
+      line(g,[[lx+stride,50],[lx+stride+4,90+Math.max(0,step*.2)]],"#211a15",11);
+      circle(g,lx+stride+4,92+Math.max(0,step*.2),7,"#241b15");
+    }
+    // Shoulder yoke and harness straps.
+    line(g,[[88,-84+bob],[160,-70+bob]],"#98744a",9);
+    line(g,[[100,-63+bob],[108,6]],"#aa8a5a",6);
+    line(g,[[72,-66+bob],[-48,-32+bob]],"#ae8a5b",5,.85);
+    g.restore();
+  }
+  ox(400,830,.94,0);
+  ox(690,844,.86,1.4);
+  // Yoke, traces and hauling ropes connect the team to the gun carriage.
+  line(g,[[750,760],[890,760]],"#916d43",17);
+  line(g,[[750,748],[890,748]],"#c5a06b",5,.9);
+  line(g,[[862,753],[1070,805]],"#b28a56",10,.85);
+  line(g,[[862,776],[1070,835]],"#8d6b43",6,.9);
+  for(let i=0;i<7;i++)circle(g,770+i*19,760,5,"#4b3c2c");
+  drawPeople(g,t,info,[
+    {preset:'ottomanInfantry',x:.49,y:.98,h:.43,face:'determined',pose:'push',walk:true,dir:1,speed:beat==='incline'?.38:.22},
+    {preset:'ottomanInfantry',x:.70,y:.98,h:.40,face:'focused',pose:'carry',walk:true,dir:1,speed:.15},
+    {preset:'ottomanElite',x:.88,y:.97,h:.42,face:'neutral',pose:'point',flip:true}
+  ],.94,.43);
+  if(beat==='incline'||beat==='departure'){
+    dust(g,t,760,900,91,44,'#c4a783');
+    dust(g,t,1050,860,92,32,'#b89c76');
+  }
+  if(beat==='emplacement'){
+    path(g,[[1200,900],[1262,900],[1245,932],[1210,932]],"#86633d","#332315",4);
+    path(g,[[1450,900],[1512,900],[1495,932],[1460,932]],"#86633d","#332315",4);
+    glow(g,1390,760,112,"#dca465",.13);
+  }
+  if(beat==='guides'){
+    for(let i=0;i<8;i++)dust(g,t,940+i*35,850-(i%3)*22,99+i,17,'#c5a881');
+  }
+}
+
 function wallBase(g,t,breach=0){
   gradient(g,0,H(),[[0,'#56697a'],[.45,'#c7b08a'],[1,'#69533d']]);
   path(g,[[0,650],[0,500],[220,445],[430,490],[670,420],[900,460],[1160,400],[1390,470],[1640,425],[1920,460],[1920,800],[0,800]],'#777b6b',null,0);
@@ -453,7 +547,8 @@ function drawCityDetail(g,t,info,a){
   } else drawHero(g,t,info,{x:.24,y:.99,h:.58,face:'determined',pose:'guard'});
 }
 registerTemplate('city_detail',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawCityDetail(g,lt,info,a));}});
-registerTemplate('command_camp',{draw(g,lt,info){camera(g,lt,info,()=>{drawCamp(g,lt);for(let i=0;i<8;i++)flag(g,80+i*250,620,140,{color:i%2?RED:BLUE,t:lt,lw:2});dust(g,lt,1200,870,88,40);});}});
+registerTemplate('command_camp',{draw(g,lt,info){const a=info.args||{},beat=a.beat||"tents";camera(g,lt,info,()=>{drawCamp(g,lt,beat);const count=beat==="standards"?11:8;for(let i=0;i<count;i++)flag(g,50+i*(1820/(count-1)),620,beat==="standards"?172:140,{color:i%2?RED:BLUE,t:lt,lw:2});dust(g,lt,1200,870,88,40);});}});
+registerTemplate('artillery_haul',{draw(g,lt,info){const a=info.args||{};camera(g,lt,info,()=>drawArtilleryHaul(g,lt,info,a));}});
 registerTemplate('city_interior',{draw(g,lt,info){camera(g,lt,info,()=>{drawCityInterior(g,lt);drawHero(g,lt,info,{x:.3,y:.98,h:.6,face:'tired',pose:'walk',walk:true,speed:.22,weapon:null,shield:null,poseAt:[[0,'walk'],[1.0,'carry'],[1.8,'walk']]});});}});
 registerTemplate('wall_battery',{draw(g,lt,info){
   const a=info.args||{},fireAt=a.fireAt??.52,age=lt-fireAt,impact=fireAt+1.02;

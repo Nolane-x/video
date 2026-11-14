@@ -92,11 +92,25 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             "final_night","night_wall_watch","night_camp","night_camp_detail",
             "night_guns","night_gun_crew","night_gun_crew_detail",
             "assault_waves","assault_first_wave","assault_second_wave","elite_reserve",
-            "defender_identity","defender_supply","rewind_map",
+            "artillery_haul","defender_identity","defender_supply","rewind_map",
             "city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys",
             "ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"
         ):
             self.assertIn(name,mod.CUSTOM)
+    def test_first_day_encampment_and_artillery_train_are_not_misclassified(self):
+        cases = [
+            ("Tents spread across the land.", "camp", "command_camp"),
+            ("Standards move in the wind.", "camp", "command_camp"),
+            ("Engineers measure the ground.", "camp", "command_camp"),
+            ("The road to the city is filling with an army assembled for one purpose.", "camp", "command_camp"),
+            ("Oxen pull heavy guns into position.", "artillery_haul", "artillery_haul"),
+            ("The artillery train drags the gun carriage into position.", "artillery_haul", "artillery_haul"),
+        ]
+        for index, (line, phase, template) in enumerate(cases, start=1):
+            with self.subTest(line=line):
+                self.assertEqual(mod.progress_phase(.072, line), phase)
+                self.assertEqual(mod.choose_template(.072, line, index, {}, None), template)
+
     def test_story_phase_changes(self):
         self.assertEqual(mod.choose_template(.3,"Rumeli Hisarı rises",20,{},"none"),"command_camp")
         self.assertEqual(mod.choose_template(.40,"Four ships break through",42,{},"none"),"relief_galleys")

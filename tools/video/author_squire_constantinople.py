@@ -10,7 +10,7 @@ CUSTOM = {
     "final_night", "night_wall_watch", "night_camp", "night_camp_detail",
     "night_guns", "night_gun_crew", "night_gun_crew_detail",
     "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve",
-    "defender_identity", "defender_supply", "rewind_map",
+    "artillery_haul", "defender_identity", "defender_supply", "rewind_map",
     "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
     "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city",
@@ -37,6 +37,8 @@ def sfx_for_shot(tpl, args, index, root):
         return cue(root, ["cannon_fire"], at=.92, gain=-12)
     if tpl == "night_gun_crew_detail":
         return cue(root, ["cannon_fire"], at=.92, gain=-15) + cue(root, ["wind_loop"], at=0, gain=-22)
+    if tpl == "artillery_haul":
+        return cue(root, ["wind_loop"], at=0, gain=-19) + cue(root, ["battle_roar"], at=.32, gain=-23)
     if tpl in {"night_wall_watch", "night_camp_detail"}:
         return cue(root, ["wind_loop"], at=0, gain=-20) + cue(root, ["battle_roar"], at=.24, gain=-23)
     if tpl == "defender_identity":
@@ -252,11 +254,25 @@ def progress_phase(p, text):
         return "tunnel"
     if any(k in t for k in ("repair crews", "repair team", "builders carry", "timber", "masonry", "repair the wall", "rebuild the wall", "breach is")):
         return "repair"
+    if any(k in t for k in (
+        "oxen pull", "oxen drag", "oxen haul", "heavy guns into position",
+        "heavy gun into position", "artillery train", "gun carriage into position",
+        "hauling the guns", "dragging the guns", "pull the guns"
+    )):
+        return "artillery_haul"
     if any(k in t for k in ("bombard", "cannon", "gun crew", "stone shot", "artillery", "powder", "wall is hit", "impact", "orban", "bombardment")):
         return "guns"
     if any(k in t for k in ("ration", "food", "churches", "praying", "wounded", "giustiniani", "constantine", "emperor", "civilians", "people who have never", "aid from the west")):
         return "inside"
-    if any(k in t for k in ("mehmed", "rumeli", "bosporus", "bosphorus", "sultan", "ottoman army", "ottoman camp", "engineers measure")):
+    # First-day establishment: tents, standards, engineers and the approach camp.
+    if any(k in t for k in (
+        "tents spread", "tents across the land", "standards move", "standards in the wind",
+        "measure the ground", "road to the city is filling", "army assembled",
+        "appears almost without end", "siege camp", "campfires", "camp fires",
+        "supply wagons", "wagons arrive"
+    )):
+        return "camp"
+    if any(k in t for ("mehmed", "rumeli", "bosporus", "bosphorus", "sultan", "ottoman army", "ottoman camp", "engineers measure")):
         return "camp"
     if any(k in t for k in ("city", "walls", "constantinople", "theodosian", "capital", "harbours", "harbors", "empire")):
         return "city"
@@ -275,6 +291,7 @@ def choose_template(p, text, i, usage, last, context_text=None):
         "night_gun_crew": "night_gun_crew",
         "city": "city_detail" if city_panorama_count >= 50 else "city_panorama",
         "camp": "command_camp",
+        "artillery_haul": "artillery_haul",
         "guns": "gun_crew" if i % 2 == 0 else "wall_battery",
         "repair": "repair_wall",
         "sea": "golden_horn" if usage.get("golden_horn", 0) < 58 else "city_detail",
@@ -314,6 +331,8 @@ def alternate_preset(phase, i, text):
     t = text.casefold()
     if phase in {"elite_reserve"}:
         return "ottomanElite"
+    if phase == "artillery_haul":
+        return "ottomanInfantry"
     if phase in {"assault_waves", "assault_first_wave", "assault_second_wave", "night_guns", "night_gun_crew", "night_gun_crew_detail", "night_camp_detail"}:
         return "ottomanInfantry"
     if phase == "camp":
@@ -467,7 +486,7 @@ def main():
         }
         offensive = {
             "night_camp_detail", "night_guns", "night_gun_crew", "night_gun_crew_detail",
-            "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve"
+            "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve", "artillery_haul"
         }
         hero_visible = opening_pov or (
             (i % 10 in {0, 3, 6, 8}) and phase not in {"camp", "night_guns", "night_gun_crew"}
@@ -592,6 +611,10 @@ def main():
                                   "match" if "match" in text.casefold() else
                                   "rammer" if any(k in text.casefold() for k in ("rammer", "preparing the next shot")) else
                                   ("powder", "stone", "rammer", "match")[i % 4])
+            elif tpl == "command_camp":
+                visual["beat"] = ("tents", "standards", "engineers", "supply", "map", "march")[i % 6]
+            elif tpl == "artillery_haul":
+                visual["beat"] = ("departure", "incline", "guides", "emplacement")[i % 4]
             elif tpl == "assault_waves":
                 visual["beat"] = ("approach", "drums", "ladders", "push")[i % 4]
             elif tpl == "assault_first_wave":

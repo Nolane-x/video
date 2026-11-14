@@ -216,6 +216,50 @@ jobs:
           python tools/video/render_squire_constantinople_redesign_proof.py \
             --project "$SQUIRE_PROJECT" --kit "$SQUIRE_KIT" \
             --output "$SQUIRE_PROJECT/build/redesign-motion-proof.mp4" --workers 2
+      - name: Render the continuous opening sequence at native 240fps
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$SQUIRE_KIT"
+          node render.mjs --project projects/constantinople-1453-redesign-proof \
+            --from 0 --to 53.15 --style dusk --workers 4 \
+            --crf 18 --maxrate 48M --bufsize 96M --preset veryfast 2>&1 | \
+            tee projects/constantinople-1453-redesign-proof/build/opening-53s-render.log
+          PREVIEW=projects/constantinople-1453-redesign-proof/build/preview.mp4
+          test -s "$PREVIEW"
+          ffprobe -v error -count_frames -show_streams -show_format -of json "$PREVIEW" \
+            > projects/constantinople-1453-redesign-proof/build/opening-53s-metadata.json
+          python - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          p=Path("projects/constantinople-1453-redesign-proof/build/preview.mp4")
+          meta=json.loads(Path("projects/constantinople-1453-redesign-proof/build/opening-53s-metadata.json").read_text())
+          v=next(x for x in meta["streams"] if x["codec_type"]=="video")
+          a=next(x for x in meta["streams"] if x["codec_type"]=="audio")
+          expected=round(53.15*240)
+          assert (v["width"],v["height"])==(1920,1080),v
+          assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
+          assert int(v["nb_read_frames"])==expected,(expected,v)
+          assert a["sample_rate"]=="48000" and a["channels"]==2,a
+          assert 53.13<=float(meta["format"]["duration"])<=53.17,meta["format"]
+          subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",str(p),"-f","null","-"],check=True)
+          report={
+            "status":"TECHNICAL_PASS_PENDING_HUMAN_ARTISTIC_REVIEW",
+            "sequence":"opening final night through dawn assault and rewind",
+            "resolution":[v["width"],v["height"]],
+            "fps":v["r_frame_rate"],
+            "frames":int(v["nb_read_frames"]),
+            "duration_seconds":float(meta["format"]["duration"]),
+            "audio_sample_rate":int(a["sample_rate"]),
+            "audio_channels":int(a["channels"]),
+            "codec":v["codec_name"],
+            "sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+            "bytes":p.stat().st_size,
+            "review_requirement":"Watch all 53 seconds and listen for shot changes, caption pacing, pauses and music/SFX balance."
+          }
+          Path("projects/constantinople-1453-redesign-proof/build/OPENING-53S-QA.json").write_text(json.dumps(report,indent=2)+"\n")
+          print("OPENING 53S NATIVE-240FPS TECHNICAL PASS",report)
+          PY
       - name: Assemble review bundle
         shell: bash
         run: |
@@ -224,6 +268,9 @@ jobs:
           mkdir -p "$OUT/contact-sheets"
           cp "$SQUIRE_PROJECT/build/redesign-motion-proof.mp4" "$OUT/constantinople-redesign-motion-proof-240fps.mp4"
           cp "$SQUIRE_PROJECT/build/redesign-motion-proof.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/build/preview.mp4" "$OUT/constantinople-opening-53s-preview-240fps.mp4"
+          cp "$SQUIRE_PROJECT/build/OPENING-53S-QA.json" "$OUT/"
+          cp "$SQUIRE_PROJECT/build/opening-53s-render.log" "$OUT/"
           cp "$SQUIRE_PROJECT/build/redesign-check.log" "$OUT/"
           cp "$SQUIRE_PROJECT/build/redesign-contact-sheet.log" "$OUT/"
           cp -a "$SQUIRE_PROJECT/build/sheets/." "$OUT/contact-sheets/"
