@@ -144,8 +144,8 @@ def add_insert_sound_cues(project: Path) -> dict:
     story_path = project / "story" / "shots.json"
     story = json.loads(story_path.read_text(encoding="utf-8"))
     cues = [
-        {"t": 239.760, "name": "cannon_fire", "gain": -4},
-        {"t": 246.060, "name": "siege_impact", "gain": -6},
+        {"t": 239.510, "name": "cannon_fire", "gain": -4},
+        {"t": 247.010, "name": "siege_impact", "gain": -6},
     ]
     existing = list(story.get("sfx", []))
     for cue in cues:
