@@ -823,12 +823,12 @@ jobs:
             "It is not archival footage or a verified replica of Orban's exact cannon; a human must review "
             "the insert, captions and audio continuity at normal speed."
           )
-          report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           if md_path.exists():
             with md_path.open("a",encoding="utf-8") as f:
-              f.write("\\n- 3D Blender insert: 60fps source keyframes interpolated to 240fps; "
+              f.write("\n- 3D Blender insert: 60fps source keyframes interpolated to 240fps; "
                       "39.1417s; captions burned in; original master audio retained. "
-                      "Artistic sign-off pending.\\n")
+                      "Artistic sign-off pending.\n")
           PY
 
       - name: Assemble complete delivery package
