@@ -56,6 +56,8 @@ jobs:
     outputs:
       proof_run_id: ${{ steps.proof.outputs.run_id }}
       proof_source_sha: ${{ steps.proof.outputs.source_sha }}
+      hybrid_run_id: ${{ steps.hybrid.outputs.run_id }}
+      hybrid_source_sha: ${{ steps.hybrid.outputs.source_sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -127,6 +129,42 @@ jobs:
             core.info("Using proof run " + source.id + " from source " + source.head_sha);
             core.setOutput("run_id", String(source.id));
             core.setOutput("source_sha", source.head_sha);
+
+      - name: Resolve latest successful 60fps Blender bombardment proof
+        id: hybrid
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 411026999,
+              branch: "cinematic/constantinople-hybrid-240fps",
+              status: "completed",
+              per_page: 30
+            });
+            for (const source of result.data.workflow_runs) {
+              if (source.conclusion !== "success" || !source.head_sha) continue;
+              const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: source.id,
+                per_page: 100
+              });
+              const expectedName = "constantinople-hybrid-240fps-proof-" + source.id;
+              const artifact = artifacts.data.artifacts.find(
+                item => item.name === expectedName && !item.expired
+              );
+              if (!artifact) continue;
+              core.info("Using Blender 60fps proof run " + source.id +
+                        " from source " + source.head_sha);
+              core.setOutput("run_id", String(source.id));
+              core.setOutput("source_sha", source.head_sha);
+              return;
+            }
+            core.setFailed(
+              "No successful, non-expired 60fps Blender proof artifact is available."
+            );
 
       - name: Cancel superseded copies of this segmented render
         uses: actions/github-script@v7
@@ -630,6 +668,15 @@ jobs:
           name: squire-constantinople-redesign-proof-${{ needs.prepare-project.outputs.proof_run_id }}
           path: prior-proof
           run-id: ${{ needs.prepare-project.outputs.proof_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download exact Blender 60fps bombardment proof bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-hybrid-240fps-proof-${{ needs.prepare-project.outputs.hybrid_run_id }}
+          path: hybrid-proof
+          repository: Nolane-x/video
+          run-id: ${{ needs.prepare-project.outputs.hybrid_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore project and verify all segment checksums
