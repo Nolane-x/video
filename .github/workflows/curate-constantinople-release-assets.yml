@@ -66,8 +66,12 @@ jobs:
               names=z.namelist()
               for name in names:
                   parts=name.split("/")
-                  if len(parts)>=5 and parts[1]=="polyhaven" and parts[2]=="textures":
-                      group=parts[3]
+                  try:
+                      pi=parts.index("polyhaven")
+                  except ValueError:
+                      continue
+                  if pi+2 < len(parts) and parts[pi+1]=="textures":
+                      group=parts[pi+2]
                       row=roots.setdefault(group,{"files":[],"bytes":0})
                       row["files"].append(name)
                       info=z.getinfo(name)
@@ -79,6 +83,7 @@ jobs:
                   selected.append({"texture_set":group,"files":len(row["files"]),"uncompressed_bytes":row["bytes"],"sample_paths":row["files"][:20]})
           out=Path("constantinople-asset-scout")/"POLYHAVEN-MATERIAL-CANDIDATES.json"
           out.write_text(json.dumps({"archive":"video-assets-polyhaven-3d-textures-001.zip","archive_bytes":zpath.stat().st_size,"entry_count":len(names),"texture_set_count":len(roots),"selected":selected},indent=2)+"\\n",encoding="utf-8")
+          Path("constantinople-asset-scout/POLYHAVEN-ALL-FILES.txt").write_text("\\n".join(names)+"\\n",encoding="utf-8")
           md=Path("constantinople-asset-scout")/"POLYHAVEN-MATERIAL-CANDIDATES.md"
           lines=["# Poly Haven material groups","",f"Archive entries: {len(names)}",f"Texture sets: {len(roots)}",""]
           for x in selected:
