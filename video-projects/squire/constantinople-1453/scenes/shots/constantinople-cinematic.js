@@ -624,28 +624,39 @@ function drawNightGuns(g,t,info,a){
   gradient(g,0,H(),[[0,"#0d1522"],[.48,"#202c38"],[1,"#332a24"]]);
   circle(g,1560,138,62,"#cbc2a9");
   path(g,[[0,620],[170,540],[380,600],[610,500],[840,575],[1080,480],[1300,560],[1540,470],[1770,550],[1920,500],[1920,1080],[0,1080]],"#18222c",null,0);
-  // Distant gun emplacements appear as silhouettes along the ridge.
-  for(let i=0;i<5;i++){
-    const x=150+i*390,y=690+(i%2)*42,scale=.55+(i%3)*.12;
-    line(g,[[x-78*scale,y],[x+72*scale,y]],"#594331",13*scale);
-    line(g,[[x-20*scale,y-8*scale],[x+66*scale,y-50*scale]],"#282724",17*scale);
-    circle(g,x-45*scale,y+3,26*scale,"#242321");
-    circle(g,x+44*scale,y+3,26*scale,"#242321");
-    if(i%2===0){
-      const pulse=(Math.sin(t*3.2+i*1.7)+1)*.5;
-      glow(g,x+88*scale,y-72*scale,66+40*pulse,"#ef9b4d",beat==="distant_flash"?.22+.22*pulse:.10);
+  if(beat==="silhouette"){
+    const x=1030,y=830;
+    line(g,[[x-250,y],[x+250,y]],"#4e3929",24);
+    line(g,[[x-110,y-62],[x+260,y-218]],"#171715",48);
+    line(g,[[x-102,y-78],[x+254,y-229]],"#6f5740",7);
+    for(const wx of [x-160,x+145]){
+      circle(g,wx,y+4,92,"#1a1918");circle(g,wx,y+4,62,"#7c6247");
+      for(let k=0;k<10;k++){const an=k*Math.PI/5;line(g,[[wx,y+4],[wx+73*Math.cos(an),y+4+73*Math.sin(an)]],"#c09b6b",6);}
     }
-    smoke(g,t+i*.21,x+90*scale,y-80*scale,100+i);
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.28,y:.98,h:.48,face:"focused",pose:"brace"},
+      {preset:"ottomanInfantry",x:.72,y:.98,h:.42,face:"determined",pose:"carry",flip:true}],.94,.47);
+  } else {
+    for(let i=0;i<5;i++){
+      const x=150+i*390,y=690+(i%2)*42,scale=.55+(i%3)*.12;
+      line(g,[[x-78*scale,y],[x+72*scale,y]],"#594331",13*scale);
+      line(g,[[x-20*scale,y-8*scale],[x+66*scale,y-50*scale]],"#282724",17*scale);
+      circle(g,x-45*scale,y+3,26*scale,"#242321");circle(g,x+44*scale,y+3,26*scale,"#242321");
+      const pulse=(Math.sin(t*3.2+i*1.7)+1)*.5;
+      if(beat==="distant_flash"&&i%2===0)glow(g,x+88*scale,y-72*scale,66+40*pulse,"#ef9b4d",.24+.2*pulse);
+      if(beat==="smoke"||beat==="thunder"||i%2===0)smoke(g,t+i*.21,x+90*scale,y-80*scale,100+i);
+    }
+    if(beat==="distant_flash"||beat==="thunder"){
+      const pulse=Math.max(0,Math.sin(t*3.8));glow(g,1230,640,170+90*pulse,"#f0a65d",.22+.26*pulse);
+    }
+    if(beat==="smoke"){
+      glow(g,1150,580,150,"#d9a36c",.12);
+      for(let i=0;i<9;i++)smoke(g,t+i*.24,970+i*48,430-i*10,170+i);
+    }
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.43,y:.96,h:.30,face:"focused",pose:"brace"},
+      {preset:"ottomanInfantry",x:.53,y:.96,h:.29,face:"determined",pose:"carry"}],.94,.30);
   }
-  if(beat==="distant_flash"||beat==="thunder"){
-    const pulse=Math.max(0,Math.sin(t*3.8));
-    glow(g,1230,640,170+90*pulse,"#f0a65d",.18+.22*pulse);
-  }
-  drawPeople(g,t,info,[
-    {preset:"ottomanInfantry",x:.43,y:.96,h:.30,face:"focused",pose:"brace"},
-    {preset:"ottomanInfantry",x:.53,y:.96,h:.29,face:"determined",pose:"carry"}
-  ],.94,.30);
 }
+
 function drawNightGunCrew(g,t,info,a){
   const beat=a.beat||"load";
   gradient(g,0,H(),[[0,"#101722"],[.42,"#252d34"],[1,"#32271f"]]);
@@ -707,38 +718,61 @@ function drawNightCampDetail(g,t,info,a){
   const beat=a.beat||"horses";
   gradient(g,0,H(),[[0,"#0f1723"],[.42,"#242d33"],[1,"#463528"]]);
   path(g,[[0,610],[180,540],[400,590],[620,500],[850,570],[1100,485],[1340,560],[1570,475],[1780,535],[1920,480],[1920,1080],[0,1080]],"#18222b",null,0);
-  // Close A-frame tents give the camera a different scale from the distant camp shot.
+  const scale=beat==="horses"?.72:beat==="carts"?.58:.64;
   for(let i=0;i<6;i++){
-    const x=80+i*335, y=645+(i%2)*38, w=135+(i%3)*18;
-    path(g,[[x-w,y],[x,y-150-(i%3)*18],[x+w,y]],i%2?"#6e5038":"#8a6846","#30251e",5);
-    line(g,[[x,y-145],[x,y]],"#b09064",3,.6);
+    const x=80+i*335,y=642+(i%2)*38,w=(135+(i%3)*18)*scale;
+    path(g,[[x-w,y],[x,y-150*scale],[x+w,y]],i%2?"#6e5038":"#8a6846","#30251e",5);
+    line(g,[[x,y-145*scale],[x,y]],"#b09064",3,.6);
   }
-  // Horse silhouettes and harnesses; no historically specific tack is asserted.
-  for(let i=0;i<3;i++){
-    const x=360+i*570+Math.sin(t*1.5+i)*10,y=795+(i%2)*20,sc=.8+(i%2)*.15;
-    g.save();g.translate(x,y);g.scale(sc,sc);
-    path(g,[[-85,-48],[-45,-87],[30,-80],[78,-36],[65,10],[-60,10]],"#201e1b","#080a0c",5);
-    circle(g,82,-75,26,"#211f1c");path(g,[[88,-93],[112,-125],[122,-107],[101,-68]],"#211f1c",null,0);
-    line(g,[[-42,0],[-50,66]],"#181716",13);line(g,[[18,0],[25,66]],"#181716",13);
-    line(g,[[58,-28],[82,-2]],"#9a7550",5);line(g,[[75,-72],[110,-65]],"#9a7550",4);
-    circle(g,112,-126,3,"#d8c7a4");g.restore();
-  }
-  // Wagon, turning wheels and canvas bundles: a clear insert for the narrated carts.
-  const cartX=beat==="carts"?980:1250, cartY=880;
-  path(g,[[cartX-120,cartY-76],[cartX+115,cartY-76],[cartX+95,cartY-10],[cartX-100,cartY-10]],"#64492f","#201a15",6);
-  for(const x of [cartX-82,cartX+82]){
-    circle(g,x,cartY+8,48,"#201d19");circle(g,x,cartY+8,34,"#9a744d");
-    for(let spoke=0;spoke<8;spoke++){
-      const an=spoke*Math.PI/4+Math.sin(t)*.12;
-      line(g,[[x,cartY+8],[x+33*Math.cos(an),cartY+8+33*Math.sin(an)]],"#cfaa73",5);
+  if(beat==="horses"){
+    for(let i=0;i<2;i++){
+      const x=610+i*690+Math.sin(t*1.35+i)*13,y=840,sc=1.42;
+      g.save();g.translate(x,y);g.scale(sc,sc);
+      path(g,[[-95,-48],[-60,-95],[14,-88],[80,-48],[66,5],[-65,5]],"#1d1b19","#080a0c",6);
+      circle(g,84,-82,28,"#211f1c");
+      path(g,[[90,-103],[119,-140],[133,-120],[103,-74]],"#211f1c",null,0);
+      line(g,[[-54,0],[-67,83+Math.sin(t*3+i)*7]],"#171614",15);
+      line(g,[[22,0],[35,83+Math.sin(t*3.2+i)*7]],"#171614",15);
+      line(g,[[59,-32],[90,-7]],"#9a7550",6);
+      line(g,[[83,-78],[119,-69]],"#9a7550",5);
+      circle(g,117,-142,4,"#d8c7a4");g.restore();
     }
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.24,y:.98,h:.39,face:"tired",pose:"hold"},
+      {preset:"ottomanInfantry",x:.80,y:.98,h:.37,face:"neutral",pose:"carry"}],.94,.4);
+    for(let i=0;i<4;i++)dust(g,t,480+i*280,930,200+i,16,"#b99a72");
+  } else if(beat==="carts"){
+    const x=990+Math.sin(t*.48)*22,y=850;
+    path(g,[[x-280,y-125],[x+275,y-125],[x+235,y-22],[x-245,y-22]],"#65482f","#201a15",8);
+    for(let i=0;i<5;i++)path(g,[[x-215+i*102,y-126],[x-192+i*102,y-220],[x-150+i*102,y-126]],"#96734c",null,0);
+    for(const wx of [x-190,x+190]){
+      circle(g,wx,y+30,78,"#1d1a17");circle(g,wx,y+30,55,"#9a744d");
+      for(let spoke=0;spoke<12;spoke++){
+        const an=spoke*Math.PI/6+Math.sin(t*1.8)*.1;
+        line(g,[[wx,y+30],[wx+62*Math.cos(an),y+30+62*Math.sin(an)]],"#d2ae78",7);
+      }
+      circle(g,wx,y+30,12,"#d0b58a");
+    }
+    line(g,[[x-340,y-105],[x-225,y-105]],"#6d4c2d",14);
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.20,y:.98,h:.38,face:"strained",pose:"push",walk:true,dir:1,speed:.16},
+      {preset:"ottomanInfantry",x:.78,y:.98,h:.35,face:"focused",pose:"carry",walk:true,dir:-1,speed:.12}],.94,.4);
+    dust(g,t,x-330,930,218,32,"#c2a17b");
+  } else if(beat==="signal"){
+    for(let i=0;i<4;i++)smoke(g,t+i*.2,230+i*480,440,270+i);
+    glow(g,1230,530,240,"#f0a35b",.24);
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.36,y:.98,h:.50,face:"urgent",pose:"run",walk:true,dir:1,speed:.46},
+      {preset:"ottomanElite",x:.72,y:.98,h:.45,face:"focused",pose:"point",flip:true}],.94,.48);
+    line(g,[[1330,640],[1410,610],[1485,590]],"#8b6a48",9);glow(g,1485,590,72,"#f2b56c",.36);
+  } else {
+    for(let i=0;i<13;i++){
+      const x=70+i*148,y=840+(i%3)*10;
+      glow(g,x,y,76,"#d98c42",.28);circle(g,x,y-6,10,"#f3b15e");
+      for(let j=0;j<3;j++)smoke(g,t+j*.3,x+(j-1)*11,y-30,310+j);
+    }
+    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.29,y:.98,h:.34,face:"tired",pose:"guard"},
+      {preset:"ottomanInfantry",x:.77,y:.98,h:.34,face:"neutral",pose:"guard"}],.94,.36);
   }
-  for(let i=0;i<5;i++)path(g,[[cartX-92+i*42,cartY-78],[cartX-74+i*42,cartY-135],[cartX-42+i*42,cartY-78]],"#92724f",null,0);
-  for(let i=0;i<10;i++){const x=80+i*194,y=575+(i%3)*70;glow(g,x,y,60,"#e8a052",.16);circle(g,x,y,5,"#f4b15c");}
-  for(let i=0;i<4;i++)smoke(g,t+i*.2,350+i*410,470,160+i);
-  drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.16,y:.98,h:.35,face:"tired",pose:"walk",walk:true,dir:1,speed:.15},
-    {preset:"ottomanInfantry",x:.87,y:.97,h:.33,face:"neutral",pose:"carry",walk:true,dir:-1,speed:.12}],.94,.34);
 }
+
 function drawNightGunCrewDetail(g,t,info,a){
   const beat=a.beat||"rammer";
   gradient(g,0,H(),[[0,"#0d1520"],[.43,"#22292f"],[1,"#30241d"]]);
