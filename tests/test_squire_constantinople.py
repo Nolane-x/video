@@ -34,9 +34,9 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             source=root/"source.srt"
             output=root/"excerpt.srt"
             source.write_text(
-                "1\\n00:03:40,000 --> 00:03:41,000\\nOpening cannon crew\\n\\n"
-                "2\\n00:04:19,000 --> 00:04:21,000\\nWall impact and debris\\n\\n"
-                "3\\n00:04:21,000 --> 00:04:22,000\\nOutside the insert\\n",
+                "1\n00:03:40,000 --> 00:03:41,000\nOpening cannon crew\n\n"
+                "2\n00:04:19,000 --> 00:04:21,000\nWall impact and debris\n\n"
+                "3\n00:04:21,000 --> 00:04:22,000\nOutside the insert\n",
                 encoding="utf-8"
             )
             count=hybrid_splice.extract_caption_excerpt(source,output)
