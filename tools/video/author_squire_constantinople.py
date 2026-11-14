@@ -9,7 +9,8 @@ STANDARD = {"top", "map", "plan", "board", "item", "title", "black"}
 CUSTOM = {
     "final_night", "night_wall_watch", "night_camp", "night_camp_detail",
     "night_guns", "night_gun_crew", "night_gun_crew_detail",
-    "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve", "defender_supply",
+    "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve",
+    "defender_identity", "defender_supply", "rewind_map",
     "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
     "tunnel_cutaway", "church_refuge", "city_interior", "last_assault", "aftermath_city",
@@ -38,6 +39,10 @@ def sfx_for_shot(tpl, args, index, root):
         return cue(root, ["cannon_fire"], at=.92, gain=-15) + cue(root, ["wind_loop"], at=0, gain=-22)
     if tpl in {"night_wall_watch", "night_camp_detail"}:
         return cue(root, ["wind_loop"], at=0, gain=-20) + cue(root, ["battle_roar"], at=.24, gain=-23)
+    if tpl == "defender_identity":
+        return cue(root, ["wind_loop"], at=0, gain=-19) + cue(root, ["battle_roar"], at=.28, gain=-20)
+    if tpl == "rewind_map":
+        return cue(root, ["wind_loop"], at=0, gain=-24)
     if tpl in {"assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve"}:
         return cue(root, ["battle_roar"], at=.18, gain=-12) + cue(root, ["arrow_whoosh"], at=.56, gain=-17)
     if tpl == "defender_supply":
@@ -61,19 +66,15 @@ def sfx_for_shot(tpl, args, index, root):
         return cue(root, ["wind_loop"], at=0, gain=-19) if index % 4 == 0 else []
     return cue(root, ["wind_loop"], at=0, gain=-19) if index % 5 == 0 else []
 
-def opening_context(shots, index, max_gap=3.4):
-    """Join adjacent voice cues only when they are temporally close.
-
-    Voice alignment often splits one clause over two 0.8–2.0s shots. Reading a
-    small local window prevents a keyword on the next cue from being lost.
-    """
+def opening_context(shots, index, max_gap=2.6):
+    """Read the current cue and immediate neighbours; neighbours complete fragments only."""
     current = shots[index]
     midpoint = (float(current["start"]) + float(current["end"])) / 2
     nearby = []
     for j in range(max(0, index - 1), min(len(shots), index + 2)):
         item = shots[j]
         other_midpoint = (float(item["start"]) + float(item["end"])) / 2
-        if abs(other_midpoint - midpoint) <= max_gap:
+        if j == index or abs(other_midpoint - midpoint) <= max_gap:
             line = str(item.get("line") or "").strip()
             if line:
                 nearby.append(line)
@@ -81,15 +82,71 @@ def opening_context(shots, index, max_gap=3.4):
 
 
 def choose_opening_template(text, context_text, index):
-    """Narration-led edit for the opening 53 seconds.
-
-    This deliberately bypasses generic insert cadence and same-template
-    alternation. Important events keep their establishing/action shots.
-    """
+    """Current narration cue wins; neighbours only complete syntactic fragments."""
     current = text.casefold()
     context = context_text.casefold()
 
-    # Assault waves have different staging and must not collapse into watchtower shots.
+    # Chronology hinge: move from the final night back to 6 April 1453.
+    if any(k in current for k in ("to understand that night", "return to the morning",
+                                  "sixth of april")):
+        return "rewind_map"
+    if any(k in context for k in ("return to the morning", "sixth of april")):
+        return "rewind_map"
+
+    # The order of the waves is explicit. Do not allow a future phrase to overwrite it.
+    if any(k in current for k in ("second wave", "climb over what remains")):
+        return "assault_second_wave"
+    if any(k in current for k in ("first men may", "not be expected to survive", "first wave")):
+        return "assault_first_wave"
+    if any(k in current for k in ("largest assault", "assault will begin", "it will come in waves",
+                                  "come in waves", "at dawn")):
+        return "assault_waves"
+    if any(k in current for k in ("sultan's best troops", "the sultan's best", "best troops")):
+        return "elite_reserve"
+
+    if "one defender among thousands" in current:
+        return "defender_identity"
+    if any(k in current for k in ("carrying water", "carry water", "water, stones",
+                                  "stones, arrows", "arrows, and messages", "arrows and messages",
+                                  "messages wherever", "wall is weakest")):
+        return "defender_supply"
+    if any(k in current for k in ("not a famous commander", "you have spent fifty-three days",
+                                  "no longer certain", "almost run out of strength",
+                                  "the question is no")):
+        return "actor_closeup"
+    if "make an empire pay" in current:
+        return "city_detail"
+    if any(k in current for k in ("walls are still standing", "the walls will hold")):
+        return "night_wall_watch"
+
+    if any(k in current for k in ("creak of carts", "cart wheels", "carts")):
+        return "night_camp_detail"
+    if any(k in current for k in ("horses shifting", "horses", "men calling", "calling to one another",
+                                  "campfires", "camp fires", "fires beyond")):
+        return "night_camp_detail"
+    if any(k in current for k in ("distant thunder of guns", "thunder of guns", "guns in the darkness",
+                                  "distant cannon", "artillery flash")):
+        return "night_guns"
+    if any(k in current for k in ("preparing the next shot", "prepare the next shot",
+                                  "stone ball", "loading the gun", "rammer", "powder charge")):
+        return "night_gun_crew_detail"
+    if "cannon crew" in current or "gun crew" in current:
+        return "night_gun_crew"
+    if "ottoman camp" in current:
+        return "night_camp"
+    if any(k in current for k in ("beyond the dark", "dark fields", "fields:")):
+        if any(k in context for k in ("horses", "carts", "men calling")):
+            return "night_camp_detail"
+        return "night_camp"
+    if "somewhere in the darkness" in current or "somewhere in darkness" in current:
+        if "cannon crew" in context or "preparing the next shot" in context:
+            return "night_gun_crew"
+    if any(k in current for k in ("tonight", "believing", "you are not", "you are one defender")):
+        return "actor_closeup"
+    if any(k in current for k in ("constantinople can win", "one city can", "one city")):
+        return "city_panorama"
+
+    # Use neighbouring lines only for incomplete fragments such as "of the siege will begin".
     if any(k in context for k in ("the sultan's best troops", "sultan's best", "best troops")):
         return "elite_reserve"
     if any(k in context for k in ("second wave", "climb over what remains")):
@@ -98,42 +155,26 @@ def choose_opening_template(text, context_text, index):
         return "assault_first_wave"
     if any(k in context for k in ("largest assault", "come in waves", "at dawn")):
         return "assault_waves"
-
-    # The defender's logistical work is a new visual beat, not another portrait.
-    if any(k in context for k in (
-        "carrying water", "carry water", "stones, arrows", "arrows and messages",
-        "messages wherever", "wall is weakest", "water, stones"
-    )):
+    if any(k in context for k in ("carrying water", "carry water", "stones, arrows",
+                                  "arrows and messages", "messages wherever", "wall is weakest")):
         return "defender_supply"
-
-    # The same gun sequence gets an establishing view followed by a close loading insert.
-    if "preparing the next shot" in context or "prepare the next shot" in context:
+    if any(k in context for k in ("preparing the next shot", "prepare the next shot")):
         return "night_gun_crew_detail"
     if "cannon crew" in context or "gun crew" in context:
         return "night_gun_crew"
     if any(k in context for k in ("distant thunder of guns", "thunder of guns", "guns in the darkness")):
         return "night_guns"
-
-    # Camp establishing first; then horses, carts and moving silhouettes as inserts.
-    if "ottoman camp" in current:
-        return "night_camp"
-    if any(k in context for k in ("horses shifting", "men calling", "creak of carts", "cart wheels")):
+    if any(k in context for k in ("horses shifting", "horses", "men calling", "creak of carts", "cart wheels")):
         return "night_camp_detail"
     if "ottoman camp" in context or "dark fields" in context:
         return "night_camp"
-
-    if any(k in context for k in (
-        "tonight, you are no longer certain", "no longer certain",
-        "not a famous commander", "almost run out of strength"
-    )):
+    if "no longer certain" in context or "not a famous commander" in context:
         return "actor_closeup"
     if "one defender among thousands" in context:
-        return "night_wall_watch"
+        return "defender_identity"
     if "walls are still standing" in context or "the walls will hold" in context:
-        return "night_wall_watch" if index % 2 else "final_night"
+        return "night_wall_watch"
 
-    # Generic final-night connective lines alternate between two genuinely different
-    # framings; do not let an unclassified cue create a long static-template run.
     return "night_wall_watch" if index % 2 else "final_night"
 
 
@@ -143,12 +184,20 @@ def progress_phase(p, text):
         "final assault", "last assault", "largest assault", "first wave", "second wave",
         "third wave", "janissar", "ladder", "twenty-ninth of may", "twenty ninth of may",
         "just before dawn", "first men may not", "the sultan's best troops",
-        "not be expected to survive", "climb over what remains"
+        "not be expected to survive", "climb over what remains", "it will come in waves"
     )):
         return "final"
-    if any(k in t for k in ("carrying water", "carry water", "stones, arrows", "arrows and messages", "wall is weakest")):
+    if p < .066 and "one defender among thousands" in t:
+        return "defender_identity"
+    if p < .066 and any(k in t for k in ("not a famous commander", "no longer certain",
+                                         "you have spent fifty-three days", "almost run out of strength")):
+        return "night_defender"
+    if p < .066 and any(k in t for k in ("carrying water", "carry water", "stones, arrows",
+                                         "arrows and messages", "wall is weakest")):
         return "defender_supply"
-    if p < .055:
+    if p < .066 and any(k in t for k in ("to understand that night", "return to the morning", "sixth of april")):
+        return "rewind_map"
+    if p < .066:
         # The film opens on the final night, but the narration already contains distinct
         # visual events. Give those events their own scenes instead of forcing every cue
         # into the same watchtower tableau until the first-day rewind.
@@ -213,7 +262,7 @@ def progress_phase(p, text):
 
 def choose_template(p, text, i, usage, last, context_text=None):
     phase = progress_phase(p, context_text or text)
-    if p < .055:
+    if p < .066:
         return choose_opening_template(text, context_text or text, i)
     # Hard cap wide city tableaux. Use a closer environmental shot after the limit.
     city_panorama_count = usage.get("city_panorama", 0)
@@ -406,15 +455,25 @@ def main():
             raise ValueError(f"Bad timing in {shot.get('id')}")
         p = ((start + end) / 2) / duration
         text = str(shot.get("line") or "")
-        context_text = opening_context(shots, i) if start < duration * .055 else text
-        phase = progress_phase(p, context_text)
+        context_text = opening_context(shots, i) if start < duration * .066 else text
+        phase = progress_phase(p, text)
         tpl = choose_template(p, text, i, usage, last, context_text=context_text)
-        # Keep the fictional composite defender out of Ottoman artillery and assault formations.
-        hero_visible = (i % 10 in {0, 3, 6, 8}) and phase not in {
-            "camp", "night_guns", "night_gun_crew", "night_camp_detail",
-            "night_gun_crew_detail", "assault_waves", "assault_first_wave",
-            "assault_second_wave", "elite_reserve"
+        # POV compositions are explicit in the opening; future Ottoman cues cannot suppress them.
+        opening_pov = p < .066 and tpl in {
+            "final_night", "night_wall_watch", "night_camp", "actor_closeup",
+            "defender_identity", "defender_supply"
         }
+        offensive = {
+            "night_camp_detail", "night_guns", "night_gun_crew", "night_gun_crew_detail",
+            "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve"
+        }
+        hero_visible = opening_pov or (
+            (i % 10 in {0, 3, 6, 8}) and phase not in {"camp", "night_guns", "night_gun_crew"}
+        )
+        if tpl in offensive or tpl == "rewind_map":
+            hero_visible = False
+        if tpl in {"defender_identity", "defender_supply", "actor_closeup", "night_wall_watch"} and p < .066:
+            hero_visible = True
         lead_preset = HERO if hero_visible else alternate_preset(phase, i, text)
 
         if tpl in STANDARD:
@@ -520,19 +579,36 @@ def main():
             elif tpl == "night_wall_watch":
                 visual["beat"] = ("watch", "torch", "dread", "patrol")[i % 4]
             elif tpl == "night_camp_detail":
-                visual["beat"] = ("horses", "carts", "movement", "fires")[i % 4]
+                visual["beat"] = ("carts" if "cart" in text.casefold() else
+                                  "horses" if "horse" in text.casefold() else
+                                  "signal" if "calling" in text.casefold() else
+                                  "fires" if "fire" in text.casefold() else
+                                  ("horses", "carts", "signal", "fires")[i % 4])
             elif tpl == "night_gun_crew_detail":
-                visual["beat"] = ("powder", "stone", "rammer", "match")[i % 4]
+                visual["beat"] = ("stone" if "stone ball" in text.casefold() else
+                                  "powder" if "powder" in text.casefold() else
+                                  "match" if "match" in text.casefold() else
+                                  "rammer" if any(k in text.casefold() for k in ("rammer", "preparing the next shot")) else
+                                  ("powder", "stone", "rammer", "match")[i % 4])
             elif tpl == "assault_waves":
                 visual["beat"] = ("approach", "drums", "ladders", "push")[i % 4]
             elif tpl == "assault_first_wave":
-                visual["beat"] = ("first_rush", "ladders", "arrows", "brace")[i % 4]
+                visual["beat"] = ("arrows" if "arrows" in text.casefold() else
+                                  "ladders" if any(k in text.casefold() for k in ("ladder", "climb")) else "first_rush")
             elif tpl == "assault_second_wave":
-                visual["beat"] = ("second_wave", "climb", "breach", "push")[i % 4]
+                visual["beat"] = ("breach" if "breach" in text.casefold() else
+                                  "climb" if any(k in text.casefold() for k in ("climb", "what remains")) else "push")
             elif tpl == "elite_reserve":
-                visual["beat"] = ("reserve", "advance", "formation", "command")[i % 4]
+                visual["beat"] = "command" if "behind them" in text.casefold() else "reserve"
+            elif tpl == "defender_identity":
+                visual["beat"] = "alone" if "not a famous commander" in text.casefold() else "among_thousands"
             elif tpl == "defender_supply":
-                visual["beat"] = ("water", "stones", "arrows", "messages")[i % 4]
+                visual["beat"] = ("water" if "water" in text.casefold() else
+                                  "stones" if "stone" in text.casefold() else
+                                  "arrows" if "arrow" in text.casefold() else
+                                  "messages" if "message" in text.casefold() else "wall")
+            elif tpl == "rewind_map":
+                visual["beat"] = "date" if any(k in text.casefold() for k in ("april", "morning")) else "route"
             elif tpl == "actor_closeup":
                 visual["actorPreset"] = lead_preset
                 visual["hero"] = hero_visible
