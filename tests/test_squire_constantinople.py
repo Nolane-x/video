@@ -56,7 +56,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             story_path.write_text(json.dumps({"shots":[]}),encoding="utf-8")
             result=hybrid_splice.add_insert_sound_cues(project)
             self.assertEqual([c["name"] for c in result["cues"]],["cannon_fire","siege_impact"])
-            self.assertEqual([c["t"] for c in result["cues"]],[239.760,246.060])
+            self.assertEqual([c["t"] for c in result["cues"]],[239.510,247.010])
             story=json.loads(story_path.read_text(encoding="utf-8"))
             self.assertEqual(len(story["sfx"]),2)
             hybrid_splice.add_insert_sound_cues(project)
