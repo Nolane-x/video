@@ -55,7 +55,7 @@ jobs:
           URL='https://github.com/Nolane-x/video/releases/download/video-asset-library-build-41184526545/video-assets-polyhaven-3d-textures-001.zip'
           curl -fL --retry 4 --retry-all-errors --connect-timeout 20 "$URL" -o "$RUNNER_TEMP/polyhaven-textures.zip"
           test "$(stat -c %s "$RUNNER_TEMP/polyhaven-textures.zip")" -eq 347196184
-          echo 'd62df29fb0d64267dea746b6dfa8fb6d2ae14eff60d2db1c7dcff74d6d444b14  '"$RUNNER_TEMP/polyhaven-textures.zip" | sha256sum -c -
+          echo '1573a65d9698375dbfd9bead9b8a551848a99f8cdba9dfd2b16c892319b5f7ef  '"$RUNNER_TEMP/polyhaven-textures.zip" | sha256sum -c -
           python - <<'PY'
           import zipfile, json
           from pathlib import Path
