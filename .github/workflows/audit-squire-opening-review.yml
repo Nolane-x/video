@@ -112,6 +112,8 @@ jobs:
           print(json.dumps({k:report[k] for k in ("status","shot_count","template_counts","longest_consecutive_template_run")},indent=2))
           print("MISMATCH_COUNT",len(mismatches))
           PY
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
           cp source/constantinople-opening-53s-preview-240fps.mp4 review/
           ffmpeg -hide_banner -v error -y -i review/constantinople-opening-53s-preview-240fps.mp4 \
             -vf "fps=30,scale=960:540" -an -c:v libx264 -preset veryfast -crf 22 \
