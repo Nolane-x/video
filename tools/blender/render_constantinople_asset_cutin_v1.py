@@ -40,6 +40,36 @@ def require_file(path: Path, expected: str | None = None) -> Path:
         raise RuntimeError(f"SHA-256 mismatch: {path}")
     return path
 
+def ensure_kenney_colormap_placeholder():
+    """Create a temporary neutral atlas so Blender can resolve the GLB sidecar at import.
+
+    This is not the missing Kenney texture. Its nodes are replaced immediately
+    after import with explicit generated stone/wood/iron materials.
+    """
+    path=ASSETS/"Textures"/"colormap.png"
+    path.parent.mkdir(parents=True,exist_ok=True)
+    if not path.is_file():
+        image=bpy.data.images.new("Project-generated neutral Kenney fallback atlas",width=64,height=64,alpha=False)
+        pixels=[]
+        for y in range(64):
+            for x in range(64):
+                grain=0.012*math.sin(x*.37)*math.cos(y*.29)
+                r=max(0,min(1,.46+grain));g=max(0,min(1,.35+grain));b=max(0,min(1,.23+grain))
+                pixels.extend((r,g,b,1.0))
+        image.pixels[:]=pixels
+        image.filepath_raw=str(path)
+        image.file_format="PNG"
+        image.save()
+        bpy.data.images.remove(image)
+    return {
+        "path":str(path),
+        "bytes":path.stat().st_size,
+        "sha256":sha256(path),
+        "license":"Project-generated neutral placeholder; not a Kenney source texture",
+        "purpose":"Satisfy the GLB's optional colormap sidecar reference before replacing its material nodes"
+    }
+
+
 def material(name, color, metallic=0.0, roughness=.75):
     m=bpy.data.materials.new(name)
     m.diffuse_color=(*color,1)
@@ -128,7 +158,8 @@ def repair_missing_prop_textures(imported):
                 if node.type!="TEX_IMAGE" or not node.image:
                     continue
                 filepath=Path(bpy.path.abspath(node.image.filepath))
-                if not filepath.is_file():
+                is_project_placeholder=filepath.name.casefold()=="colormap.png"
+                if not filepath.is_file() or is_project_placeholder:
                     missing=True
                     for link in list(links):
                         if link.from_node==node or link.to_node==node:
@@ -331,6 +362,7 @@ def main():
     if sha256(ASSETS/"siege-trebuchet.glb")!="123711fd475e35d061738f648d9bf46c7f463d57681325c369977cee8954679a":raise RuntimeError("trebuchet hash mismatch")
     if sha256(TEXTURES/"castle_brick_02_red_diff_1k.jpg")!="526019deb0533920273a0a2272f7735ca17bb578427515c6b972e2bbecf5726c":raise RuntimeError("diffuse hash mismatch")
     if sha256(TEXTURES/"castle_brick_02_red_nor_gl_1k.jpg")!="ab172b4bb8d9a2492774336f223e7725eecf1aae1efca2923c67db3e978106a6":raise RuntimeError("normal hash mismatch")
+    colormap_fallback=ensure_kenney_colormap_placeholder()
     bpy.ops.object.select_all(action="SELECT");bpy.ops.object.delete(use_global=False)
     manifest=build_scene()
     asset_manifest=json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -347,9 +379,16 @@ def main():
             "siege_trebuchet":{"file":"siege-trebuchet.glb","license":"CC0-1.0 Kenney Castle Kit","sha256":sha256(ASSETS/"siege-trebuchet.glb")},
             "castle_brick_diffuse":{"file":"castle_brick_02_red_diff_1k.jpg","license":"CC0-1.0 Poly Haven","sha256":sha256(TEXTURES/"castle_brick_02_red_diff_1k.jpg")},
             "castle_brick_normal":{"file":"castle_brick_02_red_nor_gl_1k.jpg","license":"CC0-1.0 Poly Haven","sha256":sha256(TEXTURES/"castle_brick_02_red_nor_gl_1k.jpg")},
-            "character":{"file":CHARACTER.name,"license":asset_manifest["license"],"sha256":sha256(CHARACTER)}
+            "character":{"file":CHARACTER.name,"license":asset_manifest["character"]["license"],"sha256":sha256(CHARACTER)}
         },
         "crew":manifest["crew"],
+        "kenney_colormap_fallback":colormap_fallback,
+        "missing_texture_fallback_slots":manifest["missing_texture_fallback_slots"],
+        "imported_object_counts":{
+            "siege_tower":manifest["tower_objects"],
+            "siege_ram":manifest["ram_objects"],
+            "siege_trebuchet":manifest["trebuchet_objects"]
+        },
         "limits":[
             "Generic Kenney Castle Kit siege engines are illustrative assets, not authenticated Ottoman or Byzantine equipment from 1453.",
             "The wall and camp are cinematic stand-ins, not measured reconstructions of the Theodosian walls.",
