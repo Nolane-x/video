@@ -298,6 +298,7 @@ jobs:
             tools/video/qa_squire_constantinople.py \
             tools/video/render_squire_constantinople_redesign_proof.py \
             tools/video/reflow_squire_captions.py \
+            tools/video/splice_constantinople_hybrid_insert.py \
             tests/test_squire_constantinople.py \
             tests/test_squire_caption_reflow.py
           python tests/test_squire_constantinople.py
@@ -715,6 +716,27 @@ jobs:
           cp prior-proof/redesign-check.log "$KIT/projects/$PROJECT_NAME/build/redesign-check.log"
           cp prior-proof/redesign-contact-sheet.log "$KIT/projects/$PROJECT_NAME/build/redesign-contact-sheet.log"
 
+      - name: Splice Blender 3D bombardment into the exact 240fps master interval
+        env:
+          HYBRID_SOURCE_RUN_ID: ${{ needs.prepare-project.outputs.hybrid_run_id }}
+          HYBRID_SOURCE_SHA: ${{ needs.prepare-project.outputs.hybrid_source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-dejavu-core
+          fc-match "DejaVu Sans" | grep -q "DejaVuSans"
+          python -m py_compile tools/video/splice_constantinople_hybrid_insert.py
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          PROJ="$KIT/projects/$PROJECT_NAME"
+          python tools/video/splice_constantinople_hybrid_insert.py \
+            --project "$PROJ" \
+            --segments "$GITHUB_WORKSPACE/segments" \
+            --hybrid "$GITHUB_WORKSPACE/hybrid-proof" \
+            --output-report "$GITHUB_WORKSPACE/HYBRID-INSERT-REPORT.json" \
+            --source-run-id "$HYBRID_SOURCE_RUN_ID" \
+            --source-sha "$HYBRID_SOURCE_SHA"
+
       - name: Concatenate segments without re-encoding and verify the 16-minute silent master
         shell: bash
         run: |
@@ -771,6 +793,44 @@ jobs:
           PROJ="$KIT/projects/$PROJECT_NAME"
           python tools/video/qa_squire_constantinople.py --project "$PROJ" --voice-assets "$KIT/qa-assets"
 
+      - name: Attach Blender insert provenance to the master QA report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report_path=Path("integrations/h2-squire-studio/kit/projects/constantinople-1453-redesign-proof/story/QA-REPORT.json")
+          md_path=report_path.with_suffix(".md")
+          insert=json.loads(Path("HYBRID-INSERT-REPORT.json").read_text(encoding="utf-8"))
+          assert insert["status"]=="PASS" and insert["fps"]==240 and insert["frames"]==9394,insert
+          report=json.loads(report_path.read_text(encoding="utf-8"))
+          report["hybrid_visual_insert"]={
+            "status":"technical_pass_pending_human_visual_review",
+            "sequence":"Blender 3D Ottoman bombard, crew, recoil, stone shot, wall impact and repair",
+            "source_run":insert["hybrid_source_run"],
+            "source_sha":insert["hybrid_source_sha"],
+            "source_keyframe_fps":60,
+            "output_fps":240,
+            "master_frame_range":insert["master_frame_range"],
+            "duration_seconds":round(insert["frames"]/240,6),
+            "captions_burned_in":True,
+            "master_audio_retained":True,
+            "human_artistic_signoff":"pending"
+          }
+          report.setdefault("limitations",[]).append(
+            "A 39.14-second illustrative Blender reconstruction replaces the early bombard passage. "
+            "It is not archival footage or a verified replica of Orban's exact cannon; a human must review "
+            "the insert, captions and audio continuity at normal speed."
+          )
+          report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          if md_path.exists():
+            with md_path.open("a",encoding="utf-8") as f:
+              f.write("\\n- 3D Blender insert: 60fps source keyframes interpolated to 240fps; "
+                      "39.1417s; captions burned in; original master audio retained. "
+                      "Artistic sign-off pending.\\n")
+          PY
+
       - name: Assemble complete delivery package
         shell: bash
         run: |
@@ -788,6 +848,7 @@ jobs:
           cp "$PROJ/timeline/voice.wav" "$OUT/narration-timeline.wav"
           cp "$PROJ/story/QA-REPORT.md" "$PROJ/story/QA-REPORT.json" "$OUT/"
           cp "$PROJ/story/alignment-report.json" "$PROJ/story/voice-manifest.json" "$PROJ/story/voice-selection.json" "$OUT/"
+          cp "$GITHUB_WORKSPACE/HYBRID-INSERT-REPORT.json" "$OUT/"
           cp "$PROJ/story/AUDIO-SOURCE-MANIFEST.json" "$OUT/"
           cp "$PROJ/story/captions.srt" "$PROJ/story/captions.vtt" "$PROJ/story/CAPTION-REFLOW-REPORT.json" "$OUT/"
           cp "$PROJ/story/shots.json" "$PROJ/config.json" "$OUT/"
