@@ -439,12 +439,18 @@ elif os.environ.get("BLENDER_KEYFRAME_EXPORT") == "1":
         frame_numbers.append(END)
     if limit>0:
         frame_numbers=frame_numbers[:limit]
+    total_keyframes=len(frame_numbers)
+    start_index=max(1,int(os.environ.get("BLENDER_KEYFRAME_START_INDEX","1")))
+    end_index=min(total_keyframes,int(os.environ.get("BLENDER_KEYFRAME_END_INDEX",str(total_keyframes))))
+    if start_index>end_index or start_index>total_keyframes:
+        raise ValueError("Invalid keyframe shard range %d..%d for %d total frames"%(start_index,end_index,total_keyframes))
+    selected_frames=frame_numbers[start_index-1:end_index]
     cameras=[(1,1439,c1),(1440,3119,c2),(3120,4559,c3),(4560,5759,c4),(5760,7439,c5),(7440,END,c6)]
     scene.render.image_settings.file_format="JPEG"
     scene.render.image_settings.color_mode="RGB"
     scene.render.image_settings.quality=94
     scene.render.resolution_percentage=max(50,min(100,int(os.environ.get("BLENDER_RESOLUTION_PERCENTAGE","100"))))
-    for idx,src_frame in enumerate(frame_numbers,1):
+    for idx,src_frame in enumerate(selected_frames,start_index):
         scene.frame_set(src_frame)
         for first,last,camera in cameras:
             if first <= src_frame <= last:
@@ -452,8 +458,8 @@ elif os.environ.get("BLENDER_KEYFRAME_EXPORT") == "1":
                 break
         scene.render.filepath=os.path.join(outdir,"frame_%05d.jpg"%idx)
         bpy.ops.render.render(write_still=True)
-        print("KEYFRAME_DONE %d/%d source_frame=%d"%(idx,len(frame_numbers),src_frame),flush=True)
-    print("CONSTANTINOPLE KEYFRAME EXPORT FINISHED",len(frame_numbers),"frames",flush=True)
+        print("KEYFRAME_DONE %d/%d source_frame=%d"%(idx,total_keyframes,src_frame),flush=True)
+    print("CONSTANTINOPLE KEYFRAME EXPORT FINISHED",len(selected_frames),"of",total_keyframes,"frames",flush=True)
 else:
     bpy.ops.render.render(animation=True)
     print("CONSTANTINOPLE 3D PROOF RENDER FINISHED",flush=True)
