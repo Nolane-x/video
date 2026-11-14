@@ -172,7 +172,7 @@ def look_at(obj, target):
 
 def build_scene():
     scene=bpy.context.scene
-    scene.render.engine="BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in {x.identifier for x in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items} else "BLENDER_EEVEE"
+    scene.render.engine="BLENDER_EEVEE_NEXT" if bpy.app.version >= (4,2,0) else "BLENDER_EEVEE"
     scene.render.resolution_x=1920;scene.render.resolution_y=1080;scene.render.resolution_percentage=100
     scene.render.fps=FPS;scene.render.fps_base=1
     scene.render.image_settings.color_mode="RGB"
