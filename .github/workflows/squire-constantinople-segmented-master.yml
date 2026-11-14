@@ -1,11 +1,6 @@
 name: Squire · Constantinople 1453 · Segmented 240fps master
 
 on:
-  push:
-    branches:
-      - squire/constantinople-1453-redesign
-    paths:
-      - .github/workflows/squire-constantinople-segmented-master.yml
   workflow_dispatch:
     inputs:
       reuse_run_id:
