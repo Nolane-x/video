@@ -17,20 +17,23 @@ concurrency:
   group: constantinople-hybrid-240fps
   cancel-in-progress: true
 
+env:
+  VOICE_RUN_ID: "42448341267"
+  VOICE_START: "220.760"
+  CLIP_DURATION: "39.140"
+  KEYFRAME_FPS: "30"
+  KEYFRAME_STRIDE: "8"
+  EXPECTED_KEYFRAMES: "1176"
+
 jobs:
-  hybrid-master:
+  preflight:
+    name: Validate workflow, narration and Blender scene
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
-    env:
-      VOICE_RUN_ID: "42448341267"
-      VOICE_START: "220.760"
-      CLIP_DURATION: "39.140"
-      KEYFRAME_FPS: "30"
-      KEYFRAME_STRIDE: "8"
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
-      - name: Lint the hybrid workflow before starting Blender
+      - name: Lint hybrid workflow before spending render time
         shell: bash
         run: |
           set -euo pipefail
@@ -43,14 +46,16 @@ jobs:
           "$RUNNER_TEMP/actionlint" -color .github/workflows/constantinople-hybrid-240fps.yml
 
       - name: Install Blender and FFmpeg runtime
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y blender ffmpeg libegl1 libgl1 libxkbcommon0 libsm6
           blender --version | head -n 2
           ffmpeg -version | head -n 1
           ffmpeg -hide_banner -filters | grep -w minterpolate
 
-      - name: Download verified VoiceStudio narration
+      - name: Download and verify source narration provenance
         uses: actions/download-artifact@v4
         with:
           name: video-voice-assets-42448341267
@@ -58,7 +63,7 @@ jobs:
           run-id: 42448341267
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify narration provenance and prepare exact excerpt
+      - name: Verify narration SHA, format, watermark and exact excerpt
         shell: bash
         run: |
           set -euo pipefail
@@ -77,22 +82,10 @@ jobs:
           ffmpeg -hide_banner -v error -y -ss "$VOICE_START" -i voice-assets/narration.wav \
             -t "$CLIP_DURATION" -ar 48000 -ac 2 -c:a pcm_s24le out-voice.wav
 
-      - name: Acquire recorded CC0 score and cannon effects
+      - name: Compile scene and smoke-test a full-resolution 3D frame
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p media
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o media/score.wav
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o media/cannon_fire.ogg
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
-            "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
-          for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
-          sha256sum media/* | tee media/SHA256SUMS.txt
-
-      - name: Compile scene and smoke-test optimized 3D render
-        shell: bash
+        env:
+          BLENDER_EEVEE_SAMPLES: "4"
         run: |
           set -euo pipefail
           python -m py_compile tools/blender/render_constantinople_bombardment.py
@@ -101,23 +94,187 @@ jobs:
             blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-smoke.log
           test -s out/constantinople-smoke.png
           grep "STATIC MESH JOIN" out/blender-smoke.log
+          grep "CONSTANTINOPLE ONE-FRAME SMOKE FINISHED" out/blender-smoke.log
 
-      - name: Render evaluated 3D keyframes at 30fps
+      - name: Preserve Blender preflight evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-blender-preflight-${{ github.run_id }}
+          path: |
+            out/constantinople-smoke.png
+            out/blender-smoke.log
+          if-no-files-found: error
+          retention-days: 2
+
+  render-keyframe-shards:
+    name: Render 30fps Blender keyframes shard ${{ matrix.shard }}
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - shard: "0"
+            start_index: "1"
+            end_index: "294"
+          - shard: "1"
+            start_index: "295"
+            end_index: "588"
+          - shard: "2"
+            start_index: "589"
+            end_index: "882"
+          - shard: "3"
+            start_index: "883"
+            end_index: "1176"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Blender runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y blender libegl1 libgl1 libxkbcommon0 libsm6
+          blender --version | head -n 2
+
+      - name: Render this exact global keyframe index range
         shell: bash
         env:
           BLENDER_KEYFRAME_EXPORT: "1"
           BLENDER_KEYFRAME_STRIDE: "8"
+          BLENDER_KEYFRAME_START_INDEX: ${{ matrix.start_index }}
+          BLENDER_KEYFRAME_END_INDEX: ${{ matrix.end_index }}
           BLENDER_EEVEE_SAMPLES: "4"
           BLENDER_RESOLUTION_PERCENTAGE: "80"
           BLENDER_KEYFRAME_DIR: "${{ github.workspace }}/out/keyframes"
+          SHARD_START_INDEX: ${{ matrix.start_index }}
+          SHARD_END_INDEX: ${{ matrix.end_index }}
         run: |
           set -euo pipefail
           mkdir -p out/keyframes
-          blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-keyframes.log
-          count=$(find out/keyframes -maxdepth 1 -type f -name 'frame_*.jpg' | wc -l)
-          echo "Rendered 3D keyframes: $count"
-          test "$count" -ge 1174
-          grep "CONSTANTINOPLE KEYFRAME EXPORT FINISHED" out/blender-keyframes.log
+          blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 \
+            | tee "out/blender-keyframes-${{ matrix.shard }}.log"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          start=int(os.environ["SHARD_START_INDEX"])
+          end=int(os.environ["SHARD_END_INDEX"])
+          root=Path("out/keyframes")
+          expected=[f"frame_{i:05d}.jpg" for i in range(start,end+1)]
+          actual=sorted(p.name for p in root.glob("frame_*.jpg"))
+          assert actual==expected,(start,end,len(actual),actual[:3],actual[-3:])
+          print("SHARD KEYFRAME PASS:",start,"to",end,"count",len(actual))
+          PY
+          grep "CONSTANTINOPLE KEYFRAME EXPORT FINISHED" \
+            "out/blender-keyframes-${{ matrix.shard }}.log"
+
+      - name: Upload this shard's globally numbered keyframes
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-keyframes-${{ matrix.shard }}-${{ github.run_id }}
+          path: |
+            out/keyframes/frame_*.jpg
+            out/blender-keyframes-${{ matrix.shard }}.log
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 2
+
+  assemble-hybrid-proof:
+    name: Assemble 240fps proof, mix audio and run strict media QA
+    needs:
+      - preflight
+      - render-keyframe-shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install FFmpeg runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -n 1
+          ffmpeg -hide_banner -filters | grep -w minterpolate
+
+      - name: Download Blender one-frame preflight evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-blender-preflight-${{ github.run_id }}
+          path: out/preflight
+
+      - name: Download all four keyframe shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: constantinople-keyframes-*-${{ github.run_id }}
+          path: out/keyframe-shards
+          merge-multiple: true
+
+      - name: Reassemble and validate the exact global keyframe sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/keyframes out/review media
+          test -s out/preflight/blender-smoke.log
+          cp out/preflight/blender-smoke.log out/blender-smoke.log
+          test -d out/keyframe-shards/keyframes
+          mv out/keyframe-shards/keyframes/frame_*.jpg out/keyframes/
+          cat out/keyframe-shards/blender-keyframes-*.log > out/blender-keyframes.log
+          python - <<'PY'
+          from pathlib import Path
+          root=Path("out/keyframes")
+          expected=[f"frame_{i:05d}.jpg" for i in range(1,1177)]
+          actual=sorted(p.name for p in root.glob("frame_*.jpg"))
+          assert actual==expected,("keyframe sequence is incomplete or duplicated",len(actual),actual[:5],actual[-5:])
+          print("GLOBAL KEYFRAME SEQUENCE PASS:",len(actual),"frames, indices 1..1176")
+          PY
+          ffmpeg -hide_banner -v error -y -framerate "$KEYFRAME_FPS" \
+            -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
+            -frames:v 1176 -f null -
+          sha256sum out/keyframes/frame_*.jpg > out/keyframe-sha256.txt
+
+      - name: Download and verify VoiceStudio narration
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-42448341267
+          path: voice-assets
+          run-id: 42448341267
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract the exact narration passage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("voice-assets")
+          m=json.loads((p/"manifest.json").read_text(encoding="utf-8"))
+          a=m["audio"]
+          digest=hashlib.sha256((p/"narration.wav").read_bytes()).hexdigest()
+          assert digest==a["sha256"],"VoiceStudio SHA-256 mismatch"
+          assert a["sample_rate"]==48000 and a["channels"]==1 and a["subtype"]=="PCM_24"
+          assert a["watermark"]["status"]=="verified" and a["checks"]=="passed"
+          print("Verified VoiceStudio narration:",m["voice_id"],a["duration_seconds"],digest)
+          PY
+          ffmpeg -hide_banner -v error -y -ss "$VOICE_START" -i voice-assets/narration.wav \
+            -t "$CLIP_DURATION" -ar 48000 -ac 2 -c:a pcm_s24le out-voice.wav
+
+      - name: Acquire recorded CC0 score and cannon effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/Eye%20of%20the%20Storm.wav" -o media/score.wav
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/cannon_fire_1.ogg" -o media/cannon_fire.ogg
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://opengameart.org/sites/default/files/cannon_hit_wall_no_splash.ogg" -o media/cannon_impact.ogg
+          for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
+          sha256sum media/* | tee media/SHA256SUMS.txt
 
       - name: Interpolate smooth 1080p CFR 240fps picture master
         shell: bash
@@ -130,7 +287,7 @@ jobs:
             -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
           test -s out/picture-only-240fps.mp4
 
-      - name: Mix narration, licensed score and synchronized cannon effects
+      - name: Mix narration, score and frame-synchronized cannon effects
         shell: bash
         run: |
           set -euo pipefail
@@ -138,8 +295,8 @@ jobs:
             -i media/cannon_fire.ogg -i media/cannon_impact.ogg \
             -filter_complex \
             "[1:a]atrim=0:39.140,asetpts=N/SR/TB,volume=0.14[score]; \
-             [2:a]adelay=19000|19000,volume=0.75,highpass=f=90,lowpass=f=9000[fire]; \
-             [3:a]adelay=25300|25300,volume=0.85,highpass=f=55,lowpass=f=6500[impact]; \
+             [2:a]adelay=18750|18750,volume=0.75,highpass=f=90,lowpass=f=9000[fire]; \
+             [3:a]adelay=26250|26250,volume=0.85,highpass=f=55,lowpass=f=6500[impact]; \
              [0:a]volume=1.0[voice]; \
              [voice][score][fire][impact]amix=inputs=4:duration=first:dropout_transition=0, \
              loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
@@ -165,14 +322,15 @@ jobs:
               if ms==1000: s+=1; ms=0
               return f"{h:02}:{m:02}:{s:02},{ms:03}"
           out=[]; counter=0
-          for block in src.strip().split("\n\n"):
+          for block in src.strip().split("\\n\\n"):
               lines=block.splitlines()
               if len(lines)<3 or " --> " not in lines[1]: continue
               a,b=map(sec,lines[1].split(" --> "))
               if b<=offset or a>=offset+39.140: continue
               counter+=1
               out.extend([str(counter),f"{stamp(max(0,a-offset))} --> {stamp(min(offset+39.140,b)-offset)}",*lines[2:],""])
-          Path("captions.srt").write_text("\n".join(out),encoding="utf-8")
+          assert counter>0,"No narration caption cues intersect the clip."
+          Path("captions.srt").write_text("\\n".join(out),encoding="utf-8")
           Path("RECONSTRUCTION-NOTES.txt").write_text(
             "Illustrative 3D reconstruction of a 15th-century Ottoman bombard and the Theodosian walls.\\n"
             "Not a verified replica of Orban's exact cannon; not archival footage.\\n"
@@ -216,7 +374,7 @@ jobs:
           ffmpeg -hide_banner -v error -y -i constantinople-hybrid-240fps.mp4 \
             -vf "fps=1/2,scale=480:-1,tile=4x5" -frames:v 1 out/review/contact-sheet.jpg
           python - <<'PY'
-          import hashlib,json,subprocess
+          import hashlib,json
           from pathlib import Path
           def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
           meta=json.load(open("out/metadata.json"))
@@ -232,6 +390,7 @@ jobs:
            "dimensions":[v["width"],v["height"]],"output_fps":v["r_frame_rate"],
            "average_fps":v["avg_frame_rate"],"decoded_frames":int(v["nb_read_frames"]),
            "source_3d_keyframe_fps":30,"interpolated_to_240fps":True,
+           "source_keyframes":1176,"parallel_keyframe_shards":4,
            "duration_seconds":float(meta["format"]["duration"]),
            "video_codec":v["codec_name"],"audio_codec":a["codec_name"],
            "audio_sample_rate":a["sample_rate"],"audio_channels":a["channels"],
@@ -246,10 +405,10 @@ jobs:
              "CC0 score and effects are modern candidate recordings; human audition remains required.",
              "This is a 39-second proof, not the complete film."],
            "sha256_video":sha(p)}
-          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
+          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\\n")
           PY
           cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/review/
-          cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log out/review/
+          cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log out/keyframe-sha256.txt out/review/
           (cd out/review && sha256sum -- * > SHA256SUMS.txt)
 
       - name: Upload hybrid 240fps proof bundle
