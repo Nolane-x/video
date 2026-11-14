@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: constantinople-hybrid-240fps
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   hybrid-master:
@@ -102,11 +102,13 @@ jobs:
           test -s out/constantinople-smoke.png
           grep "STATIC MESH JOIN" out/blender-smoke.log
 
-      - name: Render evaluated 3D keyframes at 30fps
+      - name: Render evaluated 3D keyframes at 60fps
         shell: bash
         env:
           BLENDER_KEYFRAME_EXPORT: "1"
           BLENDER_KEYFRAME_STRIDE: "4"
+          BLENDER_EEVEE_SAMPLES: "4"
+          BLENDER_RESOLUTION_PERCENTAGE: "80"
           BLENDER_KEYFRAME_DIR: "${{ github.workspace }}/out/keyframes"
         run: |
           set -euo pipefail
@@ -123,7 +125,7 @@ jobs:
           set -euo pipefail
           ffmpeg -hide_banner -v error -y \
             -framerate "$KEYFRAME_FPS" -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
-            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,trim=duration=$CLIP_DURATION,setpts=PTS-STARTPTS" \
+            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,scale=1920:1080:flags=lanczos,trim=duration=$CLIP_DURATION,setpts=PTS-STARTPTS" \
             -frames:v 9394 -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
             -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
           test -s out/picture-only-240fps.mp4
