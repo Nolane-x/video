@@ -724,7 +724,9 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends fonts-dejavu-core
+          sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-dejavu-core
+          export PATH="/usr/bin:/bin:$PATH"
+          ffmpeg -hide_banner -filters | grep -q subtitles
           fc-match "DejaVu Sans" | grep -q "DejaVuSans"
           python -m py_compile tools/video/splice_constantinople_hybrid_insert.py
           KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
