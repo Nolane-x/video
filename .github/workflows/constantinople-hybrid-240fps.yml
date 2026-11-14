@@ -248,7 +248,7 @@ jobs:
           PY
           cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/review/
           cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log out/review/
-          (cd out/review && sha256sum * > SHA256SUMS.txt)
+          (cd out/review && sha256sum -- * > SHA256SUMS.txt)
 
       - name: Upload hybrid 240fps proof bundle
         uses: actions/upload-artifact@v4
