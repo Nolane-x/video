@@ -132,7 +132,7 @@ jobs:
             core.setOutput("run_id", String(source.id));
             core.setOutput("source_sha", source.head_sha);
 
-      - name: Resolve latest successful 60fps Blender bombardment proof
+      - name: Resolve latest successful 30fps Blender bombardment proof
         id: hybrid
         uses: actions/github-script@v7
         with:
@@ -164,14 +164,14 @@ jobs:
                 item => item.name === expectedName && !item.expired
               );
               if (!artifact) continue;
-              core.info("Using Blender 60fps proof run " + source.id +
+              core.info("Using Blender 30fps proof run " + source.id +
                         " from source " + source.head_sha);
               core.setOutput("run_id", String(source.id));
               core.setOutput("source_sha", source.head_sha);
               return;
             }
             core.setFailed(
-              "No successful, non-expired 60fps Blender proof artifact is available."
+              "No successful, non-expired 30fps Blender proof artifact is available."
             );
 
       - name: Cancel superseded copies of this segmented render
@@ -679,7 +679,7 @@ jobs:
           run-id: ${{ needs.prepare-project.outputs.proof_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download exact Blender 60fps bombardment proof bundle
+      - name: Download exact Blender 30fps bombardment proof bundle
         uses: actions/download-artifact@v4
         with:
           name: constantinople-hybrid-240fps-proof-${{ needs.prepare-project.outputs.hybrid_run_id }}
@@ -827,7 +827,7 @@ jobs:
             "sequence":"Blender 3D Ottoman bombard, crew, recoil, stone shot, wall impact and repair",
             "source_run":insert["hybrid_source_run"],
             "source_sha":insert["hybrid_source_sha"],
-            "source_keyframe_fps":60,
+            "source_keyframe_fps":30,
             "output_fps":240,
             "master_frame_range":insert["master_frame_range"],
             "duration_seconds":round(insert["frames"]/240,6),
@@ -845,7 +845,7 @@ jobs:
           report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           if md_path.exists():
             with md_path.open("a",encoding="utf-8") as f:
-              f.write("\n- 3D Blender insert: 60fps source keyframes interpolated to 240fps; "
+              f.write("\n- 3D Blender insert: 30fps source keyframes interpolated to 240fps; "
                       "39.1417s; captions burned in; original master audio retained. "
                       "Artistic sign-off pending.\n")
           PY
