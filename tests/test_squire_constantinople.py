@@ -25,6 +25,17 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertIn("function drawNightGunCrewDetail(g,t,info,a){", source)
         self.assertNotIn("function drawNightGunCrewDetail\\n  const", source)
 
+    def test_custom_scene_function_boundaries_remain_runtime_loadable(self):
+        scene = (ROOT / "video-projects" / "squire" / "constantinople-1453" /
+                 "scenes" / "shots" / "constantinople-cinematic.js")
+        source = scene.read_text(encoding="utf-8")
+        for signature in (
+            "function drawNightCampDetail(g,t,info,a){",
+            "function drawNightGunCrewDetail(g,t,info,a){",
+        ):
+            self.assertIn(signature, source)
+        self.assertNotIn("function drawNightGunCrewDetail\\n  const", source)
+
     def test_chapter_classifier(self):
         self.assertEqual(mod.progress_phase(.01,"The final assault begins"),"final")
         self.assertEqual(mod.progress_phase(.02,"At midnight, the walls are still standing"),"night")
