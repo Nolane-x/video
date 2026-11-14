@@ -25,10 +25,22 @@ jobs:
       VOICE_RUN_ID: "42448341267"
       VOICE_START: "220.760"
       CLIP_DURATION: "39.140"
-      KEYFRAME_FPS: "30"
-      KEYFRAME_STRIDE: "8"
+      KEYFRAME_FPS: "60"
+      KEYFRAME_STRIDE: "4"
     steps:
       - uses: actions/checkout@v7
+
+      - name: Lint the hybrid workflow before starting Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 \
+            "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" \
+            | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/actionlint" -color .github/workflows/constantinople-hybrid-240fps.yml
 
       - name: Install Blender and FFmpeg runtime
         run: |
@@ -94,7 +106,7 @@ jobs:
         shell: bash
         env:
           BLENDER_KEYFRAME_EXPORT: "1"
-          BLENDER_KEYFRAME_STRIDE: "8"
+          BLENDER_KEYFRAME_STRIDE: "4"
           BLENDER_KEYFRAME_DIR: "${{ github.workspace }}/out/keyframes"
         run: |
           set -euo pipefail
@@ -102,7 +114,7 @@ jobs:
           blender -b --python tools/blender/render_constantinople_bombardment.py 2>&1 | tee out/blender-keyframes.log
           count=$(find out/keyframes -maxdepth 1 -type f -name 'frame_*.jpg' | wc -l)
           echo "Rendered 3D keyframes: $count"
-          test "$count" -ge 1174
+          test "$count" -ge 2348
           grep "CONSTANTINOPLE KEYFRAME EXPORT FINISHED" out/blender-keyframes.log
 
       - name: Interpolate smooth 1080p CFR 240fps picture master
@@ -113,7 +125,7 @@ jobs:
             -framerate "$KEYFRAME_FPS" -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
             -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,trim=duration=$CLIP_DURATION,setpts=PTS-STARTPTS" \
             -frames:v 9394 -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
-            -r 240 -fps_mode cfr out/picture-only-240fps.mp4
+            -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
           test -s out/picture-only-240fps.mp4
 
       - name: Mix narration, licensed score and synchronized cannon effects
@@ -163,7 +175,7 @@ jobs:
             "Illustrative 3D reconstruction of a 15th-century Ottoman bombard and the Theodosian walls.\\n"
             "Not a verified replica of Orban's exact cannon; not archival footage.\\n"
             "Narration excerpt: 00:03:40.760–00:04:19.900. Captions are separate.\\n"
-            "Picture is 30fps rendered 3D keyframes motion-compensated to CFR 240fps.\\n"
+            "Picture is 60fps rendered 3D keyframes motion-compensated to CFR 240fps.\\n"
             "CC0 modern score and recorded cannon candidates require human audition.\\n",encoding="utf-8")
           PY
           ffprobe -v error -count_frames -show_streams -show_format -of json \
@@ -176,11 +188,22 @@ jobs:
           a=next(x for x in j["streams"] if x["codec_type"]=="audio")
           assert (v["width"],v["height"])==(1920,1080),v
           assert v["r_frame_rate"]=="240/1" and v["avg_frame_rate"]=="240/1",v
-          assert int(v.get("nb_read_frames",0))>=9390,v
+          frames=int(v.get("nb_read_frames",0))
+          assert frames==9394,(frames,v)
           assert a["sample_rate"]=="48000" and a["channels"]==2,a
-          d=float(j["format"]["duration"]); assert 39.0<=d<=39.3,d
+          d=float(j["format"]["duration"]); assert abs(d-39.14)<=0.03,d
           subprocess.run(["ffmpeg","-hide_banner","-v","error","-i",p,"-f","null","-"],check=True)
-          print("TECHNICAL PASS:",v["width"],"x",v["height"],v["avg_frame_rate"],v["nb_read_frames"],"frames",d,"sec")
+          sample=subprocess.run([
+            "ffmpeg","-hide_banner","-v","error","-i",p,
+            "-vf","select='not(mod(n,4))',scale=96:54,format=gray",
+            "-frames:v","180","-f","framemd5","-"
+          ],check=True,capture_output=True,text=True)
+          hashes=[x.split(",")[-1].strip() for x in sample.stdout.splitlines()
+                  if x and not x.startswith("#")]
+          unique=len(set(hashes))
+          assert len(hashes)>=170 and unique>=150,(len(hashes),unique)
+          print("TECHNICAL PASS:",v["width"],"x",v["height"],v["avg_frame_rate"],frames,
+                "frames",d,"sec; unique 60fps samples",unique,"/",len(hashes))
           PY
 
       - name: Build contact sheet and provenance report
@@ -206,7 +229,7 @@ jobs:
            "engine":"Blender Eevee + FFmpeg motion-compensated interpolation",
            "dimensions":[v["width"],v["height"]],"output_fps":v["r_frame_rate"],
            "average_fps":v["avg_frame_rate"],"decoded_frames":int(v["nb_read_frames"]),
-           "source_3d_keyframe_fps":30,"interpolated_to_240fps":True,
+           "source_3d_keyframe_fps":60,"interpolated_to_240fps":True,
            "duration_seconds":float(meta["format"]["duration"]),
            "video_codec":v["codec_name"],"audio_codec":a["codec_name"],
            "audio_sample_rate":a["sample_rate"],"audio_channels":a["channels"],
