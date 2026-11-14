@@ -60,17 +60,35 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 context=mod.opening_context(shots,index)
                 self.assertEqual(mod.choose_template(.02,shots[index]["line"],index,{},None,context_text=context),expected)
 
-    def test_opening_camp_sequence_alternates_between_establishing_and_detail(self):
+    def test_opening_camp_sequence_uses_distinct_cinematic_inserts(self):
         shots=[
             {"start":0.0,"end":1.0,"line":"You can hear the Ottoman camp"},
-            {"start":1.0,"end":2.0,"line":"beyond the dark fields: horses shifting,"},
-            {"start":2.0,"end":3.0,"line":"men calling to one another, the creak of carts,"},
+            {"start":1.0,"end":2.0,"line":"beyond the dark fields"},
+            {"start":2.0,"end":3.0,"line":"fields: horses shifting,"},
+            {"start":3.0,"end":4.0,"line":"men calling to one another,"},
+            {"start":4.0,"end":5.0,"line":"the creak of carts,"},
         ]
         actual=[]
+        details=[]
         for i,s in enumerate(shots):
             context=mod.opening_context(shots,i)
-            actual.append(mod.choose_template(.02,s["line"],i,{},None,context_text=context))
-        self.assertEqual(actual,["night_camp","night_camp_detail","night_camp_detail"])
+            tpl=mod.choose_template(.02,s["line"],i,{},None,context_text=context)
+            actual.append(tpl)
+            if tpl=="night_camp_detail":
+                details.append({"tpl":tpl,"args":{"beat":mod.opening_camp_detail_beat(s["line"],i)}})
+        self.assertEqual(actual,["night_camp","night_camp_detail","night_camp_detail",
+                                 "night_camp_detail","night_camp_detail"])
+        self.assertEqual([s["args"]["beat"] for s in details],["fires","horses","signal","carts"])
+        self.assertEqual(mod.max_consecutive_visual_signature_run(details),1)
+
+    def test_visual_signature_audit_preserves_caption_split_holds(self):
+        shots=[
+            {"tpl":"assault_first_wave","args":{"beat":"first_rush"}},
+            {"tpl":"assault_first_wave","args":{"beat":"first_rush"}},
+            {"tpl":"assault_second_wave","args":{"beat":"climb"}},
+            {"tpl":"assault_second_wave","args":{"beat":"push"}},
+        ]
+        self.assertEqual(mod.max_consecutive_visual_signature_run(shots),2)
 
     def test_opening_final_night_uses_event_specific_scenes(self):
         cases = [
