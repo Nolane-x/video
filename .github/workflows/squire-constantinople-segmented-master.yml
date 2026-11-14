@@ -583,8 +583,13 @@ jobs:
                 head: context.sha
               }
             );
+            if (!["ahead", "identical"].includes(comparison.data.status)) {
+              core.setFailed("The selected proof is not an ancestor of the current source revision.");
+              return;
+            }
             const allowed = new Set([
-              ".github/workflows/squire-constantinople-segmented-master.yml"
+              ".github/workflows/squire-constantinople-segmented-master.yml",
+              ".github/workflows/test-squire-constantinople.yml"
             ]);
             const unexpected = (comparison.data.files || [])
               .map(file => file.filename)
