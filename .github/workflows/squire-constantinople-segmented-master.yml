@@ -56,6 +56,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lint proof, audit, test and master workflows before rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 \
+            "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" \
+            | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/actionlint" -color \
+            .github/workflows/squire-constantinople-segmented-master.yml \
+            .github/workflows/squire-constantinople-redesign-proof.yml \
+            .github/workflows/audit-squire-opening-review.yml \
+            .github/workflows/test-squire-constantinople.yml
+
       - name: Cancel superseded copies of this segmented render
         uses: actions/github-script@v7
         with:
