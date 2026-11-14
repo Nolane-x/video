@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -156,7 +157,7 @@ def main() -> int:
     filters = run(["ffmpeg", "-hide_banner", "-filters"])
     if "subtitles" not in filters:
         raise RuntimeError("FFmpeg was built without the libass subtitles filter.")
-    ffmpeg_path = os.path.abspath("ffmpeg")
+    ffmpeg_path = shutil.which("ffmpeg") or "ffmpeg"
     captioned = hybrid_dir / "constantinople-hybrid-captioned-240fps.mp4"
     subtitle_path = str(caption_excerpt).replace("\\", "/").replace(":", r"\:")
     vf = f"subtitles=filename='{subtitle_path}':force_style='{STYLE}'"
