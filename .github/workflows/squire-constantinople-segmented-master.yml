@@ -825,6 +825,8 @@ jobs:
             "duration_seconds":round(insert["frames"]/240,6),
             "captions_burned_in":True,
             "master_audio_retained":True,
+            "master_sfx_cues":insert["audio_effects"]["cues"],
+            "cc0_sfx_asset_provenance":insert["audio_effects"]["assets"],
             "human_artistic_signoff":"pending"
           }
           report.setdefault("limitations",[]).append(
