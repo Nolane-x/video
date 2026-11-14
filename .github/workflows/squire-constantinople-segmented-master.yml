@@ -17,7 +17,7 @@ on:
         description: "Optional run ID with an independently recovered segment to combine with the source run."
         required: false
         type: string
-        default: "43223049984"
+        default: ""
       render_only_segment:
         description: "When reusing prior segments, render only this missing or replaced segment."
         required: false
@@ -28,7 +28,7 @@ on:
           - "2"
           - "3"
           - "none"
-        default: "3"
+        default: "none"
 
 permissions:
   actions: write
@@ -44,9 +44,9 @@ env:
   VOICE_RUN_ID: "42448341267"
   EXPECTED_FRAMES: "229896"
   SEGMENT_FRAMES: "57474"
-  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || github.event.inputs.reuse_run_id || '' }}
-  RECOVERED_SEGMENT_RUN_ID: ${{ github.event_name == 'push' && '43223049984' || github.event.inputs.recovered_segment_run_id || '' }}
-  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && 'none' || github.event.inputs.render_only_segment || '3' }}
+  REUSE_RUN_ID: ${{ github.event.inputs.reuse_run_id || '' }}
+  RECOVERED_SEGMENT_RUN_ID: ${{ github.event.inputs.recovered_segment_run_id || '' }}
+  RECOVERY_SEGMENT: ${{ github.event.inputs.render_only_segment || 'none' }}
 
 jobs:
   prepare-project:
@@ -553,11 +553,59 @@ jobs:
           path: segments/current
           merge-multiple: true
 
+      - name: Resolve latest successful proof for this exact source revision
+        id: proof
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 410937867,
+              branch: "squire/constantinople-1453-redesign",
+              status: "completed",
+              per_page: 30
+            });
+            const source = result.data.workflow_runs.find(
+              run => run.conclusion === "success" && run.head_sha
+            );
+            if (!source) {
+              core.setFailed("No successful Squire redesign proof exists for this branch.");
+              return;
+            }
+
+            const comparison = await github.request(
+              "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: source.head_sha,
+                head: context.sha
+              }
+            );
+            const allowed = new Set([
+              ".github/workflows/squire-constantinople-segmented-master.yml"
+            ]);
+            const unexpected = (comparison.data.files || [])
+              .map(file => file.filename)
+              .filter(path => !allowed.has(path));
+            if (unexpected.length) {
+              core.setFailed(
+                "The latest successful proof is not for the current film source. " +
+                "Unexpected intervening changes: " + unexpected.join(", ")
+              );
+              return;
+            }
+
+            core.info("Using proof run " + source.id + " from source " + source.head_sha);
+            core.setOutput("run_id", String(source.id));
+            core.setOutput("source_sha", source.head_sha);
+
       - uses: actions/download-artifact@v4
         with:
-          name: squire-constantinople-redesign-proof-42982265108
+          name: squire-constantinople-redesign-proof-${{ steps.proof.outputs.run_id }}
           path: prior-proof
-          run-id: 42982265108
+          run-id: ${{ steps.proof.outputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore project and verify all segment checksums
