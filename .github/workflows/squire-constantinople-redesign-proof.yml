@@ -335,3 +335,14 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
+
+  audit-opening:
+    name: Enforce opening 240fps visual and event audit
+    needs: render-scene-proof
+    uses: ./.github/workflows/audit-squire-opening-review.yml
+    with:
+      source_run_id: ${{ github.run_id }}
+      source_sha: ${{ github.sha }}
+    permissions:
+      actions: read
+      contents: read

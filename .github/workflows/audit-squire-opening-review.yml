@@ -1,32 +1,27 @@
 name: Squire - opening shotbook audit
 
 on:
-  workflow_run:
-    workflows:
-      - "Squire · Constantinople 1453 · Cinematic redesign proof"
-    types:
-      - completed
-    branches:
-      - squire/constantinople-1453-redesign
-  workflow_dispatch:
+  workflow_call:
     inputs:
       source_run_id:
-        description: "Successful redesign proof run to audit when manually dispatched."
+        description: "Run ID whose exact redesign proof artifact must be reviewed."
         required: true
         type: string
-        default: "43567318021"
+      source_sha:
+        description: "Source commit SHA used by the proof renderer."
+        required: true
+        type: string
 
 permissions:
   actions: read
   contents: read
 
 env:
-  SOURCE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || inputs.source_run_id }}
-  SOURCE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+  SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+  SOURCE_SHA: ${{ inputs.source_sha }}
 
 jobs:
   audit:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -167,6 +162,8 @@ jobs:
               "longest_visual_signature_run":longest_signature,
               "mismatch_count":len(mismatches),"technical_gate":technical_ok
           },indent=2))
+          if report["status"] != "PASS":
+              raise SystemExit("Opening audit gate failed; inspect OPENING-SHOT-AUDIT.json.")
           PY
 
       - name: Build normal-speed review proxy and opening contact sheet
@@ -191,6 +188,7 @@ jobs:
           (cd review && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
 
       - name: Upload small shotbook and contact-sheet evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: squire-opening-shot-audit-evidence-${{ github.run_id }}
@@ -201,10 +199,11 @@ jobs:
             review/OPENING-53S-QA.json
             review/OPENING-53S-CONTACT-SHEET.jpg
             review/contact-sheets/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Upload focused opening review package
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: squire-opening-shot-audit-${{ github.run_id }}
