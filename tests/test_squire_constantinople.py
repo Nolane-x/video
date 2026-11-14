@@ -18,6 +18,14 @@ mod=load_module("author_squire_constantinople",ROOT/"tools"/"video"/"author_squi
 foley=load_module("import_squire_constantinople_foley",ROOT/"tools"/"video"/"import_squire_constantinople_foley.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_custom_scene_function_boundaries_remain_runtime_loadable(self):
+        scene = (ROOT / "video-projects" / "squire" / "constantinople-1453" /
+                 "scenes" / "shots" / "constantinople-cinematic.js")
+        source = scene.read_text(encoding="utf-8")
+        self.assertIn("function drawNightCampDetail(g,t,info,a){", source)
+        self.assertIn("function drawNightGunCrewDetail(g,t,info,a){", source)
+        self.assertNotIn("function drawNightGunCrewDetail\n  const", source)
+
     def test_chapter_classifier(self):
         self.assertEqual(mod.progress_phase(.01,"The final assault begins"),"final")
         self.assertEqual(mod.progress_phase(.02,"At midnight, the walls are still standing"),"night")
