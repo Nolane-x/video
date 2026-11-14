@@ -117,6 +117,49 @@ def assert_video(path: Path, expected_frames: int, expected_duration: float) -> 
     return {"frames": frames, "duration_seconds": duration, "width": 1920, "height": 1080}
 
 
+def add_insert_sound_cues(project: Path) -> dict:
+    """Add the two CC0 bombard cues to the original Squire story mix timeline."""
+    kit = project.parents[1]
+    manifest_path = project / "story" / "AUDIO-SOURCE-MANIFEST.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    rows = {row["alias"]: row for row in manifest.get("assets", [])}
+    verified_assets = {}
+    for alias in ("cannon_fire", "siege_impact"):
+        row = rows.get(alias)
+        if not row or row.get("license") != "CC0-1.0":
+            raise RuntimeError(f"Missing exact CC0 provenance for SFX alias: {alias}")
+        source = kit / row["converted_path"]
+        if not source.is_file() or sha256(source) != row["converted_sha256"]:
+            raise RuntimeError(f"Converted SFX checksum mismatch: {alias}")
+        verified_assets[alias] = {
+            "alias": alias,
+            "license": row["license"],
+            "source": row.get("source"),
+            "source_url": row.get("source_url"),
+            "converted_sha256": row["converted_sha256"],
+            "human_auditioned": row.get("human_auditioned", False),
+            "approved_for_final_mix": row.get("approved_for_final_mix", False),
+        }
+
+    story_path = project / "story" / "shots.json"
+    story = json.loads(story_path.read_text(encoding="utf-8"))
+    cues = [
+        {"t": 239.760, "name": "cannon_fire", "gain": -4},
+        {"t": 246.060, "name": "siege_impact", "gain": -6},
+    ]
+    existing = list(story.get("sfx", []))
+    for cue in cues:
+        duplicate = any(
+            item.get("name") == cue["name"] and abs(float(item.get("t", -999)) - cue["t"]) < 0.02
+            for item in existing
+        )
+        if not duplicate:
+            existing.append(cue)
+    story["sfx"] = existing
+    story_path.write_text(json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"cues": cues, "assets": verified_assets}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", type=Path, required=True)
@@ -151,6 +194,7 @@ def main() -> int:
     if source_digest != manifest.get("sha256_video"):
         raise RuntimeError("Blender proof SHA-256 does not match its manifest.")
     assert_video(hybrid, INSERT_FRAMES, INSERT_FRAMES / FPS)
+    audio_insert = add_insert_sound_cues(project)
 
     caption_excerpt = hybrid_dir / "insert-captions.srt"
     caption_count = extract_caption_excerpt(captions_source, caption_excerpt)
@@ -251,7 +295,8 @@ def main() -> int:
         "reencoded_shards": [0, 1],
         "original_shard_sha256": original_hashes,
         "replacement_shards": replacements,
-        "audio_policy": "Original Squire/VoiceStudio master mix retained; hybrid proof audio discarded.",
+        "audio_policy": "Original VoiceStudio narration and recorded score retained; verified CC0 cannon and wall-impact cues added to the Squire mix. Hybrid proof audio discarded.",
+        "audio_effects": audio_insert,
         "artistic_signoff": "pending full human watch at normal speed",
     }
     output_report.parent.mkdir(parents=True, exist_ok=True)
