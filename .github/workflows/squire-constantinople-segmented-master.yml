@@ -17,7 +17,7 @@ on:
         description: "Optional run ID with an independently recovered segment to combine with the source run."
         required: false
         type: string
-        default: "43223049984"
+        default: ""
       render_only_segment:
         description: "When reusing prior segments, render only this missing or replaced segment."
         required: false
@@ -28,7 +28,7 @@ on:
           - "2"
           - "3"
           - "none"
-        default: "3"
+        default: "none"
 
 permissions:
   actions: write
@@ -44,17 +44,135 @@ env:
   VOICE_RUN_ID: "42448341267"
   EXPECTED_FRAMES: "229896"
   SEGMENT_FRAMES: "57474"
-  REUSE_RUN_ID: ${{ github.event_name == 'push' && '43208327346' || github.event.inputs.reuse_run_id || '' }}
-  RECOVERED_SEGMENT_RUN_ID: ${{ github.event_name == 'push' && '43223049984' || github.event.inputs.recovered_segment_run_id || '' }}
-  RECOVERY_SEGMENT: ${{ github.event_name == 'push' && 'none' || github.event.inputs.render_only_segment || '3' }}
+  REUSE_RUN_ID: ${{ github.event.inputs.reuse_run_id || '' }}
+  RECOVERED_SEGMENT_RUN_ID: ${{ github.event.inputs.recovered_segment_run_id || '' }}
+  RECOVERY_SEGMENT: ${{ github.event.inputs.render_only_segment || 'none' }}
 
 jobs:
   prepare-project:
     name: Prepare verified narration, shotbook, scenes and assets
     runs-on: ubuntu-24.04
     timeout-minutes: 120
+    outputs:
+      proof_run_id: ${{ steps.proof.outputs.run_id }}
+      proof_source_sha: ${{ steps.proof.outputs.source_sha }}
+      hybrid_run_id: ${{ steps.hybrid.outputs.run_id }}
+      hybrid_source_sha: ${{ steps.hybrid.outputs.source_sha }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Lint proof, audit, test and master workflows before rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 \
+            "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" \
+            | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/actionlint" -color \
+            .github/workflows/squire-constantinople-segmented-master.yml \
+            .github/workflows/squire-constantinople-redesign-proof.yml \
+            .github/workflows/audit-squire-opening-review.yml \
+            .github/workflows/test-squire-constantinople.yml
+
+      - name: Resolve latest successful proof for this exact source revision
+        id: proof
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 410937867,
+              branch: "squire/constantinople-1453-redesign",
+              status: "completed",
+              per_page: 30
+            });
+            const source = result.data.workflow_runs.find(
+              run => run.conclusion === "success" && run.head_sha
+            );
+            if (!source) {
+              core.setFailed("No successful Squire redesign proof exists for this branch.");
+              return;
+            }
+
+            const comparison = await github.request(
+              "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: source.head_sha,
+                head: context.sha
+              }
+            );
+            if (!["ahead", "identical"].includes(comparison.data.status)) {
+              core.setFailed("The selected proof is not an ancestor of the current source revision.");
+              return;
+            }
+            const allowed = new Set([
+              ".github/workflows/squire-constantinople-segmented-master.yml",
+              ".github/workflows/test-squire-constantinople.yml",
+              "tools/video/splice_constantinople_hybrid_insert.py",
+              "tests/test_squire_constantinople.py"
+            ]);
+            const unexpected = (comparison.data.files || [])
+              .map(file => file.filename)
+              .filter(path => !allowed.has(path));
+            if (unexpected.length) {
+              core.setFailed(
+                "The latest successful proof is not for the current film source. " +
+                "Unexpected intervening changes: " + unexpected.join(", ")
+              );
+              return;
+            }
+
+            core.info("Using proof run " + source.id + " from source " + source.head_sha);
+            core.setOutput("run_id", String(source.id));
+            core.setOutput("source_sha", source.head_sha);
+
+      - name: Resolve latest successful 60fps Blender bombardment proof
+        id: hybrid
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchRef = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: "cinematic/constantinople-hybrid-240fps"
+            });
+            const expectedSha = branchRef.data.commit.sha;
+            const result = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 411026999,
+              branch: "cinematic/constantinople-hybrid-240fps",
+              status: "completed",
+              per_page: 30
+            });
+            for (const source of result.data.workflow_runs) {
+              if (source.conclusion !== "success" || source.head_sha !== expectedSha) continue;
+              const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: source.id,
+                per_page: 100
+              });
+              const expectedName = "constantinople-hybrid-240fps-proof-" + source.id;
+              const artifact = artifacts.data.artifacts.find(
+                item => item.name === expectedName && !item.expired
+              );
+              if (!artifact) continue;
+              core.info("Using Blender 60fps proof run " + source.id +
+                        " from source " + source.head_sha);
+              core.setOutput("run_id", String(source.id));
+              core.setOutput("source_sha", source.head_sha);
+              return;
+            }
+            core.setFailed(
+              "No successful, non-expired 60fps Blender proof artifact is available."
+            );
 
       - name: Cancel superseded copies of this segmented render
         uses: actions/github-script@v7
@@ -188,6 +306,7 @@ jobs:
             tools/video/qa_squire_constantinople.py \
             tools/video/render_squire_constantinople_redesign_proof.py \
             tools/video/reflow_squire_captions.py \
+            tools/video/splice_constantinople_hybrid_insert.py \
             tests/test_squire_constantinople.py \
             tests/test_squire_caption_reflow.py
           python tests/test_squire_constantinople.py
@@ -555,9 +674,18 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: squire-constantinople-redesign-proof-42982265108
+          name: squire-constantinople-redesign-proof-${{ needs.prepare-project.outputs.proof_run_id }}
           path: prior-proof
-          run-id: 42982265108
+          run-id: ${{ needs.prepare-project.outputs.proof_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download exact Blender 60fps bombardment proof bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: constantinople-hybrid-240fps-proof-${{ needs.prepare-project.outputs.hybrid_run_id }}
+          path: hybrid-proof
+          repository: Nolane-x/video
+          run-id: ${{ needs.prepare-project.outputs.hybrid_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore project and verify all segment checksums
@@ -595,6 +723,36 @@ jobs:
              "$KIT/projects/$PROJECT_NAME/build/redesign-motion-proof.json"
           cp prior-proof/redesign-check.log "$KIT/projects/$PROJECT_NAME/build/redesign-check.log"
           cp prior-proof/redesign-contact-sheet.log "$KIT/projects/$PROJECT_NAME/build/redesign-contact-sheet.log"
+
+      - name: Splice Blender 3D bombardment into the exact 240fps master interval
+        env:
+          HYBRID_SOURCE_RUN_ID: ${{ needs.prepare-project.outputs.hybrid_run_id }}
+          HYBRID_SOURCE_SHA: ${{ needs.prepare-project.outputs.hybrid_source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-dejavu-core
+          STATIC_FFMPEG="$GITHUB_WORKSPACE/.tools/ffmpeg/bin/ffmpeg"
+          if "$STATIC_FFMPEG" -filters 2>/dev/null | grep -q subtitles; then
+            echo "Using the pinned project FFmpeg toolchain with libass."
+            export PATH="$GITHUB_WORKSPACE/.tools/ffmpeg/bin:$PATH"
+          else
+            echo "Pinned FFmpeg lacks libass; using Ubuntu FFmpeg for the captioned splice."
+            export PATH="/usr/bin:/bin:$PATH"
+          fi
+          ffmpeg -hide_banner -filters | grep -q subtitles
+          fc-match "DejaVu Sans" | grep -q "DejaVuSans"
+          python -m py_compile tools/video/splice_constantinople_hybrid_insert.py
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          PROJ="$KIT/projects/$PROJECT_NAME"
+          python tools/video/splice_constantinople_hybrid_insert.py \
+            --project "$PROJ" \
+            --segments "$GITHUB_WORKSPACE/segments" \
+            --hybrid "$GITHUB_WORKSPACE/hybrid-proof" \
+            --output-report "$GITHUB_WORKSPACE/HYBRID-INSERT-REPORT.json" \
+            --source-run-id "$HYBRID_SOURCE_RUN_ID" \
+            --source-sha "$HYBRID_SOURCE_SHA"
 
       - name: Concatenate segments without re-encoding and verify the 16-minute silent master
         shell: bash
@@ -652,6 +810,46 @@ jobs:
           PROJ="$KIT/projects/$PROJECT_NAME"
           python tools/video/qa_squire_constantinople.py --project "$PROJ" --voice-assets "$KIT/qa-assets"
 
+      - name: Attach Blender insert provenance to the master QA report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report_path=Path("integrations/h2-squire-studio/kit/projects/constantinople-1453-redesign-proof/story/QA-REPORT.json")
+          md_path=report_path.with_suffix(".md")
+          insert=json.loads(Path("HYBRID-INSERT-REPORT.json").read_text(encoding="utf-8"))
+          assert insert["status"]=="PASS" and insert["fps"]==240 and insert["frames"]==9394,insert
+          report=json.loads(report_path.read_text(encoding="utf-8"))
+          report["hybrid_visual_insert"]={
+            "status":"technical_pass_pending_human_visual_review",
+            "sequence":"Blender 3D Ottoman bombard, crew, recoil, stone shot, wall impact and repair",
+            "source_run":insert["hybrid_source_run"],
+            "source_sha":insert["hybrid_source_sha"],
+            "source_keyframe_fps":60,
+            "output_fps":240,
+            "master_frame_range":insert["master_frame_range"],
+            "duration_seconds":round(insert["frames"]/240,6),
+            "captions_burned_in":True,
+            "master_audio_retained":True,
+            "master_sfx_cues":insert["audio_effects"]["cues"],
+            "cc0_sfx_asset_provenance":insert["audio_effects"]["assets"],
+            "human_artistic_signoff":"pending"
+          }
+          report.setdefault("limitations",[]).append(
+            "A 39.14-second illustrative Blender reconstruction replaces the early bombard passage. "
+            "It is not archival footage or a verified replica of Orban's exact cannon; a human must review "
+            "the insert, captions and audio continuity at normal speed."
+          )
+          report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          if md_path.exists():
+            with md_path.open("a",encoding="utf-8") as f:
+              f.write("\n- 3D Blender insert: 60fps source keyframes interpolated to 240fps; "
+                      "39.1417s; captions burned in; original master audio retained. "
+                      "Artistic sign-off pending.\n")
+          PY
+
       - name: Assemble complete delivery package
         shell: bash
         run: |
@@ -669,6 +867,7 @@ jobs:
           cp "$PROJ/timeline/voice.wav" "$OUT/narration-timeline.wav"
           cp "$PROJ/story/QA-REPORT.md" "$PROJ/story/QA-REPORT.json" "$OUT/"
           cp "$PROJ/story/alignment-report.json" "$PROJ/story/voice-manifest.json" "$PROJ/story/voice-selection.json" "$OUT/"
+          cp "$GITHUB_WORKSPACE/HYBRID-INSERT-REPORT.json" "$OUT/"
           cp "$PROJ/story/AUDIO-SOURCE-MANIFEST.json" "$OUT/"
           cp "$PROJ/story/captions.srt" "$PROJ/story/captions.vtt" "$PROJ/story/CAPTION-REFLOW-REPORT.json" "$OUT/"
           cp "$PROJ/story/shots.json" "$PROJ/config.json" "$OUT/"
