@@ -16,8 +16,38 @@ def load_module(name,path):
 
 mod=load_module("author_squire_constantinople",ROOT/"tools"/"video"/"author_squire_constantinople.py")
 foley=load_module("import_squire_constantinople_foley",ROOT/"tools"/"video"/"import_squire_constantinople_foley.py")
+hybrid_splice=load_module("splice_constantinople_hybrid_insert",ROOT/"tools"/"video"/"splice_constantinople_hybrid_insert.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_hybrid_bombard_insert_is_frame_exact_across_two_shards(self):
+        self.assertEqual(hybrid_splice.START_FRAME, 52982)
+        self.assertEqual(hybrid_splice.END_FRAME, 62376)
+        self.assertEqual(hybrid_splice.INSERT_FRAMES, 9394)
+        self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT, 4492)
+        self.assertEqual(hybrid_splice.SECOND_SHARD_INSERT, 4902)
+        self.assertEqual(hybrid_splice.SECOND_SHARD_SUFFIX, 52572)
+        self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT + hybrid_splice.SECOND_SHARD_INSERT, 9394)
+
+    def test_hybrid_caption_excerpt_clips_start_and_end_without_losing_cues(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            source=root/"source.srt"
+            output=root/"excerpt.srt"
+            source.write_text(
+                "1\\n00:03:40,000 --> 00:03:41,000\\nOpening cannon crew\\n\\n"
+                "2\\n00:04:19,000 --> 00:04:21,000\\nWall impact and debris\\n\\n"
+                "3\\n00:04:21,000 --> 00:04:22,000\\nOutside the insert\\n",
+                encoding="utf-8"
+            )
+            count=hybrid_splice.extract_caption_excerpt(source,output)
+            self.assertEqual(count,2)
+            excerpt=output.read_text(encoding="utf-8")
+            self.assertIn("Opening cannon crew",excerpt)
+            self.assertIn("Wall impact and debris",excerpt)
+            self.assertNotIn("Outside the insert",excerpt)
+            self.assertIn("00:00:00,000 --> 00:00:00,242",excerpt)
+            self.assertIn("00:00:39,142",excerpt)
+
     def test_chapter_classifier(self):
         self.assertEqual(mod.progress_phase(.01,"The final assault begins"),"final")
         self.assertEqual(mod.progress_phase(.02,"At midnight, the walls are still standing"),"night")
