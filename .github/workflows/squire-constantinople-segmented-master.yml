@@ -1,6 +1,11 @@
 name: Squire · Constantinople 1453 · Segmented 240fps master
 
 on:
+  push:
+    branches:
+      - squire/constantinople-1453-redesign
+    paths:
+      - video-projects/squire/constantinople-1453/MASTER-RENDER-DISPATCH.txt
   workflow_dispatch:
     inputs:
       reuse_run_id:
@@ -110,7 +115,8 @@ jobs:
               ".github/workflows/squire-constantinople-segmented-master.yml",
               ".github/workflows/test-squire-constantinople.yml",
               "tools/video/splice_constantinople_hybrid_insert.py",
-              "tests/test_squire_constantinople.py"
+              "tests/test_squire_constantinople.py",
+              "video-projects/squire/constantinople-1453/MASTER-RENDER-DISPATCH.txt"
             ]);
             const unexpected = (comparison.data.files || [])
               .map(file => file.filename)
