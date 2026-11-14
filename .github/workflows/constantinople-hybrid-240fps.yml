@@ -322,7 +322,7 @@ jobs:
               if ms==1000: s+=1; ms=0
               return f"{h:02}:{m:02}:{s:02},{ms:03}"
           out=[]; counter=0
-          for block in src.strip().split("\\n\\n"):
+          for block in src.strip().split("\n\n"):
               lines=block.splitlines()
               if len(lines)<3 or " --> " not in lines[1]: continue
               a,b=map(sec,lines[1].split(" --> "))
@@ -330,13 +330,13 @@ jobs:
               counter+=1
               out.extend([str(counter),f"{stamp(max(0,a-offset))} --> {stamp(min(offset+39.140,b)-offset)}",*lines[2:],""])
           assert counter>0,"No narration caption cues intersect the clip."
-          Path("captions.srt").write_text("\\n".join(out),encoding="utf-8")
+          Path("captions.srt").write_text("\n".join(out),encoding="utf-8")
           Path("RECONSTRUCTION-NOTES.txt").write_text(
-            "Illustrative 3D reconstruction of a 15th-century Ottoman bombard and the Theodosian walls.\\n"
-            "Not a verified replica of Orban's exact cannon; not archival footage.\\n"
-            "Narration excerpt: 00:03:40.760–00:04:19.900. Captions are separate.\\n"
-            "Picture is 30fps rendered 3D keyframes motion-compensated to CFR 240fps.\\n"
-            "CC0 modern score and recorded cannon candidates require human audition.\\n",encoding="utf-8")
+            "Illustrative 3D reconstruction of a 15th-century Ottoman bombard and the Theodosian walls.\n"
+            "Not a verified replica of Orban's exact cannon; not archival footage.\n"
+            "Narration excerpt: 00:03:40.760–00:04:19.900. Captions are separate.\n"
+            "Picture is 30fps rendered 3D keyframes motion-compensated to CFR 240fps.\n"
+            "CC0 modern score and recorded cannon candidates require human audition.\n",encoding="utf-8")
           PY
           ffprobe -v error -count_frames -show_streams -show_format -of json \
             constantinople-hybrid-240fps.mp4 > out/metadata.json
@@ -405,7 +405,7 @@ jobs:
              "CC0 score and effects are modern candidate recordings; human audition remains required.",
              "This is a 39-second proof, not the complete film."],
            "sha256_video":sha(p)}
-          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\\n")
+          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
           PY
           cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/review/
           cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log out/keyframe-sha256.txt out/review/
