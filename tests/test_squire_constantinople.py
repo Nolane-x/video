@@ -16,8 +16,73 @@ def load_module(name,path):
 
 mod=load_module("author_squire_constantinople",ROOT/"tools"/"video"/"author_squire_constantinople.py")
 foley=load_module("import_squire_constantinople_foley",ROOT/"tools"/"video"/"import_squire_constantinople_foley.py")
+hybrid_splice=load_module("splice_constantinople_hybrid_insert",ROOT/"tools"/"video"/"splice_constantinople_hybrid_insert.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_hybrid_bombard_insert_is_frame_exact_across_two_shards(self):
+        self.assertEqual(hybrid_splice.START_FRAME, 52982)
+        self.assertEqual(hybrid_splice.END_FRAME, 62376)
+        self.assertEqual(hybrid_splice.INSERT_FRAMES, 9394)
+        self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT, 4492)
+        self.assertEqual(hybrid_splice.SECOND_SHARD_INSERT, 4902)
+        self.assertEqual(hybrid_splice.SECOND_SHARD_SUFFIX, 52572)
+        self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT + hybrid_splice.SECOND_SHARD_INSERT, 9394)
+
+    def test_blender_insert_cannon_sfx_use_verified_cc0_assets_and_are_idempotent(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            kit=root/"kit"
+            project=kit/"projects"/"demo"
+            (project/"story").mkdir(parents=True)
+            (kit/"audio"/"sfx").mkdir(parents=True)
+            rows=[]
+            for alias in ("cannon_fire","siege_impact"):
+                path=kit/"audio"/"sfx"/f"{alias}.wav"
+                path.write_bytes((alias+"-fixture").encode())
+                rows.append({
+                    "alias":alias,
+                    "license":"CC0-1.0",
+                    "source":alias+".ogg",
+                    "source_url":"https://opengameart.org/content/battle-at-sea",
+                    "converted_path":f"audio/sfx/{alias}.wav",
+                    "converted_sha256":hashlib.sha256(path.read_bytes()).hexdigest(),
+                    "human_auditioned":False,
+                    "approved_for_final_mix":False,
+                })
+            (project/"story"/"AUDIO-SOURCE-MANIFEST.json").write_text(
+                json.dumps({"assets":rows}),encoding="utf-8")
+            story_path=project/"story"/"shots.json"
+            story_path.write_text(json.dumps({"shots":[]}),encoding="utf-8")
+            result=hybrid_splice.add_insert_sound_cues(project)
+            self.assertEqual([c["name"] for c in result["cues"]],["cannon_fire","siege_impact"])
+            self.assertEqual([c["t"] for c in result["cues"]],[239.760,246.060])
+            story=json.loads(story_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(story["sfx"]),2)
+            hybrid_splice.add_insert_sound_cues(project)
+            story=json.loads(story_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(story["sfx"]),2)
+
+    def test_hybrid_caption_excerpt_clips_start_and_end_without_losing_cues(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            source=root/"source.srt"
+            output=root/"excerpt.srt"
+            source.write_text(
+                "1\n00:03:40,000 --> 00:03:41,000\nOpening cannon crew\n\n"
+                "2\n00:04:19,000 --> 00:04:21,000\nWall impact and debris\n\n"
+                "3\n00:04:21,000 --> 00:04:22,000\nOutside the insert\n",
+                encoding="utf-8"
+            )
+            count=hybrid_splice.extract_caption_excerpt(source,output)
+            self.assertEqual(count,2)
+            excerpt=output.read_text(encoding="utf-8")
+            self.assertIn("Opening cannon crew",excerpt)
+            self.assertIn("Wall impact and debris",excerpt)
+            self.assertNotIn("Outside the insert",excerpt)
+            self.assertIn("00:00:00,000 --> 00:00:00,242",excerpt)
+            self.assertIn("00:00:39,142",excerpt)
+
     def test_custom_scene_function_boundaries_remain_runtime_loadable(self):
         scene = (ROOT / "video-projects" / "squire" / "constantinople-1453" /
                  "scenes" / "shots" / "constantinople-cinematic.js")
