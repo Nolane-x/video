@@ -1,19 +1,32 @@
 name: Squire - opening shotbook audit
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - "Squire · Constantinople 1453 · Cinematic redesign proof"
+    types:
+      - completed
     branches:
       - squire/constantinople-1453-redesign
-    paths:
-      - '.github/workflows/audit-squire-opening-review.yml'
   workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful redesign proof run to audit when manually dispatched."
+        required: true
+        type: string
+        default: "43567318021"
 
 permissions:
   actions: read
   contents: read
 
+env:
+  SOURCE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || inputs.source_run_id }}
+  SOURCE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
 jobs:
   audit:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -21,27 +34,27 @@ jobs:
       - name: Download exact proof artifact
         uses: actions/download-artifact@v4
         with:
-          name: squire-constantinople-redesign-proof-43567318021
+          name: squire-constantinople-redesign-proof-${{ env.SOURCE_RUN_ID }}
           path: source
           repository: Nolane-x/video
-          run-id: '43567318021'
+          run-id: ${{ env.SOURCE_RUN_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Audit all opening cues and create a lightweight review bundle
+      - name: Audit event accuracy, visual repetition and native-240fps proof
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p review
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
           root=Path("source")
-          p=root/"shots.json"
-          assert p.is_file(), "The source proof did not contain shots.json"
-          story=json.loads(p.read_text(encoding="utf-8"))
+          story=json.loads((root/"shots.json").read_text(encoding="utf-8"))
+          qa=json.loads((root/"OPENING-53S-QA.json").read_text(encoding="utf-8"))
           shots=sorted([s for s in story.get("shots",[]) if float(s.get("start",99999))<53.15],
                        key=lambda s:float(s.get("start",0)))
-          assert shots
+          assert shots, "The opening proof contains no timed shots."
+
           def expected(line):
               t=line.casefold()
               rules=[
@@ -55,75 +68,125 @@ jobs:
                 (("cannon crew","gun crew"),"night_gun_crew"),
                 (("distant thunder of guns","thunder of guns","guns in the darkness","distant cannon"),"night_guns"),
                 (("creak of carts","cart wheels","carts","horses shifting","horses","men calling","calling to one another"),"night_camp_detail"),
-                (("ottoman camp","dark fields"),"night_camp"),
+                (("beyond the dark","dark fields","ottoman camp"),"night_camp_detail"),
                 (("one defender among thousands",),"defender_identity"),
                 (("not a famous commander","you have spent fifty-three days","no longer certain","almost run out of strength","the question is no"),"actor_closeup"),
                 (("at midnight",),"final_night"),
                 (("walls are still standing","walls will hold"),"night_wall_watch")
               ]
               for words,name in rules:
-                if any(w in t for w in words): return name
+                  if any(w in t for w in words): return name
               return ""
+
+          def signature(template,args):
+              for key in ("beat","moment","variant"):
+                  value=args.get(key)
+                  if value is not None: return f"{template}|{key}={value}"
+              return template
+
           rows=[]
           for s in shots:
-            line=str(s.get("line") or "")
-            rows.append({
-              "id":s.get("id"),"start":round(float(s.get("start",0)),3),
-              "end":round(float(s.get("end",0)),3),"line":line,
-              "template":str(s.get("tpl") or ""),"expected":expected(line),
-              "args":s.get("args",{})
-            })
+              line=str(s.get("line") or "")
+              tpl=str(s.get("tpl") or "")
+              args=s.get("args") or {}
+              rows.append({
+                "id":s.get("id"),"start":round(float(s.get("start",0)),3),
+                "end":round(float(s.get("end",0)),3),"line":line,
+                "template":tpl,"beat":args.get("beat"),
+                "signature":signature(tpl,args),"expected":expected(line),"args":args
+              })
           mismatches=[r for r in rows if r["expected"] and r["template"]!=r["expected"]]
+
+          def runs_for(key):
+              runs=[]
+              for row in rows:
+                  value=row[key]
+                  if not runs or runs[-1]["value"]!=value:
+                      runs.append({"value":value,"count":1,"start":row["start"],"end":row["end"]})
+                  else:
+                      runs[-1]["count"]+=1
+                      runs[-1]["end"]=row["end"]
+              return runs
+
+          template_runs=runs_for("template")
+          signature_runs=runs_for("signature")
+          longest_template=max((r["count"] for r in template_runs),default=0)
+          longest_signature=max((r["count"] for r in signature_runs),default=0)
           counts={}
-          runs=[]
-          for r in rows:
-            counts[r["template"]]=counts.get(r["template"],0)+1
-            if not runs or runs[-1]["template"]!=r["template"]:
-              runs.append({"template":r["template"],"count":1,"start":r["start"],"end":r["end"]})
-            else:
-              runs[-1]["count"]+=1;runs[-1]["end"]=r["end"]
-          longest=max([x["count"] for x in runs],default=0)
+          for row in rows: counts[row["template"]]=counts.get(row["template"],0)+1
+
+          duration=float(qa.get("duration_seconds",0))
+          technical_ok=(
+              qa.get("status")=="TECHNICAL_PASS_PENDING_HUMAN_ARTISTIC_REVIEW"
+              and qa.get("resolution")==[1920,1080]
+              and qa.get("fps")=="240/1"
+              and int(qa.get("frames",0))==round(duration*240)
+              and 53.13<=duration<=53.17
+              and qa.get("audio_sample_rate")==48000
+              and qa.get("audio_channels")==2
+          )
           report={
-            "source_run":43567318021,
-            "source_sha":"aa62459aeb1d29ba89d56cc72783b39fc12e941a",
+            "source_run":int(os.environ["SOURCE_RUN_ID"]),
+            "source_sha":os.environ["SOURCE_SHA"],
             "shot_count":len(rows),"template_counts":counts,
-            "longest_consecutive_template_run":longest,
-            "mismatches":mismatches,"shots":rows,
-            "status":"PASS" if not mismatches and longest<=3 else "NEEDS_REWORK"
+            "longest_consecutive_template_run":longest_template,
+            "longest_consecutive_visual_signature_run":longest_signature,
+            "mismatches":mismatches,"technical_gate":technical_ok,
+            "technical_metadata":qa,"visual_signature_runs":signature_runs,
+            "shots":rows,
+            "status":"PASS" if technical_ok and not mismatches and longest_signature<=2 else "NEEDS_REWORK"
           }
-          Path("review/OPENING-SHOT-AUDIT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
-          lines=["# Opening shot audit","",
-                 "Status: "+report["status"],
-                 "Shots: "+str(len(rows)),
-                 "Longest same-template run: "+str(longest),
-                 "Expected event mismatches: "+str(len(mismatches)),"","## Template counts"]
+          Path("review/OPENING-SHOT-AUDIT.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          lines=[
+            "# Opening shot audit","",
+            "Status: "+report["status"],
+            "Shots: "+str(len(rows)),
+            "Longest raw template run: "+str(longest_template),
+            "Longest repeated visual signature: "+str(longest_signature),
+            "Event mismatches: "+str(len(mismatches)),
+            "Native 240fps technical gate: "+("PASS" if technical_ok else "FAIL"),
+            "","## Template counts"
+          ]
           for k,v in sorted(counts.items()): lines.append("- "+k+": "+str(v))
-          lines += ["","## Ordered shots"]
-          for r in rows:
-            lines.append("- "+str(r["start"])+"s ["+r["template"]+"] "+r["line"])
-          lines += ["","## Mismatches"]
+          lines += ["","## Ordered opening shots"]
+          for r in rows: lines.append("- "+str(r["start"])+"s ["+r["signature"]+"] "+r["line"])
+          lines += ["","## Event mismatches"]
           for r in mismatches:
-            lines.append("- "+str(r["start"])+"s expected "+r["expected"]+", got "+r["template"]+": "+r["line"])
-          Path("review/OPENING-SHOT-AUDIT.md").write_text("\n".join(lines)+"\n")
-          with open("review/OPENING-SHOTLIST.tsv","w") as f:
-            f.write("start\\tend\\tid\\ttemplate\\texpected\\tline\\n")
-            for r in rows:
-              f.write(str(r["start"])+"\\t"+str(r["end"])+"\\t"+str(r["id"])+"\\t"+r["template"]+"\\t"+r["expected"]+"\\t"+r["line"].replace("\\t"," ")+"\\n")
-          print(json.dumps({k:report[k] for k in ("status","shot_count","template_counts","longest_consecutive_template_run")},indent=2))
-          print("MISMATCH_COUNT",len(mismatches))
+              lines.append("- "+str(r["start"])+"s expected "+r["expected"]+", got "+r["template"]+": "+r["line"])
+          Path("review/OPENING-SHOT-AUDIT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
+          with open("review/OPENING-SHOTLIST.tsv","w",encoding="utf-8") as f:
+              f.write("start\tend\tid\ttemplate\tbeat\tsignature\texpected\tline\n")
+              for r in rows:
+                  line=r["line"].replace("\t"," ").replace("\n"," ")
+                  f.write(f'{r["start"]}\t{r["end"]}\t{r["id"]}\t{r["template"]}\t{r["beat"] or ""}\t{r["signature"]}\t{r["expected"]}\t{line}\n')
+          print(json.dumps({
+              "status":report["status"],"source_run":report["source_run"],
+              "shot_count":len(rows),"longest_template_run":longest_template,
+              "longest_visual_signature_run":longest_signature,
+              "mismatch_count":len(mismatches),"technical_gate":technical_ok
+          },indent=2))
           PY
+
+      - name: Build normal-speed review proxy and opening contact sheet
+        shell: bash
+        run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y --no-install-recommends ffmpeg
           cp source/constantinople-opening-53s-preview-240fps.mp4 review/
-          ffmpeg -hide_banner -v error -y -i review/constantinople-opening-53s-preview-240fps.mp4 \
+          ffmpeg -hide_banner -v error -y \
+            -i review/constantinople-opening-53s-preview-240fps.mp4 \
             -vf "fps=30,scale=960:540" -an -c:v libx264 -preset veryfast -crf 22 \
             review/constantinople-opening-53s-review-proxy.mp4
           cp source/OPENING-53S-QA.json review/
           cp source/redesign-motion-proof.json review/
           cp source/01-SCRIPT.md review/
           cp -a source/contact-sheets review/ 2>/dev/null || true
-          ffmpeg -hide_banner -v error -y -i review/constantinople-opening-53s-preview-240fps.mp4 \
-            -vf "fps=1,scale=480:270,tile=4x14" -frames:v 1 review/OPENING-53S-CONTACT-SHEET.jpg
+          ffmpeg -hide_banner -v error -y \
+            -i review/constantinople-opening-53s-preview-240fps.mp4 \
+            -vf "fps=1,scale=480:270,tile=4x14" -frames:v 1 \
+            review/OPENING-53S-CONTACT-SHEET.jpg
           (cd review && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
 
       - name: Upload small shotbook and contact-sheet evidence
