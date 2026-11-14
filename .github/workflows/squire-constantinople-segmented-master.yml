@@ -113,7 +113,9 @@ jobs:
             }
             const allowed = new Set([
               ".github/workflows/squire-constantinople-segmented-master.yml",
-              ".github/workflows/test-squire-constantinople.yml"
+              ".github/workflows/test-squire-constantinople.yml",
+              "tools/video/splice_constantinople_hybrid_insert.py",
+              "tests/test_squire_constantinople.py"
             ]);
             const unexpected = (comparison.data.files || [])
               .map(file => file.filename)
@@ -135,6 +137,12 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const branchRef = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: "cinematic/constantinople-hybrid-240fps"
+            });
+            const expectedSha = branchRef.data.commit.sha;
             const result = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -144,7 +152,7 @@ jobs:
               per_page: 30
             });
             for (const source of result.data.workflow_runs) {
-              if (source.conclusion !== "success" || !source.head_sha) continue;
+              if (source.conclusion !== "success" || source.head_sha !== expectedSha) continue;
               const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
