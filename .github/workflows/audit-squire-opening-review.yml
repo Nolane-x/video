@@ -122,7 +122,23 @@ jobs:
           cp source/redesign-motion-proof.json review/
           cp source/01-SCRIPT.md review/
           cp -a source/contact-sheets review/ 2>/dev/null || true
+          ffmpeg -hide_banner -v error -y -i review/constantinople-opening-53s-preview-240fps.mp4 \
+            -vf "fps=1,scale=480:270,tile=4x14" -frames:v 1 review/OPENING-53S-CONTACT-SHEET.jpg
           (cd review && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+
+      - name: Upload small shotbook and contact-sheet evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-opening-shot-audit-evidence-${{ github.run_id }}
+          path: |
+            review/OPENING-SHOT-AUDIT.json
+            review/OPENING-SHOT-AUDIT.md
+            review/OPENING-SHOTLIST.tsv
+            review/OPENING-53S-QA.json
+            review/OPENING-53S-CONTACT-SHEET.jpg
+            review/contact-sheets/
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload focused opening review package
         uses: actions/upload-artifact@v4
