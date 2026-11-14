@@ -725,7 +725,14 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-dejavu-core
-          export PATH="/usr/bin:/bin:$PATH"
+          STATIC_FFMPEG="$GITHUB_WORKSPACE/.tools/ffmpeg/bin/ffmpeg"
+          if "$STATIC_FFMPEG" -filters 2>/dev/null | grep -q subtitles; then
+            echo "Using the pinned project FFmpeg toolchain with libass."
+            export PATH="$GITHUB_WORKSPACE/.tools/ffmpeg/bin:$PATH"
+          else
+            echo "Pinned FFmpeg lacks libass; using Ubuntu FFmpeg for the captioned splice."
+            export PATH="/usr/bin:/bin:$PATH"
+          fi
           ffmpeg -hide_banner -filters | grep -q subtitles
           fc-match "DejaVu Sans" | grep -q "DejaVuSans"
           python -m py_compile tools/video/splice_constantinople_hybrid_insert.py
