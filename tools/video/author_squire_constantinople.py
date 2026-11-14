@@ -116,6 +116,8 @@ def choose_opening_template(text, context_text, index):
         return "actor_closeup"
     if "make an empire pay" in current:
         return "city_detail"
+    if "at midnight" in current:
+        return "final_night"
     if any(k in current for k in ("walls are still standing", "the walls will hold")):
         return "night_wall_watch"
 

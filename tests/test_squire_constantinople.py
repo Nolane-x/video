@@ -74,7 +74,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
 
     def test_opening_final_night_uses_event_specific_scenes(self):
         cases = [
-            ("At midnight, the walls are still standing.", "night", "night_wall_watch"),
+            ("At midnight, the walls are still standing.", "night", "final_night"),
             ("You can hear the Ottoman camp beyond the dark fields.", "night_camp", "night_camp"),
             ("The distant thunder of guns.", "night_guns", "night_guns"),
             ("A cannon crew is preparing the next shot.", "night_gun_crew", "night_gun_crew_detail"),
