@@ -106,6 +106,53 @@ def terrain_material():
     links.new(tex.outputs["Fac"],bump.inputs["Height"]);links.new(bump.outputs["Normal"],bs.inputs["Normal"])
     return m
 
+def repair_missing_prop_textures(imported):
+    """Replace broken optional Kenney atlas references with deterministic earthy materials.
+
+    Build 76 contains the exact GLB geometry but not the original Castle Kit
+    colormap.png sidecar. We therefore remove only missing image-node links and
+    preserve the material slots with neutral, source-honest fallback colors.
+    """
+    replacements=0
+    for obj in imported:
+        if obj.type!="MESH":
+            continue
+        for slot in obj.material_slots:
+            mat=slot.material
+            if not mat or not mat.use_nodes:
+                continue
+            nodes=mat.node_tree.nodes
+            links=mat.node_tree.links
+            missing=False
+            for node in list(nodes):
+                if node.type!="TEX_IMAGE" or not node.image:
+                    continue
+                filepath=Path(bpy.path.abspath(node.image.filepath))
+                if not filepath.is_file():
+                    missing=True
+                    for link in list(links):
+                        if link.from_node==node or link.to_node==node:
+                            links.remove(link)
+                    nodes.remove(node)
+            if missing:
+                label=(obj.name+" "+mat.name).casefold()
+                if any(k in label for k in ("iron","metal","chain","bolt","nail")):
+                    color=(.075,.085,.092,1)
+                elif any(k in label for k in ("stone","brick","wall","rock","tower")):
+                    color=(.34,.30,.24,1)
+                elif any(k in label for k in ("cloth","canvas","rope","banner")):
+                    color=(.42,.32,.20,1)
+                else:
+                    color=(.20,.12,.065,1)
+                bs=nodes.get("Principled BSDF")
+                if bs:
+                    bs.inputs["Base Color"].default_value=color
+                    bs.inputs["Roughness"].default_value=.84
+                mat.diffuse_color=color
+                replacements+=1
+    return replacements
+
+
 def import_prop(path: Path, name: str, target_height: float, x: float, y_start: float, y_end: float):
     before=set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=str(path))
@@ -140,7 +187,8 @@ def import_prop(path: Path, name: str, target_height: float, x: float, y_start: 
         if "wheel" in o.name.casefold() or "roller" in o.name.casefold():
             r0=o.rotation_euler.copy();o.keyframe_insert(data_path="rotation_euler",frame=1)
             o.rotation_euler.x+=math.tau*3;o.keyframe_insert(data_path="rotation_euler",frame=TOTAL)
-    return root, imported
+    missing_texture_replacements=repair_missing_prop_textures(imported)
+    return root, imported, missing_texture_replacements
 
 def import_worker(path: Path, name: str, x: float, y: float, action_stem: str, yaw: float=0.0, scale: float=1.0):
     before=set(bpy.data.objects)
@@ -221,9 +269,9 @@ def build_scene():
         area_light("Torch practical",(x,y,3.5),(x,0,5),140,(1.0,.42,.16),3.0)
 
     # Import the actual CC0 Castle Kit assets and animate the siege approach.
-    tower,_=import_prop(ASSETS/"siege-tower.glb","CC0 Castle Kit siege tower",13.8,-3.0,-19.0,-9.0)
-    ram,_=import_prop(ASSETS/"siege-ram.glb","CC0 Castle Kit siege ram",4.8,8.2,-17.0,-10.5)
-    trebuchet,_=import_prop(ASSETS/"siege-trebuchet.glb","CC0 Castle Kit trebuchet",5.5,-13.0,-20.0,-17.0)
+    tower,tower_objects,tower_repaired=import_prop(ASSETS/"siege-tower.glb","CC0 Castle Kit siege tower",13.8,-3.0,-19.0,-9.0)
+    ram,ram_objects,ram_repaired=import_prop(ASSETS/"siege-ram.glb","CC0 Castle Kit siege ram",4.8,8.2,-17.0,-10.5)
+    trebuchet,trebuchet_objects,trebuchet_repaired=import_prop(ASSETS/"siege-trebuchet.glb","CC0 Castle Kit trebuchet",5.5,-13.0,-20.0,-17.0)
 
     crew=[]
     crew.extend(import_worker(CHARACTER,"Ottoman artillery crew left", -7.0,-7.5,"walk_Armature",yaw=.15,scale=1.0) for _ in range(1))
@@ -264,7 +312,13 @@ def build_scene():
     # Every imported crew member must be a real rig with an assigned action.
     assert len(crew)==4 and all(x["action"] for x in crew), crew
     scene.frame_start=1;scene.frame_end=TOTAL
-    return {"crew":crew,"tower_objects":len(tower),"ram_objects":len(ram),"trebuchet_objects":len(trebuchet)}
+    return {
+        "crew":crew,
+        "tower_objects":len(tower_objects),
+        "ram_objects":len(ram_objects),
+        "trebuchet_objects":len(trebuchet_objects),
+        "missing_texture_fallback_slots":tower_repaired+ram_repaired+trebuchet_repaired
+    }
 
 def main():
     for p in [
@@ -299,8 +353,15 @@ def main():
         "limits":[
             "Generic Kenney Castle Kit siege engines are illustrative assets, not authenticated Ottoman or Byzantine equipment from 1453.",
             "The wall and camp are cinematic stand-ins, not measured reconstructions of the Theodosian walls.",
-            "The character outfit is a CC0-derived adaptation, not a historically authenticated Ottoman uniform."
-        ]
+            "The character outfit is a CC0-derived adaptation, not a historically authenticated Ottoman uniform.",
+            "The original Kenney Castle Kit colormap.png sidecar is not present in Build 76; affected material slots use explicitly generated neutral fallback colors while the source GLB geometry and exact SHA-256 are retained."
+        ],
+        "missing_texture_fallback_slots":manifest["missing_texture_fallback_slots"],
+        "imported_object_counts":{
+            "siege_tower":manifest["tower_objects"],
+            "siege_ram":manifest["ram_objects"],
+            "siege_trebuchet":manifest["trebuchet_objects"]
+        }
     }
     outjson=OUTPUT.with_suffix(".scene.json")
     outjson.parent.mkdir(parents=True,exist_ok=True)
