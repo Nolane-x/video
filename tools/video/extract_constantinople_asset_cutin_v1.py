@@ -57,12 +57,23 @@ def main():
   print("VERIFIED VOLUME",key,zpath.stat().st_size,meta["sha256"],flush=True)
  oga=zipfile.ZipFile(a.downloads/VOLUMES["opengameart"]["file"])
  nested=[n for n in oga.namelist() if n.endswith("kenney_castle-kit.zip")]
- if len(nested)!=1:raise RuntimeError(f"Kenney Castle Kit nested ZIP candidates: {nested[:10]}")
- inner_bytes=oga.read(nested[0])
- with zipfile.ZipFile(BytesIO(inner_bytes)) as inner:
-  models_manifest={}
+ if len(nested)>1:
+  raise RuntimeError(f"Kenney Castle Kit nested ZIP candidates are ambiguous: {nested[:10]}")
+ models_manifest={}
+ if len(nested)==1:
+  # Some older asset-library volumes preserve the original nested ZIP.
+  inner_bytes=oga.read(nested[0])
+  with zipfile.ZipFile(BytesIO(inner_bytes)) as inner:
+   for name in ("siege-tower.glb","siege-ram.glb","siege-trebuchet.glb"):
+    models_manifest[name]=extract_suffix(inner,"Models/GLB format/"+name,models/name,EXPECTED[name])
+  payload_layout="nested-kenney-zip"
+ else:
+  # Build 76 stores the Castle Kit files directly under the former ZIP path;
+  # the index retains the original archive name as a virtual path component.
+  # Extract the exact GLB entries from the verified outer volume instead.
   for name in ("siege-tower.glb","siege-ram.glb","siege-trebuchet.glb"):
-   models_manifest[name]=extract_suffix(inner,"Models/GLB format/"+name,models/name,EXPECTED[name])
+   models_manifest[name]=extract_suffix(oga,"Models/GLB format/"+name,models/name,EXPECTED[name])
+  payload_layout="flattened-castle-kit-tree"
  ph=zipfile.ZipFile(a.downloads/VOLUMES["polyhaven"]["file"])
  texture_manifest={}
  for name in ("castle_brick_02_red_diff_1k.jpg","castle_brick_02_red_nor_gl_1k.jpg"):
@@ -83,6 +94,7 @@ def main():
   "status":"PASS",
   "asset_library_release":"video-asset-library-build-41184526545",
   "volume_verification":VOLUMES,
+  "castle_kit_payload_layout":payload_layout,
   "models":models_manifest,
   "textures":texture_manifest,
   "character":{
