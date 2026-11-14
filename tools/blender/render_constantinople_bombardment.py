@@ -36,7 +36,7 @@ scene.render.film_transparent=False
 scene.render.threads_mode="FIXED"
 scene.render.threads=max(2,min(8,os.cpu_count() or 4))
 if hasattr(scene,"eevee"):
-    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=8
+    if hasattr(scene.eevee,"taa_render_samples"): scene.eevee.taa_render_samples=max(2,int(os.environ.get("BLENDER_EEVEE_SAMPLES","8")))
     if hasattr(scene.eevee,"use_gtao"): scene.eevee.use_gtao=True
     if hasattr(scene.eevee,"gtao_distance"): scene.eevee.gtao_distance=3.0
     if hasattr(scene.eevee,"gtao_factor"): scene.eevee.gtao_factor=1.2
@@ -443,7 +443,7 @@ elif os.environ.get("BLENDER_KEYFRAME_EXPORT") == "1":
     scene.render.image_settings.file_format="JPEG"
     scene.render.image_settings.color_mode="RGB"
     scene.render.image_settings.quality=94
-    scene.render.resolution_percentage=100
+    scene.render.resolution_percentage=max(50,min(100,int(os.environ.get("BLENDER_RESOLUTION_PERCENTAGE","100"))))
     for idx,src_frame in enumerate(frame_numbers,1):
         scene.frame_set(src_frame)
         for first,last,camera in cameras:
