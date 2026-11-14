@@ -7,7 +7,8 @@ from pathlib import Path
 CUSTOM = [
     "final_night", "night_wall_watch", "night_camp", "night_camp_detail",
     "night_guns", "night_gun_crew", "night_gun_crew_detail",
-    "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve", "defender_supply",
+    "assault_waves", "assault_first_wave", "assault_second_wave", "elite_reserve",
+    "defender_identity", "defender_supply", "rewind_map",
     "city_panorama", "command_camp", "gun_crew", "wall_battery",
     "repair_wall", "golden_horn", "relief_galleys", "ship_portage",
     "tunnel_cutaway", "church_refuge", "city_interior",

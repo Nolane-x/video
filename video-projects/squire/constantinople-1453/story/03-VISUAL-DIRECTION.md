@@ -16,10 +16,18 @@ Not a lecture made from slides. Treat the viewer as physically present in the ci
 
 ## Opening sequence — final night, then rewind
 
-The opening is cut from adjacent voice cues as one continuous event, not classified one subtitle fragment at a time. The intended order is: (1) watchtower/parapet establishing; (2) exhausted defender reaction; (3) Ottoman camp wide; (4) horses, wagons and camp movement detail; (5) distant artillery; (6) cannon crew loading/ramming close-up; (7) defender reaction; (8) layered assault waves at dawn; (9) the first assault, second wave and elite reserve as separate beats; (10) defender logistics — carrying water, stones, arrows and messages; (11) final emotional reaction; (12) city panorama and hard rewind to 6 April 1453. The author must use neighbouring time-aligned lines as context when a clause is split across shots. Event-specific scenes bypass generic map/item/close-up alternation.
+Current narration cue has priority. Use the preceding/following cue only to complete an obviously split clause; never let the next event overwrite the current speaker's action. Required visual progression:
+1. Wall/parapet establishing at midnight, then a separate exhausted-defender close-up
+2. Ottoman camp wide, followed by distinct close inserts of horses, wagon wheels/carts, and a runner/signal
+3. Distant artillery flash, one side-profile bombard silhouette, then a wide crew insert and separate stone-ball, powder, rammer and match close-ups
+4. A defender reaction before the dawn attack is announced
+5. An assault-wide shot, then separate first-wave ladders/arrows, second-wave breach/climbing and elite-reserve commander/formation
+6. A lone defender among thousands, then distinct logistics actions: water buckets, stone piles, arrow bundles and a message runner
+7. Reflective city shot, followed by a parchment geography/time transition explicitly marked 6 April 1453
+8. The first full-morning shots then begin with Ottoman army arriving, tents, artillery convoy and engineers
 
+The first-wave fragment "not be expected to survive" remains part of the first wave; it must not be reassigned to the second wave just because that phrase is nearby. "You are not a famous commander" and "one defender among thousands" are Byzantine POV beats, not Ottoman reserve shots. The crew-loading shot is Ottoman-side only. Event-specific opening scenes bypass generic insert cadence.
 
-The first narration passage stays in the final night; it must not be flattened into a repeated watchtower shot. Author the visual progression from the spoken events: exhausted defender on the parapet, distant Ottoman camp and moving fires, horses/wagons and silhouettes, far artillery flashes, a close loading/preparation insert with the cannon crew, the defender's reaction, and the first assault wave at dawn. Use the narration cues to select each scene, then hard-cut to 6 April 1453 for the chronological rewind. The city-side composite defender must never be staged as part of the Ottoman gun crew.
 
 ## Shot requirements
 - 550–800 shots expected for the long-form timeline; do not pad with random cuts.
