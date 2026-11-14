@@ -5,9 +5,11 @@ on:
     branches:
       - squire/constantinople-1453-240fps
       - squire/constantinople-1453-musicfix
+      - squire/constantinople-1453-redesign
     paths:
       - '.github/workflows/test-squire-constantinople.yml'
       - '.github/workflows/squire-constantinople-1453.yml'
+      - '.github/workflows/squire-constantinople-segmented-master.yml'
       - 'video-projects/squire/constantinople-1453/reuse-voice-run.json'
       - 'tools/video/import_squire_constantinople_foley.py'
       - 'tools/video/author_squire_constantinople.py'
@@ -37,7 +39,7 @@ jobs:
           curl -fL --retry 3 "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz" -o "$RUNNER_TEMP/actionlint.tar.gz"
           echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP"
-          "$RUNNER_TEMP/actionlint" -color .github/workflows/squire-constantinople-1453.yml .github/workflows/test-squire-constantinople.yml
+          "$RUNNER_TEMP/actionlint" -color .github/workflows/squire-constantinople-1453.yml .github/workflows/squire-constantinople-segmented-master.yml .github/workflows/test-squire-constantinople.yml
       - name: Compile and run Squire production regression tests
         run: |
           set -euo pipefail
