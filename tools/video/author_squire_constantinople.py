@@ -83,6 +83,42 @@ def opening_context(shots, index, max_gap=2.6):
     return " ".join(nearby)
 
 
+def opening_camp_detail_beat(text, index):
+    """Choose a distinct insert for each concrete camp cue in the opening."""
+    t = str(text or "").casefold()
+    if any(k in t for k in ("cart", "wagon", "wheel")):
+        return "carts"
+    if any(k in t for k in ("horse", "horses")):
+        return "horses"
+    if any(k in t for k in ("calling", "runner", "signal")):
+        return "signal"
+    if any(k in t for k in ("beyond the dark", "dark fields", "fields", "fire", "fires")):
+        return "fires"
+    return ("horses", "carts", "signal", "fires")[index % 4]
+
+
+def visual_signature_key(shot):
+    """A template's named beat is a better repetition signal than its template alone."""
+    args = shot.get("args") or {}
+    tpl = str(shot.get("tpl") or "")
+    for key in ("beat", "moment", "variant"):
+        value = args.get(key)
+        if value is not None:
+            return (tpl, key, str(value))
+    return (tpl, "", "")
+
+
+def max_consecutive_visual_signature_run(shots):
+    longest = current = 0
+    previous = None
+    for shot in shots:
+        signature = visual_signature_key(shot)
+        current = current + 1 if signature == previous else 1
+        longest = max(longest, current)
+        previous = signature
+    return longest
+
+
 def choose_opening_template(text, context_text, index):
     """Current narration cue wins; neighbours only complete syntactic fragments."""
     current = text.casefold()
@@ -600,11 +636,7 @@ def main():
             elif tpl == "night_wall_watch":
                 visual["beat"] = ("watch", "torch", "dread", "patrol")[i % 4]
             elif tpl == "night_camp_detail":
-                visual["beat"] = ("carts" if "cart" in text.casefold() else
-                                  "horses" if "horse" in text.casefold() else
-                                  "signal" if "calling" in text.casefold() else
-                                  "fires" if "fire" in text.casefold() else
-                                  ("horses", "carts", "signal", "fires")[i % 4])
+                visual["beat"] = opening_camp_detail_beat(text, i)
             elif tpl == "night_gun_crew_detail":
                 visual["beat"] = ("stone" if "stone ball" in text.casefold() else
                                   "powder" if "powder" in text.casefold() else

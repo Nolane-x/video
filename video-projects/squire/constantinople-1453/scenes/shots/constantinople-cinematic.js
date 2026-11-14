@@ -821,64 +821,152 @@ function drawNightWallWatch(g,t,info,a){
 }
 function drawNightCampDetail(g,t,info,a){
   const beat=a.beat||"horses";
-  gradient(g,0,H(),[[0,"#0f1723"],[.42,"#242d33"],[1,"#463528"]]);
-  path(g,[[0,610],[180,540],[400,590],[620,500],[850,570],[1100,485],[1340,560],[1570,475],[1780,535],[1920,480],[1920,1080],[0,1080]],"#18222b",null,0);
-  const scale=beat==="horses"?.72:beat==="carts"?.58:.64;
-  for(let i=0;i<6;i++){
-    const x=80+i*335,y=642+(i%2)*38,w=(135+(i%3)*18)*scale;
-    path(g,[[x-w,y],[x,y-150*scale],[x+w,y]],i%2?"#6e5038":"#8a6846","#30251e",5);
-    line(g,[[x,y-145*scale],[x,y]],"#b09064",3,.6);
-  }
+  const pulse=(Math.sin(t*3.4)+1)*.5;
+
   if(beat==="horses"){
-    for(let i=0;i<2;i++){
-      const x=610+i*690+Math.sin(t*1.35+i)*13,y=840,sc=1.42;
-      g.save();g.translate(x,y);g.scale(sc,sc);
-      path(g,[[-95,-48],[-60,-95],[14,-88],[80,-48],[66,5],[-65,5]],"#1d1b19","#080a0c",6);
-      circle(g,84,-82,28,"#211f1c");
-      path(g,[[90,-103],[119,-140],[133,-120],[103,-74]],"#211f1c",null,0);
-      line(g,[[-54,0],[-67,83+Math.sin(t*3+i)*7]],"#171614",15);
-      line(g,[[22,0],[35,83+Math.sin(t*3.2+i)*7]],"#171614",15);
-      line(g,[[59,-32],[90,-7]],"#9a7550",6);
-      line(g,[[83,-78],[119,-69]],"#9a7550",5);
-      circle(g,117,-142,4,"#d8c7a4");g.restore();
+    // Low stable-side insert: one working horse fills the frame; this is not
+    // another wide camp tableau. A tether, lantern and handler establish scale.
+    gradient(g,0,H(),[[0,"#0c1521"],[.42,"#202a31"],[1,"#493526"]]);
+    path(g,[[0,500],[270,430],[530,485],[810,400],[1080,465],[1350,390],[1640,450],[1920,385],[1920,1080],[0,1080]],"#18232c",null,0);
+    for(let x=80;x<1920;x+=250){
+      line(g,[[x,690],[x+150,675]],"#56432f",9,.8);
+      line(g,[[x+8,660],[x+8,770]],"#775d3e",8,.8);
     }
-    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.24,y:.98,h:.39,face:"tired",pose:"hold"},
-      {preset:"ottomanInfantry",x:.80,y:.98,h:.37,face:"neutral",pose:"carry"}],.94,.4);
-    for(let i=0;i<4;i++)dust(g,t,480+i*280,930,200+i,16,"#b99a72");
-  } else if(beat==="carts"){
-    const x=990+Math.sin(t*.48)*22,y=850;
-    path(g,[[x-280,y-125],[x+275,y-125],[x+235,y-22],[x-245,y-22]],"#65482f","#201a15",8);
-    for(let i=0;i<5;i++)path(g,[[x-215+i*102,y-126],[x-192+i*102,y-220],[x-150+i*102,y-126]],"#96734c",null,0);
-    for(const wx of [x-190,x+190]){
-      circle(g,wx,y+30,78,"#1d1a17");circle(g,wx,y+30,55,"#9a744d");
-      for(let spoke=0;spoke<12;spoke++){
-        const an=spoke*Math.PI/6+Math.sin(t*1.8)*.1;
-        line(g,[[wx,y+30],[wx+62*Math.cos(an),y+30+62*Math.sin(an)]],"#d2ae78",7);
-      }
-      circle(g,wx,y+30,12,"#d0b58a");
+    glow(g,390,485,190,"#e5a15c",.2);
+    smoke(g,t,390,430,340);
+    const stride=Math.sin(t*4.8)*15;
+    const bob=Math.sin(t*2.4)*5;
+    g.save();g.translate(955,875);g.scale(1.72,1.72);
+    // Body, shoulders and neck.
+    path(g,[[-150,-122],[-112,-174],[-20,-188],[74,-166],[138,-118],[116,-48],[40,-22],[-96,-30],[-158,-72]],"#302922","#0d0e0e",9);
+    path(g,[[54,-154],[103,-235],[158,-280],[204,-258],[180,-193],[124,-119]],"#3a3027","#111111",8);
+    path(g,[[160,-268],[174,-321],[193,-342],[203,-290],[188,-258]],"#2b251f","#111111",6);
+    path(g,[[190,-273],[225,-318],[242,-310],[220,-263]],"#2b251f","#111111",6);
+    path(g,[[194,-266],[236,-249],[224,-214],[180,-218]],"#44372d","#151311",7);
+    circle(g,205,-284,5,"#ead0a2");
+    // Mane and tail move independently from the torso.
+    path(g,[[112,-235],[128,-274],[145,-315],[165,-296],[149,-253],[133,-209]],"#171718",null,0);
+    path(g,[[-142,-130],[-208,-164],[-241,-148],[-216,-121],[-175,-116]],"#181818","#08090a",5);
+    line(g,[[-218,-146],[-260,-188+Math.sin(t*3)*13]],"#171718",12,.9);
+    // Saddle cloth, girth and reins.
+    path(g,[[-82,-170],[18,-181],[83,-142],[72,-92],[-54,-84]],"#7b4b38","#2b1d18",7);
+    line(g,[[-92,-112],[85,-112]],"#b38c5b",7,.9);
+    line(g,[[118,-195],[204,-218],[225,-247]],"#b38c5b",6,.9);
+    line(g,[[142,-190],[176,-104],[92,-64]],"#96744c",5,.85);
+    // Four articulated legs with alternating stride and visible hooves.
+    const legs=[
+      {x:-100,phase:0,front:false},{x:-30,phase:Math.PI,front:false},
+      {x:72,phase:Math.PI,front:true},{x:118,phase:0,front:true}
+    ];
+    for(const leg of legs){
+      const s=Math.sin(t*4.8+leg.phase)*17;
+      const knee=leg.front?-18:12;
+      line(g,[[leg.x,-48+bob],[leg.x+knee+s*.45,15+bob]],"#211d19",17);
+      line(g,[[leg.x+knee+s*.45,15+bob],[leg.x+s,94+Math.max(0,s*.3)]],"#171717",13);
+      path(g,[[leg.x+s-8,92+Math.max(0,s*.3)],[leg.x+s+17,92+Math.max(0,s*.3)],[leg.x+s+22,104],[leg.x+s-12,104]],"#0e0f10",null,0);
     }
-    line(g,[[x-340,y-105],[x-225,y-105]],"#6d4c2d",14);
-    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.20,y:.98,h:.38,face:"strained",pose:"push",walk:true,dir:1,speed:.16},
-      {preset:"ottomanInfantry",x:.78,y:.98,h:.35,face:"focused",pose:"carry",walk:true,dir:-1,speed:.12}],.94,.4);
-    dust(g,t,x-330,930,218,32,"#c2a17b");
-  } else if(beat==="signal"){
-    for(let i=0;i<4;i++)smoke(g,t+i*.2,230+i*480,440,270+i);
-    glow(g,1230,530,240,"#f0a35b",.24);
-    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.36,y:.98,h:.50,face:"urgent",pose:"run",walk:true,dir:1,speed:.46},
-      {preset:"ottomanElite",x:.72,y:.98,h:.45,face:"focused",pose:"point",flip:true}],.94,.48);
-    line(g,[[1330,640],[1410,610],[1485,590]],"#8b6a48",9);glow(g,1485,590,72,"#f2b56c",.36);
-  } else {
-    for(let i=0;i<13;i++){
-      const x=70+i*148,y=840+(i%3)*10;
-      glow(g,x,y,76,"#d98c42",.28);circle(g,x,y-6,10,"#f3b15e");
-      for(let j=0;j<3;j++)smoke(g,t+j*.3,x+(j-1)*11,y-30,310+j);
-    }
-    drawPeople(g,t,info,[{preset:"ottomanInfantry",x:.29,y:.98,h:.34,face:"tired",pose:"guard"},
-      {preset:"ottomanInfantry",x:.77,y:.98,h:.34,face:"neutral",pose:"guard"}],.94,.36);
+    g.restore();
+    // A stable hand leads the horse; rope is placed in the same plane as the bridle.
+    drawPeople(g,t,info,[
+      {preset:"ottomanInfantry",x:.18,y:.99,h:.42,face:"tired",pose:"hold"},
+      {preset:"ottomanInfantry",x:.83,y:.99,h:.38,face:"neutral",pose:"guard"}
+    ],.94,.4);
+    line(g,[[1180,500],[1285,575],[1390,625]],"#b08b5b",6,.8);
+    dust(g,t,1110,1010,388,18,"#b89a72");
+    return;
   }
+
+  if(beat==="carts"){
+    // Axle-height insert: the cart wheel and load are the subject, with the road
+    // leading back to the camp. Repeated tent rows and identical actor blocking
+    // are intentionally absent.
+    gradient(g,0,H(),[[0,"#111923"],[.42,"#29323a"],[1,"#51402f"]]);
+    path(g,[[0,480],[310,420],[610,500],[900,408],[1210,485],[1510,405],[1920,465],[1920,1080],[0,1080]],"#1a252e",null,0);
+    path(g,[[0,760],[400,710],[820,780],[1210,695],[1600,745],[1920,675],[1920,1080],[0,1080]],"#493b2e",null,0);
+    for(let i=0;i<7;i++){
+      const x=90+i*290,y=595+(i%2)*38;
+      glow(g,x,y,58,"#db8c43",.15);
+      smoke(g,t+i*.18,x,y-30,470+i);
+    }
+    const x=990+Math.sin(t*.48)*18,y=852;
+    // Wagon bed and iron-bound timber frame.
+    path(g,[[x-350,y-240],[x+270,y-215],[x+230,y-72],[x-320,y-85]],"#725337","#211a14",12);
+    for(let k=0;k<6;k++){
+      line(g,[[x-310+k*102,y-212+k*4],[x-286+k*96,y-96]],"#bd9662",8,.8);
+    }
+    path(g,[[x-235,y-245],[x-175,y-365],[x-40,y-354],[x+12,y-235]],"#876340","#302319",8);
+    path(g,[[x-62,y-240],[x+8,y-380],[x+145,y-365],[x+190,y-220]],"#6b4d34","#2a2018",8);
+    // Cargo is individually shaped and tied down.
+    for(let k=0;k<3;k++){
+      const bx=x-150+k*140,by=y-270+(k%2)*24;
+      path(g,[[bx-58,by+54],[bx-48,by-48],[bx+38,by-68],[bx+64,by+45]],k%2?"#8b6b43":"#a07b4d","#32251a",6);
+      line(g,[[bx-40,by-4],[bx+50,by+6]],"#d2b17c",5,.8);
+    }
+    // Two large spoked wheels rotate independently around the axle.
+    for(const wheel of [{x:x-230,y:y+35,r:132,phase:0},{x:x+210,y:y+24,r:118,phase:.32}]){
+      circle(g,wheel.x,wheel.y,wheel.r,"#1a1715");
+      circle(g,wheel.x,wheel.y,wheel.r-19,"#976f45");
+      circle(g,wheel.x,wheel.y,wheel.r-30,"#2a211a");
+      for(let spoke=0;spoke<14;spoke++){
+        const an=spoke*Math.PI/7+Math.sin(t*1.5+wheel.phase)*.08;
+        line(g,[[wheel.x,wheel.y],[wheel.x+(wheel.r-24)*Math.cos(an),wheel.y+(wheel.r-24)*Math.sin(an)]],"#d0a978",9);
+      }
+      circle(g,wheel.x,wheel.y,21,"#d6b786");
+      circle(g,wheel.x,wheel.y,8,"#3b2c20");
+    }
+    line(g,[[x-420,y-190],[x-338,y-187],[x-250,y-165]],"#9b754a",17,.9);
+    line(g,[[x-420,y-176],[x-338,y-174],[x-250,y-152]],"#d0a477",5,.9);
+    drawPeople(g,t,info,[
+      {preset:"ottomanInfantry",x:.16,y:.99,h:.48,face:"strained",pose:"push",walk:true,dir:1,speed:.16},
+      {preset:"ottomanInfantry",x:.84,y:.99,h:.42,face:"focused",pose:"carry",walk:true,dir:-1,speed:.12}
+    ],.94,.46);
+    dust(g,t,x-390,1000,218,34,"#c5a17b");
+    return;
+  }
+
+  if(beat==="signal"){
+    // High-angle signal beat: a runner crosses a ridge toward a torch post.
+    gradient(g,0,H(),[[0,"#0d1724"],[.38,"#242e37"],[1,"#493328"]]);
+    path(g,[[0,590],[270,520],[550,565],[820,470],[1080,535],[1360,430],[1630,500],[1920,405],[1920,1080],[0,1080]],"#18222d",null,0);
+    path(g,[[0,850],[320,760],[640,820],[960,720],[1280,790],[1600,690],[1920,755],[1920,1080],[0,1080]],"#4b3b2c",null,0);
+    for(let i=0;i<9;i++){
+      const x=120+i*220,y=700+(i%3)*24;
+      glow(g,x,y,64,"#e39246",.16);
+      if(i%2===0)smoke(g,t+i*.2,x,y-55,540+i);
+    }
+    const flameY=390+Math.sin(t*7)*9;
+    line(g,[[1460,910],[1460,flameY+30]],"#5d442d",25);
+    line(g,[[1460,650],[1460,flameY+30]],"#b78b55",6,.9);
+    glow(g,1460,flameY,260+30*pulse,"#ed9847",.34+.08*pulse);
+    path(g,[[1460,flameY+28],[1435,flameY-14],[1452,flameY-82],[1472,flameY-34],[1490,flameY+13]],"#f3ad58",null,0);
+    path(g,[[1460,flameY+17],[1452,flameY-18],[1464,flameY-55],[1475,flameY-12]],"#ffe2a2",null,0);
+    drawPeople(g,t,info,[
+      {preset:"ottomanInfantry",x:.34,y:.99,h:.61,face:"urgent",pose:"run",walk:true,dir:1,speed:.48},
+      {preset:"ottomanElite",x:.69,y:.98,h:.52,face:"focused",pose:"point",flip:true}
+    ],.94,.54);
+    line(g,[[1260,620],[1370,565],[1460,540]],"#97734a",8,.9);
+    dust(g,t,780,980,541,30,"#c0a07a");
+    return;
+  }
+
+  // Wide fire-line insert: a new composition between the establishing camp
+  // and the close horse/cart/signal details.
+  gradient(g,0,H(),[[0,"#111a27"],[.42,"#27323b"],[1,"#4a3527"]]);
+  path(g,[[0,580],[250,500],[510,560],[780,455],[1050,535],[1320,455],[1600,520],[1920,450],[1920,1080],[0,1080]],"#19232d",null,0);
+  for(let i=0;i<11;i++){
+    const x=90+i*178,y=820+(i%3)*28;
+    glow(g,x,y,105+20*pulse,"#e28c43",.2+.08*pulse);
+    path(g,[[x-36,y+18],[x-7,y-24],[x+28,y+18]],"#6e4e32","#34251b",5);
+    path(g,[[x,y+2],[x-10,y-25],[x+2,y-56],[x+15,y-26]],"#f0a158",null,0);
+    smoke(g,t+i*.16,x,y-42,610+i);
+  }
+  drawPeople(g,t,info,[
+    {preset:"ottomanInfantry",x:.25,y:.99,h:.38,face:"tired",pose:"guard"},
+    {preset:"ottomanInfantry",x:.76,y:.99,h:.38,face:"neutral",pose:"carry"}
+  ],.94,.4);
 }
 
-function drawNightGunCrewDetail(g,t,info,a){
+function drawNightGunCrewDetail
   const beat=a.beat||"rammer";
   gradient(g,0,H(),[[0,"#0d1520"],[.43,"#22292f"],[1,"#30241d"]]);
   path(g,[[0,920],[280,860],[560,890],[850,820],[1200,870],[1510,815],[1920,860],[1920,1080],[0,1080]],"#252625",null,0);
