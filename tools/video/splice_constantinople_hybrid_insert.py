@@ -184,8 +184,8 @@ def main() -> int:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("status") != "RENDERED_HYBRID_240FPS_PROOF_PENDING_HUMAN_REVIEW":
         raise RuntimeError("Blender proof status is not the expected review-pending state.")
-    if manifest.get("source_3d_keyframe_fps") != 60:
-        raise RuntimeError("Blender insert must be rendered from 60fps source keyframes.")
+    if manifest.get("source_3d_keyframe_fps") != 30:
+        raise RuntimeError("Blender insert must be rendered from 30fps source keyframes.")
     if manifest.get("output_fps") != "240/1" or manifest.get("average_fps") != "240/1":
         raise RuntimeError("Blender proof is not constant native-240fps output.")
     if int(manifest.get("decoded_frames", 0)) != INSERT_FRAMES:
