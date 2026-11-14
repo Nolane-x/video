@@ -966,7 +966,7 @@ function drawNightCampDetail(g,t,info,a){
   ],.94,.4);
 }
 
-function drawNightGunCrewDetail
+function drawNightGunCrewDetail(g,t,info,a){
   const beat=a.beat||"rammer";
   gradient(g,0,H(),[[0,"#0d1520"],[.43,"#22292f"],[1,"#30241d"]]);
   path(g,[[0,920],[280,860],[560,890],[850,820],[1200,870],[1510,815],[1920,860],[1920,1080],[0,1080]],"#252625",null,0);
