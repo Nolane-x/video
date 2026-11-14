@@ -27,6 +27,21 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(mod.progress_phase(.35,"Repair crews carry timber and masonry"),"repair")
         self.assertEqual(mod.progress_phase(.62,"Defenders listen beneath the wall as miners dig"),"tunnel")
         self.assertEqual(mod.progress_phase(.50,"The chain across the Golden Horn blocks the harbour"),"sea")
+    def test_opening_context_prioritizes_current_cue_over_future_events(self):
+        cues = [
+            ("the creak of carts,", "night_camp_detail"),
+            ("the distant thunder of guns.", "night_guns"),
+            ("Tonight, you are no longer certain.", "actor_closeup"),
+            ("It will come in waves.", "assault_waves"),
+            ("not be expected to survive.", "assault_first_wave"),
+            ("You are not a famous commander.", "actor_closeup"),
+            ("You are one defender among thousands,", "defender_identity"),
+            ("To understand that night,", "rewind_map"),
+        ]
+        for index, (line, expected) in enumerate(cues, start=1):
+            with self.subTest(line=line):
+                self.assertEqual(mod.choose_template(.02, line, index, {}, None, context_text=line), expected)
+
     def test_opening_event_context_preserves_split_clauses(self):
         samples = [
             ([{"start":0.0,"end":1.0,"line":"At dawn, the largest assault"},
@@ -76,7 +91,8 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         for name in (
             "final_night","night_wall_watch","night_camp","night_camp_detail",
             "night_guns","night_gun_crew","night_gun_crew_detail",
-            "assault_waves","assault_first_wave","assault_second_wave","elite_reserve","defender_supply",
+            "assault_waves","assault_first_wave","assault_second_wave","elite_reserve",
+            "defender_identity","defender_supply","rewind_map",
             "city_panorama","wall_battery","gun_crew","repair_wall","golden_horn","relief_galleys",
             "ship_portage","tunnel_cutaway","church_refuge","last_assault","aftermath_city"
         ):
