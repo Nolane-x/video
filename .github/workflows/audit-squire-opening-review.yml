@@ -1,0 +1,131 @@
+name: Squire - opening shotbook audit
+
+on:
+  push:
+    branches:
+      - squire/constantinople-1453-redesign
+    paths:
+      - '.github/workflows/audit-squire-opening-review.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download exact proof artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: squire-constantinople-redesign-proof-43567318021
+          path: source
+          repository: Nolane-x/video
+          run-id: '43567318021'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Audit all opening cues and create a lightweight review bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("source")
+          p=root/"shots.json"
+          assert p.is_file(), "The source proof did not contain shots.json"
+          story=json.loads(p.read_text(encoding="utf-8"))
+          shots=sorted([s for s in story.get("shots",[]) if float(s.get("start",99999))<53.15],
+                       key=lambda s:float(s.get("start",0)))
+          assert shots
+          def expected(line):
+              t=line.casefold()
+              rules=[
+                (("to understand that night","return to the morning","sixth of april"),"rewind_map"),
+                (("second wave","climb over what remains"),"assault_second_wave"),
+                (("first men may","not be expected to survive","first wave"),"assault_first_wave"),
+                (("largest assault","assault will begin","it will come in waves","come in waves","at dawn"),"assault_waves"),
+                (("sultan's best troops","the sultan's best","best troops"),"elite_reserve"),
+                (("carrying water","carry water","water, stones","stones, arrows","arrows, and messages","arrows and messages","messages wherever","wall is weakest"),"defender_supply"),
+                (("preparing the next shot","prepare the next shot","rammer","stone ball"),"night_gun_crew_detail"),
+                (("cannon crew","gun crew"),"night_gun_crew"),
+                (("distant thunder of guns","thunder of guns","guns in the darkness","distant cannon"),"night_guns"),
+                (("creak of carts","cart wheels","carts","horses shifting","horses","men calling","calling to one another"),"night_camp_detail"),
+                (("ottoman camp","dark fields"),"night_camp"),
+                (("one defender among thousands",),"defender_identity"),
+                (("not a famous commander","you have spent fifty-three days","no longer certain","almost run out of strength","the question is no"),"actor_closeup"),
+                (("at midnight",),"final_night"),
+                (("walls are still standing","walls will hold"),"night_wall_watch")
+              ]
+              for words,name in rules:
+                if any(w in t for w in words): return name
+              return ""
+          rows=[]
+          for s in shots:
+            line=str(s.get("line") or "")
+            rows.append({
+              "id":s.get("id"),"start":round(float(s.get("start",0)),3),
+              "end":round(float(s.get("end",0)),3),"line":line,
+              "template":str(s.get("tpl") or ""),"expected":expected(line),
+              "args":s.get("args",{})
+            })
+          mismatches=[r for r in rows if r["expected"] and r["template"]!=r["expected"]]
+          counts={}
+          runs=[]
+          for r in rows:
+            counts[r["template"]]=counts.get(r["template"],0)+1
+            if not runs or runs[-1]["template"]!=r["template"]:
+              runs.append({"template":r["template"],"count":1,"start":r["start"],"end":r["end"]})
+            else:
+              runs[-1]["count"]+=1;runs[-1]["end"]=r["end"]
+          longest=max([x["count"] for x in runs],default=0)
+          report={
+            "source_run":43567318021,
+            "source_sha":"aa62459aeb1d29ba89d56cc72783b39fc12e941a",
+            "shot_count":len(rows),"template_counts":counts,
+            "longest_consecutive_template_run":longest,
+            "mismatches":mismatches,"shots":rows,
+            "status":"PASS" if not mismatches and longest<=3 else "NEEDS_REWORK"
+          }
+          Path("review/OPENING-SHOT-AUDIT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          lines=["# Opening shot audit","",
+                 "Status: "+report["status"],
+                 "Shots: "+str(len(rows)),
+                 "Longest same-template run: "+str(longest),
+                 "Expected event mismatches: "+str(len(mismatches)),"","## Template counts"]
+          for k,v in sorted(counts.items()): lines.append("- "+k+": "+str(v))
+          lines += ["","## Ordered shots"]
+          for r in rows:
+            lines.append("- "+str(r["start"])+"s ["+r["template"]+"] "+r["line"])
+          lines += ["","## Mismatches"]
+          for r in mismatches:
+            lines.append("- "+str(r["start"])+"s expected "+r["expected"]+", got "+r["template"]+": "+r["line"])
+          Path("review/OPENING-SHOT-AUDIT.md").write_text("\n".join(lines)+"\n")
+          with open("review/OPENING-SHOTLIST.tsv","w") as f:
+            f.write("start\\tend\\tid\\ttemplate\\texpected\\tline\\n")
+            for r in rows:
+              f.write(str(r["start"])+"\\t"+str(r["end"])+"\\t"+str(r["id"])+"\\t"+r["template"]+"\\t"+r["expected"]+"\\t"+r["line"].replace("\\t"," ")+"\\n")
+          print(json.dumps({k:report[k] for k in ("status","shot_count","template_counts","longest_consecutive_template_run")},indent=2))
+          print("MISMATCH_COUNT",len(mismatches))
+          PY
+          cp source/constantinople-opening-53s-preview-240fps.mp4 review/
+          ffmpeg -hide_banner -v error -y -i review/constantinople-opening-53s-preview-240fps.mp4 \
+            -vf "fps=30,scale=960:540" -an -c:v libx264 -preset veryfast -crf 22 \
+            review/constantinople-opening-53s-review-proxy.mp4
+          cp source/OPENING-53S-QA.json review/
+          cp source/redesign-motion-proof.json review/
+          cp source/01-SCRIPT.md review/
+          cp -a source/contact-sheets review/ 2>/dev/null || true
+          (cd review && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+
+      - name: Upload focused opening review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-opening-shot-audit-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
