@@ -272,7 +272,7 @@ def progress_phase(p, text):
         "supply wagons", "wagons arrive"
     )):
         return "camp"
-    if any(k in t for ("mehmed", "rumeli", "bosporus", "bosphorus", "sultan", "ottoman army", "ottoman camp", "engineers measure")):
+    if any(k in t for k in ("mehmed", "rumeli", "bosporus", "bosphorus", "sultan", "ottoman army", "ottoman camp", "engineers measure")):
         return "camp"
     if any(k in t for k in ("city", "walls", "constantinople", "theodosian", "capital", "harbours", "harbors", "empire")):
         return "city"
