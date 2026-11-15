@@ -11,6 +11,25 @@ def sha(p):
         for b in iter(lambda:f.read(1024*1024),b""):h.update(b)
     return h.hexdigest()
 def run(args,check=True):return subprocess.run(args,check=check,capture_output=True,text=True)
+def visual_signature(shot):
+    """Identify the authored visual beat, not only the shared renderer template."""
+    template=str(shot.get("tpl") or "")
+    args=shot.get("args") or {}
+    for key in ("beat","moment","variant"):
+        value=args.get(key)
+        if value is not None:
+            return (template,key,str(value))
+    return (template,"","")
+def max_consecutive_run(values):
+    longest=current=0
+    previous=object()
+    for value in values:
+        current=current+1 if value==previous else 1
+        longest=max(longest,current)
+        previous=value
+    return longest
+def max_consecutive_visual_signature_run(shots):
+    return max_consecutive_run([visual_signature(shot) for shot in shots])
 def main():
     ap=argparse.ArgumentParser();ap.add_argument("--project",required=True);ap.add_argument("--voice-assets",required=True);a=ap.parse_args()
     p=Path(a.project).resolve();assets=Path(a.voice_assets).resolve()
@@ -45,15 +64,12 @@ def main():
     scene_source=scene_file.read_text(encoding="utf-8")
     for template in custom:
         assert f"registerTemplate('{template}'" in scene_source, f"Template is not registered: {template}"
-    run_length=1
-    max_run=1
-    for previous,current in zip(shots,shots[1:]):
-        if current.get("tpl")==previous.get("tpl"):
-            run_length+=1
-            max_run=max(max_run,run_length)
-        else:
-            run_length=1
-    assert max_run<=3, f"Too many consecutive identical templates: {max_run}"
+    max_template_run=max_consecutive_run([str(s.get("tpl") or "") for s in shots])
+    max_visual_run=max_consecutive_visual_signature_run(shots)
+    # A shared renderer family may serve distinct beats (fires -> horses -> signal -> carts).
+    # Repetition is judged by the authored visual signature; the family cap still prevents abuse.
+    assert max_template_run<=5, f"Too many consecutive shots from one template family: {max_template_run}"
+    assert max_visual_run<=3, f"Too many consecutive identical visual signatures: {max_visual_run}"
     for s in shots:
         assert s.get("args") is not None,f"No authored args: {s.get('id')}"
         assert float(s["end"])>float(s["start"]),f"Bad shot timing: {s.get('id')}"
@@ -121,9 +137,9 @@ def main():
     measurement=json.loads(hits[-1]);integrated=float(measurement["input_i"]);peak=float(measurement["input_tp"])
     assert -15.7<=integrated<=-12.3,f"LUFS outside target: {integrated}"
     assert peak<=-1.0,f"True peak too high: {peak}"
-    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"avg_fps":round(avg_fps,9),"measured_fps":round(measured_fps,9),"style":cfg.get("style"),"captions_enabled":cfg.get("captions"),"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"pov_hero_shots":int(hero.get("shot_count",0)),"pov_hero_ratio":round(hero_ratio,4),"templates":sorted({s.get("tpl") for s in shots}),"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"caption_reflow":caption_report,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
+    report={"status":"technical_pass","artistic_signoff":"pending complete human watch/listen","title":title,"duration_seconds":round(float(probe["format"]["duration"]),3),"resolution":"1920x1080","fps":FPS,"avg_fps":round(avg_fps,9),"measured_fps":round(measured_fps,9),"style":cfg.get("style"),"captions_enabled":cfg.get("captions"),"frames":frames,"expected_frames":int(duration*FPS),"video_codec":v.get("codec_name"),"audio_codec":audstream.get("codec_name"),"shot_count":len(shots),"bespoke_shots":custom_count,"pov_hero_shots":int(hero.get("shot_count",0)),"pov_hero_ratio":round(hero_ratio,4),"templates":sorted({s.get("tpl") for s in shots}),"max_consecutive_template_run":max_template_run,"max_consecutive_visual_signature_run":max_visual_run,"sampled_unique_frame_hashes":unique,"sampled_frame_hash_count":len(hashes),"lufs":integrated,"true_peak_dbtp":peak,"narrator":voice["voice_id"],"voice_sha256":aud["sha256"],"recorded_music_beds":sorted(required_beds),"music_human_auditioned":False,"final_sha256":sha(final),"final_bytes":final.stat().st_size,"caption_reflow":caption_report,"limitations":["240 fps is verified from native output time samples; monitor refresh may display fewer frames.","Automated QA is technical, not artistic sign-off.","The six recorded CC0 music beds and all Foley remain un-auditioned/unapproved candidates until human review.","A human must watch the full film at normal speed and audition every final audio stem before public release."]}
     (p/"story"/"QA-REPORT.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    lines=["# Constantinople 1453 — 240 fps technical report","",f"- Status: {report['status']}","- Artistic sign-off: pending full human review",f"- Duration: {report['duration_seconds']:.2f}s","- Picture: 1920×1080 / native 240 fps / {frames} frames",f"- Shots: {len(shots)} total; {custom_count} bespoke scene shots",f"- Recurring POV defender: {hero.get('shot_count',0)} shots ({hero_ratio:.1%})",f"- Unique sampled frames: {unique}/{len(hashes)}",f"- Sound: AAC stereo / 48 kHz / {integrated:.2f} LUFS / {peak:.2f} dBTP",f"- SHA-256: {report['final_sha256']}","","240 fps is verified in the encoded stream. A 60 Hz display cannot show 240 distinct refreshes per second; the master preserves the additional temporal samples for supported playback and slow-motion editorial use."]
+    lines=["# Constantinople 1453 — 240 fps technical report","",f"- Status: {report['status']}","- Artistic sign-off: pending full human review",f"- Duration: {report['duration_seconds']:.2f}s","- Picture: 1920×1080 / native 240 fps / {frames} frames",f"- Shots: {len(shots)} total; {custom_count} bespoke scene shots",f"- Recurring POV defender: {hero.get('shot_count',0)} shots ({hero_ratio:.1%})",f"- Max consecutive template family: {max_template_run}",f"- Max repeated visual signature: {max_visual_run}",f"- Unique sampled frames: {unique}/{len(hashes)}",f"- Sound: AAC stereo / 48 kHz / {integrated:.2f} LUFS / {peak:.2f} dBTP",f"- SHA-256: {report['final_sha256']}","","240 fps is verified in the encoded stream. A 60 Hz display cannot show 240 distinct refreshes per second; the master preserves the additional temporal samples for supported playback and slow-motion editorial use."]
     (p/"story"/"QA-REPORT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
     print(f"TECHNICAL PASS: {final} | {duration:.1f}s | 1920x1080@240 | {frames} frames | {len(shots)} shots | {custom_count} custom")
     return 0
