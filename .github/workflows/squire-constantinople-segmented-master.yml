@@ -139,22 +139,58 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const branchName = "cinematic/constantinople-hybrid-240fps";
             const branchRef = await github.rest.repos.getBranch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              branch: "cinematic/constantinople-hybrid-240fps"
+              branch: branchName
             });
             const expectedSha = branchRef.data.commit.sha;
             const result = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 411026999,
-              branch: "cinematic/constantinople-hybrid-240fps",
+              branch: branchName,
               status: "completed",
               per_page: 30
             });
+
+            // The proof must come from the current visual source. Permit only
+            // test/CI-only commits after the proof; never permit scene, render,
+            // keyframe, interpolation, audio or asset changes.
+            const allowedPostProofChanges = new Set([
+              ".github/workflows/test-squire-constantinople.yml",
+              "tests/test_hybrid_interpolation_pipeline.py",
+              "tests/test_squire_constantinople.py"
+            ]);
+
             for (const source of result.data.workflow_runs) {
-              if (source.conclusion !== "success" || source.head_sha !== expectedSha) continue;
+              if (source.conclusion !== "success" ||
+                  source.head_branch !== branchName ||
+                  !source.head_sha) continue;
+
+              const comparison = await github.request(
+                "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: source.head_sha,
+                  head: expectedSha
+                }
+              );
+              if (!["ahead", "identical"].includes(comparison.data.status)) continue;
+
+              const changed = (comparison.data.files || []).map(file => file.filename);
+              const unsafe = changed.filter(path => !allowedPostProofChanges.has(path));
+              if (unsafe.length) {
+                core.info(
+                  "Rejecting hybrid run " + source.id +
+                  " because render-affecting files changed after its proof: " +
+                  unsafe.join(", ")
+                );
+                continue;
+              }
+
               const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -163,17 +199,25 @@ jobs:
               });
               const expectedName = "constantinople-hybrid-240fps-proof-" + source.id;
               const artifact = artifacts.data.artifacts.find(
-                item => item.name === expectedName && !item.expired
+                item => item.name === expectedName &&
+                        !item.expired &&
+                        item.size_in_bytes > 1000000
               );
               if (!artifact) continue;
-              core.info("Using Blender 30fps proof run " + source.id +
-                        " from source " + source.head_sha);
+
+              core.info(
+                "Using Blender 30fps proof run " + source.id +
+                " at source " + source.head_sha +
+                "; current branch HEAD is " + expectedSha +
+                "; safe post-proof commits: " + changed.length
+              );
               core.setOutput("run_id", String(source.id));
               core.setOutput("source_sha", source.head_sha);
               return;
             }
             core.setFailed(
-              "No successful, non-expired 30fps Blender proof artifact is available."
+              "No successful, non-expired 30fps Blender proof artifact matches " +
+              "the current visual source (or safe test-only descendants)."
             );
 
       - name: Cancel superseded copies of this segmented render
