@@ -55,6 +55,24 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         ]
         self.assertEqual(qa.max_consecutive_visual_signature_run(variant_changes),1)
 
+    def test_hybrid_probe_uses_fast_metadata_and_counts_only_on_fallback(self):
+        from pathlib import Path
+        with patch.object(
+            hybrid_splice,"run",
+            return_value='{"streams":[],"format":{}}'
+        ) as mocked:
+            hybrid_splice.probe(Path("fixture.mp4"))
+            self.assertNotIn("-count_frames",mocked.call_args.args[0])
+            hybrid_splice.probe(Path("fixture.mp4"),count_frames=True)
+            self.assertIn("-count_frames",mocked.call_args.args[0])
+
+        self.assertEqual(hybrid_splice.stream_frame_count({"nb_frames":"57474"}),57474)
+        self.assertEqual(
+            hybrid_splice.stream_frame_count({"nb_frames":"N/A","nb_read_frames":"57474"}),
+            57474
+        )
+        self.assertEqual(hybrid_splice.stream_frame_count({}),0)
+
     def test_hybrid_splice_accepts_timestamp_rounded_avg_rate_but_keeps_240fps_gate(self):
         measured=hybrid_splice.validate_frame_rate({
             "r_frame_rate":"240/1",
