@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   # Keep each source revision isolated; superseding commits must not queue behind stale FFmpeg work.
-  group: constantinople-hybrid-240fps-\${{ github.ref }}-\${{ github.sha }}
+  group: constantinople-hybrid-240fps-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 
 env:
@@ -324,12 +324,12 @@ jobs:
             local index="$1"
             local expected="$2"
             local trim_filter="$3"
-            local input="out/interpolation/chunk-\${index}/frame_%05d.jpg"
-            local output="out/interpolation/part-\${index}.mp4"
+            local input="out/interpolation/chunk-${index}/frame_%05d.jpg"
+            local output="out/interpolation/part-${index}.mp4"
             ffmpeg -hide_banner -v error -y \
               -filter_threads 1 -threads 1 \
               -framerate "$KEYFRAME_FPS" -start_number 1 -i "$input" \
-              -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=obmc:me_mode=bilat:me=hexbs:search_param=16:vsbmc=0,scale=1920:1080:flags=lanczos,\${trim_filter}" \
+              -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=obmc:me_mode=bilat:me=hexbs:search_param=16:vsbmc=0,scale=1920:1080:flags=lanczos,${trim_filter}" \
               -frames:v "$expected" -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
               -r 240 -fps_mode cfr -video_track_timescale 240000 "$output"
             test -s "$output"
@@ -346,7 +346,7 @@ jobs:
           pids+=("$!")
 
           failed=0
-          for pid in "\${pids[@]}"; do
+          for pid in "${pids[@]}"; do
             if ! wait "$pid"; then failed=1; fi
           done
           if [[ "$failed" -ne 0 ]]; then
