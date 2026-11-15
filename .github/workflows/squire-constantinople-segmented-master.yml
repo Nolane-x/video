@@ -725,6 +725,31 @@ jobs:
           cp prior-proof/redesign-check.log "$KIT/projects/$PROJECT_NAME/build/redesign-check.log"
           cp prior-proof/redesign-contact-sheet.log "$KIT/projects/$PROJECT_NAME/build/redesign-contact-sheet.log"
 
+      - name: Persist the exact render profile used by the final master
+        shell: bash
+        run: |
+          set -euo pipefail
+          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
+          PROJ="$KIT/projects/$PROJECT_NAME"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          project=Path("integrations/h2-squire-studio/kit/projects/constantinople-1453-redesign-proof")
+          path=project/"config.json"
+          cfg=json.loads(path.read_text(encoding="utf-8"))
+          cfg["style"]="dusk"
+          cfg["fps"]=240
+          cfg["captions"]=True
+          cfg["captionStyle"]="squire"
+          path.write_text(json.dumps(cfg,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          saved=json.loads(path.read_text(encoding="utf-8"))
+          assert saved.get("style")=="dusk",saved
+          assert saved.get("fps")==240,saved
+          assert saved.get("captions") is True,saved
+          assert saved.get("captionStyle")=="squire",saved
+          print("MASTER PROFILE VERIFIED:",saved["style"],saved["fps"],saved["captions"],saved["captionStyle"])
+          PY
+
       - name: Splice Blender 3D bombardment into the exact 240fps master interval
         env:
           HYBRID_SOURCE_RUN_ID: ${{ needs.prepare-project.outputs.hybrid_run_id }}
