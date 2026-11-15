@@ -34,6 +34,11 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(visual,1)
         repeated=[{"tpl":"night_camp_detail","args":{"beat":"horses","variant":3}}]*4
         self.assertEqual(qa.max_consecutive_visual_signature_run(repeated),4)
+        variant_changes=[
+            {"tpl":"night_camp_detail","args":{"beat":"horses","variant":n}}
+            for n in range(4)
+        ]
+        self.assertEqual(qa.max_consecutive_visual_signature_run(variant_changes),1)
 
     def test_hybrid_bombard_insert_is_frame_exact_across_two_shards(self):
         self.assertEqual(hybrid_splice.START_FRAME, 52982)
