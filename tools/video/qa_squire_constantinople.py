@@ -21,6 +21,15 @@ def visual_signature(shot):
         if args.get(key) is not None
     )
     return (template,semantic)
+def story_duration_seconds(story: dict) -> float:
+    """Match the authoring pipeline: use explicit duration or the last shot end."""
+    duration=story.get("duration")
+    if duration:
+        return float(duration)
+    shots=story.get("shots") or []
+    if not shots:
+        raise ValueError("Story has neither an explicit duration nor any timed shots.")
+    return float(shots[-1]["end"])
 def expected_master_frame_count(duration: float, fps: int = FPS) -> int:
     """Return an exact CFR frame count or reject a duration off the frame grid."""
     exact=float(duration)*int(fps)
@@ -51,7 +60,7 @@ def main():
     assert preview.is_file() and preview.stat().st_size>50_000,"Missing 240fps moving proof"
     assert thumb.is_file() and thumb.stat().st_size>10_000,"Missing thumbnail"
     assert any((p/"build"/"sheets").glob("sheet_*.jpg")),"Contact sheets missing"
-    shots=story.get("shots") or [];duration=float(story.get("duration",0))
+    shots=story.get("shots") or [];duration=story_duration_seconds(story)
     assert 945<=duration<=975,f"Expected a 16-minute film (15:45–16:15), got {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
     custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city","actor_closeup","city_detail"}
