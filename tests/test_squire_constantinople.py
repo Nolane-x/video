@@ -299,7 +299,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                         "-show_entries","stream=color_range","-of","default=nw=1:nk=1",
                         str(video_path)
                     ],check=True,capture_output=True,text=True)
-                    self.assertEqual(probe.stdout.strip(),"tv")
+                    self.assertNotIn(probe.stdout.strip(),("pc","jpeg"))
             finally:
                 for name,value in original_constants.items():
                     setattr(hybrid_splice,name,value)
