@@ -729,8 +729,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          KIT="$GITHUB_WORKSPACE/integrations/h2-squire-studio/kit"
-          PROJ="$KIT/projects/$PROJECT_NAME"
           python - <<'PY'
           import json
           from pathlib import Path
