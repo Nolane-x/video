@@ -56,6 +56,11 @@ def main():
     assert cfg.get("fps")==FPS,f"Project config must be {FPS} fps"
     assert cfg.get("style")=="dusk",f"Cinematic grade must be dusk, got {cfg.get('style')!r}"
     assert cfg.get("captions") is True,"Readable on-frame captions must be enabled"
+    configured_duration=cfg.get("duration")
+    assert configured_duration is not None,"Project render duration is missing from config.json"
+    assert abs(float(configured_duration)-duration)<=0.001,(
+        f"Project/config duration mismatch: {configured_duration} vs {duration}"
+    )
     assert final.is_file() and final.stat().st_size>300_000,f"Missing/undersized final: {final}"
     assert preview.is_file() and preview.stat().st_size>50_000,"Missing 240fps moving proof"
     assert thumb.is_file() and thumb.stat().st_size>10_000,"Missing thumbnail"
