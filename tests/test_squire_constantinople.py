@@ -4,6 +4,7 @@ import unittest
 import tempfile
 import json
 import sys
+import shutil
 from unittest.mock import patch
 from pathlib import Path
 
@@ -42,6 +43,126 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(hybrid_splice.SECOND_SHARD_INSERT, 4902)
         self.assertEqual(hybrid_splice.SECOND_SHARD_SUFFIX, 52572)
         self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT + hybrid_splice.SECOND_SHARD_INSERT, 9394)
+
+    def test_hybrid_splice_round_trips_two_cfr240_shards_end_to_end(self):
+        import hashlib
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+            self.skipTest("FFmpeg is not installed")
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            kit=root/"kit"
+            project=kit/"projects"/"demo"
+            segments=root/"segments"
+            hybrid= root/"hybrid"
+            (project/"story").mkdir(parents=True)
+            (kit/"audio"/"sfx").mkdir(parents=True)
+            segments.mkdir()
+            hybrid.mkdir()
+
+            # Use a small deterministic fixture while keeping the production
+            # geometry: two 24-frame 240fps shards and one 24-frame insert.
+            original_constants={
+                name:getattr(hybrid_splice,name)
+                for name in ("START_FRAME","END_FRAME","INSERT_FRAMES","SHARD_FRAMES",
+                             "SHARD_BOUNDARY","FIRST_SHARD_INSERT","SECOND_SHARD_INSERT",
+                             "SECOND_SHARD_SUFFIX")
+            }
+            small_constants={
+                "START_FRAME":10,"END_FRAME":34,"INSERT_FRAMES":24,"SHARD_FRAMES":24,
+                "SHARD_BOUNDARY":24,"FIRST_SHARD_INSERT":14,"SECOND_SHARD_INSERT":10,
+                "SECOND_SHARD_SUFFIX":14
+            }
+            for name,value in small_constants.items():
+                setattr(hybrid_splice,name,value)
+
+            def make_video(path,color):
+                subprocess.run([
+                    "ffmpeg","-hide_banner","-v","error","-y",
+                    "-f","lavfi","-i",f"color=c={color}:s=1920x1080:r=240:d=0.1",
+                    "-frames:v","24","-an","-c:v","libx264","-preset","ultrafast",
+                    "-crf","23","-pix_fmt","yuv420p","-r","240","-fps_mode","cfr",
+                    "-video_track_timescale","240000",str(path)
+                ],check=True)
+
+            try:
+                make_video(segments/"constantinople-segment-0.mp4","0x26384b")
+                make_video(segments/"constantinople-segment-1.mp4","0x6b4230")
+                insert=hybrid/"constantinople-hybrid-240fps.mp4"
+                make_video(insert,"0x9b7548")
+
+                digest=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+                (hybrid/"manifest.json").write_text(json.dumps({
+                    "status":"RENDERED_HYBRID_240FPS_PROOF_PENDING_HUMAN_REVIEW",
+                    "source_3d_keyframe_fps":30,"output_fps":"240/1",
+                    "average_fps":"240/1","decoded_frames":24,
+                    "sha256_video":digest(insert)
+                }),encoding="utf-8")
+                (project/"story"/"captions.srt").write_text(
+                    "1\\n00:00:00,000 --> 00:00:00,100\\nCannon crew\\n\\n"
+                    "2\\n00:00:00,100 --> 00:00:00,200\\nWall impact\\n",
+                    encoding="utf-8"
+                )
+                assets=[]
+                for alias in ("cannon_fire","siege_impact"):
+                    path=kit/"audio"/"sfx"/f"{alias}.wav"
+                    path.write_bytes((alias+"-fixture").encode("utf-8"))
+                    assets.append({
+                        "alias":alias,"license":"CC0-1.0","source":alias+".ogg",
+                        "source_url":"https://opengameart.org/content/battle-at-sea",
+                        "converted_path":f"audio/sfx/{alias}.wav",
+                        "converted_sha256":digest(path),
+                        "human_auditioned":False,"approved_for_final_mix":False
+                    })
+                (project/"story"/"AUDIO-SOURCE-MANIFEST.json").write_text(
+                    json.dumps({"assets":assets}),encoding="utf-8")
+                (project/"story"/"shots.json").write_text(
+                    json.dumps({"shots":[]}),encoding="utf-8")
+                for index in (0,1):
+                    path=segments/f"constantinople-segment-{index}.mp4"
+                    (segments/f"segment-{index}-report.json").write_text(
+                        json.dumps({"sha256":digest(path),"bytes":path.stat().st_size}),
+                        encoding="utf-8"
+                    )
+
+                report=root/"HYBRID-INSERT-REPORT.json"
+                old_argv=sys.argv[:]
+                sys.argv=[
+                    "splice_constantinople_hybrid_insert.py",
+                    "--project",str(project),
+                    "--segments",str(segments),
+                    "--hybrid",str(hybrid),
+                    "--output-report",str(report),
+                    "--source-run-id","123456",
+                    "--source-sha","a"*40
+                ]
+                try:
+                    self.assertEqual(hybrid_splice.main(),0)
+                finally:
+                    sys.argv=old_argv
+
+                result=json.loads(report.read_text(encoding="utf-8"))
+                self.assertEqual(result["status"],"PASS")
+                self.assertEqual(result["master_frame_range"],[10,34])
+                self.assertEqual(result["frames"],24)
+                self.assertEqual(result["reencoded_shards"],[0,1])
+                self.assertEqual(result["audio_effects"]["cues"][0]["t"],239.510)
+                self.assertEqual(result["audio_effects"]["cues"][1]["t"],247.010)
+                self.assertEqual(result["caption_source"],"Squire reflowed project/story/captions.srt")
+                self.assertIn("Cannon crew",(hybrid/"insert-captions.srt").read_text())
+                for index in (0,1):
+                    self.assertTrue((segments/f"constantinople-segment-{index}.mp4").is_file())
+                    self.assertEqual(
+                        json.loads((segments/f"segment-{index}-report.json").read_text())["sha256"],
+                        result["replacement_shards"][index]["sha256"]
+                    )
+            finally:
+                for name,value in original_constants.items():
+                    setattr(hybrid_splice,name,value)
 
     def test_blender_insert_cannon_sfx_use_verified_cc0_assets_and_are_idempotent(self):
         import hashlib
