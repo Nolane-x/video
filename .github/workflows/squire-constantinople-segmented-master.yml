@@ -2,6 +2,7 @@
 # hard links where available, avoiding another multi-gigabyte segment copy.
 # 240fps validation keeps a strict nominal 240/1 clock and allows only 0.01fps
 # of container timestamp rounding in the average-rate and frame-count checks.
+# Trusted render reports + matching SHA-256 avoid redundant full-source frame scans.
 name: Squire · Constantinople 1453 · Segmented 240fps master
 
 on:
