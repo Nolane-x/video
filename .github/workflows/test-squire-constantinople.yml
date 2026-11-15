@@ -37,6 +37,13 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
+      - name: Install FFmpeg and caption fonts for splice integration tests
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-dejavu-core
+          ffmpeg -hide_banner -filters | grep -q subtitles
+          fc-match "DejaVu Sans" | grep -q "DejaVuSans"
       - name: Validate production workflows with pinned actionlint
         shell: bash
         run: |
