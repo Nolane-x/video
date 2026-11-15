@@ -103,8 +103,8 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                     "sha256_video":digest(insert)
                 }),encoding="utf-8")
                 (project/"story"/"captions.srt").write_text(
-                    "1\\n00:00:00,000 --> 00:00:00,100\\nCannon crew\\n\\n"
-                    "2\\n00:00:00,100 --> 00:00:00,200\\nWall impact\\n",
+                    "1\n00:00:00,000 --> 00:00:00,100\nCannon crew\n\n"
+                    "2\n00:00:00,100 --> 00:00:00,200\nWall impact\n",
                     encoding="utf-8"
                 )
                 assets=[]
