@@ -12,14 +12,15 @@ def sha(p):
     return h.hexdigest()
 def run(args,check=True):return subprocess.run(args,check=check,capture_output=True,text=True)
 def visual_signature(shot):
-    """Identify the authored visual beat, not only the shared renderer template."""
+    """Identify the authored visual beat and all explicit semantic variants."""
     template=str(shot.get("tpl") or "")
     args=shot.get("args") or {}
-    for key in ("beat","moment","variant"):
-        value=args.get(key)
-        if value is not None:
-            return (template,key,str(value))
-    return (template,"","")
+    semantic=tuple(
+        (key,str(args[key]))
+        for key in ("beat","moment","variant")
+        if args.get(key) is not None
+    )
+    return (template,semantic)
 def max_consecutive_run(values):
     longest=current=0
     previous=object()
