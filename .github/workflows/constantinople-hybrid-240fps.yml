@@ -483,51 +483,65 @@ jobs:
                 "frames",d,"sec; unique 60fps samples",unique,"/",len(hashes))
           PY
 
-      - name: Build contact sheet and provenance report
+      - name: Build immutable proof manifest and checkpoint verified media
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ github.run_id }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p out/proof
+          python tools/video/build_hybrid_proof_manifest.py \
+            --video constantinople-hybrid-240fps.mp4 \
+            --metadata out/metadata.json \
+            --voice-manifest voice-assets/manifest.json \
+            --score media/score.wav \
+            --cannon-fire media/cannon_fire.ogg \
+            --cannon-impact media/cannon_impact.ogg \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --source-sha "$SOURCE_SHA" \
+            --output out/proof/manifest.json
+          cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/proof/
+          cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log \
+             out/keyframe-sha256.txt out/proof/
+          (cd out/proof && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          test -s out/proof/constantinople-hybrid-240fps.mp4
+          test -s out/proof/manifest.json
+
+      - name: Upload verified hybrid 240fps media checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-hybrid-240fps-proof-${{ github.run_id }}
+          path: out/proof/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Build compact contact-sheet and review evidence
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p out/review
-          ffmpeg -hide_banner -v error -y -i constantinople-hybrid-240fps.mp4 \
+          ffmpeg -hide_banner -v error -y -i out/proof/constantinople-hybrid-240fps.mp4 \
             -vf "fps=1/2,scale=480:-1,tile=4x5" -frames:v 1 out/review/contact-sheet.jpg
-          python - <<'PY'
-          import hashlib,json
-          from pathlib import Path
-          def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
-          meta=json.load(open("out/metadata.json"))
-          v=next(x for x in meta["streams"] if x["codec_type"]=="video")
-          a=next(x for x in meta["streams"] if x["codec_type"]=="audio")
-          voice=json.loads(Path("voice-assets/manifest.json").read_text())
-          report={
-           "status":"RENDERED_HYBRID_240FPS_PROOF_PENDING_HUMAN_REVIEW",
-           "project":"53 Days to the End of an Empire",
-           "sequence":"The great bombard — crew preparation, loading, recoil, flight, wall impact and repair",
-           "classification":"illustrative 3D historical reconstruction; not archival footage",
-           "engine":"Blender Eevee + FFmpeg motion-compensated interpolation",
-           "dimensions":[v["width"],v["height"]],"output_fps":v["r_frame_rate"],
-           "average_fps":v["avg_frame_rate"],"decoded_frames":int(v["nb_read_frames"]),
-           "source_3d_keyframe_fps":30,"interpolated_to_240fps":True,
-           "source_keyframes":1176,"parallel_keyframe_shards":4,
-           "duration_seconds":float(meta["format"]["duration"]),
-           "video_codec":v["codec_name"],"audio_codec":a["codec_name"],
-           "audio_sample_rate":a["sample_rate"],"audio_channels":a["channels"],
-           "narration":{"voice_id":voice["voice_id"],"source_sha256":voice["audio"]["sha256"],
-             "source_time_start":220.760,"excerpt_duration":39.140},
-           "audio_assets":[
-             {"name":"Eye of the Storm","url":"https://opengameart.org/content/eye-of-the-storm-0","license":"CC0-1.0","sha256":sha("media/score.wav"),"human_auditioned":False},
-             {"name":"Cannon fire 1","url":"https://opengameart.org/content/battle-at-sea","license":"CC0-1.0","sha256":sha("media/cannon_fire.ogg"),"human_auditioned":False},
-             {"name":"Cannon impact","url":"https://opengameart.org/content/battle-at-sea","license":"CC0-1.0","sha256":sha("media/cannon_impact.ogg"),"human_auditioned":False}],
-           "limitations":["Generic large-bombard design, not a verified replica of Orban's exact gun.",
-             "Optical-flow frames may require visual review around fast debris and cuts.",
-             "CC0 score and effects are modern candidate recordings; human audition remains required.",
-             "This is a 39-second proof, not the complete film."],
-           "sha256_video":sha(p)}
-          Path("out/review/manifest.json").write_text(json.dumps(report,indent=2)+"\n")
-          PY
-          cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/review/
-          cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log out/keyframe-sha256.txt out/review/
-          (cd out/review && sha256sum -- * > SHA256SUMS.txt)
+          cp out/proof/manifest.json out/review/
+          cp out/proof/metadata.json out/review/
+          cp out/proof/blender-smoke.log out/proof/blender-keyframes.log \
+             out/proof/keyframe-sha256.txt out/review/
+          (cd out/review && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          test -s out/review/contact-sheet.jpg
+          test -s out/review/manifest.json
 
+      - name: Upload hybrid 240fps human-review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: constantinople-hybrid-240fps-review-${{ github.run_id }}
+          path: out/review/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
       - name: Upload hybrid 240fps proof bundle
         uses: actions/upload-artifact@v4
         with:
