@@ -21,8 +21,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: constantinople-hybrid-240fps
-  cancel-in-progress: true
+  # Keep each source revision isolated; superseding commits must not queue behind stale FFmpeg work.
+  group: constantinople-hybrid-240fps-\${{ github.ref }}-\${{ github.sha }}
+  cancel-in-progress: false
 
 env:
   VOICE_RUN_ID: "42448341267"
@@ -293,15 +294,114 @@ jobs:
           for f in media/*; do ffmpeg -hide_banner -v error -i "$f" -f null -; done
           sha256sum media/* | tee media/SHA256SUMS.txt
 
-      - name: Interpolate smooth 1080p CFR 240fps picture master
+      - name: Interpolate four frame-exact CFR 240fps picture shards in parallel
         shell: bash
         run: |
           set -euo pipefail
-          ffmpeg -hide_banner -v error -y \
-            -framerate "$KEYFRAME_FPS" -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
-            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=obmc:me_mode=bilat:me=hexbs:search_param=16:vsbmc=0,scale=1920:1080:flags=lanczos,tpad=stop_mode=clone:stop=1,trim=end_frame=9394" \
-            -frames:v 9394 -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
-            -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
+          mkdir -p out/interpolation
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path("out/keyframes")
+          specs = (
+              (0, 1, 296),
+              (1, 295, 590),
+              (2, 589, 884),
+              (3, 883, 1176),
+          )
+          for index, first, last in specs:
+              target = Path("out/interpolation") / f"chunk-{index}"
+              target.mkdir(parents=True, exist_ok=True)
+              for local_index, global_index in enumerate(range(first, last + 1), start=1):
+                  original = source / f"frame_{global_index:05d}.jpg"
+                  if not original.is_file():
+                      raise FileNotFoundError(original)
+                  (target / f"frame_{local_index:05d}.jpg").symlink_to(original.resolve())
+              print(f"Prepared interpolation shard {index}: global keyframes {first}..{last}")
+          PY
+
+          render_shard() {
+            local index="$1"
+            local expected="$2"
+            local trim_filter="$3"
+            local input="out/interpolation/chunk-\${index}/frame_%05d.jpg"
+            local output="out/interpolation/part-\${index}.mp4"
+            ffmpeg -hide_banner -v error -y \
+              -filter_threads 1 -threads 1 \
+              -framerate "$KEYFRAME_FPS" -start_number 1 -i "$input" \
+              -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=obmc:me_mode=bilat:me=hexbs:search_param=16:vsbmc=0,scale=1920:1080:flags=lanczos,\${trim_filter}" \
+              -frames:v "$expected" -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
+              -r 240 -fps_mode cfr -video_track_timescale 240000 "$output"
+            test -s "$output"
+          }
+
+          pids=()
+          render_shard 0 2353 "trim=end_frame=2353,setpts=PTS-STARTPTS" &
+          pids+=("$!")
+          render_shard 1 2352 "trim=start_frame=1:end_frame=2353,setpts=PTS-STARTPTS" &
+          pids+=("$!")
+          render_shard 2 2352 "trim=start_frame=1:end_frame=2353,setpts=PTS-STARTPTS" &
+          pids+=("$!")
+          render_shard 3 2337 "trim=start_frame=1:end_frame=2337,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop=1,trim=end_frame=2337" &
+          pids+=("$!")
+
+          failed=0
+          for pid in "\${pids[@]}"; do
+            if ! wait "$pid"; then failed=1; fi
+          done
+          if [[ "$failed" -ne 0 ]]; then
+            echo "At least one 240fps interpolation shard failed."
+            exit 1
+          fi
+
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          expected = (2353, 2352, 2352, 2337)
+          for index, count in enumerate(expected):
+              path = Path("out/interpolation") / f"part-{index}.mp4"
+              meta = json.loads(subprocess.run([
+                  "ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
+                  "-show_streams", "-of", "json", str(path)
+              ], check=True, capture_output=True, text=True).stdout)
+              stream = meta["streams"][0]
+              actual = int(stream.get("nb_read_frames") or stream.get("nb_frames") or 0)
+              assert actual == count, (index, actual, count, stream)
+              assert stream["r_frame_rate"] == "240/1", (index, stream)
+              assert stream["avg_frame_rate"] == "240/1", (index, stream)
+              assert (int(stream["width"]), int(stream["height"])) == (1920, 1080), (index, stream)
+              assert stream["pix_fmt"] == "yuv420p", (index, stream)
+              print(f"Interpolation shard {index}: PASS — {actual} CFR 240fps frames")
+          PY
+
+          {
+            for index in 0 1 2 3; do
+              printf "file '%s/out/interpolation/part-%s.mp4'\n" "$PWD" "$index"
+            done
+          } > "$RUNNER_TEMP/hybrid-parts.txt"
+
+          ffmpeg -hide_banner -v error -y -f concat -safe 0 \
+            -i "$RUNNER_TEMP/hybrid-parts.txt" -c copy -movflags +faststart \
+            out/picture-only-240fps.mp4
+
+          ffprobe -v error -count_frames -select_streams v:0 -show_streams -show_format \
+            -of json out/picture-only-240fps.mp4 > out/picture-only-probe.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          probe = json.loads(Path("out/picture-only-probe.json").read_text(encoding="utf-8"))
+          stream = probe["streams"][0]
+          frames = int(stream.get("nb_read_frames") or stream.get("nb_frames") or 0)
+          duration = float(probe["format"]["duration"])
+          assert frames == 9394, (frames, stream)
+          assert stream["r_frame_rate"] == "240/1" and stream["avg_frame_rate"] == "240/1", stream
+          assert (int(stream["width"]), int(stream["height"])) == (1920, 1080), stream
+          assert stream["pix_fmt"] == "yuv420p", stream
+          assert abs(duration - 9394 / 240) <= 0.01, duration
+          print("PARALLEL INTERPOLATION PASS:", frames, "frames; CFR 240fps;", duration, "seconds")
+          PY
           test -s out/picture-only-240fps.mp4
 
       - name: Mix narration, score and frame-synchronized cannon effects
