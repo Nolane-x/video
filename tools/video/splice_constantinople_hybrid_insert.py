@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from fractions import Fraction
 from pathlib import Path
 
 FPS = 240
@@ -130,6 +131,23 @@ def extract_caption_excerpt(source: Path, destination: Path) -> int:
     return count
 
 
+def validate_frame_rate(video: dict) -> float:
+    """Accept container timestamp rounding while retaining a strict 240fps gate."""
+    if video.get("r_frame_rate") != f"{FPS}/1":
+        raise RuntimeError(f"Nominal frame rate is not {FPS}/1: {video.get('r_frame_rate')}")
+    try:
+        average_fps = float(Fraction(str(video.get("avg_frame_rate", "0"))))
+    except (ValueError, ZeroDivisionError) as exc:
+        raise RuntimeError(
+            f"Average frame rate is missing or invalid: {video.get('avg_frame_rate')!r}"
+        ) from exc
+    if abs(average_fps - FPS) > 0.01:
+        raise RuntimeError(
+            f"Average frame rate {average_fps:.9f} is not within 0.01fps of {FPS}."
+        )
+    return average_fps
+
+
 def assert_video(
     path: Path,
     expected_frames: int,
@@ -158,12 +176,16 @@ def assert_video(
     duration = float(meta["format"]["duration"])
     if (int(video["width"]), int(video["height"])) != (1920, 1080):
         raise RuntimeError(f"{path.name}: unexpected resolution {video['width']}x{video['height']}")
-    if video.get("r_frame_rate") != "240/1" or video.get("avg_frame_rate") != "240/1":
-        raise RuntimeError(f"{path.name}: not CFR 240fps")
+    average_fps = validate_frame_rate(video)
     if frames != expected_frames:
         raise RuntimeError(f"{path.name}: {frames} frames, expected {expected_frames}")
     if abs(duration - expected_duration) > 0.02:
         raise RuntimeError(f"{path.name}: duration {duration}, expected {expected_duration}")
+    measured_fps = frames / duration if duration > 0 else 0.0
+    if duration <= 0 or abs(measured_fps - FPS) > 0.01:
+        raise RuntimeError(
+            f"{path.name}: frame-count/duration rate {measured_fps:.9f} is not {FPS}fps"
+        )
     if decode:
         run(["ffmpeg", "-hide_banner", "-v", "error", "-i", str(path), "-f", "null", "-"])
     return {
@@ -174,6 +196,8 @@ def assert_video(
         "codec": video.get("codec_name"),
         "pixel_format": video.get("pix_fmt"),
         "fps": FPS,
+        "average_fps": average_fps,
+        "measured_fps": measured_fps,
     }
 
 
