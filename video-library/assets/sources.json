@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "purpose": "Cross-genre reusable video resource library: bundle original assets and third-party items only when the specific record's license/rights supports redistribution; preserve provenance, restrictions and SHA-256.",
-  "checked_on": "2026-10-30",
+  "checked_on": "2026-10-31",
   "bundling_policy": {
     "allow_automatic": "Original assets created by this repository; item-level CC0/verified Public Domain records; NASA-origin media only under its distinct official media-use guidance after restrictive metadata filters; every third-party item keeps its source and rights basis.",
     "deny_automatic": "Non-commercial, no-derivatives, royalty-free marketplace, stock-site, unknown, conflicting, or mixed-license items unless item-level rights explicitly permit redistribution of the file itself. NASA media is not labelled CC0.",
@@ -878,6 +878,26 @@
       "authentication": "Public AWS S3 dataset access is documented with --no-sign-request; do not use the NARA Catalog API for bulk cache/download because its API terms separately prohibit storing API-returned content and require API keys",
       "bundling": "research-only-do-not-auto-download-media-until-bulk-record-schema-and-exact-item-rights-tests-pass",
       "note": "NARA states the AWS dataset contains more than 148 million digital-object URLs and its full catalog export is over 261 GB; the descriptions export is distributed in record-group and collection directories, each JSON file containing up to 10,000 descriptions. Promising candidate record groups include RG 111 (Army Signal Corps motion pictures), RG 342 (Air Force motion pictures/video) and RG 428 (Naval Photographic Center motion pictures). Before any media is downloaded, the importer must parse the exact record-level useRestriction.status and require Unrestricted, separately parse accessRestriction.status and require Unrestricted, verify that digital object files are publicly downloadable and audiovisual, then retain the record NAID/title, file-level source URL, rights notes and SHA-256. Unrestricted means no recorded copyright, donor or other use restrictions; it is not a blanket waiver of privacy, publicity, third-party, classified or other rights. The API terms prohibit storing content returned by the Catalog API; prefer the separately distributed AWS dataset only after validating its actual JSON schema and dataset conditions. This entry is research-only and contributes zero bytes until an importer passes the rights gate."
+    },
+    {
+      "id": "usfws-nctc-broll",
+      "title": "USFWS/NCTC — six official B-roll collections",
+      "provider": "U.S. Fish & Wildlife Service / National Conservation Training Center",
+      "kind": "official wildlife and nature video B-roll",
+      "category": "birds, wildlife, fisheries, Monarch butterflies, landscapes, conservation places and underwater habitats",
+      "source_page": "https://www.fws.gov/library/collections/b-roll-videos",
+      "source_indexes": [
+        "https://www.fws.gov/NCTC-american-bird-b-rolls",
+        "https://www.fws.gov/NCTC-fisheries-b-rolls",
+        "https://www.fws.gov/NCTC-monarch-butterfly-b-rolls",
+        "https://www.fws.gov/NCTC-people-and-places-b-rolls",
+        "https://www.fws.gov/NCTC-underwater-b-rolls"
+      ],
+      "license": "USFWS/NCTC collection notice invites download and use of the clips in videos and requests USFWS plus creator credit; this is not an explicit CC0 grant or raw-asset redistribution license",
+      "license_url": "https://www.fws.gov/library/collections/b-roll-videos",
+      "verified_page_license": false,
+      "bundling": "source-only-video-use-candidate-no-raw-asset-redistribution-until-specific-terms-reviewed",
+      "note": "The official index lists six B-roll collections. Category pages describe downloadable MP4 files via embedded VBrick players and request credit to the photographer/videographer/creator and U.S. Fish & Wildlife Service. The collection notice names USFWS/NCTC videographers Brett Billings, Ryan Hagerty and Doug Canfield and invites use in videos; this is recorded as a source-use notice, not CC0. Some productions contain music licensed to USFWS; the music license covers free distribution of the finished production in its entirety, while non-private public use of productions containing that licensed music requires a separate license. Do not reuse supplied soundtrack audio unless separately cleared. The public notice does not establish permission to redistribute raw MP4s in a standalone asset library, so this remains source-only. Resolve each exact VBrick MP4 URL from the official item/player page; never guess URLs. Preserve creator and USFWS credit. Prefer wildlife, birds, plants and landscapes without recognizable people; review identifiable visitors, children, researchers, fishermen, rangers, private property, third-party marks and cultural sensitivity before commercial/promotional use. Missing attribution, unresolved soundtrack rights, unclear clip-specific rights, or unverifiable media URLs mean skip. No downloads or indexed bytes are claimed by this entry. See research/USFWS_NCTC_BROLL.md."
     }
   ]
 }
