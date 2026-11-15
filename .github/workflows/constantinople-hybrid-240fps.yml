@@ -8,6 +8,12 @@ on:
       - 'tools/blender/render_constantinople_bombardment.py'
       - '.github/workflows/constantinople-hybrid-240fps.yml'
   workflow_dispatch:
+    inputs:
+      reuse_keyframe_run_id:
+        description: "Optional completed run ID containing exact four-shard 30fps keyframes; leave blank to render Blender again."
+        required: false
+        type: string
+        default: ""
 
 permissions:
   actions: read
@@ -24,9 +30,11 @@ env:
   KEYFRAME_FPS: "30"
   KEYFRAME_STRIDE: "8"
   EXPECTED_KEYFRAMES: "1176"
+  REUSE_KEYFRAME_RUN_ID: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[reuse-keyframes-43654882377]') && '43654882377' || (github.event_name == 'workflow_dispatch' && inputs.reuse_keyframe_run_id || '') }}
 
 jobs:
   preflight:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[reuse-keyframes-43654882377]')) && !(github.event_name == 'workflow_dispatch' && inputs.reuse_keyframe_run_id != '') }}
     name: Validate workflow, narration and Blender scene
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -107,6 +115,7 @@ jobs:
           retention-days: 2
 
   render-keyframe-shards:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[reuse-keyframes-43654882377]')) && !(github.event_name == 'workflow_dispatch' && inputs.reuse_keyframe_run_id != '') }}
     name: Render 30fps Blender keyframes shard ${{ matrix.shard }}
     needs: preflight
     runs-on: ubuntu-24.04
@@ -182,6 +191,7 @@ jobs:
           retention-days: 2
 
   assemble-hybrid-proof:
+    if: ${{ always() && (needs.preflight.result == 'success' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[reuse-keyframes-43654882377]')) || (github.event_name == 'workflow_dispatch' && inputs.reuse_keyframe_run_id != '')) && (needs.render-keyframe-shards.result == 'success' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[reuse-keyframes-43654882377]')) || (github.event_name == 'workflow_dispatch' && inputs.reuse_keyframe_run_id != '')) }}
     name: Assemble 240fps proof, mix audio and run strict media QA
     needs:
       - preflight
@@ -203,15 +213,21 @@ jobs:
       - name: Download Blender one-frame preflight evidence
         uses: actions/download-artifact@v4
         with:
-          name: constantinople-blender-preflight-${{ github.run_id }}
+          name: constantinople-blender-preflight-${{ env.REUSE_KEYFRAME_RUN_ID != '' && env.REUSE_KEYFRAME_RUN_ID || github.run_id }}
           path: out/preflight
+          repository: Nolane-x/video
+          run-id: ${{ env.REUSE_KEYFRAME_RUN_ID != '' && env.REUSE_KEYFRAME_RUN_ID || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all four keyframe shard artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: constantinople-keyframes-*-${{ github.run_id }}
+          pattern: constantinople-keyframes-*-${{ env.REUSE_KEYFRAME_RUN_ID != '' && env.REUSE_KEYFRAME_RUN_ID || github.run_id }}
           path: out/keyframe-shards
           merge-multiple: true
+          repository: Nolane-x/video
+          run-id: ${{ env.REUSE_KEYFRAME_RUN_ID != '' && env.REUSE_KEYFRAME_RUN_ID || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Reassemble and validate the exact global keyframe sequence
         shell: bash
@@ -282,7 +298,7 @@ jobs:
           set -euo pipefail
           ffmpeg -hide_banner -v error -y \
             -framerate "$KEYFRAME_FPS" -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
-            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,scale=1920:1080:flags=lanczos,trim=duration=$CLIP_DURATION,setpts=PTS-STARTPTS" \
+            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,scale=1920:1080:flags=lanczos,setpts=PTS-STARTPTS" \
             -frames:v 9394 -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
             -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
           test -s out/picture-only-240fps.mp4
@@ -302,7 +318,7 @@ jobs:
              loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
             -map "[out]" -t 39.140 -ar 48000 -ac 2 -c:a aac -b:a 256k out-audio.m4a
           ffmpeg -hide_banner -v error -y -i out/picture-only-240fps.mp4 -i out-audio.m4a \
-            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 39.140 \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy \
             -movflags +faststart constantinople-hybrid-240fps.mp4
 
       - name: Export subtitles and run strict media QA
