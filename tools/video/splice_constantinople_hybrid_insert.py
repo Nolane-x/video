@@ -102,13 +102,30 @@ def extract_caption_excerpt(source: Path, destination: Path) -> int:
     return count
 
 
-def assert_video(path: Path, expected_frames: int, expected_duration: float) -> dict:
+def assert_video(
+    path: Path,
+    expected_frames: int,
+    expected_duration: float,
+    *,
+    allow_full_range_input: bool = False,
+    decode: bool = True,
+) -> dict:
     meta = probe(path)
     video = video_stream(meta)
     if video.get("codec_name") != "h264":
         raise RuntimeError(f"{path.name}: expected H.264 video, got {video.get('codec_name')}")
-    if video.get("pix_fmt") != "yuv420p":
-        raise RuntimeError(f"{path.name}: expected yuv420p, got {video.get('pix_fmt')}")
+    allowed_formats = {"yuv420p"}
+    if allow_full_range_input:
+        # Squire can emit yuvj420p (full-range YUV). It is accepted only as
+        # an input format; final shards are normalized to limited-range BT.709.
+        allowed_formats.add("yuvj420p")
+    if video.get("pix_fmt") not in allowed_formats:
+        raise RuntimeError(
+            f"{path.name}: unsupported pixel format {video.get('pix_fmt')}; "
+            f"expected one of {sorted(allowed_formats)}"
+        )
+    if not allow_full_range_input and video.get("color_range") in {"pc", "jpeg"}:
+        raise RuntimeError(f"{path.name}: output remained full-range ({video.get('color_range')})")
     frames = int(video.get("nb_read_frames") or video.get("nb_frames") or 0)
     duration = float(meta["format"]["duration"])
     if (int(video["width"]), int(video["height"])) != (1920, 1080):
@@ -119,7 +136,8 @@ def assert_video(path: Path, expected_frames: int, expected_duration: float) -> 
         raise RuntimeError(f"{path.name}: {frames} frames, expected {expected_frames}")
     if abs(duration - expected_duration) > 0.02:
         raise RuntimeError(f"{path.name}: duration {duration}, expected {expected_duration}")
-    run(["ffmpeg", "-hide_banner", "-v", "error", "-i", str(path), "-f", "null", "-"])
+    if decode:
+        run(["ffmpeg", "-hide_banner", "-v", "error", "-i", str(path), "-f", "null", "-"])
     return {
         "frames": frames,
         "duration_seconds": duration,
@@ -173,7 +191,7 @@ def validate_hybrid_manifest_identity(
 def validate_existing_shards(segments: Path) -> list[dict]:
     """Validate both source shards and their reports before changing either file."""
     reports: list[dict] = []
-    for index in (0, 1):
+    for index in range(4):
         video_path = segments / f"constantinople-segment-{index}.mp4"
         report_path = segments / f"segment-{index}-report.json"
         if not video_path.is_file() or not report_path.is_file():
@@ -193,9 +211,36 @@ def validate_existing_shards(segments: Path) -> list[dict]:
             raise RuntimeError(f"Segment {index} report SHA-256 does not match its source video.")
         if "bytes" in report and int(report["bytes"]) != video_path.stat().st_size:
             raise RuntimeError(f"Segment {index} report byte count does not match its source video.")
-        assert_video(video_path, SHARD_FRAMES, SHARD_FRAMES / FPS)
+        assert_video(
+            video_path,
+            SHARD_FRAMES,
+            SHARD_FRAMES / FPS,
+            allow_full_range_input=True,
+            decode=False,
+        )
         reports.append(report)
     return reports
+
+
+def normalize_to_tv_range(
+    source: Path,
+    destination: Path,
+    expected_frames: int,
+    expected_duration: float,
+) -> dict:
+    """Re-encode one shard to limited-range BT.709 without changing frame timing."""
+    vf = "scale=in_range=auto:out_range=tv:out_color_matrix=bt709,format=yuv420p"
+    run([
+        shutil.which("ffmpeg") or "ffmpeg",
+        "-hide_banner", "-v", "error", "-y", "-i", str(source),
+        "-vf", vf, "-an", "-frames:v", str(expected_frames),
+        "-c:v", "libx264", "-preset", "slow", "-tune", "animation",
+        "-crf", "18", "-maxrate", "48M", "-bufsize", "96M",
+        "-pix_fmt", "yuv420p", "-color_range", "tv",
+        "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
+        str(destination),
+    ])
+    return assert_video(destination, expected_frames, expected_duration)
 
 
 def add_insert_sound_cues(project: Path) -> dict:
@@ -316,12 +361,12 @@ def main() -> int:
     replacements: list[dict] = []
     transaction_id = f"{args.source_run_id}-{args.source_sha.lower()[:12]}"
     source_paths = [
-        segments / "constantinople-segment-0.mp4",
-        segments / "constantinople-segment-1.mp4",
+        segments / f"constantinople-segment-{index}.mp4"
+        for index in range(4)
     ]
     source_report_paths = [
-        segments / "segment-0-report.json",
-        segments / "segment-1-report.json",
+        segments / f"segment-{index}-report.json"
+        for index in range(4)
     ]
 
     # Stage output beside the source shards so every os.replace stays on the
@@ -333,20 +378,24 @@ def main() -> int:
         temp_dir = Path(temp)
         output0 = temp_dir / "constantinople-segment-0.mp4"
         output1 = temp_dir / "constantinople-segment-1.mp4"
-        staged_videos = (output0, output1)
+        output2 = temp_dir / "constantinople-segment-2.mp4"
+        output3 = temp_dir / "constantinople-segment-3.mp4"
+        staged_videos = (output0, output1, output2, output3)
 
         run([
             ffmpeg_path, "-hide_banner", "-v", "error", "-y",
             "-i", str(source_paths[0]), "-i", str(captioned),
             "-filter_complex",
             (
-                f"[0:v]trim=start_frame=0:end_frame={START_FRAME},settb=expr=1/240,setpts=N[before];"
-                f"[1:v]trim=start_frame=0:end_frame={FIRST_SHARD_INSERT},settb=expr=1/240,setpts=N[insert];"
+                f"[0:v]scale=in_range=auto:out_range=tv:out_color_matrix=bt709,"
+                f"trim=start_frame=0:end_frame={START_FRAME},settb=expr=1/240,setpts=N[before];"
+                f"[1:v]scale=in_range=auto:out_range=tv:out_color_matrix=bt709,"
+                f"trim=start_frame=0:end_frame={FIRST_SHARD_INSERT},settb=expr=1/240,setpts=N[insert];"
                 "[before][insert]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
             "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "18",
-            "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p",
+            "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p", "-color_range", "tv",
             "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
             str(output0),
         ])
@@ -355,16 +404,36 @@ def main() -> int:
             "-i", str(source_paths[1]), "-i", str(captioned),
             "-filter_complex",
             (
-                f"[1:v]trim=start_frame={FIRST_SHARD_INSERT}:end_frame={INSERT_FRAMES},settb=expr=1/240,setpts=N[insert];"
-                f"[0:v]trim=start_frame={SECOND_SHARD_INSERT}:end_frame={SHARD_FRAMES},settb=expr=1/240,setpts=N[after];"
+                f"[1:v]scale=in_range=auto:out_range=tv:out_color_matrix=bt709,"
+                f"trim=start_frame={FIRST_SHARD_INSERT}:end_frame={INSERT_FRAMES},settb=expr=1/240,setpts=N[insert];"
+                f"[0:v]scale=in_range=auto:out_range=tv:out_color_matrix=bt709,"
+                f"trim=start_frame={SECOND_SHARD_INSERT}:end_frame={SHARD_FRAMES},settb=expr=1/240,setpts=N[after];"
                 "[insert][after]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
             "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "18",
-            "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p",
+            "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p", "-color_range", "tv",
             "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
             str(output1),
         ])
+
+        # The insert occupies shards 0 and 1; untouched shards 2 and 3 still
+        # need the same limited-range colour contract before stream-copy concat.
+        normalizations: list[dict] = []
+        for index in (2, 3):
+            verified = normalize_to_tv_range(
+                source_paths[index], staged_videos[index],
+                SHARD_FRAMES, SHARD_FRAMES / FPS,
+            )
+            normalizations.append({
+                "segment": index,
+                **verified,
+                "bytes": staged_videos[index].stat().st_size,
+                "sha256": sha256(staged_videos[index]),
+                "source_pixel_format": probe(source_paths[index])["streams"][0].get("pix_fmt"),
+                "target_pixel_format": "yuv420p",
+                "target_color_range": "tv",
+            })
 
         staged_reports: list[Path] = []
         for index, replacement in enumerate(staged_videos):
@@ -374,30 +443,36 @@ def main() -> int:
             updated_report.update({
                 "sha256": digest,
                 "bytes": replacement.stat().st_size,
-                "visual_insert": "Blender 3D great bombard",
-                "visual_insert_frame_range": [START_FRAME, END_FRAME - 1],
-                "visual_insert_frame_range_convention": "zero-based, inclusive",
-                "hybrid_source_run_id": args.source_run_id,
-                "hybrid_source_sha": args.source_sha.lower(),
+                "pixel_format": verified["pixel_format"],
+                "color_range": "tv",
+                "color_normalization": "auto-to-limited-range-bt709",
                 "transaction_id": transaction_id,
             })
+            if index in (0, 1):
+                updated_report.update({
+                    "visual_insert": "Blender 3D great bombard",
+                    "visual_insert_frame_range": [START_FRAME, END_FRAME - 1],
+                    "visual_insert_frame_range_convention": "zero-based, inclusive",
+                    "hybrid_source_run_id": args.source_run_id,
+                    "hybrid_source_sha": args.source_sha.lower(),
+                })
+                replacements.append({
+                    "segment": index,
+                    **verified,
+                    "bytes": replacement.stat().st_size,
+                    "sha256": digest,
+                })
             staged_report = temp_dir / f"segment-{index}-report.json"
             staged_report.write_text(
                 json.dumps(updated_report, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
             staged_reports.append(staged_report)
-            replacements.append({
-                "segment": index,
-                **verified,
-                "bytes": replacement.stat().st_size,
-                "sha256": digest,
-            })
 
         backup_dir = temp_dir / "backups"
         backup_dir.mkdir()
         commit_items: list[tuple[Path, Path, Path]] = []
-        for index in (0, 1):
+        for index in range(4):
             backup_video = backup_dir / f"segment-{index}.mp4.original"
             backup_report = backup_dir / f"segment-{index}.json.original"
             shutil.copy2(source_paths[index], backup_video)
@@ -412,7 +487,7 @@ def main() -> int:
                 os.replace(staged, destination)
 
             # Verify the committed files, not merely the temporary candidates.
-            for index in (0, 1):
+            for index in range(4):
                 committed = assert_video(
                     source_paths[index], SHARD_FRAMES, SHARD_FRAMES / FPS
                 )
@@ -449,7 +524,7 @@ def main() -> int:
                     + "; ".join(rollback_errors)
                 ) from commit_error
             raise RuntimeError(
-                "Hybrid splice commit failed; both source shards and reports were restored."
+                "Hybrid splice commit failed; all four source shards and reports were restored."
             ) from commit_error
     report = {
         "status": "PASS",
@@ -477,6 +552,8 @@ def main() -> int:
         "fps": FPS,
         "frames": INSERT_FRAMES,
         "reencoded_shards": [0, 1],
+        "color_normalized_shards": [0, 1, 2, 3],
+        "range_normalizations": normalizations,
         "original_shard_sha256": original_hashes,
         "replacement_shards": replacements,
         "audio_policy": "Original VoiceStudio narration and recorded score retained; verified CC0 cannon and wall-impact cues added to the Squire mix. Hybrid proof audio discarded.",
