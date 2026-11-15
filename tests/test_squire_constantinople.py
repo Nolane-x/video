@@ -55,6 +55,23 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         ]
         self.assertEqual(qa.max_consecutive_visual_signature_run(variant_changes),1)
 
+    def test_hybrid_splice_accepts_timestamp_rounded_avg_rate_but_keeps_240fps_gate(self):
+        measured=hybrid_splice.validate_frame_rate({
+            "r_frame_rate":"240/1",
+            "avg_frame_rate":"240001/1000"
+        })
+        self.assertAlmostEqual(measured,240.001,places=6)
+        with self.assertRaisesRegex(RuntimeError,"Nominal frame rate"):
+            hybrid_splice.validate_frame_rate({
+                "r_frame_rate":"239/1",
+                "avg_frame_rate":"240/1"
+            })
+        with self.assertRaisesRegex(RuntimeError,"Average frame rate"):
+            hybrid_splice.validate_frame_rate({
+                "r_frame_rate":"240/1",
+                "avg_frame_rate":"239/1"
+            })
+
     def test_hybrid_bombard_insert_is_frame_exact_across_two_shards(self):
         self.assertEqual(hybrid_splice.START_FRAME, 52982)
         self.assertEqual(hybrid_splice.END_FRAME, 62376)
