@@ -1,0 +1,17 @@
+SQUIRE CONSTANTINOPLE 1453 — FULL MASTER RENDER DISPATCH
+
+Render mode: FULL FRESH RENDER. Do not reuse or recover any prior segment artifacts.
+Source branch: squire/constantinople-1453-redesign
+Expected master: 1920x1080, H.264, constant 240fps.
+Expected duration: 957.9 seconds.
+Expected total frames: 229896.
+Segment plan: four independently rendered segments of exactly 57474 frames each.
+
+Required upstream proof sources:
+- Squire redesign proof run: 43675140984
+- Blender hybrid 240fps proof run: 43674619985
+- Hybrid source commit: 3713e7619ca235ba1e6585c38d709895e2bc32e5
+- Hybrid proof artifact: constantinople-hybrid-240fps-proof-43674619985
+
+The master workflow must resolve and verify the exact source proofs, splice the 9394-frame Blender bombard insert at the configured frame interval, retain the original master narration and music, then perform full-duration frame-count, CFR, decode, loudness, caption and checksum QA.
+Technical QA is not artistic sign-off. Full watch-through and audio audition remain required before public release.
