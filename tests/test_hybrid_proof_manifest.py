@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from tools.video.build_hybrid_proof_manifest import build_manifest
+MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "video" / "build_hybrid_proof_manifest.py"
+SPEC = importlib.util.spec_from_file_location("build_hybrid_proof_manifest", MODULE_PATH)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError(f"Cannot load manifest helper from {MODULE_PATH}")
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+build_manifest = MODULE.build_manifest
 
 
 class HybridProofManifestTests(unittest.TestCase):
