@@ -741,7 +741,7 @@ jobs:
           cfg["fps"]=240
           cfg["captions"]=True
           cfg["captionStyle"]="squire"
-          path.write_text(json.dumps(cfg,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          path.write_text(json.dumps(cfg,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           saved=json.loads(path.read_text(encoding="utf-8"))
           assert saved.get("style")=="dusk",saved
           assert saved.get("fps")==240,saved
