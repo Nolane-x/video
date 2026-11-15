@@ -17,6 +17,7 @@ on:
       - 'tools/video/import_squire_constantinople_foley.py'
       - 'tools/video/author_squire_constantinople.py'
       - 'tools/video/splice_constantinople_hybrid_insert.py'
+      - 'tools/video/qa_squire_constantinople.py'
       - 'tests/test_squire_constantinople.py'
   workflow_dispatch:
 
