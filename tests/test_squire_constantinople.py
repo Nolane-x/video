@@ -64,6 +64,18 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         self.assertEqual(hybrid_splice.SECOND_SHARD_SUFFIX, 52572)
         self.assertEqual(hybrid_splice.FIRST_SHARD_INSERT + hybrid_splice.SECOND_SHARD_INSERT, 9394)
 
+    def test_hybrid_source_identity_rejects_missing_or_malformed_provenance(self):
+        hybrid_splice.validate_source_identity(123456,"a"*40)
+        for run_id,source_sha in ((0,"a"*40),(-1,"a"*40),(123456,"not-a-sha"),(123456,"a"*39)):
+            with self.subTest(run_id=run_id,source_sha=source_sha):
+                with self.assertRaises(ValueError):
+                    hybrid_splice.validate_source_identity(run_id,source_sha)
+
+    def test_hybrid_audio_cue_timeline_must_cover_impact_and_audio_tail(self):
+        hybrid_splice.validate_cue_timeline(957.9)
+        with self.assertRaisesRegex(ValueError,"timeline ends"):
+            hybrid_splice.validate_cue_timeline(248.9)
+
     def test_hybrid_splice_round_trips_two_cfr240_shards_end_to_end(self):
         import hashlib
         import os
@@ -141,17 +153,23 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 (project/"story"/"AUDIO-SOURCE-MANIFEST.json").write_text(
                     json.dumps({"assets":assets}),encoding="utf-8")
                 (project/"story"/"shots.json").write_text(
-                    json.dumps({"shots":[]}),encoding="utf-8")
+                    json.dumps({"duration":957.9,"shots":[]}),encoding="utf-8")
                 for index in (0,1):
                     path=segments/f"constantinople-segment-{index}.mp4"
                     (segments/f"segment-{index}-report.json").write_text(
-                        json.dumps({"sha256":digest(path),"bytes":path.stat().st_size}),
+                        json.dumps({
+                            "status":"pass",
+                            "segment":index,
+                            "frames":24,
+                            "fps":240,
+                            "sha256":digest(path),
+                            "bytes":path.stat().st_size
+                        }),
                         encoding="utf-8"
                     )
 
                 report=root/"HYBRID-INSERT-REPORT.json"
-                old_argv=sys.argv[:]
-                sys.argv=[
+                argv=[
                     "splice_constantinople_hybrid_insert.py",
                     "--project",str(project),
                     "--segments",str(segments),
@@ -160,14 +178,73 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                     "--source-run-id","123456",
                     "--source-sha","a"*40
                 ]
-                try:
+                original_shard_hashes={
+                    index:digest(segments/f"constantinople-segment-{index}.mp4")
+                    for index in (0,1)
+                }
+
+                # A stale/mismatched report must fail before changing either
+                # source shard or the story's audio timeline.
+                report1=segments/"segment-1-report.json"
+                valid_report1=report1.read_text(encoding="utf-8")
+                invalid_data=json.loads(valid_report1)
+                invalid_data["sha256"]="0"*64
+                report1.write_text(json.dumps(invalid_data),encoding="utf-8")
+                with patch.object(sys,"argv",argv):
+                    with self.assertRaisesRegex(RuntimeError,"SHA-256"):
+                        hybrid_splice.main()
+                for index in (0,1):
+                    self.assertEqual(
+                        digest(segments/f"constantinople-segment-{index}.mp4"),
+                        original_shard_hashes[index]
+                    )
+                self.assertNotIn("sfx",json.loads(
+                    (project/"story"/"shots.json").read_text(encoding="utf-8")
+                ))
+                report1.write_text(valid_report1,encoding="utf-8")
+                original_report_contents={
+                    index:(segments/f"segment-{index}-report.json").read_text(encoding="utf-8")
+                    for index in (0,1)
+                }
+
+                # Simulate a runner/filesystem failure halfway through the
+                # four-file commit: rollback must restore both media and reports.
+                real_replace=os.replace
+                replace_calls={"count":0}
+                def fail_once(source,destination):
+                    replace_calls["count"]+=1
+                    if replace_calls["count"]==3:
+                        raise OSError("injected failure during second shard commit")
+                    return real_replace(source,destination)
+
+                with patch.object(hybrid_splice.os,"replace",side_effect=fail_once):
+                    with patch.object(sys,"argv",argv):
+                        with self.assertRaisesRegex(
+                            RuntimeError,"both source shards and reports were restored"
+                        ):
+                            hybrid_splice.main()
+                self.assertEqual(replace_calls["count"],7)
+                for index in (0,1):
+                    self.assertEqual(
+                        digest(segments/f"constantinople-segment-{index}.mp4"),
+                        original_shard_hashes[index]
+                    )
+                    self.assertEqual(
+                        (segments/f"segment-{index}-report.json").read_text(encoding="utf-8"),
+                        original_report_contents[index]
+                    )
+
+                with patch.object(sys,"argv",argv):
                     self.assertEqual(hybrid_splice.main(),0)
-                finally:
-                    sys.argv=old_argv
 
                 result=json.loads(report.read_text(encoding="utf-8"))
                 self.assertEqual(result["status"],"PASS")
                 self.assertEqual(result["master_frame_range"],[10,34])
+                self.assertEqual(result["master_frame_range_convention"],"zero-based, end-exclusive")
+                self.assertEqual(result["master_frame_range_inclusive"],[10,33])
+                self.assertEqual(result["source_attestation"]["run_id"],123456)
+                self.assertEqual(result["source_attestation"]["head_sha"],"a"*40)
+                self.assertTrue(result["transaction_id"].startswith("123456-"))
                 self.assertEqual(result["frames"],24)
                 self.assertEqual(result["reencoded_shards"],[0,1])
                 self.assertEqual(result["audio_effects"]["cues"][0]["t"],239.510)
@@ -209,7 +286,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             (project/"story"/"AUDIO-SOURCE-MANIFEST.json").write_text(
                 json.dumps({"assets":rows}),encoding="utf-8")
             story_path=project/"story"/"shots.json"
-            story_path.write_text(json.dumps({"shots":[]}),encoding="utf-8")
+            story_path.write_text(json.dumps({"duration":957.9,"shots":[]}),encoding="utf-8")
             result=hybrid_splice.add_insert_sound_cues(project)
             self.assertEqual([c["name"] for c in result["cues"]],["cannon_fire","siege_impact"])
             self.assertEqual([c["t"] for c in result["cues"]],[239.510,247.010])
@@ -225,9 +302,11 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             source=root/"source.srt"
             output=root/"excerpt.srt"
             source.write_text(
-                "1\n00:03:40,000 --> 00:03:41,000\nOpening cannon crew\n\n"
-                "2\n00:04:19,000 --> 00:04:21,000\nWall impact and debris\n\n"
-                "3\n00:04:21,000 --> 00:04:22,000\nOutside the insert\n",
+                "\ufeff" + (
+                    "1\n00:03:40,000 --> 00:03:41,000\nOpening cannon crew\n\n"
+                    "2\n00:04:19,000 --> 00:04:21,000\nWall impact and debris\n\n"
+                    "3\n00:04:21,000 --> 00:04:22,000\nOutside the insert\n"
+                ).replace("\n","\r\n"),
                 encoding="utf-8"
             )
             count=hybrid_splice.extract_caption_excerpt(source,output)

@@ -7,6 +7,7 @@ on:
       - squire/constantinople-1453-musicfix
       - squire/constantinople-1453-redesign
       - fix/squire-master-blender-3d-insert
+      - fix/squire-splice-atomic-qa
     paths:
       - '.github/workflows/test-squire-constantinople.yml'
       - '.github/workflows/squire-constantinople-1453.yml'
