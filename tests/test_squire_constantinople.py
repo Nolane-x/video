@@ -17,8 +17,23 @@ def load_module(name,path):
 mod=load_module("author_squire_constantinople",ROOT/"tools"/"video"/"author_squire_constantinople.py")
 foley=load_module("import_squire_constantinople_foley",ROOT/"tools"/"video"/"import_squire_constantinople_foley.py")
 hybrid_splice=load_module("splice_constantinople_hybrid_insert",ROOT/"tools"/"video"/"splice_constantinople_hybrid_insert.py")
+qa=load_module("qa_squire_constantinople",ROOT/"tools"/"video"/"qa_squire_constantinople.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_master_qa_distinguishes_visual_beats_within_one_template_family(self):
+        camp=[
+            {"tpl":"night_camp_detail","args":{"beat":"fires","variant":2}},
+            {"tpl":"night_camp_detail","args":{"beat":"horses","variant":3}},
+            {"tpl":"night_camp_detail","args":{"beat":"signal","variant":3}},
+            {"tpl":"night_camp_detail","args":{"beat":"carts","variant":0}},
+        ]
+        family=qa.max_consecutive_run([s["tpl"] for s in camp])
+        visual=qa.max_consecutive_visual_signature_run(camp)
+        self.assertEqual(family,4)
+        self.assertEqual(visual,1)
+        repeated=[{"tpl":"night_camp_detail","args":{"beat":"horses","variant":3}}]*4
+        self.assertEqual(qa.max_consecutive_visual_signature_run(repeated),4)
+
     def test_hybrid_bombard_insert_is_frame_exact_across_two_shards(self):
         self.assertEqual(hybrid_splice.START_FRAME, 52982)
         self.assertEqual(hybrid_splice.END_FRAME, 62376)
