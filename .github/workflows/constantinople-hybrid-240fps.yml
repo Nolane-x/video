@@ -504,8 +504,10 @@ jobs:
           cp constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt out/proof/
           cp out/metadata.json out/blender-smoke.log out/blender-keyframes.log \
              out/keyframe-sha256.txt out/proof/
-          (cd out/proof && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
-            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          (cd out/proof && sha256sum \
+            constantinople-hybrid-240fps.mp4 captions.srt RECONSTRUCTION-NOTES.txt \
+            manifest.json metadata.json blender-smoke.log blender-keyframes.log \
+            keyframe-sha256.txt > SHA256SUMS.txt)
           test -s out/proof/constantinople-hybrid-240fps.mp4
           test -s out/proof/manifest.json
 
@@ -529,8 +531,9 @@ jobs:
           cp out/proof/metadata.json out/review/
           cp out/proof/blender-smoke.log out/proof/blender-keyframes.log \
              out/proof/keyframe-sha256.txt out/review/
-          (cd out/review && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
-            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          (cd out/review && sha256sum \
+            contact-sheet.jpg manifest.json metadata.json blender-smoke.log \
+            blender-keyframes.log keyframe-sha256.txt > SHA256SUMS.txt)
           test -s out/review/contact-sheet.jpg
           test -s out/review/manifest.json
 
