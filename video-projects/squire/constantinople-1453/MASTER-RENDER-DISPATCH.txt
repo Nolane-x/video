@@ -13,5 +13,7 @@ Required upstream proof sources:
 - Hybrid source commit: 3713e7619ca235ba1e6585c38d709895e2bc32e5
 - Hybrid proof artifact: constantinople-hybrid-240fps-proof-43674619985
 
+Toolchain recovery: use the immutable FFmpeg release asset pinned in the master workflow; do not resolve a mutable latest URL.
+
 The master workflow must resolve and verify the exact source proofs, splice the 9394-frame Blender bombard insert at the configured frame interval, retain the original master narration and music, then perform full-duration frame-count, CFR, decode, loudness, caption and checksum QA.
 Technical QA is not artistic sign-off. Full watch-through and audio audition remain required before public release.
