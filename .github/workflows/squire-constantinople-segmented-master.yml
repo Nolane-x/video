@@ -1,5 +1,7 @@
 # The hybrid splice transaction preserves rollback originals with same-filesystem
 # hard links where available, avoiding another multi-gigabyte segment copy.
+# 240fps validation keeps a strict nominal 240/1 clock and allows only 0.01fps
+# of container timestamp rounding in the average-rate and frame-count checks.
 name: Squire · Constantinople 1453 · Segmented 240fps master
 
 on:
@@ -944,13 +946,14 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-dejavu-core
+          sudo apt-get install -y --no-install-recommends fontconfig fonts-dejavu-core
           STATIC_FFMPEG="$GITHUB_WORKSPACE/.tools/ffmpeg/bin/ffmpeg"
           if "$STATIC_FFMPEG" -filters 2>/dev/null | grep -q subtitles; then
             echo "Using the pinned project FFmpeg toolchain with libass."
             export PATH="$GITHUB_WORKSPACE/.tools/ffmpeg/bin:$PATH"
           else
             echo "Pinned FFmpeg lacks libass; using Ubuntu FFmpeg for the captioned splice."
+            sudo apt-get install -y --no-install-recommends ffmpeg
             export PATH="/usr/bin:/bin:$PATH"
           fi
           ffmpeg -hide_banner -filters | grep -q subtitles
