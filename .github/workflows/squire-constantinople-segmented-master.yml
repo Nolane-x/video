@@ -197,6 +197,91 @@ jobs:
               });
             }
 
+      - name: Reject reused segments from a different visual source revision
+        if: ${{ env.REUSE_RUN_ID != '' || env.RECOVERED_SEGMENT_RUN_ID != '' }}
+        uses: actions/github-script@v7
+        env:
+          REUSE_RUN_ID: ${{ env.REUSE_RUN_ID }}
+          RECOVERED_SEGMENT_RUN_ID: ${{ env.RECOVERED_SEGMENT_RUN_ID }}
+        with:
+          script: |
+            const allowedNonVisualChanges = new Set([
+              ".github/workflows/test-squire-constantinople.yml",
+              ".github/workflows/audit-squire-opening-review.yml",
+              "tools/video/splice_constantinople_hybrid_insert.py",
+              "tools/video/qa_squire_constantinople.py",
+              "tests/test_squire_constantinople.py",
+              "docs/AI_HANDOFF.md",
+              "docs/STATE.md",
+              "video-projects/squire/constantinople-1453/MASTER-RENDER-DISPATCH.txt"
+            ]);
+            const sourceRuns = [
+              ["reused segment source", process.env.REUSE_RUN_ID],
+              ["recovered segment source", process.env.RECOVERED_SEGMENT_RUN_ID]
+            ].filter(([, id]) => id);
+
+            for (const [label, rawId] of sourceRuns) {
+              const runId = Number(rawId);
+              if (!Number.isSafeInteger(runId) || runId <= 0) {
+                core.setFailed("Invalid " + label + " run ID: " + rawId);
+                return;
+              }
+              const response = await github.rest.actions.getWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId
+              });
+              const source = response.data;
+              if (source.head_branch !== "squire/constantinople-1453-redesign" ||
+                  source.path !== ".github/workflows/squire-constantinople-segmented-master.yml" ||
+                  !source.head_sha) {
+                core.setFailed("The " + label + " is not a segmented master run from the current project branch.");
+                return;
+              }
+              const comparison = await github.request(
+                "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: source.head_sha,
+                  head: context.sha
+                }
+              );
+              if (!["ahead", "identical"].includes(comparison.data.status)) {
+                core.setFailed("The " + label + " is not an ancestor of the current render source.");
+                return;
+              }
+              const changed = (comparison.data.files || []).map(file => file.filename);
+              const unsafe = changed.filter(file => !allowedNonVisualChanges.has(file));
+              if (unsafe.length) {
+                core.setFailed(
+                  "Refusing stale segment reuse from run " + runId +
+                  "; render-affecting source changes were found: " + unsafe.join(", ")
+                );
+                return;
+              }
+              const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId,
+                per_page: 100
+              });
+              const usable = artifacts.data.artifacts.filter(
+                item => item.name.startsWith("squire-constantinople-segment-") &&
+                        item.name.endsWith("-" + runId) &&
+                        !item.expired
+              );
+              if (!usable.length) {
+                core.setFailed("The " + label + " has no unexpired verified segment artifacts.");
+                return;
+              }
+              core.info(
+                "Accepted " + label + " run " + runId +
+                " at source " + source.head_sha +
+                " with " + usable.length + " unexpired segment artifact(s)."
+              );
+            }
+
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -568,6 +653,8 @@ jobs:
               "resolution": "1920x1080",
               "fps": 240,
               "avg_fps": round(avg_fps, 9),
+              "source_commit_sha": os.environ["GITHUB_SHA"],
+              "source_ref": os.environ["GITHUB_REF"],
               "bytes": f.stat().st_size,
               "sha256": hashlib.sha256(f.read_bytes()).hexdigest()
           }
