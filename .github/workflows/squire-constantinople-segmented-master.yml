@@ -876,10 +876,18 @@ jobs:
           npm install --no-audit --no-fund
           timeout 20m npx playwright install chromium
           tar -xzf "$GITHUB_WORKSPACE/prepared/constantinople-prepared-project.tar.gz" -C "$KIT"
+          # The extracted project is now authoritative; remove its compressed
+          # transfer bundle so the 14GB runner has room for four H.264 stages.
+          rm -f "$GITHUB_WORKSPACE/prepared/constantinople-prepared-project.tar.gz"
           cd "$GITHUB_WORKSPACE"
-          if [[ -d segments/source ]]; then cp -a segments/source/. segments/; fi
-          if [[ -d segments/recovery ]]; then cp -a segments/recovery/. segments/; fi
-          cp -a segments/current/. segments/
+          # Move verified shard files into one working directory instead of
+          # copying them: keeping both 5GB trees would exhaust runner storage.
+          for staging in segments/source segments/recovery segments/current; do
+            if [[ -d "$staging" ]]; then
+              find "$staging" -mindepth 1 -maxdepth 1 -exec mv -t segments/ -- {} +
+              rmdir "$staging"
+            fi
+          done
           python - <<'PY'
           import hashlib, json
           from pathlib import Path
@@ -902,6 +910,8 @@ jobs:
              "$KIT/projects/$PROJECT_NAME/build/redesign-motion-proof.json"
           cp prior-proof/redesign-check.log "$KIT/projects/$PROJECT_NAME/build/redesign-check.log"
           cp prior-proof/redesign-contact-sheet.log "$KIT/projects/$PROJECT_NAME/build/redesign-contact-sheet.log"
+          rm -rf "$GITHUB_WORKSPACE/prior-proof"
+          df -h "$GITHUB_WORKSPACE"
 
       - name: Persist the exact render profile used by the final master
         shell: bash
@@ -955,6 +965,8 @@ jobs:
             --output-report "$GITHUB_WORKSPACE/HYBRID-INSERT-REPORT.json" \
             --source-run-id "$HYBRID_SOURCE_RUN_ID" \
             --source-sha "$HYBRID_SOURCE_SHA"
+          rm -rf "$GITHUB_WORKSPACE/hybrid-proof"
+          df -h "$GITHUB_WORKSPACE"
 
       - name: Concatenate segments without re-encoding and verify the 16-minute silent master
         shell: bash
