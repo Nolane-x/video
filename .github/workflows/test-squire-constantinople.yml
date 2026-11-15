@@ -10,6 +10,7 @@ on:
       - '.github/workflows/test-squire-constantinople.yml'
       - '.github/workflows/constantinople-hybrid-240fps.yml'
       - '.github/workflows/squire-constantinople-1453.yml'
+      - 'tests/test_hybrid_interpolation_pipeline.py'
       - 'video-projects/squire/constantinople-1453/reuse-voice-run.json'
       - 'tools/video/import_squire_constantinople_foley.py'
       - 'tools/video/author_squire_constantinople.py'
@@ -40,8 +41,16 @@ jobs:
           echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP"
           "$RUNNER_TEMP/actionlint" -color .github/workflows/constantinople-hybrid-240fps.yml .github/workflows/squire-constantinople-1453.yml .github/workflows/test-squire-constantinople.yml
-      - name: Compile and run Squire production regression tests
+      - name: Install FFmpeg for native-240fps interpolation regression
+        shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/video/author_squire_constantinople.py tools/video/import_squire_constantinople_foley.py tests/test_squire_constantinople.py
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Compile and run Squire and hybrid 240fps regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/video/author_squire_constantinople.py tools/video/import_squire_constantinople_foley.py tests/test_squire_constantinople.py tests/test_hybrid_interpolation_pipeline.py
           python tests/test_squire_constantinople.py
+          python tests/test_hybrid_interpolation_pipeline.py
