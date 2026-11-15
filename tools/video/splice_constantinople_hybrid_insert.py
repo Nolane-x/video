@@ -74,11 +74,26 @@ def backup_original_file(source: Path, destination: Path) -> str:
         return "copy"
 
 
-def probe(path: Path) -> dict:
-    return json.loads(run([
-        "ffprobe", "-v", "error", "-count_frames", "-show_streams",
-        "-show_format", "-of", "json", str(path)
-    ]))
+def probe(path: Path, *, count_frames: bool = False) -> dict:
+    args = ["ffprobe", "-v", "error"]
+    if count_frames:
+        args.append("-count_frames")
+    args.extend(["-show_streams", "-show_format", "-of", "json", str(path)])
+    return json.loads(run(args))
+
+
+def stream_frame_count(video: dict) -> int:
+    """Read muxer frame metadata, returning zero when the container omits it."""
+    for key in ("nb_read_frames", "nb_frames"):
+        value = video.get(key)
+        if value not in (None, "", "N/A"):
+            try:
+                count = int(value)
+            except (TypeError, ValueError):
+                continue
+            if count > 0:
+                return count
+    return 0
 
 
 def video_stream(meta: dict) -> dict:
@@ -155,6 +170,7 @@ def assert_video(
     *,
     allow_full_range_input: bool = False,
     decode: bool = True,
+    trusted_frame_count: int | None = None,
 ) -> dict:
     meta = probe(path)
     video = video_stream(meta)
@@ -172,7 +188,26 @@ def assert_video(
         )
     if not allow_full_range_input and video.get("color_range") in {"pc", "jpeg"}:
         raise RuntimeError(f"{path.name}: output remained full-range ({video.get('color_range')})")
-    frames = int(video.get("nb_read_frames") or video.get("nb_frames") or 0)
+    frames = stream_frame_count(video)
+    if frames and trusted_frame_count is not None and frames != trusted_frame_count:
+        raise RuntimeError(
+            f"{path.name}: container reports {frames} frames, expected {trusted_frame_count}"
+        )
+    if not frames:
+        if trusted_frame_count is not None:
+            # For a source artifact, its passing render report and matching
+            # SHA-256 are authoritative. Avoid decoding another multi-GB source
+            # simply because the MP4 container omits nb_frames.
+            frames = trusted_frame_count
+        else:
+            # Only fall back to an expensive count-frames probe when an output
+            # container does not expose frame metadata. A full decode follows.
+            counted_meta = probe(path, count_frames=True)
+            counted_video = video_stream(counted_meta)
+            frames = stream_frame_count(counted_video)
+            if not frames:
+                raise RuntimeError(f"{path.name}: ffprobe could not determine its frame count")
+            meta, video = counted_meta, counted_video
     duration = float(meta["format"]["duration"])
     if (int(video["width"]), int(video["height"])) != (1920, 1080):
         raise RuntimeError(f"{path.name}: unexpected resolution {video['width']}x{video['height']}")
@@ -269,6 +304,7 @@ def validate_existing_shards(segments: Path) -> list[dict]:
             SHARD_FRAMES / FPS,
             allow_full_range_input=True,
             decode=False,
+            trusted_frame_count=SHARD_FRAMES,
         )
         reports.append(report)
     return reports
@@ -292,7 +328,12 @@ def normalize_to_tv_range(
         "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
         str(destination),
     ])
-    return assert_video(destination, expected_frames, expected_duration)
+    return assert_video(
+        destination,
+        expected_frames,
+        expected_duration,
+        trusted_frame_count=expected_frames,
+    )
 
 
 def add_insert_sound_cues(project: Path) -> dict:
@@ -382,7 +423,12 @@ def main() -> int:
     source_digest = sha256(hybrid)
     if source_digest != manifest.get("sha256_video"):
         raise RuntimeError("Blender proof SHA-256 does not match its manifest.")
-    assert_video(hybrid, INSERT_FRAMES, INSERT_FRAMES / FPS)
+    assert_video(
+        hybrid,
+        INSERT_FRAMES,
+        INSERT_FRAMES / FPS,
+        trusted_frame_count=INSERT_FRAMES,
+    )
     # Read, hash, decode and validate BOTH source shards before mutating the
     # story timeline or either shard.
     existing_reports = validate_existing_shards(segments)
@@ -405,7 +451,12 @@ def main() -> int:
         "-frames:v", str(INSERT_FRAMES), "-video_track_timescale", "240000",
         str(captioned),
     ])
-    assert_video(captioned, INSERT_FRAMES, INSERT_FRAMES / FPS)
+    assert_video(
+        captioned,
+        INSERT_FRAMES,
+        INSERT_FRAMES / FPS,
+        trusted_frame_count=INSERT_FRAMES,
+    )
 
     original_hashes: dict[str, str] = {
         str(index): existing_reports[index]["sha256"] for index in (0, 1)
@@ -489,7 +540,12 @@ def main() -> int:
 
         staged_reports: list[Path] = []
         for index, replacement in enumerate(staged_videos):
-            verified = assert_video(replacement, SHARD_FRAMES, SHARD_FRAMES / FPS)
+            verified = assert_video(
+                replacement,
+                SHARD_FRAMES,
+                SHARD_FRAMES / FPS,
+                trusted_frame_count=SHARD_FRAMES,
+            )
             digest = sha256(replacement)
             updated_report = dict(existing_reports[index])
             updated_report.update({
@@ -543,7 +599,10 @@ def main() -> int:
             # Verify the committed files, not merely the temporary candidates.
             for index in range(4):
                 committed = assert_video(
-                    source_paths[index], SHARD_FRAMES, SHARD_FRAMES / FPS
+                    source_paths[index],
+                    SHARD_FRAMES,
+                    SHARD_FRAMES / FPS,
+                    trusted_frame_count=SHARD_FRAMES,
                 )
                 committed_report = json.loads(
                     source_report_paths[index].read_text(encoding="utf-8")
