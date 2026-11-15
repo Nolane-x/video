@@ -71,6 +71,29 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     hybrid_splice.validate_source_identity(run_id,source_sha)
 
+    def test_hybrid_manifest_must_match_selected_run_sha_and_media_size(self):
+        with tempfile.TemporaryDirectory() as td:
+            video=Path(td)/"proof.mp4"
+            video.write_bytes(b"verified-hybrid-video")
+            valid={
+                "source_run_id":"123456",
+                "source_commit_sha":"a"*40,
+                "video_bytes":video.stat().st_size
+            }
+            hybrid_splice.validate_hybrid_manifest_identity(valid,123456,"a"*40,video)
+            for field,value,message in (
+                ("source_run_id","999999","run ID"),
+                ("source_commit_sha","b"*40,"commit SHA"),
+                ("video_bytes",video.stat().st_size+1,"byte count"),
+            ):
+                invalid=dict(valid)
+                invalid[field]=value
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(RuntimeError,message):
+                        hybrid_splice.validate_hybrid_manifest_identity(
+                            invalid,123456,"a"*40,video
+                        )
+
     def test_hybrid_audio_cue_timeline_must_cover_impact_and_audio_tail(self):
         hybrid_splice.validate_cue_timeline(957.9)
         with self.assertRaisesRegex(ValueError,"timeline ends"):
@@ -130,6 +153,8 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 digest=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
                 (hybrid/"manifest.json").write_text(json.dumps({
                     "status":"RENDERED_HYBRID_240FPS_PROOF_PENDING_HUMAN_REVIEW",
+                    "source_run_id":"123456","source_commit_sha":"a"*40,
+                    "video_bytes":insert.stat().st_size,
                     "source_3d_keyframe_fps":30,"output_fps":"240/1",
                     "average_fps":"240/1","decoded_frames":24,
                     "sha256_video":digest(insert)
