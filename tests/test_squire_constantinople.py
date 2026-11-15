@@ -202,6 +202,37 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                     (project/"story"/"shots.json").read_text(encoding="utf-8")
                 ))
                 report1.write_text(valid_report1,encoding="utf-8")
+                original_report_contents={
+                    index:(segments/f"segment-{index}-report.json").read_text(encoding="utf-8")
+                    for index in (0,1)
+                }
+
+                # Simulate a runner/filesystem failure halfway through the
+                # four-file commit: rollback must restore both media and reports.
+                real_replace=os.replace
+                replace_calls={"count":0}
+                def fail_once(source,destination):
+                    replace_calls["count"]+=1
+                    if replace_calls["count"]==3:
+                        raise OSError("injected failure during second shard commit")
+                    return real_replace(source,destination)
+
+                with patch.object(hybrid_splice.os,"replace",side_effect=fail_once):
+                    with patch.object(sys,"argv",argv):
+                        with self.assertRaisesRegex(
+                            RuntimeError,"both source shards and reports were restored"
+                        ):
+                            hybrid_splice.main()
+                self.assertEqual(replace_calls["count"],7)
+                for index in (0,1):
+                    self.assertEqual(
+                        digest(segments/f"constantinople-segment-{index}.mp4"),
+                        original_shard_hashes[index]
+                    )
+                    self.assertEqual(
+                        (segments/f"segment-{index}-report.json").read_text(encoding="utf-8"),
+                        original_report_contents[index]
+                    )
 
                 with patch.object(sys,"argv",argv):
                     self.assertEqual(hybrid_splice.main(),0)
