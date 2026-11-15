@@ -21,6 +21,12 @@ hybrid_splice=load_module("splice_constantinople_hybrid_insert",ROOT/"tools"/"vi
 qa=load_module("qa_squire_constantinople",ROOT/"tools"/"video"/"qa_squire_constantinople.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_master_qa_requires_exact_duration_to_240fps_frame_grid(self):
+        self.assertEqual(qa.expected_master_frame_count(957.9),229896)
+        self.assertEqual(qa.expected_master_frame_count(39.141666666666666),9394)
+        with self.assertRaises(ValueError):
+            qa.expected_master_frame_count(957.902)
+
     def test_master_qa_distinguishes_visual_beats_within_one_template_family(self):
         camp=[
             {"tpl":"night_camp_detail","args":{"beat":"fires","variant":2}},
