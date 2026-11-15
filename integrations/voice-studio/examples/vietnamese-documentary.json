@@ -1,0 +1,49 @@
+{
+  "project": "mau-phim-tai-lieu",
+  "language": "vi",
+  "cast": {
+    "narrator": {
+      "provider": "korva",
+      "voice": "khanh_vy",
+      "language": "vi",
+      "speed": 1.0,
+      "seed": 42,
+      "settings": {
+        "total_steps": 32,
+        "num_threads": 4
+      }
+    },
+    "expert": {
+      "provider": "voicestudio",
+      "engine": "REPLACE_WITH_INSTALLED_ENGINE_ID_AFTER_LICENSE_REVIEW",
+      "voice": "REPLACE_WITH_SAVED_PROFILE_ID",
+      "language": "vi",
+      "speed": 1.0,
+      "seed": 42,
+      "description": "Vietnamese documentary expert, adult male, clear measured articulation, calm and credible delivery."
+    }
+  },
+  "segments": [
+    {
+      "id": "V001",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Đại dương vẫn còn lưu giữ những bí mật mà con người chưa từng khám phá."
+    },
+    {
+      "id": "V002",
+      "speaker_id": "expert",
+      "slot": "EXPERT",
+      "character": "Chuyên gia",
+      "text": "Điều quan trọng là chúng ta phải phân biệt giữa quan sát khoa học và giả thuyết."
+    },
+    {
+      "id": "V003",
+      "speaker_id": "narrator",
+      "slot": "NARRATOR",
+      "character": "Người dẫn chuyện",
+      "text": "Và hành trình ấy mới chỉ bắt đầu."
+    }
+  ]
+}

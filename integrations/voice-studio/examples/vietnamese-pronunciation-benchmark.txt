@@ -1,0 +1,11 @@
+Xin chào. Đây là bài kiểm tra giọng đọc tiếng Việt của Nolane Video Studio.
+
+Trời trở lạnh, trăng sáng trên những tán cây. Chú Trường chèo thuyền qua con suối nhỏ, trong khi chị Sương sửa soạn chiếc chăn mới.
+
+Má, mà, mả, mã, mạ; ba, bá, bà, bả, bã, bạ. Sáu thanh điệu cần được phát âm rõ ràng, tự nhiên và không bị nuốt mất ở cuối câu.
+
+Ngày 31 tháng 10 năm 2026, lúc 7 giờ 05 phút, nhóm nghiên cứu công bố kết quả: 1.024 mẫu thử, 98,6 phần trăm dữ liệu đạt yêu cầu.
+
+Bản demo tích hợp AI, GPU, ONNX Runtime và text-to-speech; tên riêng, chữ viết tắt và từ tiếng Anh cần được đọc đúng ngữ cảnh trong câu tiếng Việt.
+
+Điều quan trọng không chỉ là phát âm đúng từng từ, mà còn là nhịp nghỉ, trọng âm, cảm xúc, sự liền mạch và độ ổn định của cùng một nhân vật qua nhiều cảnh quay.

@@ -1,0 +1,124 @@
+name: Voice Studio Actions human shortlist
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark_run_id:
+        description: "GitHub Actions run ID of a completed Voice Studio CPU lab benchmark"
+        type: string
+        required: true
+      benchmark_artifact_name:
+        description: "Exact artifact name, e.g. nolane-voice-actions-lab-12"
+        type: string
+        required: true
+      ratings_path:
+        description: "Committed blind ratings JSON under integrations/voice-studio/ratings/"
+        type: string
+        default: "integrations/voice-studio/ratings/voice-human-ratings-all-scripts.json"
+        required: true
+      min_ratings:
+        description: "Minimum human-rated dimensions required to enter the shortlist"
+        type: choice
+        options: ["3", "4", "5"]
+        default: "3"
+        required: true
+      shortlist_size:
+        description: "Maximum number of recommended voices in the output shortlist"
+        type: choice
+        options: ["3", "5", "10"]
+        default: "3"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: voice-studio-actions-shortlist-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-ratings:
+    name: Join blind ratings to the Actions voice benchmark
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the rated repository revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate run ID, artifact name and committed ratings path
+        env:
+          BENCHMARK_RUN_ID: ${{ inputs.benchmark_run_id }}
+          ARTIFACT_NAME: ${{ inputs.benchmark_artifact_name }}
+          RATINGS_PATH: ${{ inputs.ratings_path }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          run_id = os.environ["BENCHMARK_RUN_ID"].strip()
+          artifact_name = os.environ["ARTIFACT_NAME"].strip()
+          ratings_path = Path(os.environ["RATINGS_PATH"])
+          if not re.fullmatch(r"[0-9]{6,20}", run_id):
+              raise SystemExit("benchmark_run_id must be a numeric GitHub Actions run ID")
+          if not re.fullmatch(r"[A-Za-z0-9._-]{3,120}", artifact_name):
+              raise SystemExit("benchmark_artifact_name contains unsafe characters")
+          if ratings_path.is_absolute() or ".." in ratings_path.parts:
+              raise SystemExit("ratings_path must be a repository-relative path")
+          if not ratings_path.as_posix().startswith("integrations/voice-studio/ratings/"):
+              raise SystemExit("ratings_path must live under integrations/voice-studio/ratings/")
+          root = Path.cwd().resolve()
+          resolved = (root / ratings_path).resolve()
+          resolved.relative_to(root)
+          if not resolved.is_file():
+              raise SystemExit(f"Committed listener ratings file not found: {ratings_path}")
+          print(f"Benchmark run ID: {run_id}")
+          print(f"Artifact: {artifact_name}")
+          print(f"Ratings: {ratings_path}")
+          PY
+
+      - name: Download the exact completed benchmark artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ inputs.benchmark_artifact_name }}
+          path: out/voice-benchmark
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.benchmark_run_id }}
+
+      - name: Verify benchmark report and analyze listener ratings
+        env:
+          RATINGS_PATH: ${{ inputs.ratings_path }}
+          MIN_RATINGS: ${{ inputs.min_ratings }}
+          SHORTLIST_SIZE: ${{ inputs.shortlist_size }}
+        run: |
+          test -s out/voice-benchmark/actions-voice-lab.json
+          mkdir -p out/voice-shortlist
+          python integrations/voice-studio/analyze_actions_voice_lab.py \
+            --benchmark out/voice-benchmark/actions-voice-lab.json \
+            --ratings "$RATINGS_PATH" \
+            --output out/voice-shortlist/voice-shortlist.json \
+            --min-ratings "$MIN_RATINGS" \
+            --shortlist-size "$SHORTLIST_SIZE"
+
+      - name: Publish shortlist to the Actions summary
+        if: always()
+        run: |
+          if [ -s out/voice-shortlist/voice-shortlist.md ]; then
+            cat out/voice-shortlist/voice-shortlist.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Shortlist analysis did not produce a report. Review the failed step logs." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload human shortlist and full technical evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-voice-human-shortlist-${{ github.run_number }}
+          path: out/voice-shortlist/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 14

@@ -1,0 +1,57 @@
+{
+  "engine": "voxcpm2",
+  "language": "vi",
+  "sample_text": "Xin chào. Đây là mẫu thử giọng tiếng Việt của Nolane Video Studio. Trời trở lạnh, trăng sáng trên những tán cây.",
+  "voices": [
+    {
+      "name": "Nolane VI — Warm Documentary Narrator",
+      "description": "An original fictional Vietnamese female narrator, adult, warm low-mid register, smooth resonant timbre, clear Hanoi-standard Vietnamese articulation, measured documentary pacing, calm and intimate emotional delivery, precise final consonants and natural sentence endings.",
+      "seed": 4201
+    },
+    {
+      "name": "Nolane VI — Credible Male Expert",
+      "description": "An original fictional Vietnamese male expert voice, adult, medium-low register, grounded chest resonance, clean Hanoi-standard Vietnamese pronunciation, steady measured cadence, restrained confidence, articulate technical terms and numbers, neutral documentary delivery without theatrical exaggeration.",
+      "seed": 4202
+    },
+    {
+      "name": "Nolane VI — Bright Channel Host",
+      "description": "An original fictional Vietnamese female host voice, young adult, medium register with a bright forward timbre, lively but controlled energy, natural conversational rhythm, crisp consonants, friendly curiosity, varied intonation and clear Northern Vietnamese diction.",
+      "seed": 4203
+    },
+    {
+      "name": "Nolane VI — Cinematic Storyteller",
+      "description": "An original fictional Vietnamese male storyteller, mature adult, low register, dark warm resonance, deliberate cinematic pacing, soft breath-supported phrases, nuanced dramatic emphasis, articulate Vietnamese tones and consonants, intimate rather than booming.",
+      "seed": 4204
+    },
+    {
+      "name": "Nolane VI — Gentle Companion",
+      "description": "An original fictional Vietnamese female companion voice, adult, medium-low register, soft rounded timbre, reassuring warmth, natural pauses, relaxed conversational rhythm, emotionally empathetic but not whispery, clear Vietnamese pronunciation.",
+      "seed": 4205
+    },
+    {
+      "name": "Nolane VI — Energetic Young Host",
+      "description": "An original fictional Vietnamese male presenter, young adult, medium-high register, agile bright resonance, quick but controlled conversational pace, crisp word boundaries, upbeat curiosity, clear Northern Vietnamese articulation, lively transitions without shouting.",
+      "seed": 4206
+    },
+    {
+      "name": "Nolane VI — Thoughtful Interviewer",
+      "description": "An original fictional Vietnamese female interviewer, mature adult, medium register with a slightly textured warm timbre, attentive measured phrasing, gentle downward sentence endings, precise questions, composed confidence and natural Northern Vietnamese diction.",
+      "seed": 4207
+    },
+    {
+      "name": "Nolane VI — Reflective Elder",
+      "description": "An original fictional Vietnamese male elder narrator, older adult, medium-low register with a soft airy edge, unhurried pacing, grounded gentle resonance, clear consonants, thoughtful pauses, kind reflective delivery and natural Vietnamese tones.",
+      "seed": 4208
+    },
+    {
+      "name": "Nolane VI — Science Explainer",
+      "description": "An original fictional Vietnamese female science educator, adult, medium register, clean focused resonance, exceptionally clear syllable separation, steady explanatory rhythm, confident but approachable tone, accurate reading of symbols, units and English technical terms.",
+      "seed": 4209
+    },
+    {
+      "name": "Nolane VI — Deep Film Narrator",
+      "description": "An original fictional Vietnamese male film narrator, adult, low register, full controlled resonance, deliberate spacious pacing, clean consonants and stable tone contours, understated dramatic weight, smooth transitions and a grounded cinematic presence without imitation of any real performer.",
+      "seed": 4210
+    }
+  ]
+}

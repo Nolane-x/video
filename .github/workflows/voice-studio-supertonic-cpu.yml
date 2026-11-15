@@ -1,0 +1,209 @@
+name: VoiceStudio Supertonic-3 Vietnamese CPU audition
+
+on:
+  workflow_dispatch:
+    inputs:
+      accept_openrail_m:
+        description: "I have read and accept the OpenRAIL-M model terms for this temporary CI audition. This does not grant commercial output rights."
+        type: boolean
+        required: true
+        default: false
+  push:
+    branches:
+      - feat/voice-studio-integration
+    paths:
+      - ".github/workflows/voice-studio-supertonic-cpu.yml"
+      - "integrations/voice-studio/voicestudio_engine_actions_benchmark.py"
+      - "integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py"
+      - "integrations/voice-studio/tests/test_voicestudio_engine_actions_benchmark.py"
+      - "integrations/voice-studio/tests/test_prepare_voicestudio_cpu_dockerfile.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voicestudio-supertonic-cpu-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  supertonic-vietnamese-audition:
+    name: Build pinned VoiceStudio and audition 7 Vietnamese presets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      VOICESTUDIO_COMMIT: faa5294359f23c911972ffe6d27785c50c67097b
+      IMAGE_NAME: nolane-voicestudio-supertonic-cpu:ci
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      DO_NOT_TRACK: "1"
+      ACCEPT_OPENRAIL_M: ${{ inputs.accept_openrail_m || false }}
+    steps:
+      - name: Checkout video repo and pinned VoiceStudio submodule
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Verify exact VoiceStudio source revision
+        run: |
+          actual="$(git -C vendor/VoiceStudio rev-parse HEAD)"
+          test "$actual" = "$VOICESTUDIO_COMMIT"
+          echo "VoiceStudio source commit: $actual"
+
+      - name: Prepare runner disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc             /usr/local/.ghcup /usr/share/swift /usr/local/share/boost             /usr/local/lib/node_modules
+          sudo apt-get clean
+          docker image prune --all --force
+          df -h /
+
+      - name: Resolve immutable Python base image
+        id: base
+        run: |
+          docker pull python:3.12-slim
+          base_ref="$(docker image inspect python:3.12-slim --format '{{index .RepoDigests 0}}')"
+          case "$base_ref" in python@sha256:*) ;; *) echo "Unpinned base image: $base_ref" >&2; exit 1 ;; esac
+          echo "image=$base_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare CPU Dockerfile with pinned Supertonic SDK
+        run: |
+          python integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py             --source vendor/VoiceStudio/deploy/Dockerfile             --output "$RUNNER_TEMP/VoiceStudio.Supertonic.CPU.Dockerfile"             --install-supertonic
+
+      - name: Build pinned VoiceStudio CPU image
+        run: |
+          docker buildx build --load --progress=plain             --file "$RUNNER_TEMP/VoiceStudio.Supertonic.CPU.Dockerfile"             --build-arg "BASE_IMAGE=${{ steps.base.outputs.image }}"             --build-arg "GPU_FLAVOR=cpu"             --build-arg "BUILD_COMMIT=$VOICESTUDIO_COMMIT"             --tag "$IMAGE_NAME"             vendor/VoiceStudio
+          docker image inspect "$IMAGE_NAME" --format '{{range .Config.Env}}{{println .}}{{end}}'             | grep -Fx "OMNIVOICE_BUILD_COMMIT=$VOICESTUDIO_COMMIT"
+          docker run --rm --entrypoint python3 "$IMAGE_NAME" -c \
+            'from importlib.metadata import version; assert version("supertonic") == "1.3.1"; print("supertonic SDK:", version("supertonic"))'
+
+      - name: Install FFmpeg diagnostics on the Actions runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 2
+          ffprobe -version | head -n 2
+
+      - name: Confirm model weights are transient and never cached
+        run: |
+          echo "Supertonic-3 OpenRAIL-M weights are downloaded only into the ephemeral runner data volume when manually confirmed."
+          echo "They are not saved into Actions cache or included in uploaded artifacts."
+
+      - name: Create ephemeral VoiceStudio API key and data volume
+        shell: bash
+        run: |
+          key="$(python -c 'import secrets; print(secrets.token_urlsafe(40))')"
+          echo "::add-mask::$key"
+          echo "VOICESTUDIO_API_KEY=$key" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/voicestudio-data" out/supertonic3-actions
+
+      - name: Start VoiceStudio headless CPU server
+        run: |
+          docker run --detach --name voicestudio-supertonic-actions             --publish 127.0.0.1:3900:3900             --volume "$RUNNER_TEMP/voicestudio-data:/app/omnivoice_data"             --env OMNIVOICE_SERVER_MODE=1             --env OMNIVOICE_API_KEY="$VOICESTUDIO_API_KEY"             --env OMNIVOICE_DATA_DIR=/app/omnivoice_data             --env HF_HOME=/app/omnivoice_data/huggingface             --env OMP_NUM_THREADS=4             --env OPENBLAS_NUM_THREADS=1             --env HF_HUB_DISABLE_TELEMETRY=1             --env OMNIVOICE_ANALYTICS_DISABLED=1             "$IMAGE_NAME"
+          ready=0
+          for attempt in $(seq 1 120); do
+            if curl --silent --show-error --fail http://127.0.0.1:3900/health               --output out/supertonic3-actions/health.json; then ready=1; break; fi
+            sleep 5
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs --tail 200 voicestudio-supertonic-actions >&2 || true
+            exit 1
+          fi
+
+      - name: Verify Supertonic engine and untouched licence gate
+        run: |
+          curl --silent --show-error --fail             -H "Authorization: Bearer $VOICESTUDIO_API_KEY"             http://127.0.0.1:3900/engines/tts             --output out/supertonic3-actions/tts-engines.json
+          curl --silent --show-error --fail             -H "Authorization: Bearer $VOICESTUDIO_API_KEY"             http://127.0.0.1:3900/api/settings/license/supertonic3             --output out/supertonic3-actions/license-before.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("out/supertonic3-actions")
+          health=json.loads((root/"health.json").read_text(encoding="utf-8"))
+          engines=json.loads((root/"tts-engines.json").read_text(encoding="utf-8"))
+          license_state=json.loads((root/"license-before.json").read_text(encoding="utf-8"))
+          rows=engines.get("backends", [])
+          engine=next((row for row in rows if row.get("id")=="supertonic3"), None)
+          if engine is None:
+              raise SystemExit("Pinned VoiceStudio API does not expose supertonic3")
+          if license_state.get("accepted") is not False:
+              raise SystemExit("Fresh CI data directory unexpectedly has an accepted model licence")
+          if engine.get("license_required") is not True:
+              raise SystemExit("VoiceStudio did not expose Supertonic-3's licence gate")
+          if engine.get("available") is not False or engine.get("license_accepted") is not False:
+              raise SystemExit("Supertonic-3 is not in the expected unaccepted/disabled state")
+          if "license not accepted" not in str(engine.get("reason") or "").lower():
+              raise SystemExit("Supertonic-3 is disabled for a reason other than the expected licence gate")
+          report={
+              "schema_version":1,
+              "source_commit":"faa5294359f23c911972ffe6d27785c50c67097b",
+              "app_version":health.get("version"),
+              "device":health.get("device"),
+              "engine_id":"supertonic3",
+              "sdk_version":"1.3.1",
+              "model_revision":"724fb5abbf5502583fb520898d45929e62f02c0b",
+              "license_gate_verified":True,
+              "license_accepted_before_run":False,
+              "model_weights_downloaded":False,
+              "synthesis_performed":False,
+          }
+          (root/"license-gate-report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(report,indent=2))
+          PY
+
+      - name: Stop here unless the workflow was manually dispatched with licence confirmation
+        if: inputs.accept_openrail_m != true
+        run: |
+          echo "OpenRAIL-M was not confirmed. No licence acceptance was written and no Supertonic model weights were downloaded." >> "$GITHUB_STEP_SUMMARY"
+          echo "To run the seven-voice audition, manually dispatch this workflow after reviewing the model terms and explicitly tick accept_openrail_m." >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("out/supertonic3-actions/license-gate-report.json")
+          data=json.loads(p.read_text(encoding="utf-8"))
+          data["status"]="blocked_by_user_consent_gate"
+          data["note"]="No model weights were downloaded; no synthesis or licence acceptance was performed."
+          p.write_text(json.dumps(data,indent=2)+"\n",encoding="utf-8")
+          PY
+
+      - name: Run 7 × 4 real VoiceStudio Supertonic-3 Vietnamese auditions
+        if: inputs.accept_openrail_m == true
+        run: |
+          python integrations/voice-studio/voicestudio_engine_actions_benchmark.py             --suite integrations/voice-studio/examples/actions-benchmark-suite.json             --output out/supertonic3-actions             --base-url http://127.0.0.1:3900             --accept-model-license
+
+      - name: Publish VoiceStudio Supertonic result
+        if: always()
+        run: |
+          if [ -f out/supertonic3-actions/supertonic3-actions-benchmark.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          r=json.loads(Path("out/supertonic3-actions/supertonic3-actions-benchmark.json").read_text(encoding="utf-8"))
+          print("# VoiceStudio Supertonic-3 Vietnamese audition")
+          print()
+          print(f"- Status: **{r['status']}**")
+          print(f"- Rendered: {r['ready_count']}/{r['candidate_count']}")
+          print(f"- Technical pass / warning / error: {r['technical_pass']} / {r['technical_warning']} / {r['technical_error']}")
+          print(f"- Mastering: {r['mastering']}")
+          print("- Human listening is required; no ElevenLabs-equivalence score is inferred.")
+          PY
+          else
+            cat out/supertonic3-actions/license-gate-report.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Capture redacted container logs on failure
+        if: failure()
+        run: |
+          docker logs --tail 250 voicestudio-supertonic-actions 2>&1             | python -c 'import os,sys; key=os.environ.get("VOICESTUDIO_API_KEY",""); print(sys.stdin.read().replace(key,"[REDACTED]") if key else sys.stdin.read())'             > out/supertonic3-actions/container.log || true
+
+      - name: Upload WAVs, blind pages and evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-supertonic3-voice-studio-${{ github.run_number }}
+          path: out/supertonic3-actions/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 14
+
+      - name: Stop VoiceStudio container
+        if: always()
+        run: docker rm -f voicestudio-supertonic-actions 2>/dev/null || true

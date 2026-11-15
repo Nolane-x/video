@@ -1,0 +1,235 @@
+name: VoiceStudio headless CPU API smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/voice-studio-integration
+    paths:
+      - ".github/workflows/voice-studio-headless-smoke.yml"
+      - "integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py"
+      - "integrations/voice-studio/tests/test_prepare_voicestudio_cpu_dockerfile.py"
+      - ".gitmodules"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voicestudio-headless-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  headless-api:
+    name: Build pinned VoiceStudio CPU server and verify APIs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      VOICESTUDIO_COMMIT: faa5294359f23c911972ffe6d27785c50c67097b
+      IMAGE_NAME: nolane-voicestudio-actions:cpu
+      DO_NOT_TRACK: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - name: Checkout video repo and pinned VoiceStudio submodule
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Verify exact VoiceStudio fork revision
+        run: |
+          actual="$(git -C vendor/VoiceStudio rev-parse HEAD)"
+          test "$actual" = "$VOICESTUDIO_COMMIT"
+          git -C vendor/VoiceStudio status --short
+          echo "VoiceStudio source commit: $actual"
+
+      - name: Prepare runner space for CPU container build
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/.ghcup /usr/share/swift /usr/local/share/boost \
+            /usr/local/lib/node_modules
+          sudo apt-get clean
+          docker image prune --all --force
+          df -h /
+
+      - name: Resolve immutable Python runtime base image
+        id: base
+        run: |
+          docker pull python:3.12-slim
+          base_ref="$(docker image inspect python:3.12-slim --format '{{index .RepoDigests 0}}')"
+          case "$base_ref" in
+            python@sha256:*) ;;
+            *) echo "Could not resolve immutable python base digest: $base_ref" >&2; exit 1 ;;
+          esac
+          echo "image=$base_ref" >> "$GITHUB_OUTPUT"
+          echo "Resolved CPU base: $base_ref"
+
+      - name: Transform pinned upstream Dockerfile for CPU-only runner
+        run: |
+          python integrations/voice-studio/prepare_voicestudio_cpu_dockerfile.py \
+            --source vendor/VoiceStudio/deploy/Dockerfile \
+            --output "$RUNNER_TEMP/VoiceStudio.CPU.Dockerfile"
+
+      - name: Build headless VoiceStudio from the pinned submodule
+        run: |
+          docker buildx version
+          docker buildx build --load --progress=plain \
+            --file "$RUNNER_TEMP/VoiceStudio.CPU.Dockerfile" \
+            --build-arg "BASE_IMAGE=${{ steps.base.outputs.image }}" \
+            --build-arg "GPU_FLAVOR=cpu" \
+            --build-arg "BUILD_COMMIT=$VOICESTUDIO_COMMIT" \
+            --tag "$IMAGE_NAME" \
+            vendor/VoiceStudio
+          docker image inspect "$IMAGE_NAME" --format '{{range .Config.Env}}{{println .}}{{end}}' \
+            | grep -Fx "OMNIVOICE_BUILD_COMMIT=$VOICESTUDIO_COMMIT"
+
+      - name: Create ephemeral API key and data volume
+        shell: bash
+        run: |
+          key="$(python -c 'import secrets; print(secrets.token_urlsafe(40))')"
+          echo "::add-mask::$key"
+          echo "OMNIVOICE_API_KEY=$key" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/voicestudio-data" out/voicestudio-headless-smoke
+
+      - name: Start pinned VoiceStudio server
+        run: |
+          docker run --detach --name voicestudio-actions-smoke \
+            --publish 127.0.0.1:3900:3900 \
+            --volume "$RUNNER_TEMP/voicestudio-data:/app/omnivoice_data" \
+            --env OMNIVOICE_SERVER_MODE=1 \
+            --env OMNIVOICE_API_KEY="$OMNIVOICE_API_KEY" \
+            --env OMNIVOICE_DATA_DIR=/app/omnivoice_data \
+            --env HF_HOME=/app/omnivoice_data/huggingface \
+            --env OMNIVOICE_ANALYTICS_DISABLED=1 \
+            --env HF_HUB_DISABLE_TELEMETRY=1 \
+            "$IMAGE_NAME"
+          ready=0
+          for attempt in $(seq 1 120); do
+            if curl --silent --show-error --fail http://127.0.0.1:3900/health \
+              --output out/voicestudio-headless-smoke/health.json; then
+              ready=1
+              break
+            fi
+            sleep 5
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "VoiceStudio did not become healthy within 10 minutes." >&2
+            docker logs --tail 200 voicestudio-actions-smoke >&2 || true
+            exit 1
+          fi
+
+      - name: Verify engines, models and OpenAI-compatible API routes
+        run: |
+          curl --silent --show-error --fail \
+            -H "Authorization: Bearer $OMNIVOICE_API_KEY" \
+            http://127.0.0.1:3900/engines/tts \
+            --output out/voicestudio-headless-smoke/tts-engines.json
+          curl --silent --show-error --fail \
+            -H "Authorization: Bearer $OMNIVOICE_API_KEY" \
+            http://127.0.0.1:3900/v1/models \
+            --output out/voicestudio-headless-smoke/models.json
+          curl --silent --show-error --fail \
+            -H "Authorization: Bearer $OMNIVOICE_API_KEY" \
+            http://127.0.0.1:3900/openapi.json \
+            --output out/voicestudio-headless-smoke/openapi.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path("out/voicestudio-headless-smoke")
+          health = json.loads((root / "health.json").read_text(encoding="utf-8"))
+          engines = json.loads((root / "tts-engines.json").read_text(encoding="utf-8"))
+          models = json.loads((root / "models.json").read_text(encoding="utf-8"))
+          spec = json.loads((root / "openapi.json").read_text(encoding="utf-8"))
+          backends = engines.get("backends", [])
+          paths = set(spec.get("paths", {}))
+          required = {"/v1/audio/speech", "/v1/audio/transcriptions", "/v1/models"}
+          missing = sorted(required - paths)
+          if missing:
+              raise SystemExit(f"VoiceStudio OpenAI-compatible routes missing: {missing}")
+          engine_ids = [str(row.get("id")) for row in backends if row.get("id")]
+          if not engine_ids:
+              raise SystemExit("VoiceStudio TTS engine catalogue is empty")
+          report = {
+              "schema_version": 1,
+              "status": "healthy",
+              "source_repository": "Nolane-x/VoiceStudio",
+              "source_commit": os.environ["VOICESTUDIO_COMMIT"],
+              "runner": {
+                  "os": os.environ.get("RUNNER_OS"),
+                  "arch": os.environ.get("RUNNER_ARCH"),
+                  "run_id": os.environ.get("GITHUB_RUN_ID"),
+              },
+              "runtime": {
+                  "mode": "Docker headless / CPU-only",
+                  "base_image_digest": os.environ["BASE_IMAGE_DIGEST"],
+                  "build_commit": os.environ["VOICESTUDIO_COMMIT"],
+              },
+              "health_response": health,
+              "tts_engine_count": len(engine_ids),
+              "tts_engine_ids": engine_ids,
+              "openai_compat_routes": sorted(required),
+              "models_response_type": type(models).__name__,
+              "synthesis_performed": False,
+              "model_weights_downloaded": False,
+              "license_gate_note": (
+                  "This smoke verifies the pinned app and its API only. It does not accept "
+                  "any model license, install model weights, create profiles, or synthesize audio."
+              ),
+          }
+          (root / "headless-smoke-report.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "status": report["status"],
+              "source_commit": report["source_commit"],
+              "tts_engine_count": report["tts_engine_count"],
+              "tts_engine_ids": engine_ids,
+              "required_routes": report["openai_compat_routes"],
+              "synthesis_performed": False,
+          }, ensure_ascii=False, indent=2))
+          PY
+        env:
+          BASE_IMAGE_DIGEST: ${{ steps.base.outputs.image }}
+
+      - name: Publish VoiceStudio API smoke summary
+        if: always()
+        run: |
+          if [ -f out/voicestudio-headless-smoke/headless-smoke-report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          report = json.loads(Path("out/voicestudio-headless-smoke/headless-smoke-report.json").read_text(encoding="utf-8"))
+          print("# Pinned VoiceStudio headless CPU smoke")
+          print()
+          print(f"- Status: **{report['status']}**")
+          print(f"- Source commit: `{report['source_commit']}`")
+          print(f"- TTS engines discovered: {report['tts_engine_count']}")
+          print(f"- API routes verified: {len(report['openai_compat_routes'])}")
+          print("- Audio synthesis: **not run**")
+          print("- Model weights/licence acceptance: **not changed**")
+          PY
+          else
+            echo "VoiceStudio headless smoke did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Capture redacted container logs on failure
+        if: failure()
+        run: |
+          docker logs --tail 250 voicestudio-actions-smoke 2>&1 \
+            | python -c 'import os,sys; key=os.environ.get("OMNIVOICE_API_KEY",""); print(sys.stdin.read().replace(key,"[REDACTED]") if key else sys.stdin.read())' \
+            > out/voicestudio-headless-smoke/container.log || true
+
+      - name: Upload headless API evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nolane-voicestudio-headless-smoke-${{ github.run_number }}
+          path: out/voicestudio-headless-smoke/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop VoiceStudio container
+        if: always()
+        run: docker rm -f voicestudio-actions-smoke 2>/dev/null || true
