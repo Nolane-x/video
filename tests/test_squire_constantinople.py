@@ -99,7 +99,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"timeline ends"):
             hybrid_splice.validate_cue_timeline(248.9)
 
-    def test_hybrid_splice_round_trips_two_cfr240_shards_end_to_end(self):
+    def test_hybrid_splice_normalizes_all_four_cfr240_shards_to_bt709_end_to_end(self):
         import hashlib
         import os
         import subprocess
@@ -119,8 +119,8 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             segments.mkdir()
             hybrid.mkdir()
 
-            # Use a small deterministic fixture while keeping the production
-            # geometry: two 24-frame 240fps shards and one 24-frame insert.
+            # Use four small deterministic full-range source shards and one
+            # limited-range insert while keeping the production frame geometry.
             original_constants={
                 name:getattr(hybrid_splice,name)
                 for name in ("START_FRAME","END_FRAME","INSERT_FRAMES","SHARD_FRAMES",
@@ -135,18 +135,21 @@ class ConstantinopleAuthorTests(unittest.TestCase):
             for name,value in small_constants.items():
                 setattr(hybrid_splice,name,value)
 
-            def make_video(path,color):
+            def make_video(path,color,full_range=False):
+                pix_fmt="yuvj420p" if full_range else "yuv420p"
+                color_range="pc" if full_range else "tv"
                 subprocess.run([
                     "ffmpeg","-hide_banner","-v","error","-y",
                     "-f","lavfi","-i",f"color=c={color}:s=1920x1080:r=240:d=0.1",
                     "-frames:v","24","-an","-c:v","libx264","-preset","ultrafast",
-                    "-crf","23","-pix_fmt","yuv420p","-r","240","-fps_mode","cfr",
-                    "-video_track_timescale","240000",str(path)
+                    "-crf","23","-pix_fmt",pix_fmt,"-color_range",color_range,
+                    "-r","240","-fps_mode","cfr","-video_track_timescale","240000",
+                    str(path)
                 ],check=True)
 
             try:
-                make_video(segments/"constantinople-segment-0.mp4","0x26384b")
-                make_video(segments/"constantinople-segment-1.mp4","0x6b4230")
+                for index,color in enumerate(("0x26384b","0x6b4230","0x324a38","0x59436b")):
+                    make_video(segments/f"constantinople-segment-{index}.mp4",color,full_range=True)
                 insert=hybrid/"constantinople-hybrid-240fps.mp4"
                 make_video(insert,"0x9b7548")
 
@@ -179,7 +182,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                     json.dumps({"assets":assets}),encoding="utf-8")
                 (project/"story"/"shots.json").write_text(
                     json.dumps({"duration":957.9,"shots":[]}),encoding="utf-8")
-                for index in (0,1):
+                for index in range(4):
                     path=segments/f"constantinople-segment-{index}.mp4"
                     (segments/f"segment-{index}-report.json").write_text(
                         json.dumps({
@@ -205,7 +208,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 ]
                 original_shard_hashes={
                     index:digest(segments/f"constantinople-segment-{index}.mp4")
-                    for index in (0,1)
+                    for index in range(4)
                 }
 
                 # A stale/mismatched report must fail before changing either
@@ -218,7 +221,7 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 with patch.object(sys,"argv",argv):
                     with self.assertRaisesRegex(RuntimeError,"SHA-256"):
                         hybrid_splice.main()
-                for index in (0,1):
+                for index in range(4):
                     self.assertEqual(
                         digest(segments/f"constantinople-segment-{index}.mp4"),
                         original_shard_hashes[index]
@@ -229,11 +232,11 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 report1.write_text(valid_report1,encoding="utf-8")
                 original_report_contents={
                     index:(segments/f"segment-{index}-report.json").read_text(encoding="utf-8")
-                    for index in (0,1)
+                    for index in range(4)
                 }
 
-                # Simulate a runner/filesystem failure halfway through the
-                # four-file commit: rollback must restore both media and reports.
+                # Simulate a filesystem failure halfway through the four-shard
+                # transaction: rollback must restore every video and report.
                 real_replace=os.replace
                 replace_calls={"count":0}
                 def fail_once(source,destination):
@@ -245,11 +248,11 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 with patch.object(hybrid_splice.os,"replace",side_effect=fail_once):
                     with patch.object(sys,"argv",argv):
                         with self.assertRaisesRegex(
-                            RuntimeError,"both source shards and reports were restored"
+                            RuntimeError,"all four source shards and reports were restored"
                         ):
                             hybrid_splice.main()
-                self.assertEqual(replace_calls["count"],7)
-                for index in (0,1):
+                self.assertEqual(replace_calls["count"],11)
+                for index in range(4):
                     self.assertEqual(
                         digest(segments/f"constantinople-segment-{index}.mp4"),
                         original_shard_hashes[index]
@@ -272,16 +275,31 @@ class ConstantinopleAuthorTests(unittest.TestCase):
                 self.assertTrue(result["transaction_id"].startswith("123456-"))
                 self.assertEqual(result["frames"],24)
                 self.assertEqual(result["reencoded_shards"],[0,1])
+                self.assertEqual(result["color_normalized_shards"],[0,1,2,3])
+                self.assertEqual([row["segment"] for row in result["range_normalizations"]],[2,3])
                 self.assertEqual(result["audio_effects"]["cues"][0]["t"],239.510)
                 self.assertEqual(result["audio_effects"]["cues"][1]["t"],247.010)
                 self.assertEqual(result["caption_source"],"Squire reflowed project/story/captions.srt")
                 self.assertIn("Cannon crew",(hybrid/"insert-captions.srt").read_text())
-                for index in (0,1):
-                    self.assertTrue((segments/f"constantinople-segment-{index}.mp4").is_file())
-                    self.assertEqual(
-                        json.loads((segments/f"segment-{index}-report.json").read_text())["sha256"],
-                        result["replacement_shards"][index]["sha256"]
-                    )
+                expected_hashes={
+                    row["segment"]:row["sha256"] for row in result["replacement_shards"]
+                }
+                expected_hashes.update({
+                    row["segment"]:row["sha256"] for row in result["range_normalizations"]
+                })
+                for index in range(4):
+                    video_path=segments/f"constantinople-segment-{index}.mp4"
+                    report_path=segments/f"segment-{index}-report.json"
+                    self.assertTrue(video_path.is_file())
+                    self.assertEqual(json.loads(report_path.read_text())["sha256"],expected_hashes[index])
+                    normalized=hybrid_splice.assert_video(video_path,24,0.1)
+                    self.assertEqual(normalized["pixel_format"],"yuv420p")
+                    probe=subprocess.run([
+                        "ffprobe","-v","error","-select_streams","v:0",
+                        "-show_entries","stream=color_range","-of","default=nw=1:nk=1",
+                        str(video_path)
+                    ],check=True,capture_output=True,text=True)
+                    self.assertEqual(probe.stdout.strip(),"tv")
             finally:
                 for name,value in original_constants.items():
                     setattr(hybrid_splice,name,value)
