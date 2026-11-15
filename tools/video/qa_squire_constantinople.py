@@ -51,6 +51,8 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument("--project",required=True);ap.add_argument("--voice-assets",required=True);a=ap.parse_args()
     p=Path(a.project).resolve();assets=Path(a.voice_assets).resolve()
     cfg=json.loads((p/"config.json").read_text(encoding="utf-8"));story=json.loads((p/"story"/"shots.json").read_text(encoding="utf-8"))
+    shots=story.get("shots") or []
+    duration=story_duration_seconds(story)
     title=cfg["title"];safe=re.sub(r'[\\/:*?"<>|]',"",title).strip()
     final=p/"out"/(safe+".mp4");preview=p/"build"/"preview.mp4";thumb=p/"out"/"thumbnail.png"
     assert cfg.get("fps")==FPS,f"Project config must be {FPS} fps"
@@ -65,7 +67,6 @@ def main():
     assert preview.is_file() and preview.stat().st_size>50_000,"Missing 240fps moving proof"
     assert thumb.is_file() and thumb.stat().st_size>10_000,"Missing thumbnail"
     assert any((p/"build"/"sheets").glob("sheet_*.jpg")),"Contact sheets missing"
-    shots=story.get("shots") or [];duration=story_duration_seconds(story)
     assert 945<=duration<=975,f"Expected a 16-minute film (15:45–16:15), got {duration:.1f}s"
     assert 350<=len(shots)<=1100,f"Unexpected shot count: {len(shots)}"
     custom={"final_night","city_panorama","command_camp","gun_crew","wall_battery","repair_wall","golden_horn","relief_galleys","ship_portage","tunnel_cutaway","church_refuge","city_interior","last_assault","aftermath_city","actor_closeup","city_detail"}
