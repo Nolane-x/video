@@ -161,6 +161,7 @@ jobs:
             const allowedPostProofChanges = new Set([
               ".github/workflows/test-squire-constantinople.yml",
               "tests/test_hybrid_interpolation_pipeline.py",
+              "tests/test_hybrid_proof_manifest.py",
               "tests/test_squire_constantinople.py"
             ]);
 
