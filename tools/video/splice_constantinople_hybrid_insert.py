@@ -234,8 +234,8 @@ def main() -> int:
             "-i", str(original0), "-i", str(captioned),
             "-filter_complex",
             (
-                "[0:v]trim=start_frame=0:end_frame=52982,settb=expr=1/240,setpts=N[before];"
-                "[1:v]trim=start_frame=0:end_frame=4492,settb=expr=1/240,setpts=N[insert];"
+                f"[0:v]trim=start_frame=0:end_frame={START_FRAME},settb=expr=1/240,setpts=N[before];"
+                f"[1:v]trim=start_frame=0:end_frame={FIRST_SHARD_INSERT},settb=expr=1/240,setpts=N[insert];"
                 "[before][insert]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
@@ -249,8 +249,8 @@ def main() -> int:
             "-i", str(original1), "-i", str(captioned),
             "-filter_complex",
             (
-                "[1:v]trim=start_frame=4492:end_frame=9394,settb=expr=1/240,setpts=N[insert];"
-                "[0:v]trim=start_frame=4902:end_frame=57474,settb=expr=1/240,setpts=N[after];"
+                f"[1:v]trim=start_frame={FIRST_SHARD_INSERT}:end_frame={INSERT_FRAMES},settb=expr=1/240,setpts=N[insert];"
+                f"[0:v]trim=start_frame={SECOND_SHARD_INSERT}:end_frame={SHARD_FRAMES},settb=expr=1/240,setpts=N[after];"
                 "[insert][after]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
