@@ -412,12 +412,17 @@ jobs:
         run: |
           set -euo pipefail
           TOOLS="$GITHUB_WORKSPACE/.tools/ffmpeg"
-          ARCHIVE="$RUNNER_TEMP/ffmpeg-master-latest-linux64-gpl.tar.xz"
+          ARCHIVE="$RUNNER_TEMP/ffmpeg-master-linux64-gpl-2026-11-14.tar.xz"
           mkdir -p "$TOOLS"
+          # Download the immutable GitHub release-asset ID, not the moving
+          # /releases/download/latest URL. The digest is GitHub's release-asset
+          # SHA-256 for asset 747493441 (published 2026-11-14).
           curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 900 \
-            "https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz" \
+            -H "Accept: application/octet-stream" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/FFmpeg-Builds/FFmpeg-Builds/releases/assets/747493441" \
             -o "$ARCHIVE"
-          echo "f6f8a35568815b7a99e0c513d7c6593262422986047068db190980c4bc186865  $ARCHIVE" | sha256sum --check -
+          echo "0ce90f5f1c5867f40af7789b602c433e3b900910c5999f98591107fb67a2a6e5  $ARCHIVE" | sha256sum --check -
           tar -xJf "$ARCHIVE" -C "$TOOLS"
           FF_BIN="$(find "$TOOLS" -type f -name ffmpeg -print -quit)"
           PROBE_BIN="$(find "$TOOLS" -type f -name ffprobe -print -quit)"
