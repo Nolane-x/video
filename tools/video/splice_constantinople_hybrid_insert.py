@@ -322,7 +322,7 @@ def normalize_to_tv_range(
         shutil.which("ffmpeg") or "ffmpeg",
         "-hide_banner", "-v", "error", "-y", "-i", str(source),
         "-vf", vf, "-an", "-frames:v", str(expected_frames),
-        "-c:v", "libx264", "-preset", "slow", "-tune", "animation",
+        "-c:v", "libx264", "-preset", "medium", "-tune", "animation",
         "-crf", "18", "-maxrate", "48M", "-bufsize", "96M",
         "-pix_fmt", "yuv420p", "-color_range", "tv",
         "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
@@ -332,6 +332,7 @@ def normalize_to_tv_range(
         destination,
         expected_frames,
         expected_duration,
+        decode=False,
         trusted_frame_count=expected_frames,
     )
 
@@ -445,7 +446,7 @@ def main() -> int:
     vf = f"subtitles=filename='{subtitle_path}':force_style='{STYLE}'"
     run([
         ffmpeg_path, "-hide_banner", "-v", "error", "-y", "-i", str(hybrid),
-        "-vf", vf, "-an", "-c:v", "libx264", "-preset", "slow", "-tune", "animation",
+        "-vf", vf, "-an", "-c:v", "libx264", "-preset", "medium", "-tune", "animation",
         "-crf", "18", "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p",
         "-r", "240", "-fps_mode", "cfr",
         "-frames:v", str(INSERT_FRAMES), "-video_track_timescale", "240000",
@@ -497,7 +498,7 @@ def main() -> int:
                 "[before][insert]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
-            "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "18",
+            "-c:v", "libx264", "-preset", "medium", "-tune", "animation", "-crf", "18",
             "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p", "-color_range", "tv",
             "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
             str(output0),
@@ -514,7 +515,7 @@ def main() -> int:
                 "[insert][after]concat=n=2:v=1:a=0,format=yuv420p[outv]"
             ),
             "-map", "[outv]", "-an", "-frames:v", str(SHARD_FRAMES),
-            "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "18",
+            "-c:v", "libx264", "-preset", "medium", "-tune", "animation", "-crf", "18",
             "-maxrate", "48M", "-bufsize", "96M", "-pix_fmt", "yuv420p", "-color_range", "tv",
             "-r", "240", "-fps_mode", "cfr", "-video_track_timescale", "240000",
             str(output1),
@@ -544,6 +545,7 @@ def main() -> int:
                 replacement,
                 SHARD_FRAMES,
                 SHARD_FRAMES / FPS,
+                decode=False,
                 trusted_frame_count=SHARD_FRAMES,
             )
             digest = sha256(replacement)
@@ -602,6 +604,7 @@ def main() -> int:
                     source_paths[index],
                     SHARD_FRAMES,
                     SHARD_FRAMES / FPS,
+                    decode=False,
                     trusted_frame_count=SHARD_FRAMES,
                 )
                 committed_report = json.loads(
