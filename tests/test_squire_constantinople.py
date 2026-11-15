@@ -21,6 +21,15 @@ hybrid_splice=load_module("splice_constantinople_hybrid_insert",ROOT/"tools"/"vi
 qa=load_module("qa_squire_constantinople",ROOT/"tools"/"video"/"qa_squire_constantinople.py")
 
 class ConstantinopleAuthorTests(unittest.TestCase):
+    def test_master_qa_uses_last_shot_end_when_story_duration_is_omitted(self):
+        self.assertEqual(qa.story_duration_seconds({"shots":[{"end":957.9}]}),957.9)
+        self.assertEqual(
+            qa.story_duration_seconds({"duration":956.4,"shots":[{"end":957.9}]}),
+            956.4
+        )
+        with self.assertRaises(ValueError):
+            qa.story_duration_seconds({"shots":[]})
+
     def test_master_qa_requires_exact_duration_to_240fps_frame_grid(self):
         self.assertEqual(qa.expected_master_frame_count(957.9),229896)
         self.assertEqual(qa.expected_master_frame_count(39.141666666666666),9394)
