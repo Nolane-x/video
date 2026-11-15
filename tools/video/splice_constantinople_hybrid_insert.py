@@ -153,6 +153,23 @@ def validate_cue_timeline(duration_seconds: float) -> None:
         )
 
 
+def validate_hybrid_manifest_identity(
+    manifest: dict, expected_run_id: int, expected_sha: str, video_path: Path
+) -> None:
+    """Bind the media bytes to the exact run and source revision selected by CI."""
+    if str(manifest.get("source_run_id", "")) != str(expected_run_id):
+        raise RuntimeError(
+            "Blender proof run ID does not match the run selected by the master resolver."
+        )
+    if str(manifest.get("source_commit_sha", "")).lower() != str(expected_sha).lower():
+        raise RuntimeError(
+            "Blender proof source commit SHA does not match the run selected by the master resolver."
+        )
+    declared_bytes = manifest.get("video_bytes")
+    if declared_bytes is None or int(declared_bytes) != video_path.stat().st_size:
+        raise RuntimeError("Blender proof byte count does not match its manifest.")
+
+
 def validate_existing_shards(segments: Path) -> list[dict]:
     """Validate both source shards and their reports before changing either file."""
     reports: list[dict] = []
@@ -254,6 +271,9 @@ def main() -> int:
             raise FileNotFoundError(required)
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    validate_hybrid_manifest_identity(
+        manifest, args.source_run_id, args.source_sha, hybrid
+    )
     if manifest.get("status") != "RENDERED_HYBRID_240FPS_PROOF_PENDING_HUMAN_REVIEW":
         raise RuntimeError("Blender proof status is not the expected review-pending state.")
     if manifest.get("source_3d_keyframe_fps") != 30:
