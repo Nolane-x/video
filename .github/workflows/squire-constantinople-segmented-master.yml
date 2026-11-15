@@ -1,3 +1,5 @@
+# The hybrid splice transaction preserves rollback originals with same-filesystem
+# hard links where available, avoiding another multi-gigabyte segment copy.
 name: Squire · Constantinople 1453 · Segmented 240fps master
 
 on:
