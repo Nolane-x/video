@@ -45,6 +45,34 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def backup_original_file(source: Path, destination: Path) -> str:
+    """Preserve a rollback copy without duplicating multi-GB video files.
+
+    The staging directory is deliberately created under the segment directory,
+    so source and backup share a filesystem. A hard link is therefore the
+    preferred zero-copy backup. Fall back to a byte copy only when the
+    filesystem does not support hard links.
+    """
+    try:
+        os.link(source, destination)
+        if not os.path.samefile(source, destination):
+            raise RuntimeError(f"Rollback backup is not the original inode: {destination}")
+        return "hardlink"
+    except OSError as exc:
+        import errno
+        if exc.errno not in {
+            errno.EXDEV, errno.EPERM, errno.EACCES,
+            getattr(errno, "EOPNOTSUPP", errno.EPERM),
+            getattr(errno, "ENOTSUP", errno.EPERM),
+            errno.ENOSYS,
+        }:
+            raise
+        shutil.copy2(source, destination)
+        if source.stat().st_size != destination.stat().st_size:
+            raise RuntimeError(f"Rollback backup size mismatch: {destination}")
+        return "copy"
+
+
 def probe(path: Path) -> dict:
     return json.loads(run([
         "ffprobe", "-v", "error", "-count_frames", "-show_streams",
@@ -475,8 +503,10 @@ def main() -> int:
         for index in range(4):
             backup_video = backup_dir / f"segment-{index}.mp4.original"
             backup_report = backup_dir / f"segment-{index}.json.original"
-            shutil.copy2(source_paths[index], backup_video)
-            shutil.copy2(source_report_paths[index], backup_report)
+            media_backup_mode = backup_original_file(source_paths[index], backup_video)
+            backup_original_file(source_report_paths[index], backup_report)
+            if media_backup_mode not in {"hardlink", "copy"}:
+                raise RuntimeError(f"Unknown rollback backup mode for segment {index}.")
             commit_items.extend([
                 (staged_videos[index], source_paths[index], backup_video),
                 (staged_reports[index], source_report_paths[index], backup_report),
