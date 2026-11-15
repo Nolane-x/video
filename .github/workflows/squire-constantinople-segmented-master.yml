@@ -166,7 +166,7 @@ jobs:
             ]);
 
             for (const source of result.data.workflow_runs) {
-              if (source.conclusion !== "success" ||
+              if (!["success", "failure", "cancelled", "timed_out"].includes(source.conclusion) ||
                   source.head_branch !== branchName ||
                   !source.head_sha) continue;
 
@@ -192,6 +192,40 @@ jobs:
                 continue;
               }
 
+              // The media checkpoint is uploaded immediately after strict QA.
+              // A later contact-sheet/review packaging error must not invalidate
+              // that already verified video. Require all technical gate steps
+              // and the checkpoint upload itself to have succeeded.
+              const jobsResponse = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: source.id,
+                per_page: 100
+              });
+              const assemblyJob = jobsResponse.data.jobs.find(
+                job => job.name === "Assemble 240fps proof, mix audio and run strict media QA"
+              );
+              if (!assemblyJob) continue;
+              const stepResults = new Map(
+                (assemblyJob.steps || []).map(step => [step.name, step.conclusion])
+              );
+              const requiredSteps = [
+                "Export subtitles and run strict media QA",
+                "Build immutable proof manifest and checkpoint verified media",
+                "Upload verified hybrid 240fps media checkpoint"
+              ];
+              const failedGates = requiredSteps.filter(
+                name => stepResults.get(name) !== "success"
+              );
+              if (failedGates.length) {
+                core.info(
+                  "Rejecting hybrid run " + source.id +
+                  "; technical checkpoint steps were not all successful: " +
+                  failedGates.join(", ")
+                );
+                continue;
+              }
+
               const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -209,7 +243,9 @@ jobs:
               core.info(
                 "Using Blender 30fps proof run " + source.id +
                 " at source " + source.head_sha +
-                "; current branch HEAD is " + expectedSha +
+                "; workflow conclusion: " + source.conclusion +
+                "; strict QA and media checkpoint upload succeeded; " +
+                "current branch HEAD is " + expectedSha +
                 "; safe post-proof commits: " + changed.length
               );
               core.setOutput("run_id", String(source.id));
@@ -217,8 +253,8 @@ jobs:
               return;
             }
             core.setFailed(
-              "No successful, non-expired 30fps Blender proof artifact matches " +
-              "the current visual source (or safe test-only descendants)."
+              "No frame-exact, non-expired Blender proof checkpoint passed strict QA " +
+              "for the current visual source (or safe test-only descendants)."
             );
 
       - name: Cancel superseded copies of this segmented render
