@@ -299,7 +299,7 @@ jobs:
           set -euo pipefail
           ffmpeg -hide_banner -v error -y \
             -framerate "$KEYFRAME_FPS" -start_number 1 -i "out/keyframes/frame_%05d.jpg" \
-            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,scale=1920:1080:flags=lanczos,tpad=stop_mode=clone:stop=1,trim=end_frame=9394,setpts=PTS-STARTPTS" \
+            -vf "minterpolate=fps=240:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,scale=1920:1080:flags=lanczos,tpad=stop_mode=clone:stop=1,trim=end_frame=9394" \
             -frames:v 9394 -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p \
             -r 240 -fps_mode cfr -movflags +faststart out/picture-only-240fps.mp4
           test -s out/picture-only-240fps.mp4
