@@ -191,12 +191,14 @@ def build_aligned_shots(base: dict, lines: list[dict], words: list[dict], durati
             aligned.append(item)
         cursor_frame = end_frame
 
-    duration_frames = max(cursor_frame, round(duration_seconds * FPS))
-    if duration_frames != round(duration_seconds * FPS):
-        raise RuntimeError(
-            f"Shot timeline ends at {cursor_frame} frames but audio duration implies {round(duration_seconds * FPS)}"
-        )
-
+    duration_frames = round(duration_seconds * FPS)
+    if not aligned:
+        raise RuntimeError("No shot instances were created")
+    # Audio sample duration is authoritative; absorb at most a frame of rounding drift in the final shot.
+    frame_delta = duration_frames - cursor_frame
+    aligned[-1]["duration"] += frame_delta
+    if aligned[-1]["duration"] < 1:
+        raise RuntimeError(f"Final shot became invalid after audio/frame reconciliation: {aligned[-1]}")
     aligned.sort(key=lambda row: row["from"])
     previous_end = 0
     for shot in aligned:
