@@ -60,7 +60,7 @@ jobs:
           repository: Nolane-x/video
           run-id: 43893822013
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: voiceover-assets
+          path: video-projects/mua-thoi-gian/voiceover-assets
 
       - name: Verify the supplied VoiceStudio artifact
         run: |
