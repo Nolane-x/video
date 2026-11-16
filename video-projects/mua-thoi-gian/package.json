@@ -1,0 +1,23 @@
+{
+  "name": "mua-thoi-gian-remotion-film",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/validate.mjs",
+    "render": "remotion render src/index.ts MainVideo out/mua-thoi-gian.mp4 --codec=h264 --crf=17 --concurrency=2"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.543",
+    "remotion": "4.0.543",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.0",
+    "@types/node": "22.15.0",
+    "typescript": "5.8.3"
+  }
+}
