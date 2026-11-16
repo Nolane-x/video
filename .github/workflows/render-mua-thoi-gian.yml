@@ -1,0 +1,222 @@
+name: Render Mua Thoi Gian — 1080p cinematic film
+
+on:
+  push:
+    branches:
+      - render/mua-thoi-gian-voice-2026-11-16
+    paths:
+      - "video-projects/mua-thoi-gian/**"
+      - ".github/workflows/render-mua-thoi-gian.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: mua-thoi-gian-master
+  cancel-in-progress: false
+
+jobs:
+  render-master:
+    name: Build aligned 1080p film with Remotion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: video-projects/mua-thoi-gian
+    env:
+      IMAGE_ZIP_URL: https://d2ol7oe51mr4n9.cloudfront.net/user_3HLgODFYRYJufT9VcvcaoEwyxxm/adcf1cfa-095d-42ec-a2fb-4a2d11aeae0c.zip
+      PRODUCTION_PACKAGE_URL: https://d2ol7oe51mr4n9.cloudfront.net/user_3HLgODFYRYJufT9VcvcaoEwyxxm/88299383-71f2-4be4-863d-8c9cd2f21625.zip
+      SOURCE_VOICE_RUN_ID: "43893822013"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - name: Check out the video repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg and Vietnamese-capable fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-ui-core unzip
+
+      - name: Retrieve the exact verified VoiceStudio narration artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mua-thoi-gian-voice-ready-43893822013
+          repository: Nolane-x/video
+          run-id: 43893822013
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: voiceover-assets
+
+      - name: Verify the supplied VoiceStudio artifact
+        run: |
+          set -euo pipefail
+          test -s voiceover-assets/narration.wav
+          test -s voiceover-assets/manifest.json
+          test -s voiceover-assets/captions.srt
+          test -s voiceover-assets/captions.vtt
+          test -s voiceover-assets/h2-timeline.zip
+          test -s voiceover-assets/h2-timeline/timeline/lines.json
+          test -s voiceover-assets/h2-timeline/timeline/words.json
+          test -s voiceover-assets/h2-timeline/alignment-report.json
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path("voiceover-assets")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          audio = manifest["audio"]
+          digest = hashlib.sha256((root / "narration.wav").read_bytes()).hexdigest()
+          assert digest == audio["sha256"], "VoiceStudio WAV SHA-256 mismatch"
+          assert audio["sample_rate"] == 48000 and audio["channels"] == 1 and audio["subtype"] == "PCM_24"
+          assert audio["watermark"]["status"] == "verified" and audio["checks"] == "passed"
+          alignment = json.loads((root / "h2-timeline" / "alignment-report.json").read_text(encoding="utf-8"))
+          print(f"VOICE MASTER VERIFIED: {audio['duration_seconds']:.3f}s | {manifest['voice_id']} | {audio['sample_rate']}Hz PCM-24")
+          print(f"WORD ALIGNMENT: {alignment['alignment']['matched_word_count']}/{alignment['alignment']['expected_word_count']} matched ({alignment['alignment']['matched_ratio']:.1%})")
+          PY
+
+      - name: Download the 90 user-created images and approved production package
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --retry-all-errors --max-time 180 \
+            "$IMAGE_ZIP_URL" -o /tmp/mua-thoi-gian-images.zip
+          curl --fail --location --retry 3 --retry-all-errors --max-time 180 \
+            "$PRODUCTION_PACKAGE_URL" -o /tmp/mua-thoi-gian-package.zip
+          mkdir -p /tmp/mua-thoi-gian-package
+          unzip -q /tmp/mua-thoi-gian-package.zip -d /tmp/mua-thoi-gian-package
+          test -s /tmp/mua-thoi-gian-package/remotion/src/shots.json
+          cp /tmp/mua-thoi-gian-package/remotion/src/shots.json src/storyboard.json
+          echo "Downloaded user stills and storyboard source."
+
+      - name: Install deterministic image and audio preparation dependencies
+        run: python -m pip install --disable-pip-version-check "Pillow==11.3.0" "numpy==2.2.6"
+
+      - name: Prepare 90 stills and real voice-aligned 273-shot timeline
+        run: |
+          python -m py_compile scripts/prepare_mua_thoi_gian.py scripts/generate_mua_thoi_gian_audio.py
+          python scripts/prepare_mua_thoi_gian.py \
+            --image-zip /tmp/mua-thoi-gian-images.zip \
+            --voice-dir voiceover-assets \
+            --project-dir .
+          python scripts/generate_mua_thoi_gian_audio.py --project-dir .
+
+      - name: Install Remotion dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck and validate every image, caption, sound and frame
+        run: |
+          npm run typecheck
+          npm run validate
+
+      - name: Render a 15-second visual and audio preview
+        run: |
+          mkdir -p out
+          npx remotion render src/index.ts MainVideo out/preview-15s.mp4 \
+            --frames=0-449 --scale=0.5 --codec=h264 --crf=21 --concurrency=2
+
+      - name: Render the full 1920x1080 film
+        run: |
+          npx remotion render src/index.ts MainVideo out/mua-thoi-gian-unmastered.mp4 \
+            --codec=h264 --crf=17 --concurrency=2 --pixel-format=yuv420p
+
+      - name: Master the final audio and optimize MP4 playback
+        run: |
+          ffmpeg -hide_banner -loglevel error -y \
+            -i out/mua-thoi-gian-unmastered.mp4 \
+            -af "loudnorm=I=-14:TP=-1.5:LRA=11" \
+            -c:v copy -c:a aac -b:a 256k -ar 48000 -ac 2 \
+            -movflags +faststart out/mua-thoi-gian-master.mp4
+
+      - name: Create contact sheet, thumbnail and technical metadata
+        run: |
+          ffprobe -v error \
+            -show_entries format=duration,size:stream=codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels \
+            -of json out/mua-thoi-gian-master.mp4 > out/metadata.json
+          ffmpeg -hide_banner -loglevel error -y -i out/mua-thoi-gian-master.mp4 \
+            -vf "fps=1/12,scale=320:-1,tile=5x12:padding=10:margin=10" \
+            -frames:v 1 out/contact-sheet.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 8 -i out/mua-thoi-gian-master.mp4 \
+            -frames:v 1 -q:v 2 out/thumbnail.jpg
+          ffmpeg -hide_banner -loglevel info -i out/mua-thoi-gian-master.mp4 \
+            -af ebur128=peak=true -f null - 2> out/audio-loudness.txt
+          cp public/audio/captions.srt out/captions.srt
+          cp public/audio/captions.vtt out/captions.vtt
+          cp public/audio/voice-manifest.json out/voice-manifest.json
+          cp public/audio/alignment-report.json out/alignment-report.json
+          cp public/production-manifest.json out/production-manifest.json
+          cp voiceover-assets/h2-timeline.zip out/h2-timeline.zip
+
+      - name: Enforce final video, audio, duration and loudness gates
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          meta = json.loads(Path("out/metadata.json").read_text(encoding="utf-8"))
+          video = next(s for s in meta["streams"] if s.get("codec_type") == "video")
+          audio = next(s for s in meta["streams"] if s.get("codec_type") == "audio")
+          duration = float(meta["format"]["duration"])
+          voice = json.loads(Path("out/voice-manifest.json").read_text(encoding="utf-8"))
+          expected = float(voice["audio"]["duration_seconds"])
+          assert (video["width"], video["height"]) == (1920, 1080), video
+          assert video["r_frame_rate"] == "30/1", video
+          assert audio["codec_name"] == "aac" and audio["sample_rate"] == "48000" and audio["channels"] == 2, audio
+          assert abs(duration - expected) <= 0.05, (duration, expected)
+          report = Path("out/audio-loudness.txt").read_text(encoding="utf-8", errors="replace")
+          integrated = re.search(r"Integrated loudness:\s*I:\s*(-?\d+(?:\.\d+)?) LUFS", report, re.S)
+          peak = re.search(r"True peak:\s*Peak:\s*(-?\d+(?:\.\d+)?) dBFS", report, re.S)
+          assert integrated and peak, "Could not parse FFmpeg ebur128 report"
+          lufs, true_peak = float(integrated.group(1)), float(peak.group(1))
+          assert abs(lufs - (-14.0)) <= 1.0, f"Integrated loudness out of range: {lufs:.1f} LUFS"
+          assert true_peak <= -1.0, f"True peak too high: {true_peak:.1f} dBFS"
+          qa = {
+              "status": "passed",
+              "resolution": "1920x1080",
+              "fps": 30,
+              "duration_seconds": round(duration, 3),
+              "voice_duration_seconds": round(expected, 3),
+              "shot_count": len(json.loads(Path("src/shots.json").read_text())["shots"]),
+              "image_count": 90,
+              "integrated_lufs": round(lufs, 2),
+              "true_peak_dbfs": round(true_peak, 2),
+              "video_codec": video["codec_name"],
+              "audio_codec": audio["codec_name"],
+              "audio_sample_rate": int(audio["sample_rate"]),
+              "alignment": json.loads(Path("out/alignment-report.json").read_text())["alignment"],
+          }
+          Path("out/qa-report.json").write_text(json.dumps(qa, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(qa, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload final film and complete review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mua-thoi-gian-film-1080p
+          path: |
+            video-projects/mua-thoi-gian/out/mua-thoi-gian-master.mp4
+            video-projects/mua-thoi-gian/out/preview-15s.mp4
+            video-projects/mua-thoi-gian/out/contact-sheet.jpg
+            video-projects/mua-thoi-gian/out/thumbnail.jpg
+            video-projects/mua-thoi-gian/out/metadata.json
+            video-projects/mua-thoi-gian/out/audio-loudness.txt
+            video-projects/mua-thoi-gian/out/qa-report.json
+            video-projects/mua-thoi-gian/out/captions.srt
+            video-projects/mua-thoi-gian/out/captions.vtt
+            video-projects/mua-thoi-gian/out/voice-manifest.json
+            video-projects/mua-thoi-gian/out/alignment-report.json
+            video-projects/mua-thoi-gian/out/production-manifest.json
+            video-projects/mua-thoi-gian/out/h2-timeline.zip
+          if-no-files-found: error
+          retention-days: 30
