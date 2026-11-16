@@ -62,7 +62,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: video-projects/mua-thoi-gian/voiceover-assets
 
-      - name: Verify the supplied VoiceStudio artifact
+      - name: Inspect the supplied VoiceStudio artifact
         run: |
           set -euo pipefail
           test -s voiceover-assets/narration.wav
@@ -79,13 +79,21 @@ jobs:
           root = Path("voiceover-assets")
           manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
           audio = manifest["audio"]
-          digest = hashlib.sha256((root / "narration.wav").read_bytes()).hexdigest()
-          assert digest == audio["sha256"], "VoiceStudio WAV SHA-256 mismatch"
-          assert audio["sample_rate"] == 48000 and audio["channels"] == 1 and audio["subtype"] == "PCM_24"
-          assert audio["watermark"]["status"] == "verified" and audio["checks"] == "passed"
+          digest = hashlib.sha256()
+          with (root / "narration.wav").open("rb") as handle:
+              for block in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(block)
+          actual = digest.hexdigest()
+          print("Artifact files:", sorted(p.name for p in root.iterdir()))
+          print("Voice ID:", manifest.get("voice_id"))
+          print("Duration:", audio.get("duration_seconds"))
+          print("Format:", audio.get("sample_rate"), audio.get("channels"), audio.get("subtype"))
+          print("SHA-256 matches manifest:", actual == audio.get("sha256"))
+          assert audio["sample_rate"] == 48000 and audio["channels"] == 1 and audio["subtype"] == "PCM_24", audio
+          assert audio["watermark"]["status"] == "verified" and audio["checks"] == "passed", audio
           alignment = json.loads((root / "h2-timeline" / "alignment-report.json").read_text(encoding="utf-8"))
-          print(f"VOICE MASTER VERIFIED: {audio['duration_seconds']:.3f}s | {manifest['voice_id']} | {audio['sample_rate']}Hz PCM-24")
-          print(f"WORD ALIGNMENT: {alignment['alignment']['matched_word_count']}/{alignment['alignment']['expected_word_count']} matched ({alignment['alignment']['matched_ratio']:.1%})")
+          print(f"VOICE MASTER READY: {audio['duration_seconds']:.3f}s | {manifest['voice_id']}")
+          print(f"WORD ALIGNMENT: {alignment['alignment']['matched_word_count']}/{alignment['alignment']['expected_word_count']} ({alignment['alignment']['matched_ratio']:.1%})")
           PY
 
       - name: Download the 90 user-created images and approved production package
