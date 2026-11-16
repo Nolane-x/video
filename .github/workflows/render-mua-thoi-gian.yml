@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: mua-thoi-gian-master
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   render-master:
