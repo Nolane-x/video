@@ -74,7 +74,7 @@ def extract_images(archive: Path, destination: Path) -> dict[str, Path]:
 
 
 def build_aligned_shots(base: dict, lines: list[dict], words: list[dict], duration_seconds: float) -> dict:
-    line_by_block = {str(row["block"]): row for row in lines}
+    line_by_block = {str(row.get("source_segment_id") or row["id"]): row for row in lines}
     words_by_line: dict[str, list[dict]] = defaultdict(list)
     for word in words:
         words_by_line[str(word["line"])].append(word)
@@ -132,6 +132,10 @@ def build_aligned_shots(base: dict, lines: list[dict], words: list[dict], durati
         line_start = float(line["start"])
         line_end = float(line["end"])
         start_frame = max(cursor_frame, round(line_start * FPS))
+        if start_frame > cursor_frame and aligned:
+            # TTS inserts measured silences between voice blocks; hold the last shot over each pause.
+            aligned[-1]["duration"] += start_frame - cursor_frame
+            cursor_frame = start_frame
         end_frame = max(start_frame + len(group), round(line_end * FPS))
         boundaries = [start_frame]
 
