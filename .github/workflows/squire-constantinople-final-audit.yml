@@ -1,4 +1,4 @@
-name: Squire · Constantinople 1453 · Lightweight visual and audio audit
+name: Squire · Constantinople 1453 · Current master human-review package
 
 on:
   push:
@@ -6,189 +6,170 @@ on:
       - squire/constantinople-1453-redesign
     paths:
       - .github/workflows/squire-constantinople-final-audit.yml
+      - .github/workflows/test-squire-constantinople.yml
+      - tools/video/build_squire_review_pack.py
+      - tests/test_squire_review_pack.py
   workflow_dispatch:
 
 permissions:
   actions: read
   contents: read
 
+concurrency:
+  group: squire-constantinople-current-master-review
+  cancel-in-progress: false
+
 jobs:
-  build-audit-pack:
-    name: Extract compact audit pack from verified master
+  resolve-master:
+    name: Resolve the newest verified master on this source branch
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 15
+    outputs:
+      run_id: ${{ steps.resolve.outputs.run_id }}
+      artifact_id: ${{ steps.resolve.outputs.artifact_id }}
+      artifact_name: ${{ steps.resolve.outputs.artifact_name }}
+      source_sha: ${{ steps.resolve.outputs.source_sha }}
+    steps:
+      - name: Find the newest successful, source-compatible 240fps master
+        id: resolve
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = "squire/constantinople-1453-redesign";
+            const workflowPath = ".github/workflows/squire-constantinople-segmented-master.yml";
+            const allowedPostMasterChanges = new Set([
+              ".github/workflows/squire-constantinople-final-audit.yml",
+              ".github/workflows/test-squire-constantinople.yml",
+              "tools/video/build_squire_review_pack.py",
+              "tests/test_squire_review_pack.py"
+            ]);
+            const result = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 414750781,
+              branch: branchName,
+              status: "completed",
+              per_page: 100
+            });
+
+            for (const source of result.data.workflow_runs) {
+              if (source.conclusion !== "success" ||
+                  source.head_branch !== branchName ||
+                  source.path !== workflowPath ||
+                  !source.head_sha) continue;
+
+              const comparison = await github.request(
+                "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: source.head_sha,
+                  head: context.sha
+                }
+              );
+              if (comparison.data.too_large ||
+                  !["ahead", "identical"].includes(comparison.data.status)) continue;
+
+              const changed = (comparison.data.files || []).map(file => file.filename);
+              const unsafe = changed.filter(path => !allowedPostMasterChanges.has(path));
+              if (unsafe.length) {
+                core.info("Skipping master run " + source.id + "; render-affecting files changed afterward: " + unsafe.join(", "));
+                continue;
+              }
+
+              const [jobsResponse, artifactsResponse] = await Promise.all([
+                github.rest.actions.listJobsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: source.id,
+                  per_page: 100
+                }),
+                github.rest.actions.listWorkflowRunArtifacts({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: source.id,
+                  per_page: 100
+                })
+              ]);
+
+              const assembly = jobsResponse.data.jobs.find(
+                job => job.name === "Join segments, mix soundtrack and run strict master QA"
+              );
+              if (!assembly || assembly.conclusion !== "success") continue;
+              const steps = new Map((assembly.steps || []).map(step => [step.name, step.conclusion]));
+              const requiredSteps = [
+                "Run strict long-form 240fps technical QA",
+                "Attach Blender insert provenance to the master QA report",
+                "Assemble complete delivery package",
+                "Upload complete verified 16-minute 1080p native 240fps master"
+              ];
+              if (requiredSteps.some(name => steps.get(name) !== "success")) continue;
+
+              const expectedName = "squire-constantinople-1453-redesign-240fps-" + source.id;
+              const artifact = artifactsResponse.data.artifacts.find(item =>
+                item.name === expectedName && !item.expired && item.size_in_bytes >= 1000000000
+              );
+              if (!artifact) continue;
+
+              core.info("Selected verified master run " + source.id + ", artifact " + artifact.id + ", " + artifact.size_in_bytes + " bytes, source " + source.head_sha + ".");
+              core.setOutput("run_id", String(source.id));
+              core.setOutput("artifact_id", String(artifact.id));
+              core.setOutput("artifact_name", artifact.name);
+              core.setOutput("source_sha", source.head_sha);
+              return;
+            }
+
+            core.setFailed("No unexpired, successful, source-compatible 240fps master artifact passed the required QA and upload gates.");
+
+  build-review-pack:
+    name: Build full-length review proxy, complete audio and dense shot contact sheets
+    needs: resolve-master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download the completed master delivery artifact
+      - name: Download the exact verified master artifact selected above
         uses: actions/download-artifact@v4
         with:
-          name: squire-constantinople-1453-redesign-240fps-43118548250
+          name: ${{ needs.resolve-master.outputs.artifact_name }}
           path: source
-          run-id: 43118548250
+          run-id: ${{ needs.resolve-master.outputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install lightweight audit tools
+      - name: Install FFmpeg and timestamp overlay font
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
-          python -m pip install --disable-pip-version-check pillow
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          ffmpeg -version | head -n 1
+          test -s /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
 
-      - name: Create review package, whole-film keyframes and audio audition samples
+      - name: Verify master provenance and build full-length human-review package
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import hashlib, json, shutil, subprocess
-          from pathlib import Path
-          from PIL import Image, ImageDraw
+          python tools/video/build_squire_review_pack.py \
+            --source source \
+            --output review \
+            --run-id '${{ needs.resolve-master.outputs.run_id }}' \
+            --artifact-id '${{ needs.resolve-master.outputs.artifact_id }}' \
+            --artifact-name '${{ needs.resolve-master.outputs.artifact_name }}' \
+            --source-sha '${{ needs.resolve-master.outputs.source_sha }}'
+          du -sh review
+          test -s review/FULL-FILM-REVIEW-720p30.mp4
+          test -s review/FULL-AUDIO-REVIEW.mp3
+          test -s review/SHOT-INDEX.csv
+          test -s review/REVIEW-LOG-TEMPLATE.csv
+          test -s review/AUDIT-README.json
+          test -s review/SHA256SUMS-REVIEW.txt
 
-          root = Path("source")
-          out = Path("audit")
-          out.mkdir()
-          video = root / "53 Days to the End of an Empire.mp4"
-          required = [
-              video, root / "QA-REPORT.json", root / "QA-REPORT.md",
-              root / "thumbnail.png", root / "native-240fps-preview-segment.mp4",
-              root / "captions.srt", root / "captions.vtt",
-          ]
-          missing = [str(p) for p in required if not p.is_file()]
-          if missing:
-              raise SystemExit("Missing expected master delivery files: " + ", ".join(missing))
-
-          for name in ["QA-REPORT.json", "QA-REPORT.md", "thumbnail.png",
-                       "native-240fps-preview-segment.mp4", "captions.srt", "captions.vtt",
-                       "AUDIO-SOURCE-MANIFEST.json", "alignment-report.json",
-                       "voice-manifest.json", "voice-selection.json", "config.json",
-                       "01-SCRIPT.md", "story-bible.md"]:
-              src = root / name
-              if src.is_file():
-                  shutil.copy2(src, out / src.name)
-
-          report = json.loads((root / "QA-REPORT.json").read_text(encoding="utf-8"))
-          assert report.get("status") == "technical_pass", report
-          assert report.get("fps") == 240 and report.get("frames") == 229896, report
-          assert report.get("resolution") == "1920x1080", report
-
-          sheets = root / "contact-sheets"
-          sheet_files = sorted(p for p in sheets.glob("*") if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}) if sheets.is_dir() else []
-          if not sheet_files:
-              raise SystemExit("No full-project contact sheets found in the delivery package")
-          sheet_out = out / "contact-sheets"
-          sheet_out.mkdir()
-          for item in sheet_files:
-              shutil.copy2(item, sheet_out / item.name)
-
-          tiles = []
-          for item in sheet_files:
-              im = Image.open(item).convert("RGB")
-              im.thumbnail((480, 270))
-              tile = Image.new("RGB", (500, 310), "white")
-              tile.paste(im, ((500-im.width)//2, 8))
-              ImageDraw.Draw(tile).text((10, 282), item.name, fill="black")
-              tiles.append(tile)
-          cols = 3
-          rows = (len(tiles) + cols - 1) // cols
-          overview = Image.new("RGB", (cols*500, rows*310), (32, 32, 32))
-          for idx, tile in enumerate(tiles):
-              overview.paste(tile, ((idx % cols)*500, (idx // cols)*310))
-          overview.save(out / "contact-sheets-overview.jpg", quality=88)
-
-          times = [0, 60, 120, 180, 240, 300, 390, 480, 570, 660, 750, 840, 900, 957]
-          frames = []
-          frame_dir = out / "keyframes"
-          frame_dir.mkdir()
-          for idx, sec in enumerate(times):
-              frame_path = frame_dir / f"frame-{idx:02d}-{sec:03d}s.jpg"
-              subprocess.run([
-                  "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-                  "-ss", str(sec), "-i", str(video), "-frames:v", "1",
-                  "-vf", "scale=640:-2", "-q:v", "3", str(frame_path)
-              ], check=True)
-              im = Image.open(frame_path).convert("RGB")
-              im.thumbnail((480, 270))
-              tile = Image.new("RGB", (500, 300), "white")
-              tile.paste(im, ((500-im.width)//2, 5))
-              ImageDraw.Draw(tile).text((10, 280), f"{sec}s", fill="black")
-              frames.append(tile)
-          cols = 3
-          rows = (len(frames) + cols - 1) // cols
-          montage = Image.new("RGB", (cols*500, rows*300), (32, 32, 32))
-          for idx, tile in enumerate(frames):
-              montage.paste(tile, ((idx % cols)*500, (idx // cols)*300))
-          montage.save(out / "whole-film-keyframes.jpg", quality=90)
-
-          audio_inputs = []
-          points = [45, 225, 405, 585, 765]
-          for i, sec in enumerate(points):
-              clip = out / f"audio-audition-{i+1}.wav"
-              subprocess.run([
-                  "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-                  "-ss", str(sec), "-t", "15", "-i", str(video),
-                  "-vn", "-ac", "2", "-ar", "48000", "-c:a", "pcm_s16le", str(clip)
-              ], check=True)
-              audio_inputs += ["-i", str(clip)]
-          filters = ";".join(f"[{i}:a]atrim=duration=15,asetpts=PTS-STARTPTS[a{i}]" for i in range(5))
-          filters += ";" + "".join(f"[a{i}]" for i in range(5)) + "concat=n=5:v=0:a=1[aout]"
-          subprocess.run([
-              "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *audio_inputs,
-              "-filter_complex", filters, "-map", "[aout]", "-c:a", "libmp3lame",
-              "-b:a", "192k", str(out / "five-point-audio-audition.mp3")
-          ], check=True)
-          for i in range(5):
-              (out / f"audio-audition-{i+1}.wav").unlink(missing_ok=True)
-
-          review = {
-              "source_run_id": 43118548250,
-              "source_artifact": "squire-constantinople-1453-redesign-240fps-43118548250",
-              "technical_status": report["status"],
-              "artistic_signoff": report.get("artistic_signoff"),
-              "duration_seconds": report["duration_seconds"],
-              "resolution": report["resolution"],
-              "fps": report["fps"],
-              "frames": report["frames"],
-              "shots": report.get("shot_count"),
-              "bespoke_shots": report.get("bespoke_shots"),
-              "contact_sheet_count": len(sheet_files),
-              "keyframe_seconds": times,
-              "audio_audition_seconds": points,
-              "audio_audition_clip_seconds": 15,
-              "human_review_required": True,
-              "limitations": report.get("limitations", [])
-          }
-          (out / "AUDIT-README.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
-          (out / "AUDIT-README.md").write_text(
-              "# Constantinople 1453 — compact review pack\n\n"
-              f"- Technical QA: {report['status']}\n"
-              f"- Artistic sign-off: {report.get('artistic_signoff')}\n"
-              f"- Runtime: {report['duration_seconds']} seconds\n"
-              f"- Picture: {report['resolution']} / {report['fps']} fps / {report['frames']} frames\n"
-              f"- Shotbook: {report.get('shot_count')} shots, {report.get('bespoke_shots')} bespoke\n"
-              f"- Contact sheets: {len(sheet_files)}\n"
-              "- whole-film-keyframes.jpg samples the entire film from beginning to end.\n"
-              "- five-point-audio-audition.mp3 contains five 15-second samples from the final mixed soundtrack.\n"
-              "- The main 6.16 GB master remains in the original Actions artifact; this pack is for inspection only.\n"
-              "- Human watch/listen and artistic approval are still required before public release.\n",
-              encoding="utf-8"
-          )
-          sums = []
-          for p in sorted(out.rglob("*")):
-              if p.is_file():
-                  h = hashlib.sha256(p.read_bytes()).hexdigest()
-                  sums.append(f"{h}  {p.relative_to(out).as_posix()}")
-          (out / "SHA256SUMS.txt").write_text("\n".join(sums) + "\n", encoding="utf-8")
-          print(json.dumps(review, indent=2))
-          print("Compact audit pack size:")
-          subprocess.run(["du", "-sh", str(out)], check=True)
-          PY
-
-      - name: Upload compact visual and audio audit artifact
+      - name: Upload review package without recompressing encoded media
         uses: actions/upload-artifact@v4
         with:
-          name: squire-constantinople-visual-audit-43118548250
-          path: audit/
+          name: squire-constantinople-human-review-${{ needs.resolve-master.outputs.run_id }}
+          path: review/
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
