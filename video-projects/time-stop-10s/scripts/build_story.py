@@ -54,7 +54,7 @@ add("lockers","Hành lang trường học; tủ đồ tạo các lớp chiều s
 add("kitchen","Căn bếp ấm; mẹ đặt hộp đồ ăn cạnh cặp sách, hơi nước bốc lên dưới đèn vàng.","Mẹ vẫn chuẩn bị bữa sáng như mọi ngày.",
     [actor("mom",.62,"point","grin"),actor("hoodie",.30,"stand","neutral",hold="bag")],{"sky":"dawn","lamp":True},
     camera(.50,.52,1.0,.54,.49,1.08),lights=[{"x":.67,"y":.28,"r":.20,"color":"#ffc36f","a":.34}])
-add("phone","Cận điện thoại trên bàn; một thông báo lạ phủ lên màn hình khóa.","Một quảng cáo kỳ lạ xuất hiện trên điện thoại.",
+add("bedroom","Cận điện thoại trên bàn; một thông báo lạ phủ lên màn hình khóa.","Một quảng cáo kỳ lạ xuất hiện trên điện thoại.",
     [actor("hoodie",.68,"phone","neutral",hold="phone",h=.36)],{},camera(.70,.45,1.22,.70,.43,1.46),sfx=[cue("phone_ring"),cue("ui_click",1.0)])
 add("city","Toàn cảnh thành phố buổi sáng; các tòa nhà, ban công và cửa sổ xếp thành nhiều lớp.","Ngoài kia, hàng triệu chiếc đồng hồ vẫn đang chạy.",
     [actor("hoodie",.20,"relaxed","neutral",walk={"to":.78,"dur":4.0,"speed":.9},h=.35)],{"time":"day","birds":True,"lamps":[]},
