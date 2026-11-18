@@ -249,6 +249,57 @@ export function set(g, kind = 'bedroom', o = {}) {
       g.fillStyle = '#16181d'; g.fillRect(-60, gy, E.W + 120, E.H); ln(g, [[-60, gy], [E.W + 60, gy]], { lw: 2, la: 0.4 });
       if (o.neonDoor !== undefined && o.neonDoor !== false) { const dx = X(o.neonDoor === true ? 0.32 : o.neonDoor), dh = E.H * 0.34; box(g, dx - 60, gy - dh, 120, dh, { fill: '#0b0b0f', line: accent(), la: 0.9, lw: 3 }); g.save(); g.globalCompositeOperation = 'lighter'; const gr = g.createLinearGradient(0, gy - dh, 0, gy); gr.addColorStop(0, alpha(accent(), 0.05)); gr.addColorStop(1, alpha(accent(), 0.45)); g.fillStyle = gr; g.fillRect(dx - 56, gy - dh + 4, 112, dh - 4); g.restore(); light(g, dx, gy - dh * 0.5, dh * 0.8, accent(), 0.2); M.neon = [dx, gy]; }
       if (o.busstop !== false) { const sx = X(o.busX ?? 0.72), sw = X(0.2); box(g, sx - sw / 2, gy - E.H * 0.36, sw, 10, { fill: '#30333b' }); ln(g, [[sx - sw / 2 + 6, gy - E.H * 0.36], [sx - sw / 2 + 6, gy]], { lw: 5 }); ln(g, [[sx + sw / 2 - 6, gy - E.H * 0.36], [sx + sw / 2 - 6, gy]], { lw: 5 }); g.fillStyle = 'rgba(160,180,210,0.07)'; g.fillRect(sx - sw / 2 + 8, gy - E.H * 0.35, sw - 16, E.H * 0.3); bench(g, sx, gy, sw * 0.7); light(g, sx, gy - E.H * 0.34, sw * 0.6, '#d8e4ff', 0.25); box(g, sx + sw / 2 + 20, gy - E.H * 0.42, 34, 26, { fill: '#2f6fd0', r: 3 }); M.bus = { seat: [sx, gy], x: sx }; }
+      // Optional story props: a detailed commuter bicycle and a tilting street billboard.
+      if (o.bicycle) {
+        const bx = X(o.bikeX ?? 0.67), by = gy - 34, r = Math.min(E.H * 0.058, E.W * 0.052);
+        const rear = bx - r * 1.55, front = bx + r * 1.55;
+        g.save();
+        g.lineCap = 'round'; g.lineJoin = 'round';
+        for (const wx of [rear, front]) {
+          g.beginPath(); g.arc(wx, by, r, 0, Math.PI * 2);
+          g.strokeStyle = '#aeb9c8'; g.lineWidth = 4; g.stroke();
+          g.beginPath(); g.arc(wx, by, r * 0.08, 0, Math.PI * 2);
+          g.fillStyle = '#d7e0e9'; g.fill();
+          for (let j = 0; j < 8; j++) {
+            const a = j * Math.PI / 4;
+            g.beginPath(); g.moveTo(wx, by);
+            g.lineTo(wx + Math.cos(a) * r * 0.88, by + Math.sin(a) * r * 0.88);
+            g.strokeStyle = 'rgba(180,198,220,.42)'; g.lineWidth = 1; g.stroke();
+          }
+        }
+        const seatX = bx - r * 0.30, seatY = by - r * 1.50;
+        const pedalX = bx + r * 0.18, pedalY = by;
+        const headX = bx + r * 1.03, headY = by - r * 1.54;
+        g.strokeStyle = '#d58a54'; g.lineWidth = 5;
+        g.beginPath(); g.moveTo(rear, by); g.lineTo(seatX, seatY); g.lineTo(pedalX, pedalY);
+        g.lineTo(rear, by); g.lineTo(headX, headY); g.lineTo(pedalX, pedalY);
+        g.lineTo(seatX, seatY); g.stroke();
+        g.strokeStyle = '#d8dde6'; g.lineWidth = 4;
+        g.beginPath(); g.moveTo(seatX - r * .32, seatY); g.lineTo(seatX + r * .33, seatY);
+        g.moveTo(headX, headY); g.lineTo(headX + r * .28, headY - r * .34);
+        g.moveTo(headX - r * .22, headY - r * .34); g.lineTo(headX + r * .48, headY - r * .34); g.stroke();
+        g.beginPath(); g.arc(pedalX, pedalY, r * .18, 0, Math.PI * 2);
+        g.strokeStyle = '#e5b16b'; g.lineWidth = 3; g.stroke();
+        g.restore();
+      }
+      if (o.billboard) {
+        const sx = X(o.billboardX ?? 0.79), pivotY = gy - E.H * 0.50;
+        const bw = E.W * 0.26, bh = E.H * 0.115;
+        const angle = o.billboardTilt !== undefined ? o.billboardTilt : (o.billboardFall ? Math.min(0.95, Math.max(0, t - (o.billboardAt ?? 0)) * 0.32) : 0);
+        g.save();
+        g.translate(sx, pivotY);
+        g.rotate(angle);
+        g.strokeStyle = '#5c6675'; g.lineWidth = 8;
+        g.beginPath(); g.moveTo(-bw * .28, 0); g.lineTo(-bw * .28, bh * 1.25);
+        g.moveTo(bw * .28, 0); g.lineTo(bw * .28, bh * 1.25); g.stroke();
+        g.fillStyle = '#171e2b'; g.fillRect(-bw / 2, -bh / 2, bw, bh);
+        g.strokeStyle = '#c99b61'; g.lineWidth = 3; g.strokeRect(-bw / 2, -bh / 2, bw, bh);
+        g.fillStyle = '#f1d8ae';
+        g.font = '700 ' + Math.max(18, Math.round(E.H * .024)) + 'px sans-serif';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(o.billboardText || '10 GIÂY CÓ THỂ THAY ĐỔI TẤT CẢ', 0, 0, bw * .9);
+        g.restore();
+      }
       streetLamp(g, X(o.lampX ?? 0.55), gy, E.H * 0.42);
       if (o.rain !== false) { rain(g, t, { n: 180 }); g.save(); g.globalAlpha = 0.12; g.fillStyle = '#9fb0d0'; for (let i = 0; i < 10; i++) g.fillRect(X(0.05 + i * 0.1), gy + 12 + (i % 3) * 18, 70, 3); g.restore(); }
       break; }
