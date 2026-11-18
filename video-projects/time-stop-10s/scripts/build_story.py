@@ -165,9 +165,6 @@ add("lockers","Sách nằm yên trong tay đứa trẻ; bạn bè nhìn nhau khi
 add("court","Bạn bè chơi bóng; nhân vật chạy theo đường biên, tiếng cười trở lại.","Cậu bắt đầu tin rằng mười giây có thể tạo khác biệt.",
     [actor("friend",.66,"cheer","grin"),actor("hoodie",.28,"wave","grin")],{"hoopX":.72,"benchX":.2},
     camera(.5,.48,1.0,.56,.45,1.12),sfx=[cue("crowd_cheer",.8)])
-add("classroom","Một chiếc thước rơi khỏi bàn; nhân vật đưa tay đỡ trước khi chạm đất.","Những lần dừng thời gian nhỏ dần thành thói quen.",
-    [actor("hoodie",.44,"crouch","neutral"),actor("friend",.75,"type","neutral")],{"sky":"day","board":"VẬT LÝ","desks":[.25,.5,.75]},
-    camera(.48,.58,1.12,.53,.54,1.24),sfx=[cue("impact_light",1.2)])
 add("mirror","Nhân vật nhìn vào gương; vòng sáng xanh tắt dần trên cổ tay.","Nhưng cậu cũng bắt đầu lệ thuộc vào nó.",
     [actor("hoodie",.52,"headhold","sad")],{"mirrorX":.54},camera(.52,.45,1.18,.52,.43,1.32))
 add("kitchen","Mẹ loay hoay với túi đồ nặng; nhân vật đứng nhìn từ cửa bếp.","Ở nhà, cậu vẫn chưa biết giúp mẹ bằng cách nào.",
@@ -208,6 +205,10 @@ add("street","Biển quảng cáo nghiêng thêm; xe đạp của mẹ vẫn ti�
     [actor("mom",.64,"sit","neutral",y=.72,h=.40)],
     {"busstop":False,"rain":True,"bicycle":True,"bikeX":.67,"billboard":True,"billboardX":.78,"billboardTilt":.22,"lampX":.9},
     camera(.54,.48,1.0,.62,.48,1.12),sfx=[cue("riser_2s",.3)])
+add("street","Bánh trước xe đạp cắt qua vũng nước; phía trên, khung biển kêu răng rắc trong gió.","Mẹ không nghe thấy tiếng kim loại đang rạn.",
+    [actor("mom",.63,"sit","neutral",y=.72,h=.40)],
+    {"busstop":False,"rain":True,"bicycle":True,"bikeX":.66,"billboard":True,"billboardX":.79,"billboardTilt":.18,"lampX":.9},
+    camera(.64,.68,1.28,.66,.61,1.46),sfx=[cue("impact_heavy",2.5)])
 add("street","Cận gương mặt mẹ; ánh đèn đường phản chiếu trên giọt mưa, mắt vẫn nhìn đường.","Mẹ chỉ còn cách tấm biển vài mét.",
     [actor("mom",.53,"guard","neutral",y=.72,h=.47)],
     {"busstop":False,"rain":True,"bicycle":True,"bikeX":.67,"billboard":True,"billboardX":.78,"billboardTilt":.25,"lampX":.9},
@@ -250,9 +251,6 @@ add("street","Nhân vật đỡ mẹ đứng dậy, một tay giữ vai, tay kia
     [actor("hoodie",.40,"carry","neutral",h=.49),actor("mom",.58,"kneel","sad",y=.72,h=.42)],
     {"busstop":False,"rain":False,"bicycle":True,"bikeX":.62,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
     camera(.48,.52,1.0,.52,.51,1.14),freeze=True,timer=4)
-add("street","Cận đồng hồ; vòng sáng chỉ còn ba vạch, ánh xanh phản vào bàn tay ướt.","Ba giây cuối cùng.",
-    [actor("hoodie",.48,"headhold","sad",h=.42)],{"busstop":False,"rain":False,"bicycle":True,"bikeX":.62,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
-    camera(.51,.48,1.35,.51,.48,1.60),freeze=True,timer=3,sfx=[cue("tick",.2),cue("riser_2s",1.0)])
 add("street","Nhân vật đẩy xe đạp vào sát lề, đặt mẹ phía sau cột đèn chắc chắn.","Cậu đưa mẹ đến nơi an toàn.",
     [actor("hoodie",.38,"guard","neutral",run={"to":.27,"dur":2.8,"speed":1.1},h=.47),actor("mom",.58,"stand","neutral",h=.41)],
     {"busstop":False,"rain":False,"bicycle":True,"bikeX":.33,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
