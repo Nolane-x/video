@@ -3,7 +3,7 @@ name: Render — Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây
 on:
   push:
     branches:
-      - film/time-stop-10s-open-source
+      - 'film/time-stop-10s-*'
     paths:
       - "video-projects/time-stop-10s/**"
       - ".github/workflows/render-time-stop-10s.yml"
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: time-stop-10s-open-source
+  group: time-stop-10s-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout film branch
         uses: actions/checkout@v4
         with:
-          ref: film/time-stop-10s-open-source
+          ref: ${{ github.ref_name }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -86,7 +86,7 @@ jobs:
       - name: Check out the video production branch
         uses: actions/checkout@v4
         with:
-          ref: film/time-stop-10s-open-source
+          ref: ${{ github.ref_name }}
       - name: Check out VoiceStudio's pinned TTS and watermark implementation
         uses: actions/checkout@v4
         with:
@@ -166,7 +166,7 @@ jobs:
       - name: Checkout feature branch
         uses: actions/checkout@v4
         with:
-          ref: film/time-stop-10s-open-source
+          ref: ${{ github.ref_name }}
 
       - name: Download verified VoiceStudio narration artifact
         uses: actions/download-artifact@v4
@@ -261,6 +261,16 @@ jobs:
           test -s projects/time-stop-10s/timeline/voice.wav
           test -s projects/time-stop-10s/out/captions.srt
           test -s projects/time-stop-10s/out/voice-placement.json
+
+      - name: Install the 3D rainy rescue scene module
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          mkdir -p projects/time-stop-10s/scenes/shots
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-3d.js projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          grep -q "reg('s063'" projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          grep -q "reg('s072'" projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-3d.js
 
       - name: Scan all H2 shots for renderer and template errors
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
