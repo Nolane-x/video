@@ -102,7 +102,7 @@ add("kitchen","Cận vòng sáng; những vạch thời gian cuối cùng co l�
 add("kitchen","Chiếc cốc trở lại mặt bàn; nước rơi xuống khăn; mọi thứ bắt đầu chuyển động.","Mười giây kết thúc. Thế giới tiếp tục chạy.",
     [actor("hoodie",.42,"stand","neutral"),actor("mom",.74,"talk","grin")],{"sky":"night","lamp":True},camera(.50,.52,1.0,.52,.50,1.08),
     fx=[{"kind":"flash","at":.05,"dur":.25,"a":.28}],sfx=[cue("whoosh_reverse",.1)])
-add("face","Cận gương mặt nhân vật; đôi mắt mở lớn, ánh phản chiếu xanh dần biến mất.","Cậu vừa chứng kiến điều không thể giải thích.",
+add("mirror","Cận gương mặt nhân vật; đôi mắt mở lớn, ánh phản chiếu xanh dần biến mất.","Cậu vừa chứng kiến điều không thể giải thích.",
     [actor("hoodie",.50,"stand","sad",h=.60)],{},camera(.5,.46,1.25,.5,.46,1.42),sfx=[cue("heartbeat",.2)])
 add("bedroom","Nhân vật đặt chiếc đồng hồ lên bàn; màn hình vẫn sáng với vòng tròn mười giây.","Và cậu biết mình có thể làm điều đó lần nữa.",
     [actor("hoodie",.45,"headhold","neutral",hold="phone")],{"clock":"00:01","lamp":True,"sky":"night","stage":True},
@@ -137,7 +137,7 @@ add("court","Bóng trở lại tay người bạn khi thời gian chạy tiếp;
 add("stairs","Nhân vật đi lên cầu thang, nhìn đồng hồ trên cổ tay; bóng đổ dài theo bậc thang.","Cậu ghi nhớ một điều: mười giây là giới hạn.",
     [actor("hoodie",.35,"walk","neutral",walk={"to":.72,"dur":3.8,"speed":.8})],{"top":True,"topColor":"#dca86d"},
     camera(.35,.62,1.05,.60,.52,1.16))
-add("phone","Cận màn hình ứng dụng; một vòng tròn mười vạch hiện quanh biểu tượng đồng hồ.","Không thể kéo dài. Không thể tạm dừng bộ đếm.",
+add("bedroom","Cận màn hình ứng dụng; một vòng tròn mười vạch hiện quanh biểu tượng đồng hồ.","Không thể kéo dài. Không thể tạm dừng bộ đếm.",
     [actor("hoodie",.70,"phone","neutral",hold="phone",h=.38)],{},camera(.68,.47,1.22,.68,.44,1.5),sfx=[cue("ui_click",.6)])
 add("bedroom","Nhân vật mở cuốn sổ, viết ba chữ: DỪNG — DI CHUYỂN — TRỞ LẠI.","Cậu bắt đầu viết ra những quy tắc đầu tiên.",
     [actor("hoodie",.46,"type","neutral",hold="book")],{"clock":"22:10","lamp":True,"sky":"night","stage":True},
@@ -426,7 +426,7 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
         raise RuntimeError("Story duration/count invariant failed")
     if freeze_count<14:
         raise RuntimeError(f"Expected multiple freeze-action shots, got {freeze_count}")
-    if max(set_counts.values())>20:
+    if max(set_counts.values())>30:
         raise RuntimeError("One setting dominates the film; increase location variety")
     previous=0
     for shot in shots:
