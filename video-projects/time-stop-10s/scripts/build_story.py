@@ -68,7 +68,7 @@ add("street","Góc rộng đầu phố; xe cộ lướt qua, đèn giao thông �
     [actor("hoodie",.24,"walk","neutral",walk={"to":.55,"dur":3.8,"speed":.9})],{"busstop":False,"rain":False,"lampX":.8},
     camera(.45,.50,1.0,.60,.48,1.08))
 add("black","Màn đen mở ra với một vòng tròn mảnh màu xanh băng và một con số duy nhất.","Nếu có thể dừng thời gian trong đúng mười giây thì sao?",
-    [actor("hoodie",.50,"stand","headhold",h=.40)],{},camera(.50,.50,1.0,.50,.50,1.0),
+    [actor("hoodie",.50,"stand","neutral",h=.40)],{},camera(.50,.50,1.0,.50,.50,1.0),
     fx=[{"kind":"pulse","at":.2,"dur":4.0,"color":"#7fd8ff","a":.18}],sfx=[cue("slowmo_ring",.2)],
     transition={"type":"dip","dur":.65},text_pos="bottom")
 
