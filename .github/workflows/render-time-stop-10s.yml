@@ -20,7 +20,7 @@ concurrency:
 jobs:
   render-film:
     name: H2 Canvas render, sound mix and QA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
       - name: Checkout feature branch
@@ -42,7 +42,6 @@ jobs:
         with:
           ffmpeg-version: release
           architecture: x64
-          linking-type: static
 
       - name: Verify render toolchain
         run: |
