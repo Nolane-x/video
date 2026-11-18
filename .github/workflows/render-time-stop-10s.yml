@@ -18,7 +18,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare-narration:
+    name: Build per-shot Vietnamese narration request
+    runs-on: ubuntu-24.04
+    outputs:
+      job_json: \${{ steps.voice-job.outputs.job_json }}
+    steps:
+      - name: Checkout film branch
+        uses: actions/checkout@v4
+        with:
+          ref: film/time-stop-10s-open-source
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build H2 storyboard and VoiceStudio job payload
+        id: voice-job
+        run: |
+          set -euo pipefail
+          python video-projects/time-stop-10s/scripts/build_story.py --project-dir /tmp/time-stop-voice-story
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          story = json.loads(Path("/tmp/time-stop-voice-story/story/shots.json").read_text(encoding="utf-8"))
+          segments = []
+          for shot in story["shots"]:
+              text = str(shot.get("line", "")).strip()
+              if not text:
+                  raise SystemExit(f"Empty narration at {shot['id']}")
+              segments.append({"id": shot["id"], "text": text, "pause_ms_after": 0})
+          assert len(segments) == 84
+          payload = {
+              "schema_version": 1,
+              "job_id": "time-stop-10s-vi",
+              "title": "Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây",
+              "language": "vi",
+              "engine": "vieneu",
+              "voice_id": "vi-vieneu-v3turbo-adam-bua-87e364",
+              "segments": segments,
+          }
+          encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+          print("job_json<<VOICE_JOB")
+          print(encoded)
+          print("VOICE_JOB")
+          print(f"Prepared {len(segments)} Vietnamese narration segments / {sum(len(s['text']) for s in segments)} characters")
+          PY
+
+  voiceover:
+    name: Render and verify Vietnamese narration with VoiceStudio
+    needs: prepare-narration
+    permissions:
+      contents: read
+    uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
+    with:
+      downstream_call: true
+      job_json: \${{ needs.prepare-narration.outputs.job_json }}
+
   render-film:
+    needs: voiceover
     name: H2 Canvas render, sound mix and QA
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -27,6 +84,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: film/time-stop-10s-open-source
+
+      - name: Download verified VoiceStudio narration artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-\${{ github.run_id }}
+          path: voiceover-assets
 
       - name: Set up Node and Python
         uses: actions/setup-node@v4
@@ -105,6 +168,17 @@ jobs:
           print(f"STORY PASS: {len(shots)} shots, {story['duration']}s, {story['fps']}fps, {int(story['duration']*story['fps'])} frames")
           PY
 
+      - name: Place Vietnamese voice-over on the 84-shot timeline
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python ../../../../../video-projects/time-stop-10s/scripts/place_voiceover.py \
+            --project projects/time-stop-10s \
+            --artifact-dir ../../../../../voiceover-assets
+          test -s projects/time-stop-10s/timeline/voice.wav
+          test -s projects/time-stop-10s/out/captions.srt
+          test -s projects/time-stop-10s/out/voice-placement.json
+
       - name: Scan all H2 shots for renderer and template errors
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
         timeout-minutes: 30
@@ -151,12 +225,19 @@ jobs:
           ROOT="$GITHUB_WORKSPACE/dist/time-stop-10s"
           PROJECT="projects/time-stop-10s"
           MASTER="$PROJECT/out/time-stop-10s.mp4"
-          mkdir -p "$ROOT/contact-sheets" "$ROOT/story"
+          mkdir -p "$ROOT/contact-sheets" "$ROOT/story" "$ROOT/voiceover" "$ROOT/subtitles"
           cp "$MASTER" "$ROOT/time-stop-10s-master.mp4"
           cp "$PROJECT/story/shots.json" "$ROOT/story/"
           cp "$PROJECT/story/shot-plan.json" "$ROOT/story/"
           cp "$PROJECT/story/bible.md" "$ROOT/story/"
           cp "$PROJECT/01-PHIM-time-stop-10s.txt" "$ROOT/story/"
+          cp "$PROJECT/out/voice-placement.json" "$ROOT/"
+          cp "$PROJECT/out/captions.srt" "$ROOT/subtitles/time-stop-10s.srt"
+          cp "$PROJECT/out/captions.vtt" "$ROOT/subtitles/time-stop-10s.vtt"
+          cp "$GITHUB_WORKSPACE/voiceover-assets/narration.wav" "$ROOT/voiceover/"
+          cp "$GITHUB_WORKSPACE/voiceover-assets/manifest.json" "$ROOT/voiceover/"
+          cp "$GITHUB_WORKSPACE/voiceover-assets/transcript.txt" "$ROOT/voiceover/"
+          cp "$GITHUB_WORKSPACE/voiceover-assets/build-summary.txt" "$ROOT/voiceover/"
           if compgen -G "$PROJECT/build/sheets/*.jpg" > /dev/null; then
             cp "$PROJECT"/build/sheets/*.jpg "$ROOT/contact-sheets/"
           fi
@@ -209,6 +290,20 @@ jobs:
               "visual_approval": False,
               "note": "Technical validation only; inspect the full contact sheets and moving action proofs before artistic approval."
           }
+          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          voice = json.loads((root / "voice-placement.json").read_text(encoding="utf-8"))
+          voice_manifest = json.loads((root / "voiceover/manifest.json").read_text(encoding="utf-8"))
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84
+          assert voice["language"] == "vi" and voice["engine"] == "vieneu"
+          assert voice_manifest["audio"]["watermark"]["status"] == "verified"
+          report.update({
+              "narration_language": voice["language"],
+              "narration_engine": voice["engine"],
+              "narration_voice_id": voice["voice_id"],
+              "narration_segments": voice["placed_segments"],
+              "narration_watermark": voice_manifest["audio"]["watermark"]["status"],
+              "voiceover_timeline": "shot-synced",
+          })
           (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
