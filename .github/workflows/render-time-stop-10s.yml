@@ -1,0 +1,215 @@
+name: Render — Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây
+
+on:
+  push:
+    branches:
+      - film/time-stop-10s-open-source
+    paths:
+      - "video-projects/time-stop-10s/**"
+      - ".github/workflows/render-time-stop-10s.yml"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: time-stop-10s-open-source
+  cancel-in-progress: true
+
+jobs:
+  render-film:
+    name: H2 Canvas render, sound mix and QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: film/time-stop-10s-open-source
+
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install static FFmpeg and ffprobe
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
+          architecture: x64
+          linking-type: static
+
+      - name: Verify render toolchain
+        run: |
+          set -euo pipefail
+          node --version
+          python --version
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+          ffmpeg -hide_banner -encoders 2>/dev/null | grep -E '(^|[[:space:]])libx264([[:space:]]|$)'
+
+      - name: Install H2 Canvas and audio dependencies
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python -m pip install numpy scipy soundfile pyloudnorm
+          python audio/build_audio.py
+
+      - name: Build original 84-shot storyboard
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python ../../../../../video-projects/time-stop-10s/scripts/build_story.py \
+            --project-dir projects/time-stop-10s
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("projects/time-stop-10s")
+          cfg = json.loads((p / "config.json").read_text(encoding="utf-8"))
+          story = json.loads((p / "story/shots.json").read_text(encoding="utf-8"))
+          shots = story["shots"]
+          assert cfg["fps"] == 30 and cfg["resolution"] == "1080p"
+          assert len(shots) == 84 and story["duration"] == 378.0
+          assert story["fps"] == 30 and len(story["music"]) == 7
+          assert story["production"]["paid_video_services"] is False
+          assert story["production"]["time_freeze_fx_count"] == 26
+          assert shots[0]["start"] == 0 and shots[-1]["end"] == 378.0
+          last = 0
+          for shot in shots:
+              assert abs(shot["start"] - last) < 1e-6, f"Timeline gap at {shot['id']}"
+              assert abs((shot["end"] - shot["start"]) - 4.5) < 1e-6
+              assert shot["tpl"] == "scene"
+              last = shot["end"]
+          print(f"STORY PASS: {len(shots)} shots, {story['duration']}s, {story['fps']}fps, {int(story['duration']*story['fps'])} frames")
+          PY
+
+      - name: Scan all H2 shots for renderer and template errors
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --check --scale 0.25
+
+      - name: Render full contact sheets for visual review
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --sheet --scale 0.5 --at 0.45
+
+      - name: Render a 30-second motion preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --from 0 --to 30 --scale 0.5 --workers 2 --crf 20
+
+      - name: Render the complete 1080p 30fps silent master
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 90
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --workers 2 --crf 19
+
+      - name: Mix original procedural music and sound design
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          python tools/mix.py --project projects/time-stop-10s
+          test -s projects/time-stop-10s/out/time-stop-10s.mp4
+
+      - name: Package master, preview, contact sheets and QA
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 15
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          ROOT="$GITHUB_WORKSPACE/dist/time-stop-10s"
+          PROJECT="projects/time-stop-10s"
+          MASTER="$PROJECT/out/time-stop-10s.mp4"
+          mkdir -p "$ROOT/contact-sheets" "$ROOT/story"
+          cp "$MASTER" "$ROOT/time-stop-10s-master.mp4"
+          cp "$PROJECT/story/shots.json" "$ROOT/story/"
+          cp "$PROJECT/story/shot-plan.json" "$ROOT/story/"
+          cp "$PROJECT/story/bible.md" "$ROOT/story/"
+          cp "$PROJECT/01-PHIM-time-stop-10s.txt" "$ROOT/story/"
+          if compgen -G "$PROJECT/build/sheets/*.jpg" > /dev/null; then
+            cp "$PROJECT"/build/sheets/*.jpg "$ROOT/contact-sheets/"
+          fi
+          ffmpeg -hide_banner -loglevel error -y \
+            -i "$MASTER" -t 30 -c:v libx264 -preset veryfast -crf 22 \
+            -c:a aac -b:a 160k -movflags +faststart "$ROOT/time-stop-10s-preview-30s.mp4"
+          ffprobe -v error -show_streams -show_format -of json "$MASTER" > "$ROOT/ffprobe.json"
+          ffmpeg -hide_banner -nostats -i "$MASTER" -af ebur128=peak=true -f null - \
+            2> "$ROOT/ebur128.log"
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist/time-stop-10s"
+          meta = json.loads((root / "ffprobe.json").read_text())
+          streams = meta["streams"]
+          video = [s for s in streams if s.get("codec_type") == "video"]
+          audio = [s for s in streams if s.get("codec_type") == "audio"]
+          assert video, "Master MP4 has no video stream"
+          assert audio, "Master MP4 has no audio stream"
+          v, a = video[0], audio[0]
+          duration = float(meta["format"]["duration"])
+          assert (int(v["width"]), int(v["height"])) == (1920, 1080), (v.get("width"), v.get("height"))
+          assert v.get("r_frame_rate") == "30/1", v.get("r_frame_rate")
+          assert abs(duration - 378.0) < 0.20, duration
+          assert a.get("codec_name") == "aac", a.get("codec_name")
+          assert a.get("sample_rate") == "48000", a.get("sample_rate")
+          assert int(a.get("channels", 0)) == 2, a.get("channels")
+          log = (root / "ebur128.log").read_text(errors="replace")
+          m_i = re.findall(r"^\s*I:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*LUFS\s*$", log, re.M)
+          m_p = re.findall(r"^\s*Peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS\s*$", log, re.M)
+          assert m_i, "Missing integrated loudness result"
+          integrated = float(m_i[-1])
+          assert -15.0 <= integrated <= -13.0, integrated
+          peak = float(m_p[-1]) if m_p else None
+          if peak is not None:
+              assert peak <= -1.0, peak
+          report = {
+              "status": "technical-pass",
+              "duration_seconds": duration,
+              "fps": v.get("r_frame_rate"),
+              "resolution": [int(v["width"]), int(v["height"])],
+              "video_codec": v.get("codec_name"),
+              "audio_codec": a.get("codec_name"),
+              "audio_sample_rate": a.get("sample_rate"),
+              "audio_channels": int(a.get("channels", 0)),
+              "integrated_lufs": integrated,
+              "peak_dbfs": peak,
+              "story_shots": 84,
+              "freeze_fx_shots": 26,
+              "visual_approval": False,
+              "note": "Technical validation only; inspect the full contact sheets and moving action proofs before artistic approval."
+          }
+          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          print(json.dumps(report, indent=2))
+          PY
+          (cd "$ROOT" && sha256sum *.mp4 *.json *.log story/* contact-sheets/* > SHA256SUMS.txt)
+          cd "$GITHUB_WORKSPACE"
+          zip -qr dist/time-stop-10s-review.zip dist/time-stop-10s
+
+      - name: Upload film candidate and review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-h2-${{ github.run_number }}
+          path: |
+            dist/time-stop-10s/time-stop-10s-master.mp4
+            dist/time-stop-10s/time-stop-10s-preview-30s.mp4
+            dist/time-stop-10s-review.zip
+            dist/time-stop-10s/qa-report.json
+            dist/time-stop-10s/contact-sheets/
+          if-no-files-found: error
+          retention-days: 30
