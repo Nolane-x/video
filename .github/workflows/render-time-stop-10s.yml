@@ -71,9 +71,8 @@ jobs:
     needs: prepare-narration
     permissions:
       contents: read
-    uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
+    uses: Nolane-x/VoiceStudio/.github/workflows/render-video-narration.yml@main
     with:
-      downstream_call: true
       job_json: ${{ needs.prepare-narration.outputs.job_json }}
 
   render-film:
