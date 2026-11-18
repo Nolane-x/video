@@ -11,6 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -61,7 +62,8 @@ jobs:
           print("job_json<<VOICE_JOB")
           print(encoded)
           print("VOICE_JOB")
-          print(f"Prepared {len(segments)} Vietnamese narration segments / {sum(len(s['text']) for s in segments)} characters")
+          import sys
+          print(f"Prepared {len(segments)} Vietnamese narration segments / {sum(len(s['text']) for s in segments)} characters", file=sys.stderr)
           PY
 
   voiceover:
