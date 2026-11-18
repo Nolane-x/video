@@ -111,6 +111,71 @@ export function drawFx(g, lt, info, list, ctx = {}) {
     else if (f.kind === 'spot') light(g, x, y, fs(f.r, 0.4), f.color || '#ffe9c0', f.a ?? 0.3);
     else if (f.kind === 'dark' ) { g.save(); g.setTransform(E.PX, 0, 0, E.PX, 0, 0); g.fillStyle = `rgba(0,0,0,${clamp(p) * (f.a ?? 0.7)})`; g.fillRect(0, 0, E.W, E.H); g.restore(); }
     else if (f.kind === 'glitch' && p < 1) { const r = rng(Math.floor(lt * 30)); g.save(); g.setTransform(E.PX, 0, 0, E.PX, 0, 0); for (let i = 0; i < 6; i++) { g.fillStyle = alpha(i % 2 ? accent() : '#5ad1ff', 0.18); g.fillRect(0, r() * E.H, E.W, 6 + r() * 30); } g.restore(); }
+    else if (f.kind === 'freeze' && p < 1) {
+      // A reusable 10-second time-stop visual: refractive field, expanding time rings,
+      // suspended rain/glass motes and thin radial streaks. Deterministic per shot.
+      const fade = clamp(Math.min(p * 8, (1 - p) * 7, 1)) * (f.intensity ?? 1);
+      const col = f.color || '#8bd8ff';
+      const maxR = Math.hypot(E.W, E.H) * 0.72;
+      g.save();
+      g.globalCompositeOperation = 'screen';
+      g.fillStyle = radGrad(g, x, y, 8, maxR, [
+        [0, alpha(col, 0.14 * fade)],
+        [0.32, alpha('#6bbcff', 0.07 * fade)],
+        [1, 'rgba(0,0,0,0)'],
+      ]);
+      g.fillRect(0, 0, E.W, E.H);
+      // Three staggered rings make the freeze readable even in wide shots.
+      for (let i = 0; i < 3; i++) {
+        const phase = (p * 0.74 + i / 3) % 1;
+        const radius = maxR * (0.12 + phase * 0.88);
+        const strength = fade * (1 - phase) * 0.58;
+        g.beginPath();
+        g.arc(x, y, radius, 0, Math.PI * 2);
+        g.strokeStyle = alpha(col, strength);
+        g.lineWidth = 1.4 + (1 - phase) * 2.2;
+        g.shadowColor = col;
+        g.shadowBlur = 14;
+        g.stroke();
+      }
+      // Fine radial glass filaments; avoid a noisy full-screen HUD look.
+      g.shadowBlur = 7;
+      for (let i = 0; i < 28; i++) {
+        const a = i * 2.399963 + p * 0.09;
+        const inner = maxR * (0.20 + ((i * 17) % 11) / 22);
+        const outer = Math.min(maxR, inner + E.W * (0.025 + (i % 4) * 0.012));
+        g.beginPath();
+        g.moveTo(x + Math.cos(a) * inner, y + Math.sin(a) * inner);
+        g.lineTo(x + Math.cos(a) * outer, y + Math.sin(a) * outer);
+        g.strokeStyle = alpha(col, fade * (0.08 + (i % 5) * 0.025));
+        g.lineWidth = i % 4 === 0 ? 2 : 1;
+        g.stroke();
+      }
+      // Raindrops and dust hang in place while the rest of the world is stopped.
+      for (let i = 0; i < 52; i++) {
+        const px = ((i * 197 + 71) % 997) / 997 * E.W;
+        const py = ((i * 313 + 29) % 991) / 991 * E.H;
+        const twinkle = 0.65 + 0.35 * Math.sin(lt * 2.8 + i * 1.7);
+        const size = 1.3 + (i % 4) * 0.7;
+        g.beginPath();
+        g.arc(px, py, size, 0, Math.PI * 2);
+        g.fillStyle = alpha(i % 7 === 0 ? '#fff4d7' : col, fade * twinkle * 0.62);
+        g.shadowColor = col;
+        g.shadowBlur = 8;
+        g.fill();
+        if (i % 5 === 0) {
+          g.beginPath();
+          g.moveTo(px - size * 2.8, py);
+          g.lineTo(px + size * 2.8, py);
+          g.moveTo(px, py - size * 2.8);
+          g.lineTo(px, py + size * 2.8);
+          g.strokeStyle = alpha('#d8f5ff', fade * 0.35);
+          g.lineWidth = 0.8;
+          g.stroke();
+        }
+      }
+      g.restore();
+    }
   }
 }
 function drawLights(g, list) { for (const l of list || []) light(g, fx(l.x), fy(l.y), fs(l.r, 0.3), l.color || PAL.lamp, l.a ?? 0.35); }
