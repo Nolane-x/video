@@ -309,7 +309,7 @@ jobs:
           (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
-          (cd "$ROOT" && sha256sum *.mp4 *.json *.log story/* contact-sheets/* > SHA256SUMS.txt)
+          (cd "$ROOT" && sha256sum *.mp4 *.json *.log story/* voiceover/* subtitles/* contact-sheets/* > SHA256SUMS.txt)
           cd "$GITHUB_WORKSPACE"
           zip -qr dist/time-stop-10s-review.zip dist/time-stop-10s
 
@@ -322,6 +322,9 @@ jobs:
             dist/time-stop-10s/time-stop-10s-preview-30s.mp4
             dist/time-stop-10s-review.zip
             dist/time-stop-10s/qa-report.json
+            dist/time-stop-10s/voice-placement.json
+            dist/time-stop-10s/voiceover/
+            dist/time-stop-10s/subtitles/
             dist/time-stop-10s/contact-sheets/
           if-no-files-found: error
           retention-days: 30
