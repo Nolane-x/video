@@ -49,7 +49,7 @@ add("classroom","Toàn cảnh lớp học; bảng đầy công thức, những d
     [actor("hoodie",.36,"sit","sad"),actor("friend",.73,"type","neutral",h=.42)],{"sky":"day","board":"KIỂM TRA 15 PHÚT","desks":[.25,.48,.72]},
     camera(.50,.50,1.0,.47,.48,1.08),sfx=[cue("type_key",1.0)])
 add("lockers","Hành lang trường học; tủ đồ tạo các lớp chiều sâu, học sinh đi qua thành những bóng nhỏ.","Ai cũng có vẻ đang vội đến một nơi nào đó.",
-    [actor("hoodie",.34,"walk","sad",walk={"to":.48,"dur":3.5,"speed":.8}),actor("friend2",.78,"wave","grin")],
+    [actor("hoodie",.34,"relaxed","sad",walk={"to":.48,"dur":3.5,"speed":.8}),actor("friend2",.78,"wave","grin")],
     {"board":False},camera(.40,.50,1.0,.57,.50,1.13))
 add("kitchen","Căn bếp ấm; mẹ đặt hộp đồ ăn cạnh cặp sách, hơi nước bốc lên dưới đèn vàng.","Mẹ vẫn chuẩn bị bữa sáng như mọi ngày.",
     [actor("mom",.62,"point","grin"),actor("hoodie",.30,"stand","neutral",hold="bag")],{"sky":"dawn","lamp":True},
@@ -57,7 +57,7 @@ add("kitchen","Căn bếp ấm; mẹ đặt hộp đồ ăn cạnh cặp sách, 
 add("phone","Cận điện thoại trên bàn; một thông báo lạ phủ lên màn hình khóa.","Một quảng cáo kỳ lạ xuất hiện trên điện thoại.",
     [actor("hoodie",.68,"phone","neutral",hold="phone",h=.36)],{},camera(.70,.45,1.22,.70,.43,1.46),sfx=[cue("phone_ring"),cue("ui_click",1.0)])
 add("city","Toàn cảnh thành phố buổi sáng; các tòa nhà, ban công và cửa sổ xếp thành nhiều lớp.","Ngoài kia, hàng triệu chiếc đồng hồ vẫn đang chạy.",
-    [actor("hoodie",.20,"walk","neutral",walk={"to":.78,"dur":4.0,"speed":.9},h=.35)],{"time":"day","birds":True,"lamps":[]},
+    [actor("hoodie",.20,"relaxed","neutral",walk={"to":.78,"dur":4.0,"speed":.9},h=.35)],{"time":"day","birds":True,"lamps":[]},
     camera(.48,.48,1.0,.62,.47,1.06))
 add("court","Sân trường nhìn chéo; bảng rổ, vạch sân và ghế dài đặt theo phối cảnh.","Tiếng bóng nảy vang lên từ sân trường.",
     [actor("friend",.72,"cheer","grin",hold="ball"),actor("hoodie",.30,"stand","neutral")],{"hoopX":.78,"benchX":.23},
@@ -65,7 +65,7 @@ add("court","Sân trường nhìn chéo; bảng rổ, vạch sân và ghế dài
 add("mirror","Cận gương trong nhà vệ sinh; nhân vật nhìn thẳng vào chính mình, ánh đèn lạnh.","Cậu chỉ muốn có thêm một chút thời gian.",
     [actor("hoodie",.50,"headhold","sad")],{"mirrorX":.54},camera(.52,.43,1.16,.52,.43,1.28))
 add("street","Góc rộng đầu phố; xe cộ lướt qua, đèn giao thông đổi màu, người đi bộ qua vạch.","Cậu không biết rằng một ngày nữa sẽ thay đổi tất cả.",
-    [actor("hoodie",.24,"walk","neutral",walk={"to":.55,"dur":3.8,"speed":.9})],{"busstop":False,"rain":False,"lampX":.8},
+    [actor("hoodie",.24,"relaxed","neutral",walk={"to":.55,"dur":3.8,"speed":.9})],{"busstop":False,"rain":False,"lampX":.8},
     camera(.45,.50,1.0,.60,.48,1.08))
 add("black","Màn đen mở ra với một vòng tròn mảnh màu xanh băng và một con số duy nhất.","Nếu có thể dừng thời gian trong đúng mười giây thì sao?",
     [actor("hoodie",.50,"stand","neutral",h=.40)],{},camera(.50,.50,1.0,.50,.50,1.0),
@@ -85,7 +85,7 @@ add("kitchen","Góc rộng; mẹ đứng yên phía sau, giọt nước đứng 
     [actor("mom",.72,"point","neutral"),actor("hoodie",.35,"stand","neutral")],{"sky":"night","lamp":True},
     camera(.50,.48,1.0,.53,.47,1.08),freeze=True,timer=9)
 add("kitchen","Nhân vật bước qua những giọt nước đông cứng; camera thấp ngang mặt bàn.","Chỉ có cậu vẫn bước được giữa thế giới đứng yên.",
-    [actor("hoodie",.32,"walk","neutral",walk={"to":.70,"dur":3.7,"speed":1.2})],{"sky":"night","lamp":True},
+    [actor("hoodie",.32,"relaxed","neutral",walk={"to":.70,"dur":3.7,"speed":1.2})],{"sky":"night","lamp":True},
     camera(.34,.66,1.05,.66,.58,1.25),freeze=True,timer=8,fx=[{"kind":"dust","at":.1,"dur":4.0,"n":22}])
 add("kitchen","Cận đồng hồ trên cổ tay; vòng sáng xanh hiện rõ mười vạch nhỏ.","Trên cổ tay hiện lên con số chín giây.",
     [actor("hoodie",.53,"headhold","neutral",h=.42)],{"sky":"night","lamp":True},camera(.55,.49,1.34,.55,.49,1.52),
@@ -100,7 +100,7 @@ add("kitchen","Cận vòng sáng; những vạch thời gian cuối cùng co l�
     [actor("hoodie",.50,"facepalm","sad")],{"sky":"night","lamp":True},camera(.53,.46,1.25,.53,.46,1.42),
     freeze=True,timer=3,sfx=[cue("tick",.2),cue("riser_2s",1.2)])
 add("kitchen","Chiếc cốc trở lại mặt bàn; nước rơi xuống khăn; mọi thứ bắt đầu chuyển động.","Mười giây kết thúc. Thế giới tiếp tục chạy.",
-    [actor("hoodie",.42,"stand","neutral"),actor("mom",.74,"talk","grin")],{"sky":"night","lamp":True},camera(.50,.52,1.0,.52,.50,1.08),
+    [actor("hoodie",.42,"stand","neutral"),actor("mom",.74,"point","grin")],{"sky":"night","lamp":True},camera(.50,.52,1.0,.52,.50,1.08),
     fx=[{"kind":"flash","at":.05,"dur":.25,"a":.28}],sfx=[cue("whoosh_reverse",.1)])
 add("mirror","Cận gương mặt nhân vật; đôi mắt mở lớn, ánh phản chiếu xanh dần biến mất.","Cậu vừa chứng kiến điều không thể giải thích.",
     [actor("hoodie",.50,"stand","sad",h=.60)],{},camera(.5,.46,1.25,.5,.46,1.42),sfx=[cue("heartbeat",.2)])
@@ -135,7 +135,7 @@ add("court","Bóng trở lại tay người bạn khi thời gian chạy tiếp;
     [actor("friend",.70,"headhold","neutral",hold="ball"),actor("hoodie",.30,"relaxed","grin")],{"hoopX":.18,"benchX":.75},
     camera(.53,.50,1.0,.49,.50,1.08),fx=[{"kind":"flash","at":.05,"dur":.22,"a":.22}],sfx=[cue("whoosh_reverse",.1)])
 add("stairs","Nhân vật đi lên cầu thang, nhìn đồng hồ trên cổ tay; bóng đổ dài theo bậc thang.","Cậu ghi nhớ một điều: mười giây là giới hạn.",
-    [actor("hoodie",.35,"walk","neutral",walk={"to":.72,"dur":3.8,"speed":.8})],{"top":True,"topColor":"#dca86d"},
+    [actor("hoodie",.35,"relaxed","neutral",walk={"to":.72,"dur":3.8,"speed":.8})],{"top":True,"topColor":"#dca86d"},
     camera(.35,.62,1.05,.60,.52,1.16))
 add("bedroom","Cận màn hình ứng dụng; một vòng tròn mười vạch hiện quanh biểu tượng đồng hồ.","Không thể kéo dài. Không thể tạm dừng bộ đếm.",
     [actor("hoodie",.70,"phone","neutral",hold="phone",h=.38)],{},camera(.68,.47,1.22,.68,.44,1.5),sfx=[cue("ui_click",.6)])
@@ -187,9 +187,9 @@ add("bedroom","Cận chiếc đồng hồ; mười vạch sáng lại rồi tắ
 add("kitchen","Mẹ lau tay, xếp hộp đồ ăn vào giỏ xe; căn bếp vàng ấm đối lập trời mưa ngoài cửa.","Mẹ đã làm việc cả ngày, nhưng vẫn còn chuyến xe cuối.",
     [actor("mom",.62,"carry","sad",hold="bag")],{"sky":"rain","lamp":True},camera(.54,.52,1.0,.57,.49,1.08))
 add("mirror","Nhân vật đứng trước gương, nhìn vết xước trên cổ tay do những lần chạy vội.","Cậu biết mình không thể cứu tất cả mọi thứ.",
-    [actor("hoodie",.52,"sad","sad")],{"mirrorX":.53},camera(.50,.47,1.12,.50,.44,1.26))
+    [actor("hoodie",.52,"slump","sad")],{"mirrorX":.53},camera(.50,.47,1.12,.50,.44,1.26))
 add("city","Toàn cảnh thành phố lúc chập tối; mây mưa phủ lên các dãy nhà và ánh đèn bắt đầu sáng.","Mưa lớn dần trên những con phố.",
-    [actor("mom",.78,"walk","neutral",walk={"to":.56,"dur":3.5,"speed":.75},y=.73)],
+    [actor("mom",.78,"relaxed","neutral",walk={"to":.56,"dur":3.5,"speed":.75},y=.73)],
     {"time":"night","birds":False,"lamps":[.22,.48,.75]},camera(.50,.42,1.0,.58,.48,1.08),sfx=[cue("riser_4s",.2)])
 add("street","Mẹ đạp xe qua phố; vệt nước phản chiếu đèn đường dưới bánh xe.","Mẹ đang trên đường về nhà.",
     [actor("mom",.66,"sit","neutral",y=.72,h=.41),actor("ghost",.18,"stand","neutral",h=.30)],
@@ -290,7 +290,7 @@ add("court","Bạn bè chơi bóng; nhân vật chạy theo đường biên, ti�
     [actor("hoodie",.27,"guard","grin",run={"to":.72,"dur":3.5,"speed":1.25}),actor("friend",.76,"cheer","grin",hold="ball")],
     {"hoopX":.74,"benchX":.2},camera(.34,.50,1.0,.62,.46,1.15),fx=[{"kind":"speed","at":.2,"dur":1.4}],sfx=[cue("crowd_cheer",.6)])
 add("bedroom","Đồng hồ nằm im trên bàn; nhân vật đi ngang qua mà không nhấn nút.","Chiếc đồng hồ vẫn ở đó, nhưng cậu không còn vội vã.",
-    [actor("hoodie",.34,"walk","neutral",walk={"to":.74,"dur":3.8,"speed":.75})],{"clock":"21:30","lamp":True,"sky":"night","stage":True},
+    [actor("hoodie",.34,"relaxed","neutral",walk={"to":.74,"dur":3.8,"speed":.75})],{"clock":"21:30","lamp":True,"sky":"night","stage":True},
     camera(.5,.5,1.0,.54,.48,1.08))
 add("bedroom","Cận bàn tay đóng ngăn kéo, chiếc đồng hồ được đặt lại bên trong.","Cậu để mười giây ấy ngủ yên.",
     [actor("hoodie",.50,"carry","neutral")],{"clock":"21:31","lamp":True,"sky":"night","stage":True},
@@ -301,7 +301,7 @@ add("hill","Nhân vật và mẹ đứng trên con dốc nhìn xuống thành ph
     [actor("hoodie",.43,"relaxed","grin"),actor("mom",.58,"relaxed","grin")],{},camera(.50,.46,1.0,.52,.43,1.08),
     lights=[{"x":.75,"y":.28,"r":.38,"color":"#ffc36f","a":.26}])
 add("street","Hai mẹ con dắt xe đi trên con phố vừa tạnh mưa; vũng nước phản chiếu ánh sáng đầu ngày.","Mà là chọn điều mình làm trong từng giây đang có.",
-    [actor("hoodie",.42,"walk","grin",walk={"to":.62,"dur":3.8,"speed":.72}),actor("mom",.60,"walk","grin",walk={"to":.76,"dur":3.8,"speed":.68})],
+    [actor("hoodie",.42,"relaxed","grin",walk={"to":.62,"dur":3.8,"speed":.72}),actor("mom",.60,"relaxed","grin",walk={"to":.76,"dur":3.8,"speed":.68})],
     {"busstop":False,"rain":False,"bicycle":True,"bikeX":.70,"lampX":.84},camera(.38,.51,1.0,.58,.48,1.12))
 add("hill","Toàn cảnh thành phố trong nắng sớm; hai nhân vật nhỏ ở mép đồi, đường phố bên dưới vẫn nhộn nhịp.","Mười giây không thể thay thế một cuộc đời.",
     [actor("hoodie",.43,"stand","neutral",h=.36),actor("mom",.56,"stand","neutral",h=.36)],{},camera(.50,.48,1.0,.5,.46,1.0))
