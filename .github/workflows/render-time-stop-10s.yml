@@ -57,9 +57,21 @@ jobs:
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
           python -m pip install numpy scipy soundfile pyloudnorm
           python audio/build_audio.py
+
+      - name: Resolve Chromium for H2
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -n "$CHROME" ]; then
+            echo "Using runner browser: $CHROME"
+            echo "H2_CHROMIUM_EXECUTABLE_PATH=$CHROME" >> "$GITHUB_ENV"
+          else
+            echo "No system Chrome found; installing the pinned Playwright Chromium."
+            npx playwright install --with-deps chromium
+          fi
 
       - name: Build original 84-shot storyboard
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
