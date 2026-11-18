@@ -49,11 +49,23 @@ let _cfg = {}; try { _cfg = JSON.parse(fs.readFileSync(path.join(PROJ, 'config.j
 const gl = args.gl || (process.platform === 'linux' && !_cfg.pack ? 'swiftshader' : 'auto');
 const LAUNCH = { args: ['--disable-dev-shm-usage', '--font-render-hinting=none', ...(gl === 'swiftshader' ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : [])] };
 async function launch() {
+  // Prefer an explicitly provisioned system browser (e.g. GitHub-hosted Chrome)
+  // so Linux runners are not blocked by Playwright CDN downloads.
+  const explicit = process.env.H2_CHROMIUM_EXECUTABLE_PATH;
+  if (explicit && fs.existsSync(explicit)) {
+    return await chromium.launch({ ...LAUNCH, executablePath: explicit });
+  }
   try { return await chromium.launch(LAUNCH); }
   catch (e) {
     const base = process.env.PLAYWRIGHT_BROWSERS_PATH; let exe = null;
-    if (base && fs.existsSync(base)) for (const d of fs.readdirSync(base)) { const c = path.join(base, d, 'chrome-linux', 'chrome'); if (d.startsWith('chromium-') && fs.existsSync(c)) exe = c; }
-    if (!exe) throw new Error('Chua co Chromium. Chay: npx playwright install chromium\n' + e.message);
+    if (base && fs.existsSync(base)) for (const d of fs.readdirSync(base)) {
+      const candidates = [
+        path.join(base, d, 'chrome-linux', 'chrome'),
+        path.join(base, d, 'chrome-linux64', 'chrome'),
+      ];
+      if (d.startsWith('chromium-')) exe = candidates.find((candidate) => fs.existsSync(candidate)) || exe;
+    }
+    if (!exe) throw new Error('Chua co Chromium. Set H2_CHROMIUM_EXECUTABLE_PATH or run: npx playwright install chromium\n' + e.message);
     return await chromium.launch({ ...LAUNCH, executablePath: exe });
   }
 }
