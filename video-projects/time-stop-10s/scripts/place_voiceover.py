@@ -21,9 +21,9 @@ import numpy as np
 import soundfile as sf
 
 SAMPLE_RATE = 48_000
-START_OFFSET = 0.16
-TAIL_GUARD = 0.06
-MAX_ATEMPO = 1.20
+START_OFFSET = 0.12
+TAIL_GUARD = 0.04
+MAX_ATEMPO = 1.28
 FADE_SECONDS = 0.012
 
 def ts(seconds: float, vtt: bool = False) -> str:
