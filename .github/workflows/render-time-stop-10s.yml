@@ -22,7 +22,7 @@ jobs:
     name: Build per-shot Vietnamese narration request
     runs-on: ubuntu-24.04
     outputs:
-      job_json: \${{ steps.voice-job.outputs.job_json }}
+      job_json: ${{ steps.voice-job.outputs.job_json }}
     steps:
       - name: Checkout film branch
         uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
     uses: Nolane-x/VoiceStudio/.github/workflows/voice-library.yml@main
     with:
       downstream_call: true
-      job_json: \${{ needs.prepare-narration.outputs.job_json }}
+      job_json: ${{ needs.prepare-narration.outputs.job_json }}
 
   render-film:
     needs: voiceover
@@ -88,7 +88,7 @@ jobs:
       - name: Download verified VoiceStudio narration artifact
         uses: actions/download-artifact@v4
         with:
-          name: video-voice-assets-\${{ github.run_id }}
+          name: video-voice-assets-${{ github.run_id }}
           path: voiceover-assets
 
       - name: Set up Node and Python
