@@ -1,0 +1,1 @@
+Start the separate 60fps post-processing workflow using the QA-passed time-stop-10s-h2-18 artifact (run 44511459706). Keep the 30fps master unchanged as source and fallback.
