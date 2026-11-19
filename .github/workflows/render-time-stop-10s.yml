@@ -7,6 +7,7 @@ on:
     paths:
       - "video-projects/time-stop-10s/**"
       - ".github/workflows/render-time-stop-10s.yml"
+      - ".github/workflows/enable-time-stop-native-60fps.txt"
       - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
   workflow_dispatch:
 
@@ -33,11 +34,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Select target render FPS
+        run: |
+          set -euo pipefail
+          if [ -f .github/workflows/enable-time-stop-native-60fps.txt ] && grep -qx 'native-60fps' .github/workflows/enable-time-stop-native-60fps.txt; then
+            echo "TARGET_FPS=60" >> "$GITHUB_ENV"
+          else
+            echo "TARGET_FPS=30" >> "$GITHUB_ENV"
+          fi
       - name: Build H2 storyboard and VoiceStudio job payload
         id: voice-job
         run: |
           set -euo pipefail
-          python video-projects/time-stop-10s/scripts/build_story.py --project-dir /tmp/time-stop-voice-story
+          python video-projects/time-stop-10s/scripts/build_story.py --project-dir /tmp/time-stop-voice-story --fps "$TARGET_FPS"
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           from pathlib import Path
@@ -161,12 +170,21 @@ jobs:
     needs: voiceover
     name: H2 Canvas render, sound mix and QA
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 240
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+
+      - name: Select target render FPS
+        run: |
+          set -euo pipefail
+          if [ -f .github/workflows/enable-time-stop-native-60fps.txt ] && grep -qx 'native-60fps' .github/workflows/enable-time-stop-native-60fps.txt; then
+            echo "OUTPUT_FPS=60" >> "$GITHUB_ENV"
+          else
+            echo "OUTPUT_FPS=30" >> "$GITHUB_ENV"
+          fi
 
       - name: Download verified VoiceStudio narration artifact
         uses: actions/download-artifact@v4
@@ -228,17 +246,18 @@ jobs:
         run: |
           set -euo pipefail
           python ../../../../../video-projects/time-stop-10s/scripts/build_story.py \
-            --project-dir projects/time-stop-10s
+            --project-dir projects/time-stop-10s --fps "$OUTPUT_FPS"
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
           p = Path("projects/time-stop-10s")
           cfg = json.loads((p / "config.json").read_text(encoding="utf-8"))
           story = json.loads((p / "story/shots.json").read_text(encoding="utf-8"))
           shots = story["shots"]
-          assert cfg["fps"] == 30 and cfg["resolution"] == "1080p"
+          target_fps = int(os.environ["OUTPUT_FPS"])
+          assert cfg["fps"] == target_fps and cfg["resolution"] == "1080p"
           assert len(shots) == 84 and story["duration"] == 378.0
-          assert story["fps"] == 30 and len(story["music"]) == 7
+          assert story["fps"] == target_fps and len(story["music"]) == 7
           assert story["production"]["paid_video_services"] is False
           assert story["production"]["time_freeze_fx_count"] == 26
           assert shots[0]["start"] == 0 and shots[-1]["end"] == 378.0
@@ -248,7 +267,7 @@ jobs:
               assert abs((shot["end"] - shot["start"]) - 4.5) < 1e-6
               assert shot["tpl"] == "scene"
               last = shot["end"]
-          print(f"STORY PASS: {len(shots)} shots, {story['duration']}s, {story['fps']}fps, {int(story['duration']*story['fps'])} frames")
+          print(f"STORY PASS: {len(shots)} shots, {story['duration']}s, {target_fps}fps, {int(story['duration']*target_fps)} frames")
           PY
 
       - name: Place Vietnamese voice-over on the 84-shot timeline
@@ -293,9 +312,9 @@ jobs:
           set -euo pipefail
           node render.mjs --project projects/time-stop-10s --from 0 --to 30 --scale 0.5 --workers 2 --crf 20
 
-      - name: Render the complete 1080p 30fps silent master
+      - name: Render the complete 1080p native-FPS silent master
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
-        timeout-minutes: 90
+        timeout-minutes: 150
         run: |
           set -euo pipefail
           node render.mjs --project projects/time-stop-10s --workers 2 --crf 19
@@ -337,7 +356,7 @@ jobs:
           ffmpeg -hide_banner -loglevel error -y \
             -i "$MASTER" -t 30 -c:v libx264 -preset veryfast -crf 22 \
             -c:a aac -b:a 160k -movflags +faststart "$ROOT/time-stop-10s-preview-30s.mp4"
-          ffprobe -v error -show_streams -show_format -of json "$MASTER" > "$ROOT/ffprobe.json"
+          ffprobe -v error -count_frames -show_streams -show_format -of json "$MASTER" > "$ROOT/ffprobe.json"
           ffmpeg -hide_banner -nostats -i "$MASTER" -af ebur128=peak=true -f null - \
             2> "$ROOT/ebur128.log"
           python - <<'PY'
@@ -345,6 +364,7 @@ jobs:
           from pathlib import Path
           root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist/time-stop-10s"
           meta = json.loads((root / "ffprobe.json").read_text())
+          target_fps = int(os.environ["OUTPUT_FPS"])
           streams = meta["streams"]
           video = [s for s in streams if s.get("codec_type") == "video"]
           audio = [s for s in streams if s.get("codec_type") == "audio"]
@@ -353,7 +373,9 @@ jobs:
           v, a = video[0], audio[0]
           duration = float(meta["format"]["duration"])
           assert (int(v["width"]), int(v["height"])) == (1920, 1080), (v.get("width"), v.get("height"))
-          assert v.get("r_frame_rate") == "30/1", v.get("r_frame_rate")
+          assert v.get("r_frame_rate") == f"{target_fps}/1", v.get("r_frame_rate")
+          frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
+          assert frames == round(duration * target_fps), (frames, duration, target_fps)
           assert abs(duration - 378.0) < 0.20, duration
           assert a.get("codec_name") == "aac", a.get("codec_name")
           assert a.get("sample_rate") == "48000", a.get("sample_rate")
@@ -371,6 +393,8 @@ jobs:
               "status": "technical-pass",
               "duration_seconds": duration,
               "fps": v.get("r_frame_rate"),
+              "frames": frames,
+              "frame_generation": "native H2 render at configured FPS",
               "resolution": [int(v["width"]), int(v["height"])],
               "video_codec": v.get("codec_name"),
               "audio_codec": a.get("codec_name"),

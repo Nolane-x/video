@@ -313,7 +313,9 @@ def write_json(path: Path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-def build(project_dir: Path):
+def build(project_dir: Path, fps: int = fps):
+    if fps not in (30, 60):
+        raise ValueError(f"Unsupported render fps: {fps}; choose 30 or 60")
     if len(SHOTS) != 84:
         raise RuntimeError(f"Expected 84 shots, got {len(SHOTS)}")
     duration = round(len(SHOTS) * SHOT_SECONDS, 3)
@@ -322,7 +324,7 @@ def build(project_dir: Path):
     (project_dir / "build").mkdir(exist_ok=True)
     (project_dir / "out").mkdir(exist_ok=True)
     config = {
-        "title":"time-stop-10s","aspect":"16:9","resolution":"1080p","fps":FPS,
+        "title":"time-stop-10s","aspect":"16:9","resolution":"1080p","fps":fps,
         "style":"flat","pack":"dem","lang":"vi","accent":"teal","captions":False,
         "bars":"scope","fadeIn":0.45,"fadeOut":0.65,
         "music":{"enabled":True,"gainDb":-13},"sfx":{"enabled":True,"gainDb":-4},
@@ -333,7 +335,7 @@ def build(project_dir: Path):
     script_lines = [
         "TITLE: NẾU BẠN CÓ THỂ DỪNG THỜI GIAN TRONG 10 GIÂY?",
         "ACCENT: teal","",
-        "# Phim hoạt hình gốc, 16:9, 1080p, 30fps, 7 hồi / 84 shot.",
+        f"# Phim hoạt hình gốc, 16:9, 1080p, {fps}fps, 7 hồi / 84 shot.",
         "# Nhạc/SFX tạo bằng H2 kit; không dùng dịch vụ tạo video trả phí.","",
     ]
     set_counts = {}
@@ -376,13 +378,13 @@ def build(project_dir: Path):
     ]
     story = {
         "title":"Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây?",
-        "duration":duration,"fps":FPS,"resolution":[WIDTH,HEIGHT],"shots":shots,"music":music,"sfx":[],
+        "duration":duration,"fps":fps,"resolution":[WIDTH,HEIGHT],"shots":shots,"music":music,"sfx":[],
         "production":{"engine":"H2 Canvas/Chromium + FFmpeg","paid_video_services":False,
-                      "shot_count":len(shots),"time_freeze_fx_count":freeze_count,"set_variety":set_counts,"fps":FPS},
+                      "shot_count":len(shots),"time_freeze_fx_count":freeze_count,"set_variety":set_counts,"fps":fps},
     }
     write_json(project_dir / "story" / "shots.json", story)
     write_json(project_dir / "story" / "shot-plan.json", {
-        "title":story["title"],"durationSeconds":duration,"fps":FPS,
+        "title":story["title"],"durationSeconds":duration,"fps":fps,
         "acts":[
             {"name":"01 — Một ngày bình thường","shots":"s001–s012"},
             {"name":"02 — Lần dừng đầu tiên","shots":"s013–s024"},
@@ -396,7 +398,7 @@ def build(project_dir: Path):
                   "freeze":any(f.get("kind")=="freeze" for f in s["args"]["fx"])} for s in shots],
     })
     (project_dir / "01-PHIM-time-stop-10s.txt").write_text("\n".join(script_lines)+"\n",encoding="utf-8")
-    bible = """# Story & Art Bible — 10 Giây Dừng Thời Gian
+    bible = f"""# Story & Art Bible — 10 Giây Dừng Thời Gian
 
 ## Premise
 Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc đầu cậu dùng năng lực để giải quyết những phiền toái nhỏ. Khi mẹ gặp nguy hiểm dưới một tấm biển quảng cáo trong cơn mưa, cậu phải dùng toàn bộ mười giây để cứu người mình yêu thương.
@@ -409,7 +411,7 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
 - No photoreal humans. The world and staging carry the detail.
 
 ## Visual grammar
-- 16:9 cinematic scope, 1920×1080, 30fps.
+- 16:9 cinematic scope, 1920×1080, {fps}fps.
 - Dark plum/charcoal architecture; warm amber practicals; restrained cyan time-freeze energy.
 - Alternate wide establishing, medium action, low tracking, hand/prop inserts, face reaction and emotional holds.
 - Freeze FX is an original H2 Canvas overlay: concentric time rings, suspended rain/particles and fine refractive filaments.
@@ -430,19 +432,20 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
         raise RuntimeError("One setting dominates the film; increase location variety")
     previous=0
     for shot in shots:
-        a=round(shot["start"]*FPS); b=round(shot["end"]*FPS)
+        a=round(shot["start"]*fps); b=round(shot["end"]*fps)
         if a!=previous or b<=a:
             raise RuntimeError(f"Frame gap/overlap in {shot['id']}: {a}..{b}, expected {previous}")
         previous=b
-    print(json.dumps({"status":"story-built","shots":len(shots),"duration_seconds":duration,"fps":FPS,
-                      "frames":int(duration*FPS),"time_freeze_shots":freeze_count,"sets":set_counts,
+    print(json.dumps({"status":"story-built","shots":len(shots),"duration_seconds":duration,"fps":fps,
+                      "frames":int(duration*fps),"time_freeze_shots":freeze_count,"sets":set_counts,
                       "project_dir":str(project_dir)},ensure_ascii=False,indent=2))
 
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--project-dir",required=True)
+    ap.add_argument("--fps",type=int,choices=(30,60),default=FPS)
     args=ap.parse_args()
-    build(Path(args.project_dir))
+    build(Path(args.project_dir),fps=args.fps)
 
 if __name__=="__main__":
     main()
