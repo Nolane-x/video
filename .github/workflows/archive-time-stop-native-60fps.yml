@@ -1,0 +1,84 @@
+name: Archive native 60fps Time Stop master
+
+on:
+  push:
+    branches:
+      - film/time-stop-10s-3d-cinema
+    paths:
+      - ".github/workflows/archive-time-stop-native-60fps.txt"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    name: Verify and publish the native 60fps film
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download the verified native 60fps render artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-20
+          repository: ${{ github.repository }}
+          run-id: 44534851475
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+
+      - name: Verify technical QA, narration and release payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s dist/time-stop-10s/time-stop-10s-master.mp4
+          test -s dist/time-stop-10s/time-stop-10s-preview-30s.mp4
+          test -s dist/time-stop-10s/qa-report.json
+          test -s dist/time-stop-10s/voice-placement.json
+          test -s dist/time-stop-10s-review.zip
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("dist/time-stop-10s")
+          qa = json.loads((root / "qa-report.json").read_text(encoding="utf-8"))
+          voice = json.loads((root / "voice-placement.json").read_text(encoding="utf-8"))
+          assert qa["status"] == "technical-pass", qa
+          assert qa["fps"] == "60/1", qa
+          assert qa["frames"] == 22680, qa
+          assert qa["resolution"] == [1920, 1080], qa
+          assert abs(float(qa["duration_seconds"]) - 378.0) < 0.2, qa
+          assert qa["audio_codec"] == "aac" and qa["audio_sample_rate"] == "48000", qa
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84, voice
+          assert voice["language"] == "vi" and voice["engine"] == "vieneu", voice
+          print("Release gate passed: 1080p native 60fps, 22,680 frames, 378s, Vietnamese narration on all 84 shots.")
+          PY
+          cp dist/time-stop-10s/time-stop-10s-master.mp4 dist/time-stop-10s-native-60fps-1080p.mp4
+          cp dist/time-stop-10s/time-stop-10s-preview-30s.mp4 dist/time-stop-10s-native-60fps-preview-30s.mp4
+          sha256sum dist/time-stop-10s-native-60fps-1080p.mp4 dist/time-stop-10s-native-60fps-preview-30s.mp4 dist/time-stop-10s-review.zip > dist/SHA256SUMS.txt
+          cat > dist/RELEASE-NOTES.md <<'EOF'
+          # Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây
+
+          Native H2 Canvas/Chromium render: 1920×1080, 60 fps, 378 seconds, 22,680 frames.
+          Vietnamese VieNeu narration is aligned across 84 shots. Music/SFX are mixed by the H2/FFmpeg pipeline.
+          
+          This is a stylized stick-figure animation with selected Three.js 3D rescue shots, not a photorealistic or fully-3D feature film. CI technical QA is not equivalent to artistic approval; inspect the review ZIP and contact sheets.
+          EOF
+
+      - name: Publish permanent GitHub Release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="time-stop-10s-native-60fps-run-20"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release tag already exists; refusing to overwrite immutable delivery."
+            exit 1
+          fi
+          gh release create "$TAG" \
+            dist/time-stop-10s-native-60fps-1080p.mp4 \
+            dist/time-stop-10s-native-60fps-preview-30s.mp4 \
+            dist/time-stop-10s-review.zip \
+            dist/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" \
+            --title "Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây — Native 60fps" \
+            --notes-file dist/RELEASE-NOTES.md \
+            --latest=false
