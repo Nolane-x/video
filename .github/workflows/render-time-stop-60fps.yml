@@ -13,10 +13,8 @@ permissions:
   actions: read
   contents: read
 
-# This isolated group lets the pinned binary workflow proceed even if an older
-# APT-based attempt is stalled in the same repository concurrency queue.
 concurrency:
-  group: time-stop-10s-60fps-pinned-ffmpeg-v2
+  group: time-stop-10s-60fps-pinned-ffmpeg-v3
   cancel-in-progress: false
 
 jobs:
@@ -42,20 +40,25 @@ jobs:
           ARCHIVE_SHA256="68ee646831adaae2495618346f3bba94ff207ff83bbd34d643e7004730d66269"
           FFMPEG_SHA256="0d709a0bed1a43f24cd2c420878c63afea4580671b6949ad19ed124572f3bc3d"
           ARCHIVE="$RUNNER_TEMP/ffmpeg-linux64-gpl.tar.xz"
-          BIN_DIR="$RUNNER_TEMP/time-stop-ffmpeg/bin"
-          mkdir -p "$BIN_DIR"
+          EXTRACT_DIR="$RUNNER_TEMP/time-stop-ffmpeg"
+          mkdir -p "$EXTRACT_DIR"
           curl --fail --location --retry 6 --retry-all-errors --retry-delay 3 "$URL" -o "$ARCHIVE"
           echo "$ARCHIVE_SHA256  $ARCHIVE" | sha256sum --check -
-          tar -xJf "$ARCHIVE" --wildcards --no-anchored '*/bin/ffmpeg' '*/bin/ffprobe' --strip-components=1 -C "$RUNNER_TEMP/time-stop-ffmpeg"
-          test -x "$BIN_DIR/ffmpeg"
-          test -x "$BIN_DIR/ffprobe"
-          echo "$FFMPEG_SHA256  $BIN_DIR/ffmpeg" | sha256sum --check -
-          "$BIN_DIR/ffmpeg" -hide_banner -version | head -n 1
-          "$BIN_DIR/ffprobe" -hide_banner -version | head -n 1
-          "$BIN_DIR/ffmpeg" -hide_banner -filters 2>/dev/null | grep -w minterpolate
-          "$BIN_DIR/ffmpeg" -hide_banner -encoders 2>/dev/null | grep -w libx264
-          echo "FFMPEG_BIN=$BIN_DIR/ffmpeg" >> "$GITHUB_ENV"
-          echo "FFPROBE_BIN=$BIN_DIR/ffprobe" >> "$GITHUB_ENV"
+          echo "Archive members:"
+          tar -tJf "$ARCHIVE" | grep -E '(^|/)bin/(ffmpeg|ffprobe)$' | head -n 8
+          tar -xJf "$ARCHIVE" -C "$EXTRACT_DIR"
+          FFMPEG_BIN="$(find "$EXTRACT_DIR" -type f -name ffmpeg -print -quit)"
+          FFPROBE_BIN="$(find "$EXTRACT_DIR" -type f -name ffprobe -print -quit)"
+          test -n "$FFMPEG_BIN"
+          test -n "$FFPROBE_BIN"
+          chmod +x "$FFMPEG_BIN" "$FFPROBE_BIN"
+          echo "$FFMPEG_SHA256  $FFMPEG_BIN" | sha256sum --check -
+          "$FFMPEG_BIN" -hide_banner -version | head -n 1
+          "$FFPROBE_BIN" -hide_banner -version | head -n 1
+          "$FFMPEG_BIN" -hide_banner -filters 2>/dev/null | grep -w minterpolate
+          "$FFMPEG_BIN" -hide_banner -encoders 2>/dev/null | grep -w libx264
+          echo "FFMPEG_BIN=$FFMPEG_BIN" >> "$GITHUB_ENV"
+          echo "FFPROBE_BIN=$FFPROBE_BIN" >> "$GITHUB_ENV"
 
       - name: Motion-compensated 30-to-60fps interpolation
         timeout-minutes: 150
@@ -75,7 +78,6 @@ jobs:
             -maxrate 18M -bufsize 36M -pix_fmt yuv420p \
             -c:a copy -movflags +faststart "$OUTPUT"
           test -s "$OUTPUT"
-          # Decode the complete video stream; do not trust metadata alone.
           "$FFMPEG_BIN" -hide_banner -v error -i "$OUTPUT" -map 0:v:0 -f null - \
             2> dist/time-stop-10s-60fps/decode-check.log
           "$FFPROBE_BIN" -v error -count_frames -show_streams -show_format -of json \
