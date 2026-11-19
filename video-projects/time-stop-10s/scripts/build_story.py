@@ -313,7 +313,7 @@ def write_json(path: Path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-def build(project_dir: Path, fps: int = fps):
+def build(project_dir: Path, fps: int = FPS):
     if fps not in (30, 60):
         raise ValueError(f"Unsupported render fps: {fps}; choose 30 or 60")
     if len(SHOTS) != 84:
