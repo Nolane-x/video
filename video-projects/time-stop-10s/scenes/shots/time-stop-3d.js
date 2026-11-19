@@ -75,22 +75,21 @@ function makeStreet(info) {
   const stage = T3.stage({ mood: 'storm', fog: [22, 72], fov: 37, ambient: 1.45, keyIntensity: 1.85, keyPos: [-9, 12, 10], sun: false });
   const { scene, camera } = stage;
   scene.add(camera);
-  // A dedicated camera-space subtitle plate remains inside the active picture area,
-  // clear of H2's cinematic letterbox bars.
+  // One camera-locked subtitle plane sits below the action, inside the safe image area.
   const caption = String(info?.line || '').trim();
   if (caption) {
-    const cv = document.createElement('canvas'); cv.width = 1400; cv.height = 190;
+    const cv = document.createElement('canvas'); cv.width = 1400; cv.height = 150;
     const cg = cv.getContext('2d');
-    cg.fillStyle = 'rgba(5, 12, 22, 0.82)'; cg.beginPath(); cg.roundRect(12, 12, 1376, 166, 24); cg.fill();
-    cg.strokeStyle = 'rgba(146, 210, 250, 0.72)'; cg.lineWidth = 3; cg.stroke();
-    const words = caption.split(/\s+/); const rows = []; let row = '';
-    cg.font = '700 44px Arial';
-    for (const word of words) { const test = row ? row + ' ' + word : word; if (cg.measureText(test).width > 1120 && row) { rows.push(row); row = word; } else row = test; }
-    if (row) rows.push(row); cg.fillStyle = '#fff8ed'; cg.textAlign = 'center'; cg.textBaseline = 'middle';
-    const textRows = rows.slice(0, 2); textRows.forEach((line, i) => cg.fillText(line, 700, textRows.length === 1 ? 96 : 65 + i * 58));
+    cg.fillStyle = 'rgba(5, 10, 18, 0.86)'; cg.beginPath(); cg.roundRect(12, 10, 1376, 130, 20); cg.fill();
+    cg.strokeStyle = 'rgba(150, 205, 240, 0.62)'; cg.lineWidth = 3; cg.stroke();
+    cg.font = '700 44px Arial'; cg.fillStyle = '#f7f8fa'; cg.textAlign = 'center'; cg.textBaseline = 'middle';
+    const words = caption.split(/\s+/), rows = []; let row = '';
+    for (const word of words) { const next = row ? row + ' ' + word : word; if (cg.measureText(next).width > 1240 && row) { rows.push(row); row = word; } else row = next; }
+    if (row) rows.push(row);
+    const visible = rows.slice(0, 2); visible.forEach((line, i) => cg.fillText(line, 700, visible.length === 1 ? 75 : 48 + i * 52));
     const texture = new THREE.CanvasTexture(cv); texture.colorSpace = THREE.SRGBColorSpace;
-    const plate = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 0.76), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    plate.position.set(0, -0.3, -5.8); camera.add(plate);
+    const plate = new THREE.Mesh(new THREE.PlaneGeometry(5.15, 0.44), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    plate.position.set(0, -0.96, -5.8); camera.add(plate);
   }
   scene.add(T3.ground(48, 30, '#202733'));
   const road = new THREE.Mesh(new THREE.PlaneGeometry(48, 9.5), mat('#111923', '#101a28', 0.08)); road.rotation.x = -Math.PI / 2; road.position.set(0, 0.02, 0.1); scene.add(road);
@@ -99,8 +98,8 @@ function makeStreet(info) {
   for (const [x, z, h, w] of [[-12, -11, 10, 5], [-6.5, -13, 8, 4], [10.5, -12, 11, 5], [15, -10, 8, 4], [-17, -8, 7, 4]]) scene.add(T3.building(w, h, 3.1, { x, z, mood: 'storm', seed: Math.abs(x * 13), litChance: 0.52 }));
   scene.add(T3.lamp({ x: -5.8, z: 3.1, mood: 'storm', color: '#ffd39b', intensity: 10 })); scene.add(T3.lamp({ x: 7.8, z: -5.2, mood: 'storm', color: '#f3c58f', intensity: 7 }));
   const bike = makeBike(); bike.root.position.set(-1.4, 0, 1.4); scene.add(bike.root);
-  const mom = T3.figure({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.0, rim: '#ffd1d9', rimOpacity: 0.85 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
-  const kid = T3.figure({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 0.92, rim: '#9dd9ff', rimOpacity: 0.95 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
+  const mom = T3.figure({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.18, rim: '#ffd1d9', rimOpacity: 0.85 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
+  const kid = T3.figure({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 1.08, rim: '#9dd9ff', rimOpacity: 0.95 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
   const sign = makeBillboard(); scene.add(sign); const rain = makeRain(scene);
   for (let i = 0; i < 8; i++) { const m = new THREE.Mesh(new THREE.CircleGeometry(0.45 + (i % 3) * 0.22, 24), new THREE.MeshBasicMaterial({ color: '#7799b9', transparent: true, opacity: 0.11, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(-8 + i * 2.6, 0.047, i % 2 ? 1.7 : -1.8); scene.add(m); }
   const debris = new THREE.Group(); for (let i = 0; i < 9; i++) { const bit = T3.box(0.14 + (i % 3) * 0.12, 0.08, 0.1, '#69798b', { y: 0, mat: mat('#69798b', '#24364a', 0.12, { metalness: 0.6 }) }); bit.position.set(3.0 + i * 0.28, 0.2 + (i % 3) * 0.27, -2 + (i % 2) * 0.35); debris.add(bit); } scene.add(debris); debris.visible = false;
@@ -108,15 +107,23 @@ function makeStreet(info) {
   return { stage, scene, camera, bike, mom, kid, sign, rain, debris };
 }
 
-function cameraAt(s, t, mode = 'wide') {
-  const c = s.camera; let pos, look, fov;
-  if (mode === 'closeMom') { pos = [4.8, 3.1, 8.0]; look = [-1.2, 1.65, 1.2]; fov = 26; }
-  else if (mode === 'feet') { pos = [1.4, 1.65, 8.6]; look = [-2.6, 0.45, 1.2]; fov = 28; }
-  else if (mode === 'tracking') { pos = [5.0, 3.5, 12.0]; look = [-0.6, 1.55, 0.4]; fov = 30; }
-  else if (mode === 'hug') { pos = [0.4, 2.7, 7.3]; look = [-1.35, 1.2, 1.2]; fov = 25; }
-  else if (mode === 'impact') { pos = [6.2, 4.6, 14.0]; look = [1.2, 2.0, -1.5]; fov = 30; }
-  else { pos = [6.0, 4.3, 13.5]; look = [0.2, 1.75, -0.8]; fov = 30; }
-  const k = smooth(t / 4.5); c.position.set(pos[0] + Math.sin(t * 0.55) * 0.10, pos[1] + Math.sin(t * 0.7) * 0.045, pos[2]); c.lookAt(look[0] + (mode === 'tracking' ? lerp(-1.4, 0.9, k) : 0), look[1], look[2]); c.fov = fov; c.updateProjectionMatrix();
+function cameraAt(s, t, mode = 'wide', focus = null) {
+  const c = s.camera;
+  let pos, look, fov;
+  if (mode === 'closeMom') { pos = [0.8, 2.85, 7.0]; look = [-0.15, 1.28, 1.45]; fov = 33; }
+  else if (mode === 'feet') { pos = [0.0, 2.0, 7.8]; look = [-2.0, 0.65, 1.4]; fov = 34; }
+  else if (mode === 'action') { pos = [0.5, 2.9, 8.2]; look = [-1.6, 1.18, 1.4]; fov = 32; }
+  else if (mode === 'tracking') { pos = [1.4, 3.4, 9.5]; look = [-1.25, 1.15, 1.4]; fov = 35; }
+  else if (mode === 'action') { pos = [0.5, 2.9, 8.2]; look = [-1.6, 1.18, 1.4]; fov = 32; }
+  else if (mode === 'hug') { pos = [-0.35, 2.8, 6.8]; look = [-1.18, 1.12, 1.45]; fov = 31; }
+  else if (mode === 'impact') { pos = [2.6, 4.3, 11.5]; look = [-0.8, 1.4, -0.5]; fov = 36; }
+  else { pos = [1.6, 4.1, 11.2]; look = [-2.0, 1.3, 1.2]; fov = 36; }
+  const k = smooth(t / 4.5);
+  if (Array.isArray(focus) && focus.length === 2) look[0] = lerp(focus[0], focus[1], k);
+  c.position.set(pos[0] + Math.sin(t * 0.42) * 0.06, pos[1] + Math.sin(t * 0.55) * 0.025, pos[2]);
+  c.lookAt(look[0], look[1], look[2]);
+  c.fov = fov;
+  c.updateProjectionMatrix();
 }
 
 function animateCommon(s, t, frozen = false) {
@@ -125,14 +132,53 @@ function animateCommon(s, t, frozen = false) {
 }
 
 function overlay(g, t, info, freeze = false, title = '') {
-  if (freeze) { g.save(); g.globalCompositeOperation = 'screen'; const x = E.W * 0.53, y = E.H * 0.48, pulse = 0.5 + 0.5 * Math.sin(t * 3.4), rad = 150 + pulse * 58; const gr = g.createRadialGradient(x, y, 10, x, y, rad * 2.2); gr.addColorStop(0, 'rgba(108,208,255,0.12)'); gr.addColorStop(0.5, 'rgba(72,165,255,0.06)'); gr.addColorStop(1, 'rgba(40,110,230,0)'); g.fillStyle = gr; g.fillRect(0, 0, E.W, E.H); for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x, y, rad * (0.55 + i * 0.45), 0, Math.PI * 2); g.strokeStyle = `rgba(149,221,255,${0.34 - i * 0.08})`; g.lineWidth = 2.5 - i * 0.35; g.stroke(); } g.restore(); }
-  if (title) { g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top'; g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 178); g.restore(); }
+  if (freeze) {
+    g.save(); g.globalCompositeOperation = 'screen';
+    const x = E.W * 0.53, y = E.H * 0.43;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 3.4), rad = 145 + pulse * 48;
+    const gr = g.createRadialGradient(x, y, 10, x, y, rad * 2.2);
+    gr.addColorStop(0, 'rgba(108,208,255,0.12)');
+    gr.addColorStop(0.5, 'rgba(72,165,255,0.06)');
+    gr.addColorStop(1, 'rgba(40,110,230,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, E.W, E.H);
+    for (let i = 0; i < 3; i++) {
+      g.beginPath(); g.arc(x, y, rad * (0.55 + i * 0.45), 0, Math.PI * 2);
+      g.strokeStyle = `rgba(149,221,255,${0.34 - i * 0.08})`;
+      g.lineWidth = 2.5 - i * 0.35; g.stroke();
+    }
+    g.restore();
+  }
+  if (title) {
+    g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top';
+    g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 178); g.restore();
+  }
+  const line = String(info?.line || '').trim();
+  if (line) {
+    g.save();
+    const fontSize = 37, maxWidth = E.W - 360, rows = [];
+    g.font = `600 ${fontSize}px ${FONTS.body}`;
+    let row = '';
+    for (const word of line.split(/\s+/)) {
+      const next = row ? `${row} ${word}` : word;
+      if (g.measureText(next).width > maxWidth && row) { rows.push(row); row = word; }
+      else row = next;
+    }
+    if (row) rows.push(row);
+    const visible = rows.slice(0, 2), lineHeight = 46, plateH = Math.max(66, visible.length * lineHeight + 24);
+    const top = E.H - 124 - plateH / 2;
+    g.fillStyle = 'rgba(5,10,18,0.82)'; g.beginPath();
+    g.roundRect(150, top, E.W - 300, plateH, 17); g.fill();
+    g.strokeStyle = 'rgba(150,205,240,0.42)'; g.lineWidth = 1.5; g.stroke();
+    g.font = `600 ${fontSize}px ${FONTS.body}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f7f8fa';
+    visible.forEach((txt, i) => g.fillText(txt, E.W / 2, top + plateH / 2 + (i - (visible.length - 1) / 2) * lineHeight));
+    g.restore();
+  }
 }
 
-function reg(id, behavior, cameraMode = 'wide', frozen = false) {
+function reg(id, behavior, cameraMode = 'wide', frozen = false, focus = null) {
   registerShot(id, { kind: '3d', init: (T, info) => makeStreet(info), draw: (s, t) => {
     const p = clamp(t / 4.5); animateCommon(s, t, frozen); s.mom.position.set(-1.4, 0.02, 1.4); s.kid.position.set(-4.8, 0, 0.1); s.bike.root.position.set(-1.4, 0, 1.4); s.debris.visible = false;
-    if (behavior) behavior(s, t, p); cameraAt(s, t, cameraMode); if (frozen) { s.rain.update(t, true); s.sign.rotation.z = lerp(0.18, 0.3, smooth(p)); }
+    if (behavior) behavior(s, t, p); cameraAt(s, t, cameraMode, focus); if (frozen) { s.rain.update(t, true); s.sign.rotation.z = lerp(0.18, 0.3, smooth(p)); }
   }, overlay: (g, t, info) => overlay(g, t, info, frozen, frozen ? 'TIME STOP  /  00:10' : '') });
   // The scene already carries one camera-space subtitle plate. Disable H2's
   // word-group captions for these 3D shots so the same sentence is not drawn twice.
@@ -141,20 +187,20 @@ function reg(id, behavior, cameraMode = 'wide', frozen = false) {
   timelineShot.captions = false;
 }
 
-reg('s053', (s, t, p) => { s.bike.root.position.x = lerp(-2.2, -1.2, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.sign.rotation.z = 0.015 * Math.sin(t * 2.6); s.kid.visible = false; }, 'wide', false);
-reg('s054', (s, t) => { s.bike.root.position.x = -1.2; s.mom.position.x = -1.2; s.kid.visible = false; s.sign.rotation.z = 0.035 * Math.sin(t * 9) + 0.04 * clamp(t / 4.5); }, 'impact', false);
-reg('s056', (s, t, p) => { s.bike.root.position.x = -0.9; s.mom.position.x = -0.9; s.kid.visible = false; s.sign.rotation.z = lerp(0.06, 0.32, smooth(p)); }, 'wide', false);
-reg('s058', (s, t) => { s.bike.root.visible = false; s.kid.visible = false; s.mom.position.set(-1.4, 0.05, 1.3); s.mom.scale.setScalar(1.32); s.mom.userData.setPose('bike', t); }, 'closeMom', false);
-reg('s059', (s, t, p) => { s.bike.root.position.x = -0.7; s.mom.position.x = -0.7; s.kid.visible = true; s.kid.position.x = lerp(-5.1, -4.2, smooth(p)); s.kid.userData.setPose('stand', t); s.sign.rotation.z = 0.29 + 0.025 * Math.sin(t * 7); }, 'wide', false);
-reg('s061', (s, t, p) => { s.bike.root.position.x = -0.4; s.mom.position.x = -0.4; s.kid.position.x = -4.0; s.kid.userData.setPose('reach', t); s.sign.rotation.z = 0.33; }, 'wide', true);
-reg('s062', (s, t) => { s.bike.root.visible = false; s.mom.visible = false; s.kid.position.set(-2.9, 0, 1.3); s.kid.userData.setPose('run', t * 1.4); }, 'feet', true);
-reg('s063', (s, t, p) => { s.kid.position.x = lerp(-4.6, -0.5, smooth(p)); s.kid.position.z = 1.2; s.kid.userData.setPose('run', t * 1.8); s.bike.root.position.x = -0.35; s.mom.position.x = -0.35; s.sign.rotation.z = 0.33; }, 'tracking', true);
-reg('s064', (s, t) => { s.kid.position.set(0.0, 0, 1.45); s.kid.userData.setPose('reach', t); s.bike.root.position.x = -0.05; s.mom.position.x = -0.05; s.mom.userData.setPose('bike', t); }, 'closeMom', true);
-reg('s065', (s, t, p) => { s.kid.position.x = lerp(0.0, -1.7, smooth(p)); s.kid.userData.setPose('pull', t); s.bike.root.position.x = lerp(-0.05, -1.8, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('bike', t); s.sign.rotation.z = 0.34; }, 'tracking', true);
-reg('s066', (s, t, p) => { s.bike.root.position.x = lerp(-1.8, -2.5, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.kid.position.x = lerp(-1.7, -2.9, smooth(p)); s.kid.userData.setPose('pull', t); }, 'feet', true);
-reg('s067', (s, t, p) => { s.bike.root.position.x = -3.3; s.mom.position.set(-2.4, 0, 1.5); s.mom.userData.setPose('kneel', t); s.kid.position.set(-1.55, 0, 1.3); s.kid.userData.setPose('crouch', t); s.bike.root.rotation.z = -0.08 * smooth(p); }, 'tracking', true);
-reg('s068', (s, t, p) => { s.bike.root.position.x = lerp(-3.3, -4.0, smooth(p)); s.mom.position.set(-2.5, 0, 1.5); s.mom.userData.setPose('stand', t); s.kid.position.x = lerp(-1.55, -2.45, smooth(p)); s.kid.userData.setPose('pull', t); }, 'wide', true);
-reg('s069', (s, t, p) => { s.bike.root.position.x = -4.0; s.mom.position.set(-2.9, 0, 1.7); s.mom.userData.setPose('crouch', t); s.kid.position.set(-1.9, 0, 1.25); s.kid.userData.setPose('shield', t); s.sign.rotation.z = lerp(0.36, 0.48, smooth(p)); }, 'impact', true);
-reg('s070', (s, t) => { s.bike.root.position.x = -4.0; s.mom.position.set(-2.9, 0, 1.7); s.kid.position.set(-1.9, 0, 1.25); s.mom.userData.setPose('crouch', t); s.kid.userData.setPose('shield', t); const fall = smooth(clamp((t - 0.32) / 3.6)); s.sign.rotation.z = lerp(0.48, 1.12, fall); s.debris.visible = t > 0.9; s.debris.position.y = -(Math.max(0, t - 1.1) ** 2) * 0.9; }, 'impact', false);
-reg('s071', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-2.4, 0, 1.55); s.mom.userData.setPose('sit', t); s.kid.position.set(-1.0, 0, 1.45); s.kid.userData.setPose('sit', t); s.sign.rotation.z = 1.12; }, 'hug', false);
-reg('s072', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-1.55, 0, 1.45); s.kid.position.set(-0.82, 0, 1.45); s.mom.userData.setPose('hug', t); s.kid.userData.setPose('hug', t); s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI; s.sign.rotation.z = 1.12; }, 'hug', false);
+reg('s053', (s, t, p) => { s.bike.root.position.x = lerp(-2.2, -1.2, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.sign.rotation.z = 0.015 * Math.sin(t * 2.6); s.kid.visible = false; }, 'wide', false, [-1.7, -1.2]);
+reg('s054', (s, t) => { s.bike.root.position.x = -1.2; s.mom.position.x = -1.2; s.kid.visible = false; s.sign.rotation.z = 0.035 * Math.sin(t * 9) + 0.04 * clamp(t / 4.5); }, 'impact', false, [-1.2, -1.2]);
+reg('s056', (s, t, p) => { s.bike.root.position.x = -0.9; s.mom.position.x = -0.9; s.kid.visible = false; s.sign.rotation.z = lerp(0.06, 0.32, smooth(p)); }, 'wide', false, [-0.9, -0.9]);
+reg('s058', (s, t) => { s.bike.root.visible = false; s.kid.visible = false; s.mom.position.set(-1.4, 0.05, 1.3); s.mom.scale.setScalar(1.32); s.mom.userData.setPose('bike', t); }, 'closeMom', false, [-1.4, -1.4]);
+reg('s059', (s, t, p) => { s.bike.root.position.x = -0.7; s.mom.position.x = -0.7; s.kid.visible = true; s.kid.position.x = lerp(-5.1, -4.2, smooth(p)); s.kid.userData.setPose('stand', t); s.sign.rotation.z = 0.29 + 0.025 * Math.sin(t * 7); }, 'wide', false, [-2.8, -2.5]);
+reg('s061', (s, t, p) => { s.bike.root.position.x = -0.4; s.mom.position.x = -0.4; s.kid.position.x = -4.0; s.kid.userData.setPose('reach', t); s.sign.rotation.z = 0.33; }, 'wide', true, [-2.2, -2.2]);
+reg('s062', (s, t) => { s.bike.root.visible = false; s.mom.visible = false; s.kid.position.set(-2.9, 0, 1.3); s.kid.userData.setPose('run', t * 1.4); }, 'feet', true, [-2.9, -2.9]);
+reg('s063', (s, t, p) => { s.kid.position.x = lerp(-4.6, -0.5, smooth(p)); s.kid.position.z = 1.2; s.kid.userData.setPose('run', t * 1.8); s.bike.root.position.x = -0.35; s.mom.position.x = -0.35; s.sign.rotation.z = 0.33; }, 'tracking', true, [-2.5, -0.5]);
+reg('s064', (s, t) => { s.kid.position.set(-0.65, 0, 1.45); s.kid.userData.setPose('reach', t); s.bike.root.position.x = 0.65; s.mom.position.x = 0.65; s.mom.userData.setPose('bike', t); }, 'closeMom', true, [0.0, 0.0]);
+reg('s065', (s, t, p) => { s.kid.position.x = lerp(-0.65, -1.75, smooth(p)); s.kid.userData.setPose('pull', t); s.bike.root.position.x = lerp(0.65, -1.05, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t); s.mom.rotation.z = -0.08 * smooth(p); s.sign.rotation.z = 0.34; }, 'action', true, [-0.3, -1.4]);
+reg('s066', (s, t, p) => { s.bike.root.position.x = lerp(-1.05, -2.0, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t); s.kid.position.x = lerp(-1.75, -2.65, smooth(p)); s.kid.userData.setPose('pull', t); }, 'action', true, [-1.4, -2.4]);
+reg('s067', (s, t, p) => { s.bike.root.position.x = -3.1; s.mom.position.set(-2.25, 0, 1.5); s.mom.userData.setPose('kneel', t); s.kid.position.set(-1.05, 0, 1.3); s.kid.userData.setPose('crouch', t); s.bike.root.rotation.z = -0.08 * smooth(p); }, 'action', true, [-1.7, -1.7]);
+reg('s068', (s, t, p) => { s.bike.root.position.x = lerp(-3.1, -3.8, smooth(p)); s.mom.position.set(-2.55, 0, 1.5); s.mom.userData.setPose('stand', t); s.kid.position.set(lerp(-1.05, -1.35, smooth(p)), 0, 1.3); s.kid.userData.setPose('pull', t); }, 'action', true, [-2.0, -2.0]);
+reg('s069', (s, t, p) => { s.bike.root.position.x = -3.8; s.mom.position.set(-2.65, 0, 1.7); s.mom.userData.setPose('crouch', t); s.kid.position.set(-1.35, 0, 1.25); s.kid.userData.setPose('shield', t); s.sign.rotation.z = lerp(0.36, 0.48, smooth(p)); }, 'impact', true, [-2.0, -2.0]);
+reg('s070', (s, t) => { s.bike.root.position.x = -3.8; s.mom.position.set(-2.65, 0, 1.7); s.kid.position.set(-1.35, 0, 1.25); s.mom.userData.setPose('crouch', t); s.kid.userData.setPose('shield', t); const fall = smooth(clamp((t - 0.32) / 3.6)); s.sign.rotation.z = lerp(0.48, 1.12, fall); s.debris.visible = t > 0.9; s.debris.position.y = -(Math.max(0, t - 1.1) ** 2) * 0.9; }, 'impact', false, [-2.0, -2.0]);
+reg('s071', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-2.0, 0, 1.55); s.mom.userData.setPose('sit', t); s.kid.position.set(-0.55, 0, 1.45); s.kid.userData.setPose('sit', t); s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI; s.sign.rotation.z = 1.12; }, 'hug', false, [-1.25, -1.25]);
+reg('s072', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-1.55, 0, 1.45); s.kid.position.set(-0.55, 0, 1.45); s.mom.userData.setPose('hug', t); s.kid.userData.setPose('hug', t); s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI; s.sign.rotation.z = 1.12; }, 'hug', false, [-1.05, -1.05]);
