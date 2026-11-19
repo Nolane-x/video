@@ -139,10 +139,26 @@ export function figure(outfit = {}, o = {}) {
   const torsoC = outfit.top && outfit.top !== 'none' ? (outfit.top === 'labcoat' ? '#ece8e0' : outfit.color || '#d64a33') : ink;
   const hip = new THREE.Group(); hip.position.y = 0.9; grp.add(hip);
   const torso = limb(0.5, outfit.top && outfit.top !== 'none' ? 0.15 : 0.07, torsoC); torso.rotation.z = Math.PI; torso.position.y = 0.0; hip.add(torso); parts.push(torso);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 16), lam(ink)); head.position.y = 0.82; hip.add(head); parts.push(head);
-  // mat: 2 mat trang + mieng, quay ve +x
-  const eyeM = basic('#fbf6ee'); [-0.07, 0.07].forEach((z) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 6), eyeM); e.scale.set(0.5, 1.3, 1); e.position.set(0.18, 0.86, z); hip.add(e); });
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 12, Math.PI), eyeM); mouth.position.set(0.185, 0.77, 0); mouth.rotation.set(0, Math.PI / 2, Math.PI); hip.add(mouth);
+  const skinC = outfit.skin || '#dfb29a';
+  const skinM = lam(skinC);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24, 18), skinM);
+  head.scale.set(1.0, 1.08, 0.94); head.position.y = 0.82; hip.add(head); parts.push(head);
+  // Small ears, pupils and a nose make the side-facing expression readable.
+  for (const side of [-1, 1]) {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.043, 10, 8), skinM);
+    ear.position.set(0.005, 0.82, side * 0.19); hip.add(ear);
+  }
+  const eyeM = basic('#fff9ef'), pupilM = basic('#1a1d27');
+  [-0.07, 0.07].forEach((z) => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.034, 10, 8), eyeM);
+    e.scale.set(0.52, 1.28, 1); e.position.set(0.176, 0.86, z); hip.add(e);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), pupilM);
+    pupil.position.set(0.199, 0.86, z); hip.add(pupil);
+  });
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.027, 8, 6), skinM);
+  nose.scale.set(1.3, 0.75, 0.9); nose.position.set(0.205, 0.805, 0); hip.add(nose);
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.043, 0.009, 6, 12, Math.PI), basic('#693c3d'));
+  mouth.position.set(0.187, 0.755, 0); mouth.rotation.set(0, Math.PI / 2, Math.PI); hip.add(mouth);
   if (outfit.head === 'cap' || outfit.head === 'beanie') { const hc = outfit.headColor || outfit.color; const cap = new THREE.Mesh(new THREE.SphereGeometry(0.205, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2.2), lam(hc)); cap.position.y = 0.86; hip.add(cap); if (outfit.head === 'cap') { const b = box(0.2, 0.02, 0.22, hc, { y: 0.9, x: 0.2 }); hip.add(b); } }
   const arm = (side) => {
     const sh = new THREE.Group(); sh.position.set(0, 0.55, side * 0.2);
@@ -152,17 +168,28 @@ export function figure(outfit = {}, o = {}) {
     // Separate elbow pivot and forearm add articulated reaching and hugging.
     const elbow = new THREE.Group(); elbow.position.y = -0.29; sh.add(elbow);
     const forearm = limb(0.30, radius * 0.92, sleeveColor); elbow.add(forearm); parts.push(forearm);
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.22, 10, 8), lam(sleeveColor));
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.18, 10, 8), lam(skinC));
     hand.position.y = -0.31; elbow.add(hand); parts.push(hand);
     sh.userData.elbow = elbow; hip.add(sh); return sh;
   };
-  const leg = (side) => { const h = new THREE.Group(); h.position.set(0, 0, side * 0.08); const l = limb(0.78, 0.06, outfit.legs || ink); h.add(l); hip.add(h); parts.push(l); return h; };
+  const leg = (side) => {
+    const h = new THREE.Group(); h.position.set(0, 0, side * 0.08);
+    const upper = limb(0.36, 0.06, outfit.legs || ink); h.add(upper); parts.push(upper);
+    const knee = new THREE.Group(); knee.position.y = -0.35; h.add(knee);
+    const lower = limb(0.43, 0.057, outfit.legs || ink); knee.add(lower); parts.push(lower);
+    const shoe = new THREE.Mesh(new THREE.SphereGeometry(0.082, 10, 8), lam(outfit.legs || ink));
+    shoe.scale.set(1.35, 0.56, 0.85); shoe.position.set(0.025, -0.43, 0); knee.add(shoe);
+    h.userData.knee = knee; hip.add(h); return h;
+  };
   const L = { lA: arm(-1), rA: arm(1), lL: leg(-1), rL: leg(1) };
   // vien sang: ban sao phong to mat sau, mau rim
   const rimMat = new THREE.MeshBasicMaterial({ color: col(rimC), side: THREE.BackSide, transparent: true, opacity: o.rimOpacity ?? 0.9 });
   parts.forEach((p) => { const h = new THREE.Mesh(p.geometry, rimMat); h.scale.setScalar(1.12); p.add(h); });
   const setPose = (name, t = 0) => {
     let P = PO[name] || PO.stand;
+    hip.position.y = name === 'crouch' || name === 'shield' ? 0.76
+      : name === 'kneel' ? 0.70
+      : name === 'sit' ? 0.66 : 0.9;
     if (name === 'walk' || name === 'run') { const k = name === 'run' ? 1 : 0.5, ph = t * Math.PI * 2 * (name === 'run' ? 1.5 : 0.9), sw = Math.sin(ph) * k; P = { lA: [-sw, -0.05], rA: [sw, 0.05], lL: [sw, 0.03], rL: [-sw, -0.03] }; hip.position.y = 0.9 + Math.abs(Math.cos(ph)) * 0.04 * k; }
     for (const k of Object.keys(L)) {
       L[k].rotation.z = P[k][0];
@@ -177,6 +204,21 @@ export function figure(outfit = {}, o = {}) {
       : { lA: 0, rA: 0 };
     L.lA.userData.elbow.rotation.z = elbowBend.lA;
     L.rA.userData.elbow.rotation.z = elbowBend.rA;
+    const kneeBend = name === 'crouch' || name === 'shield' ? { lL: 1.08, rL: 1.08 }
+      : name === 'kneel' ? { lL: 1.32, rL: 0.14 }
+      : name === 'sit' ? { lL: 1.28, rL: 1.28 }
+      : name === 'run' ? { lL: 0.28 + Math.max(0, Math.sin(t * Math.PI * 3)) * 0.72, rL: 0.28 + Math.max(0, Math.sin(t * Math.PI * 3 + Math.PI)) * 0.72 }
+      : name === 'walk' ? { lL: 0.18 + Math.max(0, Math.sin(t * Math.PI * 1.8)) * 0.42, rL: 0.18 + Math.max(0, Math.sin(t * Math.PI * 1.8 + Math.PI)) * 0.42 }
+      : { lL: 0.04, rL: 0.04 };
+    L.lL.userData.knee.rotation.z = kneeBend.lL;
+    L.rL.userData.knee.rotation.z = kneeBend.rL;
+    if (name === 'hug') {
+      hip.rotation.y = Math.sin(t * 1.7) * 0.035;
+      L.lA.userData.elbow.rotation.z += Math.sin(t * 1.6) * 0.05;
+      L.rA.userData.elbow.rotation.z -= Math.sin(t * 1.6) * 0.05;
+    } else if (name === 'pull' || name === 'shield') {
+      hip.rotation.y = Math.sin(t * 2.2) * 0.025;
+    } else hip.rotation.y = 0;
   };
   setPose(o.pose || 'stand');
   grp.scale.setScalar(s); grp.position.set(o.x || 0, 0, o.z || 0); grp.rotation.y = o.ry || 0;
