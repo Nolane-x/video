@@ -63,6 +63,17 @@ jobs:
           This is a stylized stick-figure animation with selected Three.js 3D rescue shots, not a photorealistic or fully-3D feature film. CI technical QA is not equivalent to artistic approval; inspect the review ZIP and contact sheets.
           EOF
 
+      - name: Upload compact visual QA contact sheets for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-native-60fps-visual-QA
+          path: |
+            dist/time-stop-10s/contact-sheets/
+            dist/time-stop-10s/qa-report.json
+            dist/time-stop-10s/ffprobe.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Publish permanent GitHub Release assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
