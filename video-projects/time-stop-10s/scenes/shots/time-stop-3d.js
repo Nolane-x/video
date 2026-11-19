@@ -126,9 +126,7 @@ function animateCommon(s, t, frozen = false) {
 
 function overlay(g, t, info, freeze = false, title = '') {
   if (freeze) { g.save(); g.globalCompositeOperation = 'screen'; const x = E.W * 0.53, y = E.H * 0.48, pulse = 0.5 + 0.5 * Math.sin(t * 3.4), rad = 150 + pulse * 58; const gr = g.createRadialGradient(x, y, 10, x, y, rad * 2.2); gr.addColorStop(0, 'rgba(108,208,255,0.12)'); gr.addColorStop(0.5, 'rgba(72,165,255,0.06)'); gr.addColorStop(1, 'rgba(40,110,230,0)'); g.fillStyle = gr; g.fillRect(0, 0, E.W, E.H); for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x, y, rad * (0.55 + i * 0.45), 0, Math.PI * 2); g.strokeStyle = `rgba(149,221,255,${0.34 - i * 0.08})`; g.lineWidth = 2.5 - i * 0.35; g.stroke(); } g.restore(); }
-  const line = String(info.line || '').trim();
-  if (line) { g.save(); g.font = `600 37px ${FONTS.body}`; const max = E.W - 260, rows = []; let row = ''; for (const word of line.split(/\s+/)) { const test = row ? `${row} ${word}` : word; if (g.measureText(test).width > max && row) { rows.push(row); row = word; } else row = test; } if (row) rows.push(row); const lines = rows.slice(0, 2), h = lines.length * 49 + 34, y = E.H - 80 - h / 2; g.fillStyle = 'rgba(6,12,22,0.72)'; g.beginPath(); g.roundRect(95, y - h / 2, E.W - 190, h, 18); g.fill(); g.strokeStyle = 'rgba(154,208,245,0.28)'; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#f6f8fb'; g.textAlign = 'center'; g.textBaseline = 'middle'; lines.forEach((txt, i) => g.fillText(txt, E.W / 2, y - (lines.length - 1) * 24.5 + i * 49)); g.restore(); }
-  if (title) { g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top'; g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 56); g.restore(); }
+  if (title) { g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top'; g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 178); g.restore(); }
 }
 
 function reg(id, behavior, cameraMode = 'wide', frozen = false) {
@@ -136,6 +134,11 @@ function reg(id, behavior, cameraMode = 'wide', frozen = false) {
     const p = clamp(t / 4.5); animateCommon(s, t, frozen); s.mom.position.set(-1.4, 0.02, 1.4); s.kid.position.set(-4.8, 0, 0.1); s.bike.root.position.set(-1.4, 0, 1.4); s.debris.visible = false;
     if (behavior) behavior(s, t, p); cameraAt(s, t, cameraMode); if (frozen) { s.rain.update(t, true); s.sign.rotation.z = lerp(0.18, 0.3, smooth(p)); }
   }, overlay: (g, t, info) => overlay(g, t, info, frozen, frozen ? 'TIME STOP  /  00:10' : '') });
+  // The scene already carries one camera-space subtitle plate. Disable H2's
+  // word-group captions for these 3D shots so the same sentence is not drawn twice.
+  const timelineShot = E.shots.find((shot) => shot.id === id);
+  if (!timelineShot) throw new Error(`3D shot ${id} missing from the 84-shot timeline`);
+  timelineShot.captions = false;
 }
 
 reg('s053', (s, t, p) => { s.bike.root.position.x = lerp(-2.2, -1.2, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.sign.rotation.z = 0.015 * Math.sin(t * 2.6); s.kid.visible = false; }, 'wide', false);
