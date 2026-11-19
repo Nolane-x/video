@@ -6,6 +6,7 @@ on:
       - film/time-stop-10s-3d-cinema
     paths:
       - ".github/workflows/enable-time-stop-60fps.txt"
+      - ".github/workflows/render-time-stop-60fps.yml"
   workflow_dispatch:
 
 permissions:
@@ -31,15 +32,48 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: candidate
 
-      - name: Install FFmpeg
+      - name: Install a verified FFmpeg toolchain with resilient fallback
+        shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
-          ffmpeg -hide_banner -filters 2>/dev/null | grep -w minterpolate
+          install_ok=false
+          if command -v ffmpeg >/dev/null 2>&1; then
+            if ffmpeg -hide_banner -filters 2>/dev/null | grep -qE '[[:space:]]minterpolate[[:space:]]'; then
+              install_ok=true
+              echo "Using the runner-provided FFmpeg."
+            fi
+          fi
+
+          if [ "$install_ok" != true ]; then
+            echo "Trying Ubuntu packages with bounded retry/backoff."
+            for attempt in 1 2 3; do
+              if sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update &&
+                 sudo apt-get -o Acquire::Retries=5 -o Dpkg::Lock::Timeout=120 install -y --no-install-recommends ffmpeg; then
+                install_ok=true
+                break
+              fi
+              echo "APT attempt $attempt failed; retrying after backoff."
+              sleep $((attempt * 12))
+            done
+          fi
+
+          if [ "$install_ok" != true ]; then
+            echo "APT mirror unavailable; installing the self-contained imageio-ffmpeg wheel."
+            python -m pip install --disable-pip-version-check --no-cache-dir "imageio-ffmpeg==0.6.0"
+            FFMPEG_BIN="$(python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')"
+            test -x "$FFMPEG_BIN"
+            echo "FFMPEG_BIN=$FFMPEG_BIN" >> "$GITHUB_ENV"
+          else
+            echo "FFMPEG_BIN=$(command -v ffmpeg)" >> "$GITHUB_ENV"
+          fi
+
+          "$FFMPEG_BIN" -hide_banner -version | head -n 1
+          "$FFMPEG_BIN" -hide_banner -filters 2>/dev/null | grep -E '[[:space:]]minterpolate[[:space:]]'
+          "$FFMPEG_BIN" -hide_banner -encoders 2>/dev/null | grep -E '[[:space:]]libx264[[:space:]]'
 
       - name: Motion-compensated 30-to-60fps interpolation
         timeout-minutes: 150
+        shell: bash
         run: |
           set -euo pipefail
           INPUT="$(find candidate -type f -name 'time-stop-10s-master.mp4' -print -quit)"
@@ -47,19 +81,20 @@ jobs:
           test -s "$INPUT"
           mkdir -p dist/time-stop-10s-60fps
           OUTPUT="dist/time-stop-10s-60fps/time-stop-10s-master-60fps.mp4"
-          ffmpeg -hide_banner -y -i "$INPUT" \
+          "$FFMPEG_BIN" -hide_banner -y -i "$INPUT" \
             -map 0:v:0 -map 0:a:0? \
-            -vf "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1" \
+            -vf "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1:scd=fdiff:scd_threshold=10" \
             -fps_mode cfr -c:v libx264 -preset fast -crf 18 \
             -maxrate 18M -bufsize 36M -pix_fmt yuv420p \
             -c:a copy -movflags +faststart "$OUTPUT"
           test -s "$OUTPUT"
-          ffprobe -v error -count_frames -show_streams -show_format -of json "$OUTPUT" > dist/time-stop-10s-60fps/ffprobe.json
-          ffmpeg -hide_banner -loglevel error -y -i "$OUTPUT" -t 30 \
+          "$FFMPEG_BIN" -hide_banner -count_frames -i "$OUTPUT" -f null - 2> dist/time-stop-10s-60fps/decode-check.log
+          "$FFMPEG_BIN" -hide_banner -count_frames -show_streams -show_format -of json -i "$OUTPUT" > dist/time-stop-10s-60fps/ffprobe.json
+          "$FFMPEG_BIN" -hide_banner -loglevel error -y -i "$OUTPUT" -t 30 \
             -c:v libx264 -preset veryfast -crf 21 -c:a aac -b:a 160k \
             -movflags +faststart dist/time-stop-10s-60fps/preview-60fps-30s.mp4
 
-      - name: Verify duration, resolution, frame rate and audio
+      - name: Verify duration, resolution, frame rate, exact frame count and audio
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -73,30 +108,32 @@ jobs:
           duration = float(data["format"]["duration"])
           assert (int(v["width"]), int(v["height"])) == (1920, 1080)
           assert v.get("r_frame_rate") == "60/1", v.get("r_frame_rate")
+          assert v.get("avg_frame_rate") == "60/1", v.get("avg_frame_rate")
           assert abs(duration - 378.0) < 0.25, duration
           assert a.get("codec_name") == "aac"
           assert a.get("sample_rate") == "48000"
           assert int(a.get("channels", 0)) == 2
           frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
-          assert frames in (0, 22680), frames
+          assert frames == 22680, frames
           report = {
               "status": "technical-pass",
               "source_fps": "30/1",
               "output_fps": "60/1",
-              "motion_interpolation": "minterpolate-mci-aobmc-bidir",
+              "motion_interpolation": "minterpolate-mci-aobmc-bidir-scd-fdiff",
               "duration_seconds": duration,
-              "frames": frames or 22680,
+              "frames": frames,
               "resolution": [1920, 1080],
-              "audio": "AAC 48kHz stereo (copied unchanged)",
-              "note": "Motion-interpolated 60fps, not a native 60fps scene render; inspect for interpolation artifacts."
+              "audio": "AAC 48kHz stereo (copied unchanged in master)",
+              "scene_cut_detection": "enabled; prevents motion vectors from bridging hard cuts",
+              "note": "Motion-compensated 60fps interpolation, not a native 60fps scene render. Optical-flow artifacts still require visual review."
           }
           Path("dist/time-stop-10s-60fps/qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
           cd dist/time-stop-10s-60fps
-          sha256sum *.mp4 *.json > SHA256SUMS.txt
+          sha256sum *.mp4 *.json *.log > SHA256SUMS.txt
 
-      - name: Upload motion-interpolated 60fps edition
+      - name: Upload motion-interpolated 60fps edition and review data
         uses: actions/upload-artifact@v4
         with:
           name: time-stop-10s-60fps-motion-interpolated
