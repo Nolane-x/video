@@ -205,3 +205,17 @@ Source fix e82a7591d6676e68f38aaea1271e92e8789c567b widens/recentres s018 and mo
 Run #26 [44671416000](https://github.com/Nolane-x/video/actions/runs/44671416000) completed successfully and produced artifact ID 14604975960 (time-stop-10s-h2-26, 258,272,318 bytes). Separate independent master inspection [run #2 / 44736526771](https://github.com/Nolane-x/video/actions/runs/44736526771) is currently running: download artifact, full MP4 decode, exact metadata/frame-count/audio validation, SHA-256, 24 frame contact sheet, and 1080p60 clips with the original mixed audio for each key sequence.
 
 Keep the original run-20 public Release untouched. Do not publish until run #27 passes and the new master inspection plus visual review of full-mix clips are complete. visual_approval remains false.
+
+
+## Time Stop 10s — latest verified status and next actions (2026-11-20)
+
+Independent run-26 master inspection [run #5 / 44737356101](https://github.com/Nolane-x/video/actions/runs/44737356101) passed. Downloaded the actual run-26 master, separately decoded video/audio with FFmpeg, recomputed ffprobe with exact frame count, validated streams, and created 24 representative master frames plus 3 full-mix 1080p60 clips. Artifact `time-stop-10s-run26-master-inspection` ID `14629461926` (12,853,588 bytes) includes `master-inspection.json`, SHA-256, contact sheet and kitchen/court/hallway clips.
+Run #26 technical values: 1920x1080; native 60/1 fps; 22,680 frames; 378.0s; H.264 + AAC stereo 48kHz; −14.3 LUFS; −2.0 dBFS; 84 Vietnamese VieNeu segments; AudioSeal verified. CI technical pass is still not full artistic sign-off.
+
+Second targeted 3D proof [run #2 / 44736908508](https://github.com/Nolane-x/video/actions/runs/44736908508) passed after syncing the s018 framing correction. Artifact ID `14629681532`, 2,725,831 bytes, contains selected 3D shot sheets and 3 silent exact-length 960x540/60fps clips. Its renderer and frame-count QA passed.
+
+The newest full candidate is run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329), branch `film/time-stop-10s-3d-review-fixes`, source commit `e82a7591d6676e68f38aaea1271e92e8789c567b`. VoiceStudio passed; H2 storyboard, module install, full shot scan, 84-shot sheets and 30s preview passed. At last check it was rendering the complete 1080p60 master. Voice artifact ID `14628059443` (52,634,924 bytes). Once completed, download the new `time-stop-10s-h2-27` artifact and update the inspection workflow default source run ID to `44736403329`; then run independent master inspection and inspect its s018 frame.
+
+Inspection workflow iteration [run #6 / 44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) is also running. It emits a compact montage as base64 in job logs so the image can be inspected without relying on the unavailable container runtime.
+
+Keep the run-20 public Release immutable. Keep run-26 candidate as fallback. Do not publish a new Release or mark artistic approval true until run #27 passes independent QA and the full-mix clips/master visuals have been reviewed.
