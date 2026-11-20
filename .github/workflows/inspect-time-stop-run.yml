@@ -69,7 +69,29 @@ jobs:
           cp "$ROOT/voice-placement.json" review/voice-placement.json
           cp "$ROOT/subtitles/time-stop-10s.srt" review/time-stop-10s.srt
           sha256sum "$MASTER" | tee review/master-sha256.txt
-          ffmpeg -hide_banner -v error -i "$MASTER" -f null -
+          echo "SOURCE QA REPORT:"
+          cat "$ROOT/qa-report.json"
+          echo "PROBE SUMMARY:"
+          python - "$ROOT/ffprobe.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          for s in d["streams"]:
+            print({k:s.get(k) for k in ("codec_type","codec_name","width","height","r_frame_rate","avg_frame_rate","nb_frames","nb_read_frames","sample_rate","channels")})
+          print({"duration":d.get("format",{}).get("duration"),"format":d.get("format",{}).get("format_name")})
+          PY
+          set +e
+          ffmpeg -hide_banner -loglevel warning -i "$MASTER" -map 0:v:0 -an -f null - 2> review/video-decode.log
+          VIDEO_DECODE_RC=$?
+          ffmpeg -hide_banner -loglevel warning -i "$MASTER" -map 0:a:0 -vn -f null - 2> review/audio-decode.log
+          AUDIO_DECODE_RC=$?
+          set -e
+          echo "VIDEO_DECODE_RC=$VIDEO_DECODE_RC AUDIO_DECODE_RC=$AUDIO_DECODE_RC"
+          echo "VIDEO DECODE DIAGNOSTICS:"
+          cat review/video-decode.log
+          echo "AUDIO DECODE DIAGNOSTICS:"
+          cat review/audio-decode.log
+          test "$VIDEO_DECODE_RC" -eq 0
+          test "$AUDIO_DECODE_RC" -eq 0
           python - "$MASTER" "$ROOT/qa-report.json" "$ROOT/ffprobe.json" <<'PY'
           import json, sys, hashlib
           from pathlib import Path
