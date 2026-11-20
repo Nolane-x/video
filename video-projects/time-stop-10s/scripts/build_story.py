@@ -87,7 +87,7 @@ add("kitchen","Góc rộng; mẹ đứng yên phía sau, giọt nước đứng 
 add("kitchen","Nhân vật bước qua những giọt nước đông cứng; camera thấp ngang mặt bàn.","Chỉ có cậu vẫn bước được giữa thế giới đứng yên.",
     [actor("hoodie",.32,"relaxed","neutral",walk={"to":.70,"dur":3.7,"speed":1.2})],{"sky":"night","lamp":True},
     camera(.34,.66,1.05,.66,.58,1.25),freeze=True,timer=8,fx=[{"kind":"dust","at":.1,"dur":4.0,"n":22}])
-add("kitchen","Cận đồng hồ trên cổ tay; vòng sáng xanh hiện rõ mười vạch nhỏ.","Trên cổ tay hiện lên con số chín giây.",
+add("kitchen","Cận đồng hồ trên cổ tay; vòng sáng xanh hiện rõ mười vạch nhỏ.","Vòng đếm ngược báo còn bảy giây.",
     [actor("hoodie",.53,"headhold","neutral",h=.42)],{"sky":"night","lamp":True},camera(.55,.49,1.34,.55,.49,1.52),
     freeze=True,timer=7,sfx=[cue("tick",.2),cue("tick",2.0)])
 add("kitchen","Bàn tay chạm vào cốc giữa không trung; nhân vật đỡ lấy đáy cốc.","Cậu kịp giữ chiếc cốc trước khi nó vỡ.",
