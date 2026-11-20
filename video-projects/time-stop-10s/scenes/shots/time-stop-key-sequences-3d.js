@@ -188,7 +188,9 @@ function drawKitchen(s, t, info, id) {
     setCamera(s, [-0.5, 2.9, 9.5], [-0.5, 1.3, 0.7], 35, t);
   } else if (id === 's018') {
     s.cup.position.set(0.65, 1.9, 0.72); s.cup.rotation.z = -0.42;
-    s.hero.userData.setPose('point', t); setCamera(s, [-0.5, 2.55, 6.2], [-0.5, 1.45, 1.2], 29, t);
+    // Keep the protagonist and suspended cup inside frame while the countdown HUD remains readable.
+    s.hero.position.x = -1.7; s.hero.userData.setPose('point', t);
+    setCamera(s, [-0.6, 2.95, 8.0], [-0.1, 1.42, 0.72], 34, t);
   } else if (id === 's019') {
     s.cup.position.set(0.28, 1.56, 0.72); s.cup.rotation.z = 0;
     s.hero.position.x = -0.5; s.hero.userData.setPose('reach', t);
