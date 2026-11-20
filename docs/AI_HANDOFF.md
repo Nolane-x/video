@@ -144,3 +144,18 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Local conversation copies: `/mnt/data/time-stop-10s-native-60fps-1080p.mp4`, `/mnt/data/time-stop-10s-native-60fps-preview-30s.mp4`, `/mnt/data/time-stop-10s-native-60fps-review.zip`, `/mnt/data/time-stop-10s-native-60fps-subtitles.srt`, `/mnt/data/time-stop-10s-native-60fps-QA.json`, `/mnt/data/time-stop-10s-native-60fps-contact-sheet.jpg`, `/mnt/data/time-stop-10s-native-60fps-rescue-highlight.mp4`. The master SHA-256 is `ddb197588298ccd258c350299f69ce112558a76f89f6da96558500f9ccd75cec`, matching the Release asset digest.
 - The 30fps run #18 remains a fallback. Interpolated 60fps run #5 is not a deliverable: its output is 22,677 frames, three fewer than target. Prefer native H2 output.
 - Visual review: all six contact sheets plus representative rescue frames have been inspected. A complete frame-by-frame artistic sign-off has not been done. Do not set `visual_approval: true` based on technical CI success alone.
+
+## Time Stop 10s — next 3D expansion handoff (2026-11-20)
+
+Continue on branch `film/time-stop-10s-3d-cinema`. The previous native 60fps master remains the known-good fallback and permanent Release: https://github.com/Nolane-x/video/releases/tag/time-stop-10s-native-60fps-run-20 .
+
+The new file `video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js` registers Three.js versions of 24 additional timeline shots across three sequences: kitchen `s013–s022`, basketball court `s026–s033`, and school hallway `s037–s042`. Existing street rescue scenes remain in `time-stop-3d.js`; total 3D coverage is 42/84 shots, not the entire film. The H2 workflow copies both scene modules into the temporary project and runs `node --check` before H2's whole-timeline scan.
+
+Relevant commits: `3acdaaea8d0af3d55c0f3a28e671e62f8a46f633`, `9d2987a71527ca31d3aaf91f067d641223db548e`, `332ef8ef0231d80022e9db73d5d25579ab4ba268`.
+
+Check current Actions [run #23](https://github.com/Nolane-x/video/actions/runs/44666071523). At handoff, preparation of the 84-segment voice job had passed, while the VoiceStudio CPU render job was still running. Run #21/#22 were superseded/cancelled by later pushes, so inspect #23 rather than treating those as render failures. After it completes:
+1. Verify storyboard import, H2 scan, 60fps full render, audio mix, ffprobe frame count/duration and QA.
+2. Download its artifact; inspect all contact sheets and motion clips across 58.5–103.5s (kitchen), 117–153s (court), and 166.5–193.5s (hallway).
+3. Check prop contacts, hands/feet, character framing and mother hair silhouette; captions must not duplicate or overlap the acting.
+4. If the scenes pass, package a candidate master and new review bundle, preserving all old release hashes and leaving artistic approval false until complete review.
+5. Update the film QA ledger and only publish a new permanent release after the review. Never call the whole film fully 3D: only 42 shots use Three.js; 42 remain H2 Canvas 2D.
