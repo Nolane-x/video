@@ -257,3 +257,8 @@ Proof run #5 [44740324018](https://github.com/Nolane-x/video/actions/runs/447403
 Full candidate [run #28 / 44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) has passed storyboard payload and VoiceStudio. Voice artifact ID `14630746223` (51,951,746 bytes), 84 Vietnamese VieNeu segments, duration 198.00s, 7 AudioSeal blocks verified; ZIP SHA-256 `ecf9a37e67ec154ebad86eaaec24629448447d6a1fccb8e3bf20aa46aa43001a`. H2 render job has started and was installing H2/audio dependencies at this checkpoint.
 
 The source includes both s018 full-face/cup reframe and s026 ball-to-hand start at x=2.6/y=1.47/z=1.1, friend z=0.9. Review proof [#6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) includes s026 frames 112.5s/114.75s and a court proof clip from 112.5–148.5s; it has installed the source modules and is scanning all 84 shots. Run #27 is cancelled and not a deliverable. Run #26 remains a technical fallback but predates s026 contact improvement and has the prior s018 framing.
+
+
+## Inspector gate for run-28
+
+Inspector run #7 [44740902252](https://github.com/Nolane-x/video/actions/runs/44740902252) failed before media checks: the run-28 artifact name did not exist yet because the full render was still active. The inspector workflow has been changed to require marker .github/workflows/enable-inspect-time-stop-run28.txt (or manual dispatch), so it cannot run before upload. Create that marker only after run #28 has successfully uploaded time-stop-10s-h2-28; then perform independent full decode, ffprobe/frame count, audio and checksum checks.
