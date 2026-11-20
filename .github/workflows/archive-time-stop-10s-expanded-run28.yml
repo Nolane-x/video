@@ -33,9 +33,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: time-stop-10s-h2-28
-          repository: \${{ github.repository }}
+          repository: ${{ github.repository }}
           run-id: 44740306234
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: dist
 
       - name: Verify candidate QA, narration and archive payload
@@ -100,7 +100,7 @@ jobs:
 
       - name: Create a draft GitHub Release without touching run-20
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           TAG="time-stop-10s-expanded-3d-review-run28"
