@@ -25,7 +25,7 @@ jobs:
       - name: Checkout candidate source
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.sha }}
+          ref: film/time-stop-10s-3d-review-fixes
           fetch-depth: 0
           persist-credentials: true
 
