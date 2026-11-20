@@ -398,3 +398,17 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Local review package created: /mnt/data/time-stop-10s-run28-review-package.zip (65,369,947 bytes); includes inspection evidence, 24 master frames, 3 full-mix clips, 3 sampled clip sheets, SRT/VTT/transcript, narration WAV and voice assets archive. Standalone files also copied to /mnt/data/time-stop-10s-run28-*.
 - Draft archive workflow .github/workflows/archive-time-stop-10s-expanded-run28.yml is verified to target artifact time-stop-10s-h2-28, run ID 44740306234, and separate draft tag time-stop-10s-expanded-3d-review-run28. Next action: create marker .github/workflows/enable-time-stop-10s-expanded-draft.txt to start its QA-gated draft archive. Do not make the draft public until uninterrupted full-length playback review is completed. Existing run-20 release remains untouched.
 - Leave visual_approval: false. The technical pipeline and sampled sequences pass; full uninterrupted screening has not been performed.
+
+
+## Time Stop 10s — run28 draft release archived successfully (2026-11-20)
+
+- Archive workflow [run #2 / 44761976792](https://github.com/Nolane-x/video/actions/runs/44761976792) completed successfully after fixing checkout ref and unescaped GitHub Actions expressions.
+- Draft GitHub Release ID `452849739`, tag `time-stop-10s-expanded-3d-review-run28`, title “Time Stop 10s — Expanded 3D Review Candidate (Run 28)”. It remains `draft: true` and has not been published. GitHub currently returns draft page URL https://github.com/Nolane-x/video/releases/tag/untagged-52cf422ee96cca7743e1.
+- Five release assets verified:
+  - `time-stop-10s-expanded-3d-review-1080p60.mp4`, 98,485,406 bytes, SHA-256 `d299ac9e74f0efcbb86822280f6d3baa5c0710647c0155405e37eb0180542fc0` (matches independent master inspection).
+  - `time-stop-10s-expanded-3d-review-preview-30s.mp4`, 4,066,016 bytes.
+  - `time-stop-10s-expanded-3d-review-bundle.zip`, 129,354,701 bytes.
+  - `SHA256SUMS.txt` and `REVIEW-NOTES.md`.
+- Archive workflow uploaded separate artifact `time-stop-10s-expanded-3d-run28-archive`, ID `14642261070`, 462,018,811 bytes.
+- Local full review package: `/mnt/data/time-stop-10s-run28-review-package.zip`, 65,369,947 bytes. Standalone SRT/VTT, transcript, WAV, master contact sheet and three 1080p60 clips are under `/mnt/data/time-stop-10s-run28-*`.
+- Do not publish the draft Release until a complete uninterrupted watch-through is done. Keep `visual_approval: false`. Existing public run-20 Release stays untouched.
