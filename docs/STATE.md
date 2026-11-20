@@ -302,3 +302,11 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - Full corrected candidate [run #27 / 44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) has passed both VoiceStudio and H2 setup/storyboard/renderer scan/contact sheets/30s preview; it was at the full native 1080p60 render step at last check. Its voice artifact ID is `14628059443` (52,634,924 bytes). This candidate differs from run #26 by the final s018 camera/hero placement correction.
 - A new inspection iteration [run #6 / 44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) is underway to expose a compact frame montage in workflow logs for direct visual inspection; this avoids reliance on the container runtime, which was unavailable during this session.
 - Do not publish a new Release until run #27 has finished and its own master is independently inspected. Preserve run-20's public release and run-26's passing candidate. Keep `visual_approval: false` until review of the full-mix clips/master frames and a full-length review.
+
+
+## Time Stop 10s — permanent draft archive workflow prepared (2026-11-20)
+
+- Added .github/workflows/archive-time-stop-10s-expanded-run27.yml on the candidate branch. It is gated by marker .github/workflows/enable-time-stop-10s-expanded-draft.txt or workflow_dispatch. It downloads run #27 artifact time-stop-10s-h2-27, validates 1080p60 / 22,680 frames / 378s / AAC 48kHz, 84 Vietnamese VieNeu segments and AudioSeal watermark, then creates a draft release at tag time-stop-10s-expanded-3d-review-run27.
+- The workflow stores master MP4, 30s preview, full review bundle, QA, voice placement, Vietnamese SRT and SHA256SUMS. It explicitly keeps visual_approval: false and says the archive is a review candidate, not full artistic approval.
+- The workflow is prepared but NOT activated yet. Do not add the marker until run #27 has completed and independent verification of run #27 succeeds. This prevents archiving an incomplete or unverified master.
+- Existing run-20 public Release remains untouched. Run-26 independent inspection passed; run-27 full render and proof #4 remain pending at this checkpoint.
