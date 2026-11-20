@@ -153,7 +153,7 @@ The new file `video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-
 
 Relevant commits: `3acdaaea8d0af3d55c0f3a28e671e62f8a46f633`, `9d2987a71527ca31d3aaf91f067d641223db548e`, `332ef8ef0231d80022e9db73d5d25579ab4ba268`.
 
-Check current Actions [run #23](https://github.com/Nolane-x/video/actions/runs/44666071523). At handoff, preparation of the 84-segment voice job had passed, while the VoiceStudio CPU render job was still running. Run #21/#22 were superseded/cancelled by later pushes, so inspect #23 rather than treating those as render failures. After it completes:
+Check current Actions [run #23](https://github.com/Nolane-x/video/actions/runs/44666071523). VoiceStudio has since passed and uploaded `video-voice-assets-44666071523` (artifact ID `14597918199`, 52,459,735 bytes): 84 Vietnamese VieNeu segments, 199.84s PCM_24 mono at 48 kHz, AudioSeal verified (7 blocks; minimum confidence 0.9979; mean 0.9995), SHA-256 `9ff05535036814429493fce21c4abf62990ebf6934243b3d094ee707ba3544df`. The H2 render/sound-mix/QA job is now in progress. Run #21/#22 were superseded/cancelled by later pushes, so inspect #23 rather than treating those as render failures. After it completes:
 1. Verify storyboard import, H2 scan, 60fps full render, audio mix, ffprobe frame count/duration and QA.
 2. Download its artifact; inspect all contact sheets and motion clips across 58.5–103.5s (kitchen), 117–153s (court), and 166.5–193.5s (hallway).
 3. Check prop contacts, hands/feet, character framing and mother hair silhouette; captions must not duplicate or overlap the acting.
