@@ -189,3 +189,19 @@ Full corrected candidate Actions [run #26 / 44671416000](https://github.com/Nola
 For early source/motion inspection, use separate branch `review/time-stop-10s-3d-fixes` and workflow [run #1 / 44671703847](https://github.com/Nolane-x/video/actions/runs/44671703847). It skips VoiceStudio and full master, renders the 24 selected 3D shot contact sheets plus three silent 960×540/60fps clips: kitchen 58.5–85.5s, court 117–148.5s, and hallway 175.5–189s. Artifact name will be `time-stop-10s-3d-motion-review-<run_id>`.
 
 Keep run-20 native 60fps Release/master as the fallback. The old local MP4 SHA-256 remains `ddb197588298ccd258c350299f69ce112558a76f89f6da96558500f9ccd75cec`; it is not the corrected candidate. Do not set `visual_approval: true` from a green CI state. Inspect the targeted proof clips and then review the full-length new master/audio before publishing.
+
+
+## Time Stop 10s — current review state after first 3D motion proof
+
+Motion-review workflow [run #1 / 44671703847](https://github.com/Nolane-x/video/actions/runs/44671703847) passed. It rendered 24 selected 3D-shot contact sheets and three silent exact-length 960x540/60fps motion proofs (kitchen, court, hallway). I inspected the kitchen and court contact/motion sheets and the two full 24-shot contact sheets.
+
+What improved in the sampled evidence:
+- Basketball close-up now stays in-frame; a clear court/road boundary is visible; the friend faces toward the ball for the s032-s033 return.
+- Hallway books are no longer a nearly flat pile on the floor; they are separated and raised toward the child's arms.
+- Kitchen cup freeze sequence is legible, but the s018 insert still cropped the protagonist's head at left and pushed the cup too far right.
+
+Source fix e82a7591d6676e68f38aaea1271e92e8789c567b widens/recentres s018 and moves the protagonist to keep the face and cup visible. It triggered full workflow [run #27 / 44736403329]. At the last check, story payload preparation had passed and the VoiceStudio job was in progress. Wait for H2 render and QA before considering this new source final.
+
+Run #26 [44671416000](https://github.com/Nolane-x/video/actions/runs/44671416000) completed successfully and produced artifact ID 14604975960 (time-stop-10s-h2-26, 258,272,318 bytes). Separate independent master inspection [run #2 / 44736526771](https://github.com/Nolane-x/video/actions/runs/44736526771) is currently running: download artifact, full MP4 decode, exact metadata/frame-count/audio validation, SHA-256, 24 frame contact sheet, and 1080p60 clips with the original mixed audio for each key sequence.
+
+Keep the original run-20 public Release untouched. Do not publish until run #27 passes and the new master inspection plus visual review of full-mix clips are complete. visual_approval remains false.
