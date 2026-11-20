@@ -226,3 +226,9 @@ Keep the run-20 public Release immutable. Keep run-26 candidate as fallback. Do 
 Workflow .github/workflows/archive-time-stop-10s-expanded-run27.yml has been added to film/time-stop-10s-3d-review-fixes. It is deliberately gated by .github/workflows/enable-time-stop-10s-expanded-draft.txt (or workflow_dispatch). It validates run-27's 1080p60 master, exact 22,680 frames / 378s, AAC 48kHz stereo, 84 Vietnamese VieNeu segments and AudioSeal. It then builds an immutable draft release tagged time-stop-10s-expanded-3d-review-run27, carrying master MP4, preview, review ZIP, QA, voice placement, SRT and hashes. The release stays a draft and visual_approval remains false.
 
 Do NOT create the marker until run #27 succeeds and its own independent inspector passes. Preserve run-20 public release. Current run #27 is still at the full master render step; proof workflow #4 is running after adding the Pillow dependency for the compact visual montage.
+
+
+### Exact checksum for run-26 master
+
+Independent run #5 [44737356101](https://github.com/Nolane-x/video/actions/runs/44737356101) passed. The actual master inside artifact 14604975960 is 98,061,158 bytes with SHA-256 7184018d36b5dd28284a6621ba66802764e03c95bd7050efc350a3b7140f871a. It was fully decoded with FFmpeg: both video and audio return code 0. ffprobe: 1920x1080, H.264, 60/1 fps, 22,680 frames, 378.000s, AAC stereo 48kHz. Integrated loudness -14.3 LUFS; peak -2.0 dBFS; 84 Vietnamese VieNeu segments; watermark verified.
+Inspector #6 [44738517112] passed and its artifact 14629966995 (12,853,637 bytes) contains the 24-frame contact sheet, sampled stills, full-mix clips and checksum. Proof run #4 [44739190519] is rerunning the selected 3D shots after installing Pillow for a compact visual montage.
