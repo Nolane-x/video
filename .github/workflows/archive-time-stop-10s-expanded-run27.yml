@@ -62,10 +62,10 @@ jobs:
           assert qa["resolution"] == [1920,1080], qa
           assert abs(float(qa["duration_seconds"])-378.0) < 0.2, qa
           assert qa["audio_codec"] == "aac" and qa["audio_sample_rate"] == "48000", qa
+          assert qa.get("narration_watermark") == "verified", qa
           assert qa["visual_approval"] is False, "This archive is a review candidate, not artistic approval"
           assert voice["status"] == "passed" and voice["placed_segments"] == 84, voice
           assert voice["language"] == "vi" and voice["engine"] == "vieneu", voice
-          assert manifest["audio"]["watermark"]["status"] == "verified", manifest
           print("Candidate archive gate passed: 1080p60, 22,680 frames, 378s; 84 shot-synced Vietnamese segments; AudioSeal verified. Visual approval remains false.")
           PY
           mkdir -p archive
