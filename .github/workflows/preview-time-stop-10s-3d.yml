@@ -1,0 +1,190 @@
+name: Review — Time Stop 10s 3D motion proofs
+
+on:
+  push:
+    branches:
+      - review/time-stop-10s-3d-fixes
+    paths:
+      - "video-projects/time-stop-10s/**"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/**"
+      - ".github/workflows/preview-time-stop-10s-3d.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: time-stop-10s-3d-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  motion-review:
+    name: H2 targeted contact sheets and silent motion proofs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Ensure FFmpeg and ffprobe are available
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Install H2 Canvas dependencies
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+
+      - name: Resolve Chromium for H2
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -n "$CHROME" ]; then
+            echo "H2_CHROMIUM_EXECUTABLE_PATH=$CHROME" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: Build 60fps H2 storyboard and install current 3D modules
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python ../../../../../video-projects/time-stop-10s/scripts/build_story.py \
+            --project-dir projects/time-stop-10s --fps 60
+          mkdir -p projects/time-stop-10s/scenes/shots
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-3d.js \
+            projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js \
+            projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          node --check engine/three3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+
+      - name: Scan complete storyboard for missing shots and renderer errors
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --check --scale 0.25
+
+      - name: Render 24 new 3D shots as contact sheets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          IDS="s013,s014,s015,s016,s017,s018,s019,s020,s021,s022,s026,s027,s028,s029,s030,s031,s032,s033,s037,s038,s039,s040,s041,s042"
+          node render.mjs --project projects/time-stop-10s --sheet --ids "$IDS" --scale 0.5 --at 0.45
+          mkdir -p "$GITHUB_WORKSPACE/review/contact-sheets"
+          cp projects/time-stop-10s/build/sheets/sheet_*.jpg "$GITHUB_WORKSPACE/review/contact-sheets/"
+
+      - name: Render kitchen cup-stop sequence motion proof
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/review/motion"
+          node render.mjs --project projects/time-stop-10s --from 58.5 --to 85.5 --scale 0.5 --workers 2 --crf 22
+          cp projects/time-stop-10s/build/preview.mp4 "$GITHUB_WORKSPACE/review/motion/kitchen-cup-stop-58s5-85s5-silent.mp4"
+
+      - name: Render basketball and hand-off sequence motion proof
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --from 117 --to 148.5 --scale 0.5 --workers 2 --crf 22
+          cp projects/time-stop-10s/build/preview.mp4 "$GITHUB_WORKSPACE/review/motion/court-ball-rescue-117-148s5-silent.mp4"
+
+      - name: Render books hand-off and recovery motion proof
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --from 175.5 --to 189 --scale 0.5 --workers 2 --crf 22
+          cp projects/time-stop-10s/build/preview.mp4 "$GITHUB_WORKSPACE/review/motion/hallway-books-transfer-175s5-189s-silent.mp4"
+
+      - name: Validate review clips and package source references
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          mkdir -p review/source
+          cp video-projects/time-stop-10s/scripts/build_story.py review/source/
+          cp video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js review/source/
+          cp integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js review/source/
+          cp integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/projects/time-stop-10s/story/shot-plan.json review/source/
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          root = Path("review")
+          clips = {
+              "kitchen-cup-stop-58s5-85s5-silent.mp4": (27.0, 1620),
+              "court-ball-rescue-117-148s5-silent.mp4": (31.5, 1890),
+              "hallway-books-transfer-175s5-189s-silent.mp4": (13.5, 810),
+          }
+          records = []
+          for name, (duration_expected, frames_expected) in clips.items():
+              path = root / "motion" / name
+              meta = json.loads(subprocess.check_output([
+                  "ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
+                  "-show_entries", "stream=width,height,avg_frame_rate,nb_read_frames",
+                  "-show_entries", "format=duration", "-of", "json", str(path)
+              ], text=True))
+              v = meta["streams"][0]
+              duration = float(meta["format"]["duration"])
+              frames = int(v["nb_read_frames"])
+              assert (int(v["width"]), int(v["height"])) == (960, 540), (name, v)
+              assert v["avg_frame_rate"] == "60/1", (name, v["avg_frame_rate"])
+              assert abs(duration - duration_expected) < 0.02, (name, duration)
+              assert frames == frames_expected, (name, frames, frames_expected)
+              records.append({"file": name, "duration_seconds": duration, "frames": frames,
+                              "width": int(v["width"]), "height": int(v["height"]),
+                              "fps": v["avg_frame_rate"], "audio": False})
+          report = {
+              "status": "technical-pass",
+              "review_type": "targeted silent motion proof; not full-film artistic approval",
+              "source_branch": "review/time-stop-10s-3d-fixes",
+              "shot_ranges": {
+                  "kitchen": "s014-s019 / 58.5-85.5s",
+                  "court": "s027-s033 / 117-148.5s",
+                  "hallway": "s040-s042 / 175.5-189s"
+              },
+              "clips": records,
+              "visual_approval": False
+          }
+          (root / "qa-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+          (root / "README.md").write_text(
+              "# Time Stop 10s — targeted 3D motion review\n\n"
+              "Silent 960x540 / 60fps clips and selected-shot contact sheets generated by H2 Canvas/Chromium. "
+              "They are intended to review blocking, camera framing and contact only; they do not replace "
+              "the full 1080p master, original VoiceStudio narration, audio mix, or full-length artistic sign-off.\n\n"
+              "Sequences: kitchen cup-stop (58.5–85.5s), court ball rescue/hand-off (117–148.5s), "
+              "school hallway book transfer (175.5–189s).\n"
+          , encoding="utf-8")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload targeted 3D review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-3d-motion-review-${{ github.run_id }}
+          path: review/
+          if-no-files-found: error
+          retention-days: 14
