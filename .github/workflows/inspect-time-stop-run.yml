@@ -1,0 +1,193 @@
+name: Inspect — Time Stop 10s corrected master
+
+on:
+  push:
+    branches: [review/time-stop-10s-3d-fixes]
+    paths:
+      - ".github/workflows/inspect-time-stop-run.yml"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful render workflow run ID"
+        required: true
+        default: "44671416000"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-10s-master-inspection
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    name: Verify corrected master and export full-mix scene proofs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44671416000' }}
+    steps:
+      - name: Checkout review tools
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Set up FFmpeg and Python
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Download successful corrected master artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-26
+          run-id: ${{ github.event.inputs.source_run_id || '44671416000' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: source-artifact
+
+      - name: Verify MP4 streams, exact frame count, loudness and checksum
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          MASTER="$(find source-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
+          test -n "$MASTER"
+          ROOT="$(dirname "$MASTER")"
+          test -s "$MASTER"
+          test -s "$ROOT/qa-report.json"
+          test -s "$ROOT/ffprobe.json"
+          test -s "$ROOT/voice-placement.json"
+          test -s "$ROOT/subtitles/time-stop-10s.srt"
+          mkdir -p review
+          cp "$ROOT/qa-report.json" review/source-qa-report.json
+          cp "$ROOT/ffprobe.json" review/ffprobe.json
+          cp "$ROOT/voice-placement.json" review/voice-placement.json
+          cp "$ROOT/subtitles/time-stop-10s.srt" review/time-stop-10s.srt
+          sha256sum "$MASTER" | tee review/master-sha256.txt
+          ffmpeg -hide_banner -v error -i "$MASTER" -f null -
+          python - "$MASTER" "$ROOT/qa-report.json" "$ROOT/ffprobe.json" <<'PY'
+          import json, sys, hashlib
+          from pathlib import Path
+          master, qa_path, probe_path = map(Path, sys.argv[1:])
+          qa = json.loads(qa_path.read_text(encoding="utf-8"))
+          probe = json.loads(probe_path.read_text(encoding="utf-8"))
+          streams = probe["streams"]
+          v = next(s for s in streams if s.get("codec_type") == "video")
+          a = next(s for s in streams if s.get("codec_type") == "audio")
+          duration = float(probe["format"]["duration"])
+          frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
+          assert qa["status"] == "technical-pass", qa
+          assert qa["visual_approval"] is False, "Do not infer artistic approval from CI"
+          assert (int(v["width"]), int(v["height"])) == (1920, 1080), v
+          assert v["r_frame_rate"] == "60/1", v
+          assert frames == 22680, frames
+          assert abs(duration - 378.0) < 0.20, duration
+          assert a["codec_name"] == "aac" and a["sample_rate"] == "48000" and int(a["channels"]) == 2, a
+          voice = json.loads(Path("review/voice-placement.json").read_text(encoding="utf-8"))
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84, voice
+          digest = hashlib.sha256(master.read_bytes()).hexdigest()
+          summary = {
+            "status": "technical-pass",
+            "visual_approval": False,
+            "master_file": master.name,
+            "sha256": digest,
+            "duration_seconds": duration,
+            "resolution": [int(v["width"]), int(v["height"])],
+            "fps": v["r_frame_rate"],
+            "decoded_video_frames": frames,
+            "video_codec": v["codec_name"],
+            "audio_codec": a["codec_name"],
+            "audio_sample_rate": a["sample_rate"],
+            "audio_channels": int(a["channels"]),
+            "integrated_lufs": qa.get("integrated_lufs"),
+            "peak_dbfs": qa.get("peak_dbfs"),
+            "narration_segments": voice["placed_segments"],
+            "narration_engine": voice.get("engine"),
+            "note": "The complete MP4 was decoded without FFmpeg errors. Technical validation only; artistic review remains separate."
+          }
+          Path("review/master-inspection.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+          echo "MASTER=$MASTER" >> "$GITHUB_ENV"
+
+      - name: Extract 24 master frames and build a labelled contact sheet
+        run: |
+          set -euo pipefail
+          mkdir -p review/master-frames
+          python - <<'PY'
+          import subprocess, os
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          master = Path(os.environ["MASTER"])
+          shots = [
+            ("s013",54.0),("s014",58.5),("s015",63.0),("s016",67.5),
+            ("s017",72.0),("s018",76.5),("s019",81.0),("s020",85.5),
+            ("s022",94.5),("s026",112.5),("s027",117.0),("s028",121.5),
+            ("s029",126.0),("s030",130.5),("s031",135.0),("s032",139.5),
+            ("s033",144.0),("s037",162.0),("s038",166.5),("s039",171.0),
+            ("s040",175.5),("s041",180.0),("s042",184.5),("s043",189.0)
+          ]
+          thumbs=[]
+          for sid, t in shots:
+            out=Path("review/master-frames") / f"{sid}_{t:06.1f}s.jpg"
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y",
+              "-ss",str(t),"-i",str(master),"-frames:v","1","-vf","scale=480:270",
+              "-q:v","3",str(out)],check=True)
+            thumbs.append((sid,t,Image.open(out).convert("RGB")))
+          cols=4; tw,th=480,270; lab=36; pad=12
+          rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new("RGB",(pad+cols*(tw+pad),pad+rows*(th+lab+pad)),(16,18,24))
+          d=ImageDraw.Draw(sheet)
+          for i,(sid,t,im) in enumerate(thumbs):
+            x=pad+(i%cols)*(tw+pad); y=pad+(i//cols)*(th+lab+pad)
+            sheet.paste(im,(x,y))
+            d.text((x+4,y+th+7),f"{sid}  {t:.1f}s",(238,241,246))
+          sheet.save("review/master-contact-sheet.jpg",quality=92)
+          PY
+
+      - name: Export full-mix 1080p60 sequence clips
+        run: |
+          set -euo pipefail
+          mkdir -p review/full-mix-clips
+          ffmpeg -hide_banner -loglevel error -y -ss 54 -i "$MASTER" -t 45             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/kitchen-54-99s-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 112.5 -i "$MASTER" -t 36             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/court-112s5-148s5-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 162 -i "$MASTER" -t 27             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/hallway-162-189s-1080p60.mp4
+
+      - name: Package master inspection bundle
+        run: |
+          set -euo pipefail
+          cat > review/README.md <<'EOF'
+          # Time Stop 10s — corrected master inspection
+
+          Clips below are cut from the corrected run-26 1080p60 master with original narration, music and sound design. The master itself remains in the GitHub Actions run artifact and is not duplicated into this smaller review bundle.
+
+          Sequences:
+          - Kitchen/cup/time-stop: 54–99 seconds
+          - Basketball/road/hand-off: 112.5–148.5 seconds
+          - School hallway/books: 162–189 seconds
+
+          master-contact-sheet.jpg samples 24 story beats. master-inspection.json contains stream, decode, audio and checksum results. Technical pass does not imply full artistic sign-off.
+          EOF
+          (cd review && sha256sum *.json *.jpg *.txt full-mix-clips/*.mp4 > SHA256SUMS.txt)
+          zip -qr time-stop-10s-run26-inspection.zip review
+
+      - name: Upload full-mix sequence proof and master inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-run26-master-inspection
+          path: |
+            review/master-inspection.json
+            review/master-sha256.txt
+            review/master-contact-sheet.jpg
+            review/master-frames/
+            review/full-mix-clips/
+            review/README.md
+            review/SHA256SUMS.txt
+            review/time-stop-10s-run26-inspection.zip
+          if-no-files-found: error
+          retention-days: 30
