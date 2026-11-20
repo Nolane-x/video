@@ -384,3 +384,17 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Run-6 targeted motion proof [44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) passed for all three sequences after the s018 camera and basketball release corrections. Contact sheets and silent 960x540/60fps motion clips were sampled: kitchen cup drop/freeze/steady, court ball release/roll/retrieval/return, hallway book hand-off/retreat.
 - Independent full-master inspection for run #28 is running as [inspection run / 44760145701](https://github.com/Nolane-x/video/actions/runs/44760145701), using artifact name `time-stop-10s-h2-28` and source run ID `44740306234`. Wait for it to pass before archiving/releasing.
 - Draft archive workflow was corrected and renamed to `.github/workflows/archive-time-stop-10s-expanded-run28.yml`, targeting run 28 artifact and separate draft tag `time-stop-10s-expanded-3d-review-run28`. Do not create marker `.github/workflows/enable-time-stop-10s-expanded-draft.txt` until independent inspection passes. Existing public run-20 Release remains untouched.
+
+
+## Time Stop 10s — run28 independent inspection passed and review package created (2026-11-20)
+
+- Independent inspection [run #8 / 44760145701](https://github.com/Nolane-x/video/actions/runs/44760145701) completed successfully. Artifact: time-stop-10s-run28-master-inspection, ID 14641660047, 13,045,106 bytes.
+- Independent master SHA-256: d299ac9e74f0efcbb86822280f6d3baa5c0710647c0155405e37eb0180542fc0. Independent FFmpeg full decode passed; run-28 metadata independently confirms 1920x1080, 60/1 fps, 22,680 frames, 378.0s, H.264 + AAC stereo 48kHz, −14.2 LUFS, −2.9 dBFS, 84 shot-synced VieNeu narration segments.
+- The 24-frame master contact sheet was visually inspected. Specific shots: s018 now keeps the protagonist's head and reach gesture visible; s027 ball close-up is centered inside frame; s032 shows the hand-off; s040–s042 show the book transfer/recovery. This is selected-shot review, not full-length artistic approval.
+- Three full-mix clips were independently ffprobed and fully decoded without FFmpeg errors:
+  - Kitchen 54–99s: 45s, 2,700 frames, 1920x1080/60fps, AAC stereo 48kHz.
+  - Court 112.5–148.5s: 36s, 2,160 frames, same streams.
+  - Hallway 162–189s: 27s, 1,620 frames, same streams.
+- Local review package created: /mnt/data/time-stop-10s-run28-review-package.zip (65,369,947 bytes); includes inspection evidence, 24 master frames, 3 full-mix clips, 3 sampled clip sheets, SRT/VTT/transcript, narration WAV and voice assets archive. Standalone files also copied to /mnt/data/time-stop-10s-run28-*.
+- Draft archive workflow .github/workflows/archive-time-stop-10s-expanded-run28.yml is verified to target artifact time-stop-10s-h2-28, run ID 44740306234, and separate draft tag time-stop-10s-expanded-3d-review-run28. Next action: create marker .github/workflows/enable-time-stop-10s-expanded-draft.txt to start its QA-gated draft archive. Do not make the draft public until uninterrupted full-length playback review is completed. Existing run-20 release remains untouched.
+- Leave visual_approval: false. The technical pipeline and sampled sequences pass; full uninterrupted screening has not been performed.
