@@ -172,3 +172,20 @@ Before promoting run #23 or publishing a new Release, address these code-level i
 6. `s018` narration says nine seconds while HUD says seven. Fix the script and regenerate the 84-segment voice job; a wrist-timer line should ideally have a visible wrist device rather than only the top-left HUD.
 
 Candidate run #23 [Actions](https://github.com/Nolane-x/video/actions/runs/44666071523) is currently intended to finish unchanged as a first review candidate. Do not cancel it solely to fix the above. Inspect its contact sheets, then apply these repairs in a focused follow-up render. Preserve run-20 master/release and never set artistic approval from CI status alone.
+
+
+## Time Stop 10s — corrected 3D candidate handoff (2026-11-20)
+
+Current corrected source branch: `film/time-stop-10s-3d-review-fixes`, head `0b43d44d85a666d7b5df23e119bde2ca6badfaff`. The correction pass:
+- Reframed `s027` around the ball; it now projects to screen center (x≈0) rather than x≈+1.73 outside frame.
+- Resized the basketball court, added an asphalt access road beyond the right end line, and made the ball drop/roll toward that road.
+- Added a shared H2 Three.js `carry` pose. Friend faces the ball during `s032–s033`; child uses carry pose for hallway book shots.
+- Added explicit mother hair-cap/bun geometry. The former `head:'bun'` parameter was not a supported rig token.
+- Reblocked books to transfer toward the child's forearms and form two visibly separated columns of three books at torso height.
+- Corrected `s018` framing and changed voice line to “Vòng đếm ngược báo còn bảy giây.” so it agrees with the 7-second HUD.
+
+Full corrected candidate Actions [run #26 / 44671416000](https://github.com/Nolane-x/video/actions/runs/44671416000). Its story request job passed; VoiceStudio render was in progress at last check. Wait for this run's H2 render, QA and uploaded artifact before treating it as a new master.
+
+For early source/motion inspection, use separate branch `review/time-stop-10s-3d-fixes` and workflow [run #1 / 44671703847](https://github.com/Nolane-x/video/actions/runs/44671703847). It skips VoiceStudio and full master, renders the 24 selected 3D shot contact sheets plus three silent 960×540/60fps clips: kitchen 58.5–85.5s, court 117–148.5s, and hallway 175.5–189s. Artifact name will be `time-stop-10s-3d-motion-review-<run_id>`.
+
+Keep run-20 native 60fps Release/master as the fallback. The old local MP4 SHA-256 remains `ddb197588298ccd258c350299f69ce112558a76f89f6da96558500f9ccd75cec`; it is not the corrected candidate. Do not set `visual_approval: true` from a green CI state. Inspect the targeted proof clips and then review the full-length new master/audio before publishing.
