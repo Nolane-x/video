@@ -281,15 +281,20 @@ jobs:
           test -s projects/time-stop-10s/out/captions.srt
           test -s projects/time-stop-10s/out/voice-placement.json
 
-      - name: Install the 3D rainy rescue scene module
+      - name: Install 3D rescue and key-sequence scene modules
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
         run: |
           set -euo pipefail
           mkdir -p projects/time-stop-10s/scenes/shots
           cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-3d.js projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
           grep -q "reg('s063'" projects/time-stop-10s/scenes/shots/time-stop-3d.js
           grep -q "reg('s072'" projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          grep -q "kitchenIds" projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          grep -q "courtIds" projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          grep -q "hallwayIds" projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
           node --check projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
 
       - name: Scan all H2 shots for renderer and template errors
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
