@@ -304,3 +304,21 @@ Next steps:
 
 
 Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 198.00s PCM_24 mono 48kHz; checks passed; AudioSeal verified with 7 blocks, minimum confidence 0.9962 and mean 0.9993. WAV SHA-256 84ad2d365d1597a2414d3d2d9fdd458cbf2dd8ee13d31af1dcc542e2ffe9f92e matched the manifest. Subtitle cue s018 confirms “Vòng đếm ngược báo còn bảy giây.” User-facing copies are /mnt/data/time-stop-10s-run28-voice-assets.zip, /mnt/data/time-stop-10s-run28-subtitles-vi.srt and /mnt/data/time-stop-10s-run28-transcript-vi.txt. The voice track is verified; the full run-28 video master is still being rendered.
+
+
+## Handoff — run 28 rendered, independent QA pending
+
+Current corrected source branch: `film/time-stop-10s-3d-review-fixes`. Latest full render run [#28 / 44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) has completed with success:
+- VoiceStudio 84-segment job: passed.
+- H2 render/mix/QA: 24 steps passed.
+- Full native 1080p60 master artifact `time-stop-10s-h2-28`, artifact ID `14636737019`, 258,555,982 bytes.
+
+Confirmed run-28 QA values: 1920x1080, native 60/1 fps, 22,680 frames, 378.0s, H.264, AAC 48kHz stereo, −14.2 LUFS, peak −2.9 dBFS, 84 story shots, 26 time-freeze FX shots, 84 shot-synced Vietnamese VieNeu segments, AudioSeal watermark verified. `visual_approval` remains false.
+
+Run-28 voice artifact ID 14630746223: 84 Vietnamese segments, 198s PCM_24 mono/48kHz; manifest SHA and WAV hash match; AudioSeal 7 blocks, min confidence 0.9962, mean 0.9993. WAV SHA-256: `84ad2d365d1597a2414d3d2d9fdd458cbf2dd8ee13d31af1dcc542e2ffe9f92e`. Transcript/srt s018 line matches “Vòng đếm ngược báo còn bảy giây.”
+
+Latest selected-shot motion proof run #6 [44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) passed and sampled the corrected camera/ball/book blocking.
+
+Independent run-28 inspection [44760145701](https://github.com/Nolane-x/video/actions/runs/44760145701) is running on `time-stop-10s-h2-28`; it separately decodes video/audio, checks ffprobe frame count and metadata, creates a contact sheet and three full-mix 1080p60 sequence clips. Wait for conclusion success and its inspection artifact before archiving.
+
+Draft archive workflow path is now `.github/workflows/archive-time-stop-10s-expanded-run28.yml`; artifact target `time-stop-10s-h2-28`, run ID 44740306234, tag `time-stop-10s-expanded-3d-review-run28`. Do not create the enabling marker until independent inspection passes. Existing run-20 public Release is preserved and must not be overwritten.
