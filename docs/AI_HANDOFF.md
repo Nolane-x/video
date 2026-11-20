@@ -322,3 +322,19 @@ Latest selected-shot motion proof run #6 [44740517436](https://github.com/Nolane
 Independent run-28 inspection [44760145701](https://github.com/Nolane-x/video/actions/runs/44760145701) is running on `time-stop-10s-h2-28`; it separately decodes video/audio, checks ffprobe frame count and metadata, creates a contact sheet and three full-mix 1080p60 sequence clips. Wait for conclusion success and its inspection artifact before archiving.
 
 Draft archive workflow path is now `.github/workflows/archive-time-stop-10s-expanded-run28.yml`; artifact target `time-stop-10s-h2-28`, run ID 44740306234, tag `time-stop-10s-expanded-3d-review-run28`. Do not create the enabling marker until independent inspection passes. Existing run-20 public Release is preserved and must not be overwritten.
+
+
+## Handoff — run28 independently verified; draft archive is next
+
+Run #28 [44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) completed successfully and uploaded time-stop-10s-h2-28 artifact ID 14636737019 (258,555,982 bytes). Independent master inspection [run #8 / 44760145701](https://github.com/Nolane-x/video/actions/runs/44760145701) also completed successfully and uploaded artifact ID 14641660047 (13,045,106 bytes).
+
+Verified master SHA-256: d299ac9e74f0efcbb86822280f6d3baa5c0710647c0155405e37eb0180542fc0. Full MP4 decode succeeded. 1920x1080, 60/1 fps native H2 frames, 22,680 frames, 378 seconds, H.264 + AAC stereo 48kHz, −14.2 LUFS, −2.9 dBFS, 84 shot-synced Vietnamese VieNeu narration segments; AudioSeal verified. QA sets visual_approval false.
+
+Visual review:
+- Master contact sheet inspected; s018 framing now keeps the protagonist's head and reach arm visible; s027 ball is in frame; s032 hand-off is readable; s040–s042 book carry/transfer/recovery is legible.
+- Full-mix clips extracted from the run28 master and fully decoded independently: kitchen 45s / 2,700 frames, court 36s / 2,160 frames, hallway 27s / 1,620 frames. All are 1080p60 with AAC stereo 48kHz.
+- This is targeted visual inspection; do not represent it as an uninterrupted full-length screening.
+
+User-facing local review ZIP: /mnt/data/time-stop-10s-run28-review-package.zip (65,369,947 bytes). Contains master-inspection evidence, 24 sampled frames, three full-mix clips, their sampled contact sheets, Vietnamese SRT/VTT/transcript, voice WAV and full voice-assets archive. Standalone files under /mnt/data/time-stop-10s-run28-*.
+
+Next, trigger the QA-gated draft archive by creating .github/workflows/enable-time-stop-10s-expanded-draft.txt on film/time-stop-10s-3d-review-fixes. It runs .github/workflows/archive-time-stop-10s-expanded-run28.yml, downloads artifact time-stop-10s-h2-28 from run ID 44740306234, and creates draft tag time-stop-10s-expanded-3d-review-run28. Verify the archive workflow succeeds and its assets/checksums match. Do not publish the draft as a public release until an uninterrupted full-length watch; preserve run-20 release.
