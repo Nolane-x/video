@@ -75,7 +75,7 @@ jobs:
           echo "SOURCE QA REPORT:"
           cat "$ROOT/qa-report.json"
           echo "PROBE SUMMARY:"
-          python - "$ROOT/ffprobe.json" <<'PY'
+          python - "review/ffprobe.json" <<'PY'
           import json,sys
           d=json.load(open(sys.argv[1],encoding="utf-8"))
           for s in d["streams"]:
@@ -95,7 +95,7 @@ jobs:
           cat review/audio-decode.log
           test "$VIDEO_DECODE_RC" -eq 0
           test "$AUDIO_DECODE_RC" -eq 0
-          python - "$MASTER" "$ROOT/qa-report.json" "$ROOT/ffprobe.json" <<'PY'
+          python - "$MASTER" "$ROOT/qa-report.json" "review/ffprobe.json" <<'PY'
           import json, sys, hashlib
           from pathlib import Path
           master, qa_path, probe_path = map(Path, sys.argv[1:])
