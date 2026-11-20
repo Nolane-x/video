@@ -335,3 +335,11 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - Full workflow run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) was superseded and cancelled while rendering its master (render step conclusion cancelled; no sound mix/package/upload). Do not treat run #27 as a deliverable.
 - New full candidate run #28 [44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) is now running with s018 reframing and s026 hand-aligned basketball release. Story payload preparation passed; VoiceStudio has started the 84-segment render. A fresh master will be produced only after that succeeds.
 - Proof run #5 [44740324018](https://github.com/Nolane-x/video/actions/runs/44740324018) is rebuilding the targeted 3D proof on the current source. After it completes, inspect the s026 first frame to confirm hand contact, then verify s027 close-up and hand-off/recovery; preserve run-26 as the only independently verified full master until run #28 is complete and independently inspected.
+
+
+## Run #28 VoiceStudio result (2026-11-20)
+
+- Run [#28 / 44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) includes the s026 ball-to-hand contact alignment and the previous s018 reframe. Story payload preparation and VoiceStudio succeeded; H2 has begun its render job and is installing the H2/audio dependencies.
+- Voice artifact: `video-voice-assets-44740306234`, ID `14630746223`, size 51,951,746 bytes. Log confirms 84 Vietnamese VieNeu chunks, 198.00s PCM track, 7 AudioSeal watermark blocks; verification passed. Uploaded ZIP SHA-256: `ecf9a37e67ec154ebad86eaaec24629448447d6a1fccb8e3bf20aa46aa43001a`.
+- Review proof [#6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) is active using the extended court range 112.5–148.5s; the storyboard and both Three.js modules are installed, and the full renderer scan is in progress.
+- Run #27 remains cancelled before mix/package/upload; do not use it. Run #26 is independently verified fallback, but still has the older s018 framing. Run #28 is the only candidate for final draft archive if it passes.
