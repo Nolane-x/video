@@ -318,3 +318,11 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - ffprobe counted exactly 22,680 H.264 frames at 60/1, 1920x1080, 378.000s; AAC audio 48kHz, 2 channels. FFmpeg video and audio full decodes both returned code 0. Reported loudness -14.3 LUFS, peak -2.0 dBFS; 84 Vietnamese VieNeu segments, watermark verified.
 - Inspector run #6 [44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) completed successfully and created a compact montage in logs; it also generated the three full-mix clips, checksum and 24 sampled frames in artifact 14629966995 (12,853,637 bytes).
 - Proof run #4 [44739190519](https://github.com/Nolane-x/video/actions/runs/44739190519) is active after adding Pillow to the compact montage step. Earlier run #3 passed storyboard scan and still rendering but failed only because Pillow was missing on the runner; no H2 source/render error was reported.
+
+
+## Time Stop 10s — corrected s018 proof verified visually (2026-11-20)
+
+- Proof workflow [run #4 / 44739190519](https://github.com/Nolane-x/video/actions/runs/44739190519) completed successfully (20/20 steps), including full 84-shot scan, 24 selected 3D contact sheets, eight key stills, and 3 exact-duration silent 960x540 / 60fps motion clips. Artifact: `time-stop-10s-3d-motion-review-44739190519`, ID `14630392510`, 2,723,201 bytes.
+- Its compact montage was inspected from job logs. The corrected `s018` at 76.5s now keeps the protagonist's head/face in frame, the suspended cup visible, and the 7-second HUD readable. This resolves the left-edge crop seen in run-26's master sample.
+- The same montage confirms `s027` ball close-up stays in frame; `s032–s033` ball hand-off and recovery remain visible; `s040–s042` books are raised from floor level into the child's upper-body/forearm area. This is a targeted visual check, not full-length sign-off or proof that every hand contact is perfect.
+- Run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) remains the new full candidate with the corrected `s018` camera; at last check its H2 job was rendering the complete 1080p native 60fps silent master. After it finishes, mix, upload and independent-inspect the actual run-27 master before drafting the archive.
