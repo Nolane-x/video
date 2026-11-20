@@ -262,3 +262,13 @@ The source includes both s018 full-face/cup reframe and s026 ball-to-hand start 
 ## Inspector gate for run-28
 
 Inspector run #7 [44740902252](https://github.com/Nolane-x/video/actions/runs/44740902252) failed before media checks: the run-28 artifact name did not exist yet because the full render was still active. The inspector workflow has been changed to require marker .github/workflows/enable-inspect-time-stop-run28.txt (or manual dispatch), so it cannot run before upload. Create that marker only after run #28 has successfully uploaded time-stop-10s-h2-28; then perform independent full decode, ffprobe/frame count, audio and checksum checks.
+
+
+## Proof #6 result — latest s026 contact proof
+
+Proof run #6 [44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) passed all 20 steps. Artifact 14632040618 (2,826,667 bytes) contains 24 shot sheets, a 10-image montage and three exact-length silent clips:
+- kitchen 58.5–85.5s: 960x540, 60fps, 27.0s, 1,620 frames;
+- court s026–s033 112.5–148.5s: 960x540, 60fps, 36.0s, 2,160 frames;
+- hallway 175.5–189s: 960x540, 60fps, 13.5s, 810 frames.
+
+I visually inspected the montage: s026 first sample (112.5s) places ball adjacent to the friend's extended hand; at 114.75s ball has moved toward the road; s027 at 117s shows ball close-up. s018 full face/cup/timer all remain visible. Handoff and book-rescue samples also stay inside frame. This is targeted proof only; leave visual_approval false. Run #28 44740306234 is still rendering the complete master and needs mix/QA/upload plus its own independent inspector.
