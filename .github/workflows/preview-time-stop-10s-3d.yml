@@ -95,6 +95,32 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/review/contact-sheets"
           cp projects/time-stop-10s/build/sheets/sheet_*.jpg "$GITHUB_WORKSPACE/review/contact-sheets/"
 
+      - name: Emit compact 3D sequence montage for visual inspection
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --stills 76.5,117,126,139.5,144,175.5,180,184.5 --scale 0.5
+          python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          times=[76.5,117,126,139.5,144,175.5,180,184.5]
+          w,h,pad,lab=320,180,8,24
+          cols=2; rows=4
+          sheet=Image.new("RGB",(pad+cols*(w+pad),pad+rows*(h+lab+pad)),(16,18,24))
+          draw=ImageDraw.Draw(sheet)
+          for i,t in enumerate(times):
+            im=Image.open(f"projects/time-stop-10s/build/stills/t_{t:.2f}.png").convert("RGB").resize((w,h))
+            x=pad+(i%cols)*(w+pad); y=pad+(i//cols)*(h+lab+pad)
+            sheet.paste(im,(x,y)); draw.text((x+3,y+h+3),f"{t:05.1f}s — selected 3D beat",fill=(240,242,246))
+          sheet.save("projects/time-stop-10s/build/3d-visual-proof.jpg",quality=38,optimize=True)
+          print("VISION_PROOF_BYTES="+str(Path("projects/time-stop-10s/build/3d-visual-proof.jpg").stat().st_size))
+          PY
+          echo "VISION_PROOF_BASE64_BEGIN"
+          base64 -w0 projects/time-stop-10s/build/3d-visual-proof.jpg
+          echo
+          echo "VISION_PROOF_BASE64_END"
+
       - name: Render kitchen cup-stop sequence motion proof
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
         timeout-minutes: 20
