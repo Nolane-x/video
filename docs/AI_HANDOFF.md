@@ -135,3 +135,12 @@ Run checks; inspect contact sheets and motion proofs; record exact renderer, com
 - Inspect all contact sheets and moving proof around hard actions/contact/recovery before artistic sign-off. A green Actions run only proves technical validation. Preserve the 30fps fallback and explicitly report that the current style is stylized stick-figure animation, with a limited 3D rescue section.
 
 - Visual review in the current session: all six contact sheets and representative frames from the rescue/action/recovery sequence were inspected. The sampled progression is coherent; no full frame-by-frame artistic sign-off has been made. Do not change `visual_approval` to true solely because CI passed.
+
+## Time Stop 10s — definitive delivery status (2026-11-20)
+
+- The native H2 60fps run #20 [44534851475](https://github.com/Nolane-x/video/actions/runs/44534851475) succeeded and has been archived. Master: 1920×1080, 60fps, 22,680 frames, 378.0 seconds, H.264 + AAC 48 kHz stereo. QA: −14.3 LUFS / −2.1 dBFS; 84 shot-synced Vietnamese VieNeu segments with AudioSeal watermark verified.
+- Permanent public Release: https://github.com/Nolane-x/video/releases/tag/time-stop-10s-native-60fps-run-20 . Assets: native master MP4, 30s preview, review ZIP and SHA256SUMS. Release run #2 [44662755247](https://github.com/Nolane-x/video/actions/runs/44662755247) completed successfully.
+- The first release workflow run failed because the runner had no checked-out git repository for `gh release create`; the archive workflow now checks out `github.sha` first. Run #2 is green and the Release plus asset list have been independently fetched and verified.
+- Local conversation copies: `/mnt/data/time-stop-10s-native-60fps-1080p.mp4`, `/mnt/data/time-stop-10s-native-60fps-preview-30s.mp4`, `/mnt/data/time-stop-10s-native-60fps-review.zip`, `/mnt/data/time-stop-10s-native-60fps-subtitles.srt`, `/mnt/data/time-stop-10s-native-60fps-QA.json`, `/mnt/data/time-stop-10s-native-60fps-contact-sheet.jpg`, `/mnt/data/time-stop-10s-native-60fps-rescue-highlight.mp4`. The master SHA-256 is `ddb197588298ccd258c350299f69ce112558a76f89f6da96558500f9ccd75cec`, matching the Release asset digest.
+- The 30fps run #18 remains a fallback. Interpolated 60fps run #5 is not a deliverable: its output is 22,677 frames, three fewer than target. Prefer native H2 output.
+- Visual review: all six contact sheets plus representative rescue frames have been inspected. A complete frame-by-frame artistic sign-off has not been done. Do not set `visual_approval: true` based on technical CI success alone.
