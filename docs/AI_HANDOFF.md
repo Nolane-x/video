@@ -338,3 +338,24 @@ Visual review:
 User-facing local review ZIP: /mnt/data/time-stop-10s-run28-review-package.zip (65,369,947 bytes). Contains master-inspection evidence, 24 sampled frames, three full-mix clips, their sampled contact sheets, Vietnamese SRT/VTT/transcript, voice WAV and full voice-assets archive. Standalone files under /mnt/data/time-stop-10s-run28-*.
 
 Next, trigger the QA-gated draft archive by creating .github/workflows/enable-time-stop-10s-expanded-draft.txt on film/time-stop-10s-3d-review-fixes. It runs .github/workflows/archive-time-stop-10s-expanded-run28.yml, downloads artifact time-stop-10s-h2-28 from run ID 44740306234, and creates draft tag time-stop-10s-expanded-3d-review-run28. Verify the archive workflow succeeds and its assets/checksums match. Do not publish the draft as a public release until an uninterrupted full-length watch; preserve run-20 release.
+
+
+## Handoff — run28 archived as a verified draft release
+
+Archive workflow [run #2 / 44761976792](https://github.com/Nolane-x/video/actions/runs/44761976792) completed successfully. It downloaded the run28 H2 artifact, validated the QA/narration/subtitle payload, uploaded archive artifact ID 14642261070 (462,018,811 bytes), and created draft GitHub Release ID 452849739.
+
+Draft details:
+- Tag: `time-stop-10s-expanded-3d-review-run28`
+- Title: “Time Stop 10s — Expanded 3D Review Candidate (Run 28)”
+- Draft URL currently returned by GitHub: https://github.com/Nolane-x/video/releases/tag/untagged-52cf422ee96cca7743e1
+- The release remains `draft: true`, not public.
+
+Release assets verified through GitHub API:
+- `time-stop-10s-expanded-3d-review-1080p60.mp4`, 98,485,406 bytes, digest SHA-256 `d299ac9e74f0efcbb86822280f6d3baa5c0710647c0155405e37eb0180542fc0`, identical to independent inspection master hash.
+- `time-stop-10s-expanded-3d-review-preview-30s.mp4`, 4,066,016 bytes, SHA-256 `f73d8e6942215c421c58c7ea57583567f96fd26b56544436ccd2bdd5cf79b17b`.
+- `time-stop-10s-expanded-3d-review-bundle.zip`, 129,354,701 bytes, SHA-256 `825aae7342f085d8cd810929c3225f922345c941c2f8472303580fbbc0122952`.
+- `SHA256SUMS.txt`, `REVIEW-NOTES.md`.
+
+User-side full review package: `/mnt/data/time-stop-10s-run28-review-package.zip` (65,369,947 bytes); standalone SRT/VTT/transcript/WAV/master contact sheet/three 1080p60 mixed clips also at `/mnt/data/time-stop-10s-run28-*`.
+
+Do not publish the draft release as public until uninterrupted full-length screening is done. Keep `visual_approval: false`. Preserve public run-20 release.
