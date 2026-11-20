@@ -275,7 +275,9 @@ function drawBasketball(s, t, info, id) {
   s.hero.userData.setPose('stand', t); s.friend.userData.setPose('stand', t);
   if (id === 's026') {
     const drop = smooth(clamp(p * 1.25));
-    s.ball.position.set(lerp(2.5, 7.45, p), lerp(1.08, 0.3, drop) + (p > 0.18 ? Math.abs(Math.sin((p - 0.18) * Math.PI * 2.5)) * 0.16 : 0), 1.1);
+    // Align the ball's first frame with the friend's outstretched right hand before it drops and rolls to the road.
+    s.friend.position.z = 0.9;
+    s.ball.position.set(lerp(2.6, 7.45, p), lerp(1.47, 0.3, drop) + (p > 0.18 ? Math.abs(Math.sin((p - 0.18) * Math.PI * 2.5)) * 0.16 : 0), 1.1);
     s.ball.rotation.z = -p * 8;
     s.friend.userData.setPose('reach', t); s.hero.userData.setPose('point', t);
     setCamera(s, [0.7, 4.0, 13.4], [1.8, 1.2, 0.5], 37, t);
