@@ -272,3 +272,32 @@ Proof run #6 [44740517436](https://github.com/Nolane-x/video/actions/runs/447405
 - hallway 175.5–189s: 960x540, 60fps, 13.5s, 810 frames.
 
 I visually inspected the montage: s026 first sample (112.5s) places ball adjacent to the friend's extended hand; at 114.75s ball has moved toward the road; s027 at 117s shows ball close-up. s018 full face/cup/timer all remain visible. Handoff and book-rescue samples also stay inside frame. This is targeted proof only; leave visual_approval false. Run #28 44740306234 is still rendering the complete master and needs mix/QA/upload plus its own independent inspector.
+
+## Handoff — Time Stop 10s run 28 (2026-11-20)
+
+Latest source candidate: branch film/time-stop-10s-3d-review-fixes, follow-on commit f630e863c2b118cdb3e6c7ecc28fb4479783059e. It retains the s018 wider/recentered camera and adds a basketball start alignment fix: friend is moved to z=0.9, ball begins at y=1.47 near the friend's outstretched hand, then drops/rolls toward road. The updated motion proof's source bundle contains both fixes.
+
+Run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) was cancelled at 8,746 / 22,680 frames because a new commit triggered concurrency cancellation; it did not fail its renderer. Run #28 [44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) was triggered by the ball release change and has passed:
+- Story request preparation
+- VoiceStudio 84 Vietnamese narration segments (artifact ID 14630746223)
+- H2 toolchain, 84-shot storyboard, voice placement, 3D module install
+- Full shot scan
+- 84-shot contact sheets and 30s motion preview
+
+At last status check the H2 job was rendering the complete 1080p native-60fps master. No run-28 master artifact is uploaded yet. Do not claim run #28 is complete.
+
+Targeted proof [run #6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) succeeded, artifact ID 14632040618. I extracted and inspected:
+- Kitchen: cup fall/freeze, protagonist entrance, reaching/steadying close-up; s018 is now framed without cropping the character's head.
+- Court: ball starts in friend's hand, leaves hand, rolls toward road edge; protagonist runs, retrieves and returns the ball; friend faces him at hand-off.
+- Hallway: both arms receive the book stack at torso height and the hero steps back. No clip frame-count failures.
+This is targeted sampled visual review only, not a full-length artistic sign-off.
+
+The run-26 independent master artifact inspection [run #6 / 44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) passed technical full-decode, audio/video stream and exact frame validation; artifact ID 14629966995. Run-26 still has the prior s018 crop and pre-ball-start alignment, so it remains fallback, not preferred final.
+
+Patched archive workflow file .github/workflows/archive-time-stop-10s-expanded-run27.yml at commit 49e80e9d to target run ID 44740306234, artifact time-stop-10s-h2-28, and tag time-stop-10s-expanded-3d-review-run28. The enabling marker has not been added: wait until run #28 master upload/QA exists, then trigger the archive draft workflow, verify the artifact and create draft release. Retain the existing public run-20 release.
+
+Next steps:
+1. Poll run #28; require all H2 QA and artifact time-stop-10s-h2-28.
+2. In .github/workflows/inspect-time-stop-run.yml, change default/source run ID from 44671416000 to 44740306234 and artifact name from time-stop-10s-h2-26 to time-stop-10s-h2-28; trigger via the existing workflow path and inspect the new master.
+3. Visually review full-mix kitchen/court/hallway clips plus s018/s026 contact frames.
+4. Only then create a draft release through the updated archive workflow. Do not set visual_approval true.
