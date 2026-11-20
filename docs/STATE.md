@@ -310,3 +310,11 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - The workflow stores master MP4, 30s preview, full review bundle, QA, voice placement, Vietnamese SRT and SHA256SUMS. It explicitly keeps visual_approval: false and says the archive is a review candidate, not full artistic approval.
 - The workflow is prepared but NOT activated yet. Do not add the marker until run #27 has completed and independent verification of run #27 succeeds. This prevents archiving an incomplete or unverified master.
 - Existing run-20 public Release remains untouched. Run-26 independent inspection passed; run-27 full render and proof #4 remain pending at this checkpoint.
+
+
+### Run-26 exact master checksum and independent decode result
+
+- Independent inspection [run #5 / 44737356101](https://github.com/Nolane-x/video/actions/runs/44737356101) passed. The master file inside artifact 14604975960 is 98,061,158 bytes and has SHA-256: 7184018d36b5dd28284a6621ba66802764e03c95bd7050efc350a3b7140f871a.
+- ffprobe counted exactly 22,680 H.264 frames at 60/1, 1920x1080, 378.000s; AAC audio 48kHz, 2 channels. FFmpeg video and audio full decodes both returned code 0. Reported loudness -14.3 LUFS, peak -2.0 dBFS; 84 Vietnamese VieNeu segments, watermark verified.
+- Inspector run #6 [44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) completed successfully and created a compact montage in logs; it also generated the three full-mix clips, checksum and 24 sampled frames in artifact 14629966995 (12,853,637 bytes).
+- Proof run #4 [44739190519](https://github.com/Nolane-x/video/actions/runs/44739190519) is active after adding Pillow to the compact montage step. Earlier run #3 passed storyboard scan and still rendering but failed only because Pillow was missing on the runner; no H2 source/render error was reported.
