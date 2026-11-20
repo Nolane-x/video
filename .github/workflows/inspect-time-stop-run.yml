@@ -4,7 +4,7 @@ on:
   push:
     branches: [review/time-stop-10s-3d-fixes]
     paths:
-      - ".github/workflows/inspect-time-stop-run.yml"
+      - ".github/workflows/enable-inspect-time-stop-run28.txt"
   workflow_dispatch:
     inputs:
       source_run_id:
