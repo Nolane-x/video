@@ -144,7 +144,7 @@ function makeKitchen(info) {
     { mood: 'interiorWarm', s: 1.04, rim: '#ffd7b0', rimOpacity: 0.72 });
   hero.position.set(-3.1, 0, 1.65); mom.position.set(3.35, 0, 1.6);
   scene.add(hero, mom);
-  const cup = makeCup(); cup.position.set(0.28, 1.12, 0.72); scene.add(cup);
+  const cup = makeCup(); cup.position.set(0.28, 1.04, 0.72); scene.add(cup);
   const water = new THREE.Group(); const waterMat = std('#b5e6ff', { transparent: true, opacity: 0.72, roughness: 0.1 });
   for (let i = 0; i < 16; i++) {
     const a = i * 2.399, r = 0.18 + (i % 4) * 0.10;
@@ -160,7 +160,7 @@ function drawKitchen(s, t, info, id) {
   const p = smooth(t / 4.5), frozen = id >= 's015' && id <= 's021';
   s.hero.position.set(-3.1, 0, 1.65); s.mom.position.set(3.35, 0, 1.6);
   s.hero.rotation.set(0, 0, 0); s.mom.rotation.set(0, 0, 0);
-  s.cup.position.set(0.28, 1.12, 0.72); s.cup.rotation.set(0, 0, 0);
+  s.cup.position.set(0.28, 1.04, 0.72); s.cup.rotation.set(0, 0, 0);
   s.water.visible = frozen;
   s.hero.userData.setPose('stand', t); s.mom.userData.setPose('stand', t);
   if (id === 's013') {
@@ -193,9 +193,9 @@ function drawKitchen(s, t, info, id) {
     setCamera(s, [4.1, 2.75, 6.8], [2.35, 1.35, 1.0], 30, t);
   } else if (id === 's021') {
     s.cup.position.set(0.28, 1.56, 0.72);
-    s.hero.userData.setPose('headhold', t); setCamera(s, [-2.45, 2.5, 6.4], [-2.55, 1.4, 1.1], 31, t);
+    s.hero.userData.setPose('point', t); setCamera(s, [-2.45, 2.5, 6.4], [-2.55, 1.4, 1.1], 31, t);
   } else if (id === 's022') {
-    s.cup.position.set(0.28, 1.12, 0.72); s.cup.rotation.z = -0.05 * (1 - p);
+    s.cup.position.set(0.28, 1.04, 0.72); s.cup.rotation.z = -0.05 * (1 - p);
     s.water.visible = false; s.mom.userData.setPose('point', t);
     s.hero.position.x = -2.8; s.hero.userData.setPose('stand', t);
     setCamera(s, [0.2, 3.8, 13.2], [0, 1.5, 0.6], 38, t);
@@ -277,7 +277,7 @@ function drawBasketball(s, t, info, id) {
     s.hero.position.x = 3.05; s.hero.userData.setPose('crouch', t);
     s.ball.position.set(3.35, 1.18, 1.15); setCamera(s, [3.0, 2.6, 7.0], [3.1, 1.0, 1.0], 31, t);
   } else if (id === 's031') {
-    s.hero.position.x = 2.8; s.hero.userData.setPose('headhold', t);
+    s.hero.position.x = 2.8; s.hero.userData.setPose('point', t);
     s.ball.position.set(3.05, 1.25, 1.15); setCamera(s, [2.1, 2.65, 6.3], [2.8, 1.35, 1.0], 30, t);
   } else if (id === 's032') {
     s.hero.position.x = 1.0; s.hero.userData.setPose('reach', t);
@@ -285,7 +285,7 @@ function drawBasketball(s, t, info, id) {
     s.ball.position.set(2.05, 1.45, 0.95); setCamera(s, [1.1, 3.2, 10.2], [1.9, 1.35, 0.8], 34, t);
   } else if (id === 's033') {
     s.hero.position.x = -1.4; s.friend.position.x = 2.4;
-    s.friend.userData.setPose('carry', t); s.ball.position.set(2.05, 1.55, 0.95);
+    s.friend.userData.setPose('reach', t); s.ball.position.set(2.05, 1.55, 0.95);
     setCamera(s, [0.25, 3.9, 13.2], [0.4, 1.3, 0.5], 37, t);
   }
 }
@@ -368,7 +368,7 @@ function drawHallway(s, t, info, id) {
     setCamera(s, [0.2, 2.9, 10.5], [0.6, 1.35, -0.4], 34, t);
   } else if (id === 's042') {
     s.hero.position.set(-2.4, 0, 2.3); s.child.position.set(1.7, 0, -0.6);
-    s.child.userData.setPose('carry', t); s.hero.userData.setPose('relaxed', t);
+    s.child.userData.setPose('reach', t); s.hero.userData.setPose('stand', t);
     s.books.children.forEach((book, i) => { book.position.set(1.7, 0.85 + i * 0.015, -0.5); });
     setCamera(s, [0.1, 3.4, 12.8], [0, 1.3, 0], 37, t);
   }
