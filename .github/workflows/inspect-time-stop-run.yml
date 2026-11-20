@@ -175,6 +175,42 @@ jobs:
           sheet.save("review/master-contact-sheet.jpg",quality=92)
           PY
 
+      - name: Emit compact visual proof for direct inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          names = [
+            ("s018", "76.5s — corrected kitchen insert"),
+            ("s027", "117.0s — ball near road"),
+            ("s029", "126.0s — running action"),
+            ("s032", "139.5s — ball hand-off"),
+            ("s033", "144.0s — hand-off recovery"),
+            ("s040", "175.5s — books transfer"),
+            ("s041", "180.0s — stack held"),
+            ("s042", "184.5s — recovery"),
+          ]
+          w,h,pad,label=240,135,8,22
+          cols=2
+          rows=(len(names)+cols-1)//cols
+          sheet=Image.new("RGB",(pad+cols*(w+pad),pad+rows*(h+label+pad)),(16,18,24))
+          draw=ImageDraw.Draw(sheet)
+          for i,(sid,caption) in enumerate(names):
+            file=next(Path("review/master-frames").glob(f"{sid}_*.jpg"))
+            img=Image.open(file).convert("RGB").resize((w,h))
+            x=pad+(i%cols)*(w+pad); y=pad+(i//cols)*(h+label+pad)
+            sheet.paste(img,(x,y))
+            draw.text((x+2,y+h+3),f"{sid} {caption}",fill=(240,242,246))
+          sheet.save("review/vision-proof.jpg",quality=40,optimize=True)
+          print(f"VISION_PROOF_BYTES={Path('review/vision-proof.jpg').stat().st_size}")
+          PY
+          echo "VISION_PROOF_BASE64_BEGIN"
+          base64 -w0 review/vision-proof.jpg
+          echo
+          echo "VISION_PROOF_BASE64_END"
+
       - name: Export full-mix 1080p60 sequence clips
         run: |
           set -euo pipefail
