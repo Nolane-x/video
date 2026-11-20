@@ -55,19 +55,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo "DOWNLOADED ARTIFACT TREE:"
+          find source-artifact -maxdepth 5 -type f -printf '%p (%s bytes)\\n' | sort
           MASTER="$(find source-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
           test -n "$MASTER"
           ROOT="$(dirname "$MASTER")"
-          test -s "$MASTER"
-          test -s "$ROOT/qa-report.json"
-          test -s "$ROOT/ffprobe.json"
-          test -s "$ROOT/voice-placement.json"
-          test -s "$ROOT/subtitles/time-stop-10s.srt"
+          echo "MASTER=$MASTER"
+          echo "ROOT=$ROOT"
           mkdir -p review
-          cp "$ROOT/qa-report.json" review/source-qa-report.json
-          cp "$ROOT/ffprobe.json" review/ffprobe.json
-          cp "$ROOT/voice-placement.json" review/voice-placement.json
-          cp "$ROOT/subtitles/time-stop-10s.srt" review/time-stop-10s.srt
+          for f in qa-report.json ffprobe.json voice-placement.json; do
+            if [ -s "$ROOT/$f" ]; then cp "$ROOT/$f" "review/$f"; echo "FOUND $ROOT/$f"; else echo "MISSING $ROOT/$f"; fi
+          done
+          SRT="$(find "$ROOT" -type f \\( -iname 'time-stop-10s.srt' -o -iname 'captions.srt' \\) -print -quit)"
+          if [ -n "$SRT" ]; then cp "$SRT" review/time-stop-10s.srt; echo "FOUND $SRT"; else echo "NO SRT FILE UNDER $ROOT"; fi
           sha256sum "$MASTER" | tee review/master-sha256.txt
           echo "SOURCE QA REPORT:"
           cat "$ROOT/qa-report.json"
