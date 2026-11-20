@@ -32,9 +32,9 @@ jobs:
       - name: Download run-27 full film artifact
         uses: actions/download-artifact@v4
         with:
-          name: time-stop-10s-h2-27
+          name: time-stop-10s-h2-28
           repository: \${{ github.repository }}
-          run-id: 44736403329
+          run-id: 44740306234
           github-token: \${{ secrets.GITHUB_TOKEN }}
           path: dist
 
@@ -103,7 +103,7 @@ jobs:
           GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          TAG="time-stop-10s-expanded-3d-review-run27"
+          TAG="time-stop-10s-expanded-3d-review-run28"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Draft tag already exists; refusing to overwrite."
             exit 1
@@ -116,5 +116,5 @@ jobs:
             archive/REVIEW-NOTES.md \
             --draft \
             --target "$GITHUB_SHA" \
-            --title "Time Stop 10s — Expanded 3D Review Candidate (Run 27)" \
+            --title "Time Stop 10s — Expanded 3D Review Candidate (Run 28)" \
             --notes-file archive/REVIEW-NOTES.md
