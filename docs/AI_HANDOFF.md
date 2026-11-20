@@ -219,3 +219,10 @@ The newest full candidate is run #27 [44736403329](https://github.com/Nolane-x/v
 Inspection workflow iteration [run #6 / 44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) is also running. It emits a compact montage as base64 in job logs so the image can be inspected without relying on the unavailable container runtime.
 
 Keep the run-20 public Release immutable. Keep run-26 candidate as fallback. Do not publish a new Release or mark artistic approval true until run #27 passes independent QA and the full-mix clips/master visuals have been reviewed.
+
+
+## Time Stop 10s — archive run-27 draft (prepared, not yet activated)
+
+Workflow .github/workflows/archive-time-stop-10s-expanded-run27.yml has been added to film/time-stop-10s-3d-review-fixes. It is deliberately gated by .github/workflows/enable-time-stop-10s-expanded-draft.txt (or workflow_dispatch). It validates run-27's 1080p60 master, exact 22,680 frames / 378s, AAC 48kHz stereo, 84 Vietnamese VieNeu segments and AudioSeal. It then builds an immutable draft release tagged time-stop-10s-expanded-3d-review-run27, carrying master MP4, preview, review ZIP, QA, voice placement, SRT and hashes. The release stays a draft and visual_approval remains false.
+
+Do NOT create the marker until run #27 succeeds and its own independent inspector passes. Preserve run-20 public release. Current run #27 is still at the full master render step; proof workflow #4 is running after adding the Pillow dependency for the compact visual montage.
