@@ -232,3 +232,12 @@ Do NOT create the marker until run #27 succeeds and its own independent inspecto
 
 Independent run #5 [44737356101](https://github.com/Nolane-x/video/actions/runs/44737356101) passed. The actual master inside artifact 14604975960 is 98,061,158 bytes with SHA-256 7184018d36b5dd28284a6621ba66802764e03c95bd7050efc350a3b7140f871a. It was fully decoded with FFmpeg: both video and audio return code 0. ffprobe: 1920x1080, H.264, 60/1 fps, 22,680 frames, 378.000s, AAC stereo 48kHz. Integrated loudness -14.3 LUFS; peak -2.0 dBFS; 84 Vietnamese VieNeu segments; watermark verified.
 Inspector #6 [44738517112] passed and its artifact 14629966995 (12,853,637 bytes) contains the 24-frame contact sheet, sampled stills, full-mix clips and checksum. Proof run #4 [44739190519] is rerunning the selected 3D shots after installing Pillow for a compact visual montage.
+
+
+## Time Stop 10s — visual proof after s018 reframe
+
+Proof workflow [run #4 / 44739190519](https://github.com/Nolane-x/video/actions/runs/44739190519) passed (20/20 steps). Artifact ID `14630392510` contains 24 selected 3D-shot sheets, the 8-image montage and three exact-length silent 960x540/60fps clips.
+
+I directly inspected the compact montage in its job log: the revised s018 now shows the protagonist's full head/face, suspended cup and readable 7-second HUD in frame. The ball close-up (s027), friend ball return (s032–s033), and elevated book stack/child interaction (s040–s042) also read within frame. This is targeted proof, not full-film artistic sign-off or proof of perfect physical contacts.
+
+The full run-27 master [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) is still rendering at the native 1080p60 silent-master step. Once completed: verify sound mix, package, download artifact, update inspector source run ID to 44736403329, independently decode/measure the master and view its own s018 sample before activating the gated draft Release. Keep visual_approval false.
