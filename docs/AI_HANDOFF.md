@@ -250,3 +250,10 @@ A further source audit found a visible prop-contact gap in s026: the friend rig'
 Run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) is not a deliverable: it was cancelled at the full silent master render step when the new contact fix was pushed. No mixed master or upload completed. Run #28 [44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) now includes both the s018 full-head/cup reframe and the s026 hand-aligned ball start. Story job passed; the VoiceStudio job is currently in progress. Wait for H2 master, QA and upload.
 
 Proof run #5 [44740324018](https://github.com/Nolane-x/video/actions/runs/44740324018) is targeted 3D proof for the latest source. Inspect s026 at t=112.5–117s specifically (not only s027 at 117s), plus ball handoff, books and s018. Run-26 remains the only fully decoded and independently verified full candidate until run-28 completes and gets its own independent inspector.
+
+
+## Run #28 latest checkpoint
+
+Full candidate [run #28 / 44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) has passed storyboard payload and VoiceStudio. Voice artifact ID `14630746223` (51,951,746 bytes), 84 Vietnamese VieNeu segments, duration 198.00s, 7 AudioSeal blocks verified; ZIP SHA-256 `ecf9a37e67ec154ebad86eaaec24629448447d6a1fccb8e3bf20aa46aa43001a`. H2 render job has started and was installing H2/audio dependencies at this checkpoint.
+
+The source includes both s018 full-face/cup reframe and s026 ball-to-hand start at x=2.6/y=1.47/z=1.1, friend z=0.9. Review proof [#6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) includes s026 frames 112.5s/114.75s and a court proof clip from 112.5–148.5s; it has installed the source modules and is scanning all 84 shots. Run #27 is cancelled and not a deliverable. Run #26 remains a technical fallback but predates s026 contact improvement and has the prior s018 framing.
