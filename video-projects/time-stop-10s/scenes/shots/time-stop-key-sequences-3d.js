@@ -140,8 +140,14 @@ function makeKitchen(info) {
   scene.add(T3.lamp({ x: 2.2, z: -0.9, mood: 'interiorWarm', color: '#ffc985', intensity: 7 }));
   const hero = addPerson('#3c7186', 'interiorWarm', 1.05);
   const mom = T3.figure({ top: 'hoodie', color: '#a75b73', legs: '#292331',
-    skin: '#e8cbb8', head: 'bun', headColor: '#35232a' },
+    skin: '#e8cbb8' },
     { mood: 'interiorWarm', s: 1.04, rim: '#ffd7b0', rimOpacity: 0.72 });
+  // The shared figure rig has no built-in "bun" head token, so author the hairstyle as real geometry.
+  const momHair = std('#35232a', { roughness: 0.96 });
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.212, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2.05), momHair);
+  hairCap.position.set(0, 1.78, 0); mom.add(hairCap);
+  const hairBun = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 10), momHair);
+  hairBun.position.set(-0.13, 1.82, 0); mom.add(hairBun);
   hero.position.set(-3.1, 0, 1.65); mom.position.set(3.35, 0, 1.6);
   scene.add(hero, mom);
   const cup = makeCup(); cup.position.set(0.28, 1.04, 0.72); scene.add(cup);
@@ -182,7 +188,7 @@ function drawKitchen(s, t, info, id) {
     setCamera(s, [-0.5, 2.9, 9.5], [-0.5, 1.3, 0.7], 35, t);
   } else if (id === 's018') {
     s.cup.position.set(0.65, 1.9, 0.72); s.cup.rotation.z = -0.42;
-    s.hero.userData.setPose('point', t); setCamera(s, [-2.5, 2.55, 6.2], [-2.5, 1.45, 1.2], 29, t);
+    s.hero.userData.setPose('point', t); setCamera(s, [-0.5, 2.55, 6.2], [-0.5, 1.45, 1.2], 29, t);
   } else if (id === 's019') {
     s.cup.position.set(0.28, 1.56, 0.72); s.cup.rotation.z = 0;
     s.hero.position.x = -0.5; s.hero.userData.setPose('reach', t);
@@ -208,11 +214,16 @@ function makeBasketball() {
   const st = stage('dusk', { fog: [38, 130], fov: 36, ambient: 1.5 });
   const scene = st.scene, camera = st.camera;
   scene.add(T3.ground(42, 32, '#263342'));
-  scene.add(T3.ground(24, 15, '#79513e', { y: 0.035 }));
+  scene.add(T3.ground(14, 15, '#79513e', { y: 0.035 }));
+  // A compact court has a clearly readable end line; the asphalt access road sits immediately beyond it.
+  const road = T3.ground(7, 15, '#171c25', { y: 0.025 });
+  road.position.set(10.05, 0.025, 0); scene.add(road);
+  scene.add(T3.box(0.08, 0.025, 15, '#e7d8ad', { x: 6.95, y: 0.075 }));
+  for (let z = -6; z <= 6; z += 3) scene.add(T3.box(0.12, 0.025, 0.8, '#d7caa4', { x: 10.05, y: 0.075, z }));
   // Painted court markings and the centre circle.
   const line = std('#e8c99b', { roughness: 0.6 });
-  for (const z of [-5.6, 5.6]) scene.add(T3.box(22, 0.025, 0.055, '#e8c99b', { y: 0.065, z }));
-  for (const x of [-11, 11]) scene.add(T3.box(0.055, 0.025, 11.2, '#e8c99b', { x, y: 0.065 }));
+  for (const z of [-5.6, 5.6]) scene.add(T3.box(14, 0.025, 0.055, '#e8c99b', { y: 0.065, z }));
+  for (const x of [-6.8, 6.8]) scene.add(T3.box(0.055, 0.025, 11.2, '#e8c99b', { x, y: 0.065 }));
   const circle = new THREE.Mesh(new THREE.TorusGeometry(1.45, 0.035, 8, 48), line);
   circle.rotation.x = -Math.PI / 2; circle.position.y = 0.07; scene.add(circle);
   // Chain-link fence, posts, and a real hoop silhouette.
@@ -222,15 +233,15 @@ function makeBasketball() {
   scene.add(T3.box(22, 0.075, 0.09, '#3b4655', { y: 3.6, z: -7.2 }));
   scene.add(T3.box(22, 0.055, 0.06, '#3b4655', { y: 1.3, z: -7.2 }));
   const hoop = new THREE.Group();
-  hoop.add(T3.cyl(0.09, 0.12, 4.2, '#303947', { x: 8.7, y: 2.1, z: -5.8 }));
-  hoop.add(T3.box(1.7, 1.12, 0.14, '#d9dce1', { x: 8.05, y: 3.75, z: -5.8 }));
-  hoop.add(T3.pane(1.36, 0.82, '#8fa8b7', { x: 8.05, y: 3.75, z: -5.69 }));
+  hoop.add(T3.cyl(0.09, 0.12, 4.2, '#303947', { x: -5.7, y: 2.1, z: -5.8 }));
+  hoop.add(T3.box(1.7, 1.12, 0.14, '#d9dce1', { x: -6.35, y: 3.75, z: -5.8 }));
+  hoop.add(T3.pane(1.36, 0.82, '#8fa8b7', { x: -6.35, y: 3.75, z: -5.69 }));
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.045, 8, 32), std('#e56f48', { metalness: 0.35 }));
-  ring.rotation.x = Math.PI / 2; ring.position.set(8.05, 3.1, -5.2); hoop.add(ring); scene.add(hoop);
+  ring.rotation.x = Math.PI / 2; ring.position.set(-6.35, 3.1, -5.2); hoop.add(ring); scene.add(hoop);
   scene.add(T3.lamp({ x: -7.5, z: 0, mood: 'dusk', color: '#ffc77a', intensity: 6 }));
   scene.add(T3.building(6, 8, 4, { x: -14, z: -12, mood: 'dusk', seed: 31, litChance: 0.5 }));
   scene.add(T3.building(8, 10, 4, { x: 14, z: -13, mood: 'dusk', seed: 19, litChance: 0.55 }));
-  const bench = T3.box(3.0, 0.18, 0.55, '#76513c', { x: -7.5, y: 0.72, z: 4.4 }); scene.add(bench);
+  const bench = T3.box(3.0, 0.18, 0.55, '#76513c', { x: -4.4, y: 0.72, z: 4.4 }); scene.add(bench);
   const hero = addPerson('#3c7186', 'dusk', 1.05);
   const friend = addPerson('#bd9861', 'dusk', 1.02, 'cap');
   hero.position.set(-3.3, 0, 1.0); friend.position.set(2.0, 0, 0.5);
@@ -261,31 +272,36 @@ function drawBasketball(s, t, info, id) {
   s.ball.position.set(2.8, 0.3, 1.1); s.ball.rotation.set(0, 0, 0); s.dust.visible = frozen;
   s.hero.userData.setPose('stand', t); s.friend.userData.setPose('stand', t);
   if (id === 's026') {
-    s.ball.position.x = lerp(2.0, 4.6, p); s.ball.rotation.z = -p * 5;
+    const drop = smooth(clamp(p * 1.25));
+    s.ball.position.set(lerp(2.5, 7.45, p), lerp(1.08, 0.3, drop) + (p > 0.18 ? Math.abs(Math.sin((p - 0.18) * Math.PI * 2.5)) * 0.16 : 0), 1.1);
+    s.ball.rotation.z = -p * 8;
     s.friend.userData.setPose('reach', t); s.hero.userData.setPose('point', t);
-    setCamera(s, [0.7, 4.0, 13.4], [0.8, 1.2, 0.5], 37, t);
+    setCamera(s, [0.7, 4.0, 13.4], [1.8, 1.2, 0.5], 37, t);
   } else if (id === 's027') {
     s.hero.position.x = -0.25; s.hero.userData.setPose('point', t);
-    s.ball.position.set(4.55, 0.3, 1.1); setCamera(s, [-0.8, 2.65, 7.0], [-0.7, 1.25, 1.0], 30, t);
+    s.ball.position.set(7.45, 0.3, 1.1);
+    setCamera(s, [7.45, 2.1, 5.8], [7.45, 0.38, 1.1], 26, t);
   } else if (id === 's028') {
-    s.ball.position.set(4.55, 1.0, 1.1); s.hero.userData.setPose('point', t);
-    setCamera(s, [0.1, 4.2, 13.8], [0.6, 1.4, 0.2], 37, t);
+    s.ball.position.set(7.45, 1.0, 1.1); s.hero.userData.setPose('point', t);
+    setCamera(s, [2.2, 4.2, 13.8], [2.7, 1.4, 0.2], 37, t);
   } else if (id === 's029') {
-    s.hero.position.x = lerp(-3.8, 3.15, p); s.hero.userData.setPose('run', t * 1.1);
-    s.ball.position.set(4.55, 1.0, 1.1); setCamera(s, [0.2, 3.1, 10.8], [0.7, 1.15, 0.9], 35, t);
+    const cx = lerp(-0.8, 4.4, p);
+    s.hero.position.x = lerp(-3.8, 6.1, p); s.hero.userData.setPose('run', t * 1.1);
+    s.ball.position.set(7.45, 1.0, 1.1);
+    setCamera(s, [cx, 3.1, 10.8], [cx + 0.5, 1.15, 0.9], 35, t);
   } else if (id === 's030') {
-    s.hero.position.x = 3.05; s.hero.userData.setPose('crouch', t);
-    s.ball.position.set(3.35, 1.18, 1.15); setCamera(s, [3.0, 2.6, 7.0], [3.1, 1.0, 1.0], 31, t);
+    s.hero.position.x = 6.15; s.hero.userData.setPose('crouch', t);
+    s.ball.position.set(6.45, 1.18, 1.15); setCamera(s, [5.95, 2.6, 7.0], [6.1, 1.0, 1.0], 31, t);
   } else if (id === 's031') {
-    s.hero.position.x = 2.8; s.hero.userData.setPose('point', t);
-    s.ball.position.set(3.05, 1.25, 1.15); setCamera(s, [2.1, 2.65, 6.3], [2.8, 1.35, 1.0], 30, t);
+    s.hero.position.x = 5.85; s.hero.userData.setPose('point', t);
+    s.ball.position.set(6.1, 1.25, 1.15); setCamera(s, [5.35, 2.65, 6.3], [5.8, 1.35, 1.0], 30, t);
   } else if (id === 's032') {
-    s.hero.position.x = 1.0; s.hero.userData.setPose('reach', t);
-    s.friend.position.x = 3.0; s.friend.userData.setPose('reach', t);
-    s.ball.position.set(2.05, 1.45, 0.95); setCamera(s, [1.1, 3.2, 10.2], [1.9, 1.35, 0.8], 34, t);
+    s.hero.position.x = 2.9; s.hero.userData.setPose('reach', t);
+    s.friend.position.x = 5.0; s.friend.rotation.y = Math.PI; s.friend.userData.setPose('carry', t);
+    s.ball.position.set(3.9, 1.45, 0.95); setCamera(s, [3.2, 3.2, 10.2], [4.0, 1.35, 0.8], 34, t);
   } else if (id === 's033') {
-    s.hero.position.x = -1.4; s.friend.position.x = 2.4;
-    s.friend.userData.setPose('reach', t); s.ball.position.set(2.05, 1.55, 0.95);
+    s.hero.position.x = -1.4; s.friend.position.x = 2.4; s.friend.rotation.y = Math.PI;
+    s.friend.userData.setPose('carry', t); s.ball.position.set(2.05, 1.45, 0.95);
     setCamera(s, [0.25, 3.9, 13.2], [0.4, 1.3, 0.5], 37, t);
   }
 }
@@ -355,22 +371,31 @@ function drawHallway(s, t, info, id) {
     setCamera(s, [0.2, 2.8, 10.0], [0.5, 1.3, -0.5], 34, t);
   } else if (id === 's040') {
     s.hero.position.set(0.75, 0, -0.1); s.hero.userData.setPose('kneel', t);
-    s.child.userData.setPose('kneel', t);
+    s.child.userData.setPose('reach', t);
     s.books.children.forEach((book, i) => {
-      book.position.set(0.85 + (i % 2) * 0.12, 0.45 + Math.floor(i / 2) * 0.16, -0.3 + (i % 3) * 0.12);
-      book.rotation.z = -0.04;
+      const targetX = 1.92 + (i % 2) * 0.38;
+      const targetY = 0.90 + Math.floor(i / 2) * 0.145;
+      const targetZ = -0.42 + (i % 3) * 0.035;
+      const startX = 0.85 + (i % 2) * 0.12, startY = 0.45 + Math.floor(i / 2) * 0.16;
+      const startZ = -0.3 + (i % 3) * 0.12;
+      book.position.set(lerp(startX, targetX, p), lerp(startY, targetY, p), lerp(startZ, targetZ, p));
+      book.rotation.z = lerp(-0.04, 0.015, p);
     });
-    setCamera(s, [1.2, 2.2, 6.3], [1.0, 1.0, -0.2], 30, t);
+    setCamera(s, [1.7, 2.35, 6.8], [1.35, 1.2, -0.35], 30, t);
   } else if (id === 's041') {
     s.hero.position.set(-0.2, 0, 0.2); s.hero.userData.setPose('stand', t);
-    s.child.position.set(1.7, 0, -0.6); s.child.userData.setPose('stand', t);
-    s.books.children.forEach((book, i) => { book.position.set(1.7, 0.85 + i * 0.015, -0.5); });
-    setCamera(s, [0.2, 2.9, 10.5], [0.6, 1.35, -0.4], 34, t);
+    s.child.position.set(1.7, 0, -0.6); s.child.userData.setPose('carry', t);
+    s.books.children.forEach((book, i) => {
+      book.position.set(1.92 + (i % 2) * 0.38, 0.90 + Math.floor(i / 2) * 0.145, -0.42 + (i % 3) * 0.035);
+    });
+    setCamera(s, [0.2, 2.9, 10.5], [0.9, 1.35, -0.4], 34, t);
   } else if (id === 's042') {
     s.hero.position.set(-2.4, 0, 2.3); s.child.position.set(1.7, 0, -0.6);
-    s.child.userData.setPose('reach', t); s.hero.userData.setPose('stand', t);
-    s.books.children.forEach((book, i) => { book.position.set(1.7, 0.85 + i * 0.015, -0.5); });
-    setCamera(s, [0.1, 3.4, 12.8], [0, 1.3, 0], 37, t);
+    s.child.userData.setPose('carry', t); s.hero.userData.setPose('stand', t);
+    s.books.children.forEach((book, i) => {
+      book.position.set(1.92 + (i % 2) * 0.38, 0.90 + Math.floor(i / 2) * 0.145, -0.42 + (i % 3) * 0.035);
+    });
+    setCamera(s, [0.1, 3.4, 12.8], [0.5, 1.3, 0], 37, t);
   }
 }
 
