@@ -350,3 +350,11 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - The initial inspector attempt [run #7 / 44740902252](https://github.com/Nolane-x/video/actions/runs/44740902252) failed only at artifact download because the run-28 master artifact had not yet been uploaded. It did not execute media QA.
 - Fixed the ordering issue in the review-branch workflow: .github/workflows/inspect-time-stop-run.yml is now gated on marker .github/workflows/enable-inspect-time-stop-run28.txt (or workflow_dispatch) rather than triggering immediately when its own YAML changes. Do not create the marker until run #28 uploads time-stop-10s-h2-28.
 - After upload, add marker, let independent inspector run with source run ID 44740306234, and only then use the gated Draft Release workflow. Run-20 public release and run-26 verified fallback remain unchanged.
+
+
+## Proof #6 — s026 hand-contact targeted review passed (2026-11-20)
+
+- Review [run #6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) completed successfully. Artifact ID 14632040618, name time-stop-10s-3d-motion-review-44740517436, size 2,826,667 bytes.
+- QA validates three silent clips at 960x540 / 60fps with exact frame counts: kitchen 27.0s / 1,620 frames; court s026-s033 36.0s / 2,160 frames (112.5-148.5s); hallway 13.5s / 810 frames. Full timeline renderer scan and all 24 selected-shot contact sheets passed.
+- Inspected the 10-frame montage: s018 at 76.5s keeps protagonist face, cup and timer HUD in view. s026 at 112.5s shows the ball adjacent to the friend's outstretched hand; by 114.75s it has moved away toward the road; s027 at 117s frames the rolling ball close-up. s032-s033 hand-off/recovery and s040-s042 book rescue also remain in frame. This resolves the earlier off-frame and low-release issues in targeted samples, not a full-length artistic approval.
+- Keep visual_approval false. The new full-film run #28 still needs master render, sound mix, technical QA, upload and independent inspection.
