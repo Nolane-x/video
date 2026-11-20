@@ -10,7 +10,7 @@ on:
       source_run_id:
         description: "Successful render workflow run ID"
         required: true
-        default: "44671416000"
+        default: "44740306234"
 
 permissions:
   actions: read
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44671416000' }}
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44740306234' }}
     steps:
       - name: Checkout review tools
         uses: actions/checkout@v4
@@ -45,8 +45,8 @@ jobs:
       - name: Download successful corrected master artifact
         uses: actions/download-artifact@v4
         with:
-          name: time-stop-10s-h2-26
-          run-id: ${{ github.event.inputs.source_run_id || '44671416000' }}
+          name: time-stop-10s-h2-28
+          run-id: ${{ github.event.inputs.source_run_id || '44740306234' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: source-artifact
 
@@ -225,7 +225,7 @@ jobs:
           cat > review/README.md <<'EOF'
           # Time Stop 10s — corrected master inspection
 
-          Clips below are cut from the corrected run-26 1080p60 master with original narration, music and sound design. The master itself remains in the GitHub Actions run artifact and is not duplicated into this smaller review bundle.
+          Clips below are cut from the corrected run-28 1080p60 master with original narration, music and sound design. The master itself remains in the GitHub Actions run artifact and is not duplicated into this smaller review bundle.
 
           Sequences:
           - Kitchen/cup/time-stop: 54–99 seconds
@@ -235,12 +235,12 @@ jobs:
           master-contact-sheet.jpg samples 24 story beats. master-inspection.json contains stream, decode, audio and checksum results. Technical pass does not imply full artistic sign-off.
           EOF
           (cd review && sha256sum *.json *.jpg *.txt full-mix-clips/*.mp4 > SHA256SUMS.txt)
-          zip -qr time-stop-10s-run26-inspection.zip review
+          zip -qr time-stop-10s-run28-inspection.zip review
 
       - name: Upload full-mix sequence proof and master inspection
         uses: actions/upload-artifact@v4
         with:
-          name: time-stop-10s-run26-master-inspection
+          name: time-stop-10s-run28-master-inspection
           path: |
             review/master-inspection.json
             review/master-sha256.txt
@@ -249,6 +249,6 @@ jobs:
             review/full-mix-clips/
             review/README.md
             review/SHA256SUMS.txt
-            review/time-stop-10s-run26-inspection.zip
+            review/time-stop-10s-run28-inspection.zip
           if-no-files-found: error
           retention-days: 30
