@@ -343,3 +343,10 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - Voice artifact: `video-voice-assets-44740306234`, ID `14630746223`, size 51,951,746 bytes. Log confirms 84 Vietnamese VieNeu chunks, 198.00s PCM track, 7 AudioSeal watermark blocks; verification passed. Uploaded ZIP SHA-256: `ecf9a37e67ec154ebad86eaaec24629448447d6a1fccb8e3bf20aa46aa43001a`.
 - Review proof [#6 / 44740517436](https://github.com/Nolane-x/video/actions/runs/44740517436) is active using the extended court range 112.5–148.5s; the storyboard and both Three.js modules are installed, and the full renderer scan is in progress.
 - Run #27 remains cancelled before mix/package/upload; do not use it. Run #26 is independently verified fallback, but still has the older s018 framing. Run #28 is the only candidate for final draft archive if it passes.
+
+
+## Run-28 inspector dispatch gate (2026-11-20)
+
+- The initial inspector attempt [run #7 / 44740902252](https://github.com/Nolane-x/video/actions/runs/44740902252) failed only at artifact download because the run-28 master artifact had not yet been uploaded. It did not execute media QA.
+- Fixed the ordering issue in the review-branch workflow: .github/workflows/inspect-time-stop-run.yml is now gated on marker .github/workflows/enable-inspect-time-stop-run28.txt (or workflow_dispatch) rather than triggering immediately when its own YAML changes. Do not create the marker until run #28 uploads time-stop-10s-h2-28.
+- After upload, add marker, let independent inspector run with source run ID 44740306234, and only then use the gated Draft Release workflow. Run-20 public release and run-26 verified fallback remain unchanged.
