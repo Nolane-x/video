@@ -13,12 +13,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: time-stop-10s-expanded-draft-run27
+  group: time-stop-10s-expanded-draft-run28
   cancel-in-progress: false
 
 jobs:
   archive-draft:
-    name: Verify and archive run-27 candidate as a draft Release
+    name: Verify and archive run-28 candidate as a draft Release
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Download run-27 full film artifact
+      - name: Download run-28 full film artifact
         uses: actions/download-artifact@v4
         with:
           name: time-stop-10s-h2-28
@@ -79,7 +79,7 @@ jobs:
           cat > archive/REVIEW-NOTES.md <<'EOF'
           # Time Stop 10s — expanded 3D review candidate
 
-          This is a draft archive of the corrected run-27 candidate. It preserves the earlier native 60fps run-20 release and does not overwrite it.
+          This is a draft archive of the corrected run-28 candidate. It preserves the earlier native 60fps run-20 release and does not overwrite it.
 
           - 1920×1080, native H2 render at 60fps, 22,680 frames, 378 seconds.
           - 84 Vietnamese VieNeu narration segments, shot-synced; AudioSeal watermark verified.
@@ -93,7 +93,7 @@ jobs:
       - name: Upload immutable archive artifact
         uses: actions/upload-artifact@v4
         with:
-          name: time-stop-10s-expanded-3d-run27-archive
+          name: time-stop-10s-expanded-3d-run28-archive
           path: archive/
           if-no-files-found: error
           retention-days: 30
