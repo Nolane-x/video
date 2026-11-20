@@ -294,7 +294,7 @@ This is targeted sampled visual review only, not a full-length artistic sign-off
 
 The run-26 independent master artifact inspection [run #6 / 44738517112](https://github.com/Nolane-x/video/actions/runs/44738517112) passed technical full-decode, audio/video stream and exact frame validation; artifact ID 14629966995. Run-26 still has the prior s018 crop and pre-ball-start alignment, so it remains fallback, not preferred final.
 
-Patched archive workflow file .github/workflows/archive-time-stop-10s-expanded-run27.yml at commit 49e80e9d to target run ID 44740306234, artifact time-stop-10s-h2-28, and tag time-stop-10s-expanded-3d-review-run28. The enabling marker has not been added: wait until run #28 master upload/QA exists, then trigger the archive draft workflow, verify the artifact and create draft release. Retain the existing public run-20 release.
+Patched archive workflow file .github/workflows/archive-time-stop-10s-expanded-run28.yml at commit 49e80e9d to target run ID 44740306234, artifact time-stop-10s-h2-28, and tag time-stop-10s-expanded-3d-review-run28. The enabling marker has not been added: wait until run #28 master upload/QA exists, then trigger the archive draft workflow, verify the artifact and create draft release. Retain the existing public run-20 release.
 
 Next steps:
 1. Poll run #28; require all H2 QA and artifact time-stop-10s-h2-28.
