@@ -301,3 +301,6 @@ Next steps:
 2. In .github/workflows/inspect-time-stop-run.yml, change default/source run ID from 44671416000 to 44740306234 and artifact name from time-stop-10s-h2-26 to time-stop-10s-h2-28; trigger via the existing workflow path and inspect the new master.
 3. Visually review full-mix kitchen/court/hallway clips plus s018/s026 contact frames.
 4. Only then create a draft release through the updated archive workflow. Do not set visual_approval true.
+
+
+Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 198.00s PCM_24 mono 48kHz; checks passed; AudioSeal verified with 7 blocks, minimum confidence 0.9962 and mean 0.9993. WAV SHA-256 84ad2d365d1597a2414d3d2d9fdd458cbf2dd8ee13d31af1dcc542e2ffe9f92e matched the manifest. Subtitle cue s018 confirms “Vòng đếm ngược báo còn bảy giây.” User-facing copies are /mnt/data/time-stop-10s-run28-voice-assets.zip, /mnt/data/time-stop-10s-run28-subtitles-vi.srt and /mnt/data/time-stop-10s-run28-transcript-vi.txt. The voice track is verified; the full run-28 video master is still being rendered.
