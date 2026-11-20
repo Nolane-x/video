@@ -241,3 +241,12 @@ Proof workflow [run #4 / 44739190519](https://github.com/Nolane-x/video/actions/
 I directly inspected the compact montage in its job log: the revised s018 now shows the protagonist's full head/face, suspended cup and readable 7-second HUD in frame. The ball close-up (s027), friend ball return (s032–s033), and elevated book stack/child interaction (s040–s042) also read within frame. This is targeted proof, not full-film artistic sign-off or proof of perfect physical contacts.
 
 The full run-27 master [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) is still rendering at the native 1080p60 silent-master step. Once completed: verify sound mix, package, download artifact, update inspector source run ID to 44736403329, independently decode/measure the master and view its own s018 sample before activating the gated draft Release. Keep visual_approval false.
+
+
+## Time Stop 10s — new s026 hand-contact fix; run-28 supersedes run-27
+
+A further source audit found a visible prop-contact gap in s026: the friend rig's right-hand center is approximately x=2.60, y=1.47, z=1.10, but the basketball had started at x=2.5, y=1.08, z=1.1. Fixed in f630e863c2b118cdb3e6c7ecc28fb4479783059e by moving the friend to z=0.9 for this shot and starting the ball at [2.6,1.47,1.1] before its drop/bounce toward road x=7.45. Synced to review branch at 6fba5daf0d2285f1df3944cd8c1be4d13b30b040.
+
+Run #27 [44736403329](https://github.com/Nolane-x/video/actions/runs/44736403329) is not a deliverable: it was cancelled at the full silent master render step when the new contact fix was pushed. No mixed master or upload completed. Run #28 [44740306234](https://github.com/Nolane-x/video/actions/runs/44740306234) now includes both the s018 full-head/cup reframe and the s026 hand-aligned ball start. Story job passed; the VoiceStudio job is currently in progress. Wait for H2 master, QA and upload.
+
+Proof run #5 [44740324018](https://github.com/Nolane-x/video/actions/runs/44740324018) is targeted 3D proof for the latest source. Inspect s026 at t=112.5–117s specifically (not only s027 at 117s), plus ball handoff, books and s018. Run-26 remains the only fully decoded and independently verified full candidate until run-28 completes and gets its own independent inspector.
