@@ -159,3 +159,16 @@ Check current Actions [run #23](https://github.com/Nolane-x/video/actions/runs/4
 3. Check prop contacts, hands/feet, character framing and mother hair silhouette; captions must not duplicate or overlap the acting.
 4. If the scenes pass, package a candidate master and new review bundle, preserving all old release hashes and leaving artistic approval false until complete review.
 5. Update the film QA ledger and only publish a new permanent release after the review. Never call the whole film fully 3D: only 42 shots use Three.js; 42 remain H2 Canvas 2D.
+
+
+## Time Stop 10s — source-level visual blockers discovered during 3D expansion (2026-11-20)
+
+Before promoting run #23 or publishing a new Release, address these code-level issues. This list is based on source geometry/camera projection, not yet on a full playback review:
+1. `s027` ball close-up is framed incorrectly: ball projects at normalized x≈+1.73 (outside frame) with the current [−0.8,2.65,7] camera looking at [−0.7,1.25,1].
+2. `s032–s033` friend faces +X while the ball is to the friend's left. Rotate to face the ball; add a proper carrying pose / hand contact.
+3. `s040` book pile is near hero x≈0.75, not child x=2.0; animate it toward the child's forearms.
+4. `s041–s042` six books overlap nearly exactly (0.13 thickness vs 0.015 vertical spacing) and sit near foot level. Build an actual separated, held stack.
+5. Mother outfit requests `head:'bun'` but H2 Three.js figure rig only implements `cap` and `beanie`; author real bun/hair geometry.
+6. `s018` narration says nine seconds while HUD says seven. Fix the script and regenerate the 84-segment voice job; a wrist-timer line should ideally have a visible wrist device rather than only the top-left HUD.
+
+Candidate run #23 [Actions](https://github.com/Nolane-x/video/actions/runs/44666071523) is currently intended to finish unchanged as a first review candidate. Do not cancel it solely to fix the above. Inspect its contact sheets, then apply these repairs in a focused follow-up render. Preserve run-20 master/release and never set artistic approval from CI status alone.
