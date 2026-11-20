@@ -184,7 +184,7 @@ Current corrected source branch: `film/time-stop-10s-3d-review-fixes`, head `0b4
 - Reblocked books to transfer toward the child's forearms and form two visibly separated columns of three books at torso height.
 - Corrected `s018` framing and changed voice line to “Vòng đếm ngược báo còn bảy giây.” so it agrees with the 7-second HUD.
 
-Full corrected candidate Actions [run #26 / 44671416000](https://github.com/Nolane-x/video/actions/runs/44671416000). Its story request job passed; VoiceStudio render was in progress at last check. Wait for this run's H2 render, QA and uploaded artifact before treating it as a new master.
+Full corrected candidate Actions [run #26 / 44671416000](https://github.com/Nolane-x/video/actions/runs/44671416000). Its story request job passed. VoiceStudio passed and uploaded `video-voice-assets-44671416000` (artifact ID `14599653357`, 52,525,240 bytes): 84 Vietnamese VieNeu segments, 200.24s PCM_24 mono/48kHz, AudioSeal verified (7 blocks; minimum confidence 0.9992; mean 0.9997), SHA-256 `30d756206f9a35183d2cdd0b82d5f4ef669d7af5dcd004da6f875fc342ea86fe`. Transcript confirms `s018`: “Vòng đếm ngược báo còn bảy giây.” The H2 full render job has started. Wait for this run's H2 render, QA and uploaded artifact before treating it as a new master.
 
 For early source/motion inspection, use separate branch `review/time-stop-10s-3d-fixes` and workflow [run #1 / 44671703847](https://github.com/Nolane-x/video/actions/runs/44671703847). It skips VoiceStudio and full master, renders the 24 selected 3D shot contact sheets plus three silent 960×540/60fps clips: kitchen 58.5–85.5s, court 117–148.5s, and hallway 175.5–189s. Artifact name will be `time-stop-10s-3d-motion-review-<run_id>`.
 
