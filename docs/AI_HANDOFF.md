@@ -423,3 +423,24 @@ Project README corrected at a47f99db1b3e359a251bbb895a3a11b85caf83b8 to reflect 
 3. Compare master SHA-256 across render and independent inspection; do full FFmpeg decode and stream/loudness validation.
 4. Trigger archive-time-stop-10s-expanded-run29.yml only after independent inspection passes; verify assets and digests; keep as draft.
 5. Do not set visual_approval true or publish without uninterrupted full-length watch-through with audio.
+
+## Handoff — Run 30 replaces cancelled Run 29 (2026-11-21)
+
+Important: Do not repeat the Run-29 trigger/cancellation cycle.
+
+### Run 29 cancellation diagnosis
+Run 29 / 44870641689 was cancelled by GitHub while at 10,327 / 22,680 frames. Its H2 log contains 'The operation was canceled' without a renderer exception. The README update commit a47f99db1b3e359a251bbb895a3a11b85caf83b8 changed video-projects/time-stop-10s/README.md, which matches render-time-stop-10s.yml's broad path filter video-projects/time-stop-10s/**. Since the render workflow uses cancel-in-progress: true, the push started Run 30 and cancelled Run 29. Treat this as concurrency orchestration, not H2 rendering failure.
+
+### Current active render
+Run 30: https://github.com/Nolane-x/video/actions/runs/44873063135
+Head SHA: a47f99db1b3e359a251bbb895a3a11b85caf83b8 (contains s002 camera correction plus README fix).
+Expected artifact: time-stop-10s-h2-30.
+At the last status poll, storyboard preparation succeeded and VoiceStudio was still installing dependencies; no master artifact was available yet. Verify current run/jobs/artifacts before claiming progress beyond that.
+
+Do not make commits to any of these render-triggered paths while Run 30 is active: video-projects/time-stop-10s/**, integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**, .github/workflows/render-time-stop-10s.yml, or the 60fps enable marker. Docs-only changes under docs/ and distinct archive workflow files do not match the render workflow's path filter.
+
+### Run-30 follow-up workflows prepared
+- Inspector: .github/workflows/inspect-time-stop-run30.yml on review/time-stop-10s-3d-fixes, commit 9155efe4ad453badb19ea334fa79ce0e9085a9a9. Defaults to run 44873063135 and artifact time-stop-10s-h2-30. It independently decodes the full master, checks stream/frame metadata, hash, extracts 32 key frames, creates four full-mix sequence clips including the 270–324s final rescue, and creates 252 sampled frames (three per shot). To start after successful master artifact upload, add marker .github/workflows/enable-inspect-time-stop-run30.txt to the review branch or dispatch manually.
+- Draft archive: .github/workflows/archive-time-stop-10s-expanded-run30.yml on film/time-stop-10s-3d-review-fixes, commit 9c92c57e0b584b5abbb4b0c9389f1ff2d543d866. It targets run 44873063135, artifact time-stop-10s-h2-30 and unique tag time-stop-10s-expanded-3d-review-run30. Do not add marker .github/workflows/enable-time-stop-10s-expanded-run30-draft.txt until the inspector is green.
+
+Preserve the Run-28 draft release and public Run-20 release. Never overwrite either. Keep visual_approval false; do not publish until a human has watched the full film uninterrupted with audio.
