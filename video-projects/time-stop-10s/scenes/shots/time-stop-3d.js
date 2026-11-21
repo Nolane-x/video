@@ -59,7 +59,9 @@ function makeBillboard() {
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(5.38, 2.78), new THREE.MeshBasicMaterial({ map: tex })); plane.position.set(0, 0, 0.105); root.add(plane);
   for (const x of [-2.58, 2.58]) for (const y of [-1.27, 1.27]) { const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), mat('#d8dee5', '#6f91ad', 0.2, { metalness: 0.8 })); bolt.position.set(x, y, 0.15); root.add(bolt); }
   const glow = T3.sprite('#ffbf7c', 6.5, 0.22); glow.position.set(0, 0, -0.3); root.add(glow);
-  root.position.set(3.6, 3.55, -3.7); return root;
+  // Re-anchor the sign to its footing so the collapse rotates around the support, not the panel centre.
+  root.children.forEach((part) => { part.position.y += 1.875; });
+  root.position.set(3.6, 0.12, -3.7); return root;
 }
 
 function makeRain(scene) {
@@ -98,8 +100,8 @@ function makeStreet(info) {
   for (const [x, z, h, w] of [[-12, -11, 10, 5], [-6.5, -13, 8, 4], [10.5, -12, 11, 5], [15, -10, 8, 4], [-17, -8, 7, 4]]) scene.add(T3.building(w, h, 3.1, { x, z, mood: 'storm', seed: Math.abs(x * 13), litChance: 0.52 }));
   scene.add(T3.lamp({ x: -5.8, z: 3.1, mood: 'storm', color: '#ffd39b', intensity: 10 })); scene.add(T3.lamp({ x: 7.8, z: -5.2, mood: 'storm', color: '#f3c58f', intensity: 7 }));
   const bike = makeBike(); bike.root.position.set(-1.4, 0, 1.4); scene.add(bike.root);
-  const mom = T3.figure({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.18, rim: '#ffd1d9', rimOpacity: 0.85 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
-  const kid = T3.figure({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 1.08, rim: '#9dd9ff', rimOpacity: 0.95 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
+  const mom = T3.figureCinematic({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.18, rim: '#ffd1d9', rimOpacity: 0.85 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
+  const kid = T3.figureCinematic({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 1.08, rim: '#9dd9ff', rimOpacity: 0.95 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
   const sign = makeBillboard(); scene.add(sign); const rain = makeRain(scene);
   for (let i = 0; i < 8; i++) { const m = new THREE.Mesh(new THREE.CircleGeometry(0.45 + (i % 3) * 0.22, 24), new THREE.MeshBasicMaterial({ color: '#7799b9', transparent: true, opacity: 0.11, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(-8 + i * 2.6, 0.047, i % 2 ? 1.7 : -1.8); scene.add(m); }
   const debris = new THREE.Group(); for (let i = 0; i < 9; i++) { const bit = T3.box(0.14 + (i % 3) * 0.12, 0.08, 0.1, '#69798b', { y: 0, mat: mat('#69798b', '#24364a', 0.12, { metalness: 0.6 }) }); bit.position.set(3.0 + i * 0.28, 0.2 + (i % 3) * 0.27, -2 + (i % 2) * 0.35); debris.add(bit); } scene.add(debris); debris.visible = false;
@@ -112,23 +114,36 @@ function cameraAt(s, t, mode = 'wide', focus = null) {
   let pos, look, fov;
   if (mode === 'closeMom') { pos = [0.8, 2.85, 7.0]; look = [-0.15, 1.28, 1.45]; fov = 33; }
   else if (mode === 'feet') { pos = [0.0, 2.0, 7.8]; look = [-2.0, 0.65, 1.4]; fov = 34; }
-  else if (mode === 'action') { pos = [0.5, 2.9, 8.2]; look = [-1.6, 1.18, 1.4]; fov = 32; }
-  else if (mode === 'tracking') { pos = [1.4, 3.4, 9.5]; look = [-1.25, 1.15, 1.4]; fov = 35; }
+    else if (mode === 'tracking') { pos = [1.4, 3.4, 9.5]; look = [-1.25, 1.15, 1.4]; fov = 35; }
   else if (mode === 'action') { pos = [0.5, 2.9, 8.2]; look = [-1.6, 1.18, 1.4]; fov = 32; }
   else if (mode === 'hug') { pos = [-0.35, 2.8, 6.8]; look = [-1.18, 1.12, 1.45]; fov = 31; }
   else if (mode === 'impact') { pos = [2.6, 4.3, 11.5]; look = [-0.8, 1.4, -0.5]; fov = 36; }
   else { pos = [1.6, 4.1, 11.2]; look = [-2.0, 1.3, 1.2]; fov = 36; }
   const k = smooth(t / 4.5);
-  if (Array.isArray(focus) && focus.length === 2) look[0] = lerp(focus[0], focus[1], k);
-  c.position.set(pos[0] + Math.sin(t * 0.42) * 0.06, pos[1] + Math.sin(t * 0.55) * 0.025, pos[2]);
-  c.lookAt(look[0], look[1], look[2]);
+  let focusShift = 0;
+  if (Array.isArray(focus) && focus.length === 2) {
+    const focusedX = lerp(focus[0], focus[1], k);
+    focusShift = focusedX - look[0];
+    look[0] = focusedX;
+  }
+  // A gentle dolly and pan follow the subject instead of leaving the virtual camera locked.
+  const push = (mode === 'closeMom' ? 0.18 : mode === 'impact' ? 0.36 : mode === 'tracking' ? 0.42 : 0.28) * k;
+  const arc = Math.sin(k * Math.PI) * (mode === 'tracking' ? 0.20 : 0.10);
+  c.position.set(pos[0] + focusShift * 0.22 + arc + Math.sin(t * 0.42) * 0.022,
+    pos[1] + Math.sin(t * 0.55) * 0.014, pos[2] - push);
+  c.lookAt(look[0] + Math.sin(k * Math.PI) * 0.055, look[1], look[2]);
   c.fov = fov;
   c.updateProjectionMatrix();
 }
 
 function animateCommon(s, t, frozen = false) {
-  s.rain.update(t, frozen); s.bike.wheels.forEach((w, i) => { if (!frozen) w.rotation.z = -t * (1.8 + i * 0.04); });
-  s.mom.userData.setPose('bike', t); s.kid.userData.setPose('stand', t); s.sign.rotation.z = 0.045 * Math.sin(t * 2.8); cameraAt(s, t, 'wide');
+  s.rain.update(t, frozen);
+  s.bike.wheels.forEach((w, i) => { if (!frozen) w.rotation.z = -t * (1.8 + i * 0.04); });
+  s.bike.crankArm.rotation.z = frozen ? 0.18 : -t * 3.6;
+  s.mom.userData.setPose('bike', t);
+  s.kid.userData.setPose('stand', t);
+  s.sign.rotation.z = 0.025 * Math.sin(t * 2.2);
+  cameraAt(s, t, 'wide');
 }
 
 function overlay(g, t, info, freeze = false, title = '') {
