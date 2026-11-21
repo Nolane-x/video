@@ -484,3 +484,13 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - A dedicated independent inspector was added to the review branch and triggered: https://github.com/Nolane-x/video/actions/runs/44914373793. It will run full FFmpeg decode, exact frame/hash verification, 252 still samples (3 per shot) and four full-mix story clips. Update this state after the inspector completes.
 - Detailed evidence: `docs/reviews/time-stop-10s-run32-caption-fix-qa.md`.
 - Preserve Run 30 and all existing releases. Keep `visual_approval=false`; no public release or draft replacement until an uninterrupted human review of all 6m18s with sound is complete.
+
+
+## Time Stop 10s — Run 32 independent QA completed (2026-11-21)
+
+- Independent inspector Run 44914373793: https://github.com/Nolane-x/video/actions/runs/44914373793 — success. It decoded the complete MP4 with FFmpeg (video + audio), verified the exact 22,680-frame count, metadata and MP4 SHA-256, validated all 84 narration segments and 84 non-overlapping SRT cues, and generated 32 key frames plus 252 dense still samples (3 per shot).
+- The inspector exported and fully decoded four full-mix action clips, each 1920×1080/60fps/AAC stereo 48kHz: kitchen 54–99s (45s/2,700 frames), basketball 112.5–148.5s (36s/2,160), hallway/books 162–189s (27s/1,620), final bicycle/sign rescue 270–324s (54s/3,240).
+- Independent artifact: `time-stop-10s-run32-independent-inspection`, ID `14711346655`, 58,746,924 bytes, GitHub digest `sha256:15e31ac571fa986b098218cf8a252d371174f9a9bee02c9089348d6e9a156080`. Nested ZIP integrity and all 50 uploaded outer manifest entries passed. Six dense motion sheets have been visually inspected.
+- Confirmed rendered fixes: s014 subtitle plate clears the lower letterbox bar; s063 duplicate subtitle is removed. No analogous clipping/duplicate was apparent across sampled modified 3D shot families.
+- Run 32 remains a technical review candidate; keep `visual_approval=false`. The only remaining sign-off is an uninterrupted human watch-through of the entire 6m18s film with sound. Do not publish or overwrite existing Run 30 / Run 28 drafts or the public Run 20 release.
+- Detailed evidence: `docs/reviews/time-stop-10s-run32-caption-fix-qa.md`.
