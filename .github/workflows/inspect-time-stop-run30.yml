@@ -315,24 +315,21 @@ jobs:
 
           dense-samples/motion-sheet-01.jpg through motion-sheet-06.jpg contain three frames from every shot (+0.75s, +2.25s, +3.75s), 252 frames total. master-contact-sheet.jpg samples 32 key story beats, including s002 and the final rescue. master-inspection.json contains stream, decode, audio and checksum results. Technical pass does not imply full artistic sign-off.
           EOF
-          (cd review && sha256sum *.json *.jpg *.txt full-mix-clips/*.mp4 > SHA256SUMS.txt)
-          zip -qr time-stop-10s-run30-inspection.zip review
+          (
+            cd review
+            find . -type f \
+              ! -name 'SHA256SUMS.txt' \
+              ! -name 'time-stop-10s-run30-inspection.zip' \
+              -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+            sha256sum -c SHA256SUMS.txt
+            zip -qr time-stop-10s-run30-inspection.zip . -x './time-stop-10s-run30-inspection.zip'
+            test -s time-stop-10s-run30-inspection.zip
+          )
 
       - name: Upload full-mix sequence proof and master inspection
         uses: actions/upload-artifact@v4
         with:
           name: time-stop-10s-run30-master-inspection
-          path: |
-            review/master-inspection.json
-            review/master-sha256.txt
-            review/master-contact-sheet.jpg
-            review/master-frames/
-            review/full-mix-clips/
-            review/dense-grid.jpg
-            review/dense-samples/
-            review/dense-sampling.json
-            review/README.md
-            review/SHA256SUMS.txt
-            review/time-stop-10s-run30-inspection.zip
+          path: review/
           if-no-files-found: error
           retention-days: 30
