@@ -1,0 +1,146 @@
+name: Build readable subtitle alternative — Run 30
+
+on:
+  push:
+    branches:
+      - review/time-stop-10s-3d-fixes
+    paths:
+      - ".github/workflows/enable-build-time-stop-run30-readable-subtitles.txt"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful immutable Run-30 render workflow run ID"
+        required: true
+        default: "44873063135"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-run30-readable-subtitles
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Rebuild and validate the alternate Vietnamese subtitle track
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_RUN_ID: \${{ github.event.inputs.source_run_id || '44873063135' }}
+    steps:
+      - name: Check out the subtitle builder
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download the immutable Run-30 source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-30
+          repository: \${{ github.repository }}
+          run-id: \${{ github.event.inputs.source_run_id || '44873063135' }}
+          github-token: \${{ secrets.GITHUB_TOKEN }}
+          path: source-artifact
+
+      - name: Generate the alternate SRT/VTT and enforce subtitle invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_SRT="$(find source-artifact -type f -path '*/subtitles/time-stop-10s.srt' -print -quit)"
+          test -n "$SOURCE_SRT"
+          test -s "$SOURCE_SRT"
+          mkdir -p output
+          python video-projects/time-stop-10s/tools/extend_readable_subtitles.py \
+            --input "$SOURCE_SRT" \
+            --output output \
+            --video-duration 378.0 \
+            --gap 0.12 \
+            --expected-cues 84
+          cp "$SOURCE_SRT" output/time-stop-10s-original-voice-sync.srt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("output/subtitle-readability-qa.json").read_text(encoding="utf-8"))
+          assert report["status"] == "passed", report
+          assert report["cue_count"] == 84, report
+          assert report["preserves_original_text_and_cue_starts"] is True, report
+          assert report["preserves_voiceover_timing"] is True, report
+          assert report["overlap_count"] == 0, report
+          assert report["text_changes"] == 0, report
+          assert report["extended"]["min_dwell_seconds"] >= 4.0, report
+          assert report["extended"]["max_chars_per_second"] < report["original"]["max_chars_per_second"], report
+          print("All subtitle invariants passed.")
+          PY
+          cat > output/README.md <<'EOF'
+          # Run-30 readable Vietnamese subtitle alternative
+
+          This is a reproducible extended-dwell subtitle track generated from the immutable Run-30 render artifact.
+
+          - All 84 original Vietnamese cue texts and cue start times are preserved.
+          - The original voice-synchronous SRT is included for comparison.
+          - Each alternate cue remains visible until 0.12 seconds before the next narration cue; the final cue ends at 378.0 seconds.
+          - The alternative track has no overlaps and does not change the voiceover, WAV, story timing or master MP4.
+          - The canonical voice-synchronous SRT/VTT remain unchanged. This package is an optional slower-reading track.
+
+          Run the source builder with Python 3.12 or newer. It uses only the Python standard library.
+          EOF
+          (
+            cd output
+            sha256sum README.md \
+              time-stop-10s-original-voice-sync.srt \
+              time-stop-10s-readable-vi.srt \
+              time-stop-10s-readable-vi.vtt \
+              subtitle-readability-qa.json > SHA256SUMS.txt
+            sha256sum -c SHA256SUMS.txt
+            zip -q -r time-stop-10s-run30-readable-subtitles.zip \
+              README.md SHA256SUMS.txt \
+              time-stop-10s-original-voice-sync.srt \
+              time-stop-10s-readable-vi.srt \
+              time-stop-10s-readable-vi.vtt \
+              subtitle-readability-qa.json
+            unzip -t time-stop-10s-run30-readable-subtitles.zip
+          )
+
+      - name: Publish quantitative QA summary
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          import os
+          from pathlib import Path
+          q = json.loads(Path("output/subtitle-readability-qa.json").read_text(encoding="utf-8"))
+          old, new = q["original"], q["extended"]
+          print("# Run-30 readable subtitle alternative — passed")
+          print()
+          print(f"- Source artifact run: {os.environ['SOURCE_RUN_ID']}")
+          print(f"- Cue count: {q['cue_count']} (unchanged)")
+          print(f"- Cue overlaps: {q['overlap_count']}")
+          print(f"- Text changes: {q['text_changes']}")
+          print()
+          print("| Metric | Original | Extended dwell |")
+          print("|---|---:|---:|")
+          for label, key in [
+              ("Median reading speed (chars/s)", "median_chars_per_second"),
+              ("P90 reading speed (chars/s)", "p90_chars_per_second"),
+              ("Maximum reading speed (chars/s)", "max_chars_per_second"),
+              ("Minimum dwell (s)", "min_dwell_seconds"),
+          ]:
+              print(f"| {label} | {old[key]:.2f} | {new[key]:.2f} |")
+          print()
+          print("The canonical voice-synchronous subtitles and the master MP4 were not modified.")
+          PY
+
+      - name: Upload reproducible subtitle package
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-run30-readable-subtitles
+          path: output/
+          if-no-files-found: error
+          retention-days: 90
