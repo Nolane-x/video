@@ -271,3 +271,15 @@ Blocking / P1 review items to inspect and repair before a new Release:
 - Countdown continuity: the spoken line for `s018` says “con số chín giây”, while the shot HUD is configured with `timer=7` (the sequence already shows 10, 9, 8 in `s015–s017`). Correct the spoken line / corresponding cue and regenerate the affected narration job so voice and timer agree. The line also describes a wrist display, but the current timer overlay is fixed at the upper-left; consider a visible wrist device for a stronger visual match.
 
 These findings do not invalidate the technical pipeline pass; they do block artistic approval and permanent publication of the expanded candidate until addressed. Keep the existing run-20 release/master untouched. Re-run source checks and motion QA after fixes, then leave `visual_approval: false` until full-length viewing is complete.
+
+
+## Time Stop 10s — reproducible readable-subtitle tooling (2026-11-21)
+
+- Added standard-library subtitle builder: video-projects/time-stop-10s/tools/extend_readable_subtitles.py. It preserves cue text and starts, extends display to 0.12s before the next narration cue, ends the final cue at the exact video duration, and emits SRT, WebVTT and a JSON QA report.
+- Added unit tests at video-projects/time-stop-10s/tests/test_extend_readable_subtitles.py for multiline parsing, preserved starts/text, dwell extension, and cue-count rejection.
+- Added .github/workflows/build-time-stop-run30-readable-subtitles.yml. It downloads the immutable render artifact from Run 30 (44873063135, artifact time-stop-10s-h2-30), runs the tests, generates the alternate track, checks 84 cues/zero overlaps/no text changes and uploads a checksum-verified package with 90-day retention.
+- Workflow is intentionally isolated to review/time-stop-10s-3d-fixes; marker .github/workflows/enable-build-time-stop-run30-readable-subtitles.txt was committed as c377e2fea862bddca3837c6bf2249686dc0cb152 to trigger it.
+- Tooling commits: builder 0ba77d72a5dc295ff4a66c10076fb0ac24679612; workflow 48eb747a37e967a25ec15cf5a4d168d735d921f5; unit tests 661660eb0f838d6dcfd3c0a3e021eae6fed4d336.
+- Verification gate: the workflow file and marker are committed, but the Actions run ID, job conclusion and resulting artifact have not yet been independently confirmed. Do not label this CI build as passed until the actual run and artifact are inspected.
+- This work does not edit the canonical subtitle files, narration audio, scene source, master MP4, or any release. It does not trigger the video render path.
+
