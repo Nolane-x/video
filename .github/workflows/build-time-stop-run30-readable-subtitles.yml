@@ -6,6 +6,9 @@ on:
       - review/time-stop-10s-3d-fixes
     paths:
       - ".github/workflows/enable-build-time-stop-run30-readable-subtitles.txt"
+      - "video-projects/time-stop-10s/tools/extend_readable_subtitles.py"
+      - "video-projects/time-stop-10s/tests/test_extend_readable_subtitles.py"
+      - ".github/workflows/build-time-stop-run30-readable-subtitles.yml"
   workflow_dispatch:
     inputs:
       source_run_id:
@@ -81,6 +84,9 @@ jobs:
           assert report["text_changes"] == 0, report
           assert report["extended"]["min_dwell_seconds"] >= 4.0, report
           assert report["extended"]["max_chars_per_second"] < report["original"]["max_chars_per_second"], report
+          assert report["wrapped_variant"]["max_line_characters"] <= 42, report
+          assert report["wrapped_variant"]["max_observed_lines_per_cue"] <= 2, report
+          assert report["wrapped_variant"]["word_text_changes"] == 0, report
 
           # Golden SHA-256 values from the already reviewed Run-30 add-on.
           expected = {
@@ -94,15 +100,15 @@ jobs:
           print("All subtitle invariants and golden SHA-256 comparisons passed.")
           PY
           cat > output/README.md <<'EOF'
-          # Run-30 readable Vietnamese subtitle alternative
+          # Run-30 readable Vietnamese subtitle alternatives
 
-          This is a reproducible extended-dwell subtitle track generated from the immutable Run-30 render artifact.
+          This package is reproducibly generated from the immutable Run-30 render artifact.
 
           - All 84 original Vietnamese cue texts and cue start times are preserved.
-          - The original voice-synchronous SRT is included for comparison.
-          - Each alternate cue remains visible until 0.12 seconds before the next narration cue; the final cue ends at 378.0 seconds.
-          - The alternative track has no overlaps and does not change the voiceover, WAV, story timing or master MP4.
-          - The canonical voice-synchronous SRT/VTT remain unchanged. This package is an optional slower-reading track.
+          - The extended-dwell alternative keeps each cue visible until 0.12 seconds before the next narration cue; the final cue ends at 378.0 seconds.
+          - An additional wrapped alternative limits each line to 42 characters and each cue to at most two lines. It wraps only at word boundaries and preserves the words and punctuation.
+          - Both alternatives have zero cue overlap and do not change the voiceover, WAV, story timing or master MP4.
+          - The canonical voice-synchronous SRT/VTT remain unchanged.
 
           Run the source builder with Python 3.12 or newer. It uses only the Python standard library.
           EOF
@@ -112,6 +118,8 @@ jobs:
               time-stop-10s-original-voice-sync.srt \
               time-stop-10s-readable-vi.srt \
               time-stop-10s-readable-vi.vtt \
+              time-stop-10s-readable-wrapped-vi.srt \
+              time-stop-10s-readable-wrapped-vi.vtt \
               subtitle-readability-qa.json > SHA256SUMS.txt
             sha256sum -c SHA256SUMS.txt
             zip -q -r time-stop-10s-run30-readable-subtitles.zip \
@@ -119,6 +127,8 @@ jobs:
               time-stop-10s-original-voice-sync.srt \
               time-stop-10s-readable-vi.srt \
               time-stop-10s-readable-vi.vtt \
+              time-stop-10s-readable-wrapped-vi.srt \
+              time-stop-10s-readable-wrapped-vi.vtt \
               subtitle-readability-qa.json
             unzip -t time-stop-10s-run30-readable-subtitles.zip
           )
@@ -148,6 +158,12 @@ jobs:
               ("Minimum dwell (s)", "min_dwell_seconds"),
           ]:
               print(f"| {label} | {old[key]:.2f} | {new[key]:.2f} |")
+          wrapped = q["wrapped_variant"]
+          print()
+          print("## Wrapped alternative")
+          print(f"- Maximum line length: {wrapped['max_line_characters']} / 42 characters")
+          print(f"- Maximum lines per cue: {wrapped['max_observed_lines_per_cue']} / 2")
+          print(f"- Word-text changes: {wrapped['word_text_changes']}")
           print()
           print("The canonical voice-synchronous subtitles and the master MP4 were not modified.")
           PY
