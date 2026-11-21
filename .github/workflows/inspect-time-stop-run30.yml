@@ -140,7 +140,7 @@ jobs:
           PY
           echo "MASTER=$MASTER" >> "$GITHUB_ENV"
 
-      - name: Extract 24 master frames and build a labelled contact sheet
+      - name: Extract 32 master frames and build a labelled contact sheet
         run: |
           set -euo pipefail
           mkdir -p review/master-frames
