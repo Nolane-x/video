@@ -227,3 +227,13 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 
 
 Next handoff must continue from Run-30 subtitle automation verification, not from the superseded P1 list.
+
+
+### Final source-overlap guard (2026-11-21)
+- Builder additionally rejects an original SRT whose final cue exceeds the video end or whose source cues overlap; QA reports source_overlap_count.
+- Unit test now explicitly covers overlapping source SRT rejection. The workflow asserts source_overlap_count=0 as well as output overlap_count=0.
+- Latest commits: source guard 834e81d45191c37f1f3d3bd93d551ce4d6604e2b; test 7c76f3d39ca1a0482124702e170a7b486fb3c65b; workflow enforcement cdd10c28b2e2bf1f62350e34ded4573b951b733d.
+- Workflow is configured to rerun when the builder or unit tests change. Run-level confirmation is still a separate gate; do not assume the marker-triggered Actions job has passed.
+
+
+Next action is to verify the marker-triggered Actions run and inspect the uploaded ZIP/manifest. CI execution and the full human film review are still not confirmed.
