@@ -68,8 +68,8 @@ jobs:
           fps = next(s["r_frame_rate"] for s in meta["streams"] if s.get("codec_type") == "video")
           log = Path("audit/black-scan.log").read_text(errors="replace")
           pattern = re.compile(
-              r"black_start:(?P<start>[-+0-9.eE]+)\\s+"
-              r"black_end:(?P<end>[-+0-9.eE]+)\\s+"
+              r"black_start:(?P<start>[-+0-9.eE]+)\s+"
+              r"black_end:(?P<end>[-+0-9.eE]+)\s+"
               r"black_duration:(?P<duration>[-+0-9.eE]+)"
           )
           intervals = []
@@ -111,7 +111,7 @@ jobs:
               )
           }
           Path("audit/black-interval-report.json").write_text(
-              json.dumps(report, ensure_ascii=False, indent=2) + "\\n"
+              json.dumps(report, ensure_ascii=False, indent=2) + "\n"
           )
           summary = [
               "# Run-30 sustained-black scan",
@@ -132,7 +132,7 @@ jobs:
               )
           if not intervals:
               summary.append("| — | — | — | No sustained black interval ≥0.5s detected |")
-          Path("audit/BLACK-SCAN-SUMMARY.md").write_text("\\n".join(summary) + "\\n")
+          Path("audit/BLACK-SCAN-SUMMARY.md").write_text("\n".join(summary) + "\n")
           print(json.dumps(report, ensure_ascii=False, indent=2))
           PY
 
