@@ -27,25 +27,28 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      SOURCE_RUN_ID: \${{ github.event.inputs.source_run_id || '44873063135' }}
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44873063135' }}
     steps:
       - name: Check out the subtitle builder
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.ref_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      - name: Run subtitle-builder unit tests
+        run: python -m unittest discover -s video-projects/time-stop-10s/tests -p 'test_*.py' -v
+
       - name: Download the immutable Run-30 source artifact
         uses: actions/download-artifact@v4
         with:
           name: time-stop-10s-h2-30
-          repository: \${{ github.repository }}
-          run-id: \${{ github.event.inputs.source_run_id || '44873063135' }}
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.inputs.source_run_id || '44873063135' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: source-artifact
 
       - name: Generate the alternate SRT/VTT and enforce subtitle invariants
