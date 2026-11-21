@@ -283,3 +283,18 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - Verification gate: the workflow file and marker are committed, but the Actions run ID, job conclusion and resulting artifact have not yet been independently confirmed. Do not label this CI build as passed until the actual run and artifact are inspected.
 - This work does not edit the canonical subtitle files, narration audio, scene source, master MP4, or any release. It does not trigger the video render path.
 
+
+
+## Subtitle automation hardening — exact parity and local smoke-test (2026-11-21)
+
+- Corrected the WebVTT writer to omit optional numeric cue identifiers, matching the already-reviewed add-on exactly. The SRT and VTT generated from the Run-30 original now match the prepared local SRT and VTT byte-for-byte.
+- Added a regression test for WebVTT header/timing formatting and literal newline handling. The test uses chr(10) to avoid escaped-newline ambiguity.
+- Expanded the workflow push filter so changes to the builder or its tests trigger the subtitle QA workflow; the video render workflow remains unaffected.
+- Added golden SHA-256 assertions for:
+  - Original voice-synchronous SRT: 7e0872b4fa958c089f9b44845530fb103a57eb25bd3527aacec16b9c1f1fefd4
+  - Extended-dwell SRT: 53e322292f963249731cea9c6ed1ee67bef4c101a07ffb8a4d2b3ff48b989caa
+  - Extended-dwell VTT: e32125cab18293d4f32dca21cb0e6e50b39bc07ab9103233324e1c433eae4deb
+- Local reference smoke test: 4/4 checks passed; 84 cues; zero overlaps; exact SRT/VTT byte parity; 4.38s minimum extended dwell; extended median 9.59 chars/s versus original 16.95 chars/s.
+- Latest hardening commits: script f407c94fa078ac430a93da8471b3027b37698925; unit test 0f4fdaedeed58b62edacfd6c9979b11998ef65b0; workflow trigger filter 60e7e507d1ac8d31274103cdf6f80d6bf34936e5; golden hashes efd104aa214926257995f816950e3c4491a00d77.
+- The GitHub Actions workflow run and its artifact still require direct run-level confirmation before being reported as green. The local smoke-test does not substitute for CI execution or the full-film human screening gate.
+
