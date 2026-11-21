@@ -78,6 +78,7 @@ jobs:
           assert report["cue_count"] == 84, report
           assert report["preserves_original_text_and_cue_starts"] is True, report
           assert report["preserves_voiceover_timing"] is True, report
+          assert report["source_overlap_count"] == 0, report
           assert report["overlap_count"] == 0, report
           assert report["text_changes"] == 0, report
           assert report["extended"]["min_dwell_seconds"] >= 4.0, report
