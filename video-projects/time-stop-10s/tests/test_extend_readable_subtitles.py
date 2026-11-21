@@ -53,7 +53,35 @@ class ExtendReadableSubtitlesTests(unittest.TestCase):
             self.assertEqual(report["overlap_count"], 0)
             self.assertEqual(report["text_changes"], 0)
             self.assertTrue((output / "time-stop-10s-readable-vi.vtt").is_file())
+            self.assertTrue((output / "time-stop-10s-readable-wrapped-vi.srt").is_file())
+            self.assertTrue((output / "time-stop-10s-readable-wrapped-vi.vtt").is_file())
+            wrapped = MODULE.parse_srt(
+                (output / "time-stop-10s-readable-wrapped-vi.srt").read_text(encoding="utf-8")
+            )
+            self.assertEqual([cue.start for cue in extended], [cue.start for cue in wrapped])
+            self.assertEqual([cue.end for cue in extended], [cue.end for cue in wrapped])
+            self.assertEqual(
+                [" ".join(cue.text.split()) for cue in extended],
+                [" ".join(cue.text.split()) for cue in wrapped],
+            )
+            self.assertTrue(all(max(map(len, cue.text.splitlines())) <= 42 for cue in wrapped))
+            self.assertTrue(all(len(cue.text.splitlines()) <= 2 for cue in wrapped))
+            self.assertLessEqual(report["wrapped_variant"]["max_line_characters"], 42)
+            self.assertLessEqual(report["wrapped_variant"]["max_observed_lines_per_cue"], 2)
+            self.assertEqual(report["wrapped_variant"]["word_text_changes"], 0)
             self.assertTrue((output / "subtitle-readability-qa.json").is_file())
+
+    def test_wrap_text_preserves_words_and_limits_each_line_to_42(self):
+        original = "Cậu hiểu rằng dừng thời gian không thể thay thế sự quan tâm."
+        wrapped = MODULE.wrap_text(original, max_line_chars=42, max_lines=2)
+        lines = wrapped.splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(all(len(line) <= 42 for line in lines))
+        self.assertEqual(" ".join(wrapped.split()), original)
+
+    def test_wrap_text_rejects_more_than_two_lines(self):
+        with self.assertRaisesRegex(ValueError, "2-line limit"):
+            MODULE.wrap_text("one two three four five", max_line_chars=4, max_lines=2)
 
     def test_vtt_omits_numeric_identifiers_and_keeps_webvtt_timing(self):
         cues = [MODULE.Cue(1, 0.12, 4.50, "Một ngày bình thường.")]
