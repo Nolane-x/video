@@ -58,9 +58,9 @@ class ExtendReadableSubtitlesTests(unittest.TestCase):
     def test_vtt_omits_numeric_identifiers_and_keeps_webvtt_timing(self):
         cues = [MODULE.Cue(1, 0.12, 4.50, "Một ngày bình thường.")]
         rendered = MODULE.render_vtt(cues)
-        self.assertTrue(rendered.startswith("WEBVTT\\n\\n"))
+        self.assertTrue(rendered.startswith("WEBVTT" + chr(10) + chr(10)))
         self.assertIn("00:00:00.120 --> 00:00:04.500", rendered)
-        self.assertNotIn("\\n1\\n", rendered)
+        self.assertNotIn(chr(10) + "1" + chr(10), rendered)
 
     def test_rejects_wrong_expected_cue_count(self):
         with tempfile.TemporaryDirectory() as tmp:
