@@ -471,3 +471,14 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Detailed report: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
 - Dense 252-frame samples and contact sheets were visually inspected. The four principal action sequences and closing embrace remain readable; static poses in freeze beats are intended. This remains sampled QA only.
 - Keep `visual_approval: false`; no uninterrupted full-film watch-through with audio has been completed. No new render is needed for these QA-only changes. Preserve Run-28 draft and public Run-20 release.
+
+
+## Time Stop 10s — Run 35 cinematic 3D overhaul in progress (2026-11-21)
+
+- Isolated candidate branch: film/time-stop-10s-cinematic-3d-pass, based on Run32 source SHA d2b6bf694be2139400e58145ba263a140ee7c1e6.
+- New additive shared rig figureCinematic() in integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js adds balanced proportions, shaped shoulders/pelvis/neck, articulated arms/legs, hand/foot details, hoodie/hair/headwear/face detail and breathing/lean/blink/stride performance. Legacy figure() is unchanged for other projects.
+- Custom 3D scenes updated on this branch to use the new rig. Key-sequence scenes add a modest dolly/arc camera move, a shaped basketball drop/bounce/roll, book-fall and hand-off arcs, and adjusted key lighting. Street rescue adds follow camera pan/dolly, animated bicycle crank and a billboard pivot re-anchored to its support.
+- Render Run #35: https://github.com/Nolane-x/video/actions/runs/44918426729, commit 398b04e0b7d15df41f6f0c28878634a16dd96235. VoiceStudio job succeeded (84 segments + verified watermark). H2 initialized all 84 shots and copied new scene modules, all-shot renderer scan passed, six contact sheets and 30s preview succeeded. The 1080p60 master render is still in progress; mix/package/upload pending.
+- Independent QA workflow prepared on review branch: .github/workflows/inspect-time-stop-run35.yml, commit 7dddb9c0f02832e7fb6c22a7eaea906b3f5bc6fa. It validates the complete MP4 decode and SHA manifest, subtitle↔narration start/text alignment, 252 per-shot stills, four full-mix action sequences and contact sheets. Add trigger marker only after Run35 artifact is uploaded.
+- Detailed plan/rubric: docs/reviews/time-stop-10s-cinematic-3d-pass.md.
+- Preserve Run30 and Run32. Run35 is an unapproved candidate; keep visual_approval=false. After render, review 3D sequences against proportions, motion, prop physics, camera framing, lighting and shot continuity before deciding whether another 3D polish pass is needed.
