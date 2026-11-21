@@ -1,0 +1,1 @@
+Enable independent FFmpeg decode, frame-count validation, per-shot sampling and action-clip QA for render run 44901911523 / artifact time-stop-10s-h2-32. Keep visual_approval false until full human watch-through.
