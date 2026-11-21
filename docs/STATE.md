@@ -298,3 +298,18 @@ These findings do not invalidate the technical pipeline pass; they do block arti
 - Latest hardening commits: script f407c94fa078ac430a93da8471b3027b37698925; unit test 0f4fdaedeed58b62edacfd6c9979b11998ef65b0; workflow trigger filter 60e7e507d1ac8d31274103cdf6f80d6bf34936e5; golden hashes efd104aa214926257995f816950e3c4491a00d77.
 - The GitHub Actions workflow run and its artifact still require direct run-level confirmation before being reported as green. The local smoke-test does not substitute for CI execution or the full-film human screening gate.
 
+
+
+## Branch reconciliation — earlier 3D blocker list superseded (2026-11-21)
+
+The earlier P1 list in this review-branch document described the pre-correction scene state. Do not treat that list as a current defect queue or reapply the fixes blindly. The authoritative production/source branch is film/time-stop-10s-3d-review-fixes, whose recorded corrective commits include:
+- 101547139501d908ff2aba710bca835ac3e9962e — basketball camera and prop blocking corrections.
+- 2ad3f03bce89f3e8d752299837a54322fbda1687 — articulated carry pose in the Three.js rig.
+- 0b43d44d85a666d7b5df23e119bde2ca6badfaff — countdown narration/HUD consistency and corrected source head, including explicit mother bun geometry.
+- f630e863c2b118cdb3e6c7ecc28fb4479783059 — basketball release contact aligned with the friend's hand.
+- 57c6ab294bba89acfdd0e79c20c9f817febf3aa9 — Run-30 s002 alarm-clock camera reframing.
+
+Run-28 selected-shot review and Run-30 dense sampling both recorded the basketball close-up within frame, hand-off readable, and hallway book transfer/recovery readable. No new source-level blocker from the old list was confirmed in the Run-30 sampled review. Reopen a scene only when new evidence identifies a concrete fault.
+
+Run-30 remains a draft candidate; the separate, still-required gate is an uninterrupted full-film watch-through with sound. This review branch additionally hosts the Run-30 subtitle/black-scan inspection automation and must not be confused with the production source branch.
+
