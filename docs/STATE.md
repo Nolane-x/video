@@ -459,3 +459,15 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Render trigger was narrowed in commit `ed6a79870fbd1a1eb6575f4deb1c33df38e12bc5`: only `video-projects/time-stop-10s/scripts/**` and `video-projects/time-stop-10s/scenes/**` now trigger source renders, avoiding README-only rerenders. The change commit used `[skip ci]`; no extra render was triggered.
 - Keep `visual_approval: false`. Do not publish this Draft Release until a human has watched the entire film uninterrupted with sound. Preserve Run-28 draft and public Run-20 release unchanged.
 - Next step: uninterrupted full-film human review with audio. If that reveals fixes, update only the affected source scenes/scripts, rerender once, repeat technical QA, and make a new candidate rather than overwriting this immutable Run-30 draft.
+
+
+## Time Stop 10s — post-render black scan and subtitle readability (2026-11-21)
+
+- New sustained-black audit workflow: https://github.com/Nolane-x/video/actions/runs/44886988249 — success. It scans the full 378s immutable Run-30 master at 4fps after 160×90 grayscale downscaling. Detector: `blackdetect=d=0.5:pix_th=0.06:pic_th=0.985`.
+- Exactly one near-black interval was detected: **373.50–374.75s, duration 1.25s**. This matches the intentional s084 charcoal end card, not a missing-image issue: `build_story.py` defines a black background, 0.7s dip entry and a cyan pulse shrinking to a dot; end-card text is “HÃY SỐNG TRỌN VẸN TỪNG GIÂY.” No unexpected black interval >=1.5s was detected.
+- Audit artifact: `time-stop-10s-run30-black-scan`, ID `14700104314`. Workflow now recognizes 373.5–378.0s as a designed dark end-card range for future scans.
+- Subtitle readability audit: original 84-cue SRT has median 16.95 chars/s and max 20.09 chars/s. A supplementary extended-dwell SRT/VTT variant was generated without changing the master, voice WAV, narration timing or canonical subtitle files. It preserves all texts and starts, extends each cue to 0.12s before the next cue (final cue through 378s), gives 4.38s minimum dwell, lowers median to 9.59 chars/s and max to 13.70 chars/s, with zero overlaps.
+- Downloadable add-on: `/mnt/data/time-stop-10s-run30-readable-subtitles.zip`. The complete review package was rebuilt locally as `/mnt/data/time-stop-10s-run30-review-package-complete.zip`; ZIP integrity and all 80 checksum entries passed.
+- Detailed report: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
+- Dense 252-frame samples and contact sheets were visually inspected. The four principal action sequences and closing embrace remain readable; static poses in freeze beats are intended. This remains sampled QA only.
+- Keep `visual_approval: false`; no uninterrupted full-film watch-through with audio has been completed. No new render is needed for these QA-only changes. Preserve Run-28 draft and public Run-20 release.
