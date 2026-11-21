@@ -79,16 +79,24 @@ jobs:
               known = [54.0, 162.0, 270.0]
               nearest = min(known, key=lambda x: abs(x - midpoint)) if known else None
               near_transition = nearest is not None and abs(nearest - midpoint) <= 2.5
+              # The last shot is deliberately a charcoal end card beginning at 373.5s.
+              near_end_card = start < 378.0 and end > 373.5
+              classification = (
+                  "designed-dark-end-card" if near_end_card else
+                  "near-known-transition" if near_transition else
+                  "other-black-interval"
+              )
               intervals.append({
                   "start_seconds": round(start, 3),
                   "end_seconds": round(end, 3),
                   "duration_seconds": round(length, 3),
                   "nearest_known_transition_seconds": nearest if near_transition else None,
-                  "classification": "near-known-transition" if near_transition else "other-black-interval"
+                  "classification": classification
               })
           unexpected = [
               x for x in intervals
-              if x["duration_seconds"] >= 1.5 and x["classification"] != "near-known-transition"
+              if x["duration_seconds"] >= 1.5
+              and x["classification"] not in ("near-known-transition", "designed-dark-end-card")
           ]
           report = {
               "status": "scan-complete",
@@ -102,6 +110,7 @@ jobs:
                   "scope": "full video timeline; decoder reads the complete source"
               },
               "known_transition_centres_seconds": [54.0, 162.0, 270.0],
+              "known_designed_dark_ranges_seconds": [{"start": 373.5, "end": 378.0, "purpose": "charcoal final end card"}],
               "detected_intervals": intervals,
               "unexpected_intervals_at_least_1_5s": unexpected,
               "interpretation": (
