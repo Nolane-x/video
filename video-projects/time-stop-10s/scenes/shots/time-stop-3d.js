@@ -152,27 +152,8 @@ function overlay(g, t, info, freeze = false, title = '') {
     g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top';
     g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 178); g.restore();
   }
-  const line = String(info?.line || '').trim();
-  if (line) {
-    g.save();
-    const fontSize = 37, maxWidth = E.W - 360, rows = [];
-    g.font = `600 ${fontSize}px ${FONTS.body}`;
-    let row = '';
-    for (const word of line.split(/\s+/)) {
-      const next = row ? `${row} ${word}` : word;
-      if (g.measureText(next).width > maxWidth && row) { rows.push(row); row = word; }
-      else row = next;
-    }
-    if (row) rows.push(row);
-    const visible = rows.slice(0, 2), lineHeight = 46, plateH = Math.max(66, visible.length * lineHeight + 24);
-    const top = E.H - 124 - plateH / 2;
-    g.fillStyle = 'rgba(5,10,18,0.82)'; g.beginPath();
-    g.roundRect(150, top, E.W - 300, plateH, 17); g.fill();
-    g.strokeStyle = 'rgba(150,205,240,0.42)'; g.lineWidth = 1.5; g.stroke();
-    g.font = `600 ${fontSize}px ${FONTS.body}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f7f8fa';
-    visible.forEach((txt, i) => g.fillText(txt, E.W / 2, top + plateH / 2 + (i - (visible.length - 1) / 2) * lineHeight));
-    g.restore();
-  }
+  // The camera-locked caption plate is authored once in makeStreet(info).
+  // Do not draw the same narration line again on the 2D overlay canvas.
 }
 
 function reg(id, behavior, cameraMode = 'wide', frozen = false, focus = null) {
