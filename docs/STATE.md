@@ -349,3 +349,16 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - The pinned CI run executed 5 unit tests; all passed in 0.087s: multiline SRT parsing, start/text-preserving extension, source overlap rejection, cue-count rejection, and WebVTT syntax/format.
 - Detailed action metadata blob hashes and the test run are recorded in docs/reviews/time-stop-10s-run30-subtitle-automation-qa.md.
 
+
+
+## Wrapped subtitle variant — 42-character line layout (2026-11-21)
+
+- Source audit found 39/84 cues above 42 characters on one line (maximum 60). Added an optional word-boundary-wrapped SRT/VTT alternative, max 42 characters per line and max 2 lines/cue.
+- The wrapped alternative has 84 cues; 39 use two lines; no word/punctuation changes; cue timings match the extended-dwell version; zero overlaps.
+- Golden hashes: wrapped SRT cd1c0aa3979f97af8d4d530f3489f1ca1bc8333bb1c7811411153a9d8607018d; wrapped VTT fe98852fd6519947c12117f6297b228b5a1c1a38c4f08e634a7c9de4a4d629f6.
+- CI run 44892965218 exposed a mistaken test fixture (word length 5 against a 4-character limit), not a production wrapping defect. Fixture corrected; run 44893084157 passed all 7 tests and generated the wrapped package. Golden hashes then pinned.
+- Final CI run 44893210135 passed all 7 unit tests and all 8 functional steps. Artifact 14702613946 (32,032 bytes); SHA-256 dd505c856cdebc5987179225c8135a4d430cebe9cdfdb51a526d3ef905930974. Download link: https://github.com/Nolane-x/video/actions/runs/44893210135/artifacts/14702613946
+- Downloaded artifact and nested ZIP pass integrity; each manifest verifies 7/7 items; all 6 subtitle golden hashes match.
+- Final consolidated local review pack: /mnt/data/time-stop-10s-run30-review-package-final.zip, 60,723,066 bytes, SHA-256 33495e050d31521db7be0f9afeca3ca4baa0588e901e0cede1859a64f5f22d3f; its root manifest verifies 88/88 files.
+- These are optional subtitle tracks only. Master MP4, narration, canonical subtitles and release state remain unchanged; visual_approval stays false.
+
