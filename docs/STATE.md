@@ -321,3 +321,23 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - Latest commits: source guard 834e81d45191c37f1f3d3bd93d551ce4d6604e2b; test 7c76f3d39ca1a0482124702e170a7b486fb3c65b; workflow enforcement cdd10c28b2e2bf1f62350e34ded4573b951b733d.
 - Workflow is configured to rerun when the builder or unit tests change. Run-level confirmation is still a separate gate; do not assume the marker-triggered Actions job has passed.
 
+
+
+## Run-30 readable subtitle automation — fully verified (2026-11-21)
+
+- CI run 44890042017 succeeded on all 8 functional workflow steps; artifact 14701638125 (20,391 bytes) uploaded successfully.
+- After pinning all four GitHub Actions dependencies to immutable Node 24 compatible release commits, CI run 44892508009 also succeeded on all 8 functional steps.
+- Immutable action refs now used:
+  - actions/checkout v7.0.1: 3d3c42e5aac5ba805825da76410c181273ba90b1
+  - actions/setup-python v7.1.0: 6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+  - actions/download-artifact v8.0.2: 9000827ccba6bdab643e8b6fd33ac0654aef8333
+  - actions/upload-artifact v7.0.2: cf430e030ddbb5b0abf93d22962f4752f3646cd9
+- New pinned workflow commit: 78cff3d71f8db80a5686e973fd8458704baf1d44.
+- Final CI artifact: ID 14702017799, 20,390 bytes, expires 2027-02-19. Download: https://github.com/Nolane-x/video/actions/runs/44892508009/artifacts/14702017799
+- Artifact digest from GitHub and local outer ZIP SHA-256 match exactly: f9f1752f6ec1ddd41f75a81e26d0cce2ff67f44d16c635bc1b2acef8eaadf71d.
+- Downloaded output passed outer and nested ZIP integrity tests; outer and inner manifests each verified 5/5 entries. The original and alternate SRT/VTT match the approved golden hashes byte-for-byte.
+- QA confirms 84 cues, zero source overlaps, zero output overlaps, zero text changes, preserved cue starts/voice timing, 4.38s minimum dwell, 9.59 chars/s median (down from 16.95).
+- The pinned action run logs contain no Node.js 20 deprecation warning and no punycode warning.
+- Detailed report: docs/reviews/time-stop-10s-run30-subtitle-automation-qa.md.
+- No master MP4, narration WAV, canonical subtitle, story source, or release state changed. Run-30 remains a draft; visual_approval remains false pending the uninterrupted full-film screening.
+
