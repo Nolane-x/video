@@ -71,7 +71,14 @@ function overlay(g, t, info, frozen = false) {
     }
     if (row) rows.push(row);
     const visible = rows.slice(0, 2), lineHeight = 46;
-    const h = Math.max(66, visible.length * lineHeight + 24), top = E.H - 124 - h / 2;
+    const h = Math.max(66, visible.length * lineHeight + 24);
+    // Keep the subtitle plate above the active image's lower letterbox bar.
+    const ratio = E.cfg.bars === 'scope' ? 2.39
+      : E.cfg.bars === 'wide' ? 2.0
+      : typeof E.cfg.bars === 'number' ? E.cfg.bars : 0;
+    const bar = !E.vertical && ratio ? Math.max(0, (E.H - E.W / ratio) / 2) : 0;
+    const safeBottom = E.H - bar;
+    const top = safeBottom - 28 - h;
     g.fillStyle = 'rgba(5,10,18,0.86)'; g.beginPath(); g.roundRect(150, top, E.W - 300, h, 17); g.fill();
     g.strokeStyle = 'rgba(150,205,240,0.48)'; g.lineWidth = 1.5; g.stroke();
     g.font = '600 ' + fontSize + 'px ' + FONTS.body; g.textAlign = 'center';
