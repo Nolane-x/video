@@ -81,7 +81,7 @@ class ExtendReadableSubtitlesTests(unittest.TestCase):
 
     def test_wrap_text_rejects_more_than_two_lines(self):
         with self.assertRaisesRegex(ValueError, "2-line limit"):
-            MODULE.wrap_text("one two three four five", max_line_chars=4, max_lines=2)
+            MODULE.wrap_text("one two six ten", max_line_chars=4, max_lines=2)
 
     def test_vtt_omits_numeric_identifiers_and_keeps_webvtt_timing(self):
         cues = [MODULE.Cue(1, 0.12, 4.50, "Một ngày bình thường.")]
