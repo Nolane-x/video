@@ -512,3 +512,14 @@ Preserve the Run-28 draft release and public Run-20 release. Never overwrite eit
 - Independent inspection workflow is active: https://github.com/Nolane-x/video/actions/runs/44914373793. Poll its job and artifacts. It must pass full master FFmpeg decode, 22,680-frame/60fps metadata, exact master SHA, subtitle count/overlap checks, 252-frame per-shot sample, and four audio/video action clips before recording independent QA as green.
 - Do not mistake the full local decode timeout for a pass; audio-only and keyframe-only local checks passed, and CI's EBU R128 analysis reports 22,680 processed video frames. The dedicated inspector will provide the independent full decode.
 - Keep `visual_approval=false`; the full 6m18s continuous watch-through with sound remains the only artistic release gate. Do not publish or overwrite Run 30 or any existing release.
+
+
+## Handoff — Run 32 independent QA finished (2026-11-21)
+
+- Inspector Run 44914373793: https://github.com/Nolane-x/video/actions/runs/44914373793 — success.
+- Full MP4 video+audio decoded independently by FFmpeg; exact stream metadata, 22,680 frames and master SHA matched. 84 SRT cues / narration segments cross-check cleanly with no cue overlaps.
+- 252 stills (3 per each of 84 shots), 32 key frames, six dense sheets generated; all six sheets were visually checked. Caption plate at s014 remains above lower scope bar; redundant street caption at s063 is gone.
+- Four full-mix clips passed full decode and exact stream validation: kitchen 54–99s (2,700 frames), basketball 112.5–148.5s (2,160), hallway/books 162–189s (1,620), final rescue 270–324s (3,240). All 1080p60 with AAC 48kHz stereo.
+- Artifact `time-stop-10s-run32-independent-inspection` ID 14711346655, 58,746,924 bytes, digest `15e31ac571fa986b098218cf8a252d371174f9a9bee02c9089348d6e9a156080`; all 50 outer checksum lines and nested archive integrity passed.
+- Full evidence is in `docs/reviews/time-stop-10s-run32-caption-fix-qa.md`.
+- Keep `visual_approval=false`. Technical QA and sampled visual inspection pass; do not publish until a person watches the entire 6m18s continuously with audio. Keep Run 30 / Run 28 drafts and public Run 20 unchanged.
