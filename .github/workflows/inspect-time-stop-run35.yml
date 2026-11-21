@@ -51,6 +51,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: source-artifact
 
+      - name: Download immutable Run 32 baseline render artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: time-stop-10s-h2-32
+          run-id: 44901911523
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: baseline-artifact
+
       - name: Unpack review ZIP and verify original SHA256 manifest
         shell: bash
         run: |
@@ -194,6 +202,48 @@ jobs:
           sheet.save("review/master-contact-sheet.jpg",quality=92)
           PY
 
+      - name: Create matched Run 32 versus Run 35 3D comparison sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASELINE="$(find baseline-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
+          test -n "$BASELINE"
+          echo "BASELINE_MASTER=$BASELINE" >> "$GITHUB_ENV"
+          mkdir -p review/3d-comparisons
+          python - <<'PY'
+          import os, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          candidate=Path(os.environ["MASTER"])
+          baseline=Path(os.environ["BASELINE_MASTER"])
+          shots=list(range(13,23))+list(range(26,34))+list(range(37,43))+list(range(53,73))
+          assert len(shots)==44, len(shots)
+          thumbs=[]
+          for shot in shots:
+            ts=(shot-1)*4.5+2.25
+            pair=[]
+            for label,source in [("Run 32",baseline),("Run 35",candidate)]:
+              out=Path("review/3d-comparisons")/f"s{shot:03d}-{label.replace(' ','-')}.jpg"
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(ts),"-i",str(source),"-frames:v","1","-vf","scale=320:180","-q:v","3",str(out)],check=True)
+              pair.append(Image.open(out).convert("RGB"))
+            thumbs.append((shot,ts,pair))
+          w,h,pad,lab=320,180,10,24
+          per_page=8
+          for page in range((len(thumbs)+per_page-1)//per_page):
+            rows=min(4,len(thumbs)-page*per_page)
+            canvas=Image.new("RGB",(4*w+5*pad,rows*(h+lab+pad)+pad),(16,18,24))
+            draw=ImageDraw.Draw(canvas)
+            for local,(shot,ts,pair) in enumerate(thumbs[page*per_page:(page+1)*per_page]):
+              row=local//2; side=(local%2)*2
+              x0=pad+side*(w+pad); y=pad+row*(h+lab+pad)
+              for idx,(label,img) in enumerate(zip(("Run 32","Run 35"),pair)):
+                x=x0+idx*(w+pad)
+                draw.text((x+2,y),f"s{shot:03d} · {label} · {ts:.2f}s",(238,241,246))
+                canvas.paste(img,(x,y+lab))
+            canvas.save(Path("review/3d-comparisons")/f"before-after-3d-{page+1:02d}.jpg",quality=92)
+          print({"matched_3d_shots":len(thumbs),"comparison_pages":(len(thumbs)+per_page-1)//per_page,"baseline":"Run 32","candidate":"Run 35","sample":"shot midpoint"})
+          PY
+
       - name: Generate 252-frame dense sample — three moments per story shot
         shell: bash
         run: |
@@ -267,7 +317,7 @@ jobs:
           Source render: GitHub Actions run 44918426729, artifact time-stop-10s-h2-35.
           This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
 
-          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Sampled proof is not a substitute for a continuous full-film review.
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run35. Sampled proof is not a substitute for a continuous full-film review.
           Keep visual_approval false until the full 6m18s film is watched with sound.
           EOF
           (
