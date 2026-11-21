@@ -439,3 +439,23 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Prepared Run-30 independent inspector on review/time-stop-10s-3d-fixes: .github/workflows/inspect-time-stop-run30.yml, commit 9155efe4ad453badb19ea334fa79ce0e9085a9a9. It targets source run 44873063135 and artifact time-stop-10s-h2-30, generates 32 key frames, four full-mix sequences including final rescue, and the three-per-shot 252-frame dense sample.
 - Prepared isolated Run-30 draft archive on film branch: .github/workflows/archive-time-stop-10s-expanded-run30.yml, commit 9c92c57e0b584b5abbb4b0c9389f1ff2d543d866. It targets run 44873063135, artifact time-stop-10s-h2-30 and unique draft tag time-stop-10s-expanded-3d-review-run30. Its marker must not be added before independent technical inspection succeeds.
 - Preserve run28 and public run20; keep visual_approval false. Only a full, uninterrupted watch-through with audio can grant artistic approval.
+
+
+## Time Stop 10s — Run 30 technical QA, dense visual inspection and draft archive (2026-11-21)
+
+- Corrected render Run 30: https://github.com/Nolane-x/video/actions/runs/44873063135 — success. Master artifact `time-stop-10s-h2-30`, artifact ID `14696661216`, 258,513,035 bytes.
+- Master is 1920×1080, native H2 60fps, 22,680 frames, 378.0s, H.264 + AAC stereo 48kHz, integrated loudness −14.4 LUFS, peak −2.6 dBFS. SHA-256: `f4a7819429796c24393056240244b970c7fbb130445a4184fa60bbe8a03863b7`.
+- QA report is technical-pass: 84 story shots, 26 freeze-effect shots, 84 Vietnamese VieNeu narration segments shot-synced; AudioSeal watermark verified. WAV checksum matches its voice manifest. SRT has 84 cues, no overlaps, and the last cue ends at 375.38s before the 378s film end.
+- Independent inspection rerun after packaging correction: https://github.com/Nolane-x/video/actions/runs/44882622546 — success. It independently decoded the full master video and audio with FFmpeg, verified 22,680 frames and the same SHA-256, extracted 32 key frames, generated 252 still samples (3 per shot at +0.75/+2.25/+3.75s), and exported/decoded four full-mix clips:
+  - Kitchen/cup/time-stop: 54–99s (45s / 2,700 frames).
+  - Basketball retrieval and hand-off: 112.5–148.5s (36s / 2,160 frames).
+  - School hallway/books: 162–189s (27s / 1,620 frames).
+  - Final bicycle/sign rescue: 270–324s (54s / 3,240 frames).
+  All four clips are 1920×1080/60fps with AAC 48kHz stereo and pass full FFmpeg decode.
+- Final self-contained inspection artifact: `time-stop-10s-run30-master-inspection`, artifact ID `14698183371`, 58,295,393 bytes. Its SHA256SUMS manifest verifies every included file; nested `time-stop-10s-run30-inspection.zip` passes ZIP integrity. The earlier inspector artifact ID `14698622159` had an incomplete outer upload path/manifest; it was superseded by the clean rerun above and should not be used.
+- Visual sampling covered all 84 shots and the main story beats (cup rescue, basketball retrieval/hand-off, book transfer, final bicycle/sign rescue and embrace). The scene boundaries at approximately 54s, 162s and 270s contain intentional short fade-to-black transitions, not sustained missing footage. This remains a sampled review, not a continuous 6m18s watch-through.
+- Draft Release: ID `453535448`, tag `time-stop-10s-expanded-3d-review-run30`, title “Time Stop 10s — Expanded 3D Review Candidate (Run 30)”. Draft URL: https://github.com/Nolane-x/video/releases/tag/untagged-6d2b148e20b9aadb6662. It is still `draft: true` / not published. Release master MP4 asset digest matches the independent master SHA-256 exactly.
+- Archive workflow run: https://github.com/Nolane-x/video/actions/runs/44883079398 — success. Archive artifact ID `14698757170`, size 461,938,280 bytes. It does not overwrite the Run-28 draft or the public Run-20 release.
+- Render trigger was narrowed in commit `ed6a79870fbd1a1eb6575f4deb1c33df38e12bc5`: only `video-projects/time-stop-10s/scripts/**` and `video-projects/time-stop-10s/scenes/**` now trigger source renders, avoiding README-only rerenders. The change commit used `[skip ci]`; no extra render was triggered.
+- Keep `visual_approval: false`. Do not publish this Draft Release until a human has watched the entire film uninterrupted with sound. Preserve Run-28 draft and public Run-20 release unchanged.
+- Next step: uninterrupted full-film human review with audio. If that reveals fixes, update only the affected source scenes/scripts, rerender once, repeat technical QA, and make a new candidate rather than overwriting this immutable Run-30 draft.
