@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,7 +11,6 @@ SCRIPT = Path(__file__).resolve().parents[1] / "tools" / "extend_readable_subtit
 SPEC = importlib.util.spec_from_file_location("extend_readable_subtitles", SCRIPT)
 assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
-import sys
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
@@ -61,6 +61,18 @@ class ExtendReadableSubtitlesTests(unittest.TestCase):
         self.assertTrue(rendered.startswith("WEBVTT" + chr(10) + chr(10)))
         self.assertIn("00:00:00.120 --> 00:00:04.500", rendered)
         self.assertNotIn(chr(10) + "1" + chr(10), rendered)
+
+    def test_rejects_overlapping_source_cues(self):
+        source_text = (
+            "1\n00:00:00,120 --> 00:00:04,700\nFirst cue\n\n"
+            "2\n00:00:04,620 --> 00:00:05,900\nSecond cue\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "overlap.srt"
+            source.write_text(source_text, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "source SRT contains 1 overlapping cues"):
+                MODULE.build(source, root / "out", duration=9.0, gap=0.12, expected_cues=2)
 
     def test_rejects_wrong_expected_cue_count(self):
         with tempfile.TemporaryDirectory() as tmp:
