@@ -451,3 +451,40 @@ Preserve the Run-28 draft release and public Run-20 release. Never overwrite eit
 - Run30 archive workflow is ready at .github/workflows/archive-time-stop-10s-expanded-run30.yml (commit 9c92c57e0b584b5abbb4b0c9389f1ff2d543d866). Do not create its marker before the independent inspector succeeds.
 - Preventive maintenance to do only AFTER Run30 has finished: narrow .github/workflows/render-time-stop-10s.yml's path filter. Replace broad video-projects/time-stop-10s/** with runtime-bearing folders video-projects/time-stop-10s/scripts/** and video-projects/time-stop-10s/scenes/** (plus any future runtime asset directories). This prevents README-only/documentation commits from triggering another 6m18s master render. Do not change the render workflow while a run using it is active because the workflow file itself is in its trigger path list and cancel-in-progress is true.
 - Latest status check for Run30: storyboard job passed; VoiceStudio render/master/watermark step was still in progress; no artifacts visible. Continue polling from the Actions API before triggering inspector.
+
+
+## Handoff — Run 30 render, independent QA and draft archive complete (2026-11-21)
+
+### Current immutable candidate
+- Render: Run 30 / 44873063135 — https://github.com/Nolane-x/video/actions/runs/44873063135
+- Master artifact: `time-stop-10s-h2-30`, ID `14696661216`, 258,513,035 bytes.
+- Master: 1920×1080 / 60fps / 22,680 frames / 378.0 seconds, H.264 + AAC 48kHz stereo, −14.4 LUFS integrated, −2.6 dBFS peak.
+- Master SHA-256: `f4a7819429796c24393056240244b970c7fbb130445a4184fa60bbe8a03863b7`.
+- 84 Vietnamese VieNeu segments, shot-synced; AudioSeal verified. SRT has 84 cues, no overlaps, final cue ends at 375.38 seconds. Voice WAV checksum matches manifest.
+- 42/84 shots use Three.js 3D; the other 42/84 use H2 Canvas 2D.
+
+### Independent QA — final clean rerun
+- Workflow run 44882622546 — https://github.com/Nolane-x/video/actions/runs/44882622546 — success.
+- Independent full-master video and audio decode passed; 22,680 frames and exact SHA-256 match verified.
+- 32 key-frame contact sheet and 252 stills (three per each of 84 shots, offsets +0.75/+2.25/+3.75 seconds) created.
+- Four full-mix 1080p60/AAC-stereo clips independently probed and fully decoded:
+  - Kitchen 54–99s (45s)
+  - Basketball 112.5–148.5s (36s)
+  - Hallway/books 162–189s (27s)
+  - Final bicycle/sign rescue 270–324s (54s)
+- Final QA artifact `time-stop-10s-run30-master-inspection`, ID `14698183371`, 58,295,393 bytes. SHA256SUMS verification passes for every uploaded file; nested ZIP also passes integrity.
+- Do not use earlier artifact ID `14698622159` (first inspect attempt): its upload path omitted some checksum-listed files; superseded by artifact ID 14698183371.
+
+### Release archive — draft only
+- Archive workflow run 44883079398 — https://github.com/Nolane-x/video/actions/runs/44883079398 — success.
+- Draft Release ID 453535448, tag `time-stop-10s-expanded-3d-review-run30`, page https://github.com/Nolane-x/video/releases/tag/untagged-6d2b148e20b9aadb6662.
+- Release remains `draft: true`, not published. Master MP4 release asset SHA-256 matches the above master hash. Archive artifact ID `14698757170`, 461,938,280 bytes.
+- Keep Run-28 draft and public Run-20 release unchanged.
+
+### Workflow trigger maintenance
+- Commit `ed6a79870fbd1a1eb6575f4deb1c33df38e12bc5` narrowed `.github/workflows/render-time-stop-10s.yml` paths from the whole project folder to `video-projects/time-stop-10s/scripts/**` and `video-projects/time-stop-10s/scenes/**`. README-only edits no longer cause a 6m18s rerender. Commit was made with `[skip ci]`; it did not start a new render.
+
+### Review gate / next actions
+- Sampled visual inspection found the main action beats readable and the short fade-to-black transitions around 54s, 162s and 270s appear intentional.
+- This is not a continuous full-film screening. Keep `visual_approval: false` and do not publish the Draft Release until a human has watched all 6m18s continuously with audio.
+- For any fixes after review, create a new render candidate; do not alter or overwrite Run-30 or Run-28 release assets.
