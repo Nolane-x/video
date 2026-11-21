@@ -26,3 +26,24 @@ This pass is isolated on `film/time-stop-10s-cinematic-3d-pass`; it does not mut
 - The review must explicitly inspect s013–s022 (kitchen/cup), s026–s033 (basketball), s037–s042 (books), and s053–s072 (street rescue).
 - Compare the new candidate with Run 32 on character proportions, pose legibility, camera movement, foot/ground contact, prop continuity, sign collapse pivot, and cross-shot visual consistency.
 - Keep `visual_approval=false`; a rendered candidate and sampled frames are not a substitute for watching all 6m18s with sound.
+
+
+## Visual review rubric (score each sequence 1–5)
+
+| Dimension | What to verify |
+|---|---|
+| Character silhouette | Head/body ratio, shoulder width, visible neck, articulated elbows/knees, readable hands and footwear |
+| Performance | Weight shift, anticipation, follow-through, arm counter-swing, stride cadence, crouch/reach/pull/hug readability |
+| Prop physics | Ball release/bounce/roll, books falling and being caught, cup continuity, pedal/wheel relation, sign tipping around the foot |
+| Camera | Shot has purpose; restrained push/pan follows action; subjects are not clipped; consecutive shots vary scale and angle |
+| Lighting/material | Character separates from background; feet contact ground; faces/clothes retain shape; warm/cool palette stays consistent |
+| Continuity | Character colors, scale, pose direction, prop position, screen direction and freeze logic remain consistent between adjacent shots |
+| Stability | No renderer warnings, missing meshes, z-fighting, jitter, sudden teleports, one-frame pops or unexpected blank/black images |
+
+Review each group at 0.75s, 2.25s and 3.75s per shot, and watch its motion preview with sound:
+- Kitchen/cup s013–s022: release, falling cup, freeze, reaching/catching, re-entry.
+- Basketball s026–s033: ball leaves the hand, rolls toward the road, protagonist runs, crouches, retrieves and hands back.
+- Books s037–s042: stack falls, protagonist enters, catches/re-stacks and gives books back.
+- Street rescue s053–s072: bike/mother establish geography, child runs, pulls mother/bike, billboard collapse, both recover and embrace.
+
+A sequence is not accepted on screenshots alone: the motion must read continuously. Record scores and defects; any critical continuity/physics/cropping issue blocks the candidate. Keep visual_approval=false pending a continuous full-film viewing with audio.
