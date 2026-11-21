@@ -20,8 +20,10 @@ This pass is isolated on `film/time-stop-10s-cinematic-3d-pass`; it does not mut
 
 ## Render and review gate
 
-- Render workflow: `.github/workflows/render-time-stop-10s.yml`, triggered by the final runtime commit on this branch.
-- Run ID: pending final discovery from the Actions API.
+- Render workflow: `.github/workflows/render-time-stop-10s.yml`.
+- Candidate Run #35: https://github.com/Nolane-x/video/actions/runs/44918426729 — source commit `398b04e0b7d15df41f6f0c28878634a16dd96235`.
+- VoiceStudio job completed successfully with all 84 Vietnamese narration segments and watermark verification. H2 initialized the full 84-shot story, placed voice, installed both new 3D modules, passed the all-shot renderer scan, rendered six contact sheets and a 30-second motion preview. The complete 1080p60 master is currently rendering; sound mix, package and upload are pending.
+- Independent Run #35 inspection workflow prepared on `review/time-stop-10s-3d-fixes`: `.github/workflows/inspect-time-stop-run35.yml`, commit `7dddb9c0f02832e7fb6c22a7eaea906b3f5bc6fa`. Trigger marker `.github/workflows/enable-inspect-time-stop-run35.txt` only after the render candidate artifact is confirmed uploaded.
 - The first gate is the built-in renderer scan, contact sheets, preview, full 1080p60 master and audio/QA package.
 - The review must explicitly inspect s013–s022 (kitchen/cup), s026–s033 (basketball), s037–s042 (books), and s053–s072 (street rescue).
 - Compare the new candidate with Run 32 on character proportions, pose legibility, camera movement, foot/ground contact, prop continuity, sign collapse pivot, and cross-shot visual consistency.
