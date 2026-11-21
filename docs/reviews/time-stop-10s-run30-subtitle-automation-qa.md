@@ -94,3 +94,21 @@ This CI success establishes reproducible subtitle generation and artifact integr
 - Keep visual_approval: false.
 - Do not publish until a human watches the full 6m18s master uninterrupted with sound.
 - No video re-render was necessary for this subtitle-only work.
+
+
+## Runtime and unit-test final audit
+
+- The pinned action metadata was fetched from each exact SHA at its upstream repository. All four action.yml files explicitly declare runs.using: node24.
+- The GitHub-hosted runner reported version 2.338.2, above the actions' Node-24 minimum runner requirement of 2.327.1.
+- The final pinned CI job ran all 5 unit tests, all passed in 0.087s:
+  1. Multiline SRT parsing.
+  2. Extended dwell preserves cue starts and text.
+  3. Source subtitle overlaps are rejected.
+  4. Incorrect expected cue count is rejected.
+  5. WebVTT omits numeric cue identifiers and preserves valid timestamps.
+- Action metadata blob SHAs:
+  - checkout action.yml: 5b0524f730db83f9513c18ab31a6c086c7239076
+  - setup-python action.yml: 645de4f5108b28bcc7ed043ee171770b0754cc35
+  - download-artifact action.yml: 8b8c65029ccad20750a29fecb438eca5a607fc57
+  - upload-artifact action.yml: 7cb4d1e81db55320b41217e1a78a1a46e3d2baef
+
