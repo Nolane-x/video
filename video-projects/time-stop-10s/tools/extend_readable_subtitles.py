@@ -115,7 +115,6 @@ def render_vtt(cues: list[Cue]) -> str:
     blocks = ["WEBVTT"]
     for cue in cues:
         blocks.append(
-            f"{cue.number}\n"
             f"{format_time(cue.start, '.')} --> {format_time(cue.end, '.')}\n"
             f"{cue.text}"
         )
