@@ -488,3 +488,15 @@ Preserve the Run-28 draft release and public Run-20 release. Never overwrite eit
 - Sampled visual inspection found the main action beats readable and the short fade-to-black transitions around 54s, 162s and 270s appear intentional.
 - This is not a continuous full-film screening. Keep `visual_approval: false` and do not publish the Draft Release until a human has watched all 6m18s continuously with audio.
 - For any fixes after review, create a new render candidate; do not alter or overwrite Run-30 or Run-28 release assets.
+
+
+## Handoff delta — Run-30 black scan and readable subtitle alternative (2026-11-21)
+
+- Sustained-black audit completed successfully: run 44886988249, https://github.com/Nolane-x/video/actions/runs/44886988249. Artifact ID 14700104314 (`time-stop-10s-run30-black-scan`).
+- Full 378s timeline sampled at 4fps / 160×90 grayscale. One near-black event: 373.50–374.75s (1.25s), which is the intentionally dark s084 end card. Confirmed from source: the final shot uses location `black`, a 0.7s dip, cyan pulse that shrinks to a dot, and the final text “HÃY SỐNG TRỌN VẸN TỪNG GIÂY.” No unexpected >=1.5s blackout was found.
+- Reusable scan workflow: `.github/workflows/audit-time-stop-run30-blackframes.yml` on `review/time-stop-10s-3d-fixes`. It now marks the designed end-card range 373.5–378.0s separately from unknown black intervals.
+- Subtitle check found 84 cues, no overlaps; voice-synchronous original track median 16.95 chars/s, max 20.09 chars/s. The supplementary extended-dwell alternative preserves text + starts, keeps each cue visible to 0.12s before the following shot cue, gives 4.38s minimum dwell, median 9.59 chars/s, max 13.70 chars/s, zero overlaps. It does not change narration, video or canonical subtitles.
+- Current-session downloads: `/mnt/data/time-stop-10s-run30-readable-subtitles.zip` and complete refreshed review archive `/mnt/data/time-stop-10s-run30-review-package-complete.zip`. These are local conversation deliverables; they have not been uploaded as release assets.
+- Detailed QA record: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
+- Six dense sheets were reviewed across all 84 shots. The designed freeze beats should not be mistaken for broken animation. Main cup/basketball/books/final rescue sequences remain coherent in the sampled evidence.
+- Remains pending: uninterrupted human watch-through of the entire 6m18s master with sound. Keep `visual_approval: false` and Run-30 Release in Draft. No rerender for this audit-only work. If a future full watch-through reveals actual scene problems, prepare a new candidate instead of editing archived Run 30.
