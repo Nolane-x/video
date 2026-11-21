@@ -259,3 +259,13 @@ Next action is to verify the marker-triggered Actions run and inspect the upload
 
 
 Next work should build on the now-complete reproducible subtitle workflow. The remaining film release gate is still the uninterrupted full-length human screening with sound; do not publish Run-30 or set visual_approval true until that has happened.
+
+
+### Runtime verification addendum (2026-11-21)
+- Inspected action.yml at each pinned upstream commit; all four declare runs.using: node24, not merely a Node-24-compatible release label.
+- GitHub-hosted runner version was 2.338.2 (minimum required by Node-24 actions: 2.327.1).
+- The pinned CI run executed 5 unit tests; all passed in 0.087s: multiline SRT parsing, start/text-preserving extension, source overlap rejection, cue-count rejection, and WebVTT syntax/format.
+- Detailed action metadata blob hashes and the test run are recorded in docs/reviews/time-stop-10s-run30-subtitle-automation-qa.md.
+
+
+This subtitle CI workflow is now reproducible, pinned to immutable Node 24 action commits, and independently artifact-verified. Avoid spending another cycle on it absent a new failing case.
