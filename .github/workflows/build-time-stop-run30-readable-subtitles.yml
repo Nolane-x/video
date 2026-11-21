@@ -69,6 +69,7 @@ jobs:
             --expected-cues 84
           cp "$SOURCE_SRT" output/time-stop-10s-original-voice-sync.srt
           python - <<'PY'
+          import hashlib
           import json
           from pathlib import Path
 
@@ -81,7 +82,17 @@ jobs:
           assert report["text_changes"] == 0, report
           assert report["extended"]["min_dwell_seconds"] >= 4.0, report
           assert report["extended"]["max_chars_per_second"] < report["original"]["max_chars_per_second"], report
-          print("All subtitle invariants passed.")
+
+          # Golden SHA-256 values from the already reviewed Run-30 add-on.
+          expected = {
+              "time-stop-10s-original-voice-sync.srt": "7e0872b4fa958c089f9b44845530fb103a57eb25bd3527aacec16b1c9f1fefd4",
+              "time-stop-10s-readable-vi.srt": "53e322292f963249731cea9c6ed1ee67bef4c101a07ffb8a4d2b3ff48b989caa",
+              "time-stop-10s-readable-vi.vtt": "e32125cab18293d4f32dca21cb0e6e50b39bc07ab9103233324e1c433eae4deb",
+          }
+          for filename, expected_sha in expected.items():
+              actual_sha = hashlib.sha256((Path("output") / filename).read_bytes()).hexdigest()
+              assert actual_sha == expected_sha, (filename, actual_sha, expected_sha)
+          print("All subtitle invariants and golden SHA-256 comparisons passed.")
           PY
           cat > output/README.md <<'EOF'
           # Run-30 readable Vietnamese subtitle alternative
