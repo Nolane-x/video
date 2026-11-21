@@ -500,3 +500,15 @@ Preserve the Run-28 draft release and public Run-20 release. Never overwrite eit
 - Detailed QA record: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
 - Six dense sheets were reviewed across all 84 shots. The designed freeze beats should not be mistaken for broken animation. Main cup/basketball/books/final rescue sequences remain coherent in the sampled evidence.
 - Remains pending: uninterrupted human watch-through of the entire 6m18s master with sound. Keep `visual_approval: false` and Run-30 Release in Draft. No rerender for this audit-only work. If a future full watch-through reveals actual scene problems, prepare a new candidate instead of editing archived Run 30.
+
+
+## Handoff — Run 32 caption-safe-area fixes rendered (2026-11-21)
+
+- Read full QA record: `docs/reviews/time-stop-10s-run32-caption-fix-qa.md`.
+- Source branch: `film/time-stop-10s-caption-safe-area-fixes`, render SHA `d2b6bf694be2139400e58145ba263a140ee7c1e6`.
+- Render Run 32 / 44901911523 completed all jobs successfully. Artifact `time-stop-10s-h2-32` ID `14707913978`; voice artifact ID `14706377147`.
+- Master 1920×1080, 60fps, 22,680 frames, 378s, H.264 + AAC 48kHz stereo. SHA-256 `c55b883070448d526cffeb5525cec8c9ee1583704d245dd31f239a1db878a641`. −14.2 LUFS integrated; true peak −3.1 dBFS. SRT has 84 cues and zero overlaps. Vietnamese voice has 84 segments; AudioSeal verified; clipped ratio 0.0.
+- Six full contact sheets were reviewed. s014 at 59.25s shows the key-sequence subtitle plate entirely within the active image region. s063 at 280s shows only one caption plate; the duplicate canvas overlay is removed.
+- Independent inspection workflow is active: https://github.com/Nolane-x/video/actions/runs/44914373793. Poll its job and artifacts. It must pass full master FFmpeg decode, 22,680-frame/60fps metadata, exact master SHA, subtitle count/overlap checks, 252-frame per-shot sample, and four audio/video action clips before recording independent QA as green.
+- Do not mistake the full local decode timeout for a pass; audio-only and keyframe-only local checks passed, and CI's EBU R128 analysis reports 22,680 processed video frames. The dedicated inspector will provide the independent full decode.
+- Keep `visual_approval=false`; the full 6m18s continuous watch-through with sound remains the only artistic release gate. Do not publish or overwrite Run 30 or any existing release.
