@@ -1,0 +1,120 @@
+name: Archive — Time Stop 10s expanded 3D review candidate Run 29
+
+on:
+  push:
+    branches:
+      - film/time-stop-10s-3d-review-fixes
+    paths:
+      - ".github/workflows/enable-time-stop-10s-expanded-run29-draft.txt"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: time-stop-10s-expanded-draft-run29
+  cancel-in-progress: false
+
+jobs:
+  archive-draft:
+    name: Verify and archive run-29 candidate as a draft Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout candidate source
+        uses: actions/checkout@v4
+        with:
+          ref: film/time-stop-10s-3d-review-fixes
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download run-29 full film artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-29
+          repository: ${{ github.repository }}
+          run-id: 44870641689
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+
+      - name: Verify candidate QA, narration and archive payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="dist/time-stop-10s"
+          MASTER="$ROOT/time-stop-10s-master.mp4"
+          PREVIEW="$ROOT/time-stop-10s-preview-30s.mp4"
+          REVIEW="dist/time-stop-10s-review.zip"
+          test -s "$MASTER"
+          test -s "$PREVIEW"
+          test -s "$ROOT/qa-report.json"
+          test -s "$ROOT/voice-placement.json"
+          test -s "$ROOT/voiceover/manifest.json"
+          test -s "$ROOT/subtitles/time-stop-10s.srt"
+          test -s "$REVIEW"
+          python - "$ROOT/qa-report.json" "$ROOT/voice-placement.json" "$ROOT/voiceover/manifest.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          qa,voice,manifest=(json.loads(Path(p).read_text(encoding="utf-8")) for p in sys.argv[1:])
+          assert qa["status"] == "technical-pass", qa
+          assert qa["fps"] == "60/1" and qa["frames"] == 22680, qa
+          assert qa["resolution"] == [1920,1080], qa
+          assert abs(float(qa["duration_seconds"])-378.0) < 0.2, qa
+          assert qa["audio_codec"] == "aac" and qa["audio_sample_rate"] == "48000", qa
+          assert qa.get("narration_watermark") == "verified", qa
+          assert qa["visual_approval"] is False, "This archive is a review candidate, not artistic approval"
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84, voice
+          assert voice["language"] == "vi" and voice["engine"] == "vieneu", voice
+          print("Candidate archive gate passed: 1080p60, 22,680 frames, 378s; 84 shot-synced Vietnamese segments; AudioSeal verified. Visual approval remains false.")
+          PY
+          mkdir -p archive
+          cp "$MASTER" archive/time-stop-10s-expanded-3d-review-run29-1080p60.mp4
+          cp "$PREVIEW" archive/time-stop-10s-expanded-3d-review-run29-preview-30s.mp4
+          cp "$REVIEW" archive/time-stop-10s-expanded-3d-review-run29-bundle.zip
+          cp "$ROOT/qa-report.json" archive/qa-report.json
+          cp "$ROOT/voice-placement.json" archive/voice-placement.json
+          cp "$ROOT/subtitles/time-stop-10s.srt" archive/subtitles-vi.srt
+          (cd archive && sha256sum *.mp4 *.zip *.json *.srt > SHA256SUMS.txt)
+          cat > archive/REVIEW-NOTES.md <<'EOF'
+          # Time Stop 10s — expanded 3D review candidate
+
+          This is a draft archive of the corrected run-29 candidate. It preserves the earlier native 60fps run-20 release and does not overwrite it.
+
+          - 1920×1080, native H2 render at 60fps, 22,680 frames, 378 seconds.
+          - 84 Vietnamese VieNeu narration segments, shot-synced; AudioSeal watermark verified.
+          - 42 of 84 shots use Three.js 3D; the other 42 use H2 Canvas 2D.
+          - The master has passed technical QA. visual_approval remains false; this draft is not a claim of full-length artistic sign-off.
+
+          Review bundle contains story/shot plans, narration, subtitles, contact sheets and QA data.
+          EOF
+          zip -qr archive/time-stop-10s-expanded-3d-review-archive.zip archive
+
+      - name: Upload immutable archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-expanded-3d-run29-archive
+          path: archive/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create a draft GitHub Release without touching run-20
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="time-stop-10s-expanded-3d-review-run29"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Draft tag already exists; refusing to overwrite."
+            exit 1
+          fi
+          gh release create "$TAG" \
+            archive/time-stop-10s-expanded-3d-review-run29-1080p60.mp4 \
+            archive/time-stop-10s-expanded-3d-review-run29-preview-30s.mp4 \
+            archive/time-stop-10s-expanded-3d-review-run29-bundle.zip \
+            archive/SHA256SUMS.txt \
+            archive/REVIEW-NOTES.md \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "Time Stop 10s — Expanded 3D Review Candidate (Run 29)" \
+            --notes-file archive/REVIEW-NOTES.md
