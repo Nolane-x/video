@@ -500,3 +500,15 @@ Preserve the Run-28 draft release and public Run-20 release. Never overwrite eit
 - Detailed QA record: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
 - Six dense sheets were reviewed across all 84 shots. The designed freeze beats should not be mistaken for broken animation. Main cup/basketball/books/final rescue sequences remain coherent in the sampled evidence.
 - Remains pending: uninterrupted human watch-through of the entire 6m18s master with sound. Keep `visual_approval: false` and Run-30 Release in Draft. No rerender for this audit-only work. If a future full watch-through reveals actual scene problems, prepare a new candidate instead of editing archived Run 30.
+
+
+## Handoff — Run 35 cinematic 3D pass currently rendering (2026-11-21)
+
+- Branch: film/time-stop-10s-cinematic-3d-pass.
+- New source changes: commit 6a681a0b80668d63f554d1da6f18c9677d9dff24 adds additive figureCinematic(); 14d087596f12172964b96780884040e847164b75 upgrades key-sequence character rig, lighting, camera, basketball and books; 398b04e0b7d15df41f6f0c28878634a16dd96235 upgrades street character rig, camera, bicycle crank and sign pivot.
+- Run #35 / 44918426729: https://github.com/Nolane-x/video/actions/runs/44918426729. VoiceStudio passed; H2 storyboard/voice placement/module installation passed; 84-shot render scan passed; six contact sheets and a 30-second preview completed. Full master render remains in progress, mix/package/upload pending.
+- Keep runtime branch unchanged while Run35 is active because the render workflow uses cancel-in-progress. Do not push commits to render-triggered paths until it completes.
+- Run35 inspector is prepared on review/time-stop-10s-3d-fixes: .github/workflows/inspect-time-stop-run35.yml, commit 7dddb9c0f02832e7fb6c22a7eaea906b3f5bc6fa. Activate .github/workflows/enable-inspect-time-stop-run35.txt only once Run35 candidate artifact is successfully uploaded.
+- Review all 44 custom 3D shots: kitchen s013–s022, basketball s026–s033, hallway/books s037–s042, street rescue s053–s072. Use six dense sheets plus kitchen/court/hallway/final-rescue full-mix clips; do not sign off on stills alone.
+- Keep visual_approval=false. Run30 and Run32 are immutable and must remain unchanged. Full 6m18s continuous screening with sound is still required before publication.
+- Full review rubric: docs/reviews/time-stop-10s-cinematic-3d-pass.md.
