@@ -112,3 +112,45 @@ This CI success establishes reproducible subtitle generation and artifact integr
   - download-artifact action.yml: 8b8c65029ccad20750a29fecb438eca5a607fc57
   - upload-artifact action.yml: 7cb4d1e81db55320b41217e1a78a1a46e3d2baef
 
+
+
+## Additional wrapped-line subtitle variant — final CI pass
+
+A second optional subtitle presentation was added after a line-width audit found 39 of 84 original cues exceeded 42 characters on one line (longest line: 60 characters). The extended-dwell track remains unchanged; this new variant only adds line breaks at word boundaries.
+
+- Builder also emits:
+  - time-stop-10s-readable-wrapped-vi.srt
+  - time-stop-10s-readable-wrapped-vi.vtt
+- Maximum line length: 42 characters.
+- Maximum lines per cue: 2.
+- Cues using two lines: 39 / 84.
+- Word/punctuation changes after whitespace normalization: 0.
+- Cue start/end timestamps: identical to the extended-dwell alternative.
+- Source/output overlap: 0.
+- The wrapped files have immutable golden SHA-256 assertions:
+  - SRT: cd1c0aa3979f97af8d4d530f3489f1ca1bc8333bb1c7811411153a9d8607018d
+  - VTT: fe98852fd6519947c12117f6297b228b5a1c1a38c4f08e634a7c9de4a4d629f6
+
+### CI history for this extension
+
+- Run 44892965218 failed only because the unit-test fixture contained the five-character word "three" while the test used a four-character limit. The implementation correctly rejected the over-width word; the test expected a two-line overflow error. No render or artifact generation occurred.
+- The fixture was corrected to "one two six ten", with all tokens fitting the four-character test width.
+- Run 44893084157 then passed all 7 tests and all 8 functional workflow steps. It produced artifact 14702528875 (32,032 bytes).
+- Golden hashes for both wrapped outputs were then added to the workflow.
+- Final pinned CI run: 44893210135 (Run 10), commit 268fbea0bd134d8da9625ba240f6274b0621b368 — success.
+- Job ID: 136813271896; 7 unit tests passed in 0.005s; all functional steps successful.
+- Final artifact ID: 14702613946, 32,032 bytes, expires 2027-02-19.
+- Final outer artifact SHA-256: dd505c856cdebc5987179225c8135a4d430cebe9cdfdb51a526d3ef905930974; local digest matches GitHub's artifact digest.
+- Outer and inner ZIPs pass integrity checks; outer and inner manifests each verify 7/7 entries. All four base subtitle golden hashes (original SRT and the two extended-dwell formats) and both new wrapped-file golden hashes match.
+- Final pinned run has no Node.js 20 deprecation warning and no punycode warning.
+
+### Consolidated local review package
+
+- Final review package: /mnt/data/time-stop-10s-run30-review-package-final.zip
+- Size: 60,723,066 bytes.
+- SHA-256: 33495e050d31521db7be0f9afeca3ca4baa0588e901e0cede1859a64f5f22d3f
+- The package includes the final Node-24 pinned CI artifact, standalone wrapped SRT/VTT, all previous master/voice/scene review evidence, black-scan output and the subtitle QA reports.
+- Root manifest: 88/88 entries pass; outer ZIP and nested CI ZIP integrity checks pass.
+
+The wrapped track is optional; it does not replace the canonical subtitle track or prior extended-dwell alternative. This additional CI work still does not constitute artistic approval or satisfy the uninterrupted full-film screening gate.
+
