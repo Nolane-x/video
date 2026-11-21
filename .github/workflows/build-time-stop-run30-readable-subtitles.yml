@@ -93,6 +93,8 @@ jobs:
               "time-stop-10s-original-voice-sync.srt": "7e0872b4fa958c089f9b44845530fb103a57eb25bd3527aacec16b1c9f1fefd4",
               "time-stop-10s-readable-vi.srt": "53e322292f963249731cea9c6ed1ee67bef4c101a07ffb8a4d2b3ff48b989caa",
               "time-stop-10s-readable-vi.vtt": "e32125cab18293d4f32dca21cb0e6e50b39bc07ab9103233324e1c433eae4deb",
+              "time-stop-10s-readable-wrapped-vi.srt": "cd1c0aa3979f97af8d4d530f3489f1ca1bc8333bb1c7811411153a9d8607018d",
+              "time-stop-10s-readable-wrapped-vi.vtt": "fe98852fd6519947c12117f6297b228b5a1c1a38c4f08e634a7c9de4a4d629f6",
           }
           for filename, expected_sha in expected.items():
               actual_sha = hashlib.sha256((Path("output") / filename).read_bytes()).hexdigest()
