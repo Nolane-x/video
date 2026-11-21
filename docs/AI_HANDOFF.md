@@ -359,3 +359,32 @@ Release assets verified through GitHub API:
 User-side full review package: `/mnt/data/time-stop-10s-run28-review-package.zip` (65,369,947 bytes); standalone SRT/VTT/transcript/WAV/master contact sheet/three 1080p60 mixed clips also at `/mnt/data/time-stop-10s-run28-*`.
 
 Do not publish the draft release as public until uninterrupted full-length screening is done. Keep `visual_approval: false`. Preserve public run-20 release.
+
+## Handoff — s002 camera correction; run 29 in progress (2026-11-21)
+
+Repository: Nolane-x/video
+Branch: film/time-stop-10s-3d-review-fixes
+Latest source commit: 57c6ab294bba89acfdd0e79c20c9f817febf3aa9
+
+### Why this change was made
+A dense review of the Run-28 master sampled three instants (+0.75s, +2.25s, +3.75s) for every 4.5-second shot: 252 frames across all 84 shots. This was not an uninterrupted screening. A specific defect was found in s002: its written action is an alarm-clock insert, yet the current camera clipped the bedside digital clock, leaving only part of the character in frame.
+
+The diagnosis was checked against the bedroom set in integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/packs/dem/sets.js (clock at nx, gy - 97) and camera cropping in .../packs/dem/templates.js (center clamp plus zoom). The camera in only the s002 add(...) block of video-projects/time-stop-10s/scripts/build_story.py was changed:
+- Before: camera(.62,.30,1.32,.63,.30,1.50)
+- After: camera(.56,.44,1.16,.57,.44,1.25)
+The scene caption, time 06:10, actor/pose, SFX and remaining shots were preserved.
+
+### Current workflow
+Full render Run #29: https://github.com/Nolane-x/video/actions/runs/44870641689
+Source commit: 57c6ab294bba89acfdd0e79c20c9f817febf3aa9
+At handoff snapshot, job 'Build per-shot Vietnamese narration request' passed; VoiceStudio was installing CPU inference/audio dependencies. H2 render, master artifact and QA are not yet confirmed. Check run status/jobs/artifacts before making claims.
+Expected artifact name if the run succeeds: time-stop-10s-h2-29
+
+### Next actions
+1. Poll Run #29; require all jobs green and the time-stop-10s-h2-29 artifact.
+2. Verify story/shots.json contains s002 camera from=[0.56,0.44,1.16], to=[0.57,0.44,1.25] (or equivalent generated fields), 84 shots and total 378s.
+3. Inspect s002 at +0.75s/+2.25s/+3.75s (5.25s, 6.75s, 8.25s) from the actual run29 master and ensure the full alarm clock is clearly visible, readable at 1080p, without sacrificing the protagonist/scene context.
+4. Generate 3 samples for each of the 84 shots (252 frames), inspect all six contact sheets, compare high-risk action sequences, and rerun full master FFmpeg decode + ffprobe, frame count, audio format, loudness and SHA-256 verification.
+5. Only after successful run29 QA, create a separate run29 draft archive/release using a new tag/name. Preserve the run28 draft and run20 public release; never overwrite either. Keep visual_approval false until an uninterrupted full-length watch-through is performed.
+
+Run28 remains a valid previous technical candidate (details immediately above in this handoff); it is superseded by source commit 57c6ab2 for the s002 framing issue, but its master/draft archive remain immutable and available for comparison.
