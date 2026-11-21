@@ -313,3 +313,11 @@ Run-28 selected-shot review and Run-30 dense sampling both recorded the basketba
 
 Run-30 remains a draft candidate; the separate, still-required gate is an uninterrupted full-film watch-through with sound. This review branch additionally hosts the Run-30 subtitle/black-scan inspection automation and must not be confused with the production source branch.
 
+
+
+### Final source-overlap guard (2026-11-21)
+- Builder additionally rejects an original SRT whose final cue exceeds the video end or whose source cues overlap; QA reports source_overlap_count.
+- Unit test now explicitly covers overlapping source SRT rejection. The workflow asserts source_overlap_count=0 as well as output overlap_count=0.
+- Latest commits: source guard 834e81d45191c37f1f3d3bd93d551ce4d6604e2b; test 7c76f3d39ca1a0482124702e170a7b486fb3c65b; workflow enforcement cdd10c28b2e2bf1f62350e34ded4573b951b733d.
+- Workflow is configured to rerun when the builder or unit tests change. Run-level confirmation is still a separate gate; do not assume the marker-triggered Actions job has passed.
+
