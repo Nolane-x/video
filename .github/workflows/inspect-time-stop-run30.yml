@@ -1,0 +1,338 @@
+name: Inspect — Time Stop 10s corrected run-30 master
+
+on:
+  push:
+    branches: [review/time-stop-10s-3d-fixes]
+    paths:
+      - ".github/workflows/enable-inspect-time-stop-run30.txt"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful render workflow run ID"
+        required: true
+        default: "44873063135"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-10s-master-inspection
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    name: Verify corrected master and export full-mix scene proofs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44873063135' }}
+    steps:
+      - name: Checkout review tools
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Set up FFmpeg and Python
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Download successful corrected master artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-30
+          run-id: ${{ github.event.inputs.source_run_id || '44873063135' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: source-artifact
+
+      - name: Verify MP4 streams, exact frame count, loudness and checksum
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "DOWNLOADED ARTIFACT TREE:"
+          find source-artifact -maxdepth 5 -type f -printf '%p (%s bytes)\\n' | sort
+          MASTER="$(find source-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
+          test -n "$MASTER"
+          ROOT="$(dirname "$MASTER")"
+          echo "MASTER=$MASTER"
+          echo "ROOT=$ROOT"
+          test -s "$MASTER"
+          test -s "$ROOT/qa-report.json"
+          test -s "$ROOT/voice-placement.json"
+          test -s "$ROOT/subtitles/time-stop-10s.srt"
+          mkdir -p review
+          cp "$ROOT/qa-report.json" review/source-qa-report.json
+          cp "$ROOT/voice-placement.json" review/voice-placement.json
+          cp "$ROOT/subtitles/time-stop-10s.srt" review/time-stop-10s.srt
+          sha256sum "$MASTER" | tee review/master-sha256.txt
+          ffprobe -v error -count_frames -show_streams -show_format -of json "$MASTER" > review/ffprobe.json
+          echo "SOURCE QA REPORT:"
+          cat "$ROOT/qa-report.json"
+          echo "PROBE SUMMARY:"
+          python - "review/ffprobe.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          for s in d["streams"]:
+            print({k:s.get(k) for k in ("codec_type","codec_name","width","height","r_frame_rate","avg_frame_rate","nb_frames","nb_read_frames","sample_rate","channels")})
+          print({"duration":d.get("format",{}).get("duration"),"format":d.get("format",{}).get("format_name")})
+          PY
+          set +e
+          ffmpeg -hide_banner -loglevel warning -i "$MASTER" -map 0:v:0 -an -f null - 2> review/video-decode.log
+          VIDEO_DECODE_RC=$?
+          ffmpeg -hide_banner -loglevel warning -i "$MASTER" -map 0:a:0 -vn -f null - 2> review/audio-decode.log
+          AUDIO_DECODE_RC=$?
+          set -e
+          echo "VIDEO_DECODE_RC=$VIDEO_DECODE_RC AUDIO_DECODE_RC=$AUDIO_DECODE_RC"
+          echo "VIDEO DECODE DIAGNOSTICS:"
+          cat review/video-decode.log
+          echo "AUDIO DECODE DIAGNOSTICS:"
+          cat review/audio-decode.log
+          test "$VIDEO_DECODE_RC" -eq 0
+          test "$AUDIO_DECODE_RC" -eq 0
+          python - "$MASTER" "$ROOT/qa-report.json" "review/ffprobe.json" <<'PY'
+          import json, sys, hashlib
+          from pathlib import Path
+          master, qa_path, probe_path = map(Path, sys.argv[1:])
+          qa = json.loads(qa_path.read_text(encoding="utf-8"))
+          probe = json.loads(probe_path.read_text(encoding="utf-8"))
+          streams = probe["streams"]
+          v = next(s for s in streams if s.get("codec_type") == "video")
+          a = next(s for s in streams if s.get("codec_type") == "audio")
+          duration = float(probe["format"]["duration"])
+          frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
+          assert qa["status"] == "technical-pass", qa
+          assert qa["visual_approval"] is False, "Do not infer artistic approval from CI"
+          assert (int(v["width"]), int(v["height"])) == (1920, 1080), v
+          assert v["r_frame_rate"] == "60/1", v
+          assert frames == 22680, frames
+          assert abs(duration - 378.0) < 0.20, duration
+          assert a["codec_name"] == "aac" and a["sample_rate"] == "48000" and int(a["channels"]) == 2, a
+          voice = json.loads(Path("review/voice-placement.json").read_text(encoding="utf-8"))
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84, voice
+          digest = hashlib.sha256(master.read_bytes()).hexdigest()
+          summary = {
+            "status": "technical-pass",
+            "visual_approval": False,
+            "master_file": master.name,
+            "sha256": digest,
+            "duration_seconds": duration,
+            "resolution": [int(v["width"]), int(v["height"])],
+            "fps": v["r_frame_rate"],
+            "decoded_video_frames": frames,
+            "video_codec": v["codec_name"],
+            "audio_codec": a["codec_name"],
+            "audio_sample_rate": a["sample_rate"],
+            "audio_channels": int(a["channels"]),
+            "integrated_lufs": qa.get("integrated_lufs"),
+            "peak_dbfs": qa.get("peak_dbfs"),
+            "narration_segments": voice["placed_segments"],
+            "narration_engine": voice.get("engine"),
+            "note": "The complete MP4 was decoded without FFmpeg errors. Technical validation only; artistic review remains separate."
+          }
+          Path("review/master-inspection.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+          echo "MASTER=$MASTER" >> "$GITHUB_ENV"
+
+      - name: Extract 24 master frames and build a labelled contact sheet
+        run: |
+          set -euo pipefail
+          mkdir -p review/master-frames
+          python - <<'PY'
+          import subprocess, os
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          master = Path(os.environ["MASTER"])
+          shots = [
+            ("s002",5.25),("s013",54.0),("s014",58.5),("s015",63.0),
+            ("s016",67.5),("s017",72.0),("s018",76.5),("s019",81.0),
+            ("s020",85.5),("s021",90.0),("s022",94.5),("s026",112.5),
+            ("s027",117.0),("s028",121.5),("s029",126.0),("s030",130.5),
+            ("s031",135.0),("s032",139.5),("s033",144.0),("s037",162.0),
+            ("s038",166.5),("s039",171.0),("s040",175.5),("s041",180.0),
+            ("s042",184.5),("s061",270.0),("s063",279.0),("s066",292.5),
+            ("s069",306.0),("s070",310.5),("s071",315.0),("s072",319.5)
+          ]
+          thumbs=[]
+          for sid, t in shots:
+            out=Path("review/master-frames") / f"{sid}_{t:06.1f}s.jpg"
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y",
+              "-ss",str(t),"-i",str(master),"-frames:v","1","-vf","scale=480:270",
+              "-q:v","3",str(out)],check=True)
+            thumbs.append((sid,t,Image.open(out).convert("RGB")))
+          cols=4; tw,th=480,270; lab=36; pad=12
+          rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new("RGB",(pad+cols*(tw+pad),pad+rows*(th+lab+pad)),(16,18,24))
+          d=ImageDraw.Draw(sheet)
+          for i,(sid,t,im) in enumerate(thumbs):
+            x=pad+(i%cols)*(tw+pad); y=pad+(i//cols)*(th+lab+pad)
+            sheet.paste(im,(x,y))
+            d.text((x+4,y+th+7),f"{sid}  {t:.1f}s",(238,241,246))
+          sheet.save("review/master-contact-sheet.jpg",quality=92)
+          PY
+
+      - name: Emit compact visual proof for direct inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          names = [
+            ("s002", "5.25s — alarm clock insert"),
+            ("s018", "76.5s — corrected kitchen insert"),
+            ("s027", "117.0s — ball near road"),
+            ("s032", "139.5s — ball hand-off"),
+            ("s040", "175.5s — books transfer"),
+            ("s042", "184.5s — book recovery"),
+            ("s063", "279.0s — final rescue run"),
+            ("s066", "292.5s — pull mother and bike"),
+            ("s070", "310.5s — sign impact"),
+            ("s072", "319.5s — recovery embrace"),
+          ]
+          w,h,pad,label=240,135,8,22
+          cols=2
+          rows=(len(names)+cols-1)//cols
+          sheet=Image.new("RGB",(pad+cols*(w+pad),pad+rows*(h+label+pad)),(16,18,24))
+          draw=ImageDraw.Draw(sheet)
+          for i,(sid,caption) in enumerate(names):
+            file=next(Path("review/master-frames").glob(f"{sid}_*.jpg"))
+            img=Image.open(file).convert("RGB").resize((w,h))
+            x=pad+(i%cols)*(w+pad); y=pad+(i//cols)*(h+label+pad)
+            sheet.paste(img,(x,y))
+            draw.text((x+2,y+h+3),f"{sid} {caption}",fill=(240,242,246))
+          sheet.save("review/vision-proof.jpg",quality=40,optimize=True)
+          print(f"VISION_PROOF_BYTES={Path('review/vision-proof.jpg').stat().st_size}")
+          PY
+          echo "VISION_PROOF_BASE64_BEGIN"
+          base64 -w0 review/vision-proof.jpg
+          echo
+          echo "VISION_PROOF_BASE64_END"
+
+      - name: Export full-mix 1080p60 sequence clips
+        run: |
+          set -euo pipefail
+          mkdir -p review/full-mix-clips
+          ffmpeg -hide_banner -loglevel error -y -ss 54 -i "$MASTER" -t 45             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/kitchen-54-99s-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 112.5 -i "$MASTER" -t 36             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/court-112s5-148s5-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 162 -i "$MASTER" -t 27             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/hallway-162-189s-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 270 -i "$MASTER" -t 54             -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60             -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart             review/full-mix-clips/final-bicycle-sign-rescue-270-324s-1080p60.mp4
+
+      - name: Generate 252-frame dense sample — three moments per shot
+        run: |
+          set -euo pipefail
+          mkdir -p review/dense-samples
+          ffmpeg -hide_banner -loglevel error -y -i "$MASTER" -an \
+            -vf "select='gte(n,45)*eq(mod(n-45,90),0)',scale=240:135,tile=3x84:padding=8:margin=8:color=0x101218" \
+            -frames:v 1 -q:v 3 review/dense-grid.jpg
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          src = Image.open("review/dense-grid.jpg").convert("RGB")
+          cw, ch, pad = 240, 135, 8
+          expected = (3*cw + 4*pad, 84*ch + 85*pad)
+          assert src.size == expected, (src.size, expected)
+          labels = ["+0.75s", "+2.25s", "+3.75s"]
+          for page in range(6):
+              start = page * 14
+              canvas = Image.new("RGB", (2*(3*cw)+3*pad, 7*(ch+28)+8*pad), (16,18,24))
+              draw = ImageDraw.Draw(canvas)
+              for local in range(14):
+                  shot = start + local
+                  x = pad + (local % 2) * (3*cw + pad)
+                  y = pad + (local // 2) * (ch + 28 + pad)
+                  for col in range(3):
+                      left = pad + col*(cw+pad)
+                      top = pad + shot*(ch+pad)
+                      canvas.paste(src.crop((left,top,left+cw,top+ch)), (x+col*cw,y))
+                  draw.text((x+3,y+ch+5), f"s{shot+1:03d}  |  " + " / ".join(labels), fill=(238,241,246))
+              out = Path("review/dense-samples") / f"motion-sheet-{page+1:02d}.jpg"
+              canvas.save(out, quality=90)
+          report = {
+              "status": "sampled",
+              "source": "run-30 master",
+              "shots": 84,
+              "frames": 252,
+              "sampling_offsets_seconds": [0.75, 2.25, 3.75],
+              "fps": 60,
+              "visual_approval": False,
+              "note": "Dense per-shot still sampling aids review but is not a continuous full-length watch-through."
+          }
+          import json
+          Path("review/dense-sampling.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Verify full-mix review sequence clips
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          clips = {
+              "kitchen-54-99s-1080p60.mp4": (45.0, 2700),
+              "court-112s5-148s5-1080p60.mp4": (36.0, 2160),
+              "hallway-162-189s-1080p60.mp4": (27.0, 1620),
+              "final-bicycle-sign-rescue-270-324s-1080p60.mp4": (54.0, 3240),
+          }
+          for name, (duration_expected, frames_expected) in clips.items():
+              path = Path("review/full-mix-clips") / name
+              meta = json.loads(subprocess.check_output([
+                  "ffprobe","-v","error","-count_frames","-show_streams","-show_format","-of","json",str(path)
+              ], text=True))
+              v = next(s for s in meta["streams"] if s.get("codec_type") == "video")
+              a = next(s for s in meta["streams"] if s.get("codec_type") == "audio")
+              duration = float(meta["format"]["duration"])
+              frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
+              assert (int(v["width"]),int(v["height"])) == (1920,1080), (name,v)
+              assert v["avg_frame_rate"] == "60/1", (name,v)
+              assert abs(duration-duration_expected) < 0.03, (name,duration)
+              assert frames == frames_expected, (name,frames,frames_expected)
+              assert a["codec_name"] == "aac" and a["sample_rate"] == "48000" and int(a["channels"]) == 2, (name,a)
+              print({"file":name,"duration":duration,"frames":frames,"fps":v["avg_frame_rate"],"audio":"aac/48kHz/stereo"})
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-i",str(path),"-f","null","-"],check=True)
+          PY
+
+      - name: Package master inspection bundle
+        run: |
+          set -euo pipefail
+          cat > review/README.md <<'EOF'
+          # Time Stop 10s — corrected master inspection
+
+          Clips below are cut from the corrected run-30 1080p60 master with original narration, music and sound design. The master itself remains in the GitHub Actions run artifact and is not duplicated into this smaller review bundle.
+
+          Sequences:
+          - Kitchen/cup/time-stop: 54–99 seconds
+          - Basketball/road/hand-off: 112.5–148.5 seconds
+          - School hallway/books: 162–189 seconds
+          - Final bicycle/sign rescue: 270–324 seconds
+
+          dense-samples/motion-sheet-01.jpg through motion-sheet-06.jpg contain three frames from every shot (+0.75s, +2.25s, +3.75s), 252 frames total. master-contact-sheet.jpg samples 32 key story beats, including s002 and the final rescue. master-inspection.json contains stream, decode, audio and checksum results. Technical pass does not imply full artistic sign-off.
+          EOF
+          (cd review && sha256sum *.json *.jpg *.txt full-mix-clips/*.mp4 > SHA256SUMS.txt)
+          zip -qr time-stop-10s-run30-inspection.zip review
+
+      - name: Upload full-mix sequence proof and master inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-run30-master-inspection
+          path: |
+            review/master-inspection.json
+            review/master-sha256.txt
+            review/master-contact-sheet.jpg
+            review/master-frames/
+            review/full-mix-clips/
+            review/dense-grid.jpg
+            review/dense-samples/
+            review/dense-sampling.json
+            review/README.md
+            review/SHA256SUMS.txt
+            review/time-stop-10s-run30-inspection.zip
+          if-no-files-found: error
+          retention-days: 30
