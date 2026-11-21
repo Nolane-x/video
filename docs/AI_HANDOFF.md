@@ -172,3 +172,24 @@ Before promoting run #23 or publishing a new Release, address these code-level i
 6. `s018` narration says nine seconds while HUD says seven. Fix the script and regenerate the 84-segment voice job; a wrist-timer line should ideally have a visible wrist device rather than only the top-left HUD.
 
 Candidate run #23 [Actions](https://github.com/Nolane-x/video/actions/runs/44666071523) is currently intended to finish unchanged as a first review candidate. Do not cancel it solely to fix the above. Inspect its contact sheets, then apply these repairs in a focused follow-up render. Preserve run-20 master/release and never set artistic approval from CI status alone.
+
+
+## Handoff — Run-30 readable subtitle automation added (2026-11-21)
+
+Current work is on branch review/time-stop-10s-3d-fixes, separate from the film/source branch.
+
+### Files added
+- video-projects/time-stop-10s/tools/extend_readable_subtitles.py — Python-standard-library SRT parser, extended-dwell generator, SRT/VTT writer, reading-speed and overlap QA.
+- video-projects/time-stop-10s/tests/test_extend_readable_subtitles.py — unit tests for parsing, preserved cue content/start timestamps, dwell extension and invalid cue-count handling.
+- .github/workflows/build-time-stop-run30-readable-subtitles.yml — downloads the immutable Run-30 artifact time-stop-10s-h2-30 from workflow run 44873063135, runs unit tests, generates the 84-cue alternate track, validates no overlap/text changes, builds a ZIP/checksum manifest and uploads an artifact with 90-day retention.
+- Marker: .github/workflows/enable-build-time-stop-run30-readable-subtitles.txt, commit c377e2fea862bddca3837c6bf2249686dc0cb152.
+
+### Required next verification
+1. Open the Actions history for Build readable subtitle alternative — Run 30 on this branch.
+2. Confirm the run triggered by the marker commit, inspect every job step and confirm a green conclusion.
+3. Download time-stop-10s-run30-readable-subtitles; verify ZIP integrity, SHA256SUMS.txt, 84 cues, zero overlaps, preserved cue starts/text and matching master-source identity.
+4. Compare generated SRT/VTT against the already prepared local add-on. A discrepancy should be investigated before describing the automated output as equivalent.
+5. Append the verified run ID, artifact ID, byte size and checksums here and in docs/STATE.md.
+
+Do not replace or rename the canonical voice-synchronous subtitle track. This is an optional slower-reading alternative. No master re-render is needed. Run-30 remains a draft review candidate, and visual_approval remains false until uninterrupted full-length screening with sound is completed.
+
