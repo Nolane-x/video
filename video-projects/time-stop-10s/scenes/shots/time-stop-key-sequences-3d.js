@@ -16,22 +16,25 @@ const addRod = (group, a, b, radius, material) => {
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
   group.add(mesh); return mesh;
 };
-const addPerson = (color, mood, scale = 1, head = 'none') => T3.figure({
+const addPerson = (color, mood, scale = 1, head = 'none') => T3.figureCinematic({
   top: 'hoodie', color, legs: '#18212d', skin: '#efd8c2', head,
   headColor: color,
-}, { mood, s: scale, rim: '#b9dfff', rimOpacity: 0.62 });
+}, { mood, s: scale, rim: '#b9dfff', rimOpacity: 0.72 });
 function stage(mood, options = {}) {
   const st = T3.stage({ mood, fog: options.fog || [34, 110], fov: options.fov || 36,
-    ambient: options.ambient ?? 1.55, keyIntensity: options.keyIntensity ?? 1.9,
+    ambient: options.ambient ?? 1.30, keyIntensity: options.keyIntensity ?? 2.25,
     keyPos: options.keyPos || [-8, 12, 9], sun: false });
   st.scene.add(st.camera);
   return st;
 }
 function setCamera(s, pos, look, fov, t) {
-  const p = clamp(t / 4.5);
-  s.camera.position.set(pos[0] + Math.sin(t * 0.34) * 0.045,
-    pos[1] + Math.sin(t * 0.46) * 0.025, pos[2]);
-  s.camera.lookAt(look[0] + Math.sin(p * Math.PI) * 0.08, look[1], look[2]);
+  const p = smooth(t / 4.5);
+  // A restrained dolly-in and lateral arc provide parallax without distracting from the action.
+  const push = 0.26 * p;
+  const arc = Math.sin(p * Math.PI) * 0.11;
+  s.camera.position.set(pos[0] + arc + Math.sin(t * 0.62) * 0.018,
+    pos[1] + Math.sin(t * 0.78) * 0.012, pos[2] - push);
+  s.camera.lookAt(look[0] + Math.sin(p * Math.PI) * 0.10, look[1] + Math.sin(p * Math.PI) * 0.018, look[2]);
   s.camera.fov = fov; s.camera.updateProjectionMatrix();
 }
 function overlay(g, t, info, frozen = false) {
@@ -146,7 +149,7 @@ function makeKitchen(info) {
     scene.add(T3.box(0.13, 0.93, 0.13, '#654a3b', { x, y: 0.46, z }));
   scene.add(T3.lamp({ x: 2.2, z: -0.9, mood: 'interiorWarm', color: '#ffc985', intensity: 7 }));
   const hero = addPerson('#3c7186', 'interiorWarm', 1.05);
-  const mom = T3.figure({ top: 'hoodie', color: '#a75b73', legs: '#292331',
+  const mom = T3.figureCinematic({ top: 'hoodie', color: '#a75b73', legs: '#292331',
     skin: '#e8cbb8' },
     { mood: 'interiorWarm', s: 1.04, rim: '#ffd7b0', rimOpacity: 0.72 });
   // The shared figure rig has no built-in "bun" head token, so author the hairstyle as real geometry.
@@ -281,11 +284,15 @@ function drawBasketball(s, t, info, id) {
   s.ball.position.set(2.8, 0.3, 1.1); s.ball.rotation.set(0, 0, 0); s.dust.visible = frozen;
   s.hero.userData.setPose('stand', t); s.friend.userData.setPose('stand', t);
   if (id === 's026') {
-    const drop = smooth(clamp(p * 1.25));
-    // Align the ball's first frame with the friend's outstretched right hand before it drops and rolls to the road.
+    const travel = smooth(p);
+    const drop = smooth(clamp(p / 0.42));
+    // Release, gravity arc, first bounce and rolling friction are staged as one continuous trajectory.
     s.friend.position.z = 0.9;
-    s.ball.position.set(lerp(2.6, 7.45, p), lerp(1.47, 0.3, drop) + (p > 0.18 ? Math.abs(Math.sin((p - 0.18) * Math.PI * 2.5)) * 0.16 : 0), 1.1);
-    s.ball.rotation.z = -p * 8;
+    const x = lerp(2.6, 7.45, travel);
+    const bouncePhase = clamp((p - 0.42) / 0.34);
+    const bounce = p > 0.42 ? 0.13 * Math.sin(Math.PI * bouncePhase) : 0;
+    s.ball.position.set(x, 0.30 + 1.17 * (1 - drop) + bounce, 1.1);
+    s.ball.rotation.z = -(x - 2.6) / 0.25;
     s.friend.userData.setPose('reach', t); s.hero.userData.setPose('point', t);
     setCamera(s, [0.7, 4.0, 13.4], [1.8, 1.2, 0.5], 37, t);
   } else if (id === 's027') {
@@ -301,11 +308,11 @@ function drawBasketball(s, t, info, id) {
     s.ball.position.set(7.45, 1.0, 1.1);
     setCamera(s, [cx, 3.1, 10.8], [cx + 0.5, 1.15, 0.9], 35, t);
   } else if (id === 's030') {
-    s.hero.position.x = 6.15; s.hero.userData.setPose('crouch', t);
-    s.ball.position.set(6.45, 1.18, 1.15); setCamera(s, [5.95, 2.6, 7.0], [6.1, 1.0, 1.0], 31, t);
+    s.hero.position.x = 6.15; s.hero.userData.setPose('crouch', t); s.hero.rotation.z = -0.045 * smooth(p);
+    s.ball.position.set(6.45 - 0.10 * p, 1.18 - 0.12 * p, 1.15); setCamera(s, [5.95, 2.6, 7.0], [6.1, 1.0, 1.0], 31, t);
   } else if (id === 's031') {
-    s.hero.position.x = 5.85; s.hero.userData.setPose('point', t);
-    s.ball.position.set(6.1, 1.25, 1.15); setCamera(s, [5.35, 2.65, 6.3], [5.8, 1.35, 1.0], 30, t);
+    s.hero.position.x = 5.85; s.hero.userData.setPose('carry', t);
+    s.ball.position.set(6.0, 1.12, 1.15); setCamera(s, [5.35, 2.65, 6.3], [5.8, 1.35, 1.0], 30, t);
   } else if (id === 's032') {
     s.hero.position.x = 2.9; s.hero.userData.setPose('reach', t);
     s.friend.position.x = 5.0; s.friend.rotation.y = Math.PI; s.friend.userData.setPose('carry', t);
@@ -365,8 +372,11 @@ function drawHallway(s, t, info, id) {
   s.hero.position.set(-2.6, 0, 3.1); s.child.position.set(2.0, 0, -0.8);
   s.hero.userData.setPose('stand', t); s.child.userData.setPose('kneel', t);
   s.books.children.forEach((book, i) => {
-    book.position.set(1.9 + (i % 3) * 0.14, 1.35 + Math.floor(i / 3) * 0.24 - (id === 's037' ? p * (1.0 + i * 0.04) : 0),
-      -0.7 + (i % 2) * 0.25);
+    const baseY = 1.35 + Math.floor(i / 3) * 0.24;
+    const fall = id === 's037' ? Math.min(baseY - 0.16, p * p * (1.55 + i * 0.035)) : 0;
+    book.position.set(1.9 + (i % 3) * 0.14, baseY - fall, -0.7 + (i % 2) * 0.25);
+    book.rotation.z = (i % 2 ? 1 : -1) * (0.08 + (id === 's037' ? Math.sin(p * Math.PI * 1.25 + i * 0.3) * 0.16 : 0));
+    book.rotation.x = id === 's037' ? Math.sin(p * Math.PI + i * 0.4) * 0.12 : 0;
   });
   if (id === 's037') {
     s.child.userData.setPose('kneel', t); s.hero.userData.setPose('reach', t);
@@ -389,8 +399,10 @@ function drawHallway(s, t, info, id) {
       const targetZ = -0.42 + (i % 3) * 0.035;
       const startX = 0.85 + (i % 2) * 0.12, startY = 0.45 + Math.floor(i / 2) * 0.16;
       const startZ = -0.3 + (i % 3) * 0.12;
-      book.position.set(lerp(startX, targetX, p), lerp(startY, targetY, p), lerp(startZ, targetZ, p));
-      book.rotation.z = lerp(-0.04, 0.015, p);
+      const arc = Math.sin(Math.PI * p) * (0.22 + (i % 3) * 0.045);
+      book.position.set(lerp(startX, targetX, p), lerp(startY, targetY, p) + arc, lerp(startZ, targetZ, p));
+      book.rotation.z = lerp(-0.16 + (i % 2) * 0.08, 0.015, smooth(p)) + Math.sin(Math.PI * p) * 0.055;
+      book.rotation.x = Math.sin(Math.PI * p + i * 0.5) * 0.10 * (1 - p);
     });
     setCamera(s, [1.7, 2.35, 6.8], [1.35, 1.2, -0.35], 30, t);
   } else if (id === 's041') {
