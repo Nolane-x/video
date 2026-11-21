@@ -362,3 +362,13 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - Final consolidated local review pack: /mnt/data/time-stop-10s-run30-review-package-final.zip, 60,723,066 bytes, SHA-256 33495e050d31521db7be0f9afeca3ca4baa0588e901e0cede1859a64f5f22d3f; its root manifest verifies 88/88 files.
 - These are optional subtitle tracks only. Master MP4, narration, canonical subtitles and release state remain unchanged; visual_approval stays false.
 
+
+
+## Caption burn-in defect found in Run-30 — new fix branch (2026-11-21)
+- Inspected full-resolution immutable Run-30 stills s014 (59.25s) and s063 (280s), identifying two real burn-in defects: key-sequence 3D subtitle plates clipped by the scope lower letterbox; street-rescue scenes showing a camera-plane subtitle plus a second clipped canvas duplicate.
+- Root cause is confined to custom 3D overlays. The dem pack intentionally disables generic karaoke captions; 2D story scenes already use args.texts, so global captions must remain disabled.
+- Fix branch: film/time-stop-10s-caption-safe-area-fixes.
+- Commits: c746adc3b252aa42d991f35c011a1b1a39de9031 (letterbox-aware safe bottom for key-sequence plates); d2b6bf694be2139400e58145ba263a140ee7c1e6 (remove duplicate street-scene text overlay).
+- Full audit: docs/reviews/time-stop-10s-run30-caption-burnin-audit.md.
+- Run #31 (44901907125) was cancelled by the second source push; Run #32 (44901911523) is currently checking all shots and building the corrected master. Do not claim the corrected film is ready until full render and frame-level verification pass.
+
