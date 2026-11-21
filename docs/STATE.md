@@ -471,3 +471,16 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Detailed report: `docs/reviews/time-stop-10s-run30-post-render-qa.md`.
 - Dense 252-frame samples and contact sheets were visually inspected. The four principal action sequences and closing embrace remain readable; static poses in freeze beats are intended. This remains sampled QA only.
 - Keep `visual_approval: false`; no uninterrupted full-film watch-through with audio has been completed. No new render is needed for these QA-only changes. Preserve Run-28 draft and public Run-20 release.
+
+
+## Time Stop 10s — Run 32 caption-safe-area candidate (2026-11-21)
+
+- Source candidate branch: `film/time-stop-10s-caption-safe-area-fixes`, source SHA `d2b6bf694be2139400e58145ba263a140ee7c1e6`. Two source corrections: key-sequence 3D subtitle placement now respects the bottom edge of the active image area after letterboxing; street 3D scenes no longer draw a duplicate canvas subtitle on top of the camera-space plate.
+- Render Run 32: https://github.com/Nolane-x/video/actions/runs/44901911523 — all three jobs succeeded, including full 1080p60 render, original sound mix, package and upload. Candidate artifact `time-stop-10s-h2-32` ID `14707913978` (259,453,076 bytes); voice artifact ID `14706377147`.
+- Master is 1920×1080, 60fps, 22,680 frames, 378.0s, H.264 + AAC 48kHz stereo. MP4 SHA-256: `c55b883070448d526cffeb5525cec8c9ee1583704d245dd31f239a1db878a641`. QA report: technical-pass; −14.2 LUFS integrated, −3.1 dBFS true peak; 84 shots; `visual_approval=false`.
+- Extracted review ZIP integrity passed and every one of its 20 SHA256SUMS entries verified. Canonical SRT: 84 cues, zero overlaps, final cue 375.46s. VieNeu: 84 Vietnamese voice segments; AudioSeal verified (7 blocks; min confidence 0.9953, mean 0.9988), no source voice clipping.
+- Six contact sheets for s001–s084 were visually checked. Direct frame s014 at 59.25s confirms the caption plate is above the lower scope bar; s063 at 280.0s confirms the duplicate caption is gone. The other modified 3D scene groups show no apparent bottom-bar clipping in the sampled sheets.
+- Full local FFmpeg decode exceeded the local execution window; do not call it an independent pass. Audio-only decode and keyframe-only video decode passed. The render's EBU R128 log records all 22,680 frames and full audio processed (14.1×), with I = −14.2 LUFS, LRA = 5.2 LU and true peak = −3.1 dBFS.
+- A dedicated independent inspector was added to the review branch and triggered: https://github.com/Nolane-x/video/actions/runs/44914373793. It will run full FFmpeg decode, exact frame/hash verification, 252 still samples (3 per shot) and four full-mix story clips. Update this state after the inspector completes.
+- Detailed evidence: `docs/reviews/time-stop-10s-run32-caption-fix-qa.md`.
+- Preserve Run 30 and all existing releases. Keep `visual_approval=false`; no public release or draft replacement until an uninterrupted human review of all 6m18s with sound is complete.
