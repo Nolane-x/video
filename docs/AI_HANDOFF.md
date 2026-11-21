@@ -388,3 +388,38 @@ Expected artifact name if the run succeeds: time-stop-10s-h2-29
 5. Only after successful run29 QA, create a separate run29 draft archive/release using a new tag/name. Preserve the run28 draft and run20 public release; never overwrite either. Keep visual_approval false until an uninterrupted full-length watch-through is performed.
 
 Run28 remains a valid previous technical candidate (details immediately above in this handoff); it is superseded by source commit 57c6ab2 for the s002 framing issue, but its master/draft archive remain immutable and available for comparison.
+
+## Handoff — Run 29 full render and QA follow-through (2026-11-21)
+
+Current source branch: film/time-stop-10s-3d-review-fixes
+Latest source fix: 57c6ab294bba89acfdd0e79c20c9f817febf3aa9 (s002 alarm clock reframe)
+Latest docs commit: 90b66296d28f05e4fe97af517a5b3ded4efb3c34
+
+### Run 29
+Workflow run: https://github.com/Nolane-x/video/actions/runs/44870641689
+Expected render artifact on success: time-stop-10s-h2-29
+Confirmed successful: storyboard / 84-segment VoiceStudio request; VoiceStudio render, master and AudioSeal validation; H2 toolchain install; build 84-shot storyboard; voice placement; installation and syntax checks for 3D shot modules; full shot renderer scan; full contact sheets; 30-second motion preview.
+VoiceStudio artifact ID 14693966717 (51,636,211 bytes).
+At the latest check, H2 step 'Render the complete 1080p native-FPS silent master' was still in progress. No full master artifact was visible. Do not describe run29 as complete. After the render, confirm mix, 1080p60/22,680-frame QA, artifact upload and workflow conclusion.
+
+### Prepared independent inspection
+Workflow file: .github/workflows/inspect-time-stop-run29.yml
+Branch: review/time-stop-10s-3d-fixes
+Commit: fa6f616ff525ff2d9edfb82b87bf3ab094b94d2b
+Defaults to source run 44870641689 and artifact time-stop-10s-h2-29. To start it after render upload, create only the marker .github/workflows/enable-inspect-time-stop-run29.txt on the review branch, or manually dispatch the workflow with the exact run ID. It performs complete audio/video decode, ffprobe/frame validation, SHA-256, 32 selected key frames, four full-mix scene clips including the complete final bicycle/sign rescue beat (270–324s), and 252 still samples (three at +0.75/+2.25/+3.75s for each shot). It leaves visual_approval false.
+
+### Prepared isolated draft archive
+Workflow file: .github/workflows/archive-time-stop-10s-expanded-run29.yml
+Branch: film/time-stop-10s-3d-review-fixes
+Commit: 0a205edad152e6117976c7db860da94cea0c73e8
+Targets run 44870641689, artifact time-stop-10s-h2-29 and unique tag time-stop-10s-expanded-3d-review-run29. Do not create .github/workflows/enable-time-stop-10s-expanded-run29-draft.txt until render and independent inspection are both successful. This archive is separate from run28 and public run20.
+
+### Documentation
+Project README corrected at a47f99db1b3e359a251bbb895a3a11b85caf83b8 to reflect the current 60fps path, 84 VieNeu shot-aligned segments, AudioSeal and 42/42 3D/2D split.
+
+### Next actions
+1. Poll run 44870641689; confirm final H2 job succeeds and artifact time-stop-10s-h2-29 appears.
+2. Trigger inspect-time-stop-run29.yml from its review branch only after artifact upload; inspect s002 at 5.25/6.75/8.25 seconds to validate the full bedside clock. Inspect dense sample sheets and final rescue clips.
+3. Compare master SHA-256 across render and independent inspection; do full FFmpeg decode and stream/loudness validation.
+4. Trigger archive-time-stop-10s-expanded-run29.yml only after independent inspection passes; verify assets and digests; keep as draft.
+5. Do not set visual_approval true or publish without uninterrupted full-length watch-through with audio.
