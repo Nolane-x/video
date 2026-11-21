@@ -100,6 +100,44 @@ def cue_metrics(cues: list[Cue]) -> dict[str, float]:
     }
 
 
+def wrap_text(text: str, max_line_chars: int = 42, max_lines: int = 2) -> str:
+    """Wrap subtitle text at word boundaries without changing its words."""
+    if max_line_chars < 1 or max_lines < 1:
+        raise ValueError("Line width and maximum line count must be positive")
+    words = text.split()
+    if not words:
+        raise ValueError("Cannot wrap empty subtitle text")
+
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        if len(word) > max_line_chars:
+            raise ValueError(f"Word exceeds subtitle line width ({len(word)} > {max_line_chars})")
+        candidate = word if not current else f"{current} {word}"
+        if len(candidate) <= max_line_chars:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+            if len(lines) >= max_lines:
+                raise ValueError(f"Subtitle text exceeds the {max_lines}-line limit")
+    if current:
+        lines.append(current)
+    if len(lines) > max_lines:
+        raise ValueError(f"Subtitle text exceeds the {max_lines}-line limit")
+    return "\n".join(lines)
+
+
+def wrap_cues(cues: list[Cue], max_line_chars: int = 42, max_lines: int = 2) -> list[Cue]:
+    wrapped: list[Cue] = []
+    for cue in cues:
+        text = wrap_text(cue.text, max_line_chars=max_line_chars, max_lines=max_lines)
+        if " ".join(text.split()) != " ".join(cue.text.split()):
+            raise AssertionError(f"Word content changed while wrapping cue {cue.number}")
+        wrapped.append(Cue(cue.number, cue.start, cue.end, text))
+    return wrapped
+
+
 def render_srt(cues: list[Cue]) -> str:
     blocks = []
     for cue in cues:
@@ -163,6 +201,21 @@ def build(source: Path, output: Path, duration: float, gap: float, expected_cues
     srt_path.write_text(render_srt(extended), encoding="utf-8", newline="\n")
     vtt_path.write_text(render_vtt(extended), encoding="utf-8", newline="\n")
 
+    wrapped = wrap_cues(extended, max_line_chars=42, max_lines=2)
+    wrapped_srt = output / "time-stop-10s-readable-wrapped-vi.srt"
+    wrapped_vtt = output / "time-stop-10s-readable-wrapped-vi.vtt"
+    wrapped_srt.write_text(render_srt(wrapped), encoding="utf-8", newline="\n")
+    wrapped_vtt.write_text(render_vtt(wrapped), encoding="utf-8", newline="\n")
+    wrapped_lines = [line for cue in wrapped for line in cue.text.splitlines()]
+    max_line_characters = max(map(len, wrapped_lines))
+    max_lines_per_cue = max(len(cue.text.splitlines()) for cue in wrapped)
+    wrapped_word_text_changes = sum(
+        " ".join(source.text.split()) != " ".join(target.text.split())
+        for source, target in zip(extended, wrapped)
+    )
+    if max_line_characters > 42 or max_lines_per_cue > 2 or wrapped_word_text_changes:
+        raise AssertionError("Wrapped subtitle output violated its text/line-width constraints")
+
     report = {
         "status": "passed",
         "source": "Run-30 84-shot Vietnamese VieNeu subtitle track",
@@ -179,6 +232,15 @@ def build(source: Path, output: Path, duration: float, gap: float, expected_cues
         ),
         "original": cue_metrics(original),
         "extended": cue_metrics(extended),
+        "wrapped_variant": {
+            "line_width_limit_characters": 42,
+            "max_line_characters": max_line_characters,
+            "max_lines_per_cue": 2,
+            "max_observed_lines_per_cue": max_lines_per_cue,
+            "word_text_changes": wrapped_word_text_changes,
+            "files": [wrapped_srt.name, wrapped_vtt.name],
+            "cue_text_preserved_after_whitespace_normalization": True,
+        },
         "source_overlap_count": source_overlap_count,
         "overlap_count": overlap_count,
         "text_changes": 0,
