@@ -341,3 +341,11 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - Detailed report: docs/reviews/time-stop-10s-run30-subtitle-automation-qa.md.
 - No master MP4, narration WAV, canonical subtitle, story source, or release state changed. Run-30 remains a draft; visual_approval remains false pending the uninterrupted full-film screening.
 
+
+
+### Runtime verification addendum (2026-11-21)
+- Inspected action.yml at each pinned upstream commit; all four declare runs.using: node24, not merely a Node-24-compatible release label.
+- GitHub-hosted runner version was 2.338.2 (minimum required by Node-24 actions: 2.327.1).
+- The pinned CI run executed 5 unit tests; all passed in 0.087s: multiline SRT parsing, start/text-preserving extension, source overlap rejection, cue-count rejection, and WebVTT syntax/format.
+- Detailed action metadata blob hashes and the test run are recorded in docs/reviews/time-stop-10s-run30-subtitle-automation-qa.md.
+
