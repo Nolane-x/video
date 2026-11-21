@@ -128,8 +128,14 @@ def build(source: Path, output: Path, duration: float, gap: float, expected_cues
         raise ValueError(f"Expected {expected_cues} cues, found {len(original)}")
     if duration <= 0 or gap < 0:
         raise ValueError("Duration must be positive and the inter-cue gap cannot be negative")
-    if original[-1].start >= duration:
-        raise ValueError("The final cue starts at or after the video end")
+    if original[-1].end > duration:
+        raise ValueError("The original final cue extends beyond the video end")
+    source_overlap_count = sum(
+        original[index].end > original[index + 1].start
+        for index in range(len(original) - 1)
+    )
+    if source_overlap_count:
+        raise ValueError(f"The source SRT contains {source_overlap_count} overlapping cues")
 
     extended: list[Cue] = []
     for index, cue in enumerate(original):
@@ -173,6 +179,7 @@ def build(source: Path, output: Path, duration: float, gap: float, expected_cues
         ),
         "original": cue_metrics(original),
         "extended": cue_metrics(extended),
+        "source_overlap_count": source_overlap_count,
         "overlap_count": overlap_count,
         "text_changes": 0,
         "notes": (
