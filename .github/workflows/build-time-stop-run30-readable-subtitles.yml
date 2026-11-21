@@ -6,6 +6,8 @@ on:
       - review/time-stop-10s-3d-fixes
     paths:
       - ".github/workflows/enable-build-time-stop-run30-readable-subtitles.txt"
+      - "video-projects/time-stop-10s/tools/extend_readable_subtitles.py"
+      - "video-projects/time-stop-10s/tests/test_extend_readable_subtitles.py"
   workflow_dispatch:
     inputs:
       source_run_id:
