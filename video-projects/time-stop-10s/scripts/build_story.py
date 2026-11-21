@@ -41,7 +41,7 @@ add("bedroom","Toàn cảnh phòng ngủ nhỏ lúc bình minh; rèm cửa, bàn
     camera(.48,.53,1.0,.55,.48,1.08),sfx=[cue("phone_ring"),cue("tick",1.5)])
 add("bedroom","Cận đồng hồ báo thức; kim giây chạy, ánh nắng sớm lướt qua mặt kính.","Thời gian chưa bao giờ chờ ai.",
     [actor("hoodie",.30,"sit","sad",hold="phone",h=.38)],{"clock":"06:10","lamp":False,"sky":"dawn","stage":True},
-    camera(.62,.30,1.32,.63,.30,1.50),sfx=[cue("tick"),cue("whoosh_tiny",2.2)])
+    camera(.56,.44,1.16,.57,.44,1.25),sfx=[cue("tick"),cue("whoosh_tiny",2.2)])
 add("bedroom","Góc qua vai nhìn bài kiểm tra còn dang dở; bút nằm cạnh vở, đèn bàn vẫn sáng.","Bài kiểm tra ngày mai vẫn còn nguyên trên bàn.",
     [actor("hoodie",.36,"type","sad",hold="book")],{"clock":"23:48","lamp":True,"laptop":False,"sky":"night","stage":True},
     camera(.42,.57,1.08,.48,.55,1.18),lights=[{"x":.72,"y":.43,"r":.22,"color":"#ffc36f","a":.28}])
