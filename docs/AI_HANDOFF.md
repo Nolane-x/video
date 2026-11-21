@@ -444,3 +444,10 @@ Do not make commits to any of these render-triggered paths while Run 30 is activ
 - Draft archive: .github/workflows/archive-time-stop-10s-expanded-run30.yml on film/time-stop-10s-3d-review-fixes, commit 9c92c57e0b584b5abbb4b0c9389f1ff2d543d866. It targets run 44873063135, artifact time-stop-10s-h2-30 and unique tag time-stop-10s-expanded-3d-review-run30. Do not add marker .github/workflows/enable-time-stop-10s-expanded-run30-draft.txt until the inspector is green.
 
 Preserve the Run-28 draft release and public Run-20 release. Never overwrite either. Keep visual_approval false; do not publish until a human has watched the full film uninterrupted with audio.
+
+## Handoff delta — Run 30 follow-up pipeline refinements (2026-11-21)
+
+- Inspector Run30 file was added at commit 9155efe4ad453badb19ea334fa79ce0e9085a9a9 and then its contact-sheet step label was corrected to 32 frames in commit 47f3813fa3d0c97a65b7dd2ac25b8af20292ae79. Use the latest review-branch version; its source run/artifact references remain 44873063135 / time-stop-10s-h2-30.
+- Run30 archive workflow is ready at .github/workflows/archive-time-stop-10s-expanded-run30.yml (commit 9c92c57e0b584b5abbb4b0c9389f1ff2d543d866). Do not create its marker before the independent inspector succeeds.
+- Preventive maintenance to do only AFTER Run30 has finished: narrow .github/workflows/render-time-stop-10s.yml's path filter. Replace broad video-projects/time-stop-10s/** with runtime-bearing folders video-projects/time-stop-10s/scripts/** and video-projects/time-stop-10s/scenes/** (plus any future runtime asset directories). This prevents README-only/documentation commits from triggering another 6m18s master render. Do not change the render workflow while a run using it is active because the workflow file itself is in its trigger path list and cancel-in-progress is true.
+- Latest status check for Run30: storyboard job passed; VoiceStudio render/master/watermark step was still in progress; no artifacts visible. Continue polling from the Actions API before triggering inspector.
