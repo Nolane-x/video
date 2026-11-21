@@ -5,7 +5,8 @@ on:
     branches:
       - 'film/time-stop-10s-*'
     paths:
-      - "video-projects/time-stop-10s/**"
+      - "video-projects/time-stop-10s/scripts/**"
+      - "video-projects/time-stop-10s/scenes/**"
       - ".github/workflows/render-time-stop-10s.yml"
       - ".github/workflows/enable-time-stop-native-60fps.txt"
       - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/**"
