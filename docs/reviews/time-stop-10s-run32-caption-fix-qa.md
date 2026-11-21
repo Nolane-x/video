@@ -36,6 +36,8 @@ Both source changes are included in the Run 32 source SHA above. The 60 H2 Canva
 - Audio-only FFmpeg decode passed locally; video keyframe-only decode passed locally. A separate full local all-frame decode exceeded the available execution window and was not counted as a pass. The CI-generated EBU R128 log reports processing all 22,680 frames and the complete audio stream at 14.1×, with I = −14.2 LUFS, LRA = 5.2 LU and true peak = −3.1 dBFS.
 - An independent GitHub Actions inspection workflow was added and triggered: [Run 32 independent inspection](https://github.com/Nolane-x/video/actions/runs/44914373793). It performs a complete FFmpeg decode, exact frame/hash checks, 252 per-shot sample frames and four full-mix action clips. Its final conclusion must be appended here after it finishes.
 
+- Additional cross-track verification: all 84 SRT cue start timestamps match the corresponding `voice-placement.json` `video_start` values exactly (zero start-time mismatches), and all 84 subtitle texts match the corresponding placed narration text exactly (zero text mismatches).
+
 ## Approval and release gate
 
 - This is a rendered and technically validated candidate, not an approved release.
