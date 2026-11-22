@@ -399,8 +399,8 @@ jobs:
           check(a.get("sample_rate") == "48000", f"audio sample rate={a.get('sample_rate')}; expected 48000")
           check(int(a.get("channels", 0)) == 2, f"audio channels={a.get('channels')}; expected stereo")
           log = (root / "ebur128.log").read_text(errors="replace")
-          m_i = re.findall(r"^\\s*I:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*LUFS\\s*$", log, re.M)
-          m_p = re.findall(r"^\\s*Peak:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*dBFS\\s*$", log, re.M)
+          m_i = re.findall(r"^\s*I:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*LUFS\s*$", log, re.M)
+          m_p = re.findall(r"^\s*Peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS\s*$", log, re.M)
           integrated = float(m_i[-1]) if m_i else None
           peak = float(m_p[-1]) if m_p else None
           check(integrated is not None, "Missing integrated loudness measurement")
