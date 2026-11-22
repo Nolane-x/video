@@ -91,7 +91,7 @@ jobs:
           set -euo pipefail
           node render.mjs --project projects/time-stop-10s --sheet --scale 0.5 --at 0.45
           mkdir -p "$GITHUB_WORKSPACE/dist/v4-preview/contact-sheets"
-          cp projects/time-stop-10s/build/sheet_*.jpg "$GITHUB_WORKSPACE/dist/v4-preview/contact-sheets/"
+          cp projects/time-stop-10s/build/sheets/sheet_*.jpg "$GITHUB_WORKSPACE/dist/v4-preview/contact-sheets/"
 
       - name: Render V4 cold-open motion preview
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
