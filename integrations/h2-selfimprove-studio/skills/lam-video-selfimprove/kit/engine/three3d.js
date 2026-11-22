@@ -528,7 +528,16 @@ export function figureCinematic(outfit = {}, o = {}) {
   grp.position.set(o.x || 0, 0, o.z || 0);
   grp.rotation.y = o.ry || 0;
   grp.userData.setPose = setPose;
-  grp.userData.modelVersion = 'cinematic-v1';
+  grp.userData.modelVersion = 'cinematic-v2-contact-rig';
+  grp.userData.handWorldPosition = (side = 'right') => {
+    grp.updateMatrixWorld(true);
+    const armRig = side === 'left' ? limbs.lA : limbs.rA;
+    const hand = armRig.userData.hand;
+    const world = new THREE.Vector3();
+    hand.getWorldPosition(world);
+    return world;
+  };
+  grp.userData.limbRig = limbs;
 
   const shadow = new THREE.Mesh(
     new THREE.CircleGeometry(0.53, 28),
