@@ -137,11 +137,9 @@ function cameraAt(s, t, mode = 'wide', focus = null) {
   c.updateProjectionMatrix();
 }
 
-function snapHandToHandlebar(figure, bike, side = 'right') {
-  const target = bike.root.localToWorld(V(0.53, 1.32, 0));
-  const hand = figure.userData.handWorldPosition(side);
-  figure.position.add(target.sub(hand));
-  figure.updateMatrixWorld(true);
+function aimHandAtHandlebar(figure, bike, side = 'right') {
+  const target = bike.root.localToWorld(V(0.40, 1.32, -0.06));
+  figure.userData.aimHandAtWorld(side, target);
 }
 
 function animateCommon(s, t, frozen = false) {
@@ -332,24 +330,24 @@ reg('s063', (s, t, p) => { s.kid.position.x = lerp(-4.6, -0.5, smooth(p)); s.kid
 reg('s064', (s, t) => {
   s.bike.root.position.set(0.65, 0, 1.4); s.mom.position.set(0.65, 0.02, 1.4);
   s.mom.userData.setPose('bike', 0);
-  s.kid.position.set(-0.5, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.position.set(s.bike.root.position.x - 0.17, 0, 1.135); s.kid.rotation.y = 0.0;
   s.kid.userData.setPose('reach', t);
-  snapHandToHandlebar(s.kid, s.bike, 'right');
+  aimHandAtHandlebar(s.kid, s.bike, 'right');
 }, 'closeMom', true, [0.0, 0.0]);
 reg('s065', (s, t, p) => {
   s.bike.root.position.x = lerp(0.65, -1.05, smooth(p));
   s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t);
-  s.kid.position.set(-0.45, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.position.set(s.bike.root.position.x - 0.17, 0, 1.135); s.kid.rotation.y = 0.0;
   s.kid.userData.setPose('pull', t);
-  snapHandToHandlebar(s.kid, s.bike, 'right');
+  aimHandAtHandlebar(s.kid, s.bike, 'right');
   s.mom.rotation.z = -0.08 * smooth(p); s.sign.rotation.z = 0.34;
 }, 'action', true, [-0.3, -1.4]);
 reg('s066', (s, t, p) => {
   s.bike.root.position.x = lerp(-1.05, -2.0, smooth(p));
   s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t);
-  s.kid.position.set(-0.45, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.position.set(s.bike.root.position.x - 0.17, 0, 1.135); s.kid.rotation.y = 0.0;
   s.kid.userData.setPose('pull', t);
-  snapHandToHandlebar(s.kid, s.bike, 'right');
+  aimHandAtHandlebar(s.kid, s.bike, 'right');
 }, 'action', true, [-1.4, -2.4]);
 reg('s067', (s, t, p) => { s.bike.root.position.x = -3.1; s.mom.position.set(-2.25, 0, 1.5); s.mom.userData.setPose('kneel', t); s.kid.position.set(-1.05, 0, 1.3); s.kid.userData.setPose('crouch', t); s.bike.root.rotation.z = -0.08 * smooth(p); }, 'action', true, [-1.7, -1.7]);
 reg('s068', (s, t, p) => { s.bike.root.position.x = lerp(-3.1, -3.8, smooth(p)); s.mom.position.set(-2.55, 0, 1.5); s.mom.userData.setPose('stand', t); s.kid.position.set(lerp(-1.05, -1.35, smooth(p)), 0, 1.3); s.kid.userData.setPose('pull', t); }, 'action', true, [-2.0, -2.0]);
