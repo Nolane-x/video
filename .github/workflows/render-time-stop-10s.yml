@@ -260,13 +260,21 @@ jobs:
           assert len(shots) == 84 and story["duration"] == 378.0
           assert story["fps"] == target_fps and len(story["music"]) == 7
           assert story["production"]["paid_video_services"] is False
-          assert story["production"]["time_freeze_fx_count"] == 26
+          assert story["production"]["time_freeze_fx_count"] == 29
           assert shots[0]["start"] == 0 and shots[-1]["end"] == 378.0
+          custom_3d = set(range(13, 23)) | set(range(26, 34)) | set(range(37, 43)) | set(range(53, 73))
+          durations = [float(shot["end"]) - float(shot["start"]) for shot in shots]
+          assert abs(sum(durations) - 378.0) < 1e-3
+          assert min(durations) >= 2.6 and max(durations) <= 6.2
+          assert len({round(x, 2) for x in durations}) >= 5
           last = 0
-          for shot in shots:
+          for number, shot in enumerate(shots, 1):
+              duration = float(shot["end"]) - float(shot["start"])
               assert abs(shot["start"] - last) < 1e-6, f"Timeline gap at {shot['id']}"
-              assert abs((shot["end"] - shot["start"]) - 4.5) < 1e-6
+              assert abs(float(shot["args"]["cam"]["dur"]) - duration) < 1e-6, f"Camera timing mismatch at {shot['id']}"
               assert shot["tpl"] == "scene"
+              if number in custom_3d:
+                  assert abs(duration - 4.5) < 1e-6, f"Custom 3D local clock changed at {shot['id']}"
               last = shot["end"]
           print(f"STORY PASS: {len(shots)} shots, {story['duration']}s, {target_fps}fps, {int(story['duration']*target_fps)} frames")
           PY
