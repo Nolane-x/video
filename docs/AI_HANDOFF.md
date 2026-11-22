@@ -310,3 +310,12 @@ Next action is to resume from workflow Run 44901911523 and inspect its new Run-3
 - Runs #37 and #38 were cancelled before H2 master render; do not search for missing film artifacts in those runs.
 - Resume at Run #39: https://github.com/Nolane-x/video/actions/runs/44983301715. Once artifact time-stop-10s-h2-39 is uploaded, trigger the retargeted independent inspection workflow and compare 44 3D shots with Run #32.
 - Preserve Run #30/32. Keep visual_approval=false until the entire 6m18s master has been screened continuously with audio.
+
+## Latest Run 39/40 update — 2026-11-22
+
+- Run #39 (`44983301715`) completed render and mix, but its QA step did not execute because of a malformed Python indentation in the defensive “missing video/audio stream” branch. Exact failure: `IndentationError: unexpected indent` at `print(json.dumps(report, indent=2))`.
+- Diagnostic artifact `time-stop-10s-diagnostic-39` is preserved (ID `14740333359`, 131,323,445 bytes). Independent checks on its MP4 confirm 1920x1080, 60fps, 22,680 frames, 378s, AAC 48kHz stereo, -14.3 LUFS integrated, and -2.3 dBFS EBU peak. All corresponding media gates pass. Voice placement has 84 Vietnamese segments, status passed, and verified watermark. SRT has 84 cues, no overlap and exact text/start/end match against the placed voice timeline.
+- Production workflow indentation repair committed as `42d23953e252b79f36dd7dd09834a19fbf934de6`. The defensive branch now writes, prints and exits its failure report from within the same conditional block.
+- New rebuild Run #40: https://github.com/Nolane-x/video/actions/runs/44987846626 (source commit `42d23953e252b79f36dd7dd09834a19fbf934de6`). At the latest recorded check, storyboard preparation passed and VoiceStudio was rendering/verifying narration; H2 render had not started.
+- Do not claim Run #39 is officially released: the official artifact upload was skipped because package QA failed before report creation. Run #40 must complete the corrected QA and upload its candidate before independent inspection.
+- Run 32 baseline artifact remains immutable and available (ID `14707913978`). Retarget the independent inspection workflow to Run #40 once its official artifact is uploaded. Keep visual_approval=false through full technical, 44-shot comparative, and continuous audiovisual review.
