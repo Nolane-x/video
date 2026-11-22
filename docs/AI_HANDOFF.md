@@ -296,3 +296,10 @@ Next work should avoid reopening the completed subtitle pipeline. Use the wrappe
 
 
 Next action is to resume from workflow Run 44901911523 and inspect its new Run-32 master, not to re-investigate Run-30. Keep visual_approval false until the full-length screening is done.
+
+## Immediate continuation — Run 38 AAC calibrated rebuild (2026-11-22)
+- Read `docs/reviews/time-stop-10s-run36-inspector-preflight.md` for exact 28-case AAC calibration. The selected real-mix settings are pre-AAC 0.70 and final AAC 0.65 (-14.2 LUFS / -2.4 dBFS); do not revert to 0.55/0.50.
+- Production render workflow commit `9a8dc9f18057125b7054fbf26ca76207a9cce651` includes calibrated mix and robust persisted QA. Parser fix commit `3be3a70835cb649fe7d24ec3dca22d96980b4163` ensures EBU regex reads both measurements.
+- Run #38 is active/queued at https://github.com/Nolane-x/video/actions/runs/44983218933. Watch renderer scan, six contact sheets, 30-second preview, full 22,680-frame master, audio mix, loudness/peak QA, and upload. If QA still fails, retrieve the diagnostic artifact and use its `qa-report.json` rather than changing gates.
+- After the official candidate artifact is uploaded, trigger the updated Run 38 independent inspection workflow. It checks full master decode, SHA-256, subtitles/narration, 252 frames, four full-mix sequence clips, and 44 matched 3D shots against Run #32.
+- Do not mark artistic approval until complete continuous 6m18s screening with audio; Run #30 and Run #32 remain immutable baselines.

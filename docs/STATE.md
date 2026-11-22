@@ -372,3 +372,10 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - Full audit: docs/reviews/time-stop-10s-run30-caption-burnin-audit.md.
 - Run #31 (44901907125) was cancelled by the second source push; Run #32 (44901911523) is currently checking all shots and building the corrected master. Do not claim the corrected film is ready until full render and frame-level verification pass.
 
+## Time Stop 10s — calibrated AAC QA and Run 38 (2026-11-22)
+- Run #36 failed only at package QA after full 1080p60 master and mix completed: integrated loudness measured -15.7 LUFS. Its film artifact was not uploaded; only the verified 84-segment voice package survived.
+- Real-mix AAC calibration Run 44979460350 passed all 28 encode/measure attempts; 14 combinations met both -15..-13 LUFS and peak <= -1.0 dBFS. Selected pre-AAC limiter 0.70 and final AAC limiter 0.65 measured -14.2 LUFS / -2.4 dBFS peak.
+- Production commit 9a8dc9f18057125b7054fbf26ca76207a9cce651 applies calibrated limits and makes QA save both audio metrics and diagnostic failure reasons before failing. Failed QA now attempts to upload a diagnostic candidate package.
+- EBU parser escaping corrected in commit 3be3a70835cb649fe7d24ec3dca22d96980b4163. Run #37 was cancelled before H2 render began. Run #38: https://github.com/Nolane-x/video/actions/runs/44983218933 is the current rebuild.
+- Independent inspection workflow retargeted to Run #38; do not trigger it until the successful candidate artifact exists.
+- Keep Run #30 and Run #32 immutable and keep visual_approval=false pending full continuous screening with sound.

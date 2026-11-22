@@ -54,3 +54,15 @@ At the time of this preflight, Run 36 had passed the all-shot renderer scan, ful
 - Calibration is isolated on `review/time-stop-10s-3d-fixes`; it does not change production source or trigger the 378-second film render.
 - Next production change must preserve both delivery gates: integrated loudness -15 to -13 LUFS and EBU peak <= -1.0 dBFS. The QA routine must print and persist both measurements before asserting, and its diagnostic package upload should run even if QA fails.
 - Keep `visual_approval=false` until the full candidate is delivered and continuously watched with audio.
+
+## Run 36 AAC loudness calibration and Run 38 rebuild (2026-11-22)
+
+- Calibration workflow succeeded: [Run 4](https://github.com/Nolane-x/video/actions/runs/44979460350), artifact `time-stop-10s-audio-calibration-run36` (artifact ID `14737795599`).
+- It rebuilt the exact 84-shot / 378-second Run 36 storyboard, placed all 84 verified Vietnamese narration segments, mixed the corresponding music/SFX, and encoded/measured 28 limiter combinations as AAC.
+- 14 of 28 combinations passed both gates: integrated loudness -15 to -13 LUFS and decoded AAC EBU peak <= -1.0 dBFS.
+- Selected production limits: pre-AAC limiter **0.70**, final AAC limiter **0.65**. The selected real-mix measurement was **-14.2 LUFS** and **-2.4 dBFS** peak. The previously failing 0.55/0.50 pair measured -15.7 LUFS / -4.0 dBFS: peak was safe, integrated loudness was too low.
+- Production commit `9a8dc9f18057125b7054fbf26ca76207a9cce651` applies both selected limits and makes QA persist both audio measurements and all failures before returning a failing exit code. It also uploads a diagnostic artifact if technical QA fails, so the rendered master/contact sheets are not lost.
+- A parser escaping issue in the first commit was corrected in `3be3a70835cb649fe7d24ec3dca22d96980b4163`. Run #37 was cancelled before its H2 render began; it did not consume a full film render.
+- Current candidate: [Run #38](https://github.com/Nolane-x/video/actions/runs/44983218933), commit `3be3a70835cb649fe7d24ec3dca22d96980b4163`. Its narration/build is queued; do not treat it as delivered yet.
+- Independent inspection workflow has been retargeted to Run #38. It will compare the new candidate against immutable Run #32 and inspect all 44 custom 3D shots after the production artifact is uploaded.
+- Keep `visual_approval=false`; the new master still requires full technical checks, frame/motion review, and continuous full-film viewing with audio.
