@@ -384,7 +384,7 @@ jobs:
               failures.append("Master MP4 has no audio stream")
           if not video or not audio:
               report = {"status": "technical-fail", "visual_approval": False, "qa_failures": failures}
-              (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\\n")
+          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
               print(json.dumps(report, indent=2))
               raise SystemExit(1)
           v, a = video[0], audio[0]
@@ -448,7 +448,7 @@ jobs:
               "visual_approval": False,
               "note": "Technical validation only; inspect the full contact sheets and motion proofs before artistic approval."
           }
-          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\\n")
+          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           if failures:
               raise SystemExit(f"Technical QA failed with {len(failures)} issue(s); see qa-report.json")
