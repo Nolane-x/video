@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build-and-validate:
@@ -97,3 +98,51 @@ jobs:
             "music_acts": len(beds)
           })
           PY
+
+      - name: Install voice-placement smoke-test dependencies
+        run: python -m pip install --disable-pip-version-check "numpy>=1.26" "soundfile>=0.12.1"
+      - name: Download verified Run 40 narration as duration-only fixture
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-44987846626
+          run-id: 44987846626
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/narrative-v3-voice-fixture
+      - name: Smoke-test all 84 variable narration slots
+        run: |
+          set -euo pipefail
+          python video-projects/time-stop-10s/scripts/place_voiceover.py \
+            --project /tmp/time-stop-narrative-v3 \
+            --artifact-dir /tmp/narrative-v3-voice-fixture
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("/tmp/time-stop-narrative-v3")
+          placed = json.loads((root / "out/voice-placement.json").read_text(encoding="utf-8"))
+          assert placed["status"] == "passed", placed
+          assert placed["placed_segments"] == 84, placed
+          assert abs(placed["duration_seconds"] - 378.0) < 0.001, placed
+          tempos = [float(x["atempo"]) for x in placed["segments"]]
+          assert max(tempos) <= 1.28 + 0.001, max(tempos)
+          report = {
+            "status": "slot-smoke-pass",
+            "segments": len(tempos),
+            "max_atempo": round(max(tempos), 3),
+            "accelerated_segments": sum(1 for x in tempos if x > 1.001),
+            "source_fixture": "Run 40 verified narration artifact",
+            "important": "Duration-only compatibility smoke test. The Run 40 audio does NOT match V3 rewritten lines; final V3 production must synthesize fresh narration."
+          }
+          (root / "out/voice-slot-smoke-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload narrative V3 storyboard validation proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-narrative-v3-validation
+          path: |
+            /tmp/time-stop-narrative-v3/config.json
+            /tmp/time-stop-narrative-v3/story/shots.json
+            /tmp/time-stop-narrative-v3/story/shot-plan.json
+            /tmp/time-stop-narrative-v3/out/voice-slot-smoke-report.json
+          if-no-files-found: error
+          retention-days: 14
