@@ -1,32 +1,32 @@
-name: Inspect — Time Stop 10s Run 36 cinematic 3D pass
+name: Inspect — Time Stop 10s Run 38 cinematic 3D pass
 
 on:
   push:
     branches: [review/time-stop-10s-3d-fixes]
     paths:
-      - ".github/workflows/enable-inspect-time-stop-run36.txt"
+      - ".github/workflows/enable-inspect-time-stop-run38.txt"
   workflow_dispatch:
     inputs:
       source_run_id:
-        description: "Successful Run 36 render workflow run ID"
+        description: "Successful Run 38 render workflow run ID"
         required: true
-        default: "44964684746"
+        default: "44983218933"
 
 permissions:
   actions: read
   contents: read
 
 concurrency:
-  group: time-stop-10s-run36-independent-inspection
+  group: time-stop-10s-run38-independent-inspection
   cancel-in-progress: true
 
 jobs:
   inspect:
-    name: Decode Run 36 master and create cinematic 3D review proof
+    name: Decode Run 38 master and create cinematic 3D review proof
     runs-on: ubuntu-24.04
     timeout-minutes: 75
     env:
-      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44964684746' }}
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44983218933' }}
     steps:
       - name: Checkout review tools
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -43,11 +43,11 @@ jobs:
           fi
           python -m pip install --disable-pip-version-check pillow
 
-      - name: Download immutable Run 36 render artifact
+      - name: Download immutable Run 38 render artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
-          name: time-stop-10s-h2-36
-          run-id: ${{ github.event.inputs.source_run_id || '44964684746' }}
+          name: time-stop-10s-h2-38
+          run-id: ${{ github.event.inputs.source_run_id || '44983218933' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: source-artifact
 
@@ -143,7 +143,7 @@ jobs:
           summary = {
             "status": "independent-technical-pass",
             "visual_approval": False,
-            "source_run_id": "44964684746",
+            "source_run_id": "44983218933",
             "master_sha256": digest,
             "duration_seconds": duration,
             "resolution": [int(video["width"]), int(video["height"])],
@@ -202,7 +202,7 @@ jobs:
           sheet.save("review/master-contact-sheet.jpg",quality=92)
           PY
 
-      - name: Create matched Run 32 versus Run 36 3D comparison sheets
+      - name: Create matched Run 32 versus Run 38 3D comparison sheets
         shell: bash
         run: |
           set -euo pipefail
@@ -222,7 +222,7 @@ jobs:
           for shot in shots:
             ts=(shot-1)*4.5+2.25
             pair=[]
-            for label,source in [("Run 32",baseline),("Run 36",candidate)]:
+            for label,source in [("Run 32",baseline),("Run 38",candidate)]:
               out=Path("review/3d-comparisons")/f"s{shot:03d}-{label.replace(' ','-')}.jpg"
               subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(ts),"-i",str(source),"-frames:v","1","-vf","scale=320:180","-q:v","3",str(out)],check=True)
               pair.append(Image.open(out).convert("RGB"))
@@ -236,12 +236,12 @@ jobs:
             for local,(shot,ts,pair) in enumerate(thumbs[page*per_page:(page+1)*per_page]):
               row=local//2; side=(local%2)*2
               x0=pad+side*(w+pad); y=pad+row*(h+lab+pad)
-              for idx,(label,img) in enumerate(zip(("Run 32","Run 36"),pair)):
+              for idx,(label,img) in enumerate(zip(("Run 32","Run 38"),pair)):
                 x=x0+idx*(w+pad)
                 draw.text((x+2,y),f"s{shot:03d} · {label} · {ts:.2f}s",(238,241,246))
                 canvas.paste(img,(x,y+lab))
             canvas.save(Path("review/3d-comparisons")/f"before-after-3d-{page+1:02d}.jpg",quality=92)
-          print({"matched_3d_shots":len(thumbs),"comparison_pages":(len(thumbs)+per_page-1)//per_page,"baseline":"Run 32","candidate":"Run 36","sample":"shot midpoint"})
+          print({"matched_3d_shots":len(thumbs),"comparison_pages":(len(thumbs)+per_page-1)//per_page,"baseline":"Run 32","candidate":"Run 38","sample":"shot midpoint"})
           PY
 
       - name: Generate 252-frame dense sample — three moments per story shot
@@ -270,7 +270,7 @@ jobs:
                 canvas.paste(src.crop((left,top,left+cw,top+ch)),(x+col*cw,y))
               draw.text((x+3,y+ch+5),f"s{shot+1:03d}  |  +0.75s / +2.25s / +3.75s",(238,241,246))
             canvas.save(Path("review/dense-samples")/f"motion-sheet-{page+1:02d}.jpg",quality=90)
-          report={"status":"sampled","source_run_id":"44964684746","shots":84,"frames":252,"sampling_offsets_seconds":[0.75,2.25,3.75],"visual_approval":False}
+          report={"status":"sampled","source_run_id":"44983218933","shots":84,"frames":252,"sampling_offsets_seconds":[0.75,2.25,3.75],"visual_approval":False}
           Path("review/dense-sampling.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps(report,ensure_ascii=False,indent=2))
           PY
@@ -307,31 +307,31 @@ jobs:
             print({"file":name,"duration":duration,"frames":frames,"fps":v["avg_frame_rate"],"audio":"AAC 48kHz stereo","decode":"pass"})
           PY
 
-      - name: Package independent Run 36 review bundle
+      - name: Package independent Run 38 review bundle
         shell: bash
         run: |
           set -euo pipefail
           cat > review/README.md <<'EOF'
-          # Time Stop 10s — Run 36 cinematic 3D independent inspection
+          # Time Stop 10s — Run 38 cinematic 3D independent inspection
 
-          Source render: GitHub Actions run 44964684746, artifact time-stop-10s-h2-36.
+          Source render: GitHub Actions run 44983218933, artifact time-stop-10s-h2-38.
           This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
 
-          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run36. Sampled proof is not a substitute for a continuous full-film review.
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run38. Sampled proof is not a substitute for a continuous full-film review.
           Keep visual_approval false until the full 6m18s film is watched with sound.
           EOF
           (
             cd review
-            find . -type f ! -name SHA256SUMS.txt ! -name run36-inspection.zip -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+            find . -type f ! -name SHA256SUMS.txt ! -name run38-inspection.zip -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
             sha256sum -c SHA256SUMS.txt
-            zip -qr run36-inspection.zip . -x './run36-inspection.zip'
-            unzip -tq run36-inspection.zip
+            zip -qr run38-inspection.zip . -x './run38-inspection.zip'
+            unzip -tq run38-inspection.zip
           )
 
-      - name: Upload Run 36 independent inspection bundle
+      - name: Upload Run 38 independent inspection bundle
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: time-stop-10s-run36-independent-inspection
+          name: time-stop-10s-run38-independent-inspection
           path: review/
           if-no-files-found: error
           retention-days: 30
