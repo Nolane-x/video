@@ -319,3 +319,12 @@ Next action is to resume from workflow Run 44901911523 and inspect its new Run-3
 - New rebuild Run #40: https://github.com/Nolane-x/video/actions/runs/44987846626 (source commit `42d23953e252b79f36dd7dd09834a19fbf934de6`). At the latest recorded check, storyboard preparation passed and VoiceStudio was rendering/verifying narration; H2 render had not started.
 - Do not claim Run #39 is officially released: the official artifact upload was skipped because package QA failed before report creation. Run #40 must complete the corrected QA and upload its candidate before independent inspection.
 - Run 32 baseline artifact remains immutable and available (ID `14707913978`). Retarget the independent inspection workflow to Run #40 once its official artifact is uploaded. Keep visual_approval=false through full technical, 44-shot comparative, and continuous audiovisual review.
+
+## Latest production handoff — Run 40 (2026-11-22)
+
+- Run #39 rendered and mixed a full master but QA did not execute because the workflow's defensive branch had malformed Python indentation. The exact issue is fixed in production commit `42d23953e252b79f36dd7dd09834a19fbf934de6`.
+- Run #40: https://github.com/Nolane-x/video/actions/runs/44987846626, source commit `42d23953e252b79f36dd7dd09834a19fbf934de6`. Storyboard, VoiceStudio, renderer scan, contact sheets and preview passed. Voice artifact ID `14740058876` has 84 verified segments and 84 exact SRT/VTT cues. H2 is currently rendering the full 1080p/60fps master; mix, QA and official artifact upload remain pending.
+- Independent inspection workflow is now retargeted to Run #40 in commit `589402a4699c65f0378f10ca09382e725c780792`. Do not trigger before official artifact `time-stop-10s-h2-40` exists.
+- Once that artifact uploads, trigger inspection marker `.github/workflows/enable-inspect-time-stop-run40.txt`; verify full master decode, 84 subtitle/voice alignment, 32 key frames, 252 stills, four action clips and all 44 custom 3D shot comparisons versus immutable Run #32.
+- Run #39 diagnostic media measured -14.3 LUFS and -2.3 dBFS EBU peak, both within existing audio gates. Keep the same gate ranges and calibrated mix levels; do not bypass QA.
+- Sampled contact-sheet review has not granted artistic approval. Keep `visual_approval=false` until the full film is watched continuously with audio and the Run #40 independent inspection is complete.
