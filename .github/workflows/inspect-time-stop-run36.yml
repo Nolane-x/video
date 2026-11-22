@@ -209,6 +209,7 @@ jobs:
           BASELINE="$(find baseline-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
           test -n "$BASELINE"
           echo "BASELINE_MASTER=$BASELINE" >> "$GITHUB_ENV"
+          export BASELINE_MASTER="$BASELINE"
           mkdir -p review/3d-comparisons
           python - <<'PY'
           import os, subprocess
