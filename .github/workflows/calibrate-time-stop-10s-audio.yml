@@ -76,6 +76,21 @@ jobs:
           print("Exact Run 36 soundtrack inputs: 84 shots / 378s / 84 placed Vietnamese segments")
           PY
 
+      - name: Enable a calibration-only pre-AAC limiter override
+        working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path=Path("tools/mix.py")
+          source=path.read_text(encoding="utf-8")
+          old='f"volume={gain:.2f}dB,alimiter=limit=0.55:level=false"'
+          new="""f\"volume={gain:.2f}dB,alimiter=limit={float(os.environ.get('NOLANE_AUDIO_PRE_LIMIT', '0.55')):.3f}:level=false\""" 
+          assert source.count(old)==1, "Expected one production pre-AAC limiter expression"
+          path.write_text(source.replace(old,new),encoding="utf-8")
+          print("Calibration-only environment override installed; production branch remains unchanged")
+          PY
+
       - name: Calibrate limiter matrix on the actual 378-second soundtrack
         working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
         run: |
