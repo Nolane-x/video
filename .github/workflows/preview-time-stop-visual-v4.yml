@@ -76,7 +76,6 @@ jobs:
           print(f"RESCUE_FROM={start}")
           print(f"RESCUE_TO={end}")
           PY
-          echo "V4 rescue preview range: $RESCUE_FROM–$RESCUE_TO"
 
       - name: Scan every shot for template and renderer errors
         working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
