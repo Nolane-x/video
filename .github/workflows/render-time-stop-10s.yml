@@ -263,6 +263,10 @@ jobs:
           assert story["production"]["time_freeze_fx_count"] == 29
           assert shots[0]["start"] == 0 and shots[-1]["end"] == 378.0
           custom_3d = set(range(13, 23)) | set(range(26, 34)) | set(range(37, 43)) | set(range(53, 73))
+          flashforward_3d_durations = [3.2, 3.2, 3.2, 3.4, 3.6, 3.6]
+          for number, expected_duration in enumerate(flashforward_3d_durations, 1):
+              actual = float(shots[number - 1]["end"]) - float(shots[number - 1]["start"])
+              assert abs(actual - expected_duration) < 1e-6, f"V3 3D cold-open duration mismatch at s{number:03d}: {actual}"
           durations = [float(shot["end"]) - float(shot["start"]) for shot in shots]
           assert abs(sum(durations) - 378.0) < 1e-3
           assert min(durations) >= 2.6 and max(durations) <= 6.2
@@ -430,6 +434,9 @@ jobs:
           check(voice.get("engine") == "vieneu", f"voice engine={voice.get('engine')}; expected vieneu")
           watermark = voice_manifest.get("audio", {}).get("watermark", {}).get("status")
           check(watermark == "verified", f"narration watermark={watermark}; expected verified")
+          story_report = json.loads((root / "story/shots.json").read_text(encoding="utf-8"))
+          freeze_fx_shots = int(story_report["production"]["time_freeze_fx_count"])
+          check(freeze_fx_shots == 29, f"freeze FX shots={freeze_fx_shots}; expected 29 for Narrative V3")
           report = {
               "status": "technical-pass" if not failures else "technical-fail",
               "duration_seconds": duration,
@@ -445,7 +452,7 @@ jobs:
               "peak_dbfs": peak,
               "audio_gates": {"integrated_lufs": [-15.0, -13.0], "peak_dbfs_max": -1.0},
               "story_shots": 84,
-              "freeze_fx_shots": 26,
+              "freeze_fx_shots": freeze_fx_shots,
               "narration_language": voice.get("language"),
               "narration_engine": voice.get("engine"),
               "narration_voice_id": voice.get("voice_id"),
