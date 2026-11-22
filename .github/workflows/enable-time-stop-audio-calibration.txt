@@ -1,1 +1,1 @@
-run measured Run 36 AAC loudness/true-peak matrix; calibration override syntax corrected
+run the 378-second Run 36 soundtrack limiter calibration; system FFmpeg/ffprobe are installed and diagnostics retained
