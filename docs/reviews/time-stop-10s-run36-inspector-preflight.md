@@ -66,3 +66,12 @@ At the time of this preflight, Run 36 had passed the all-shot renderer scan, ful
 - Current candidate: [Run #38](https://github.com/Nolane-x/video/actions/runs/44983218933), commit `3be3a70835cb649fe7d24ec3dca22d96980b4163`. Its narration/build is queued; do not treat it as delivered yet.
 - Independent inspection workflow has been retargeted to Run #38. It will compare the new candidate against immutable Run #32 and inspect all 44 custom 3D shots after the production artifact is uploaded.
 - Keep `visual_approval=false`; the new master still requires full technical checks, frame/motion review, and continuous full-film viewing with audio.
+
+## Run 38 cancellation and current Run 39 (2026-11-22)
+
+- Run #38 (`44983218933`) was cancelled before the H2 film render began after a second workflow-source audit found that the QA JSON writer emitted a literal escaped newline. No master or candidate artifact was produced by Run #38.
+- The writer was corrected in production commit `112ed8b8b57af75173913cde60f7a7bd7dad516a`. Both JSON write sites now use a real newline terminator. The EBU parser was separately fixed in `3be3a70835cb649fe7d24ec3dca22d96980b4163`.
+- Local parser/serialization smoke test passed on representative measurements: `-14.2 LUFS` and `-2.4 dBFS` are extracted correctly and the resulting QA JSON round-trips successfully.
+- Current rebuild is [Run #39](https://github.com/Nolane-x/video/actions/runs/44983301715), source commit `112ed8b8b57af75173913cde60f7a7bd7dad516a`. Its storyboard job is starting; do not infer film render completion from workflow creation.
+- Independent inspection workflow is now configured for Run #39 and immutable Run #32 baseline. Trigger it only when official artifact `time-stop-10s-h2-39` is uploaded after passing package QA.
+- The chosen production audio settings remain pre-AAC 0.70 / final AAC 0.65; do not revert them or weaken the existing loudness/peak gates.

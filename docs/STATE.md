@@ -379,3 +379,10 @@ Run-30 remains a draft candidate; the separate, still-required gate is an uninte
 - EBU parser escaping corrected in commit 3be3a70835cb649fe7d24ec3dca22d96980b4163. Run #37 was cancelled before H2 render began. Run #38: https://github.com/Nolane-x/video/actions/runs/44983218933 is the current rebuild.
 - Independent inspection workflow retargeted to Run #38; do not trigger it until the successful candidate artifact exists.
 - Keep Run #30 and Run #32 immutable and keep visual_approval=false pending full continuous screening with sound.
+
+## Time Stop 10s — Run 39 is current rebuild (2026-11-22)
+- Measured real-mix AAC calibration Run 44979460350: 28 combinations tested, 14 passed both gates. Selected pre-AAC 0.70/final AAC 0.65, measured -14.2 LUFS and -2.4 dBFS.
+- Production commit 9a8dc9f18057125b7054fbf26ca76207a9cce651 applies those levels and saves QA diagnostics. EBU parser fix: 3be3a70835cb649fe7d24ec3dca22d96980b4163. QA JSON newline fix: 112ed8b8b57af75173913cde60f7a7bd7dad516a.
+- Runs #37 and #38 were cancelled before H2 master rendering during QA source corrections; no candidate movie artifacts were uploaded from those runs.
+- Current rebuild: Run #39 https://github.com/Nolane-x/video/actions/runs/44983301715. Independent inspection workflow is retargeted to Run #39 and Run #32 baseline; trigger only after official candidate artifact upload.
+- Keep visual_approval=false pending full technical and visual review.

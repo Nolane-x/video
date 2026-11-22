@@ -303,3 +303,10 @@ Next action is to resume from workflow Run 44901911523 and inspect its new Run-3
 - Run #38 is active/queued at https://github.com/Nolane-x/video/actions/runs/44983218933. Watch renderer scan, six contact sheets, 30-second preview, full 22,680-frame master, audio mix, loudness/peak QA, and upload. If QA still fails, retrieve the diagnostic artifact and use its `qa-report.json` rather than changing gates.
 - After the official candidate artifact is uploaded, trigger the updated Run 38 independent inspection workflow. It checks full master decode, SHA-256, subtitles/narration, 252 frames, four full-mix sequence clips, and 44 matched 3D shots against Run #32.
 - Do not mark artistic approval until complete continuous 6m18s screening with audio; Run #30 and Run #32 remain immutable baselines.
+
+## Current run — Run 39 (2026-11-22)
+- The measured AAC settings are fixed at pre-AAC 0.70 and final AAC 0.65; real-mix sample measured -14.2 LUFS / -2.4 dBFS with 14/28 combinations passing both limits.
+- Production QA parser and JSON newline fixes are committed (3be3a70835cb649fe7d24ec3dca22d96980b4163 and 112ed8b8b57af75173913cde60f7a7bd7dad516a).
+- Runs #37 and #38 were cancelled before H2 master render; do not search for missing film artifacts in those runs.
+- Resume at Run #39: https://github.com/Nolane-x/video/actions/runs/44983301715. Once artifact time-stop-10s-h2-39 is uploaded, trigger the retargeted independent inspection workflow and compare 44 3D shots with Run #32.
+- Preserve Run #30/32. Keep visual_approval=false until the entire 6m18s master has been screened continuously with audio.
