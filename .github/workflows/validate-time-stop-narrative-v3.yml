@@ -6,6 +6,7 @@ on:
       - "story/time-stop-10s-narrative-v3"
     paths:
       - "video-projects/time-stop-10s/scripts/build_story.py"
+      - "video-projects/time-stop-10s/scenes/shots/time-stop-3d.js"
       - ".github/workflows/validate-time-stop-narrative-v3.yml"
 
 permissions:
@@ -25,6 +26,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Set up Node for 3D scene syntax validation
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate the six V3 3D cold-open registrations
+        run: |
+          set -euo pipefail
+          node --check video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          for shot in s001 s002 s003 s004 s005 s006; do
+            grep -Fq "regV3Flash('$shot'" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          done
+          echo "V3 3D cold-open syntax and six registrations PASS"
       - name: Build 1080p60 storyboard without rendering
         run: |
           set -euo pipefail
