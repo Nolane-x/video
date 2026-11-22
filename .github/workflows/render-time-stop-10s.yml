@@ -366,74 +366,105 @@ jobs:
           ffmpeg -hide_banner -nostats -i "$MASTER" -af ebur128=peak=true -f null - \
             2> "$ROOT/ebur128.log"
           python - <<'PY'
-          import json, os, re
+          import json, os, re, sys
           from pathlib import Path
           root = Path(os.environ["GITHUB_WORKSPACE"]) / "dist/time-stop-10s"
           meta = json.loads((root / "ffprobe.json").read_text())
           target_fps = int(os.environ["OUTPUT_FPS"])
-          streams = meta["streams"]
+          streams = meta.get("streams", [])
           video = [s for s in streams if s.get("codec_type") == "video"]
           audio = [s for s in streams if s.get("codec_type") == "audio"]
-          assert video, "Master MP4 has no video stream"
-          assert audio, "Master MP4 has no audio stream"
+          failures = []
+          def check(condition, message):
+              if not condition:
+                  failures.append(str(message))
+          if not video:
+              failures.append("Master MP4 has no video stream")
+          if not audio:
+              failures.append("Master MP4 has no audio stream")
+          if not video or not audio:
+              report = {"status": "technical-fail", "visual_approval": False, "qa_failures": failures}
+              (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\\n")
+              print(json.dumps(report, indent=2))
+              raise SystemExit(1)
           v, a = video[0], audio[0]
           duration = float(meta["format"]["duration"])
-          assert (int(v["width"]), int(v["height"])) == (1920, 1080), (v.get("width"), v.get("height"))
-          assert v.get("r_frame_rate") == f"{target_fps}/1", v.get("r_frame_rate")
+          width, height = int(v.get("width", 0)), int(v.get("height", 0))
           frames = int(v.get("nb_read_frames", v.get("nb_frames", 0)))
-          assert frames == round(duration * target_fps), (frames, duration, target_fps)
-          assert abs(duration - 378.0) < 0.20, duration
-          assert a.get("codec_name") == "aac", a.get("codec_name")
-          assert a.get("sample_rate") == "48000", a.get("sample_rate")
-          assert int(a.get("channels", 0)) == 2, a.get("channels")
+          check((width, height) == (1920, 1080), f"resolution={(width, height)}; expected 1920x1080")
+          check(v.get("r_frame_rate") == f"{target_fps}/1", f"fps={v.get('r_frame_rate')}; expected {target_fps}/1")
+          check(frames == round(duration * target_fps), f"decoded frames={frames}, duration={duration}, fps={target_fps}")
+          check(abs(duration - 378.0) < 0.20, f"duration={duration}; expected 378 seconds")
+          check(a.get("codec_name") == "aac", f"audio codec={a.get('codec_name')}; expected AAC")
+          check(a.get("sample_rate") == "48000", f"audio sample rate={a.get('sample_rate')}; expected 48000")
+          check(int(a.get("channels", 0)) == 2, f"audio channels={a.get('channels')}; expected stereo")
           log = (root / "ebur128.log").read_text(errors="replace")
-          m_i = re.findall(r"^\s*I:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*LUFS\s*$", log, re.M)
-          m_p = re.findall(r"^\s*Peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS\s*$", log, re.M)
-          assert m_i, "Missing integrated loudness result"
-          integrated = float(m_i[-1])
-          assert -15.0 <= integrated <= -13.0, integrated
+          m_i = re.findall(r"^\\s*I:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*LUFS\\s*$", log, re.M)
+          m_p = re.findall(r"^\\s*Peak:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*dBFS\\s*$", log, re.M)
+          integrated = float(m_i[-1]) if m_i else None
           peak = float(m_p[-1]) if m_p else None
+          check(integrated is not None, "Missing integrated loudness measurement")
+          if integrated is not None:
+              check(-15.0 <= integrated <= -13.0, f"integrated loudness={integrated} LUFS; required -15 to -13 LUFS")
+          check(peak is not None, "Missing EBU peak measurement")
           if peak is not None:
-              assert peak <= -1.0, peak
+              check(peak <= -1.0, f"EBU peak={peak} dBFS; maximum allowed -1.0 dBFS")
+          voice = {}
+          voice_manifest = {}
+          try:
+              voice = json.loads((root / "voice-placement.json").read_text(encoding="utf-8"))
+              voice_manifest = json.loads((root / "voiceover/manifest.json").read_text(encoding="utf-8"))
+          except Exception as exc:
+              failures.append(f"Could not read narration placement/manifest: {exc}")
+          check(voice.get("status") == "passed", f"voice placement status={voice.get('status')}")
+          check(voice.get("placed_segments") == 84, f"voice segments={voice.get('placed_segments')}; expected 84")
+          check(voice.get("language") == "vi", f"voice language={voice.get('language')}; expected vi")
+          check(voice.get("engine") == "vieneu", f"voice engine={voice.get('engine')}; expected vieneu")
+          watermark = voice_manifest.get("audio", {}).get("watermark", {}).get("status")
+          check(watermark == "verified", f"narration watermark={watermark}; expected verified")
           report = {
-              "status": "technical-pass",
+              "status": "technical-pass" if not failures else "technical-fail",
               "duration_seconds": duration,
               "fps": v.get("r_frame_rate"),
               "frames": frames,
               "frame_generation": "native H2 render at configured FPS",
-              "resolution": [int(v["width"]), int(v["height"])],
+              "resolution": [width, height],
               "video_codec": v.get("codec_name"),
               "audio_codec": a.get("codec_name"),
               "audio_sample_rate": a.get("sample_rate"),
               "audio_channels": int(a.get("channels", 0)),
               "integrated_lufs": integrated,
               "peak_dbfs": peak,
+              "audio_gates": {"integrated_lufs": [-15.0, -13.0], "peak_dbfs_max": -1.0},
               "story_shots": 84,
               "freeze_fx_shots": 26,
+              "narration_language": voice.get("language"),
+              "narration_engine": voice.get("engine"),
+              "narration_voice_id": voice.get("voice_id"),
+              "narration_segments": voice.get("placed_segments"),
+              "narration_watermark": watermark,
+              "voiceover_timeline": "shot-synced" if voice.get("status") == "passed" else "failed",
+              "qa_failures": failures,
               "visual_approval": False,
-              "note": "Technical validation only; inspect the full contact sheets and moving action proofs before artistic approval."
+              "note": "Technical validation only; inspect the full contact sheets and motion proofs before artistic approval."
           }
-          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
-          voice = json.loads((root / "voice-placement.json").read_text(encoding="utf-8"))
-          voice_manifest = json.loads((root / "voiceover/manifest.json").read_text(encoding="utf-8"))
-          assert voice["status"] == "passed" and voice["placed_segments"] == 84
-          assert voice["language"] == "vi" and voice["engine"] == "vieneu"
-          assert voice_manifest["audio"]["watermark"]["status"] == "verified"
-          report.update({
-              "narration_language": voice["language"],
-              "narration_engine": voice["engine"],
-              "narration_voice_id": voice["voice_id"],
-              "narration_segments": voice["placed_segments"],
-              "narration_watermark": voice_manifest["audio"]["watermark"]["status"],
-              "voiceover_timeline": "shot-synced",
-          })
-          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          (root / "qa-report.json").write_text(json.dumps(report, indent=2) + "\\n")
           print(json.dumps(report, indent=2))
+          if failures:
+              raise SystemExit(f"Technical QA failed with {len(failures)} issue(s); see qa-report.json")
           PY
           (cd "$ROOT" && sha256sum *.mp4 *.json *.log story/* voiceover/* subtitles/* contact-sheets/* > SHA256SUMS.txt)
           cd "$GITHUB_WORKSPACE"
           zip -qr dist/time-stop-10s-review.zip dist/time-stop-10s
 
+      - name: Upload diagnostic package when technical QA fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-diagnostic-${{ github.run_number }}
+          path: dist/time-stop-10s/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload film candidate and review package
         uses: actions/upload-artifact@v4
         with:
