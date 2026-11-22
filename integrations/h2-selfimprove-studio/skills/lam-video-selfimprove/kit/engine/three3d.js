@@ -281,7 +281,8 @@ export function figure(outfit = {}, o = {}) {
 export function figureCinematic(outfit = {}, o = {}) {
   const M = mood(o.mood || 'dusk');
   const scale = (o.s || 1) * (outfit.kid ? 0.78 : 1);
-  const skinColor = outfit.skin || '#e5c5ad';
+  const mascot = outfit.faceStyle === 'mascot';
+  const skinColor = outfit.skin || (mascot ? '#171722' : '#e5c5ad');
   const shirtColor = outfit.color || '#3c7186';
   const pantsColor = outfit.legs || '#202938';
   const faceInk = '#362b31';
@@ -317,7 +318,7 @@ export function figureCinematic(outfit = {}, o = {}) {
   const headGroup = new THREE.Group();
   headGroup.position.set(0, 0.80, 0);
   upperBody.add(headGroup);
-  const headRadius = 0.162;
+  const headRadius = mascot ? 0.19 : 0.162;
   const head = new THREE.Mesh(new THREE.SphereGeometry(headRadius, 24, 18), solid(skinColor));
   head.scale.set(1.0, 1.08, 0.96); headGroup.add(head);
 
@@ -340,7 +341,7 @@ export function figureCinematic(outfit = {}, o = {}) {
     pupil.position.set(0.161, 0.022, side * 0.052);
     headGroup.add(pupil);
 
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.055), solid(outfit.hairColor || '#30262c'));
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.055), solid(mascot ? (outfit.browColor || '#d8c9b8') : (outfit.hairColor || '#30262c')));
     brow.position.set(0.137, 0.071, side * 0.052);
     brow.rotation.x = side * -0.08;
     headGroup.add(brow); browMeshes.push(brow);
@@ -348,7 +349,7 @@ export function figureCinematic(outfit = {}, o = {}) {
 
   const nose = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), solid(skinColor));
   nose.scale.set(1.25, 0.8, 0.85); nose.position.set(0.164, -0.015, 0); headGroup.add(nose);
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.0065, 6, 14, Math.PI), basic('#70434a'));
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.0065, 6, 14, Math.PI), basic(mascot ? '#f0e4d2' : '#70434a'));
   mouth.position.set(0.147, -0.073, 0);
   mouth.rotation.set(0, Math.PI / 2, Math.PI);
   headGroup.add(mouth);
