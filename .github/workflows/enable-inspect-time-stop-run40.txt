@@ -1,2 +1,2 @@
 inspect official Run 40 candidate against immutable Run 32 baseline
-retry after fixing BASELINE_MASTER export
+verify subtitle start, end and text equality; correct Run40 README
