@@ -49,6 +49,16 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Ensure FFmpeg and ffprobe are available
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          command -v ffmpeg
+          command -v ffprobe
+
       - name: Install H2 audio dependencies and build sound library
         working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
         run: |
@@ -96,6 +106,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/calibration"
+          printf "Calibration setup started; measured results follow.\\n" > "$GITHUB_WORKSPACE/calibration/STATUS.txt"
           python - <<'PY'
           import json, os, re, subprocess, sys
           from pathlib import Path
