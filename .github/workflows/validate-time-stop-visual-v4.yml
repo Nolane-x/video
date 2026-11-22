@@ -1,0 +1,68 @@
+name: Validate — Time Stop 10s Visual V4
+
+on:
+  push:
+    branches:
+      - "story/time-stop-10s-visual-v4"
+    paths:
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/core.js"
+      - "integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js"
+      - "video-projects/time-stop-10s/scenes/shots/time-stop-3d.js"
+      - ".github/workflows/validate-time-stop-visual-v4.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: story/time-stop-10s-visual-v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Syntax-check renderer and rescue scene
+        run: |
+          set -euo pipefail
+          node --check integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/core.js
+          node --check integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js
+          node --check video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
+      - name: Validate restrained grade and physical contact rig
+        run: |
+          set -euo pipefail
+          grep -Fq "contrast: 1.08, sat: 0.84" integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/core.js
+          grep -Fq "handWorldPosition = (side = 'right')" integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js
+          grep -Fq "function snapHandToHandlebar" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          test "$(grep -Fc "snapHandToHandlebar(s.kid, s.bike, 'right')" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js)" -eq 3
+          grep -Fq "s.mom.position.set(-1.30, 0, 1.5)" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          echo "V4 grade and action-contact wiring PASS"
+      - name: Build unchanged 84-shot Narrative V3 storyboard
+        run: |
+          set -euo pipefail
+          python video-projects/time-stop-10s/scripts/build_story.py --project-dir /tmp/time-stop-v4 --fps 60
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/time-stop-v4')
+          story=json.loads((root/'story/shots.json').read_text(encoding='utf-8'))
+          shots=story['shots']
+          durations=[round(x['end']-x['start'],3) for x in shots]
+          assert len(shots)==84
+          assert story['duration']==378.0
+          assert story['production']['time_freeze_fx_count']==29
+          assert shots[3]['start']==9.6
+          assert len(set(durations))==13
+          assert abs(sum(durations)-378.0)<0.001
+          print({
+            'status':'PASS','shots':len(shots),'duration':story['duration'],
+            'fps':story['fps'],'frames':int(story['duration']*story['fps']),
+            'freeze_shots':story['production']['time_freeze_fx_count'],
+            'duration_range':[min(durations),max(durations)]
+          })
+          PY
