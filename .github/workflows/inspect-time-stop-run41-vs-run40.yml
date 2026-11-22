@@ -250,6 +250,80 @@ jobs:
           print({"matched_3d_shots":len(thumbs),"comparison_pages":(len(thumbs)+per_page-1)//per_page,"baseline":"Run 40","candidate":"Run 41","sample":"shot midpoint"})
           PY
 
+      - name: Measure matched-shot exposure, contrast and saturation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, math, statistics
+          from pathlib import Path
+          from PIL import Image
+
+          def percentile(values, q):
+            ordered = sorted(values)
+            if not ordered:
+              return 0.0
+            pos = (len(ordered) - 1) * q
+            lo = int(math.floor(pos)); hi = int(math.ceil(pos))
+            if lo == hi:
+              return float(ordered[lo])
+            return float(ordered[lo] * (hi - pos) + ordered[hi] * (pos - lo))
+
+          def measure(path):
+            image = Image.open(path).convert("RGB").resize((160, 90))
+            luma, saturation = [], []
+            for r, g, b in image.getdata():
+              y = 0.2126*r + 0.7152*g + 0.0722*b
+              luma.append(y)
+              peak = max(r, g, b)
+              low = min(r, g, b)
+              saturation.append((peak - low) / peak if peak else 0.0)
+            return {
+              "mean_luma_0_255": round(statistics.mean(luma), 2),
+              "p10_luma": round(percentile(luma, 0.10), 2),
+              "median_luma": round(percentile(luma, 0.50), 2),
+              "p90_luma": round(percentile(luma, 0.90), 2),
+              "luma_stddev": round(statistics.pstdev(luma), 2),
+              "mean_saturation_0_1": round(statistics.mean(saturation), 4)
+            }
+
+          rows = []
+          for shot in list(range(13, 23)) + list(range(26, 34)) + list(range(37, 43)) + list(range(53, 73)):
+            row = {"shot": f"s{shot:03d}"}
+            for label, key in [("Run-40", "run40"), ("Run-41", "run41")]:
+              image = Path("review/3d-comparisons") / f"s{shot:03d}-{label}.jpg"
+              assert image.is_file(), image
+              row[key] = measure(image)
+            row["delta_run41_minus_run40"] = {
+              field: round(row["run41"][field] - row["run40"][field], 3)
+              for field in row["run40"]
+            }
+            rows.append(row)
+
+          summary = {}
+          for key in ("run40", "run41"):
+            summary[key] = {
+              field: round(statistics.mean(row[key][field] for row in rows), 3)
+              for field in rows[0][key]
+            }
+          deltas = {
+            field: round(summary["run41"][field] - summary["run40"][field], 3)
+            for field in summary["run40"]
+          }
+          report = {
+            "status": "measured",
+            "comparison": "Run 41 cinematic V2 vs immutable Run 40",
+            "matched_3d_shots": len(rows),
+            "sample_size_per_image": "160x90 RGB pixels",
+            "aggregate_mean_metrics": summary,
+            "aggregate_delta_run41_minus_run40": deltas,
+            "per_shot": rows,
+            "interpretation": "Objective exposure/contrast/saturation diagnostics only; not an artistic pass/fail decision."
+          }
+          Path("review/grade-metrics.json").write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+          print(json.dumps({k: report[k] for k in ("matched_3d_shots", "aggregate_mean_metrics", "aggregate_delta_run41_minus_run40")}, indent=2))
+          PY
+
       - name: Generate 252-frame dense sample — three moments per story shot
         shell: bash
         run: |
@@ -321,9 +395,9 @@ jobs:
           # Time Stop 10s — Run 41 cinematic 3D independent inspection
 
           Source render: GitHub Actions run 45014668552, artifact time-stop-10s-h2-41.
-          This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
+          This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), 44 matched-shot exposure/contrast/saturation measurements, and four full-mix action clips.
 
-          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run40 and Run41. Sampled proof is not a substitute for a continuous full-film review.
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run40 and Run41. The grade-metrics JSON provides objective exposure, contrast and saturation deltas for these matched frames; it is diagnostic evidence, not automatic artistic approval. Sampled proof is not a substitute for a continuous full-film review.
           Keep visual_approval false until the full 6m18s film is watched with sound.
           EOF
           (
