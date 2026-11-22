@@ -482,3 +482,11 @@ Run #28 VoiceStudio artifact (ID 14630746223): 84 Vietnamese VieNeu segments; 19
 - Independent QA workflow prepared on review branch: .github/workflows/inspect-time-stop-run35.yml, commit 7dddb9c0f02832e7fb6c22a7eaea906b3f5bc6fa. It validates the complete MP4 decode and SHA manifest, subtitle↔narration start/text alignment, 252 per-shot stills, four full-mix action sequences and contact sheets. Add trigger marker only after Run35 artifact is uploaded.
 - Detailed plan/rubric: docs/reviews/time-stop-10s-cinematic-3d-pass.md.
 - Preserve Run30 and Run32. Run35 is an unapproved candidate; keep visual_approval=false. After render, review 3D sequences against proportions, motion, prop physics, camera framing, lighting and shot continuity before deciding whether another 3D polish pass is needed.
+ 
+
+## Run 35 — package QA failure and peak-headroom correction (2026-11-22)
+
+- Run #35 (44918426729) completed the 1080p60 master render and procedural mix. Package step 19 failed because encoded AAC EBU peak measured -0.5 dBFS against the -1.0 dBFS ceiling; integrated loudness passed. The failure was in delivery audio headroom, not 3D rendering.
+- Fix committed in integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/tools/mix.py: pre-AAC limiter 0.65 to 0.55 and a final AAC mux limiter at 0.50. Commit 553b9b782dc5ad649a57f9973e59ae00a50acc2c.
+- A new run is expected from the mix.py push; check Actions for run #36. Run #35 did not upload a film candidate because the job-local master was lost after the package failure. Only the verified VoiceStudio artifact exists for Run35.
+- Retain the strict QA thresholds; do not waive the -1 dBFS output peak gate. Rebuild is necessary, and the next candidate still requires visual comparison and full screening.
