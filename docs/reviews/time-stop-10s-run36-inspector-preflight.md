@@ -43,3 +43,14 @@ The baseline validation confirms that the Run 36 inspection workflow's archive-r
 ## Run 36 gate
 
 At the time of this preflight, Run 36 had passed the all-shot renderer scan, full contact-sheet render, and 30-second preview. Its full 1080p/60fps master render was still in progress. The mix, package QA, artifact upload, and independent visual review remained pending.
+
+## Run 36 result and next audio calibration (2026-11-22)
+
+- Run #36 completed with failure in package QA, not in scene rendering or video mastering.
+- The all-shot renderer scan, six contact-sheet render, 30-second motion preview, full 22,680-frame 1080p60 silent master, and procedural sound mix all succeeded.
+- The package QA measured integrated loudness at **-15.7 LUFS**, below the accepted range of -15 to -13 LUFS. The assertion stopped before the script checked/reported the encoded AAC peak, so Run #36 does not prove whether the new peak limiter passed.
+- The full candidate was not uploaded; Run #36 retains only its verified VoiceStudio narration artifact. Do not claim that a Run #36 film master was delivered or visually reviewed.
+- The measured calibration workflow is running as [Run 37](https://github.com/Nolane-x/video/actions/runs/44979180178). It uses the exact 84-segment Run 36 narration, story/music/SFX inputs and measures decoded AAC output across 28 combinations of pre-AAC and final AAC limiter ceilings.
+- Calibration is isolated on `review/time-stop-10s-3d-fixes`; it does not change production source or trigger the 378-second film render.
+- Next production change must preserve both delivery gates: integrated loudness -15 to -13 LUFS and EBU peak <= -1.0 dBFS. The QA routine must print and persist both measurements before asserting, and its diagnostic package upload should run even if QA fails.
+- Keep `visual_approval=false` until the full candidate is delivered and continuously watched with audio.
