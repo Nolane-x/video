@@ -17,8 +17,8 @@ const addRod = (group, a, b, radius, material) => {
   group.add(mesh); return mesh;
 };
 const addPerson = (color, mood, scale = 1, head = 'none') => T3.figureCinematic({
-  top: 'hoodie', color, legs: '#18212d', skin: '#efd8c2', head,
-  headColor: color,
+  top: 'hoodie', color, legs: '#18212d', skin: '#171722', head,
+  headColor: color, faceStyle: 'mascot',
 }, { mood, s: scale, rim: '#b9dfff', rimOpacity: 0.72 });
 function stage(mood, options = {}) {
   const st = T3.stage({ mood, cinematic: true, fog: options.fog || [30, 105], fov: options.fov || 34,
@@ -179,7 +179,7 @@ function makeKitchen(info) {
   }
   const hero = addPerson('#3c7186', 'interiorWarm', 1.12);
   const mom = T3.figureCinematic({ top: 'hoodie', color: '#a75b73', legs: '#292331',
-    skin: '#e8cbb8' },
+    skin: '#171722', faceStyle: 'mascot' },
     { mood: 'interiorWarm', s: 1.04, rim: '#ffd7b0', rimOpacity: 0.72 });
   // The shared figure rig has no built-in "bun" head token, so author the hairstyle as real geometry.
   const momHair = std('#35232a', { roughness: 0.96 });
