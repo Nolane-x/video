@@ -36,10 +36,23 @@ This explains why V2's practical lights and highlights read more cinematic, but 
    - Rescue shots s064–s066 use a two-segment shoulder/elbow IK solve against the bicycle's actual handlebar point. The character root stays grounded; only shoulder and elbow angles change to reach the target.
    - Mother/child positions in s071–s072 are brought closer and rotated toward one another to make the embrace read as contact instead of two separate reaching poses.
 
-3. **Story remains unchanged**
+3. **Cast identity / visual consistency**
+   - All V4 3D casts use a near-black mascot head and dark hands/neck, restrained cream facial marks, a slightly larger round head and a soft pale rim outline.
+   - Key-sequence, kitchen, court, hallway and street figures now share the same face treatment; clothing and environment carry the color/detail.
+   - Goal: reduce the visible seam between outlined 2D figures and the more detailed 3D scenes without making the 3D characters plastic or photoreal.
+4. **Story remains unchanged**
    - Keeps the Narrative V3 cold open, 84 shots, 378 seconds, 60fps, 22,680 frames, 29 freeze beats, 13 different shot durations, and 44 established 4.5s custom 3D local-clock shots.
-   - Validation confirmed JS syntax, grounded IK contact wiring (three rescue beats), grade values and storyboard invariants.
+   - Validation confirmed JS syntax, grounded IK contact wiring (three rescue beats), mascot styling, grade values and storyboard invariants.
 
 ## Promotion rule
 
 Do not render V4 before the Run #42 Narrative V3 preview/contact sheets are available. If Run #42 shows the V3 story structure is sound but color or contact acting still reads poorly, promote V4 to a separate `film/time-stop-10s-visual-v4` branch and compare with Run #42. Never overwrite Run #40, Run #41 or Run #42. Keep visual approval false until the full master is watched continuously with sound.
+
+
+## V4 preview-only verification
+
+- Workflow: `.github/workflows/preview-time-stop-visual-v4.yml`.
+- Run: `45031728597` (queued after marker `.github/workflows/enable-preview-time-stop-v4.txt`).
+- Expected outputs: 30s 960x540 cold-open motion preview, variable-timeline rescue clip s063–s072, full 84-shot contact sheets, stream/decode report.
+- This is visual proof only; no fresh V4 narration is attached and no 6m18 master is generated.
+- A production V4 branch/render is gated on reviewing this preview and the Narrative V3 Run42 candidate.
