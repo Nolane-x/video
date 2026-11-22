@@ -37,6 +37,9 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq "contrast: 1.08, sat: 0.84" integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/core.js
+          grep -Fq "const mascot = outfit.faceStyle === 'mascot'" integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js
+          grep -Fq "faceStyle: 'mascot'" video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          test "$(grep -Fc "faceStyle: 'mascot'" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js)" -eq 2
           grep -Fq "aimHandAtWorld = (side = 'right', targetWorld)" integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit/engine/three3d.js
           grep -Fq "function aimHandAtHandlebar" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js
           test "$(grep -Fc "aimHandAtHandlebar(s.kid, s.bike, 'right')" video-projects/time-stop-10s/scenes/shots/time-stop-3d.js)" -eq 3
