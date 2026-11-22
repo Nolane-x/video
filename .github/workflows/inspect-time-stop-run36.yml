@@ -131,13 +131,17 @@ jobs:
           assert not overlaps, overlaps
           segments = placement["segments"]
           assert len(segments) == 84
-          start_mismatches, text_mismatches = [], []
+          start_mismatches, end_mismatches, text_mismatches = [], [], []
           for i, (cue, segment) in enumerate(zip(cues, segments)):
             if abs(cue[0] - float(segment["video_start"])) > 0.001:
               start_mismatches.append((i+1, cue[0], segment["video_start"]))
+            expected_end = float(segment["video_start"]) + float(segment["voice_duration"])
+            if abs(cue[1] - expected_end) > 0.02:
+              end_mismatches.append((i+1, cue[1], expected_end))
             if cue[2] != str(segment["text"]).strip():
               text_mismatches.append((i+1, cue[2], segment["text"]))
           assert not start_mismatches, start_mismatches
+          assert not end_mismatches, end_mismatches
           assert not text_mismatches, text_mismatches
           digest = hashlib.sha256(master.read_bytes()).hexdigest()
           summary = {
@@ -160,6 +164,7 @@ jobs:
             "subtitle_cues": len(cues),
             "subtitle_overlaps": len(overlaps),
             "subtitle_start_mismatches": len(start_mismatches),
+            "subtitle_end_mismatches": len(end_mismatches),
             "subtitle_text_mismatches": len(text_mismatches),
             "note": "Complete MP4 decoded without FFmpeg errors. Sampled visuals are not a continuous artistic review."
           }
@@ -318,7 +323,7 @@ jobs:
           Source render: GitHub Actions run 44987846626, artifact time-stop-10s-h2-40.
           This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
 
-          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run39. Sampled proof is not a substitute for a continuous full-film review.
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run40. Sampled proof is not a substitute for a continuous full-film review.
           Keep visual_approval false until the full 6m18s film is watched with sound.
           EOF
           (
