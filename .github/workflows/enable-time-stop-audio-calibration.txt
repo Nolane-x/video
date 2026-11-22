@@ -1,1 +1,1 @@
-calibrate Run 36 AAC loudness and true-peak limits using its verified 84-segment narration; corrected six-level workspace artifact path
+run measured Run 36 AAC loudness/true-peak matrix; calibration override syntax corrected
