@@ -1,0 +1,1 @@
+Narrative V3 production render trigger. Storyboard and voice-slot validation passed before promotion.
