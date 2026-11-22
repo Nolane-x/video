@@ -1,0 +1,158 @@
+name: Preview — Time Stop 10s Visual V4
+
+on:
+  push:
+    branches:
+      - "story/time-stop-10s-visual-v4"
+    paths:
+      - ".github/workflows/enable-preview-time-stop-v4.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout Visual V4 experiment
+        uses: actions/checkout@v4
+        with:
+          ref: story/time-stop-10s-visual-v4
+
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install H2 Canvas and audio dependencies
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          python -m pip install --disable-pip-version-check numpy scipy soundfile pyloudnorm
+
+      - name: Ensure FFmpeg and Chromium
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -n "$CHROME" ]; then
+            echo "H2_CHROMIUM_EXECUTABLE_PATH=$CHROME" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Build Narrative V3 storyboard and procedural audio
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python ../../../../../video-projects/time-stop-10s/scripts/build_story.py \
+            --project-dir projects/time-stop-10s --fps 60
+          python audio/build_audio.py
+          mkdir -p projects/time-stop-10s/scenes/shots
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-3d.js projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          cp ../../../../../video-projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-3d.js
+          node --check projects/time-stop-10s/scenes/shots/time-stop-key-sequences-3d.js
+          node --check engine/three3d.js
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          from pathlib import Path
+          shots=json.loads(Path("projects/time-stop-10s/story/shots.json").read_text(encoding="utf-8"))["shots"]
+          by_id={x["id"]:x for x in shots}
+          start=float(by_id["s063"]["start"])
+          end=float(by_id["s072"]["end"])
+          assert end>start
+          print(f"RESCUE_FROM={start}")
+          print(f"RESCUE_TO={end}")
+          PY
+          echo "V4 rescue preview range: $RESCUE_FROM–$RESCUE_TO"
+
+      - name: Scan every shot for template and renderer errors
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --check --scale 0.25
+
+      - name: Render V4 full contact sheets
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --sheet --scale 0.5 --at 0.45
+          mkdir -p "$GITHUB_WORKSPACE/dist/v4-preview/contact-sheets"
+          cp projects/time-stop-10s/build/sheet_*.jpg "$GITHUB_WORKSPACE/dist/v4-preview/contact-sheets/"
+
+      - name: Render V4 cold-open motion preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s --from 0 --to 30 --scale 0.5 --workers 2 --crf 20
+          mkdir -p "$GITHUB_WORKSPACE/dist/v4-preview"
+          cp projects/time-stop-10s/build/preview.mp4 "$GITHUB_WORKSPACE/dist/v4-preview/v4-cold-open-0-30s-960x540.mp4"
+
+      - name: Render V4 bicycle rescue motion preview
+        working-directory: integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        timeout-minutes: 35
+        run: |
+          set -euo pipefail
+          node render.mjs --project projects/time-stop-10s \
+            --from "$RESCUE_FROM" --to "$RESCUE_TO" --scale 0.5 --workers 2 --crf 20
+          cp projects/time-stop-10s/build/preview.mp4 "$GITHUB_WORKSPACE/dist/v4-preview/v4-rescue-s063-s072-960x540.mp4"
+
+      - name: Verify V4 preview streams and create report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          root=Path("dist/v4-preview")
+          expected={"v4-cold-open-0-30s-960x540.mp4":30.0}
+          for name,duration_expected in expected.items():
+            path=root/name
+            meta=json.loads(subprocess.check_output(["ffprobe","-v","error","-count_frames","-show_streams","-show_format","-of","json",str(path)],text=True))
+            video=next(x for x in meta["streams"] if x.get("codec_type")=="video")
+            duration=float(meta["format"]["duration"])
+            assert (int(video["width"]),int(video["height"]))==(960,540),(name,video)
+            assert video["avg_frame_rate"]=="60/1",(name,video)
+            assert abs(duration-duration_expected)<0.05,(name,duration)
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-i",str(path),"-f","null","-"],check=True)
+          rescue=root/"v4-rescue-s063-s072-960x540.mp4"
+          meta=json.loads(subprocess.check_output(["ffprobe","-v","error","-count_frames","-show_streams","-show_format","-of","json",str(rescue)],text=True))
+          video=next(x for x in meta["streams"] if x.get("codec_type")=="video")
+          assert (int(video["width"]),int(video["height"]))==(960,540),video
+          assert video["avg_frame_rate"]=="60/1",video
+          subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-i",str(rescue),"-f","null","-"],check=True)
+          report={
+            "status":"visual-preview-pass",
+            "resolution":[960,540],
+            "fps":60,
+            "cold_open_seconds":30,
+            "rescue_clip_seconds":round(float(meta["format"]["duration"]),3),
+            "rescue_shots":"s063-s072",
+            "important":"Visual-only V4 preview. It does not include the newly synthesized V3 narration and is not a master candidate."
+          }
+          (root/"preview-report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(report,indent=2))
+          PY
+
+      - name: Upload Visual V4 preview bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-visual-v4-preview
+          path: dist/v4-preview/
+          if-no-files-found: error
+          retention-days: 14
