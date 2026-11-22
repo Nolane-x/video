@@ -5,17 +5,29 @@ import * as THREE from 'three';
 import { E, mood, hex, rng, lerp, clamp, ease, UI } from './core.js';
 
 let R = null;              // WebGLRenderer dung chung
+const shadowPrepared = new WeakSet();
 export function renderer(w, h) {
   if (!R) {
     const c = document.createElement('canvas');
-    R = new THREE.WebGLRenderer({ canvas: c, antialias: true, preserveDrawingBuffer: true, alpha: false });
-    R.outputColorSpace = THREE.SRGBColorSpace; R.toneMapping = THREE.NoToneMapping;
+    R = new THREE.WebGLRenderer({ canvas: c, antialias: true, preserveDrawingBuffer: true, alpha: false, powerPreference: 'high-performance' });
+    R.outputColorSpace = THREE.SRGBColorSpace;
+    R.toneMapping = THREE.ACESFilmicToneMapping;
+    R.toneMappingExposure = 1.12;
+    R.shadowMap.enabled = true;
+    R.shadowMap.type = THREE.PCFSoftShadowMap;
+    R.setPixelRatio(1);
   }
   if (R.domElement.width !== w || R.domElement.height !== h) R.setSize(w, h, false);
   return R;
 }
 const col = (c) => new THREE.Color(...hex(c).map((v) => v / 255)).convertSRGBToLinear();
-const lam = (c, o = {}) => new THREE.MeshLambertMaterial({ color: col(c), emissive: col(c).multiplyScalar(0.22), flatShading: true, ...o });
+const lam = (c, o = {}) => {
+  const { roughness = 0.82, metalness = 0.025, emissiveIntensity = 0.055, ...extra } = o;
+  return new THREE.MeshStandardMaterial({
+    color: col(c), emissive: col(c).multiplyScalar(emissiveIntensity),
+    roughness, metalness, flatShading: false, ...extra,
+  });
+};
 const basic = (c, o = {}) => new THREE.MeshBasicMaterial({ color: col(c), ...o });
 
 function gradTex(stops) {
@@ -34,21 +46,54 @@ function glowTex() {
 // ---------- san khau
 export function stage(o = {}) {
   const M = mood(o.mood || 'dusk');
+  const cinematic = !!o.cinematic;
   const scene = new THREE.Scene();
-  scene.background = gradTex(M.sky);                              // troi theo mood (tren -> duoi)
+  scene.background = gradTex(M.sky);
   const fogC = col(o.fogColor || M.fog);
   scene.fog = new THREE.Fog(fogC, (o.fog || [18, 90])[0], (o.fog || [18, 90])[1]);
   const camera = new THREE.PerspectiveCamera(o.fov || 38, E.W / E.H, 0.1, 600);
-  scene.add(new THREE.HemisphereLight(col(M.sky[2]), col(M.floor), o.ambient ?? 1.6));
-  const key = new THREE.DirectionalLight(col(M.key), o.keyIntensity ?? 2.6);
-  key.position.set(...(o.keyPos || [-20, 14, -30])); scene.add(key);
-  const fill = new THREE.DirectionalLight(col(M.sky[1]), 0.8); fill.position.set(15, 10, 20); scene.add(fill);
-  const st = { scene, camera, M, key, add: (...objs) => { objs.forEach((x) => scene.add(x)); return objs[0]; } };
-  if (o.sun !== false) { const s = sprite(M.sun, o.sunSize || 26, 0.9); s.position.set(...(o.sunPos || [-60, 8, -140])); scene.add(s); }
+  scene.add(new THREE.HemisphereLight(col(M.sky[2]), col(M.floor), o.ambient ?? (cinematic ? 0.88 : 1.6)));
+  const key = new THREE.DirectionalLight(col(M.key), o.keyIntensity ?? (cinematic ? 3.25 : 2.6));
+  key.position.set(...(o.keyPos || [-20, 14, -30]));
+  if (cinematic) {
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.left = -30; key.shadow.camera.right = 30;
+    key.shadow.camera.top = 25; key.shadow.camera.bottom = -25;
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 110;
+    key.shadow.camera.updateProjectionMatrix();
+    key.shadow.bias = -0.00028; key.shadow.normalBias = 0.035;
+    key.shadow.radius = 4;
+  }
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(col(M.sky[1]), cinematic ? 0.52 : 0.8);
+  fill.position.set(15, 10, 20); scene.add(fill);
+  const rim = new THREE.DirectionalLight(col(M.rim), cinematic ? (o.rimIntensity ?? 1.45) : 0.45);
+  rim.position.set(10, 8, -14); scene.add(rim);
+  const bounce = new THREE.PointLight(col(M.practical), cinematic ? (o.practicalIntensity ?? 0.8) : 0.25, 26, 2);
+  bounce.position.set(-1, 3.2, 2.4); scene.add(bounce);
+  const st = { scene, camera, M, key, cinematic, add: (...objs) => { objs.forEach((x) => scene.add(x)); return objs[0]; } };
+  if (o.sun !== false) { const sun = sprite(M.sun, o.sunSize || 26, 0.9); sun.position.set(...(o.sunPos || [-60, 8, -140])); scene.add(sun); }
   return st;
 }
+function prepareCinematicShadows(st) {
+  if (!st?.cinematic || shadowPrepared.has(st.scene)) return;
+  st.scene.traverse((obj) => {
+    if (!obj.isMesh) return;
+    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+    const translucent = materials.some((m) => !m || m.transparent || (m.opacity ?? 1) < 0.88 || m.depthWrite === false);
+    obj.castShadow = !translucent;
+    obj.receiveShadow = !translucent;
+  });
+  shadowPrepared.add(st.scene);
+}
 export function render(st, w, h) {
-  const r = renderer(w, h); st.camera.aspect = E.W / E.H; st.camera.updateProjectionMatrix(); r.render(st.scene, st.camera); return r.domElement;
+  const r = renderer(w, h);
+  st.camera.aspect = E.W / E.H;
+  st.camera.updateProjectionMatrix();
+  prepareCinematicShadows(st);
+  r.render(st.scene, st.camera);
+  return r.domElement;
 }
 export function dispose(st) { st.scene.traverse((o) => { o.geometry?.dispose?.(); if (o.material) [].concat(o.material).forEach((m) => { m.map?.dispose?.(); m.dispose?.(); }); }); }
 
@@ -57,7 +102,7 @@ export const box = (w, h, d, c, o = {}) => { const m = new THREE.Mesh(new THREE.
 export const cyl = (rt, rb, h, c, o = {}) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, o.seg || 12), lam(c, o.mat)); m.position.set(o.x || 0, (o.y ?? h / 2), o.z || 0); return m; };
 export const sphere = (r, c, o = {}) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, o.seg || 16, o.seg || 12), o.basic ? basic(c) : lam(c)); m.position.set(o.x || 0, o.y || 0, o.z || 0); return m; };
 export function ground(w, d, c, o = {}) {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lam(c)); m.rotation.x = -Math.PI / 2; m.position.y = o.y || 0;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lam(c)); m.rotation.x = -Math.PI / 2; m.position.y = o.y || 0; m.receiveShadow = true;
   if (o.lines) { const g = new THREE.Group(); g.add(m); for (let x = -w / 2; x <= w / 2; x += o.lines) { const l = box(0.08, 0.01, d, o.lineColor || '#c8b890', { y: (o.y || 0) + 0.01, x, basic: true, mat: { transparent: true, opacity: 0.35 } }); g.add(l); } return g; }
   return m;
 }
@@ -78,7 +123,7 @@ export function building(w, h, d, o = {}) {
   const cw = c.width / cols, rh = c.height / rows;
   for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { const on = r() < (o.litChance ?? 0.45); g.fillStyle = on ? lit : '#0d0a12'; g.globalAlpha = on ? 0.75 + r() * 0.25 : 0.7; g.fillRect(i * cw + cw * 0.22, j * rh + rh * 0.25, cw * 0.56, rh * 0.5); }
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const side = new THREE.MeshLambertMaterial({ map: tex, emissive: col('#ffffff'), emissiveMap: tex, emissiveIntensity: 0.55 });
+  const side = new THREE.MeshStandardMaterial({ map: tex, emissive: col('#ffffff'), emissiveMap: tex, emissiveIntensity: 0.42, roughness: 0.9 });
   const plain = lam(color);
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, plain, plain, side, side]);
   m.position.set(o.x || 0, h / 2, o.z || 0); if (o.ry) m.rotation.y = o.ry; return m;

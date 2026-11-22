@@ -65,6 +65,7 @@ const MOODS = {
   void:   { sky: ['#0a1630', '#0e1d3e', '#12244a', '#163058'], sun: '#9fd2ff', key: '#9fd2ff', rim: '#bfe2ff', wall: '#0e1d3e', floor: '#0a1630', dark: '#050b18', practical: '#ffd36b', fog: '#1c3060', far: '#12244a' },
 };
 export const STYLES = {
+  cinematic:{ name: 'Dien anh hien dai', tint: { dusk: 'golden' }, grade: { lift: [7, 6, 15], gain: [255, 244, 231], contrast: 1.14, sat: 1.12, vignette: 0.28, grain: 0.045 } },
   dusk:      { name: 'Hoang hon (mac dinh)', tint: null, grade: { lift: [14, 6, 22], gain: [255, 236, 214], contrast: 1.05, sat: 1.0, vignette: 0.55, grain: 0.07 } },
   midnight:  { name: 'Dem xanh', tint: { dusk: 'night', golden: 'night', interiorWarm: 'interiorCool' }, grade: { lift: [4, 10, 26], gain: [222, 236, 255], contrast: 1.08, sat: 0.92, vignette: 0.6, grain: 0.07 } },
   golden:    { name: 'Nang vang', tint: { dusk: 'golden', interiorCool: 'interiorWarm' }, grade: { lift: [18, 10, 14], gain: [255, 232, 200], contrast: 1.04, sat: 1.08, vignette: 0.45, grain: 0.06 } },

@@ -74,7 +74,7 @@ function makeRain(scene) {
 }
 
 function makeStreet(info) {
-  const stage = T3.stage({ mood: 'storm', fog: [22, 72], fov: 37, ambient: 1.45, keyIntensity: 1.85, keyPos: [-9, 12, 10], sun: false });
+  const stage = T3.stage({ mood: 'storm', cinematic: true, fog: [18, 78], fov: 35, ambient: 0.90, keyIntensity: 3.25, rimIntensity: 1.65, practicalIntensity: 1.25, keyPos: [-9, 12, 10], sun: false });
   const { scene, camera } = stage;
   scene.add(camera);
   // One camera-locked subtitle plane sits below the action, inside the safe image area.
@@ -100,8 +100,8 @@ function makeStreet(info) {
   for (const [x, z, h, w] of [[-12, -11, 10, 5], [-6.5, -13, 8, 4], [10.5, -12, 11, 5], [15, -10, 8, 4], [-17, -8, 7, 4]]) scene.add(T3.building(w, h, 3.1, { x, z, mood: 'storm', seed: Math.abs(x * 13), litChance: 0.52 }));
   scene.add(T3.lamp({ x: -5.8, z: 3.1, mood: 'storm', color: '#ffd39b', intensity: 10 })); scene.add(T3.lamp({ x: 7.8, z: -5.2, mood: 'storm', color: '#f3c58f', intensity: 7 }));
   const bike = makeBike(); bike.root.position.set(-1.4, 0, 1.4); scene.add(bike.root);
-  const mom = T3.figureCinematic({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.18, rim: '#ffd1d9', rimOpacity: 0.85 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
-  const kid = T3.figureCinematic({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 1.08, rim: '#9dd9ff', rimOpacity: 0.95 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
+  const mom = T3.figureCinematic({ top: 'hoodie', color: '#a94f68', legs: '#242b3b', head: 'beanie', headColor: '#642d43' }, { mood: 'storm', s: 1.25, rim: '#ffd1d9', rimOpacity: 0.72 }); mom.position.set(-1.4, 0.02, 1.4); scene.add(mom);
+  const kid = T3.figureCinematic({ top: 'hoodie', color: '#3858a5', legs: '#192337', head: 'beanie', headColor: '#16223d' }, { mood: 'storm', s: 1.16, rim: '#9dd9ff', rimOpacity: 0.72 }); kid.position.set(-4.8, 0, 0.1); scene.add(kid);
   const sign = makeBillboard(); scene.add(sign); const rain = makeRain(scene);
   for (let i = 0; i < 8; i++) { const m = new THREE.Mesh(new THREE.CircleGeometry(0.45 + (i % 3) * 0.22, 24), new THREE.MeshBasicMaterial({ color: '#7799b9', transparent: true, opacity: 0.11, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(-8 + i * 2.6, 0.047, i % 2 ? 1.7 : -1.8); scene.add(m); }
   const debris = new THREE.Group(); for (let i = 0; i < 9; i++) { const bit = T3.box(0.14 + (i % 3) * 0.12, 0.08, 0.1, '#69798b', { y: 0, mat: mat('#69798b', '#24364a', 0.12, { metalness: 0.6 }) }); bit.position.set(3.0 + i * 0.28, 0.2 + (i % 3) * 0.27, -2 + (i % 2) * 0.35); debris.add(bit); } scene.add(debris); debris.visible = false;
@@ -127,11 +127,12 @@ function cameraAt(s, t, mode = 'wide', focus = null) {
     look[0] = focusedX;
   }
   // A gentle dolly and pan follow the subject instead of leaving the virtual camera locked.
-  const push = (mode === 'closeMom' ? 0.18 : mode === 'impact' ? 0.36 : mode === 'tracking' ? 0.42 : 0.28) * k;
-  const arc = Math.sin(k * Math.PI) * (mode === 'tracking' ? 0.20 : 0.10);
-  c.position.set(pos[0] + focusShift * 0.22 + arc + Math.sin(t * 0.42) * 0.022,
-    pos[1] + Math.sin(t * 0.55) * 0.014, pos[2] - push);
-  c.lookAt(look[0] + Math.sin(k * Math.PI) * 0.055, look[1], look[2]);
+  const push = (mode === 'closeMom' ? 0.56 : mode === 'impact' ? 0.82 : mode === 'tracking' ? 0.92 : 0.62) * k;
+  const arc = Math.sin(k * Math.PI) * (mode === 'tracking' ? 0.36 : 0.18);
+  const impactShake = mode === 'impact' ? Math.sin(t * 16) * 0.018 * (1 - k * 0.4) : 0;
+  c.position.set(pos[0] + focusShift * 0.28 + arc + Math.sin(t * 0.34) * 0.012 + impactShake,
+    pos[1] + Math.sin(t * 0.55) * 0.012, pos[2] - push);
+  c.lookAt(look[0] + Math.sin(k * Math.PI) * 0.10, look[1], look[2]);
   c.fov = fov;
   c.updateProjectionMatrix();
 }
@@ -148,29 +149,34 @@ function animateCommon(s, t, frozen = false) {
 
 function overlay(g, t, info, freeze = false, title = '') {
   if (freeze) {
+    const id = String(info?.shot?.id || 's000');
+    const seed = Number(id.slice(1)) || 0;
+    const x = E.W * (0.44 + (seed % 4) * 0.035), y = E.H * 0.39;
     g.save(); g.globalCompositeOperation = 'screen';
-    const x = E.W * 0.53, y = E.H * 0.43;
-    const pulse = 0.5 + 0.5 * Math.sin(t * 3.4), rad = 145 + pulse * 48;
-    const gr = g.createRadialGradient(x, y, 10, x, y, rad * 2.2);
-    gr.addColorStop(0, 'rgba(108,208,255,0.12)');
-    gr.addColorStop(0.5, 'rgba(72,165,255,0.06)');
-    gr.addColorStop(1, 'rgba(40,110,230,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, E.W, E.H);
-    for (let i = 0; i < 3; i++) {
-      g.beginPath(); g.arc(x, y, rad * (0.55 + i * 0.45), 0, Math.PI * 2);
-      g.strokeStyle = `rgba(149,221,255,${0.34 - i * 0.08})`;
-      g.lineWidth = 2.5 - i * 0.35; g.stroke();
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+    const glow = g.createRadialGradient(x, y, 8, x, y, 520 + pulse * 70);
+    glow.addColorStop(0, 'rgba(125,205,255,0.13)');
+    glow.addColorStop(0.52, 'rgba(85,156,226,0.045)');
+    glow.addColorStop(1, 'rgba(25,75,150,0)');
+    g.fillStyle = glow; g.fillRect(0, 0, E.W, E.H);
+    // Rain beads and suspended streaks replace the static circular game reticle.
+    for (let i = 0; i < 54; i++) {
+      const phase = (i * 0.754877666 + t * (0.035 + (i % 5) * 0.008)) % 1;
+      const px = (i * 97.3 + phase * 240) % E.W;
+      const py = (i * 61.9 + phase * 34 + (i % 4) * 13) % E.H;
+      const len = 10 + (i % 6) * 7;
+      g.beginPath(); g.moveTo(px, py); g.lineTo(px - len * 0.16, py + len);
+      g.strokeStyle = 'rgba(190,224,255,' + (0.08 + (i % 3) * 0.024) + ')';
+      g.lineWidth = i % 6 === 0 ? 2 : 1; g.stroke();
     }
     g.restore();
   }
   if (title) {
-    g.save(); g.font = '700 24px Arial'; g.textAlign = 'left'; g.textBaseline = 'top';
-    g.fillStyle = 'rgba(164,220,255,0.75)'; g.fillText(title, 70, 178); g.restore();
+    g.save(); g.font = '700 22px Arial'; g.textAlign = 'left'; g.textBaseline = 'top';
+    g.fillStyle = 'rgba(164,220,255,0.78)'; g.fillText(title, 70, 178); g.restore();
   }
-  // The camera-locked caption plate is authored once in makeStreet(info).
-  // Do not draw the same narration line again on the 2D overlay canvas.
+  // The camera-locked subtitle is drawn only once in makeStreet(info).
 }
-
 function reg(id, behavior, cameraMode = 'wide', frozen = false, focus = null) {
   registerShot(id, { kind: '3d', init: (T, info) => makeStreet(info), draw: (s, t) => {
     const p = clamp(t / 4.5); animateCommon(s, t, frozen); s.mom.position.set(-1.4, 0.02, 1.4); s.kid.position.set(-4.8, 0, 0.1); s.bike.root.position.set(-1.4, 0, 1.4); s.debris.visible = false;

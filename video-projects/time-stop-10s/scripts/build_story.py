@@ -325,8 +325,8 @@ def build(project_dir: Path, fps: int = FPS):
     (project_dir / "out").mkdir(exist_ok=True)
     config = {
         "title":"time-stop-10s","aspect":"16:9","resolution":"1080p","fps":fps,
-        "style":"flat","pack":"dem","lang":"vi","accent":"teal","captions":False,
-        "bars":"scope","fadeIn":0.45,"fadeOut":0.65,
+        "style":"cinematic","pack":"dem","lang":"vi","accent":"teal","captions":False,
+        "bars":"wide","fadeIn":0.45,"fadeOut":0.65,
         "music":{"enabled":True,"gainDb":-13},"sfx":{"enabled":True,"gainDb":-4},
         "loudness":-14,"duration":duration,
     }
