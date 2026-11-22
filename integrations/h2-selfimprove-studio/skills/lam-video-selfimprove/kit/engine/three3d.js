@@ -537,6 +537,34 @@ export function figureCinematic(outfit = {}, o = {}) {
     hand.getWorldPosition(world);
     return world;
   };
+  grp.userData.aimHandAtWorld = (side = 'right', targetWorld) => {
+    if (!targetWorld || !targetWorld.isVector3) throw new TypeError('aimHandAtWorld requires a THREE.Vector3 world target');
+    grp.updateMatrixWorld(true);
+    upperBody.updateMatrixWorld(true);
+    const armRig = side === 'left' ? limbs.lA : limbs.rA;
+    const target = upperBody.worldToLocal(targetWorld.clone());
+    const dx = target.x - armRig.position.x;
+    const dy = target.y - armRig.position.y;
+    const upperLength = 0.285;
+    const forearmLength = 0.325;
+    const rawDistance = Math.hypot(dx, dy);
+    const distance = clamp(rawDistance, Math.abs(upperLength - forearmLength) + 0.012,
+      upperLength + forearmLength - 0.012);
+    const direction = Math.atan2(dy, dx);
+    const shoulderCos = clamp(
+      (upperLength * upperLength + distance * distance - forearmLength * forearmLength) /
+      (2 * upperLength * distance), -1, 1);
+    const elbowCos = clamp(
+      (upperLength * upperLength + forearmLength * forearmLength - distance * distance) /
+      (2 * upperLength * forearmLength), -1, 1);
+    const shoulderOffset = Math.acos(shoulderCos);
+    const elbowInner = Math.acos(elbowCos);
+    const firstBoneAngle = direction - shoulderOffset;
+    armRig.rotation.z = firstBoneAngle + Math.PI / 2;
+    armRig.userData.elbow.rotation.z = Math.PI - elbowInner;
+    grp.updateMatrixWorld(true);
+    return grp.userData.handWorldPosition(side);
+  };
   grp.userData.limbRig = limbs;
 
   const shadow = new THREE.Mesh(
