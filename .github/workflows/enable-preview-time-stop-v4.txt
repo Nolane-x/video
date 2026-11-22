@@ -1,1 +1,1 @@
-Generate a visual-only V4 preview for the 3D cold open and rescue contact animation.
+Regenerate the visual-only V4 preview using corrected build-step environment propagation and the actual H2 contact-sheet directory.
