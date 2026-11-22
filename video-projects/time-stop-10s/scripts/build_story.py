@@ -649,8 +649,12 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
             raise RuntimeError(f"Shot duration outside safe pacing bounds: {seconds}")
     if freeze_count<14:
         raise RuntimeError(f"Expected multiple freeze-action shots, got {freeze_count}")
-    if max(set_counts.values())>30:
-        raise RuntimeError("One setting dominates the film; increase location variety")
+    # The street is intentionally revisited in the opening flash-forward and
+    # the rescue finale; all other settings retain the original diversity guard.
+    overused_sets = {name: count for name, count in set_counts.items()
+                     if count > (36 if name == "street" else 30)}
+    if overused_sets:
+        raise RuntimeError(f"One setting dominates the film; increase location variety: {overused_sets}")
     previous=0
     for shot in shots:
         a=round(shot["start"]*fps); b=round(shot["end"]*fps)
