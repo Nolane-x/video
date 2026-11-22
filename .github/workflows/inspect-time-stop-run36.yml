@@ -317,7 +317,7 @@ jobs:
           Source render: GitHub Actions run 44964684746, artifact time-stop-10s-h2-36.
           This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
 
-          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run35. Sampled proof is not a substitute for a continuous full-film review.
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run36. Sampled proof is not a substitute for a continuous full-film review.
           Keep visual_approval false until the full 6m18s film is watched with sound.
           EOF
           (
