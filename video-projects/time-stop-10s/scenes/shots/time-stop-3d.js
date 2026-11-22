@@ -137,6 +137,13 @@ function cameraAt(s, t, mode = 'wide', focus = null) {
   c.updateProjectionMatrix();
 }
 
+function snapHandToHandlebar(figure, bike, side = 'right') {
+  const target = bike.root.localToWorld(V(0.53, 1.32, 0));
+  const hand = figure.userData.handWorldPosition(side);
+  figure.position.add(target.sub(hand));
+  figure.updateMatrixWorld(true);
+}
+
 function animateCommon(s, t, frozen = false) {
   s.rain.update(t, frozen);
   s.bike.wheels.forEach((w, i) => { if (!frozen) w.rotation.z = -t * (1.8 + i * 0.04); });
@@ -322,12 +329,43 @@ reg('s059', (s, t, p) => { s.bike.root.position.x = -0.7; s.mom.position.x = -0.
 reg('s061', (s, t, p) => { s.bike.root.position.x = -0.4; s.mom.position.x = -0.4; s.kid.position.x = -4.0; s.kid.userData.setPose('reach', t); s.sign.rotation.z = 0.33; }, 'wide', true, [-2.2, -2.2]);
 reg('s062', (s, t) => { s.bike.root.visible = false; s.mom.visible = false; s.kid.position.set(-2.9, 0, 1.3); s.kid.userData.setPose('run', t * 1.4); }, 'feet', true, [-2.9, -2.9]);
 reg('s063', (s, t, p) => { s.kid.position.x = lerp(-4.6, -0.5, smooth(p)); s.kid.position.z = 1.2; s.kid.userData.setPose('run', t * 1.8); s.bike.root.position.x = -0.35; s.mom.position.x = -0.35; s.sign.rotation.z = 0.33; }, 'tracking', true, [-2.5, -0.5]);
-reg('s064', (s, t) => { s.kid.position.set(-0.65, 0, 1.45); s.kid.userData.setPose('reach', t); s.bike.root.position.x = 0.65; s.mom.position.x = 0.65; s.mom.userData.setPose('bike', t); }, 'closeMom', true, [0.0, 0.0]);
-reg('s065', (s, t, p) => { s.kid.position.x = lerp(-0.65, -1.75, smooth(p)); s.kid.userData.setPose('pull', t); s.bike.root.position.x = lerp(0.65, -1.05, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t); s.mom.rotation.z = -0.08 * smooth(p); s.sign.rotation.z = 0.34; }, 'action', true, [-0.3, -1.4]);
-reg('s066', (s, t, p) => { s.bike.root.position.x = lerp(-1.05, -2.0, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t); s.kid.position.x = lerp(-1.75, -2.65, smooth(p)); s.kid.userData.setPose('pull', t); }, 'action', true, [-1.4, -2.4]);
+reg('s064', (s, t) => {
+  s.bike.root.position.set(0.65, 0, 1.4); s.mom.position.set(0.65, 0.02, 1.4);
+  s.mom.userData.setPose('bike', 0);
+  s.kid.position.set(-0.5, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.userData.setPose('reach', t);
+  snapHandToHandlebar(s.kid, s.bike, 'right');
+}, 'closeMom', true, [0.0, 0.0]);
+reg('s065', (s, t, p) => {
+  s.bike.root.position.x = lerp(0.65, -1.05, smooth(p));
+  s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t);
+  s.kid.position.set(-0.45, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.userData.setPose('pull', t);
+  snapHandToHandlebar(s.kid, s.bike, 'right');
+  s.mom.rotation.z = -0.08 * smooth(p); s.sign.rotation.z = 0.34;
+}, 'action', true, [-0.3, -1.4]);
+reg('s066', (s, t, p) => {
+  s.bike.root.position.x = lerp(-1.05, -2.0, smooth(p));
+  s.mom.position.x = s.bike.root.position.x; s.mom.userData.setPose('pull', t);
+  s.kid.position.set(-0.45, 0, 1.4); s.kid.rotation.y = 0.35;
+  s.kid.userData.setPose('pull', t);
+  snapHandToHandlebar(s.kid, s.bike, 'right');
+}, 'action', true, [-1.4, -2.4]);
 reg('s067', (s, t, p) => { s.bike.root.position.x = -3.1; s.mom.position.set(-2.25, 0, 1.5); s.mom.userData.setPose('kneel', t); s.kid.position.set(-1.05, 0, 1.3); s.kid.userData.setPose('crouch', t); s.bike.root.rotation.z = -0.08 * smooth(p); }, 'action', true, [-1.7, -1.7]);
 reg('s068', (s, t, p) => { s.bike.root.position.x = lerp(-3.1, -3.8, smooth(p)); s.mom.position.set(-2.55, 0, 1.5); s.mom.userData.setPose('stand', t); s.kid.position.set(lerp(-1.05, -1.35, smooth(p)), 0, 1.3); s.kid.userData.setPose('pull', t); }, 'action', true, [-2.0, -2.0]);
 reg('s069', (s, t, p) => { s.bike.root.position.x = -3.8; s.mom.position.set(-2.65, 0, 1.7); s.mom.userData.setPose('crouch', t); s.kid.position.set(-1.35, 0, 1.25); s.kid.userData.setPose('shield', t); s.sign.rotation.z = lerp(0.36, 0.48, smooth(p)); }, 'impact', true, [-2.0, -2.0]);
 reg('s070', (s, t) => { s.bike.root.position.x = -3.8; s.mom.position.set(-2.65, 0, 1.7); s.kid.position.set(-1.35, 0, 1.25); s.mom.userData.setPose('crouch', t); s.kid.userData.setPose('shield', t); const fall = smooth(clamp((t - 0.32) / 3.6)); s.sign.rotation.z = lerp(0.48, 1.12, fall); s.debris.visible = t > 0.9; s.debris.position.y = -(Math.max(0, t - 1.1) ** 2) * 0.9; }, 'impact', false, [-2.0, -2.0]);
-reg('s071', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-2.0, 0, 1.55); s.mom.userData.setPose('sit', t); s.kid.position.set(-0.55, 0, 1.45); s.kid.userData.setPose('sit', t); s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI; s.sign.rotation.z = 1.12; }, 'hug', false, [-1.25, -1.25]);
-reg('s072', (s, t) => { s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8; s.mom.position.set(-1.55, 0, 1.45); s.kid.position.set(-0.55, 0, 1.45); s.mom.userData.setPose('hug', t); s.kid.userData.setPose('hug', t); s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI; s.sign.rotation.z = 1.12; }, 'hug', false, [-1.05, -1.05]);
+reg('s071', (s, t) => {
+  s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8;
+  s.mom.position.set(-1.35, 0, 1.5); s.mom.userData.setPose('sit', t);
+  s.kid.position.set(-0.55, 0, 1.5); s.kid.userData.setPose('sit', t);
+  s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI;
+  s.sign.rotation.z = 1.12;
+}, 'hug', false, [-0.95, -0.95]);
+reg('s072', (s, t) => {
+  s.bike.root.position.set(-4.0, 0, 1.8); s.bike.root.rotation.z = -0.8;
+  s.mom.position.set(-1.30, 0, 1.5); s.kid.position.set(-0.56, 0, 1.5);
+  s.mom.userData.setPose('hug', t); s.kid.userData.setPose('hug', t);
+  s.mom.rotation.y = 0; s.kid.rotation.y = Math.PI;
+  s.sign.rotation.z = 1.12;
+}, 'hug', false, [-0.95, -0.95]);
