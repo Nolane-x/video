@@ -85,7 +85,7 @@ jobs:
           path=Path("tools/mix.py")
           source=path.read_text(encoding="utf-8")
           old='f"volume={gain:.2f}dB,alimiter=limit=0.55:level=false"'
-          new="""f\"volume={gain:.2f}dB,alimiter=limit={float(os.environ.get('NOLANE_AUDIO_PRE_LIMIT', '0.55')):.3f}:level=false\""" 
+          new = "f\"volume={gain:.2f}dB,alimiter=limit={float(os.environ.get('NOLANE_AUDIO_PRE_LIMIT', '0.55')):.3f}:level=false\""
           assert source.count(old)==1, "Expected one production pre-AAC limiter expression"
           path.write_text(source.replace(old,new),encoding="utf-8")
           print("Calibration-only environment override installed; production branch remains unchanged")
