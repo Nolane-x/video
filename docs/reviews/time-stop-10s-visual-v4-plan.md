@@ -32,13 +32,13 @@ This explains why V2's practical lights and highlights read more cinematic, but 
    - Goal: keep the amber practicals, cool night separation and readable lighting while reducing the high saturation and dark midtones measured in V2.
 
 2. **Explicit physical contact**
-   - `figureCinematic` exposes a world-space hand anchor for either hand.
-   - Rescue shots s064–s066 use the bicycle's actual handlebar point as a hand target, rather than relying on approximate arm pose alone.
+   - `figureCinematic` exposes a world-space hand anchor and `aimHandAtWorld`, which solves the upper-arm and forearm angles in the upper-body coordinate frame.
+   - Rescue shots s064–s066 use a two-segment shoulder/elbow IK solve against the bicycle's actual handlebar point. The character root stays grounded; only shoulder and elbow angles change to reach the target.
    - Mother/child positions in s071–s072 are brought closer and rotated toward one another to make the embrace read as contact instead of two separate reaching poses.
 
 3. **Story remains unchanged**
    - Keeps the Narrative V3 cold open, 84 shots, 378 seconds, 60fps, 22,680 frames, 29 freeze beats, 13 different shot durations, and 44 established 4.5s custom 3D local-clock shots.
-   - Validation confirmed JS syntax, physical contact wiring, grade values and storyboard invariants.
+   - Validation confirmed JS syntax, grounded IK contact wiring (three rescue beats), grade values and storyboard invariants.
 
 ## Promotion rule
 
