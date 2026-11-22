@@ -1,0 +1,337 @@
+name: Inspect — Time Stop 10s Run 36 cinematic 3D pass
+
+on:
+  push:
+    branches: [review/time-stop-10s-3d-fixes]
+    paths:
+      - ".github/workflows/enable-inspect-time-stop-run36.txt"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful Run 36 render workflow run ID"
+        required: true
+        default: "44964684746"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-10s-run36-independent-inspection
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    name: Decode Run 36 master and create cinematic 3D review proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '44964684746' }}
+    steps:
+      - name: Checkout review tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Install inspection dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Download immutable Run 36 render artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: time-stop-10s-h2-36
+          run-id: ${{ github.event.inputs.source_run_id || '44964684746' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: source-artifact
+
+      - name: Download immutable Run 32 baseline render artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: time-stop-10s-h2-32
+          run-id: 44901911523
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: baseline-artifact
+
+      - name: Unpack review ZIP and verify original SHA256 manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          REVIEW_ZIP="$(find source-artifact -type f -name 'time-stop-10s-review.zip' -print -quit)"
+          test -n "$REVIEW_ZIP"
+          mkdir -p source-review
+          unzip -q "$REVIEW_ZIP" -d source-review
+          ROOT="$(find source-review -type f -name 'qa-report.json' -printf '%h\n' -quit)"
+          test -n "$ROOT"
+          test -s "$ROOT/time-stop-10s-master.mp4"
+          test -s "$ROOT/voice-placement.json"
+          test -s "$ROOT/subtitles/time-stop-10s.srt"
+          test -s "$ROOT/subtitles/time-stop-10s.vtt"
+          test -s "$ROOT/SHA256SUMS.txt"
+          (cd "$ROOT" && sha256sum -c SHA256SUMS.txt)
+          echo "MASTER=$ROOT/time-stop-10s-master.mp4" >> "$GITHUB_ENV"
+          echo "ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Independently decode full master and cross-check streams, narration and subtitles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          cp "$ROOT/qa-report.json" review/source-qa-report.json
+          cp "$ROOT/voice-placement.json" review/voice-placement.json
+          cp "$ROOT/subtitles/time-stop-10s.srt" review/time-stop-10s.srt
+          cp "$ROOT/subtitles/time-stop-10s.vtt" review/time-stop-10s.vtt
+          cp "$ROOT/SHA256SUMS.txt" review/source-SHA256SUMS.txt
+          cp "$ROOT/contact-sheets/"*.jpg review/ 2>/dev/null || true
+          sha256sum "$MASTER" | tee review/master-sha256.txt
+          ffprobe -v error -count_frames -show_streams -show_format -of json "$MASTER" > review/ffprobe.json
+          ffmpeg -hide_banner -loglevel error -i "$MASTER" -map 0:v:0 -map 0:a:0 -f null -
+          python - "$MASTER" "$ROOT/qa-report.json" "$ROOT/voice-placement.json" "$ROOT/subtitles/time-stop-10s.srt" "review/ffprobe.json" <<'PY'
+          import hashlib, json, re, sys
+          from pathlib import Path
+          master, qa_path, placement_path, srt_path, probe_path = map(Path, sys.argv[1:])
+          qa = json.loads(qa_path.read_text(encoding="utf-8"))
+          placement = json.loads(placement_path.read_text(encoding="utf-8"))
+          probe = json.loads(probe_path.read_text(encoding="utf-8"))
+          streams = probe["streams"]
+          video = next(s for s in streams if s.get("codec_type") == "video")
+          audio = next(s for s in streams if s.get("codec_type") == "audio")
+          frames = int(video.get("nb_read_frames", video.get("nb_frames", 0)))
+          duration = float(probe["format"]["duration"])
+          assert qa["status"] == "technical-pass", qa
+          assert qa["visual_approval"] is False, "CI cannot grant artistic approval"
+          assert [int(video["width"]), int(video["height"])] == [1920, 1080], video
+          assert video["avg_frame_rate"] == "60/1", video
+          assert frames == 22680, frames
+          assert abs(duration - 378.0) < 0.05, duration
+          assert audio["codec_name"] == "aac" and audio["sample_rate"] == "48000" and int(audio["channels"]) == 2, audio
+          assert placement["status"] == "passed" and placement["placed_segments"] == 84, placement
+          assert placement["source_watermark"]["status"] == "verified", placement
+          srt = srt_path.read_text(encoding="utf-8")
+          blocks = [b for b in re.split(r"\n\s*\n", srt.strip()) if b.strip()]
+          cues = []
+          def seconds(stamp):
+            hh, mm, ss = stamp.split(":")
+            whole, ms = ss.split(",")
+            return int(hh)*3600 + int(mm)*60 + int(whole) + int(ms)/1000
+          for block in blocks:
+            lines = block.strip().splitlines()
+            match = re.search(r"(\d\d:\d\d:\d\d,\d{3}) --> (\d\d:\d\d:\d\d,\d{3})", block)
+            assert match, block
+            body = " ".join(lines[2:]).strip()
+            cues.append((seconds(match.group(1)), seconds(match.group(2)), body))
+          assert len(cues) == 84, len(cues)
+          overlaps = [(i, cues[i], cues[i+1]) for i in range(len(cues)-1) if cues[i][1] > cues[i+1][0]]
+          assert not overlaps, overlaps
+          segments = placement["segments"]
+          assert len(segments) == 84
+          start_mismatches, text_mismatches = [], []
+          for i, (cue, segment) in enumerate(zip(cues, segments)):
+            if abs(cue[0] - float(segment["video_start"])) > 0.001:
+              start_mismatches.append((i+1, cue[0], segment["video_start"]))
+            if cue[2] != str(segment["text"]).strip():
+              text_mismatches.append((i+1, cue[2], segment["text"]))
+          assert not start_mismatches, start_mismatches
+          assert not text_mismatches, text_mismatches
+          digest = hashlib.sha256(master.read_bytes()).hexdigest()
+          summary = {
+            "status": "independent-technical-pass",
+            "visual_approval": False,
+            "source_run_id": "44964684746",
+            "master_sha256": digest,
+            "duration_seconds": duration,
+            "resolution": [int(video["width"]), int(video["height"])],
+            "fps": video["avg_frame_rate"],
+            "decoded_video_frames": frames,
+            "video_codec": video["codec_name"],
+            "audio_codec": audio["codec_name"],
+            "audio_sample_rate": audio["sample_rate"],
+            "audio_channels": int(audio["channels"]),
+            "integrated_lufs": qa.get("integrated_lufs"),
+            "peak_dbfs": qa.get("peak_dbfs"),
+            "narration_segments": placement["placed_segments"],
+            "narration_watermark": placement["source_watermark"]["status"],
+            "subtitle_cues": len(cues),
+            "subtitle_overlaps": len(overlaps),
+            "subtitle_start_mismatches": len(start_mismatches),
+            "subtitle_text_mismatches": len(text_mismatches),
+            "note": "Complete MP4 decoded without FFmpeg errors. Sampled visuals are not a continuous artistic review."
+          }
+          Path("review/master-inspection.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Extract 32 key story frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/master-frames
+          python - <<'PY'
+          import os, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          master = Path(os.environ["MASTER"])
+          shots = [
+            ("s013",58.5),("s014",63.0),("s016",67.5),("s018",76.5),
+            ("s020",85.5),("s022",94.5),("s026",112.5),("s027",117.0),
+            ("s028",121.5),("s029",126.0),("s030",130.5),("s031",135.0),
+            ("s032",139.5),("s033",144.0),("s037",162.0),("s038",166.5),
+            ("s039",171.0),("s040",175.5),("s041",180.0),("s042",184.5),
+            ("s053",238.5),("s054",243.0),("s058",261.0),("s061",274.5),
+            ("s063",283.5),("s065",292.5),("s066",297.0),("s067",301.5),
+            ("s068",306.0),("s069",310.5),("s070",315.0),("s072",321.0)
+          ]
+          thumbs=[]
+          for sid, ts in shots:
+            out=Path("review/master-frames") / f"{sid}_{ts:06.1f}s.jpg"
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(ts),"-i",str(master),"-frames:v","1","-vf","scale=480:270","-q:v","3",str(out)],check=True)
+            thumbs.append((sid,ts,Image.open(out).convert("RGB")))
+          cols,tw,th,pad,lab=4,480,270,12,32
+          rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new("RGB",(pad+cols*(tw+pad),pad+rows*(th+lab+pad)),(16,18,24))
+          draw=ImageDraw.Draw(sheet)
+          for i,(sid,ts,im) in enumerate(thumbs):
+            x=pad+(i%cols)*(tw+pad); y=pad+(i//cols)*(th+lab+pad)
+            sheet.paste(im,(x,y)); draw.text((x+4,y+th+6),f"{sid}  {ts:.1f}s",(238,241,246))
+          sheet.save("review/master-contact-sheet.jpg",quality=92)
+          PY
+
+      - name: Create matched Run 32 versus Run 36 3D comparison sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASELINE="$(find baseline-artifact -type f -name 'time-stop-10s-master.mp4' -print -quit)"
+          test -n "$BASELINE"
+          echo "BASELINE_MASTER=$BASELINE" >> "$GITHUB_ENV"
+          mkdir -p review/3d-comparisons
+          python - <<'PY'
+          import os, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          candidate=Path(os.environ["MASTER"])
+          baseline=Path(os.environ["BASELINE_MASTER"])
+          shots=list(range(13,23))+list(range(26,34))+list(range(37,43))+list(range(53,73))
+          assert len(shots)==44, len(shots)
+          thumbs=[]
+          for shot in shots:
+            ts=(shot-1)*4.5+2.25
+            pair=[]
+            for label,source in [("Run 32",baseline),("Run 36",candidate)]:
+              out=Path("review/3d-comparisons")/f"s{shot:03d}-{label.replace(' ','-')}.jpg"
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(ts),"-i",str(source),"-frames:v","1","-vf","scale=320:180","-q:v","3",str(out)],check=True)
+              pair.append(Image.open(out).convert("RGB"))
+            thumbs.append((shot,ts,pair))
+          w,h,pad,lab=320,180,10,24
+          per_page=8
+          for page in range((len(thumbs)+per_page-1)//per_page):
+            rows=min(4,len(thumbs)-page*per_page)
+            canvas=Image.new("RGB",(4*w+5*pad,rows*(h+lab+pad)+pad),(16,18,24))
+            draw=ImageDraw.Draw(canvas)
+            for local,(shot,ts,pair) in enumerate(thumbs[page*per_page:(page+1)*per_page]):
+              row=local//2; side=(local%2)*2
+              x0=pad+side*(w+pad); y=pad+row*(h+lab+pad)
+              for idx,(label,img) in enumerate(zip(("Run 32","Run 36"),pair)):
+                x=x0+idx*(w+pad)
+                draw.text((x+2,y),f"s{shot:03d} · {label} · {ts:.2f}s",(238,241,246))
+                canvas.paste(img,(x,y+lab))
+            canvas.save(Path("review/3d-comparisons")/f"before-after-3d-{page+1:02d}.jpg",quality=92)
+          print({"matched_3d_shots":len(thumbs),"comparison_pages":(len(thumbs)+per_page-1)//per_page,"baseline":"Run 32","candidate":"Run 36","sample":"shot midpoint"})
+          PY
+
+      - name: Generate 252-frame dense sample — three moments per story shot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/dense-samples
+          ffmpeg -hide_banner -loglevel error -y -i "$MASTER" -an \
+            -vf "select='gte(n,45)*eq(mod(n-45,90),0)',scale=240:135,tile=3x84:padding=8:margin=8:color=0x101218" \
+            -frames:v 1 -q:v 3 review/dense-grid.jpg
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          src=Image.open("review/dense-grid.jpg").convert("RGB")
+          cw,ch,pad=240,135,8
+          assert src.size == (3*cw+4*pad,84*ch+85*pad), src.size
+          for page in range(6):
+            start=page*14
+            canvas=Image.new("RGB",(2*(3*cw)+3*pad,7*(ch+28)+8*pad),(16,18,24))
+            draw=ImageDraw.Draw(canvas)
+            for local in range(14):
+              shot=start+local; x=pad+(local%2)*(3*cw+pad); y=pad+(local//2)*(ch+28+pad)
+              for col in range(3):
+                left=pad+col*(cw+pad); top=pad+shot*(ch+pad)
+                canvas.paste(src.crop((left,top,left+cw,top+ch)),(x+col*cw,y))
+              draw.text((x+3,y+ch+5),f"s{shot+1:03d}  |  +0.75s / +2.25s / +3.75s",(238,241,246))
+            canvas.save(Path("review/dense-samples")/f"motion-sheet-{page+1:02d}.jpg",quality=90)
+          report={"status":"sampled","source_run_id":"44964684746","shots":84,"frames":252,"sampling_offsets_seconds":[0.75,2.25,3.75],"visual_approval":False}
+          Path("review/dense-sampling.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Export four full-mix action sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/full-mix-clips
+          ffmpeg -hide_banner -loglevel error -y -ss 54 -i "$MASTER" -t 45 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60 -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart review/full-mix-clips/kitchen-54-99s-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 112.5 -i "$MASTER" -t 36 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60 -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart review/full-mix-clips/court-112s5-148s5-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 162 -i "$MASTER" -t 27 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60 -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart review/full-mix-clips/hallway-162-189s-1080p60.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 270 -i "$MASTER" -t 54 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset veryfast -crf 21 -r 60 -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart review/full-mix-clips/final-bicycle-sign-rescue-270-324s-1080p60.mp4
+
+      - name: Verify all full-mix action sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          expected={"kitchen-54-99s-1080p60.mp4":(45.0,2700),"court-112s5-148s5-1080p60.mp4":(36.0,2160),"hallway-162-189s-1080p60.mp4":(27.0,1620),"final-bicycle-sign-rescue-270-324s-1080p60.mp4":(54.0,3240)}
+          for name,(duration_expected,frames_expected) in expected.items():
+            path=Path("review/full-mix-clips")/name
+            meta=json.loads(subprocess.check_output(["ffprobe","-v","error","-count_frames","-show_streams","-show_format","-of","json",str(path)],text=True))
+            v=next(x for x in meta["streams"] if x.get("codec_type")=="video")
+            a=next(x for x in meta["streams"] if x.get("codec_type")=="audio")
+            frames=int(v.get("nb_read_frames",v.get("nb_frames",0))); duration=float(meta["format"]["duration"])
+            assert (int(v["width"]),int(v["height"]))==(1920,1080), (name,v)
+            assert v["avg_frame_rate"]=="60/1" and frames==frames_expected, (name,frames)
+            assert abs(duration-duration_expected)<0.04, (name,duration)
+            assert a["codec_name"]=="aac" and a["sample_rate"]=="48000" and int(a["channels"])==2, (name,a)
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-i",str(path),"-f","null","-"],check=True)
+            print({"file":name,"duration":duration,"frames":frames,"fps":v["avg_frame_rate"],"audio":"AAC 48kHz stereo","decode":"pass"})
+          PY
+
+      - name: Package independent Run 36 review bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > review/README.md <<'EOF'
+          # Time Stop 10s — Run 36 cinematic 3D independent inspection
+
+          Source render: GitHub Actions run 44964684746, artifact time-stop-10s-h2-36.
+          This bundle contains full master FFmpeg decode, exact stream/frame/hash verification against the original render manifest, 84 narration/subtitle alignment checks, 32 key frames, 252 stills (three per shot), and four full-mix action clips.
+
+          The four action clips cover kitchen/cup, basketball, hallway/books, and the street/family rescue. The six dense sheets cover the complete 84-shot timeline. Six before/after comparison pages show the same midpoint in each of the 44 custom 3D shots from Run32 and Run35. Sampled proof is not a substitute for a continuous full-film review.
+          Keep visual_approval false until the full 6m18s film is watched with sound.
+          EOF
+          (
+            cd review
+            find . -type f ! -name SHA256SUMS.txt ! -name run36-inspection.zip -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+            sha256sum -c SHA256SUMS.txt
+            zip -qr run36-inspection.zip . -x './run36-inspection.zip'
+            unzip -tq run36-inspection.zip
+          )
+
+      - name: Upload Run 36 independent inspection bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: time-stop-10s-run36-independent-inspection
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
