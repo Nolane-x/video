@@ -1,0 +1,362 @@
+name: Inspect — Time Stop 10s Narrative V3 versus Cinematic V2
+
+on:
+  push:
+    branches: [review/time-stop-10s-3d-fixes]
+    paths:
+      - ".github/workflows/enable-inspect-time-stop-run42.txt"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful Narrative V3 production run ID"
+        required: true
+        default: "45030100930"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-10s-run42-independent-inspection
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    name: Decode Run 42 and compare V3 story and visuals
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id || '45030100930' }}
+      BASELINE_RUN_ID: "45014668552"
+    steps:
+      - name: Checkout review tools
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Install inspection dependencies
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Download immutable Narrative V3 render artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-42
+          run-id: ${{ github.event.inputs.source_run_id || '45030100930' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: source-artifact
+
+      - name: Download immutable Run 41 cinematic baseline
+        uses: actions/download-artifact@v4
+        with:
+          name: time-stop-10s-h2-41
+          run-id: 45014668552
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: baseline-artifact
+
+      - name: Unpack artifacts and verify manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_ZIP="$(find source-artifact -type f -name 'time-stop-10s-review.zip' -print -quit)"
+          BASELINE_ZIP="$(find baseline-artifact -type f -name 'time-stop-10s-review.zip' -print -quit)"
+          test -n "$SOURCE_ZIP" && test -n "$BASELINE_ZIP"
+          mkdir -p source-review baseline-review
+          unzip -q "$SOURCE_ZIP" -d source-review
+          unzip -q "$BASELINE_ZIP" -d baseline-review
+          SOURCE_ROOT="$(find source-review -type f -name 'qa-report.json' -printf '%h\n' -quit)"
+          BASELINE_ROOT="$(find baseline-review -type f -name 'qa-report.json' -printf '%h\n' -quit)"
+          test -n "$SOURCE_ROOT" && test -n "$BASELINE_ROOT"
+          for root in "$SOURCE_ROOT" "$BASELINE_ROOT"; do
+            test -s "$root/time-stop-10s-master.mp4"
+            test -s "$root/voice-placement.json"
+            test -s "$root/story/shots.json"
+            test -s "$root/story/shot-plan.json"
+            test -s "$root/subtitles/time-stop-10s.srt"
+            test -s "$root/SHA256SUMS.txt"
+            (cd "$root" && sha256sum -c SHA256SUMS.txt)
+          done
+          echo "SOURCE_ROOT=$SOURCE_ROOT" >> "$GITHUB_ENV"
+          echo "BASELINE_ROOT=$BASELINE_ROOT" >> "$GITHUB_ENV"
+          echo "MASTER=$SOURCE_ROOT/time-stop-10s-master.mp4" >> "$GITHUB_ENV"
+          echo "BASELINE_MASTER=$BASELINE_ROOT/time-stop-10s-master.mp4" >> "$GITHUB_ENV"
+
+      - name: Independently decode master and validate story, audio and subtitles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          sha256sum "$MASTER" | tee review/master-sha256.txt
+          ffprobe -v error -count_frames -show_streams -show_format -of json "$MASTER" > review/ffprobe.json
+          ffmpeg -hide_banner -loglevel error -i "$MASTER" -map 0:v:0 -map 0:a:0 -f null -
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          source = Path(__import__("os").environ["SOURCE_ROOT"])
+          baseline = Path(__import__("os").environ["BASELINE_ROOT"])
+          qa = json.loads((source / "qa-report.json").read_text(encoding="utf-8"))
+          placement = json.loads((source / "voice-placement.json").read_text(encoding="utf-8"))
+          story = json.loads((source / "story/shots.json").read_text(encoding="utf-8"))
+          shots = story["shots"]
+          probe = json.loads(Path("review/ffprobe.json").read_text(encoding="utf-8"))
+          video = next(x for x in probe["streams"] if x.get("codec_type") == "video")
+          audio = next(x for x in probe["streams"] if x.get("codec_type") == "audio")
+          frames = int(video.get("nb_read_frames", video.get("nb_frames", 0)))
+          duration = float(probe["format"]["duration"])
+          assert qa["status"] == "technical-pass", qa
+          assert qa["visual_approval"] is False, qa
+          assert [int(video["width"]), int(video["height"])] == [1920, 1080]
+          assert video["avg_frame_rate"] == "60/1" and frames == 22680, (video, frames)
+          assert abs(duration - 378.0) < 0.05, duration
+          assert audio["codec_name"] == "aac" and audio["sample_rate"] == "48000" and int(audio["channels"]) == 2
+          assert len(shots) == 84 and story["duration"] == 378.0
+          assert story["production"]["time_freeze_fx_count"] == 29
+          assert placement["status"] == "passed" and placement["placed_segments"] == 84
+          assert placement["source_watermark"]["status"] == "verified"
+          assert len(placement["segments"]) == 84
+          for left, right in zip(shots, shots[1:]):
+            assert abs(float(left["end"]) - float(right["start"])) < 0.001
+          srt = (source / "subtitles/time-stop-10s.srt").read_text(encoding="utf-8")
+          blocks = [x for x in re.split(r"\n\s*\n", srt.strip()) if x.strip()]
+          assert len(blocks) == 84, len(blocks)
+          print(json.dumps({
+            "status": "independent-decode-pass",
+            "duration": duration, "fps": video["avg_frame_rate"], "frames": frames,
+            "story_shots": len(shots), "freeze_beats": story["production"]["time_freeze_fx_count"],
+            "narration_segments": placement["placed_segments"], "subtitle_cues": len(blocks),
+            "integrated_lufs": qa.get("integrated_lufs"), "peak_dbfs": qa.get("peak_dbfs")
+          }, indent=2))
+          PY
+
+      - name: Extract six 3D cold-open shots using their actual V3 midpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/cold-open-3d
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          root = Path(os.environ["SOURCE_ROOT"])
+          story = json.loads((root / "story/shots.json").read_text(encoding="utf-8"))
+          shots = {s["id"]: s for s in story["shots"]}
+          ids = [f"s{i:03d}" for i in range(1, 7)]
+          frames = []
+          for sid in ids:
+            shot = shots[sid]
+            at = (float(shot["start"]) + float(shot["end"])) / 2
+            out = Path("review/cold-open-3d") / f"{sid}.jpg"
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(at),"-i",os.environ["MASTER"],"-frames:v","1","-vf","scale=640:360","-q:v","3",str(out)],check=True)
+            frames.append((sid,at,Image.open(out).convert("RGB")))
+          w,h,lab,pad,cols=640,360,26,12,2
+          canvas=Image.new("RGB",(pad+cols*(w+pad),pad+3*(h+lab+pad)),(16,18,24))
+          draw=ImageDraw.Draw(canvas)
+          for i,(sid,at,img) in enumerate(frames):
+            x=pad+(i%cols)*(w+pad); y=pad+(i//cols)*(h+lab+pad)
+            canvas.paste(img,(x,y+lab)); draw.text((x+4,y+5),f"{sid} · {at:.2f}s",(238,241,246))
+          canvas.save("review/v3-3d-cold-open.jpg",quality=92)
+          PY
+
+      - name: Create matched V3 versus Run 41 3D shot comparisons
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/matched-3d
+          python - <<'PY'
+          import json, os, subprocess, math, statistics
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          source=Path(os.environ["SOURCE_ROOT"])
+          baseline=Path(os.environ["BASELINE_ROOT"])
+          a=json.loads((source/"story/shots.json").read_text(encoding="utf-8"))
+          b=json.loads((baseline/"story/shots.json").read_text(encoding="utf-8"))
+          sa={x["id"]:x for x in a["shots"]}; sb={x["id"]:x for x in b["shots"]}
+          ids=list(range(13,23))+list(range(26,34))+list(range(37,43))+list(range(53,73))
+          assert len(ids)==44
+          pairs=[]
+          for number in ids:
+            sid=f"s{number:03d}"
+            assert sid in sa and sid in sb, sid
+            ta=(float(sa[sid]["start"])+float(sa[sid]["end"]))/2
+            tb=(float(sb[sid]["start"])+float(sb[sid]["end"]))/2
+            pair=[]
+            for label,path,at in [("Run 41",os.environ["BASELINE_MASTER"],tb),("V3",os.environ["MASTER"],ta)]:
+              out=Path("review/matched-3d")/f"{sid}-{label.replace(' ','-')}.jpg"
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(at),"-i",path,"-frames:v","1","-vf","scale=320:180","-q:v","3",str(out)],check=True)
+              pair.append(Image.open(out).convert("RGB"))
+            pairs.append((sid,ta,tb,pair))
+          w,h,lab,pad=320,180,25,10
+          for page in range(6):
+            batch=pairs[page*8:(page+1)*8]
+            rows=len(batch)
+            canvas=Image.new("RGB",(4*w+5*pad,rows*(h+lab+pad)+pad),(16,18,24))
+            draw=ImageDraw.Draw(canvas)
+            for index,(sid,ta,tb,pair) in enumerate(batch):
+              row=index//2; col=(index%2)*2; y=pad+row*(h+lab+pad)
+              for side,(label,img) in enumerate(zip(("Run 41","V3"),pair)):
+                x=pad+(col+side)*(w+pad)
+                draw.text((x+2,y+4),f"{sid} · {label}",(238,241,246))
+                canvas.paste(img,(x,y+lab))
+            canvas.save(Path("review/matched-3d")/f"comparison-{page+1:02d}.jpg",quality=92)
+
+          def measure(image_path):
+            im=Image.open(image_path).convert("RGB").resize((160,90))
+            luma=[]; sat=[]
+            for r,g,bb in im.getdata():
+              y=.2126*r+.7152*g+.0722*bb; luma.append(y)
+              peak=max(r,g,bb); low=min(r,g,bb)
+              sat.append((peak-low)/peak if peak else 0.0)
+            return {"mean_luma":statistics.mean(luma),"median_luma":statistics.median(luma),
+                    "luma_stddev":statistics.pstdev(luma),"mean_saturation":statistics.mean(sat)}
+          metric_rows=[]
+          for sid,ta,tb,pair in pairs:
+            base=measure(Path("review/matched-3d")/f"{sid}-Run-41.jpg")
+            cand=measure(Path("review/matched-3d")/f"{sid}-V3.jpg")
+            metric_rows.append({"shot":sid,"v3_midpoint":ta,"run41_midpoint":tb,
+              "run41":base,"v3":cand,
+              "delta":{k:cand[k]-base[k] for k in base}})
+          summary={}
+          for key in ("run41","v3"):
+            summary[key]={k:statistics.mean(x[key][k] for x in metric_rows) for k in metric_rows[0][key]}
+          report={"status":"measured","matched_shots":len(metric_rows),
+                  "comparison":"Narrative V3 versus immutable Run 41; each shot midpoint resolved by shot ID in each independent timeline",
+                  "aggregate_mean_metrics":summary,
+                  "delta_v3_minus_run41":{k:summary["v3"][k]-summary["run41"][k] for k in summary["v3"]},
+                  "per_shot":metric_rows,
+                  "interpretation":"Luma and saturation measurements are diagnostics, not artistic approval."}
+          Path("review/grade-metrics-v3-vs-run41.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps({k:report[k] for k in ("matched_shots","aggregate_mean_metrics","delta_v3_minus_run41")},indent=2))
+          PY
+
+      - name: Generate 252 timeline-aware V3 motion samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          root=Path(os.environ["SOURCE_ROOT"])
+          story=json.loads((root/"story/shots.json").read_text(encoding="utf-8"))
+          fps=60
+          indices=[]
+          for shot in story["shots"]:
+            start=float(shot["start"]); duration=float(shot["end"])-start
+            for offset in (.16,.50,.84):
+              indices.append(round((start+duration*offset)*fps))
+          indices=sorted(set(indices))
+          assert len(indices)==252, len(indices)
+          selector="+".join(f"eq(n\\,{n})" for n in indices)
+          subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",os.environ["MASTER"],
+            "-vf",f"select='{selector}',scale=240:135,tile=3x84:padding=8:margin=8:color=0x101218",
+            "-frames:v","1","-q:v","3","review/v3-dense-grid.jpg"],check=True)
+          src=Image.open("review/v3-dense-grid.jpg").convert("RGB")
+          cw,ch,pad=240,135,8
+          assert src.size==(3*cw+4*pad,84*ch+85*pad),src.size
+          out=Path("review/dense-samples");out.mkdir(exist_ok=True)
+          for page in range(6):
+            canvas=Image.new("RGB",(2*(3*cw)+3*pad,7*(ch+28)+8*pad),(16,18,24))
+            draw=ImageDraw.Draw(canvas)
+            for local in range(14):
+              shot=page*14+local
+              x=pad+(local%2)*(3*cw+pad); y=pad+(local//2)*(ch+28+pad)
+              for col in range(3):
+                left=pad+col*(cw+pad); top=pad+shot*(ch+pad)
+                canvas.paste(src.crop((left,top,left+cw,top+ch)),(x+col*cw,y))
+              draw.text((x+3,y+ch+5),f"s{shot+1:03d} · -0.34 / mid / +0.34",(238,241,246))
+            canvas.save(out/f"motion-sheet-{page+1:02d}.jpg",quality=90)
+          Path("review/dense-sampling.json").write_text(json.dumps({"status":"sampled","shots":84,"frames":252,"fps":60,"timeline":"variable duration; sample offsets 16%, 50%, 84%"},indent=2)+"\n")
+          PY
+
+      - name: Export full-mix story action clips from variable V3 timeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review/full-mix-clips
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          story=json.loads((Path(os.environ["SOURCE_ROOT"])/"story/shots.json").read_text(encoding="utf-8"))
+          shots={s["id"]:s for s in story["shots"]}
+          groups=[
+            ("cold-open-s001-s006",["s001","s006"]),
+            ("kitchen-cup-s013-s024",["s013","s024"]),
+            ("basketball-s026-s036",["s026","s036"]),
+            ("hallway-books-s037-s042",["s037","s042"]),
+            ("street-rescue-s053-s072",["s053","s072"])
+          ]
+          report=[]
+          for name,(first,last) in [(x[0],x[1]) for x in groups]:
+            start=float(shots[first]["start"]); end=float(shots[last]["end"]); duration=end-start
+            out=Path("review/full-mix-clips")/(name+"-1080p60.mp4")
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(start),"-i",os.environ["MASTER"],"-t",str(duration),
+              "-map","0:v:0","-map","0:a:0","-c:v","libx264","-preset","veryfast","-crf","21","-r","60","-pix_fmt","yuv420p","-c:a","aac","-b:a","160k","-movflags","+faststart",str(out)],check=True)
+            report.append({"name":out.name,"start":start,"end":end,"duration":duration})
+          Path("review/action-clips.json").write_text(json.dumps(report,indent=2)+"\n")
+          PY
+
+      - name: Verify all variable-timeline full-mix action clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          report=json.loads(Path("review/action-clips.json").read_text())
+          for item in report:
+            path=Path("review/full-mix-clips")/item["name"]
+            meta=json.loads(subprocess.check_output(["ffprobe","-v","error","-count_frames","-show_streams","-show_format","-of","json",str(path)],text=True))
+            v=next(x for x in meta["streams"] if x.get("codec_type")=="video")
+            a=next(x for x in meta["streams"] if x.get("codec_type")=="audio")
+            frames=int(v.get("nb_read_frames",v.get("nb_frames",0)))
+            duration=float(meta["format"]["duration"])
+            assert (int(v["width"]),int(v["height"]))==(1920,1080),(item,v)
+            assert v["avg_frame_rate"]=="60/1",(item,v)
+            assert abs(duration-item["duration"])<0.05,(item,duration)
+            assert frames==round(item["duration"]*60),(item,frames)
+            assert a["codec_name"]=="aac" and a["sample_rate"]=="48000" and int(a["channels"])==2
+            subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-i",str(path),"-f","null","-"],check=True)
+            print({"clip":item["name"],"duration":duration,"frames":frames,"decode":"pass"})
+          PY
+
+      - name: Package independent Narrative V3 inspection bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > review/README.md <<'EOF'
+          # Time Stop 10s — Narrative V3 independent inspection
+
+          Source: Narrative V3 production run 45030100930, artifact time-stop-10s-h2-42.
+          Baseline: immutable Run 41 cinematic V2, artifact time-stop-10s-h2-41.
+
+          This bundle contains independent full-master decode and stream checks, hash evidence,
+          84 voice/subtitle checks, six 3D cold-open frames, 44 matched 3D shot midpoint pairs
+          resolved using each version's own shot timeline, objective exposure/contrast/saturation
+          diagnostics, 252 variable-timeline stills, and five variable-length full-mix action clips.
+
+          The 44 matched frames compare the same shot IDs, not the same absolute timestamps.
+          The six V3 opening 3D shots are new and have no direct Run 41 counterpart.
+          Static samples cannot establish acting, pacing or emotional success; watch the full film
+          with sound. Keep visual_approval false until that review is complete.
+          EOF
+          (
+            cd review
+            find . -type f ! -name SHA256SUMS.txt ! -name narrative-v3-inspection.zip -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+            sha256sum -c SHA256SUMS.txt
+            zip -qr narrative-v3-inspection.zip . -x './narrative-v3-inspection.zip'
+            unzip -tq narrative-v3-inspection.zip
+          )
+
+      - name: Upload Narrative V3 independent inspection bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-run42-independent-inspection
+          path: review/
+          if-no-files-found: error
+          retention-days: 30
