@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           python ../../../../../video-projects/time-stop-10s/scripts/build_story.py --project-dir projects/time-stop-10s --fps 60
-          python ../../../../../video-projects/time-stop-10s/scripts/place_voiceover.py --project projects/time-stop-10s --artifact-dir ../../../../../voiceover-assets
+          python ../../../../../video-projects/time-stop-10s/scripts/place_voiceover.py --project projects/time-stop-10s --artifact-dir ../../../../../../voiceover-assets
           test -s projects/time-stop-10s/timeline/voice.wav
           test -s projects/time-stop-10s/out/voice-placement.json
           python - <<'PY'
