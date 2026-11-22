@@ -320,7 +320,7 @@ jobs:
             "per_shot": rows,
             "interpretation": "Objective exposure/contrast/saturation diagnostics only; not an artistic pass/fail decision."
           }
-          Path("review/grade-metrics.json").write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+          Path("review/grade-metrics.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
           print(json.dumps({k: report[k] for k in ("matched_3d_shots", "aggregate_mean_metrics", "aggregate_delta_run41_minus_run40")}, indent=2))
           PY
 
