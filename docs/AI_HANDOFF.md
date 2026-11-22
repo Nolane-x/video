@@ -381,3 +381,15 @@ Next action is to resume from workflow Run 44901911523 and inspect its new Run-3
 - Visual V4 experiment validated: branch `story/time-stop-10s-visual-v4`; validation run `45030643152` success. It lowers cinematic grade to contrast 1.08 / saturation 0.84, adds a world-space hand anchor in `figureCinematic`, snaps protagonist hand to the actual bicycle handlebar in s064–s066, and stages the final embrace closer in s071–s072. Validation includes JS syntax, contact-rig wiring, and V3 84-shot/378s/29-freeze/9.6s hook/13-duration story invariants.
 - V4 is still an experiment and has not been rendered. Wait for Run42 proof (contact sheets/preview at minimum) before creating a production branch from V4. Do not overwrite Run40, Run41 or Run42.
 - Keep `visual_approval=false` until the complete final master has been watched with audio.
+
+## Narrative V3 production and Visual V4 character/style refinement (2026-11-22, latest)
+
+- Run #42 (`45030100930`, branch `film/time-stop-10s-narrative-v3`) successfully completed VoiceStudio fresh Vietnamese narration, 84-shot storyboard, narration placement, 3D module copy, renderer scan and contact sheets, and 30-second motion preview. The full 1080p/60fps 22,680-frame master is now rendering. No official V3 film artifact exists until package/QA completes.
+- Run #42 source SHA: `8e992dbf4a445e807206de4cfe130aaf5e1d93a4`. Do not modify the branch's render-trigger paths while the full master render is active.
+- V4 latest source branch: `story/time-stop-10s-visual-v4`.
+  - Restrained grade: contrast 1.08, saturation 0.84 to address Run41's measured oversaturation (0.344→0.628) and dark midtones.
+  - Grounded two-segment arm IK: `figureCinematic.userData.aimHandAtWorld` solves shoulder/elbow angles; s064–s066 reach the actual bike handlebar while the body root stays on the ground.
+  - Cast consistency: dark mascot heads, restrained face detail, cream features and light rim across key-sequence and street/rescue 3D casts, matching the repository art direction.
+- Latest V4 validation runs succeeded: `45031503028`, `45031513799`, and `45031517373`. These check JS syntax, IK contact wiring, shared mascot style, restrained grade, and unchanged Narrative V3 invariants.
+- V4 remains an experimental branch. Do not create its production branch or start its full render until Run42 contact sheets/preview are reviewed. Keep Run40, Run41 and Run42 immutable. Keep `visual_approval=false` until the complete chosen master is watched continuously with sound.
+- A timeline-aware Run42-vs-Run41 independent inspector is authored at `.github/workflows/inspect-time-stop-run42-vs-run41.yml`. It matches the 44 established custom 3D shots by shot ID and each file's own midpoint timestamps, separately reviews new 3D cold-open shots s001–s006, checks full master/subtitle/voice integrity, samples 252 variable-timeline frames and exports five full-mix sequences. Trigger only once official Run42 artifact `time-stop-10s-h2-42` exists.
