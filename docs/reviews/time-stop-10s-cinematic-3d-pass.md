@@ -57,3 +57,12 @@ A sequence is not accepted on screenshots alone: the motion must read continuous
 - Fix commit: `553b9b782dc5ad649a57f9973e59ae00a50acc2c` in `tools/mix.py`. It preserves the loudness workflow, increases pre-AAC peak headroom (limiter 0.65 → 0.55), and adds a final limiter (0.50) at the AAC mux stage, targeting the already-existing -1 dBFS QA requirement with extra codec overshoot margin.
 - Run #35's uploaded artifacts contain the verified VoiceStudio package only; the film master lived on the failed hosted runner and was not uploaded because step 19 failed. A fresh workflow run must rebuild the master. Do not describe Run #35 as a delivered movie.
 - The new run must pass both integrated loudness and encoded-AAC EBU peak checks before upload.
+
+
+## Run #36 rebuild status (2026-11-22)
+
+- Rebuild workflow: https://github.com/Nolane-x/video/actions/runs/44964684746 (run number 36; commit 553b9b782dc5ad649a57f9973e59ae00a50acc2c).
+- VoiceStudio narration regenerated and verified successfully (84 Vietnamese segments, watermark validation included).
+- H2 Canvas render job has begun. Environment/toolchain checks are complete; dependency install and scene build follow, then renderer scan, contact sheets, 30s preview, full 1080p60 master, mix and package.
+- New audio headroom fix: pre-AAC limiter 0.55 and final AAC limiter 0.50. The existing -1 dBFS EBU peak gate remains unchanged. A local synthetic AAC encode/decode check measured -5.3 dBFS true peak after limiter; this is only a filter sanity check, not evidence of the film mix passing.
+- Independent Run36 inspection workflow is prepared on review branch at .github/workflows/inspect-time-stop-run36.yml (source commit 0739b09603b2bea211f07841de284e09babb6c55). It compares all 44 3D shot midpoints against Run32 and performs full-master, audio, subtitle and motion checks after the candidate artifact is uploaded.
