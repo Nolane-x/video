@@ -1,0 +1,99 @@
+name: Validate — Time Stop 10s Narrative V3
+
+on:
+  push:
+    branches:
+      - "story/time-stop-10s-narrative-v3"
+    paths:
+      - "video-projects/time-stop-10s/scripts/build_story.py"
+      - ".github/workflows/validate-time-stop-narrative-v3.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout narrative V3 branch
+        uses: actions/checkout@v4
+        with:
+          ref: story/time-stop-10s-narrative-v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build 1080p60 storyboard without rendering
+        run: |
+          set -euo pipefail
+          python video-projects/time-stop-10s/scripts/build_story.py --project-dir /tmp/time-stop-narrative-v3 --fps 60
+      - name: Validate variable pacing, timing, narration slots and musical acts
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("/tmp/time-stop-narrative-v3")
+          cfg = json.loads((root / "config.json").read_text(encoding="utf-8"))
+          story = json.loads((root / "story/shots.json").read_text(encoding="utf-8"))
+          plan = json.loads((root / "story/shot-plan.json").read_text(encoding="utf-8"))
+          shots = story["shots"]
+
+          assert len(shots) == 84, len(shots)
+          assert story["duration"] == 378.0, story["duration"]
+          assert cfg["fps"] == 60 and cfg["resolution"] == "1080p"
+          assert cfg["style"] == "cinematic" and cfg["bars"] == "wide"
+          durations = [round(float(s["end"]) - float(s["start"]), 3) for s in shots]
+          assert len(set(durations)) >= 5, sorted(set(durations))
+          assert min(durations) >= 2.6 and max(durations) <= 6.2
+          assert abs(sum(durations) - 378.0) < 0.001
+
+          # Hook must demonstrate danger + time-stop within the first 10 seconds.
+          assert shots[0]["start"] == 0
+          assert shots[2]["end"] <= 10.0, shots[:3]
+          assert any(any(f.get("kind") == "freeze" for f in s["args"]["fx"]) for s in shots[:5])
+
+          # Keep the custom 3D local clock at 4.5 seconds until its draw functions
+          # have been explicitly retimed; only generic shots receive variable beats.
+          custom = set(range(13, 23)) | set(range(26, 34)) | set(range(37, 43)) | set(range(53, 73))
+          for number in custom:
+            shot = shots[number - 1]
+            assert abs((shot["end"] - shot["start"]) - 4.5) < 0.001, shot["id"]
+          for shot in shots:
+            duration = shot["end"] - shot["start"]
+            assert abs(float(shot["args"]["cam"]["dur"]) - duration) < 0.001, shot["id"]
+            captions = shot["args"].get("texts", [])
+            assert captions and captions[0]["dur"] <= duration - 0.3, shot["id"]
+
+          # Music beds must follow the seven variable-length acts with no gaps.
+          beds = story["music"]
+          assert len(beds) == 7
+          assert beds[0]["start"] == 0 and beds[-1]["end"] == story["duration"]
+          for left, right in zip(beds, beds[1:]):
+            assert abs(left["end"] - right["start"]) < 0.001, (left, right)
+
+          # The shot-plan must mirror the generated timeline rather than a fixed
+          # 4.5-second index formula.
+          plan_shots = plan["shots"]
+          assert len(plan_shots) == 84
+          for a, b in zip(shots, plan_shots):
+            assert a["id"] == b["id"]
+            assert abs(a["start"] - b["start"]) < 0.001
+            assert abs(a["end"] - b["end"]) < 0.001
+            assert abs(a["duration"] - b["duration"]) < 0.001
+
+          print({
+            "status": "PASS",
+            "shots": len(shots),
+            "duration": story["duration"],
+            "fps": story["fps"],
+            "frames": int(story["duration"] * story["fps"]),
+            "duration_range": [min(durations), max(durations)],
+            "unique_durations": len(set(durations)),
+            "hook_freeze_at": shots[3]["start"],
+            "custom_3d_4_5s_shots": len(custom),
+            "music_acts": len(beds)
+          })
+          PY
