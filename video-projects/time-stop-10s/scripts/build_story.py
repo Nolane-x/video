@@ -27,12 +27,12 @@ def cue(name, at=.25, gain=-7):
 SHOTS = []
 def add(location, scene, caption, actors=None, set_args=None, cam=None, *,
         freeze=False, timer=None, fx=None, lights=None, sfx=None, text_pos="top",
-        transition=None, vignette=.56):
+        transition=None, vignette=.56, duration=SHOT_SECONDS):
     SHOTS.append({
         "location":location,"scene":scene,"caption":caption,"actors":actors or [],
         "set_args":set_args or {},"cam":cam or camera(),"freeze":freeze,"timer":timer,
         "fx":fx or [],"lights":lights or [],"sfx":sfx or [],"text_pos":text_pos,
-        "transition":transition,"vignette":vignette,
+        "transition":transition,"vignette":vignette,"duration":float(duration),
     })
 
 # ACT 01 — A normal day, until the impossible offer appears.
@@ -309,6 +309,185 @@ add("black","Thẻ kết nền than chì; vòng sáng xanh nhỏ co lại thành
     [],{},camera(.5,.5,1,.5,.5,1),fx=[{"kind":"pulse","at":.2,"dur":3.8,"color":"#8bd8ff","a":.14}],
     sfx=[cue("ding_soft",2.4)],transition={"type":"dip","dur":.7},text_pos="bottom")
 
+
+# NARRATIVE V3 — open on the rescue, then rewind to the morning.
+# This prologue replaces only the first twelve non-custom shots. The 44
+# custom 3D IDs (s013–s072 blocks listed below) stay in their original slots.
+_legacy_shots = SHOTS[12:]
+SHOTS.clear()
+
+add("street","Cực cận bu-lông gỉ bật khỏi chân biển quảng cáo; một giọt mưa văng khỏi ren.",
+    "Một chiếc bu-lông vừa bật khỏi tấm biển.",
+    [],{"busstop":False,"rain":True,"bicycle":True,"bikeX":.68,"billboard":True,"billboardX":.80,"billboardTilt":.18,"lampX":.9},
+    camera(.78,.33,1.42,.78,.33,1.62),sfx=[cue("impact_light",.4)],duration=3.2)
+add("street","Mẹ đạp xe tiến vào vùng sáng dưới tấm biển; khung sắt rung trên đầu.",
+    "Mẹ đang đi ngay bên dưới.",
+    [actor("mom",.66,"sit","neutral",y=.72,h=.42)],
+    {"busstop":False,"rain":True,"bicycle":True,"bikeX":.67,"billboard":True,"billboardX":.80,"billboardTilt":.22,"lampX":.9},
+    camera(.64,.58,1.08,.69,.52,1.22),sfx=[cue("riser_2s",.3)],duration=3.2)
+add("street","Cậu bé bên kia đường nhìn thấy tấm biển nghiêng; mắt cậu chuyển xuống đồng hồ.",
+    "Cậu chỉ còn mười giây.",
+    [actor("hoodie",.24,"guard","sad"),actor("mom",.72,"sit","neutral",y=.72,h=.40)],
+    {"busstop":False,"rain":True,"bicycle":True,"bikeX":.70,"billboard":True,"billboardX":.80,"billboardTilt":.27,"lampX":.9},
+    camera(.48,.52,1.0,.56,.48,1.12),sfx=[cue("heartbeat",.1)],duration=3.2)
+add("street","Biển quảng cáo nghiêng giữa không trung; mưa, bánh xe và giọt nước bất động.",
+    "Thế giới lập tức đứng yên.",
+    [actor("hoodie",.24,"guard","neutral"),actor("mom",.70,"sit","neutral",y=.72,h=.40)],
+    {"busstop":False,"rain":False,"bicycle":True,"bikeX":.70,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
+    camera(.50,.48,1.0,.54,.46,1.10),freeze=True,timer=10,
+    fx=[{"kind":"dust","at":.1,"dur":2.8,"n":18}],duration=3.4)
+add("street","Cậu lao qua mặt đường ướt; giọt mưa đứng yên quanh đôi giày.",
+    "Cậu lao về phía mẹ.",
+    [actor("hoodie",.18,"guard","neutral",run={"to":.66,"dur":3.0,"speed":1.9},h=.46),
+     actor("mom",.70,"sit","neutral",y=.72,h=.40)],
+    {"busstop":False,"rain":False,"bicycle":True,"bikeX":.70,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
+    camera(.20,.72,1.0,.58,.66,1.22),freeze=True,timer=8,
+    fx=[{"kind":"speed","at":.1,"dur":2.8,"dir":1}],sfx=[cue("whoosh_fast",.2)],duration=3.6)
+add("street","Bàn tay cậu chỉ còn cách tay lái một gang; bóng biển đổ lên mặt đường.",
+    "Nhưng mẹ vẫn ngoài tầm tay.",
+    [actor("hoodie",.52,"point","sad",h=.50),actor("mom",.70,"sit","neutral",y=.72,h=.38)],
+    {"busstop":False,"rain":False,"bicycle":True,"bikeX":.70,"billboard":True,"billboardX":.80,"billboardTilt":.32,"lampX":.9},
+    camera(.60,.62,1.28,.64,.59,1.50),freeze=True,timer=7,duration=3.6)
+add("black","Màn hình tối; tiếng mưa biến thành tiếng chuông báo thức trong phòng ngủ.",
+    "Vài giờ trước đó.",
+    [],{},camera(.5,.5,1,.5,.5,1),transition={"type":"dip","dur":.55},
+    sfx=[cue("phone_ring",.2)],text_pos="bottom",duration=2.8)
+add("bedroom","Đồng hồ báo thức rung trên bàn; cậu bật dậy, bài kiểm tra còn dang dở.",
+    "Cậu thức dậy muộn cho buổi kiểm tra.",
+    [actor("hoodie",.34,"sit","sad",hold="phone")],
+    {"clock":"06:10","lamp":False,"laptop":True,"sky":"dawn","stage":True},
+    camera(.48,.53,1.0,.55,.48,1.08),sfx=[cue("phone_ring"),cue("tick",1.2)],duration=3.8)
+add("kitchen","Mẹ đặt hộp đồ ăn lên bàn, bên cạnh là chiếc xe đạp đã được sửa lại phanh.",
+    "Mẹ đã sửa xe và chuẩn bị bữa sáng.",
+    [actor("mom",.62,"point","grin"),actor("hoodie",.30,"stand","neutral",hold="bag")],
+    {"sky":"dawn","lamp":True,"bicycle":True,"bikeX":.84},
+    camera(.50,.52,1.0,.54,.49,1.08),
+    lights=[{"x":.67,"y":.28,"r":.20,"color":"#ffc36f","a":.34}],duration=4.2)
+add("kitchen","Mẹ đưa hộp đồ ăn; cậu vừa nhận vừa cúi nhìn điện thoại, không nhìn mẹ.",
+    "Cậu nhận lấy mà chẳng nhìn mẹ.",
+    [actor("mom",.62,"point","neutral"),actor("hoodie",.32,"phone","sad",hold="phone")],
+    {"sky":"dawn","lamp":True},
+    camera(.60,.52,1.12,.54,.49,1.20),sfx=[cue("ui_click",.7)],duration=4.2)
+add("classroom","Cậu nhìn bài kiểm tra, mí mắt nặng trĩu; bạn bên cạnh đã viết gần xong.",
+    "Trong đầu cậu chỉ có bài kiểm tra.",
+    [actor("hoodie",.36,"sit","sad"),actor("friend",.73,"type","neutral",h=.42)],
+    {"sky":"day","board":"KIỂM TRA 15 PHÚT","desks":[.25,.48,.72]},
+    camera(.50,.50,1.0,.47,.48,1.08),sfx=[cue("type_key",.7)],duration=4.2)
+add("bedroom","Cận ngăn bàn hé mở; một chiếc đồng hồ lạ phát ánh xanh lạnh giữa những quyển vở.",
+    "Rồi chiếc đồng hồ lạ sáng lên.",
+    [actor("hoodie",.68,"phone","neutral",hold="phone",h=.36)],
+    {"clock":"23:48","lamp":True,"sky":"night","stage":True},
+    camera(.70,.45,1.22,.70,.43,1.46),fx=[{"kind":"pulse","at":.2,"dur":3.2,"color":"#7fd8ff","a":.22}],
+    sfx=[cue("ting_idea",.5),cue("ui_click",2.0)],duration=4.6)
+
+SHOTS.extend(_legacy_shots)
+
+def revise_shot(number, *, location=None, scene=None, caption=None, actors=None, set_args=None, cam=None, sfx=None):
+    item = SHOTS[number - 1]
+    if location is not None: item["location"] = location
+    if scene is not None: item["scene"] = scene
+    if caption is not None: item["caption"] = caption
+    if actors is not None: item["actors"] = actors
+    if set_args is not None: item["set_args"] = set_args
+    if cam is not None: item["cam"] = cam
+    if sfx is not None: item["sfx"] = sfx
+
+# ACT 04–05: make the cost visible before the storm.
+revise_shot(43, scene="Bạn cậu hỏi vì sao quả bóng tự trở lại đúng tay; cậu giấu cổ tay sau lưng.",
+    caption="Bạn cậu không hiểu quả bóng đã quay lại bằng cách nào.")
+revise_shot(44, scene="Trong gương, cậu nhìn chiếc đồng hồ và bấm thử dù chẳng có nguy hiểm.",
+    caption="Cậu bắt đầu dùng nó cho cả việc nhỏ nhất.")
+revise_shot(45, location="kitchen", scene="Mẹ cúi sửa phanh xe; cậu đứng cạnh, tay vẫn cầm điện thoại.",
+    caption="Mẹ nhờ cậu giữ chiếc xe trong lúc sửa phanh.",
+    actors=[actor("mom",.66,"crouch","sad",hold="bag"),actor("hoodie",.28,"stand","neutral",hold="phone")],
+    set_args={"sky":"dusk","lamp":True,"bicycle":True,"bikeX":.72})
+revise_shot(46, location="doorway", scene="Mẹ ngẩng lên chờ câu trả lời; cậu liếc màn hình đồng hồ thay vì nhìn mẹ.",
+    caption="Cậu nhìn đồng hồ, không nhìn mẹ.",
+    actors=[actor("hoodie",.34,"phone","sad",hold="phone"),actor("mom",.70,"stand","neutral")])
+revise_shot(47, location="bedroom", scene="Đồng hồ đếm ngược nằm cạnh bức ảnh hai mẹ con; kim báo thức vẫn chạy.",
+    caption="Mười giây không thể lấy lại điều đã bỏ lỡ.",
+    actors=[actor("hoodie",.42,"headhold","sad")])
+revise_shot(48, location="street", scene="Mẹ tự dắt xe ra khỏi nhà; cậu vẫn đứng sau cánh cửa nhìn xuống điện thoại.",
+    caption="Mẹ tự đạp xe đi trong cơn mưa.",
+    actors=[actor("mom",.66,"stand","neutral",y=.73),actor("hoodie",.28,"phone","sad",hold="phone")],
+    set_args={"busstop":False,"rain":True,"bicycle":True,"bikeX":.67,"lampX":.84})
+
+# ACT 05: show the hard limit and mother's ordinary effort before the crisis.
+revise_shot(49, scene="Cận đồng hồ; cậu bấm giữ nút nhưng vòng đếm vẫn dừng ở đúng mười vạch.",
+    caption="Cậu thử kéo dài, nhưng giới hạn vẫn là mười giây.")
+revise_shot(50, location="kitchen", scene="Hộp đồ ăn mẹ chuẩn bị vẫn nằm trên bàn; ghế bên cạnh đã trống.",
+    caption="Mẹ đã rời đi sau một ngày làm việc dài.",
+    actors=[actor("hoodie",.32,"stand","sad")],
+    set_args={"sky":"rain","lamp":True,"bicycle":True,"bikeX":.84})
+revise_shot(51, location="bedroom", scene="Điện thoại sáng lên với cuộc gọi nhỡ từ mẹ; cậu chạm vào màn hình rồi dừng lại.",
+    caption="Cậu thấy cuộc gọi nhỡ, nhưng vẫn chần chừ.",
+    actors=[actor("hoodie",.50,"phone","sad",hold="phone")])
+revise_shot(52, location="city", scene="Mây đen kéo ngang thành phố; gió giật mạnh làm tấm biển quảng cáo rung lên.",
+    caption="Cơn gió mạnh quật vào khung biển quảng cáo.",
+    actors=[actor("mom",.78,"relaxed","neutral",walk={"to":.56,"dur":3.5,"speed":.75},y=.73)],
+    set_args={"time":"night","birds":False,"lamps":[.22,.48,.75]})
+
+# ACT 07: fewer moral statements; one physical callback and one quiet choice.
+revise_shot(73, location="street", scene="Mẹ và con ngồi trên vỉa hè ướt; mẹ nắm chặt cổ tay cậu sau cú ngã.",
+    caption="Mẹ siết chặt tay cậu giữa cơn mưa.",
+    actors=[actor("mom",.56,"sit","sad",h=.44),actor("hoodie",.40,"kneel","sad",h=.45)],
+    set_args={"busstop":False,"rain":True,"bicycle":True,"bikeX":.77,"billboard":True,"billboardX":.80,"billboardFall":True,"lampX":.9})
+revise_shot(74, location="street", scene="Mẹ kiểm tra từng bàn tay con; chiếc xe nằm cạnh hộp đồ ăn chưa mở.",
+    caption="Mẹ chỉ hỏi cậu có bị thương không.",
+    actors=[actor("mom",.56,"kneel","sad",h=.44),actor("hoodie",.40,"kneel","sad",h=.45)])
+revise_shot(75, location="street", scene="Cậu định giải thích chiếc đồng hồ, rồi lặng lẽ ôm lấy mẹ.",
+    caption="Cậu định kể, rồi chỉ ôm mẹ thật chặt.",
+    actors=[actor("hoodie",.43,"carry","sad",h=.49),actor("mom",.56,"carry","sad",h=.46)])
+revise_shot(76, location="street", scene="Mẹ lau nước mưa trên má con như khi cậu còn bé.",
+    caption="Mẹ lau giọt mưa trên má cậu.",
+    actors=[actor("hoodie",.43,"carry","sad",h=.49),actor("mom",.56,"carry","sad",h=.46)])
+revise_shot(77, location="kitchen", scene="Sáng hôm sau; hộp đồ ăn được đặt giữa hai người, lần này cậu ngồi lại.",
+    caption="Sáng hôm sau, cậu ngồi ăn cùng mẹ.",
+    actors=[actor("mom",.63,"stand","grin"),actor("hoodie",.36,"carry","grin",hold="cup")],
+    set_args={"sky":"dawn","lamp":False})
+revise_shot(78, location="street", scene="Hai mẹ con cùng kiểm tra phanh và siết lại chiếc bu-lông xe đạp.",
+    caption="Hai người cùng sửa lại chiếc xe đạp.",
+    actors=[actor("hoodie",.43,"crouch","neutral"),actor("mom",.70,"stand","grin")],
+    set_args={"busstop":False,"rain":False,"bicycle":True,"bikeX":.60,"lampX":.84})
+revise_shot(79, location="doorway", scene="Mẹ đưa áo mưa; cậu dừng điện thoại, nhìn thẳng vào mắt mẹ.",
+    caption="Lần này, cậu nhìn mẹ và nói cảm ơn.",
+    actors=[actor("hoodie",.37,"carry","grin",hold="umbrella"),actor("mom",.68,"point","grin")],
+    set_args={"doorX":.55,"doorOpen":.8})
+revise_shot(80, location="bedroom", scene="Chiếc đồng hồ nằm cạnh ngăn kéo đang mở; cậu chậm rãi đặt nó vào trong.",
+    caption="Cậu đặt chiếc đồng hồ trở lại ngăn kéo.",
+    actors=[actor("hoodie",.50,"carry","neutral")],
+    set_args={"clock":"21:31","lamp":True,"sky":"night","stage":True})
+revise_shot(81, location="bedroom", scene="Bàn tay đóng ngăn kéo; ánh xanh tắt hẳn.",
+    caption="Cậu không cần thêm mười giây nữa.",
+    actors=[actor("hoodie",.50,"carry","neutral")],
+    set_args={"clock":"21:31","lamp":True,"sky":"night","stage":True})
+revise_shot(82, location="street", scene="Hai mẹ con dắt xe đi cạnh nhau trên con phố sau mưa.",
+    caption="Cậu chọn đi bên cạnh mẹ.",
+    actors=[actor("hoodie",.42,"relaxed","grin",walk={"to":.62,"dur":3.8,"speed":.72}),
+            actor("mom",.60,"relaxed","grin",walk={"to":.76,"dur":3.8,"speed":.68})],
+    set_args={"busstop":False,"rain":False,"bicycle":True,"bikeX":.70,"lampX":.84})
+revise_shot(83, location="city", scene="Thành phố tiếp tục chuyển động; hai bóng người nhỏ đi qua vùng sáng ấm.",
+    caption="Thế giới vẫn chạy, và cậu không còn muốn dừng nó.",
+    actors=[actor("hoodie",.43,"relaxed","grin"),actor("mom",.58,"relaxed","grin")],
+    set_args={"time":"dusk","birds":False,"lamps":[.2,.45,.7,.9]})
+revise_shot(84, location="black", scene="Thẻ kết tối giản; tiếng đồng hồ ngừng lại, rồi một nhịp tim vang lên.",
+    caption="ĐI TIẾP, CÙNG NHAU.",
+    actors=[],set_args={},
+    sfx=[cue("heartbeat",.2)],cam=camera(.5,.5,1,.5,.5,1))
+
+# Variable rhythm for the 40 non-custom shots. The 44 custom 3D action shots
+# retain their 4.5s local clock in this pass; the 84-shot film remains exactly
+# 378s: fast 3–4s hooks/inserts, roomier emotional holds, no mechanical cadence.
+_PACING = {
+    1:3.2,2:3.2,3:3.2,4:3.4,5:3.6,6:3.6,7:2.8,8:3.8,9:4.2,10:4.2,11:4.2,12:4.6,
+    23:3.6,24:3.6,25:4.0,
+    34:3.6,35:3.8,36:4.0,
+    43:5.0,44:5.5,45:5.2,46:5.0,47:5.5,48:5.8,49:5.5,50:5.0,51:5.0,52:4.5,
+    73:5.0,74:5.0,75:5.0,76:5.2,77:5.2,78:5.2,79:5.0,80:5.2,81:5.2,82:5.2,83:5.2,84:5.0,
+}
+for shot_number, seconds in _PACING.items():
+    SHOTS[shot_number - 1]["duration"] = seconds
+
 def write_json(path: Path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -318,7 +497,7 @@ def build(project_dir: Path, fps: int = FPS):
         raise ValueError(f"Unsupported render fps: {fps}; choose 30 or 60")
     if len(SHOTS) != 84:
         raise RuntimeError(f"Expected 84 shots, got {len(SHOTS)}")
-    duration = round(len(SHOTS) * SHOT_SECONDS, 3)
+    duration = round(sum(float(item.get("duration", SHOT_SECONDS)) for item in SHOTS), 3)
     project_dir.mkdir(parents=True, exist_ok=True)
     (project_dir / "story").mkdir(exist_ok=True)
     (project_dir / "build").mkdir(exist_ok=True)
@@ -340,42 +519,72 @@ def build(project_dir: Path, fps: int = FPS):
     ]
     set_counts = {}
     freeze_count = 0
+    cursor = 0.0
     for index, item in enumerate(SHOTS):
-        start = round(index * SHOT_SECONDS, 3)
-        end = round(start + SHOT_SECONDS, 3)
+        shot_duration = float(item.get("duration", SHOT_SECONDS))
+        start = round(cursor, 3)
+        end = round(start + shot_duration, 3)
+        cursor = end
+        cam = dict(item["cam"])
+        cam["dur"] = shot_duration
+        cam["at"] = min(float(cam.get("at", 0.0)), max(0.0, shot_duration - 0.2))
+        actors = []
+        for actor_item in item["actors"]:
+            actor_copy = dict(actor_item)
+            for movement in ("walk", "run"):
+                if isinstance(actor_copy.get(movement), dict):
+                    move = dict(actor_copy[movement])
+                    move["dur"] = min(float(move.get("dur", shot_duration * 0.75)), max(0.8, shot_duration - 0.45))
+                    actor_copy[movement] = move
+            actors.append(actor_copy)
+        shot_fx = []
+        for effect_item in item["fx"]:
+            effect = dict(effect_item)
+            effect_at = min(float(effect.get("at", 0.0)), max(0.0, shot_duration - 0.3))
+            effect["at"] = effect_at
+            if "dur" in effect:
+                effect["dur"] = min(float(effect["dur"]), max(0.2, shot_duration - effect_at - 0.08))
+            shot_fx.append(effect)
+        shot_sfx = []
+        for cue_item in item["sfx"]:
+            cue_copy = dict(cue_item)
+            cue_copy["at"] = min(float(cue_copy.get("at", 0.0)), max(0.0, shot_duration - 0.12))
+            shot_sfx.append(cue_copy)
         shot_id = f"s{index + 1:03d}"
         set_name = item["location"]
         set_counts[set_name] = set_counts.get(set_name, 0) + 1
         args = {
-            "set":set_name,"setArgs":dict(item["set_args"]),"actors":item["actors"],
+            "set":set_name,"setArgs":dict(item["set_args"]),"actors":actors,
             "texts":[{
-                "kind":"narr","t":item["caption"],"at":0.28,"dur":4.02,
+                "kind":"narr","t":item["caption"],"at":min(0.28, shot_duration * 0.07),
+                "dur":max(0.55, min(4.02, shot_duration - 0.34)),
                 "pos":item["text_pos"],"size":54,"type":True,"maxW":0.84,
             }],
-            "cam":item["cam"],"fx":list(item["fx"]),"lights":list(item["lights"]),
+            "cam":cam,"fx":shot_fx,"lights":list(item["lights"]),
             "vignette":item["vignette"],
         }
         if item["freeze"]:
             freeze_count += 1
-            args["fx"].append({"kind":"freeze","at":0.10,"dur":4.25,"x":0.50,"y":0.48,"color":"#8bd8ff","intensity":1.0})
+            args["fx"].append({"kind":"freeze","at":min(0.10, shot_duration * 0.05),"dur":min(4.25, shot_duration - 0.16),"x":0.50,"y":0.48,"color":"#8bd8ff","intensity":1.0})
             args["setArgs"]["rain"] = False
         if item["timer"] is not None:
             args["hud"] = {"rows":[{"label":"GIÂY CÒN","n":int(item["timer"]),"color":"#a8e5ff"}]}
-        transition = item["transition"] or ({"type":"dip","dur":0.48} if index in (12,24,36,48,60,72) else {"type":"cut"})
+        transition = dict(item["transition"] or ({"type":"dip","dur":0.48} if index in (12,24,36,48,60,72) else {"type":"cut"}))
+        transition["dur"] = min(float(transition.get("dur", 0.35)), max(0.12, shot_duration * 0.28))
         shots.append({
-            "id":shot_id,"start":start,"end":end,"scene":item["scene"],"line":item["caption"],
-            "tpl":"scene","args":args,"in":transition,"sfx":item["sfx"],"notes":item["scene"],
+            "id":shot_id,"start":start,"end":end,"duration":shot_duration,"scene":item["scene"],"line":item["caption"],
+            "tpl":"scene","args":args,"in":transition,"sfx":shot_sfx,"notes":item["scene"],
         })
-        script_lines.append(f"[{shot_id.upper()}] {SHOT_SECONDS:.1f}s | CẢNH: {item['scene']} | SET: {set_name} | HÀNH ĐỘNG: {item['caption']}")
-    music = [
-        {"start":0,"end":54,"bed":"curious","gainDb":0},
-        {"start":54,"end":108,"bed":"mystery","gainDb":-1},
-        {"start":108,"end":162,"bed":"tension","gainDb":-1},
-        {"start":162,"end":216,"bed":"triumph","gainDb":-1},
-        {"start":216,"end":270,"bed":"tension","gainDb":-2},
-        {"start":270,"end":324,"bed":"emotional","gainDb":0},
-        {"start":324,"end":378,"bed":"emotional","gainDb":-1},
+        script_lines.append(f"[{shot_id.upper()}] {shot_duration:.1f}s | CẢNH: {item['scene']} | SET: {set_name} | HÀNH ĐỘNG: {item['caption']}")
+    act_beds = [
+        ("curious", 0), ("mystery", -1), ("tension", -1), ("triumph", -1),
+        ("tension", -2), ("emotional", 0), ("emotional", -2),
     ]
+    music = []
+    for act_index, (bed, gain) in enumerate(act_beds):
+        act_start = round(sum(float(x.get("duration", SHOT_SECONDS)) for x in SHOTS[:act_index * 12]), 3)
+        act_end = round(sum(float(x.get("duration", SHOT_SECONDS)) for x in SHOTS[:(act_index + 1) * 12]), 3)
+        music.append({"start":act_start,"end":act_end,"bed":bed,"gainDb":gain})
     story = {
         "title":"Nếu Bạn Có Thể Dừng Thời Gian Trong 10 Giây?",
         "duration":duration,"fps":fps,"resolution":[WIDTH,HEIGHT],"shots":shots,"music":music,"sfx":[],
@@ -394,7 +603,7 @@ def build(project_dir: Path, fps: int = FPS):
             {"name":"06 — Cứu mẹ trong mười giây","shots":"s061–s072"},
             {"name":"07 — Sống trọn vẹn","shots":"s073–s084"},
         ],
-        "shots":[{"id":s["id"],"start":s["start"],"end":s["end"],"set":s["args"]["set"],"line":s["line"],"scene":s["scene"],
+        "shots":[{"id":s["id"],"start":s["start"],"end":s["end"],"duration":s["duration"],"set":s["args"]["set"],"line":s["line"],"scene":s["scene"],
                   "freeze":any(f.get("kind")=="freeze" for f in s["args"]["fx"])} for s in shots],
     })
     (project_dir / "01-PHIM-time-stop-10s.txt").write_text("\n".join(script_lines)+"\n",encoding="utf-8")
@@ -426,6 +635,18 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
     (project_dir / "story" / "bible.md").write_text(bible,encoding="utf-8")
     if len(shots)!=84 or round(shots[-1]["end"],3)!=duration:
         raise RuntimeError("Story duration/count invariant failed")
+    if abs(duration - 378.0) > 0.001:
+        raise RuntimeError(f"Narrative V3 must preserve 378s, got {duration}")
+    if len({round(float(item.get("duration", SHOT_SECONDS)), 2) for item in SHOTS}) < 5:
+        raise RuntimeError("Narrative V3 pacing has insufficient duration variety")
+    custom_3d = set(range(13, 23)) | set(range(26, 34)) | set(range(37, 43)) | set(range(53, 73))
+    for number in custom_3d:
+        if abs(float(SHOTS[number - 1]["duration"]) - SHOT_SECONDS) > 0.001:
+            raise RuntimeError(f"Custom 3D local-clock shot s{number:03d} must remain 4.5s until retimed")
+    for item in SHOTS:
+        seconds = float(item.get("duration", SHOT_SECONDS))
+        if seconds < 2.6 or seconds > 6.2:
+            raise RuntimeError(f"Shot duration outside safe pacing bounds: {seconds}")
     if freeze_count<14:
         raise RuntimeError(f"Expected multiple freeze-action shots, got {freeze_count}")
     if max(set_counts.values())>30:
@@ -435,6 +656,10 @@ Một học sinh có thể đóng băng thế giới trong đúng 10 giây. Lúc
         a=round(shot["start"]*fps); b=round(shot["end"]*fps)
         if a!=previous or b<=a:
             raise RuntimeError(f"Frame gap/overlap in {shot['id']}: {a}..{b}, expected {previous}")
+        if abs(float(shot["args"]["cam"]["dur"]) - float(shot["duration"])) > 0.001:
+            raise RuntimeError(f"Camera duration mismatch in {shot['id']}")
+        if shot["duration"] < 3.0 and len(shot["line"].split()) > 8:
+            raise RuntimeError(f"Short shot has too much narration in {shot['id']}")
         previous=b
     print(json.dumps({"status":"story-built","shots":len(shots),"duration_seconds":duration,"fps":fps,
                       "frames":int(duration*fps),"time_freeze_shots":freeze_count,"sets":set_counts,
