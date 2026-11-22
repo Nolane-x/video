@@ -1,0 +1,176 @@
+name: Calibrate — Time Stop 10s audio loudness and AAC true-peak
+
+on:
+  push:
+    branches: [review/time-stop-10s-3d-fixes]
+    paths:
+      - ".github/workflows/enable-time-stop-audio-calibration.txt"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: time-stop-10s-audio-calibration
+  cancel-in-progress: true
+
+jobs:
+  calibrate:
+    name: Measure real Run 36 narration mix against AAC delivery gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout review workflow
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Checkout exact Run 36 production source
+        uses: actions/checkout@v4
+        with:
+          repository: Nolane-x/video
+          ref: film/time-stop-10s-cinematic-3d-pass
+          path: production
+
+      - name: Download verified Run 36 Vietnamese narration
+        uses: actions/download-artifact@v4
+        with:
+          name: video-voice-assets-44964684746
+          run-id: 44964684746
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: voiceover-assets
+
+      - name: Set up Node and Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install H2 audio dependencies and build sound library
+        working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          python -m pip install --disable-pip-version-check numpy scipy soundfile pyloudnorm
+          python audio/build_audio.py
+
+      - name: Build exact Run 36 story and place narration
+        working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          python ../../../../../video-projects/time-stop-10s/scripts/build_story.py --project-dir projects/time-stop-10s --fps 60
+          python ../../../../../video-projects/time-stop-10s/scripts/place_voiceover.py --project projects/time-stop-10s --artifact-dir ../../../../../voiceover-assets
+          test -s projects/time-stop-10s/timeline/voice.wav
+          test -s projects/time-stop-10s/out/voice-placement.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("projects/time-stop-10s")
+          story=json.loads((p/"story/shots.json").read_text())
+          voice=json.loads((p/"out/voice-placement.json").read_text())
+          assert len(story["shots"]) == 84 and story["duration"] == 378.0
+          assert voice["status"] == "passed" and voice["placed_segments"] == 84
+          print("Exact Run 36 soundtrack inputs: 84 shots / 378s / 84 placed Vietnamese segments")
+          PY
+
+      - name: Calibrate limiter matrix on the actual 378-second soundtrack
+        working-directory: production/integrations/h2-selfimprove-studio/skills/lam-video-selfimprove/kit
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/calibration"
+          python - <<'PY'
+          import json, os, re, subprocess, sys
+          from pathlib import Path
+
+          kit=Path.cwd()
+          project="projects/time-stop-10s"
+          report=[]
+          pre_values=[0.55,0.60,0.65,0.70]
+          aac_values=[0.50,0.54,0.56,0.58,0.60,0.62,0.65]
+          base_env=os.environ.copy()
+
+          for pre in pre_values:
+              env=base_env.copy()
+              env["NOLANE_AUDIO_PRE_LIMIT"]=f"{pre:.3f}"
+              subprocess.run([sys.executable,"tools/mix.py","--project",project,"--no-video"],env=env,check=True)
+              wav=Path(project)/"build/mix.wav"
+              assert wav.is_file() and wav.stat().st_size>100000, wav
+              for aac in aac_values:
+                  output=Path(base_env["GITHUB_WORKSPACE"])/"calibration"/f"pre-{pre:.2f}-aac-{aac:.2f}.m4a"
+                  enc=subprocess.run([
+                    "ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(wav),
+                    "-af",f"alimiter=limit={aac:.3f}:level=false",
+                    "-c:a","aac","-b:a","192k","-ar","48000","-ac","2",str(output)
+                  ],capture_output=True,text=True)
+                  if enc.returncode:
+                      raise RuntimeError(f"AAC encode failed for {pre}/{aac}: {enc.stderr[-2000:]}")
+                  measured=subprocess.run([
+                    "ffmpeg","-hide_banner","-nostats","-i",str(output),
+                    "-af","ebur128=peak=true","-f","null","-"
+                  ],capture_output=True,text=True)
+                  log=measured.stderr
+                  mi=re.findall(r"^\s*I:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*LUFS\s*$",log,re.M)
+                  mp=re.findall(r"^\s*Peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS\s*$",log,re.M)
+                  if measured.returncode:
+                      raise RuntimeError(f"EBU measurement failed for {pre}/{aac}: {log[-2000:]}")
+                  if not mi:
+                      raise RuntimeError(f"Missing EBU integrated value for {pre}/{aac}: {log[-3000:]}")
+                  integrated=float(mi[-1])
+                  peak=float(mp[-1]) if mp else None
+                  duration=float(subprocess.check_output([
+                    "ffprobe","-v","error","-show_entries","format=duration",
+                    "-of","default=nw=1:nk=1",str(output)],text=True).strip())
+                  row={
+                    "pre_aac_limit":pre,"final_aac_limit":aac,
+                    "integrated_lufs":integrated,"peak_dbfs":peak,
+                    "duration_seconds":duration,
+                    "passes_integrated":-15.0<=integrated<=-13.0,
+                    "passes_peak":peak is not None and peak<=-1.0,
+                  }
+                  row["passes_both"]=row["passes_integrated"] and row["passes_peak"]
+                  report.append(row)
+                  print(json.dumps(row))
+                  output.unlink(missing_ok=True)
+
+          passing=[r for r in report if r["passes_both"]]
+          passing.sort(key=lambda r:(abs(r["integrated_lufs"]+14.0),-(r["peak_dbfs"] if r["peak_dbfs"] is not None else -99)))
+          result={
+            "status":"calibrated-pass" if passing else "no-combination-passed",
+            "source_run_id":"44964684746",
+            "source_voice_artifact":"video-voice-assets-44964684746",
+            "duration_seconds":378.0,
+            "tested_pre_limits":pre_values,
+            "tested_final_aac_limits":aac_values,
+            "required_integrated_lufs":[-15.0,-13.0],
+            "required_peak_dbfs_max":-1.0,
+            "tested_combinations":len(report),
+            "passing_combinations":len(passing),
+            "recommended":passing[0] if passing else None,
+            "measurements":report,
+            "note":"Measurements are made on AAC-encoded output after decoding through FFmpeg ebur128=peak=true, using the real Run 36 narration, music and SFX mix. No video master render is needed for this calibration."
+          }
+          target=Path(base_env["GITHUB_WORKSPACE"])/"calibration/audio-limiter-calibration.json"
+          target.write_text(json.dumps(result,indent=2)+"\n",encoding="utf-8")
+          (target.parent/"README.md").write_text(
+            "# Run 36 audio limiter calibration\n\n"
+            "This matrix uses the actual 378-second Run 36 soundtrack inputs and measures decoded AAC output. "
+            "A passing setting must meet both -15 to -13 LUFS integrated and peak <= -1.0 dBFS. "
+            "See audio-limiter-calibration.json for all measurements and the selected candidate.\n",
+            encoding="utf-8"
+          )
+          print("\nFINAL CALIBRATION")
+          print(json.dumps({k:v for k,v in result.items() if k!="measurements"},indent=2))
+          assert passing, "No tested limiter combination satisfies both delivery gates"
+          PY
+
+      - name: Upload measured audio calibration
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-stop-10s-audio-calibration-run36
+          path: calibration/
+          if-no-files-found: error
+          retention-days: 30
