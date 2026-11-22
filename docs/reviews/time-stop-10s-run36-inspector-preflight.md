@@ -75,3 +75,15 @@ At the time of this preflight, Run 36 had passed the all-shot renderer scan, ful
 - Current rebuild is [Run #39](https://github.com/Nolane-x/video/actions/runs/44983301715), source commit `112ed8b8b57af75173913cde60f7a7bd7dad516a`. Its storyboard job is starting; do not infer film render completion from workflow creation.
 - Independent inspection workflow is now configured for Run #39 and immutable Run #32 baseline. Trigger it only when official artifact `time-stop-10s-h2-39` is uploaded after passing package QA.
 - The chosen production audio settings remain pre-AAC 0.70 / final AAC 0.65; do not revert them or weaken the existing loudness/peak gates.
+
+## Run 39 voice asset verification and active master render (2026-11-22)
+
+- Production run: [Run #39](https://github.com/Nolane-x/video/actions/runs/44983301715), source commit `112ed8b8b57af75173913cde60f7a7bd7dad516a`.
+- VoiceStudio job completed successfully and uploaded artifact `video-voice-assets-44983301715` (artifact ID `14738338133`). The downloaded archive was inspected directly: 84 Vietnamese segments, 48 kHz / 24-bit / mono PCM, 200 seconds, and `clipped_ratio=0`.
+- AudioSeal watermark reports `verified`, 7 blocks, minimum confidence 0.9946 and mean confidence 0.999. The outer and nested copies of the narration WAV match the manifest SHA-256.
+- Both SRT and VTT contain 84 cues. Every SRT cue was compared to its manifest segment: zero text mismatches, zero start-time mismatches, and zero end-time mismatches. The segment text SHA-256 matches the newline-joined manifest text. This verifies machine-readable alignment, not subjective voice quality; listening review remains outstanding.
+- H2 render preparation, storyboard generation, voice placement, 3D module installation, all-shot renderer scan, six contact sheets and the 30-second motion preview completed successfully.
+- At the latest check, the H2 job remains in progress at **Render the complete 1080p native-FPS silent master**. The 1080p/60fps, 22,680-frame master is not yet reported complete; mix, package QA and film upload remain pending. Only the verified voice artifact is currently uploaded for Run #39; do not describe this as a delivered film.
+- Immutable Run #32 baseline artifact `time-stop-10s-h2-32` (artifact ID `14707913978`, about 259 MB) remains available and unexpired.
+- The Run #39 independent-inspection workflow is configured against the Run #32 baseline. Trigger it only after the official `time-stop-10s-h2-39` artifact is uploaded following successful package QA.
+- Keep `visual_approval=false` until the complete film is watched continuously with sound and the 44 matched 3D shots are visually reviewed.
