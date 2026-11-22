@@ -269,7 +269,7 @@ jobs:
               for col in range(3):
                 left=pad+col*(cw+pad); top=pad+shot*(ch+pad)
                 canvas.paste(src.crop((left,top,left+cw,top+ch)),(x+col*cw,y))
-              draw.text((x+3,y+ch+5),f"s{shot+1:03d} · -0.34 / mid / +0.34",(238,241,246))
+              draw.text((x+3,y+ch+5),f"s{shot+1:03d} · 16% / mid / 84%",(238,241,246))
             canvas.save(out/f"motion-sheet-{page+1:02d}.jpg",quality=90)
           Path("review/dense-sampling.json").write_text(json.dumps({"status":"sampled","shots":84,"frames":252,"fps":60,"timeline":"variable duration; sample offsets 16%, 50%, 84%"},indent=2)+"\n")
           PY
