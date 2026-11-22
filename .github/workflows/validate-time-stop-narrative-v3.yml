@@ -7,6 +7,7 @@ on:
     paths:
       - "video-projects/time-stop-10s/scripts/build_story.py"
       - "video-projects/time-stop-10s/scenes/shots/time-stop-3d.js"
+      - ".github/workflows/render-time-stop-10s.yml"
       - ".github/workflows/validate-time-stop-narrative-v3.yml"
 
 permissions:
@@ -30,6 +31,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify V3 production render QA matches the storyboard
+        run: |
+          set -euo pipefail
+          grep -Fq 'time_freeze_fx_count"] == 29' .github/workflows/render-time-stop-10s.yml
+          grep -Fq 'flashforward_3d_durations = [3.2, 3.2, 3.2, 3.4, 3.6, 3.6]' .github/workflows/render-time-stop-10s.yml
+          grep -Fq '"freeze_fx_shots": freeze_fx_shots' .github/workflows/render-time-stop-10s.yml
+          ! grep -Fq '"freeze_fx_shots": 26' .github/workflows/render-time-stop-10s.yml
+          echo "V3 production QA gates and story metadata PASS"
       - name: Validate the six V3 3D cold-open registrations
         run: |
           set -euo pipefail
