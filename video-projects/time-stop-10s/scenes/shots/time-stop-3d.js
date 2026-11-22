@@ -189,6 +189,131 @@ function reg(id, behavior, cameraMode = 'wide', frozen = false, focus = null) {
   timelineShot.captions = false;
 }
 
+
+function regV3Flash(id, options, action) {
+  registerShot(id, {
+    kind: '3d',
+    init: (T, info) => {
+      const world = makeStreet(info);
+      world.localDuration = Math.max(0.1, Number(info?.dur) || 4.5);
+      return world;
+    },
+    draw: (world, t) => {
+      const duration = world.localDuration || 4.5;
+      const p = smooth(t / duration);
+      world.kid.visible = true;
+      world.mom.visible = true;
+      world.bike.root.visible = true;
+      world.sign.visible = true;
+      world.debris.visible = false;
+      world.bike.root.position.set(-1.4, 0, 1.4);
+      world.mom.position.set(-1.4, 0.02, 1.4);
+      world.kid.position.set(-4.8, 0, 0.1);
+      world.mom.userData.setPose('bike', t);
+      world.kid.userData.setPose('stand', t);
+      world.bike.wheels.forEach((wheel, index) => {
+        if (!options.frozen) wheel.rotation.z = -t * (1.8 + index * 0.04);
+      });
+      world.bike.crankArm.rotation.z = options.frozen ? 0.18 : -t * 3.6;
+      world.rain.update(t, !!options.frozen);
+      if (action) action(world, t, p);
+      const k = smooth(t / duration);
+      const from = options.camera.from, to = options.camera.to;
+      const lookFrom = options.camera.lookFrom, lookTo = options.camera.lookTo;
+      world.camera.position.set(
+        lerp(from[0], to[0], k),
+        lerp(from[1], to[1], k),
+        lerp(from[2], to[2], k)
+      );
+      world.camera.lookAt(
+        lerp(lookFrom[0], lookTo[0], k),
+        lerp(lookFrom[1], lookTo[1], k),
+        lerp(lookFrom[2], lookTo[2], k)
+      );
+      world.camera.fov = options.camera.fov || 36;
+      world.camera.updateProjectionMatrix();
+    },
+    overlay: (g, t, info) => overlay(g, t, info, !!options.frozen,
+      options.frozen ? 'TIME STOP  /  00:10' : '')
+  });
+  const timelineShot = E.shots.find((shot) => shot.id === id);
+  if (!timelineShot) throw new Error('V3 flash-forward shot missing from timeline: ' + id);
+  timelineShot.captions = false;
+}
+
+// Six-shot 3D cold open: mechanical failure, mother's path, discovery, freeze,
+// pursuit and the hand reaching the bicycle. It reuses the rescue set so the
+// audience recognizes the same geography when the story returns later.
+regV3Flash('s001', {
+  camera: {
+    from: [1.0, 0.95, -0.15], to: [1.02, 0.78, -0.55],
+    lookFrom: [1.02, 0.72, -3.55], lookTo: [1.02, 0.72, -3.55], fov: 27
+  }
+}, (world, t, p) => {
+  world.kid.visible = false; world.mom.visible = false; world.bike.root.visible = false;
+  world.sign.rotation.z = 0.05 + 0.035 * Math.sin(t * 7) + 0.05 * p;
+});
+regV3Flash('s002', {
+  camera: {
+    from: [5.2, 4.7, 16.5], to: [3.5, 3.8, 13.4],
+    lookFrom: [0.8, 1.55, -0.2], lookTo: [0.2, 1.6, -0.4], fov: 40
+  }
+}, (world, t, p) => {
+  world.kid.visible = false;
+  world.bike.root.position.x = lerp(-2.6, -1.4, smooth(p));
+  world.mom.position.x = world.bike.root.position.x;
+  world.sign.rotation.z = 0.08 + 0.02 * Math.sin(t * 3.5);
+});
+regV3Flash('s003', {
+  camera: {
+    from: [0.3, 4.8, 17.5], to: [-0.1, 4.0, 15.0],
+    lookFrom: [-0.9, 1.65, 0.0], lookTo: [-1.0, 1.6, 0.0], fov: 42
+  }
+}, (world, t, p) => {
+  world.kid.position.x = -4.65;
+  world.kid.userData.setPose('guard', t);
+  world.bike.root.position.x = -1.0;
+  world.mom.position.x = -1.0;
+  world.sign.rotation.z = lerp(0.12, 0.28, smooth(p));
+});
+regV3Flash('s004', {
+  frozen: true,
+  camera: {
+    from: [0.5, 4.5, 16.8], to: [-0.6, 3.8, 13.4],
+    lookFrom: [-0.8, 1.55, -0.1], lookTo: [-0.75, 1.5, -0.2], fov: 40
+  }
+}, (world, t, p) => {
+  world.kid.position.x = -4.6; world.kid.userData.setPose('guard', t);
+  world.bike.root.position.x = -0.9; world.mom.position.x = -0.9;
+  world.sign.rotation.z = 0.30;
+});
+regV3Flash('s005', {
+  frozen: true,
+  camera: {
+    from: [-3.5, 3.1, 9.8], to: [-1.3, 2.8, 7.5],
+    lookFrom: [-1.5, 1.2, 1.1], lookTo: [-0.25, 1.2, 1.1], fov: 36
+  }
+}, (world, t, p) => {
+  world.kid.position.x = lerp(-4.6, -1.9, smooth(p));
+  world.kid.userData.setPose('run', t * 1.65);
+  world.bike.root.position.x = -0.65; world.mom.position.x = -0.65;
+  world.mom.userData.setPose('bike', 0);
+  world.sign.rotation.z = 0.32;
+});
+regV3Flash('s006', {
+  frozen: true,
+  camera: {
+    from: [1.8, 2.45, 7.0], to: [0.35, 2.05, 5.8],
+    lookFrom: [-0.85, 1.35, 1.42], lookTo: [-0.85, 1.35, 1.42], fov: 31
+  }
+}, (world, t, p) => {
+  world.kid.position.set(lerp(-1.9, -1.25, smooth(p)), 0, 1.28);
+  world.kid.userData.setPose('reach', t);
+  world.bike.root.position.x = -0.65; world.mom.position.x = -0.65;
+  world.mom.userData.setPose('bike', 0);
+  world.sign.rotation.z = 0.32;
+});
+
 reg('s053', (s, t, p) => { s.bike.root.position.x = lerp(-2.2, -1.2, smooth(p)); s.mom.position.x = s.bike.root.position.x; s.sign.rotation.z = 0.015 * Math.sin(t * 2.6); s.kid.visible = false; }, 'wide', false, [-1.7, -1.2]);
 reg('s054', (s, t) => { s.bike.root.position.x = -1.2; s.mom.position.x = -1.2; s.kid.visible = false; s.sign.rotation.z = 0.035 * Math.sin(t * 9) + 0.04 * clamp(t / 4.5); }, 'impact', false, [-1.2, -1.2]);
 reg('s056', (s, t, p) => { s.bike.root.position.x = -0.9; s.mom.position.x = -0.9; s.kid.visible = false; s.sign.rotation.z = lerp(0.06, 0.32, smooth(p)); }, 'wide', false, [-0.9, -0.9]);
